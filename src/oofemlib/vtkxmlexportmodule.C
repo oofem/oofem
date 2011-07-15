@@ -954,24 +954,22 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
     FloatMatrix mtrx(3, 3);
     IntegrationRule *iRule;
     GaussPoint *gp;
-    FloatArray answer;
+    FloatArray answer, temp;
+    double gptot;
 
     switch ( type ) {
     case IST_MaterialNumber:
     case IST_ElementNumber:
-    case IST_AverageTemperature:
     case IST_Pressure:
-        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
+        // if it wasn't for IST_Pressure,
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
 
-	    if ( ( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ) ) {
-	      continue;
-	    }
-
-	    if ( this->isElementComposite(elem) ) {
-	      continue;                                  // composite cells exported individually
-	    }
+            if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
+                    || this->isElementComposite(elem) ) { // composite cells exported individually
+                continue;
+            }
 
 #ifdef __PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
@@ -983,31 +981,20 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
                 fprintf( stream, "%d ", elem->giveMaterial()->giveNumber() );
             } else if ( type == IST_ElementNumber ) {
                 fprintf( stream, "%d ", elem->giveNumber() );
-            } else if ( type == IST_AverageTemperature ) {    //grab from the first IP
-                iRule = elem->giveDefaultIntegrationRulePtr();
-                gp  = iRule->getIntegrationPoint(0);
-                gp->giveMaterialStatus();
-                elem->giveIPValue(answer, gp, IST_AverageTemperature, tStep);
-                fprintf( stream, "%f ", answer.at(1) );
-            
-	    } else if (type == IST_Pressure) {
-	      if (elem->giveNumberOfInternalDofManagers() == 1) {
-		IntArray pmask(1); pmask.at(1) = P_f;
-		elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);             
-		fprintf( stream, "%f ", answer.at(1) );
-	      }
-	    } else {
-	      
-                OOFEM_ERROR2( "Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
+            } else if (type == IST_Pressure) { // TODO: Why this special treatment for pressure? / Mikael
+                if (elem->giveNumberOfInternalDofManagers() == 1) {
+                    IntArray pmask(1); pmask.at(1) = P_f;
+                    elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
+                    fprintf( stream, "%f ", answer.at(1) );
+                }
             }
         }
-
         break;
 
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
-        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
         if ( type == IST_MaterialOrientation_x ) {
             pos = 1;
         }
@@ -1021,6 +1008,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
         }
 
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
+            // TODO: Should no elements be skipped here? / Mikael
             if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
                 mtrx.resize(3, 3);
                 mtrx.zero();
@@ -1032,9 +1020,49 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
         break;
 
     default:
-        OOFEM_ERROR2( "Unsupported Cell variable %s", __InternalStateTypeToString(type) );
+        InternalStateValueType vt = giveInternalStateValueType(type);
+        switch ( vt ) {
+        case ISVT_TENSOR_S3: // These could be written as tensors as well, if one wants to.
+        case ISVT_TENSOR_S3E:
+        case ISVT_VECTOR:
+        case ISVT_SCALAR:
+            if (vt == ISVT_SCALAR) {
+                fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+            } else if (vt == ISVT_TENSOR_G) {
+                fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+            } else {
+                fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+            }
+            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                elem = d->giveElement(ielem);
+                if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
+                        || this->isElementComposite(elem) ) { // composite cells exported individually
+                    continue;
+                }
+#ifdef __PARALLEL_MODE
+                if ( elem->giveParallelMode() != Element_local ) {
+                    continue;
+                }
+#endif
+                gptot = 0;
+                answer.resize(0);
+                for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); ++i) {
+                    gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
+                    elem->giveIPValue(temp, gp, type, tStep);
+                    gptot += gp->giveWeight();
+                    answer.add(gp->giveWeight(), temp);
+                }
+                answer.times(1/gptot);
+                for (int i = 1; i <= answer.giveSize(); ++i) {
+                    fprintf( stream, "%e ", answer.at(i) );
+                }
+                fprintf( stream, "\n" );
+            }
+            break;
+        default:
+            OOFEM_ERROR2("Quantity %s not handled yet.", __InternalStateTypeToString(type) );
+        }
     }
-
 
     fprintf(stream, "</DataArray>\n");
 }
