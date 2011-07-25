@@ -46,7 +46,7 @@
 namespace oofem {
 class GaussPoint;
 
-#define BINGHAM_DEFAULT_STRESS_GROWTH_RATE 4000.0
+#define BINGHAM_DEFAULT_STRESS_GROWTH_RATE 400.0
 
 /**
  * Class representing material status for Bingham material

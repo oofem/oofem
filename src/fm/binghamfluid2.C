@@ -48,7 +48,7 @@
 
 namespace oofem {
 #define BINGHAM_ALT 1
-#define BINGHAM_MIN_SHEAR_RATE     1.e-12
+#define BINGHAM_MIN_SHEAR_RATE     1.e-10
 
 int
 BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
