@@ -54,7 +54,7 @@
 
 namespace oofem {
 class QTrPlaneStress2d : public StructuralElement, public SpatialLocalizerInterface,
-    public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
+    public SPRNodalRecoveryModelInterface,
     public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
 {
     /*
@@ -101,6 +101,8 @@ public:
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
+    // returns interpolation type
+    FEInterpolation *giveInterpolation() { return & interpolation; } 
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
     //int    hasEdgeLoadSupport () {return 0;}
@@ -129,27 +131,6 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     /// Returns distance of given point from element parametric center
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-    //@}
-
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     * currently used but problems in lumping procedure
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    /**
-     * Returns the corresponding element to interface
-     */
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    /**
-     * Evaluates N matrix (interpolation estimated stress matrix).
-     */
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
     //@}
 
     /**

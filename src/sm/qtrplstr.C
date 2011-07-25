@@ -71,10 +71,15 @@ QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
 Interface *
 QTrPlaneStress2d :: giveInterface(InterfaceType interface)
 {
-    //if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
+  /*
+    Note ZZNodalRecoveryModelInterface disabled, as the 
+    sum of row entries is zero for (N^T)N matrix for vertices,
+    yielding zero entries in lumped form. 
+
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+  */
+    if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return ( SpatialLocalizerInterface * ) this;
@@ -591,63 +596,6 @@ QTrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 
 #endif
 
-
-
-
-int
-QTrPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
-        return 3;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
-void
-QTrPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    int i;
-    FloatArray n;
-
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 6);
-    } else {
-        return;
-    }
-
-    for ( i = 1; i <= 6; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
-
-    //  double l1,l2,l3;
-    //  l1 = aGaussPoint -> giveCoordinate(1);
-    //  l2 = aGaussPoint -> giveCoordinate(2);
-    //  l3 = 1.0 - l1 - l2;
-    //
-    //  if (this->giveIPValueSize(type, aGaussPoint)){
-    //      answer.resize(1,6) ;
-    //  } else {
-    //      return;
-    //  }
-    //
-    //  answer.at(1,1)  = (2.*l1-1.)*l1;
-    //  answer.at(1,2)  = (2.*l2-1.)*l2;
-    //  answer.at(1,3)  = (2.*l3-1.)*l3;
-    //  answer.at(1,4)  = 4.*l1*l2;
-    //  answer.at(1,5)  = 4.*l2*l3;
-    //  answer.at(1,6)  = 4.*l3*l1;
-
-    return;
-}
 
 
 int
