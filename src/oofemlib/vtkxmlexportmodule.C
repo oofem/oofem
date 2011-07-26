@@ -613,7 +613,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 {
     Domain *d = emodel->giveDomain(1);
     int inode;
-    int j, jsize;
+    int j, jsize, valSize;
     FloatArray iVal(3);
     FloatMatrix t(3, 3);
     const FloatArray *val;
@@ -667,14 +667,15 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             }
         }
 
+	valSize = val->giveSize();
         if ( type == ISVT_SCALAR ) {
-            if ( val->giveSize() ) {
+            if ( valSize ) {
                 fprintf( stream, "%e ", val->at(1) );
             } else {
                 fprintf(stream, "%e ", 0.0);
             }
         } else if ( type == ISVT_VECTOR ) {
-            jsize = min( 3, val->giveSize() );
+            jsize = min( 3, valSize );
             for ( j = 1; j <= jsize; j++ ) {
                 fprintf( stream, "%e ", val->at(j) );
             }
@@ -688,7 +689,8 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             int ii, jj, iii;
             t.zero();
             for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
-                iii = regionVarMap.at(ii);
+	        iii = regionVarMap.at(ii) ;
+		iii *= (valSize >= iii); // set iii to zero if val array size mismatch
 
                 if ( ( ii == 1 ) && iii ) {
                     t.at(1, 1) = val->at(iii);
