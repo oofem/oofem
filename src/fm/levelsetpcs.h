@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -55,35 +54,40 @@ class LevelSetPCS;
  */
 class LevelSetPCSElementInterface : public Interface
 {
-protected:
 public:
     LevelSetPCSElementInterface() { }
 
-    /** Evaluetes F in level set equation of the form
-     *  fi_t+F(grad(fi), x)*norm(grad(fi)) = 0
-     *  where for interface position driven by flow with speed u:
-     *  F=dotProduct(u,grad(fi))/norm(grad(fi))
+    /// @name The element interface required by LevelSetPCSElementInterface.
+    //@{
+    /**
+     * Evaluates F in level set equation of the form
+     * @f[ \phi_t + F(\nabla\phi, x) |\nabla\phi| = 0 @f]
+     * where for interface position driven by flow with speed u:
+     * @f[ F = u\cdot \frac{\nabla\phi}{|\nabla\phi|} @f]
      */
-    virtual double LS_PCS_computeF(LevelSetPCS *, TimeStep *) = 0;
+    virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep) = 0;
 
-    /** Returns gradient of shape functions (assumed constatnt <- linear approx)
+    /**
+     * Returns gradient of shape functions.
      */
     virtual void LS_PCS_computedN(FloatMatrix &answer) = 0;
     /// Returns receiver's volume
     virtual double LS_PCS_computeVolume() = 0;
 
-    /** Evaluetes S in level set equation of the form
-     *  fi_t = S(fi)*(1-norm(grad(fi))) = 0
-     *  where for interface position driven by flow with speed u:
-     *  S=fi/sqrt(fi^2+eps^2)
+    /**
+     * Evaluates S in level set equation of the form
+     * @f[ \phi_t = S(\phi) (1-|\nabla\phi|) = 0 @f]
+     * where
+     * @f[ S=\frac{\phi}{\sqrt{\phi^2+\epsilon^2}} @f]
      */
-    virtual double LS_PCS_computeS(LevelSetPCS *, TimeStep *) = 0;
+    virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep) = 0;
 
     /**
      * Returns VOF fractions for each material on element
      * according to nodal values of level set function (passed as parameter)
      */
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi) = 0;
+    //@}
 };
 
 /**
@@ -97,36 +101,37 @@ public:
 class LevelSetPCS : public MaterialInterface
 {
 protected:
-    /// array used to store value of level set function for each node
+    /// Array used to store value of level set function for each node.
     FloatArray levelSetValues, previousLevelSetValues;
     enum PCSEqType { PCS_levelSetUpdate, PCS_levelSetRedistance };
     Polygon initialRefMatVol;
     bool initialRefMatFlag;
-    /// indexes of nodal coordinates used to init levelset using initialRefMatVol
+    /// Indexes of nodal coordinates used to init levelset using initialRefMatVol.
     int ci1, ci2;
 
-    /// type of reinitialization algorithm to use
+    /// Type of reinitialization algorithm to use.
     int reinit_alg;
-    // time step used in reinitialization of LS (if apply)
+    /// Time step used in reinitialization of LS (if apply).
     double reinit_dt;
     bool reinit_dt_flag;
-    // reinitialization error limit
+    /// Reinitialization error limit.
     double reinit_err;
-    /// number of spatial dimensions
+    /// number of spatial dimensions.
     int nsd;
-    /// level st values version
+    /// Level set values version.
     long int levelSetVersion;
 
 #ifdef LevelSetPCS_CACHE_ELEMENT_VOF
     std :: vector< FloatArray >elemVof;
     long int elemVofLevelSetVersion;
 #endif
+
 public:
     /** Constructor. Takes two two arguments. Creates
      *  MaterialInterface instance with given number and belonging to given domain.
-     *  @param n component number in particular domain. For instance, can represent
+     *  @param n Component number in particular domain. For instance, can represent
      *  node number in particular domain.
-     *  @param d domain to which component belongs to
+     *  @param d Domain to which component belongs to.
      */
     LevelSetPCS(int n, Domain *d) : MaterialInterface(n, d) {
         initialRefMatFlag = false;
@@ -134,36 +139,15 @@ public:
         levelSetVersion = 0;
     }
 
-    /// initialize receiver
     virtual void initialize();
-
-    /**
-     * Updates the position of interface according to state reached in given solution step.
-     */
     virtual void updatePosition(TimeStep *atTime);
-    /**
-     * Updates element state after equlibrium in time step has been reached.
-     * All temporary history variables,
-     * which now describe equlibrium state should be copied into equilibrium ones.
-     * The existing internal state is used for update.
-     */
     virtual void updateYourself(TimeStep *tStep) { previousLevelSetValues = levelSetValues; }
     double computeCriticalTimeStep(TimeStep *);
     virtual IRResultType initializeFrom(InputRecord *ir);
-
     virtual void reinitialization(TimeStep *atTime);
 
-
-    /**
-     * Returns relative material contens at given point. Usually only one material is presented in given point,
-     * but some smoothing may be applied close to material interface to make transition smooth
-     */
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
-    /**
-     * Returns volumetric (or other based measure) of relative material contens in given element.
-     */
     virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
-    /** Returns scalar value representation of material Interface at given point. For visualization */
     virtual double giveNodalScalarRepresentation(int i) { return levelSetValues.at(i); }
 
     /// Returns level set value in specific node
@@ -171,27 +155,26 @@ public:
 
     // identification
     const char *giveClassName() const { return "LevelSetPCS"; }
-    classType giveClassID()      const { return LevelSetPCSClass; }
+    classType giveClassID() const { return LevelSetPCSClass; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 protected:
-
     void pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *atTime, PCSEqType t);
     double evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime);
     double evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime);
 
-    /** 
+    /**
      * Reinitializes the level set representation by solving
-     * @f$d_{\tau} = S(\phi)(1-\vert\nabla d\vert)@f$ to steady state
+     * @f$ d_{\tau} = S(\phi)(1-|\nabla d|) @f$ to steady state.
      */
     void redistance(TimeStep *atTime);
 
 
     /** @name Fast marching related services */
     //@{
-    /** Reinitializes the level set representation using fast marching method */
+    /** Reinitializes the level set representation using fast marching method. */
     void FMMReinitialization(FloatArray &ls);
     //@}
 };

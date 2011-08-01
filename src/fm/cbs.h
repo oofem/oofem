@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/nltransienttransportproblem.h,v 1.1 2003/04/14 16:01:39 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// Class NonLinearTransientTransportProblem
-//
 
 #ifndef cbs_h
 #define cbs_h
@@ -58,41 +53,45 @@ namespace oofem {
 class CBS : public EngngModel
 {
 protected:
-    /// Numerical method used to solve the problem
+    /// Numerical method used to solve the problem.
     SparseLinearSystemNM *nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
     SparseMtrx *lhs;
-    /// Pressure field
+    /// Pressure field.
     PrimaryField PressureField;
-    /// Velocity field
+    /// Velocity field.
     PrimaryField VelocityField;
     FloatArray deltaAuxVelocity;
     FloatArray prescribedTractionPressure;
     FloatArray nodalPrescribedTractionPressureConnectivity;
 
-    /** lumped mass matrix */
+    /// Lumped mass matrix.
     FloatArray mm;
-    /** Sparse consistent mass */
+    /// Sparse consistent mass.
     SparseMtrx *mss;
 
-    /// time step and its minimal value
+    /// Time step and its minimal value.
     double deltaT, minDeltaT;
-    // integration constants
+    /// Integration constants.
     double theta [ 2 ];
 
     int initFlag;
-    /// consistent mass flag
+    /// Consistent mass flag.
     int consistentMassFlag;
 
     int numberOfMomentumEqs, numberOfConservationEqs;
     int numberOfPrescribedMomentumEqs, numberOfPrescribedConservationEqs;
 
     bool equationScalingFlag;
-    /// length, velocity, and density scales
-    double lscale, uscale, dscale;
+    /// Length scale.
+    double lscale;
+    /// Velocity scale.
+    double uscale;
+    /// Density scale.
+    double dscale;
     /// Reynolds number
     double Re;
 
@@ -118,21 +117,15 @@ public:
     ~CBS() {
         //<RESTRICTED_SECTION>
         if ( materialInterface ) { delete materialInterface; }
-
         //</RESTRICTED_SECTION>
     }
 
-    void solveYourselfAt(TimeStep *);
-    /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
-     */
-    virtual void               updateYourself(TimeStep *);
+    void solveYourselfAt(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
-    double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *);
+    virtual void updateYourself(TimeStep *tStep);
+
+    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
@@ -140,45 +133,28 @@ public:
 
     TimeStep *giveNextStep();
     TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(TimeStep *);
+    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    /// Initialization from given input record
     IRResultType initializeFrom(InputRecord *ir);
 
-    // consistency check
-    virtual int checkConsistency(); // returns nonzero if o.k.
+    virtual int checkConsistency();
     // identification
     const char *giveClassName() const { return "CBS"; }
-    classType giveClassID()      const { return CBSClass; }
+    classType giveClassID() const { return CBSClass; }
     fMode giveFormulation() { return TL; }
 
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     *  Dof class provides component printing routines, but emodel is responsible
-     *  for what will be printed at DOF level.
-     *  @param stream output stream
-     *  @param iDof dof to be processed
-     *  @param atTime solution step
-     */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 
-    virtual int giveNumberOfEquations(EquationID);
-    virtual int giveNumberOfPrescribedEquations(EquationID);
-    virtual int giveNumberOfDomainEquations(int, EquationID);
-    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
+    virtual int giveNumberOfEquations(EquationID eid);
+    virtual int giveNumberOfPrescribedEquations(EquationID eid);
+    virtual int giveNumberOfDomainEquations(int, EquationID eid);
+    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID eid);
 
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
 
-    /// Returns the Equation scaling flag, which is used to indicate that governing equation(s) are scaled, or non-dimensionalized
     virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
-    /// Returns the scale factor for given variable type
     virtual double giveVariableScale(VarScaleType varId);
-    /**
-     * Prints output of receiver to ouput domain stream, for given time step.
-     * Corresponding function for element gauss points is invoked
-     * (gaussPoint::printOutputAt).
-     */
-    //virtual void                  printOutputAt (FILE *, TimeStep*) ;
 
 protected:
     /**
@@ -187,8 +163,8 @@ protected:
      * if model supports changes of static system). The element internal state update is also forced using
      * updateInternalState service.
      */
-    void updateInternalState(TimeStep *);
-    void applyIC(TimeStep *);
+    void updateInternalState(TimeStep *tStep);
+    void applyIC(TimeStep *tStep);
     void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
 };
 } // end namespace oofem

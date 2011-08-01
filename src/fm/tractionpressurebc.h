@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/boundary.h,v 1.11 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -48,7 +47,7 @@ class TractionPressureBC : public BoundaryCondition
 public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param n Boundary condition number.
+     * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
     TractionPressureBC(int i, Domain *d) : BoundaryCondition(i, d) { }

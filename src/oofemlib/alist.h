@@ -52,12 +52,12 @@ class FEMComponent;
  * any derived class instance, this class can be used as list or array containing
  * elements, nodes, materials, loads or load-time functions, which are represented by classes
  * derived from base FEMComponent.
- * 
+ *
  * This class maintains only the links (pointers) to particular objects, objects themselfs are not contained within
  * this array. They have to be created outside (in memory, usually on heap) and then their pointers can be added to
  * array. This is sometimes called non-intrusive approach. When destructor is called, the linked objects
  * are <em>deleted</em>. To prevent the deletion, objects should be unlinked before deconstructor is called.
- * 
+ *
  * The links to particular objects in array are stored in pointer array, therefore the access to particular
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
  * existing pointer table must be transfered) and is recommended to set size of the array to the final size.
@@ -110,7 +110,7 @@ public:
     void printYourself() const;
     /**
      * Stores anObject at position i.
-     * Enlarges the receiver if too small and deletes the old value if it exists.
+     * Enlarges the receiver if too small and delates the old value if it exists.
      * @param i Index to put object
      * @param anObject Object to put as position i.
      */

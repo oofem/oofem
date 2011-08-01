@@ -123,7 +123,7 @@ public:
      */
     int  setCodeNumbers(int &equationCounter);
 };
+} // end namespace oofem
 
 #endif
-} // end namespace oofem
 #endif // fetiboundarydofman_h

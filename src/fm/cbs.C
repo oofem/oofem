@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/nonstationarytransportproblem.C,v 1.2.4.1 2004/04/05 15:19:53 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 
 #include "cbs.h"
 #include "nummet.h"
@@ -134,8 +132,8 @@ CBS :: initializeFrom(InputRecord *ir)
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-	IntArray mask(3); 
-	mask.at(1) = V_u; mask.at(1) = V_v; mask.at(1) = V_w; 
+	IntArray mask(3);
+	mask.at(1) = V_u; mask.at(1) = V_v; mask.at(1) = V_w;
 	MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, &this->VelocityField, mask);
         fm->registerField( _velocityField, FT_Velocity, true);
     }
@@ -146,8 +144,8 @@ CBS :: initializeFrom(InputRecord *ir)
 }
 
 double
-CBS ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                             TimeStep *tStep, Domain *d, Dof *dof)
+CBS :: giveUnknownComponent(EquationID chc, ValueModeType mode,
+                            TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
@@ -184,8 +182,8 @@ CBS ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 
 
 double
-CBS ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                             TimeStep *tStep, Domain *d, Dof *dof)
+CBS :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
+                            TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {

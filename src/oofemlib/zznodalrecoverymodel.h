@@ -100,6 +100,8 @@ public:
     /// Constructor
     ZZNodalRecoveryModelInterface() { }
 
+    /// @name The element interface required by ZZNodalRecoveryModel
+    //@{
     /**
      * Computes the element contribution to @f$ \int_\Omega N^{\mathrm{T}}\alpha\;\mathrm{d}\Omega @f$,
      * where @f$ \alpha @f$ is quantity to be recovered (for example stress or strain vector).
@@ -122,17 +124,18 @@ public:
      * @param type Determines the type of internal variable to be recovered.
      * @return Size of DofManger record required to hold recovered values.
      */
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type) ;
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     /**
      * Returns the corresponding element to interface.
      */
     virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
     /**
-     * Evaluates N matrix (interpolation estimated value matrix). 
+     * Evaluates N matrix (interpolation estimated value matrix).
      * Default implementation requires element to provide valid interpolation via giveInterpolation method.
      */
     virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                                     InternalStateType type) ;
+                                                                     InternalStateType type);
+    //@}
 };
 } // end namespace oofem
 #endif // zznodalrecoverymodel_h

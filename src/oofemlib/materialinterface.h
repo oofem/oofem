@@ -74,7 +74,7 @@ public:
     /**
      * Computes critical time step induced by receiver integration algorithm
      */
-    virtual double computeCriticalTimeStep(TimeStep *) = 0;
+    virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
     /**
      * Returns relative material contents at given point. Usually only one material is presented in given point,

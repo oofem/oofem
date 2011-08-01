@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.C,v 1.3.4.1 2004/04/05 15:19:53 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -62,7 +61,6 @@
 namespace oofem {
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 { }
 
 
@@ -74,7 +72,7 @@ IRResultType
 SUPGElement :: initializeFrom(InputRecord *ir)
 {
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     FMElement :: initializeFrom(ir);
     this->computeGaussPoints();
@@ -84,7 +82,7 @@ SUPGElement :: initializeFrom(InputRecord *ir)
 
 
 void
-SUPGElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
+SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
                                          CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
@@ -117,21 +115,21 @@ SUPGElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == LSICStabilizationTerm_MB ) {
         this->computeLSICStabilizationTerm_MB(answer, tStep);
     } else if ( mtrx == StiffnessMatrix) {
-      // support for stokes solver
-      IntArray vloc, ploc;
-      FloatMatrix h;
-      int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size,size); answer.zero();
-      this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
-      this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep); answer.assemble(h, vloc);
-      this->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);     
-      this->computeLinearAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);     
-      this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);     
-      this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);     
-      this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);     
-      this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
+        // support for stokes solver
+        IntArray vloc, ploc;
+        FloatMatrix h;
+        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size,size); answer.zero();
+        this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
+        this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep); answer.assemble(h, vloc);
+        this->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
+        this->computeLinearAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
+        this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
+        this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
+        this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
+        this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
@@ -141,7 +139,7 @@ SUPGElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-SUPGElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                          TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to requested type
@@ -160,53 +158,52 @@ SUPGElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     } else if ( mtrx == DiffusionTerm_MC ) {
         this->computeDiffusionTerm_MC(answer, tStep);
     } else if ( mtrx == LoadVector) {
-      // stokes flow
-      IntArray vloc, ploc;
-      FloatArray h;
-      int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size); answer.zero();
-      this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
-      this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
+        // stokes flow
+        IntArray vloc, ploc;
+        FloatArray h;
+        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size); answer.zero();
+        this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
+        this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
     } else if ( mtrx == NodalInternalForcesVector) {
-      // stokes flow
-      IntArray vloc, ploc;
-      FloatArray h;
-      int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size); answer.zero();
-      this->computeAdvectionTerm_MB(h, tStep); answer.assemble(h, vloc);
-      this->computeAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc);
-      this->computeDiffusionTerm_MB(h, tStep); answer.assemble(h, vloc);
-      this->computeDiffusionTerm_MC(h, tStep); answer.assemble(h, ploc);
+        // stokes flow
+        IntArray vloc, ploc;
+        FloatArray h;
+        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size); answer.zero();
+        this->computeAdvectionTerm_MB(h, tStep); answer.assemble(h, vloc);
+        this->computeAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc);
+        this->computeDiffusionTerm_MB(h, tStep); answer.assemble(h, vloc);
+        this->computeDiffusionTerm_MC(h, tStep); answer.assemble(h, ploc);
 
-      FloatMatrix m1;
-      FloatArray v,p;
-      // add lsic stabilization term
-      this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
-      //m1.times( lscale / ( dscale * uscale * uscale ) );
-      this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
-      h.beProductOf(m1, v);
-      answer.assemble(h, vloc);
-      this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
-      //m1.times( 1. / ( dscale * uscale ) );
-      h.beProductOf(m1, v);
-      answer.assemble(h,ploc);
+        FloatMatrix m1;
+        FloatArray v,p;
+        // add lsic stabilization term
+        this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
+        //m1.times( lscale / ( dscale * uscale * uscale ) );
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        h.beProductOf(m1, v);
+        answer.assemble(h, vloc);
+        this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
+        //m1.times( 1. / ( dscale * uscale ) );
+        h.beProductOf(m1, v);
+        answer.assemble(h,ploc);
 
+        // add pressure term
+        this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
+        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        h.beProductOf(m1, v);
+        answer.assemble(h, vloc);
 
-      // add pressure term
-      this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
-      this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
-      h.beProductOf(m1, v);
-      answer.assemble(h, vloc);
-
-      // pressure term
-      this->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
-      this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
-      h.beProductOf(m1, v);
-      answer.assemble(h, ploc);
+        // pressure term
+        this->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
+        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        h.beProductOf(m1, v);
+        answer.assemble(h, ploc);
 
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
@@ -335,99 +332,96 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #endif
 
-int 
-SUPGElement::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) 
+int
+SUPGElement::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-  if ( type == IST_DeviatoricStrain ) {
-    this->computeDeviatoricStrain (answer, gp, tStep);
-    return 1;
-  } else if ( type == IST_DeviatoricStress ) {
-    this->computeDeviatoricStress (answer, gp, tStep);
-    return 1;
-  } else {
-    return FMElement::giveIPValue(answer, gp, type, tStep);
-  }
+    if ( type == IST_DeviatoricStrain ) {
+        this->computeDeviatoricStrain (answer, gp, tStep);
+        return 1;
+    } else if ( type == IST_DeviatoricStress ) {
+        this->computeDeviatoricStress (answer, gp, tStep);
+        return 1;
+    } else {
+        return FMElement::giveIPValue(answer, gp, type, tStep);
+    }
 }
 
-int 
+int
 SUPGElement::giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-  MaterialMode mmode = gp->giveMaterialMode();
-  if ( ( type == IST_DeviatoricStrain ) || (type == IST_DeviatoricStress) ) {
-      if ( mmode == _2dFlow ) {
-	return 3;
-      } else if (mmode == _2dAxiFlow ) {
-	return 4;
-      } else if (mmode == _3dFlow ) {
-	return 6;
-      } else {
-	OOFEM_ERROR ("SUPGElement::giveIPValueSize: material mode not supported");
-	return 0;
-      }
-  } else {
-    return FMElement::giveIPValueSize(type, gp);
-  }
+    MaterialMode mmode = gp->giveMaterialMode();
+    if ( ( type == IST_DeviatoricStrain ) || (type == IST_DeviatoricStress) ) {
+        if ( mmode == _2dFlow ) {
+            return 3;
+        } else if (mmode == _2dAxiFlow ) {
+            return 4;
+        } else if (mmode == _3dFlow ) {
+            return 6;
+        } else {
+            OOFEM_ERROR ("SUPGElement::giveIPValueSize: material mode not supported");
+            return 0;
+        }
+    } else {
+        return FMElement::giveIPValueSize(type, gp);
+    }
 }
 
 InternalStateValueType
 SUPGElement::giveIPValueType(InternalStateType type)
 {
-  if ( ( type == IST_DeviatoricStrain ) || (type == IST_DeviatoricStress ) ) {
-    return ISVT_TENSOR_S3;
-  } else {
-    return FMElement::giveIPValueType(type);
-  }
+    if ( ( type == IST_DeviatoricStrain ) || (type == IST_DeviatoricStress ) ) {
+        return ISVT_TENSOR_S3;
+    } else {
+        return FMElement::giveIPValueType(type);
+    }
 }
 
 int
 SUPGElement::giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-  MaterialMode mmode = this->giveMaterialMode();
-  if ( ( type == IST_DeviatoricStrain ) || ( type == IST_DeviatoricStress ) ) {
-      if ( mmode == _2dFlow ) {
-	answer.resize(6);
-	answer.at(1) = 1;
-	answer.at(2) = 2;
-	answer.at(6) = 3;
-	return 1;
-      } else if (mmode == _2dAxiFlow ) {
-	answer.resize(6);
-	answer.at(1) = 1;
-	answer.at(2) = 2;
-	answer.at(3) = 3;
-	answer.at(6) = 4;
-	return 1;
-      } else if (mmode == _3dFlow ) {
-	answer.resize(6);
-	int i;
-	for (i=1; i<=6; i++) answer.at(i) = i;
-	return 1;
-      } else {
-	OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
-	return 0;
-      }
-  } else {
-    return FMElement::giveIntVarCompFullIndx(answer, type);
-  }
+    MaterialMode mmode = this->giveMaterialMode();
+    if ( ( type == IST_DeviatoricStrain ) || ( type == IST_DeviatoricStress ) ) {
+        if ( mmode == _2dFlow ) {
+            answer.resize(6);
+            answer.at(1) = 1;
+            answer.at(2) = 2;
+            answer.at(6) = 3;
+            return 1;
+        } else if (mmode == _2dAxiFlow ) {
+            answer.resize(6);
+            answer.at(1) = 1;
+            answer.at(2) = 2;
+            answer.at(3) = 3;
+            answer.at(6) = 4;
+            return 1;
+        } else if (mmode == _3dFlow ) {
+            answer.resize(6);
+            for (int i=1; i<=6; i++) answer.at(i) = i;
+            return 1;
+        } else {
+            OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
+            return 0;
+        }
+    } else {
+        return FMElement::giveIntVarCompFullIndx(answer, type);
+    }
 }
 
 
-/*
- * void
- * SUPGElement::computeVectorOfPrescribed (EquationID ut, ValueModeType type, TimeStep* stepN, FloatArray& answer)
- * {
- * double scale;
- *
- * Element::computeVectorOfPrescribed (ut, type, stepN, answer);
- *
- * if (domain->giveEngngModel()->giveEquationScalingFlag()) {
- *  if (ut == EID_MomentumBalance) {
- *    scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
- *  } else if (ut == EID_ConservationEquation) {
- *    scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
- *  } else scale = 1.0;
- *  answer.times (1.0/scale);
- * }
- * }
- */
+#if 0
+void
+SUPGElement::computeVectorOfPrescribed (EquationID ut, ValueModeType type, TimeStep* stepN, FloatArray& answer)
+{
+    double scale;
+    Element::computeVectorOfPrescribed (ut, type, stepN, answer);
+    if (domain->giveEngngModel()->giveEquationScalingFlag()) {
+    if (ut == EID_MomentumBalance) {
+        scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
+    } else if (ut == EID_ConservationEquation) {
+        scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
+    } else scale = 1.0;
+        answer.times (1.0/scale);
+    }
+}
+#endif
 } // end namespace oofem

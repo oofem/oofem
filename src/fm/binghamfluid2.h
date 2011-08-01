@@ -60,7 +60,7 @@ protected:
     double devStressMagnitude, temp_devStressMagnitude;
     /// Deviatoric stresses and strains (reduced form).
     FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;
-    
+
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
     BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g);
@@ -87,12 +87,8 @@ public:
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
     void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
-
-    /// Returns "BinghamFluidMaterial2Status" string - class name of the receiver.
     const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
-    /// Returns TransportMaterialStatusClass - classType id of receiver.
-    classType                giveClassID() const
-    { return BinghamFluidMaterialStatusClass; }
+    classType giveClassID() const { return BinghamFluidMaterialStatusClass; }
 };
 
 

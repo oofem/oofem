@@ -31,7 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
- 
+
 #ifndef nodalaveragingrecoverymodel_h
 #define nodalaveragingrecoverymodel_h
 
@@ -98,6 +98,8 @@ public:
     /// Constructor
     NodalAveragingRecoveryModelInterface() { }
 
+    /// @name The element interface required by NodalAveragingRecoveryModel
+    //@{
     /**
      * Computes the element value in given node.
      * @param answer Contains the result.
@@ -122,6 +124,7 @@ public:
      * @return Size of DofManger record required to hold recovered values.
      */
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
+    //@}
 };
 } // end namespace oofem
 #endif // nodalaveragingrecoverymodel_h

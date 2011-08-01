@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -34,6 +33,7 @@
  */
 
 #include "fastmarchingmethod.h"
+#include "domain.h"
 #include "mathfem.h"
 #include "node.h"
 #include "conTable.h"

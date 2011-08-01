@@ -39,7 +39,6 @@
 #include "domain.h"
 #include "flotmtrx.h"
 
-#include "primaryfield.h"
 #include "integrationrule.h"
 #include "classtype.h"
 #include "chartype.h"
@@ -112,7 +111,7 @@ enum elementParallelMode {
  *   layered cross section model strains in each layer has to be evaluated from "integrated"
  *   strains (integrated means element-like strains including curvatures in case of beams and plates)
  *   by element, in cases of non local material and many other examples can be found).
- * 
+ *
  * There are some general rules, that programmer must take into account.
  * - Element stores the numbers of its dofmanagers in dofManArray.
  *   These include nodes, element sides and internal DOFs that are not condensed at element level.
@@ -859,7 +858,7 @@ public:
     void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
 #ifdef __PARALLEL_MODE
     /*
-     * Returns the parallel mode for particular knot span of the receiver. 
+     * Returns the parallel mode for particular knot span of the receiver.
      * The knot span identifies the sub-region of the finite element.
      */
     virtual elementParallelMode giveKnotSpanParallelMode(int) const {return parallel_mode;}

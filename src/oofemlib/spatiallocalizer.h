@@ -60,9 +60,13 @@ class SpatialLocalizerInterface : public Interface
 public:
     SpatialLocalizerInterface() : Interface() { }
 
+    /**
+     * @name The element interface required by SpatialLocalizerInterface
+     */
+    //@{
     /// @return Reference to corresponding element.
     virtual Element *SpatialLocalizerI_giveElement() = 0;
-    /** 
+    /**
      * Checks if element contains specified coordinate.
      * @param coords Global coordinate.
      * @return Nonzero if given element contains given point.
@@ -103,6 +107,7 @@ public:
         OOFEM_ERROR2("SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint - Not implemented for %s", this->giveClassName());
         return 0.0;
     }
+    //@}
 };
 
 

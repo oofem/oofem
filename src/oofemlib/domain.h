@@ -126,7 +126,7 @@ private:
     IntArray defaultNodeDofIDArry;
     IntArray defaultSideDofIDArry;
 
-    /** 
+    /**
      * Domain type. Determined by input data. It determines the problem type (like plane stress or plane strain mode).
      * According to this mode the default number of Dofs per node (or side) and their physical meaning are determined.
      * These default settings can be redefined by particular node or side. See related documentation for details.
@@ -201,7 +201,7 @@ public:
     /**
      * Constructor. Creates empty n-th domain belonging to given engineering model.
      * @param n Domain number.
-     * @param serNum Serial number 
+     * @param serNum Serial number
      * @param e Engineering model domain will belong to.
      * @see giveSerialNumber
      */

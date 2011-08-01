@@ -35,15 +35,11 @@
 #ifndef fmelement_h
 #define fmelement_h
 
-
 #include "element.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "flotmtrx.h"
-
-#include "primaryfield.h"
+#include "intarray.h"
 
 namespace oofem {
+
 ///@name Declaration of basic boundary codes.
 //@{
 #define FMElement_PrescribedTractionBC ( 1 << 0 )

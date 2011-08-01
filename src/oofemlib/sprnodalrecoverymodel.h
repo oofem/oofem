@@ -122,6 +122,8 @@ public:
     /// Constructor.
     SPRNodalRecoveryModelInterface() { }
 
+    /// @name The element interface required by SPRNodalRecoveryModelInterface
+    //@{
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) = 0;
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) = 0;
     virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
@@ -129,6 +131,7 @@ public:
     //virtual void SPRNodalRecoveryMI_giveIPValue(FloatArray& answer, int ipNum, InternalStateType type) = 0;
     virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp) = 0;
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() = 0;
+    //@}
 };
 } // end namespace oofem
 #endif // sprnodalrecoverymodel_h

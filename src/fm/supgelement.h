@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.h,v 1.3 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,135 +32,122 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *******************************************************************
-//   *** CLASS GENERAL STABILIZED SUPG/PSPG ELEMENT for CFD Analysis ***
-//   *******************************************************************
-
 #ifndef supgelement_h
 #define supgelement_h
 
-
 #include "fmelement.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "flotmtrx.h"
-
-#include "primaryfield.h"
 #include "fluiddynamicmaterial.h"
 
 namespace oofem {
 class TimeStep;
-class Node;
-class Material;
 class GaussPoint;
 class FloatMatrix;
 class FloatArray;
 class IntArray;
 
 /**
- * This abstract class represent a general base element class for
- * fluid dynamic problems.
+ * General stabilized SUPG/PSPG element for CFD analysis.
  */
 class SUPGElement : public FMElement
 {
-public:
 protected:
     /**
-     * stabilization coefficients, updated for each solution step
+     * Stabilization coefficients, updated for each solution step
      * in updateStabilizationCoeffs()
      */
     double t_supg, t_pspg, t_lsic;
 
 public:
-    // constructor
-    SUPGElement(int, Domain *);
-    ~SUPGElement();                        // destructor
+    SUPGElement(int n, Domain *aDomain);
+    ~SUPGElement();
 
-    ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 
-    // characteristic  matrix
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
-    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
-    virtual double giveCharacteristicValue(CharType, TimeStep *);
-    virtual void     updateStabilizationCoeffs(TimeStep *) { }
-    virtual void     updateElementForNewInterfacePosition(TimeStep *) { }
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
+    virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
+    virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 
     /**
-     * Computes acceleration terms (generalized mass matrix with stabilization terms ) for momentum balance equations(s)
+     * Computes acceleration terms (generalized mass matrix with stabilization terms) for momentum balance equations(s).
      */
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
-     * Computes nonlinear advection terms for momentum balance equations(s)
+     * Computes nonlinear advection terms for momentum balance equations(s).
      */
     virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
     /**
      * Computes the derivative of advection terms for momentum balance equations(s)
-     * with respect to nodal velocities
+     * with respect to nodal velocities.
      */
     virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
-     *  Computes diffusion terms for momentum balance equations(s)
+     * Computes diffusion terms for momentum balance equations(s).
      */
     virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
-    /** Computes the derivative of diffusion terms for momentum balance equations(s)
-     *  with respect to nodal velocities
+    /**
+     * Computes the derivative of diffusion terms for momentum balance equations(s)
+     * with respect to nodal velocities.
      */
     virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime) = 0;
-    /** Computes pressure terms for momentum balance equations(s) */
+    /**
+     * Computes pressure terms for momentum balance equations(s).
+     */
     virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
-    /** Computes SLIC stabilization term for momentum balance equation(s) */
+    /**
+     * Computes SLIC stabilization term for momentum balance equation(s).
+     */
     virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
-    /** Computes the linear advection term for mass conservation equation
+    /**
+     * Computes the linear advection term for mass conservation equation.
      */
     virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
-     * Computes advection terms for mass conservation equation
+     * Computes advection terms for mass conservation equation.
      */
     virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
-    /** Computes the derivative of advection terms for mass conservation equation
-     *  with respect to nodal velocities
+    /**
+     * Computes the derivative of advection terms for mass conservation equation
+     * with respect to nodal velocities.
      */
     virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
-     * Computes diffusion terms for mass conservation equation
+     * Computes diffusion derivative terms for mass conservation equation.
      */
     virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    /**
+     * Computes diffusion terms for mass conservation equation.
+     */
     virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
     /**
-     * Computes acceleration terms for mass conservation equation
+     * Computes acceleration terms for mass conservation equation.
      */
-    virtual void  computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
-     * Computes pressure terms for mass conservation equation
+     * Computes pressure terms for mass conservation equation.
      */
     virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
-     * Computes Rhs terms due to boundary conditions
+     * Computes Rhs terms due to boundary conditions.
      */
-    virtual void  computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;
     /**
-     * Computes Rhs terms due to boundary conditions
+     * Computes Rhs terms due to boundary conditions.
      */
-    virtual void  computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
 
+    /// Computes the critical time increment.
+    virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
-    /// calculates critical time step
-    virtual double        computeCriticalTimeStep(TimeStep *tStep) = 0;
     // time step termination
-    /**
-     * Updates element state corresponding to newly reached solution.
-     * It computes stress vector in each element integration point (to ensure that data in integration point's
-     * statuses are valid).
-     * @param tStep finished time step
-     */
-    void                  updateInternalState(TimeStep *);
-    void                  printOutputAt(FILE *, TimeStep *);
-    virtual int           checkConsistency();
+    void updateInternalState(TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual int checkConsistency();
 
     // definition
     const char *giveClassName() const { return "SUPGElement"; }
-    classType                giveClassID() const { return SUPGElementClass; }
+    classType giveClassID() const { return SUPGElementClass; }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
@@ -171,21 +157,18 @@ public:
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
-    //
     // Graphics output
-    //
-    //void          drawYourself (oofegGraphicContext&);
-    //virtual void  drawRawGeometry (oofegGraphicContext&) {}
-    //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //void drawYourself(oofegGraphicContext&);
+    //virtual void drawRawGeometry(oofegGraphicContext&) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
 protected:
-    
-    virtual void giveLocalVelocityDofMap (IntArray &map) {}
-    virtual void giveLocalPressureDofMap (IntArray &map) {}
+    virtual void giveLocalVelocityDofMap(IntArray &map) {}
+    virtual void giveLocalPressureDofMap(IntArray &map) {}
 
-    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // supgelement_h
