@@ -48,8 +48,8 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * This class implements a transport material status information. It is attribute of
- * gaussPoint. This is only an abstract class, for every instance of material class
+ * This class implements a transport material status information. It is an attribute of
+ * a Gauss point. This is only an abstract class, for every instance of material class
  * there should be specialized derived class, which handles are history variables.
  * It only adds attributes common to all "transport problem" material models - the
  * state value vectors (both the temporary and equilibrium) containing the state values
@@ -99,7 +99,7 @@ public:
  * material model related history variables in integration points, see base class @ref Material documentation.
  *
  * The constitutive model can in general support several material modes (plane stress, plane strain ,... modes).
- * Its capabilities can be examined using hasMaterialModeCapability  service.
+ * Its capabilities can be examined using hasMaterialModeCapability service.
  * It is generally assumed, that results obtained from constitutive model services are according to
  * valid material mode. This mode is determined from integration point, which is compulsory parameter of all material
  * services.
@@ -141,7 +141,7 @@ public:
      * @param gp Integration point.
      * @param tStep Solution step.
      */
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *);
+    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testMaterialExtension(MaterialExtension ext) { return ( ( ext == Material_FluidDynamicsCapability ) ? 1 : 0 ); }
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.h,v 1.3 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,18 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************************************************************************
-//   *** 3D LINEAR PYRAMID ELEMENT FOR FLUID DYNAMIC PROBLEMS SOLVED WITH SUPG/PSSPG ALGORITHM ***
-//   ************************************************************************************************
-
 #ifndef py1_3d_supg_h
 #define py1_3d_supg_h
 
-
 #include "supgelement2.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "flotmtrx.h"
 
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -65,61 +56,45 @@ class IntArray;
 /**
  * Class representing 3d linear pyramid element
  * for solving incompressible fluid with SUPG solver
- *
  */
 class PY1_3D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface
 {
 protected:
     static FEI3dTrLin interpolation;
+
 public:
-    // constructor
-    PY1_3D_SUPG(int, Domain *);
-    ~PY1_3D_SUPG();                        // destructor
+    PY1_3D_SUPG(int n, Domain *d);
+    ~PY1_3D_SUPG();
 
     // definition
     const char *giveClassName() const { return "PY1_3D_SUPG"; }
-    classType                giveClassID() const { return SUPGElementClass; }
+    classType giveClassID() const { return SUPGElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
     MaterialMode giveMaterialMode() { return _3dFlow; }
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
-    virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    virtual int            computeNumberOfDofs(EquationID ut);
-    IRResultType           initializeFrom(InputRecord *ir);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual int computeNumberOfDofs(EquationID ut);
+    IRResultType initializeFrom(InputRecord *ir);
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType t);
 
-    double                computeCriticalTimeStep(TimeStep *tStep);
-    double                computeVolumeAround(GaussPoint *);
+    double computeCriticalTimeStep(TimeStep *tStep);
+    double computeVolumeAround(GaussPoint *gp);
 
-    virtual void     updateStabilizationCoeffs(TimeStep *);
+    virtual void updateStabilizationCoeffs(TimeStep *tStep);
 
-
-    /**
-     * @name The element interface required by LevelSetPCSElementInterface
-     */
-    //@{
-    /** Evaluetes F in level set equation of the form
-     *  fi_t+F(grad(fi), x)*norm(grad(fi)) = 0
-     *  where for interface position driven by flow with speed u:
-     *  F=integral of {dotProduct(u,grad(fi))/norm(grad(fi))}
-     */
     double LS_PCS_computeF(LevelSetPCS *, TimeStep *);
-    /// Returns gradient of shape functions (assumed constatnt <- linear approx)
     void LS_PCS_computedN(FloatMatrix &answer);
-    /// Returns receiver's volume
     double LS_PCS_computeVolume();
     virtual double LS_PCS_computeS(LevelSetPCS *, TimeStep *);
     void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
-    //@}
-
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
 #endif
 
 protected:
-    void                  computeGaussPoints();
+    void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);

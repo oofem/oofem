@@ -54,7 +54,7 @@ public:
     CBSElement(int n, Domain *aDomain);
     ~CBSElement();
 
-    ///Initializes receiver acording to object description stored in input record.
+    ///Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 
     // characteristic  matrix

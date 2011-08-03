@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/nltransienttransportproblem.h,v 1.1 2003/04/14 16:01:39 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -47,7 +46,7 @@
 
 namespace oofem {
 /**
- * This class represents transient incopressible flow problem. Solution is based on
+ * This class represents transient incompressible flow problem. Solution is based on
  * algorithm with SUPG/PSPG stabilization.
  */
 class SUPG : public EngngModel
@@ -67,15 +66,16 @@ protected:
 
     double deltaT;
     int deltaTLTF;
-    /// covergence tolerance
+    /// Convergence tolerance.
     double atolv, rtolv;
-    /// max number of iterations
+    /// Max number of iterations.
     int maxiter;
-    /** flag if set to true (default), then when max number of iteration reached, computation stops
-     *  otherwise computation continues with next step
+    /**
+     * Flag if set to true (default), then when max number of iteration reached, computation stops
+     * otherwise computation continues with next step.
      */
     bool stopmaxiter;
-    // integration constants
+    /// Integration constant.
     double alpha;
 
     int initFlag;
@@ -84,9 +84,9 @@ protected:
     bool equationScalingFlag;
     // length, velocity, and density scales
     double lscale, uscale, dscale;
-    // Reynolds number
+    /// Reynolds number.
     double Re;
-    // indicates if equation renumbering requiered
+    /// Indicates if equation renumbering required.
     bool renumberFlag;
 
 
@@ -118,68 +118,32 @@ public:
         if ( materialInterface ) { delete materialInterface; }
     }
 
-    void solveYourselfAt(TimeStep *);
-    /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
-     */
-    virtual void               updateYourself(TimeStep *);
+    void solveYourselfAt(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
-    double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *);
-    /**
-     * Returns characteristic vector of element. The Element::GiveCharacteristicVector function
-     * should not be called directly, because EngngModel may require some special modification
-     * of characteristic vectors supported on element level.
-     * @param answer characteristic matrix
-     * @param num element number
-     * @param type type of CharMatrix requsted
-     * @param tStep time step when response is computed
-     * @param domain source domain
-     */
+    double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
-    /**
-     * Returns characteristic matrix of element. The Element::GiveCharacteristicMatrix function
-     * should not be called directly, because EngngModel may require some special modification
-     * of characteristic matrices supported on element level. But default implementation does
-     * the direct call to element level.
-     * @param answer characteristic matrix
-     * @param num element number
-     * @param type type of CharMatrix requsted
-     * @param tStep time step when response is computed
-     * @param domain source domain
-     */
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
-
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void   updateDomainLinks();
+    void updateDomainLinks();
 
     TimeStep *giveNextStep();
     TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(TimeStep *);
+    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    /// Initialization from given input record
     IRResultType initializeFrom(InputRecord *ir);
 
-    // consistency check
-    virtual int checkConsistency(); // returns nonzero if o.k.
+    virtual int checkConsistency();
     // identification
     const char *giveClassName() const { return "SUPG"; }
-    classType giveClassID()      const { return SUPGClass; }
+    classType giveClassID() const { return SUPGClass; }
+
     fMode giveFormulation() { return TL; }
 
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     *  Dof class provides component printing routines, but emodel is responsible
-     *  for what will be printed at DOF level.
-     *  @param stream output stream
-     *  @param iDof dof to be processed
-     *  @param atTime solution step
-     */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     virtual int giveNumberOfEquations(EquationID);
@@ -190,62 +154,25 @@ public:
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
 
-    /// Returns the Equation scaling flag, which is used to indicate that governing equation(s) are scaled, or non-dimensionalized
     virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
-    /// Returns the scale factor for given variable type
     virtual double giveVariableScale(VarScaleType varId);
-    /**
-     * Prints output of receiver to ouput domain stream, for given time step.
-     * Corresponding function for element gauss points is invoked
-     * (gaussPoint::printOutputAt).
-     */
-    //virtual void                  printOutputAt (FILE *, TimeStep*) ;
 
-    virtual int       requiresUnknownsDictionaryUpdate() { return renumberFlag; }
-    virtual bool      requiresEquationRenumbering(TimeStep *) { return renumberFlag; }
-    virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
-    /*
-     * Here we store only total and inceremental value; so hash is computed from mode value only
-     */
-    virtual int       giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
+    virtual bool requiresEquationRenumbering(TimeStep *tStep) { return renumberFlag; }
+    virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
+    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
 
-    /**
-     * Forces equation renumbering on given domain. All equation numbers in all dofManagers are invalidated,
-     * and new equation numbers are generated starting from domainNeqs entry corresponding to given domain.
-     * It will update numberOfEquations variable accordingly.
-     * Should be used at startup to force equation numbering and therefore sets numberOfEquations.
-     * Must be used if model supports changes of static system to assign  new valid equation numbers
-     * to dofManagers.
-     */
-    virtual int       forceEquationNumbering(int i);
-    /**
-     * Forces equation renumbering on all domains associated to engng model.
-     * All equation numbers in all domains for all dofManagers are invalidated,
-     * and new equation numbers are generated starting from 1 on each domain.
-     * It will update numberOfEquations variable accordingly.
-     * Should be used at startup to force equation numbering and therefore sets numberOfEquations.
-     * Must be used if model supports changes of static system to assign  new valid equation numbers
-     * to dofManagers.
-     */
-    virtual int       forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
+    virtual int forceEquationNumbering(int i);
+    virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
 
-    /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 
-
-
 protected:
-    /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
-     */
-    void updateInternalState(TimeStep *);
-    void applyIC(TimeStep *);
+    void updateInternalState(TimeStep *tStep);
+    void applyIC(TimeStep *tStep);
     void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
-    void evaluateElementStabilizationCoeffs(TimeStep *);
-    void updateElementsForNewInterfacePosition(TimeStep *);
+    void evaluateElementStabilizationCoeffs(TimeStep *tStep);
+    void updateElementsForNewInterfacePosition(TimeStep *tStep);
 
     void updateDofUnknownsDictionary_predictor(TimeStep *tStep);
     void updateDofUnknownsDictionary_corrector(TimeStep *tStep);
@@ -257,7 +184,7 @@ protected:
     //void updateDofManActivityMap (TimeStep* tStep);
     void updateDofManVals(TimeStep *tStep);
     //void imposeAmbientPressureInOuterNodes(SparseMtrx* lhs, FloatArray* rhs, TimeStep* stepN);
-    //void    __debug  (TimeStep* atTime);
+    //void __debug(TimeStep* atTime);
 };
 } // end namespace oofem
 #endif // supg_h

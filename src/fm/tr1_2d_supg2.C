@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/tr1_ht.C,v 1.2 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,20 +30,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-/*
- * TODO:
- * - modify computeDeviatoricStress to account for two material setting
- **done, since this method is used only for output purposes (rule of mixture used here)
- * - check computation of stabilization coeffs whether the multi material setting is correctly taken into account
- **done, average viscosity according to rule of mixture applied
- *
- * - save&restore context will not work (some way how to save/restore dynamic integration rules have to be found:
- *  element has to restore these rules based on restored data, and then rules will be restored,
- *  or integration rule can store more info about gauss points if desired (when dynamic)
- * - integrate sub_IPRule as ordinary element integration rule
- *
  */
 
 #include "tr1_2d_supg2.h"

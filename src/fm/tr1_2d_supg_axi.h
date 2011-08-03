@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.h,v 1.3 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,7 +35,6 @@
 #ifndef tr1_2d_supg_axi_h
 #define tr1_2d_supg_axi_h
 
-
 #include "tr1_2d_supg.h"
 
 namespace oofem {
@@ -44,7 +42,7 @@ namespace oofem {
  * Class representing 2d linear axisymmetric triangular element
  * for solving incompressible fluid with SUPG solver
  *
- * This class is similar to TR1_2D_SUPG2_AXI, but diference is in handling
+ * This class is similar to TR1_2D_SUPG2_AXI, but difference is in handling
  * multiple fluids. This class uses rule of mixture which interpolates the
  * properties using VOF value, requiring the use of twofluidmaterial class
  * as material model for this situation.
@@ -52,88 +50,46 @@ namespace oofem {
 class TR1_2D_SUPG_AXI : public TR1_2D_SUPG
 {
 protected:
-    /// radius at element center
+    /// Radius at element center.
     double rc;
-public:
-    // constructor
-    TR1_2D_SUPG_AXI(int, Domain *);
-    ~TR1_2D_SUPG_AXI();                        // destructor
 
-    /**
-     * Computes acceleration terms (generalized mass matrix with stabilization terms ) for momentum balance equations(s)
-     */
+public:
+    TR1_2D_SUPG_AXI(int n, Domain *d);
+    ~TR1_2D_SUPG_AXI();
+
     void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    /**
-     * Computes nonlinear advection terms for momentum balance equations(s)
-     */
     void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    /**
-     * Computes the derivative of advection terms for momentum balance equations(s)
-     * with respect to nodal velocities
-     */
     void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    /**
-     *  Computes diffusion terms for momentum balance equations(s)
-     */
     void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    /** Computes the derivative of diffusion terms for momentum balance equations(s)
-     *  with respect to nodal velocities
-     */
     void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
-    /** Computes pressure terms for momentum balance equations(s) */
     void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    /** Computes SLIC stabilization term for momentum balance equation(s) */
     void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    /** Computes the linear advection term for mass conservation equation */
     void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    /**
-     * Computes advection terms for mass conservation equation
-     */
     void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    /** Computes the derivative of advection terms for mass conservation equation
-     *  with respect to nodal velocities
-     */
     void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    /**
-     * Computes diffusion terms for mass conservation equation
-     */
     void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
     void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    /**
-     * Computes acceleration terms for mass conservation equation
-     */
-    void  computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    /**
-     * Computes pressure terms for mass conservation equation
-     */
+    void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
     void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
 
-    void     updateStabilizationCoeffs(TimeStep *);
-    // calculates critical time step
-    // virtual double        computeCriticalTimeStep (TimeStep* tStep);
-    /**
-     * Computes Rhs terms due to boundary conditions
-     */
-    void  computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
-    /**
-     * Computes Rhs terms due to boundary conditions
-     */
-    void  computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
+    void updateStabilizationCoeffs(TimeStep *tStep);
+    void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
+    void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
 
-    double             computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
 
     // definition
     const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
-    classType                giveClassID() const { return SUPGElementClass; }
+    classType giveClassID() const { return SUPGElementClass; }
     MaterialMode giveMaterialMode() { return _2dAxiFlow; }
 protected:
-    void                  computeGaussPoints();
-    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *);
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
+    void computeGaussPoints();
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void initGeometry();
-    double computeRadiusAt(GaussPoint *);
-    void   computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
-    void   computeNVector(FloatArray &answer, GaussPoint *gp);
+    double computeRadiusAt(GaussPoint *gp);
+    void computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
+    void computeNVector(FloatArray &answer, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // tr1_2d_supg_axi_h

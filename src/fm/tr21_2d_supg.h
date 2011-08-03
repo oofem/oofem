@@ -49,14 +49,9 @@
 #include "levelsetpcs.h"
 
 namespace oofem {
-class TimeStep;
-class Node;
-class Material;
-class GaussPoint;
-
 /**
  * Class representing 2d triangular element  with quadratic velocity
- * and linear pressure aproximations for solving incompressible fluid problems
+ * and linear pressure approximation for solving incompressible fluid problems
  * with SUPG solver.
  */
 class TR21_2D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
@@ -89,11 +84,11 @@ public:
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    virtual double LS_PCS_computeF(LevelSetPCS *, TimeStep *);
+    virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
     virtual double LS_PCS_computeVolume();
     void LS_PCS_computeVolume(double &answer,  const FloatArray **coordinates);
-    virtual double LS_PCS_computeS(LevelSetPCS *, TimeStep *);
+    virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 

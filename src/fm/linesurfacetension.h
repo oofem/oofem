@@ -54,18 +54,14 @@ namespace oofem {
  * The load is dependent on the solution, thus there is a "stiffness"/tangent matrix as well.
  * @author Mikael Öhman
  */
-class LineSurfaceTension : 
-	public FMElement, 
-	public SpatialLocalizerInterface, 
+class LineSurfaceTension :
+	public FMElement,
+	public SpatialLocalizerInterface,
 	public EIPrimaryUnknownMapperInterface
 {
-protected:
-	/// True if used as FMElement
-	bool fmtype;
-
 public:
     /**
-     * Constructor. Creates an element with number n belonging to domain aDomain.
+     * Constructor.
      * @param n Elements number.
      * @param d Pointer to the domain to which element belongs.
      */
@@ -73,10 +69,7 @@ public:
     /// Destructor.
 	~LineSurfaceTension ();
 
-	/**
-	 * Initializes the element.
-	 */
-	IRResultType initializeFrom(InputRecord *);
+	IRResultType initializeFrom(InputRecord *ir);
 
 	virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 	virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
@@ -91,7 +84,7 @@ public:
 	 * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
 	 */
 	virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
-	
+
 	virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

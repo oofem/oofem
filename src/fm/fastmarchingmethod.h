@@ -105,29 +105,30 @@ public:
     ~FastMarchingMethod() { }
 
     /**
-     * Solution of problem. I/O param dmanValues on input will contain boundary
-     * values for those dofnam, that are known; on output will contain solution.
-     * paramemeter bcDofMans is a list containing IDs (numbers) of those
+     * Solution of problem.
+     * @param[in,out] dmanValues On input should contain boundary
+     * values for those dofnam that are known; on output will contain solution.
+     * @param bcDofMans A list containing IDs (numbers) of those
      * dofmans, for which boundary value is known. If this number is positive,
      * then the front will propagate from this dofman, if negative, then the front
      * will not propagate from this dofman (usefull, when one needs to construct
      * "one sided" solution).
-     * F is the front propagation speed.
+     * @param F is the front propagation speed.
      */
     void solve(FloatArray &dmanValues, const std :: list< int > &bcDofMans, double F);
 
     // identification
     const char *giveClassName() const { return "FastMarchingMethod"; }
-    classType giveClassID()     const { return FastMarchingMethodClass; }
+    classType giveClassID() const { return FastMarchingMethodClass; }
 
 protected:
     /// Initialize receiver.
     void initialize(FloatArray &dmanValues, const std :: list< int > &bcDofMans, double F);
 
-    /// Updates the distace of trial node with given id).
+    /// Updates the distance of trial node with given id).
     void updateTrialValue(FloatArray &dmanValues, int id, double F);
 
-    /// Get the trial point with smallest T; zero if emty.
+    /// Get the trial point with smallest T; zero if empty.
     int  getSmallestTrialDofMan();
 };
 } // end namespace oofem

@@ -65,7 +65,7 @@ class SUPGElement2 : public SUPGElement
 protected:
     /// Cached transformation matrix of receiver.
     FloatMatrix rotationMatrix;
-    /// Flag indicating if tranformation matrix has been already computed.
+    /// Flag indicating if transformation matrix has been already computed.
     int rotationMatrixDefined;
 
 public:

@@ -45,7 +45,7 @@ class FEI2dLineQuad;
  * @see LineSurfaceTension
  * @author Mikael Öhman
  */
-class Line2SurfaceTension : 
+class Line2SurfaceTension :
 	public LineSurfaceTension
 {
 protected:
@@ -53,7 +53,7 @@ protected:
 
 public:
     /**
-     * Constructor. Creates an element with number n belonging to domain aDomain.
+     * Constructor.
      * @param n Element's number.
      * @param d Pointer to the domain to which element belongs.
      */

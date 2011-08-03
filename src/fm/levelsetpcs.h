@@ -49,7 +49,7 @@ class LevelSetPCS;
 
 /**
  * Element interface for LevelSetPCS class representing level-set like material interface.
- * The elements should provide specific functionality in order to colaborate with LEPlic and this
+ * The elements should provide specific functionality in order to collaborate with LEPlic and this
  * required functionality is declared in this interface.
  */
 class LevelSetPCSElementInterface : public Interface
@@ -92,8 +92,8 @@ public:
 
 /**
  * Abstract base class representing Level Set representation of material interfaces.
- * The solution algorithm is based on positive coefficint scheme.
- * This algorithm is limitted to d-dimensional simplexes with linear approximation.
+ * The solution algorithm is based on positive coefficient scheme.
+ * This algorithm is limited to d-dimensional simplexes with linear approximation.
  * Its typical use to model moving interface (such as free surface)
  * in a fixed-grid methods (as typically used in CFD).
  * The basic tasks are representation of interface and its updating.
@@ -128,7 +128,7 @@ protected:
 
 public:
     /** Constructor. Takes two two arguments. Creates
-     *  MaterialInterface instance with given number and belonging to given domain.
+     *  a MaterialInterface instance with given number and belonging to given domain.
      *  @param n Component number in particular domain. For instance, can represent
      *  node number in particular domain.
      *  @param d Domain to which component belongs to.

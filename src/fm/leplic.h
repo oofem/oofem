@@ -44,7 +44,7 @@ class LEPlic;
 
 /**
  * Element interface for LEPlic class representing Lagrangian-Eulerian (moving) material interface.
- * The elements should provide specific functionality in order to colaborate with LEPlic and this
+ * The elements should provide specific functionality in order to collaborate with LEPlic and this
  * required functionality is declared in this interface.
  */
 class LEPlicElementInterface : public Interface
@@ -75,7 +75,7 @@ public:
     /// Assembles receiver material polygon based solely on given interface line.
     virtual void formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                                          const FloatArray &normal, const double p, bool updFlag) = 0;
-    /// Truncates givem material polygon to receiver.
+    /// Truncates given material polygon to receiver.
     virtual double truncateMatVolume(const Polygon &matvolpoly, double &volume) = 0;
     /// Computes the receiver center (in updated Lagrangian configuration).
     virtual void giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool updFlag) = 0;
@@ -83,9 +83,9 @@ public:
     virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag) = 0;
     /// Computes the volume of receiver.
     virtual double computeMyVolume(LEPlic *matInterface, bool updFlag) = 0;
-    /// Returns trie if cell is boundary.
+    /// Returns true if cell is boundary.
     bool isBoundary();
-    /// Return number of receiver's elemnent.
+    /// Return number of receiver's element.
     virtual Element *giveElement() = 0;
     /// Computes critical time step.
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep) = 0;
@@ -117,7 +117,7 @@ public:
      * Stores context of receiver into given stream.
      * Only non-temp internal history variables are stored.
      * @param stream stream where to write data
-     * @param mode determines ammount of info required in stream (state, definition,...)
+     * @param mode determines amount of info required in stream (state, definition,...)
      * @param obj pointer to integration point, which invokes this method
      * @return contextIOResultType.
      */
@@ -125,7 +125,7 @@ public:
     /**
      * Restores context of receiver from given stream.
      * @param stream stream where to read data
-     * @param mode determines ammount of info required in stream (state, definition,...)
+     * @param mode determines amount of info required in stream (state, definition,...)
      * @param obj pointer to integration point, which invokes this method
      * @return contextIOResultType.
      */
