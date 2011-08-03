@@ -1,0 +1,18 @@
+\begin{tikzpicture}[scale=6,>=stealth]
+ \tikzstyle{elemnode} = [draw,circle,inner sep=1,fill=white]
+ \newcommand{\lcoordsys}[1]{\draw[->] (-0.05,0) -- (1,0) node[above] {$x_{#1}$}; \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y_{#1}$};}
+ \draw[->] (-0.05,0) -- (0.8,0) node[above] {$x_g$};
+ \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y_g$};
+ 
+ \draw[thick,xshift=-2] 
+     (0.2,0.1)
+  -- (0.7,0.15) coordinate[midway] (e1) node[below,midway,blue] {1} node[elemnode] {} node[below right] {2}
+  -- (0.8,0.45) coordinate[midway] (e2) node[right,midway,blue] {2} node[elemnode] {} node[above] {3}
+  -- (0.3,0.5)  coordinate[midway] (e3) node[above,midway,blue] {3} node[elemnode] {} node[above] {4}
+  -- (0.2,0.1)  coordinate[midway] (e4) node[left,midway,blue] {4} node[elemnode] {} node[below] {1};
+
+ \node[above] at (e1) {\rotatebox{7}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
+ \node[left] at (e2) {\rotatebox{70}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
+ \node[below] at (e3) {\rotatebox{175}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
+ \node[right] at (e4) {\rotatebox{255}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
+\end{tikzpicture}

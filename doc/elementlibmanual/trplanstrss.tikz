@@ -1,9 +1,8 @@
-\tikzstyle{elemnode} = [draw,circle,inner sep=1,fill=white]
 \begin{tikzpicture}[scale=6,>=stealth]
+ \tikzstyle{elemnode} = [draw,circle,inner sep=1,fill=white]
  \newcommand{\lcoordsys}[1]{\draw[->] (-0.05,0) -- (1,0) node[above] {$x_{#1}$}; \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y_{#1}$};}
-
- \draw[->] (-0.05,0) -- (0.8,0) node[above] {$x$};
- \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y$};
+ \draw[->] (-0.05,0) -- (0.8,0) node[above] {$x_g$};
+ \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y_g$};
  
  \draw[thick] 
      (0.2,0.1) node[elemnode] {} node[below] {1}
