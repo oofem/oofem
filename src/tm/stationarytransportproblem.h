@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/stationarytransportproblem.h,v 1.1 2003/04/14 16:01:40 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// Class StartionaryTransportProblem
-//
 
 #ifndef stationarytransportproblem_h
 #define stationarytransportproblem_h
@@ -81,67 +76,50 @@ public:
         delete  conductivityMatrix;
         if ( nMethod ) { delete nMethod; } }
 
-    void solveYourselfAt(TimeStep *);
-    /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
-     */
-    virtual void               updateYourself(TimeStep *);
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+    void solveYourselfAt(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
+    double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void   updateDomainLinks();
+    void updateDomainLinks();
 
     TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *);
+    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    /// Initialization from given input record
     IRResultType initializeFrom(InputRecord *ir);
 
-    // consistency check
-    virtual int checkConsistency(); // returns nonzero if o.k.
+    virtual int checkConsistency();
 
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream output stream
-     * @param iDof dof to be processed
-     * @param atTime solution step
-     */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
     const char *giveClassName() const { return "StationaryTransportProblem"; }
-    classType giveClassID()      const { return StationaryTransportProblemClass; }
+    classType giveClassID() const { return StationaryTransportProblemClass; }
     fMode giveFormulation() { return TL; }
 
 #ifdef __PETSC_MODULE
-    /**
-     * Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is reqired
-     * for context creation.
-     */
     virtual void initPetscContexts();
 #endif
 
 protected:
     /**
      * Assembles part of rhs due to Dirichlet boundary conditions.
-     * @param answer global vector where the contribution will be added
-     * @param tStep solution step
-     * @param mode CharTypeMode of result
-     * @param lhsType type of element matrix to be multiplied by vector of prescribed.
+     * @param answer Global vector where the contribution will be added.
+     * @param tStep Solution step.
+     * @param eid Equation ID.
+     * @param mode CharTypeMode of result.
+     * @param lhsType Type of element matrix to be multiplied by vector of prescribed.
      * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
-     * @param d domain
+     * @param s Numbering scheme for unknowns.
+     * @param d Domain.
      */
-    void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,
+    void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID eid, ValueModeType mode,
                                       CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
 
     /**
      * Updates IP values on elements
-     * @param TimeStep solution step
+     * @param stepN Solution step.
      */
     virtual void updateInternalState(TimeStep *stepN);
 };

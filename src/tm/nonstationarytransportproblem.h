@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/nonstationarytransportproblem.h,v 1.2 2003/05/19 13:04:10 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// Class NonStartionaryTransportProblem
-//
 
 #ifndef nonstationarytransportproblem_h
 #define nonstationarytransportproblem_h
@@ -65,44 +60,39 @@ protected:
     StateCounterType internalVarUpdateStamp;
 
     SparseMtrx *lhs;
-    ///Right hand side vector from boundary conditions
+    /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;
-    ///This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies
+    /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
     PrimaryField *UnknownsField;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
-    /// Numerical method used to solve the problem
+    /// Numerical method used to solve the problem.
     SparseLinearSystemNM *nMethod;
 
     double deltaT;
     double alpha;
 
-    /// if set then stabilization using lumped capacity will be used
+    /// If set then stabilization using lumped capacity will be used.
     int lumpedCapacityStab;
 
-    //// if set, the receiver flux field will be exported using FieldManager
+    // if set, the receiver flux field will be exported using FieldManager
     //int exportFieldFlag;
 
-    /// Associated time function for time step increment
+    /// Associated time function for time step increment.
     int dtTimeFunction;
 
-    /// changingProblemSize=0 means no change in the problem size (no application/removal of Dirichet boundary conditions)
+    /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
     bool changingProblemSize;
 
 public:
-    ///constructor
+    /// Constructor.
     NonStationaryTransportProblem(int i, EngngModel *_master);
-    ///destructor
+    /// Destructor.
     ~NonStationaryTransportProblem();
 
-    void solveYourselfAt(TimeStep *);
-    /**
-     * Updates nodal values. The method calls also this->updateDofUnknownsDictionary for updating DOFs unknowns dictionaries,
-     * because the model supports assignment of Dirichlet b.c. at various time steps. The number of equations may be different
-     * in each timeStep. The element internal state update is also forced using updateInternalState service.
-     */
-    virtual void updateYourself(TimeStep *);
+    void solveYourselfAt(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
     double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -111,41 +101,27 @@ public:
 
     TimeStep *giveNextStep();
     TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(TimeStep *);
+    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    /// Initialization from given input record
     IRResultType initializeFrom(InputRecord *ir);
-
-    /// Consistency check
-    virtual int checkConsistency(); // returns nonzero if o.k.
+    virtual int checkConsistency();
 
     // identification
     const char *giveClassName() const { return "NonStationaryTransportProblem"; }
     classType giveClassID() const { return NonStationaryTransportProblemClass; }
     fMode giveFormulation() { return TL; }
 
-    ///Allows to change number of equations during solution
-    virtual int       requiresUnknownsDictionaryUpdate() { return changingProblemSize; }
-    virtual bool      requiresEquationRenumbering(TimeStep *) { return changingProblemSize; }
+    /// Allows to change number of equations during solution.
+    virtual int requiresUnknownsDictionaryUpdate() { return changingProblemSize; }
+    virtual bool requiresEquationRenumbering(TimeStep *) { return changingProblemSize; }
     //Store solution vector to involved DoFs
-    //virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
+    //virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
 
-    /**
-     * The array of MasterDof::unknowns contains, in this case, one previous solution and previous RHS.
-     * The hash index tells position in the array MasterDof::unknowns, depending on @param mode
-     */
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream output stream
-     * @param iDof dof to be processed
-     * @param atTime solution step
-     */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     /**
@@ -156,22 +132,15 @@ public:
     LoadTimeFunction *giveDtTimeFunction();
 
     /**
-     * Returns the timestep length for given step number n, initial step is number 0
+     * Returns the time step length for given step number n, initial step is number 0.
      */
     double giveDeltaT(int n);
 
-
     void averageOverElements(TimeStep *tStep);
 
-
 #ifdef __PETSC_MODULE
-    /**
-     * Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is reqired
-     * for context creation.
-     */
     virtual void initPetscContexts();
 #endif
-
 
 protected:
     virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
@@ -179,26 +148,27 @@ protected:
 
     /**
      * This function is normally called at the first time to project initial conditions to previous (0^th) solution vector.
-     * @param tStep previous solution step
+     * @param tStep Previous solution step.
      */
-    virtual void applyIC(TimeStep *);
+    virtual void applyIC(TimeStep *tStep);
 
     /**
-     * Assembles part of rhs due to Dirichlet boundary conditions.
-     * @param answer global vector where the contribution will be added
-     * @param tStep solution step
-     * @param mode CharTypeMode of result
-     * @param lhsType type of element matrix to be multiplied by vector of prescribed.
+     * Assembles part of RHS due to Dirichlet boundary conditions.
+     * @param answer Global vector where the contribution will be added.
+     * @param tStep Solution step.
+     * @param eid Equation ID.
+     * @param mode Mode of result.
+     * @param lhsType Type of element matrix to be multiplied by vector of prescribed.
      * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
-     * @param s a map of non-default equation numbering if required
-     * @param d domain
+     * @param s A map of non-default equation numbering if required.
+     * @param d Domain.
      */
-    virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,
+    virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID eid, ValueModeType mode,
                                               CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
 
     /**
-     * Updates IP values on elements
-     * @param TimeStep solution step
+     * Updates IP values on elements.
+     * @param stepN Solution step.
      */
     virtual void updateInternalState(TimeStep *stepN);
 };

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/quad1_ht.C,v 1.2 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -160,7 +159,7 @@ Quad1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
 
 
 void
-Quad1_ht :: computeJacobianMatrix(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Quad1_ht :: computeJacobianMatrix(oofem::FloatMatrix& answer, oofem::GaussPoint* aGaussPoint)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 // Computes it if it does not exist yet.
 {

@@ -33,6 +33,7 @@
  */
 
 #include "hydratinghemomat.h"
+#include "hydratingisoheatmat.h"
 #include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"

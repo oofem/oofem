@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/quadaxisym1_ht.h,v 1.1 2003/04/14 16:01:40 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,29 +32,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************************************************************************
-//   *** CLASS QuadAxisym1_ht: Axisymmetric Quad(2d), linear approximation, Heat Transfer element ***
-//   ************************************************************************************************
-
 #ifndef quadaxisym1_ht_h
 #define quadaxisym1_ht_h
 
 #include "quad1_ht.h"
 
 namespace oofem {
+/**
+ * Quadratic axisymmetric element with linear approximation for heat transfer.
+ * @todo Use the interpolation classes.
+ */
 class QuadAxisym1_ht : public Quad1_ht
 {
-protected:
 public:
+    QuadAxisym1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
+    ~QuadAxisym1_ht();
 
-    // constructor
-    QuadAxisym1_ht(int, Domain *, ElementMode em = HeatTransferEM);
-    ~QuadAxisym1_ht();                       // destructor
-
-    double                computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
     // definition
     const char *giveClassName() const { return "QuadAxisym1_htElement"; }
-    classType                giveClassID() const { return QuadAxisym1_htClass; }
+    classType giveClassID() const { return QuadAxisym1_htClass; }
 
 protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

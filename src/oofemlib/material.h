@@ -126,17 +126,19 @@ public:
 
     /**
      * Computes characteristic matrix of receiver in given integration point.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
      * @param answer Contains result.
      * @param form Material response form.
      * @param mode Material response mode.
      * @param gp Integration point.
      * @param atTime Time step (most models are able to respond only when atTime is current time step).
      */
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+                                          MatResponseForm form,
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *atTime);
     /**
      * Computes the characteristic value of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status

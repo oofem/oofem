@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/tr1_ht.C,v 1.2 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -173,7 +172,7 @@ Tr1_ht :: computeGaussPoints()
 }
 
 void
-Tr1_ht ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Tr1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)

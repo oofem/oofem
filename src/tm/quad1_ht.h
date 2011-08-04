@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/quad1_ht.h,v 1.2 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *****************************************************************************
-//   *** CLASS Quad1_ht: Quad(2d), linear approximation, Heat Transfer element ***
-//   *****************************************************************************
-
 #ifndef quad1_ht_h
 #define quad1_ht_h
 
@@ -45,99 +40,62 @@
 #include "zznodalrecoverymodel.h"
 
 namespace oofem {
+/**
+ * Quadratic (2d) element with linear approximation for heat transfer.
+ */
 class Quad1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
-public:
 protected:
-
     int numberOfGaussPoints;
 
 public:
+    Quad1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
+    ~Quad1_ht();
 
-    // constructor
-    Quad1_ht(int, Domain *, ElementMode em = HeatTransferEM);
-    ~Quad1_ht();                       // destructor
+    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    double computeVolumeAround(GaussPoint *gp);
 
-    /** Computes the contribution to balance equation(s) due to internal sources */
-    virtual void          computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
-    double                computeVolumeAround(GaussPoint *);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models. Child classes should overload this function only
-     * if they can be used together with nonlocal materil (where nonlocal averaging over
-     * surronding volume is used).
-     * @returns nonzero if successful; zero otherwise
-     */
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+
     // definition
     const char *giveClassName() const { return "Quad1_htElement"; }
-    classType                giveClassID() const { return Quad1_htClass; }
+    classType giveClassID() const { return Quad1_htClass; }
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    IRResultType           initializeFrom(InputRecord *ir);
+    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
+    IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType t);
 
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
     int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-
-    /// Returns the corresponding element to interface
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    /// Evaluates N matrix (interpolation estimated matrix).
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
-    //@}
 
-    /**
-     * @name The element interface required by SpatialLocalizerInterface
-     */
-    //@{
-    /// Returns reference to corresponding element
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    /// Returns nonzero if given element contains given point
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
-    /// Returns distance of given point from element parametric center
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-    //@}
 
 #ifdef __OOFEG
-    //
     // Graphics output
-    //
-    void          drawRawGeometry(oofegGraphicContext &);
-    virtual void  drawScalar(oofegGraphicContext &context);
-    //void          drawYourself (oofegGraphicContext&);
-    //virtual void  drawRawGeometry (oofegGraphicContext&) {}
-    //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawScalar(oofegGraphicContext &context);
+    //void drawYourself(oofegGraphicContext&);
+    //virtual void drawRawGeometry(oofegGraphicContext&) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
 protected:
-    void                  computeGaussPoints();
+    void computeGaussPoints();
 
-    virtual void  computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *);
-    virtual void  computeNmatrixAt(FloatMatrix &n, FloatArray *);
-    /* computes the submatrix of interpolation matrix cooresponding to single unknown.*/
-    virtual void  computeNSubMatrixAt(FloatMatrix &n, FloatArray *);
+    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
+    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
 
-    void giveDerivativeKsi(FloatArray &answer, double);
-    void giveDerivativeEta(FloatArray &answer, double);
-    void computeJacobianMatrix(FloatMatrix &answer, GaussPoint *aGaussPoint);
+    void giveDerivativeKsi(FloatArray &answer, double eta);
+    void giveDerivativeEta(FloatArray &answer, double ksi);
+    void computeJacobianMatrix(FloatMatrix &answer, GaussPoint *gp);
 
     void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

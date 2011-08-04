@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/isoheatmat.h,v 1.1 2003/04/14 16:01:39 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ********************************************************
-//   *** CLASS ISOTROPIC MATERIAL FOR HEAT WITH HYDRATION ***
-//   ********************************************************
-
 #ifndef hydratingisoheatmat_h
 #define hydratingisoheatmat_h
 
@@ -45,17 +39,18 @@
 #include "../sm/hydram.h"
 
 namespace oofem {
-class GaussPoint;
-
+/**
+ * Isotropic material for heat with hydration.
+ */
 class HydratingTransportMaterialStatus : public TransportMaterialStatus, public HydrationModelStatusInterface
 {
 public:
     HydratingTransportMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g), HydrationModelStatusInterface() { }
     ~HydratingTransportMaterialStatus() { }
 
-    virtual Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType t);
     const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
-    classType giveClassID()         const { return HydratingTransportMaterialStatusClass; }
+    classType giveClassID() const { return HydratingTransportMaterialStatusClass; }
 
     virtual void updateYourself(TimeStep *atTime) {
         HydrationModelStatusInterface :: updateYourself(atTime);
@@ -64,65 +59,39 @@ public:
     void printOutputAt(FILE *file, TimeStep *atTime);
 };
 
+/**
+ * This class implements a isotropic linear heat material in a finite element problem.
+ * A material is an attribute of a domain. It is usually also attribute of many elements.
+ * Isotropic Linear Heat Material with interface to the Hydration Model
+ */
 class HydratingIsoHeatMaterial : public IsotropicHeatTransferMaterial, public HydrationModelInterface
 {
-    /*
-     * This class implements a isotropic linear heat  material in a finite element problem.
-     * A material is an attribute of a domain. It is usually also attribute of many elements.
-     *
-     * DESCRIPTION
-     * Isotropic Linear Heat Material with interface to the Hydration Model
-     *
-     * TASK
-     *
-     */
-
 protected:
     int hydration, hydrationHeat, hydrationLHS;
 
 public:
-
     HydratingIsoHeatMaterial(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }
     ~HydratingIsoHeatMaterial() { }
 
     void setMixture(MixtureType mix);
 
-    virtual int hasInternalSource(); // return true if hydration heat source is present
+    /// Return true if hydration heat source is present.
+    virtual int hasInternalSource();
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
-    /**
-     * Updates internal state of material according to new state vector.
-     * @param vec new state vector
-     * @param gp integration point
-     * @param tStep solution step
-     */
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *);
+    virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
 
-    /*
-     * void  giveCharacteristicMatrix (FloatMatrix& answer,
-     *                               MatResponseForm form,
-     *                               MatResponseMode mode,
-     *                               GaussPoint* gp,
-     *                               TimeStep* atTime);
-     */
+    virtual double giveCharacteristicValue(MatResponseMode mode,
+                                           GaussPoint *gp,
+                                           TimeStep *atTime);
 
-    virtual double  giveCharacteristicValue(MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *atTime);
-
-    // saves current context(state) into stream
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // identification and auxiliary functions
     const char *giveClassName() const { return "HydratingIsoHeatMaterial"; }
-    classType giveClassID()         const { return HydratingIsoHeatMaterialClass; }
+    classType giveClassID() const { return HydratingIsoHeatMaterialClass; }
 
     IRResultType initializeFrom(InputRecord *ir);
-
-    /*
-     * // non-standard - returns time independent material constant
-     * double  give (int) ;
-     */
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

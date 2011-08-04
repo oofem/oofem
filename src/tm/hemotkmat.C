@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/hemotkmat.C,v 1.2 2003/05/19 13:04:10 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *

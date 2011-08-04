@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/isoheatmat.h,v 1.1 2003/04/14 16:01:39 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,75 +32,46 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ************************************************
-//   *** CLASS ISOTROPIC MATERIAL FOR HEAT
-//   ************************************************
-
 #ifndef isoheatmat_h
 #define isoheatmat_h
 
 #include "transportmaterial.h"
-#include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
 
 namespace oofem {
-class GaussPoint;
-
-
+/**
+ * This class implements a isotropic linear heat  material. A material
+ * is an attribute of a domain. It is usually also attribute of many elements.
+ */
 class IsotropicHeatTransferMaterial : public TransportMaterial
 {
-    /*
-     * This class implements a isotropic linear heat  material in a finite
-     * element problem. A material
-     * is an attribute of a domain. It is usually also attribute of many elements.
-     *
-     * DESCRIPTION
-     * ISOTROPIC Linear Heat Material
-     *
-     * TASK
-     *
-     */
-
 protected:
-
-    double conductivity; //conductivity (k in input file)
-    double capacity; //capacity (c in input file)
+    double conductivity; ///< Conductivity (k in input file).
+    double capacity;     ///< Capacity (c in input file).
 
 public:
-
     IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
     ~IsotropicHeatTransferMaterial() { }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime); // identification and auxiliary functions
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+                                          MatResponseForm form,
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *atTime);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-
     const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
-    classType giveClassID()         const { return IsotropicHeatTransferMaterialClass; }
+    classType giveClassID() const { return IsotropicHeatTransferMaterialClass; }
 
     IRResultType initializeFrom(InputRecord *ir);
 
-    // non-standard - returns time independent material constant
-    double   give(int, GaussPoint *);
+    double give(int aProperty, GaussPoint *gp);
 
-    /**
-     * Creates a new copy of the associated status and inserts it into a given integration point.
-     * @param gp Integration point where newly created status will be stored.
-     * @return reference to new status.
-     */
-    //virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return NULL; }
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
-
-protected:
 };
 } // end namespace oofem
 #endif // isoheatmat_h

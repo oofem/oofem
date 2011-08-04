@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/nltransienttransportproblem.C,v 1.2.4.1 2004/04/05 15:19:53 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 
 #include "nltransienttransportproblem.h"
 #include "nummet.h"
@@ -55,9 +53,9 @@
 #endif
 
 namespace oofem {
-///Constructor
+
 NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master) {}
-///Destructor
+
 NLTransientTransportProblem :: ~NLTransientTransportProblem() {}
 
 IRResultType

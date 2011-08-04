@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/quadaxisym1_ht.C,v 1.1 2003/04/14 16:01:40 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -102,7 +101,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
         aNode = 4;
         bNode = 1;
     } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
+        _error("computeEdgeVolumeAround: wrong edge number");
     }
 
     nodeA   = this->giveNode(aNode);

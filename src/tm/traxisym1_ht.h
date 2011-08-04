@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/traxisym1_ht.h,v 1.2 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,29 +32,24 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *************************************************************************************************
-//   *** CLASS TrAxisym1_ht: Axisymmtric Triangle(2d), linear approximation, Heat Transfer element ***
-//   *************************************************************************************************
-
 #ifndef traxisym1_ht_h
 #define traxisym1_ht_h
 
 #include "tr1_ht.h"
 
 namespace oofem {
+/**
+ * Triangular axisymmetric element with linear approximation for heat transfer.
+ */
 class TrAxisym1_ht : public Tr1_ht
 {
-protected:
-
 public:
+    TrAxisym1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
+    ~TrAxisym1_ht();
 
-    // constructor
-    TrAxisym1_ht(int, Domain *, ElementMode em = HeatTransferEM);
-    ~TrAxisym1_ht();                       // destructor
-
-    double                computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
     const char *giveClassName() const { return "TrAxisym1_htElement"; }
-    classType                giveClassID() const { return TrAxisym1_htClass; }
+    classType giveClassID() const { return TrAxisym1_htClass; }
 
 protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

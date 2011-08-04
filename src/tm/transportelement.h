@@ -36,22 +36,12 @@
 #define transportelement_h
 
 #include "element.h"
-#include "femcmpnn.h"
-#include "domain.h"
 #include "flotmtrx.h"
 
 #include "primaryfield.h"
 #include "matresponsemode.h"
 
 namespace oofem {
-class TimeStep;
-class Node;
-class Material;
-class GaussPoint;
-class FloatMatrix;
-class FloatArray;
-class IntArray;
-
 /**
  * This abstract class represent a general base element class for transport problems.
  * In actual implementation, the same approximation order of all unknowns is assumed,
@@ -63,11 +53,12 @@ class TransportElement : public Element, public EIPrimaryFieldInterface
 {
 public:
     enum ElementMode { HeatTransferEM, HeatMass1TransferEM };
+
 protected:
     ElementMode emode;
 
 public:
-    TransportElement(int, Domain *, ElementMode em = HeatTransferEM);
+    TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
     ~TransportElement();
 
     void giveCharacteristicMatrix(FloatMatrix & answer, CharType type, TimeStep *tStep);
@@ -78,11 +69,11 @@ public:
     /** Computes the conductivity matrix of the receiver */
     virtual void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     /** Computes the RHS contribution to balance equation(s) due to boundary conditions */
-    virtual void computeBCVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
-    /* Computes the LHS contribution to balance equation(s) due to boundary conditions */
-    virtual void computeBCMtrxAt(FloatMatrix &answer, TimeStep *, ValueModeType mode);
+    virtual void computeBCVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    /** Computes the LHS contribution to balance equation(s) due to boundary conditions */
+    virtual void computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode);
     /** Computes the contribution to balance equation(s) due to internal sources */
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) = 0;
+    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
     /** Computes the LHS contribution to balance equation(s) due to material internal source */
     virtual void computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the part of internal source LHS contribution corresponding to unknown identified by rmode parameter */
@@ -96,10 +87,6 @@ public:
     virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // time step termination
-    /**
-     * Updates a state vector in each integration point of element
-     * @param tStep finished time step
-     */
     void updateInternalState(TimeStep *tStep);
     void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
@@ -109,20 +96,18 @@ public:
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
 
-    virtual int  EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                       TimeStep *atTime);
+    virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
+                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode,
+                                                      TimeStep *atTime);
 
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *atTime);
-    //
     // Graphics output
-    //
-    //void         drawYourself (oofegGraphicContext&);
-    //virtual void drawRawGeometry (oofegGraphicContext&) {}
+    //void drawYourself (oofegGraphicContext&);
+    //virtual void drawRawGeometry(oofegGraphicContext&) {}
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
@@ -135,7 +120,7 @@ protected:
      * @param tStep Time step.
      */
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer,
-                                             MatResponseMode rMode, GaussPoint *,
+                                             MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep);
     /**
      * Computes the matrix @f$ P=\int_\Omega N^{\mathrm{T}} N\;\mathrm{d}\Omega @f$.
@@ -207,14 +192,16 @@ protected:
      * receiver's nodes, at stepN.
      */
     //void  computeDirichletBcRhsVectorAt (FloatArray& answer, TimeStep* stepN, CharTypeMode mode);
-    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *)  = 0;
-    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *)  = 0;
-    /*
-     * Computes the submatrix of interpolation matrix corresponding to single unknown.
+    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)  = 0;
+    /**
+     * Computes the sub-matrix of interpolation matrix corresponding to single unknown.
      * Currently, the same approximation order is assumed, but it can be extended.
      */
-    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *)  = 0;
-    /** Computes the contribution to balance equation(s) due to internal sources */
+    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords)  = 0;
+    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords)  = 0;
+    /**
+     * Computes the contribution to balance equation(s) due to internal sources
+     */
     virtual void computeInternalSourceRhsSubVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode, int indx);
 
     virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp) = 0;
@@ -238,7 +225,7 @@ protected:
      * The DOFs in answer are ordered in a same way as the DOFS at the element level are
      * (all Dofs corresponding to given node subsequently, followed by next node DOFS).
      * @param answer Receiver matrix.
-     * @param src Source mtrx containing local sub matrix corresponding to single DOF.
+     * @param src Source matrix containing local sub matrix corresponding to single DOF.
      * @param ndofs Number of DOFs per node (assumed same for all nodes).
      * @param rdof Rows of src are localized into rows of answer corresponding to rdof-th dof.
      * @param cdof Columns of src are localized into columns of answer corresponding to cdof-th dof.
