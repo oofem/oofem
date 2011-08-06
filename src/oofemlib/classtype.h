@@ -50,6 +50,7 @@ enum classType {
     FEMComponentClass,
 
     GeneralBoundaryConditionClass,
+    ActiveBoundaryConditionClass,
     LoadClass,
     BoundaryConditionClass,
     PrescribedGradientClass,
