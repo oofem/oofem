@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/beam2d.C,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file libeam2d.cc
-
 #include "beam2d.h"
 #include "node.h"
 #include "material.h"
@@ -50,31 +47,28 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
+// Set up interpolation coordinates
+FEI2dLineLin Beam2d :: interp_geom(1, 3);
+
 Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
-    // Constructor.
 {
-    numberOfDofMans     = 2;
+    numberOfDofMans = 2;
 
     kappa = -1; // set kappa to undef value (should be always > 0.)
-    length              = 0.;
-    pitch               = 10.;  // a dummy value
+    length = 0.;
+    pitch = 10.;  // a dummy value
 
     dofsToCondense = NULL;
 }
 
 Beam2d :: ~Beam2d()
 {
-    // destructor
-
     delete dofsToCondense;
 }
 
@@ -318,7 +312,8 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
 
 
 void
-Beam2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -332,7 +327,6 @@ Beam2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
 
     return;
 }
-
 
 
 double Beam2d :: giveLength()

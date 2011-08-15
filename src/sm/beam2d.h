@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/beam2d.h,v 1.5 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,127 +32,97 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************
-//   *** CLASS Beam2d ***
-//   ********************
-
 #ifndef beam2d_h
 #define beam2d_h
 
 #include "structuralelement.h"
 #include "layeredcrosssection.h"
+#include "fei2dlinelin.h"
+//#include "fei2dlinehermite.h"
 
 namespace oofem {
+/**
+ * This class implements a 2-dimensional beam element
+ * with cubic lateral displacement and geometry, quadratic rotations,
+ * and linear longitudinal displacements.
+ * This is an exact displacement approximation for beam with no
+ * nonnodal loading.
+ *
+ * This class is not derived from linear beam or truss element, because it does not support
+ * any material nonlinearities (if should, stiffness must be integrated)
+ */
 class Beam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
-    /*
-     * This class implements a 2-dimensional beam element
-     * with cubic lateral displace,ent interpolation (rotations are quadratic)
-     * and longitudial displacements are linear.
-     * This is an exact displacement approximation for beam with no
-     * nonnodal loading.
-     *
-     * This class is not derived from liBeam2d or truss element, because it does not support
-     * any material nonlinearities (if shoul, stiffness must be integrated)
-     */
 protected:
     double kappa, pitch, length;
     IntArray *dofsToCondense;
 
+    static FEI2dLineLin interp_geom;
+    //static FEI2dLineHermite interp_beam;
+
 public:
-    Beam2d(int, Domain *);                     // constructor
-    ~Beam2d();                                 // destructor
+    Beam2d(int n, Domain *aDomain);
+    ~Beam2d();
 
-    void          computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
-    void          computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
-    /*
-     * Returns mask indicating, which unknowns (their type and ordering is the same as in vector
-     * of receivers unknowns, interpolated by N matrix. Nonzero value at i-th position
-     * indicates that corresponding row in interpolation matrix N will participate in
-     * mass matrix integration (typically only displacements are taken into account).
-     */
-    //virtual void          giveMassMtrxIntegrationgMask (IntArray& answer) ;
-
-    void          computeStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseMode rMode, TimeStep *tStep);
-    int           giveLocalCoordinateSystem(FloatMatrix &answer);
-    void          computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void          giveInternalForcesVector(FloatArray &answer,
-                                           TimeStep *, int useUpdatedGpRecord = 0);
-    void          giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
+    void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    int giveLocalCoordinateSystem(FloatMatrix &answer);
+    void computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
     /**
      * Computes the global coordinates from given element's local coordinates.
-     * @returns retutns nonzero if successful
+     * @returns Nonzero if successful.
      */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    //int hasLayeredSupport () {return 1;}
 
-    /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double        computeVolumeAround(GaussPoint *);
+    virtual FEInterpolation *giveInterpolation() { return &interp_geom; }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) { return NULL; }
 
-    void  printOutputAt(FILE *, TimeStep *);
-    //
-    // definition & identification
-    //
+    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    double computeVolumeAround(GaussPoint *gp);
+    void  printOutputAt(FILE *file, TimeStep *tStep);
+
     const char *giveClassName() const { return "Beam2d"; }
-    classType            giveClassID() const { return Beam2dClass; }
+    classType giveClassID() const { return Beam2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-
-    /**
-     * @name The element interface required by LayeredCrossSectionInterface
-     */
-    //@{
-    /**
-     * Computes full 3d strain vector in element layer. This function is necesary
-     * if layered cross section is specified. If it is implemented, the testElementExtension
-     * servise should return nonzero for Element_LayeredSupport parameter. This service is used by
-     * layered cross section models.
-     * @param answer full layer starin vector
-     * @param masterGp element integration point
-     * @param slaveGp slave integration point representing particular layer
-     * @tStep time step
-     */
-    void  computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                      GaussPoint *slaveGp, TimeStep *tStep);
-    //@}
 
 protected:
-    void          computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
-    void          computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    //void          computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    int           computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
-    //  int           computeGtoNRotationMatrix (FloatMatrix&);
+    void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
+    void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    int computeGtoLRotationMatrix(FloatMatrix &);
+    //int computeGtoNRotationMatrix (FloatMatrix&);
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     double giveKappaCoeff();
-    double        giveLength();
-    double        givePitch();
+    double giveLength();
+    double givePitch();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, TimeStep *tStep);
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode rMode, TimeStep *tStep);
-    void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  { return _2dBeam; }
-    // return desired number of integration points for consistent mass matrix
-    // computation, if required.
+    void computeGaussPoints();
+    integrationDomain giveIntegrationDomain() { return _Line; }
+    MaterialMode giveMaterialMode() { return _2dBeam; }
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

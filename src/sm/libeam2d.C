@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/libeam2d.C,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file libeam2d.cc
-
 #include "libeam2d.h"
 #include "node.h"
 #include "material.h"
@@ -47,13 +44,13 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "dof.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
+// Set up interpolation coordinates
+FEI2dLineLin LIBeam2d :: interpolation(1, 3);
+
 LIBeam2d :: LIBeam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
-    // Constructor.
 {
     numberOfDofMans     = 2;
     length              = 0.;
@@ -106,6 +103,7 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     return;
 }
 
+
 void LIBeam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
@@ -133,8 +131,6 @@ LIBeam2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
 
     return 1;
 }
-
-
 
 
 void
@@ -186,25 +182,6 @@ LIBeam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     return;
 }
 
-/*
- * FloatArray*  LIBeam2d :: ComputeResultingBodyForceAt (TimeStep* stepN)
- * {
- * FloatMatrix  *rot ;
- * FloatArray   *f ;
- * double       area ;
- *
- * f   = this -> Truss2d::ComputeResultingBodyForceAt(stepN) ;
- * // if (f) {
- * // rot = this -> giveRotationMatrix() ;
- * // f->rotatedWith(rot,'n') ;
- * // area = this -> giveMaterial() -> give('A') ;
- * // return f->times(area) ;
- * // }
- * // else
- * // return NULL ;
- *
- * }
- */
 
 void
 LIBeam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -213,7 +190,6 @@ LIBeam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
 {
     this->StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
-
 
 
 int
@@ -279,7 +255,8 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
 
 
 void
-LIBeam2d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+LIBeam2d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -294,43 +271,6 @@ LIBeam2d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
     return;
 }
 
-
-/*
- * void
- * LIBeam2d :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
- * {
- * // computes temperature strain vector of the receiver
- * StructuralMaterial * mat = (StructuralMaterial*) this->giveMaterial();
- * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
- * FloatArray  et, e0 ;
- * double thick;
- *
- * if ( this -> giveBodyLoadArray() -> isEmpty()) {answer.resize(0); return;}
- *
- * this -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
- * if (et.giveSize() == 0) {answer.resize(0); return;}
- * if (et.giveSize() < 1) {
- * _error ("computeTemperatureStrainVectorAt - Bad format of TemperatureLoad");
- * exit (1);
- * }
- * mat->giveThermalDilatationVector (e0, gp,stepN);
- *
- * if (e0.giveSize()) {
- * answer.resize (3);
- * answer.zero();
- *
- * answer.at(1) = e0.at(1) * et.at(1);
- * if (et.giveSize() > 1) {
- * thick = cs->give(THICKNESS);
- * answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
- * }
- * }
- * //delete et;
- * //delete e0;
- *
- * return ;
- * }
- */
 
 double LIBeam2d :: giveLength()
 // Returns the length of the receiver.
@@ -425,6 +365,7 @@ LIBeam2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     return;
 }
 
+
 double
 LIBeam2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
@@ -436,13 +377,13 @@ LIBeam2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     return 0.5 * this->giveLength() * weight;
 }
 
+
 void 
 LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
   answer.times(this->giveCrossSection()->give(CS_Area));
 }
-
 
 
 int
@@ -472,7 +413,6 @@ LIBeam2d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 
     return 1;
 }
-
 
 
 int
