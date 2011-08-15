@@ -48,7 +48,7 @@ namespace oofem {
 class EngngModel;
 class FloatArray;
 
-/*
+/**
  * This class provides an communication context to PETSc library.
  */
 class PetscContext
