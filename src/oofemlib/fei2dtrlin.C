@@ -164,7 +164,7 @@ FEI2dTrLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEI
 }
 
 void
-FEI2dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
+FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     double l;
@@ -172,9 +172,9 @@ FEI2dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     l = this->edgeComputeLength(edgeNodes, cellgeo);
 
-    answer.resize(2, 1);
-    answer.at(1, 1) = -1.0 / l;
-    answer.at(2, 1) =  1.0 / l;
+    answer.resize(2);
+    answer.at(1) = -1.0 / l;
+    answer.at(2) =  1.0 / l;
 }
 
 void

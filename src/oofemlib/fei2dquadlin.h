@@ -62,7 +62,7 @@ public:
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
     virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
+    virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);

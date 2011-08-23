@@ -43,7 +43,6 @@ namespace oofem {
  */
 class FEInterpolation2d : public FEInterpolation
 {
-protected:
 public:
     FEInterpolation2d(int o) : FEInterpolation(o) { }
 
@@ -71,13 +70,13 @@ public:
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).
-     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
+     * @param answer Contains resulting array of derivatives, the member at i position contains value of @f$ \frac{\mathrm{d}N_i}{\mathrm{d}s} @f$.
      * @param iedge Determines the edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      * @param time Time.
      */
-    virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
+    virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords,
                               const FEICellGeometry &cellgeo, double time) = 0;
     /**

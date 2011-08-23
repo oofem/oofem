@@ -236,7 +236,7 @@ FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FE
 }
 
 void
-FEI2dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
+FEI2dTrQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
                             const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
 	// I think it at least should return both dNds and J. Both are almost always needed. 
@@ -266,10 +266,10 @@ FEI2dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 	*/
     double xi = lcoords.at(1);
     double J = edgeGiveTransformationJacobian(iedge,lcoords, cellgeo,time);
-    answer.resize(3,1);
-    answer(0,0) = (xi-0.5)/J;
-    answer(1,0) = (xi+0.5)/J;
-    answer(2,0) = -2*xi/J;
+    answer.resize(3);
+    answer(0) = (xi-0.5)/J;
+    answer(1) = (xi+0.5)/J;
+    answer(2) = -2*xi/J;
 }
 
 void

@@ -62,7 +62,7 @@ public:
 
 /**
  * Void cell geometry wrapper. 
- * Allows to use some interpolation servises not needing the reference to cell geometry.
+ * Allows to use some interpolation services not needing the reference to cell geometry.
  */
 class FEIVoidCellGeometry : public FEICellGeometry
 {
@@ -175,7 +175,7 @@ public:
      */
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
 
-    /// Initializes receiver acording to object description stored in input record.
+    /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     /**@name Methods to support interpolation defined on patch by patch basis. */

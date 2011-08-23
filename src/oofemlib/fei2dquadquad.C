@@ -198,10 +198,10 @@ FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const 
 }
 
 void
-FEI2dQuadQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
+FEI2dQuadQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    OOFEM_ERROR("FEI2dQuadQuad :: edgeEvaldNdx: not implemented");
+    OOFEM_ERROR("FEI2dQuadQuad :: edgeEvaldNds: not implemented");
 }
 
 void

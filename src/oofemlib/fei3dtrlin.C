@@ -363,6 +363,56 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int iedge,
                     l3 * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(3) );
 }
 
+void
+FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
+    double a, b, c;
+    a = lcoords.at(1);
+    b = lcoords.at(2);
+    c = 1.0 - a - b;
+    FloatArray lcoords_tet(4);
+    lcoords_tet.at(isurf) = 0.0;
+    if (isurf == 1) {
+        lcoords_tet.at(4) = a;
+        lcoords_tet.at(3) = b;
+        lcoords_tet.at(2) = c;
+    } else if (isurf == 2) {
+        lcoords_tet.at(1) = a;
+        lcoords_tet.at(3) = b;
+        lcoords_tet.at(4) = c;
+    } else if (isurf == 3) {
+        lcoords_tet.at(1) = a;
+        lcoords_tet.at(4) = b;
+        lcoords_tet.at(2) = c;
+    } else if (isurf == 4) {
+        lcoords_tet.at(2) = a;
+        lcoords_tet.at(3) = b;
+        lcoords_tet.at(1) = c;
+    }
+    this->evaldNdx(answer, lcoords_tet, cellgeo, 0.0);
+}
+
+void
+FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    int n1, n2, n3;
+    IntArray snodes(3);
+    this->computeLocalSurfaceMapping(snodes, isurf);
+
+    n1 = snodes.at(1);
+    n2 = snodes.at(2);
+    n3 = snodes.at(3);
+
+    FloatArray a(3), b(3);
+    for ( int i = 1; i <= 3; i++ ) {
+        a.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+        b.at(i) = cellgeo.giveVertexCoordinates(n3)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+    }
+
+    answer.beVectorProductOf(a, b);
+}
+
 double
 FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                 const FEICellGeometry &cellgeo, double time)
@@ -382,7 +432,10 @@ FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lco
     }
 
     c.beVectorProductOf(a, b);
-    return 0.5 * sqrt( dotProduct(c, c, 3) );
+
+    //FloatArray c;
+    //this->surfaceEvalNormal(c, isurf, lcoords, cellgeo);
+    return 0.5 * c.computeNorm();
 }
 
 void

@@ -138,10 +138,10 @@ FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const F
 }
 
 void
-FEI2dTrConst :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
+FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    answer.resize(1,2);
+    answer.resize(2);
     answer.zero();
 }
 
