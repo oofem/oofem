@@ -85,7 +85,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    GeneralBoundaryCondition(int, Domain *);
+    GeneralBoundaryCondition(int n, Domain *d);
     /// Destructor.
     virtual ~GeneralBoundaryCondition() { }
 

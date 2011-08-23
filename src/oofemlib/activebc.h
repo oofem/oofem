@@ -62,6 +62,28 @@ public:
     /// Destructor.
     virtual ~ActiveBoundaryCondition() { }
 
+    /**@name Methods supporting classical input files*/
+    //{
+    /**
+     * Adds element for active boundary condition.
+     * @param elem Element number.
+     */
+    virtual void addElement(int n) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
+
+    /**
+     * Adds element for active boundary condition.
+     * @param elem Element number.
+     * @param side Side number.
+     */
+    virtual void addElementSide(int elem, int side) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
+
+    /**
+     * Adds dof manager for active boundary condition.
+     * @param dman Dof manager number.
+     */
+    virtual void addDofman(int dman) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
+    //}
+
     /**
      * Assembles B.C. contributions to specified matrix.
      * @param[in,out] answer Matrix to assemble to.
@@ -74,7 +96,7 @@ public:
      * @param domain Domain to assemble from.
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
 
     /**
      * Assembles B.C. contributions to specified vector.
@@ -87,19 +109,20 @@ public:
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain);
+                                const UnknownNumberingScheme &s, Domain *domain) {};
 
     /**
      * Gives a list of location arrays that will be assembled.
      * This should only be used to construct zero structure in sparse matrices.
-     * @param answer List of location arrays.
+     * @param rows List of location arrays for r_s.
+     * @param cols List of location arrays for c_s.
      * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      * @param domain Domain to assemble from.
      */
-    virtual void giveLocationArrays(AList<IntArray> answer, EquationID eid, CharType type,
+    virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
                                     UnknownNumberingScheme &r_s, UnknownNumberingScheme &c_s, Domain *domain);
 
     classType giveClassID() const { return ActiveBoundaryConditionClass; }
