@@ -18,7 +18,7 @@ node 10 coords 3 8   3   0   bc 2 2 0
 bsplineplanestresselement 1 nodes 6 1 2 3 6 7 8 crossSect 1 mat 1 knotvectoru 2 0 3 knotvectorv 2 0 2 knotmultiplicityu 2 3 3 knotmultiplicityv 2 2 2 degree 2 2 1 nip 16
 bsplineplanestresselement 2 nodes 6 3 4 5 8 9 10 crossSect 1 mat 1 knotvectoru 2 0 3 knotvectorv 2 0 2 degree 2 2 1 nip 16
 #
-SimpleCS 1 thick 0.15 width 1.0
+SimpleCS 1 thick 0.15
 #
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 

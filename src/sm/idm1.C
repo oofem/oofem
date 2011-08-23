@@ -343,11 +343,9 @@ IsotropicDamageMaterial1 :: computeStrainInvariants(FloatArray *strainVector, do
 void
 IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    if ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->give(gf_ID, gp) != 0. ) {
-        // adjustment of softening law according to the element size, given crack opening or fracture energy
+    if ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->give(gf_ID, gp) != 0. ) { // adjustment of softening law according to the element size, given crack opening or fracture energy
         computeDamageParamForCohesiveCrack(omega, kappa, gp);
-    } else {
-        // no adjustment according to element size, given fracturing strain
+    } else { // no adjustment according to element size, given fracturing strain
         omega = damageFunction(kappa, gp);
     }
 }
@@ -355,7 +353,7 @@ IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, cons
 void
 IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, double kappa, GaussPoint *gp)
 {
-    const double e0 = this->give(e0_ID, gp);     // e0 is the strain at the peak stress
+    const double e0 = this->give(e0_ID, gp);  // e0 is the strain at the peak stress
     const double E = this->giveLinearElasticMaterial()->give('E', gp);
     const double gf = this->give(gf_ID, gp);
     double wf = this->give(wf_ID, gp);     // wf is the crack opening
@@ -363,28 +361,45 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
     omega = 0.0;
 
     if ( kappa > e0 ) {
-        if ( gf != 0. ) { //specifies fracture energy
-            wf = 2. * gf / E / e0; // wf is the crack opening
+        if ( this->gf != 0. ) { //cohesive crack model
+            if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening
+                wf = this->gf / E / e0; // wf is the crack opening
+            } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { // (bi)linear softening law
+                wf = 2. * gf / E / e0; // wf is the crack opening
+            } else {
+                OOFEM_ERROR2("Gf unsupported for softening type softType = %d", softType);
+            }
         }
 
         IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
         Le = status->giveLe();
         ef = wf / Le;    //ef is the fracturing strain
         if ( ef < e0 ) { //check that no snapback occurs
+            double minGf = 0.;
             OOFEM_WARNING5("ef %f < e0 %f, this leads to material snapback in element %d, characteristic length %f", gp->giveElement()->giveNumber(), ef, e0, Le);
-            OOFEM_WARNING4("Material number %d, Decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, E * e0 * E * e0 * Le / 2. / E);
+            if ( gf != 0. ) { //cohesive crack
+                if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening
+                    minGf = E * e0 * e0 * Le;
+                } else if ( softType == ST_Linear || softType == ST_BiLinear_Cohesive_Crack ) { // (bi)linear softening law
+                    minGf = E * e0 * e0 * Le / 2.;
+                } else {
+                    OOFEM_WARNING2("Gf unsupported for softening type softType = %d", softType);
+                }
+
+                OOFEM_WARNING4("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
+            }
         }
 
         if ( this->softType == ST_Linear_Cohesive_Crack ) {
             if ( kappa < ef ) {
                 omega = ( ef / kappa ) * ( kappa - e0 ) / ( ef - e0 );
             } else {
-                omega = 1.0;//maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
+                omega = 1.0; //maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
             }
         } else if (  this->softType == ST_BiLinear_Cohesive_Crack ) {
             double ek = this->give(ek_ID, gp);
             double gft = this->give(gft_ID, gp);
-            double ef = 2 * gf / E / e0 / Le;//the first part corresponds to linear softening
+            double ef = 2 * gf / E / e0 / Le; //the first part corresponds to linear softening
             double sigmak = E * e0 * ( ef - ek ) / ( ef - e0 );
             double epsf = 2 * ( gft - gf ) / sigmak / Le + ef;
             if ( ( ek > ef ) || ( ek < e0 ) ) {
@@ -392,7 +407,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             }
 
             if ( gft < gf ) {
-                OOFEM_WARNING3("The total fracture energy gft %f must be greater than the initial fracture energy gf %f", gft, gf);
+                OOFEM_ERROR3("The total fracture energy gft %f must be greater than the initial fracture energy gf %f", gft, gf);
             }
 
             if ( kappa <= ek ) {
@@ -425,16 +440,16 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
         } else {
             OOFEM_ERROR1("Unknown softening type for cohesive crack model.");
         }
-        
+
         if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-                _error("computeDamageParam: damage parameter out of range, snap-back problems");
+            _error("computeDamageParam: damage parameter out of range, snap-back problems");
         }
     }
 }
 double
 IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 {
-    const double e0 = this->give(e0_ID, gp);         // ef is the fracturing strain
+    const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
     if ( softType == ST_Linear || softType == ST_Exponential ) {
         ef = this->give(ef_ID, gp);         // ef is the fracturing strain
@@ -447,7 +462,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         } else if ( kappa < ef ) {
             return ( ef / kappa ) * ( kappa - e0 ) / ( ef - e0 );
         } else {
-            return 1.0;//maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
+            return 1.0; //maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
         }
 
     case ST_Exponential:
@@ -499,11 +514,19 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
 
     const double e0 = this->give(e0_ID, gp);
-    double ef = this->give(ef_ID, gp);
+    const double ef = this->give(ef_ID, gp);
+    const double gf = this->give(gf_ID, gp);
     double wf = this->give(wf_ID, gp);
 
-    if ( this->give(gf_ID, gp) != 0) {
-        wf = 2. * gf / E / e0;         // wf is the crack opening
+
+    if ( gf != 0. ) { //cohesive crack model
+        if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening
+            wf = gf / E / e0; // wf is the crack opening
+        } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { // (bi) linear softening law
+            wf = 2. * gf / E / e0; // wf is the crack opening
+        } else {
+            OOFEM_ERROR2("Gf unsupported for softening type softType = %d", softType);
+        }
     }
 
     crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
@@ -525,8 +548,8 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         // remember le in corresponding status
         status->setLe(le);
 
-        if ( this->give(gf_ID, gp) !=0. && e0 >= ( 2. * gf / E / e0 / le ) ) {
-            _warning3("Fracturing strain %f is lower than the elastic strain e0=%f, possible snap-back.", 2. * gf / E / e0 / le, e0);
+        if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
+            _warning3("Fracturing strain %f is lower than the elastic strain e0=%f, possible snap-back.", wf / le, e0);
         } else if ( wf == 0. && e0 >= ef ) {
             _warning4("Fracturing strain ef=%f is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f", ef, e0, e0);
         } else if ( ef == 0. && e0 * le >= wf ) {

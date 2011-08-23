@@ -13,7 +13,7 @@ node 4 coords 3 4.0 0.  0. bc 6 0 1 1 1 1 0 lcs 6 0.866025 -0.5 0.0 0.5 0.866025
 Beam3d 1 nodes 2 1 2 mat 1 crossSect 1 refNode 4
 Beam3d 2 nodes 2 2 3 mat 1 crossSect 1 refNode 1
 Beam3d 3 nodes 2 3 4 mat 1 crossSect 1 refNode 1 
-SimpleCS 1 area 0.1575 Iy 0.002657812 Iz 0.001607812 Ik 0.003606447115384616 beamShearCoeff 1.e30 thick 0.43 width 0.35 
+SimpleCS 1 area 0.1575 Iy 0.002657812 Iz 0.001607812 Ik 0.003606447115384616 beamShearCoeff 1.e30
 IsoLE 1 d 1. E 25.e6 n 0.2 tAlpha 1.2e-5
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad          2 loadTimeFunction 1 Components 6 0.0 10.0 0.0 0. 0. 0.

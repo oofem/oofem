@@ -36,7 +36,7 @@ node 27 coords 4 4 3 5 1 bc 3 0 0 2
 #
 nurbs3delement 1 nodes 27 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 mat 1 crossSect 1 knotvectoru 2 0 1 knotmultiplicityu 2 3 3 knotvectorv 2 0 1 knotmultiplicityv 2 3 3 knotvectorw 2 0 1 knotmultiplicityw 2 3 3 degree 3 2 2 2 nip 64
 #
-SimpleCS 1 thick 0.15 width 1.0
+SimpleCS 1
 #
 IsoLE 1 d 0. E 15.0e3 n 0.25 tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 

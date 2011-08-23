@@ -1,6 +1,6 @@
 #<RESTRICTED_FILE>
 test1500.out
-Plane stress - konzola l=3. h=1. - Plasticky nelinearni vypocet, HMH.
+Plane stress - cantilever l=3. h=1. - Nonlinear solution using HMH material.
 #LinearStatic 1
 NonLinearStatic nsteps 8 stepLength 0.000011497039 minStepLength 0.00001 rtolv 0.01 Psi 0.0 MaxIter 120
 domain 2dPlaneStress

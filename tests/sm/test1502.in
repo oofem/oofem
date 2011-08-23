@@ -1,6 +1,6 @@
 #<RESTRICTED_FILE>
 test1502.out
-Test of LIBeam2d elements -> cantiliver loaded by end moment, with plastic layers
+Test of LIBeam2d elements -> cantilever loaded by end moment, with plastic layers
 #LinearStatic nsteps 1
 ##NonLinearStatic nsteps 180 stepLength 0.015 minStepLength 0.001 rtolv 0.0001 Psi 1.0
 NonLinearStatic nsteps 11 stepLength 0.00020 minStepLength 0.0001 rtolv 0.0001 Psi 0.0

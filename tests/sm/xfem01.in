@@ -846,7 +846,7 @@ PlaneStress2dXfem 397 nodes 4 416 417 438 437 mat 1 NIP 4 crossSect 1
 PlaneStress2dXfem 398 nodes 4 417 418 439 438 mat 1 NIP 4 crossSect 1
 PlaneStress2dXfem 399 nodes 4 418 419 440 439 mat 1 NIP 4 crossSect 1
 PlaneStress2dXfem 400 nodes 4 419 420 441 440 mat 1 NIP 4 crossSect 1
-SimpleCS 1 thick 1.0 width 1.0
+SimpleCS 1 thick 1.0
 IsoLE 1 tAlpha 1.2e-05 d 1 E 30000.0 n 0.3
 IsoLE 2 tAlpha 1.2e-05 d 1 E 0.1 n 0.3
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0

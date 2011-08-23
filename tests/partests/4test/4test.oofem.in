@@ -27,7 +27,7 @@ Planestress2D 5 nodes 4 5 15 12 8 crossSect 1 mat 1
 Planestress2D 6 nodes 4 15 6 9 12 crossSect 1 mat 1 boundaryLoads 2 2 2
 Planestress2D 7 nodes 4 4 14 13 7 crossSect 1 mat 1
 Planestress2D 8 nodes 4 14 5 8 13 crossSect 1 mat 1
-SimpleCS 1 thick 1.0 width 1.0
+SimpleCS 1 thick 1.0
 IsoLE  1 d 1.0 E 300.e3 n 0.2 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
 ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3

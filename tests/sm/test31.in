@@ -38,7 +38,7 @@ PlaneStress2d 9 nodes 4 13 14 17 16  crossSect 1 mat 1 NIP 1
 PlaneStress2d 10 nodes 4 14 15 18 17  crossSect 1 mat 1 NIP 1
 PlaneStress2d 11 nodes 4 16 17 20 19  crossSect 1 mat 1 NIP 1
 PlaneStress2d 12 nodes 4 17 18 21 20  crossSect 1 mat 1 NIP 1
-SimpleCS 1 thick 1.0  width 1.0
+SimpleCS 1 thick 1.0
 j2mat 1 d 1. Ry 1.7321 E 1.0 n 0.2 IHM 0.5  tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 2 0.25 0.0

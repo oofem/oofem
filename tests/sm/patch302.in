@@ -126,7 +126,7 @@ lspacebb 29 nodes 8 36 41 42 37 81 86 87 82 crosssect 1 mat 1
 lspacebb 30 nodes 8 37 42 43 38 82 87 88 83 crosssect 1 mat 1
 lspacebb 31 nodes 8 38 43 44 39 83 88 89 84 crosssect 1 mat 1
 lspacebb 32 nodes 8 39 44 45 40 84 89 90 85 crosssect 1 mat 1
-simplecs 1 thick 1 width 1
+simplecs 1
 isole 1 E 205.50003049998844 n 0.49999987500003124 talpha 0.0 d 0.0
 boundarycondition 1 loadtimefunction 1 prescribedvalue 0.0
 nodalload 2 loadTimeFunction 1 Components 3 0.0 0.0 -0.125 

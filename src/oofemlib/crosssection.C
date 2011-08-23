@@ -148,7 +148,7 @@ CrossSection :: give(CrossSectionProperty aProperty)
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        _error("give: property not defined");
+        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
     }
 
     return 0.0;

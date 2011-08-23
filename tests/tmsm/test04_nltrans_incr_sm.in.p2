@@ -18,7 +18,7 @@ planestress2d 1 nodes 4 1 2 5 4 crosssect 1 mat 1
 planestress2d 2 nodes 4 2 3 6 5 crosssect 1 mat 1
 planestress2d 3 nodes 4 4 5 8 7 crosssect 1 mat 1
 planestress2d 4 nodes 4 5 6 9 8 crosssect 1 mat 1
-SimpleCS 1 thick 1.0 width 1.0
+SimpleCS 1 thick 1.0
 IsoLe 1 d 2400. E 10e3 n 0.15 talpha 12.e-6
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0 isImposedTimeFunction 2

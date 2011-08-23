@@ -13,7 +13,7 @@ node 5 coords 3  2.0   1.0   0.0  bc 1 0
 node 6 coords 3  2.0   8.0   0.0  bc 1 2
 quad1ht 1 nodes 4 1 2 5 4  crossSect 1 mat 1 NIP 1
 quad1ht 2 nodes 4 2 3 6 5  crossSect 1 mat 1 NIP 1
-SimpleCS 1 thick 0.15 width 1.0
+SimpleCS 1 thick 0.15
 IsoHeat 1 d 0. k 1.0 c 1.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0

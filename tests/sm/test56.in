@@ -41,7 +41,7 @@ Beam3d 15 nodes 2 15 16 mat 1 crossSect 1 refNode 18
 Beam3d 16 nodes 2 16 17 mat 1 crossSect 1 refNode 18 DofsToCondense 2 11 12
 #
 #
-SimpleCS 1 area 0.06 Iy 0.00045 Iz 0.0002 Ik 0.000498461  beamShearCoeff 1.e60 thick 0.3 width 0.2 
+SimpleCS 1 area 0.06 Iy 0.00045 Iz 0.0002 Ik 0.000498461  beamShearCoeff 1.e60
 IsoLE 1 d 25.0 E 25.e6 n 0.15 tAlpha 1.2e-5
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.

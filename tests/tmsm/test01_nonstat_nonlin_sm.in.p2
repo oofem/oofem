@@ -10,7 +10,7 @@ node 2 coords 3 0.04 0.00 0.00 bc 2 0 1
 node 3 coords 3 0.00 0.12 0.00
 node 4 coords 3 0.04 0.12 0.00
 planestress2d 1 nodes 4 1 2 4 3 crosssect 1 mat 1
-SimpleCS 1 thick 1.0 width 1.0
+SimpleCS 1 thick 1.0
 IsoLe 1 d 2400. E 10e3 n 0.15 talpha 12.e-6
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.0

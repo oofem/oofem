@@ -12,7 +12,7 @@ node 4 coords 3 0.  1.  0.  bc 6 1 1 1 1 1 1
 beam3d 1 nodes 2 2 3 mat 1 crossSect 1 boundaryLoads 2 3 1 refnode 4
 Spring 2 nodes 2 1 2 mat 2 crossSect 1 mode 4 orientation 3 0 1 0 k 5.0
 Spring 3 nodes 2 1 2 mat 2 crossSect 1 mode 4 orientation 3 0 0 1 k 4.0
-SimpleCS 1 area 2.0 Iy 15.0 Iz 12.0 beamShearCoeff 1.e18 thick 0.54 
+SimpleCS 1 area 2.0 Iy 15.0 Iz 12.0 beamShearCoeff 1.e18
 IsoLE 1 d 1. E 1.0 n 0.2 tAlpha 1.2e-5
 DummyMat 2
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 

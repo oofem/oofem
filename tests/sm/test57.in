@@ -14,7 +14,7 @@ Beam2d 1 nodes 2 1 2 mat 1 crossSect 1
 Beam2d 2 nodes 2 2 3 mat 1 crossSect 1 
 Beam2d 3 nodes 2 3 4 mat 1 crossSect 1 
 #
-SimpleCS 1 area 0.0054  Iy 85.e-6  beamShearCoeff 1.e60 thick 0.3 
+SimpleCS 1 area 0.0054  Iy 85.e-6  beamShearCoeff 1.e60
 IsoLE 1 d 25.0 E 21.e7 n 0.2 tAlpha 1.2e-5
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 3 0.0  -1.0 0.0

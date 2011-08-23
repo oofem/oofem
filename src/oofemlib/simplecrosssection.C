@@ -244,12 +244,16 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     this->CrossSection :: initializeFrom(ir);
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_thick, "thick"); // Macro
-    propertyDictionary->add(CS_Thickness, value);
+    if ( ir->hasField(IFT_SimpleCrossSection_thick, "thick")) {
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_thick, "thick"); // Macro
+        propertyDictionary->add(CS_Thickness, value);
+    }
 
     value = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_width, "width"); // Macro
-    propertyDictionary->add(CS_Width, value);
+    if ( ir->hasField(IFT_SimpleCrossSection_width, "width")) {
+        IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_width, "width"); // Macro
+        propertyDictionary->add(CS_Width, value);
+    }
 
     if ( ir->hasField(IFT_SimpleCrossSection_area, "area") ) {
         IR_GIVE_FIELD(ir, value, IFT_SimpleCrossSection_area, "area"); // Macro
@@ -307,7 +311,7 @@ SimpleCrossSection :: give(CrossSectionProperty aProperty)
     } else if ( propertyDictionary->includes(aProperty) )   {
         value = propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR("SimpleCrossSection :: give: property not defined");
+        OOFEM_ERROR3("Simple cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);  
     }
 
     return value;

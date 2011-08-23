@@ -15,7 +15,7 @@ TrPlaneStrain 1 nodes 3 1 2 5 crossSect 1 mat 1
 TrPlaneStrain 2 nodes 3 2 3 5 crossSect 1 mat 1
 TrPlaneStrain 3 nodes 3 3 4 5 crossSect 1 mat 1
 TrPlaneStrain 4 nodes 3 4 1 5 crossSect 1 mat 1
-SimpleCS 1 thick 1.0 width 0.1
+SimpleCS 1 thick 1.0
 IsoLE 1 d 1.0 E 10. n 0.2 tAlpha 0.000012
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 2 1.5 0.0

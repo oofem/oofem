@@ -16,7 +16,7 @@ node 7 coords 3 4.000 4.000   0.000 bc 3 0 2 0
 node 8 coords 3 4.000 0.000   0.000 bc 3 0 1 1
 lspace 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 mat 1
 truss3d 2 Nodes 2 1 2 mat 1 crosssect 1
-SimpleCS 1
+SimpleCS 1 thick 1.0 width 1.0
 compdammat 1 d 0.0 Exx 10.0 EyyEzz 2.0 nuxynuxz 0.2 nuyz 0.1 GxyGxz 8.0 Tension_f0_Gf 12  100.0 2000.0    7.0 100     130 11000   140 13000    150 13000   100 13000  Compres_f0_gf 12  -10.5 11000    -4.0 120    -10.3 11000   -10.4 11000    -10.5 11000   -10 11000 allowSnapBack 1 2
 #isole 1 E 10. n 0.2 talpha 0.0 d 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0

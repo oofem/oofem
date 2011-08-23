@@ -195,10 +195,12 @@ protected:
     */
     double gf;
     
+    /// Determines the softening for the bilinear law -> corresponds to the total fracture energy
+    double gft;
+    
     /// Determines the softening for the bilinear law -> corresponds to the strain at the knee point
     double ek;
-     /// Determines the softening for the bilinear law -> corresponds to the total energy
-    double gft;
+    
     
     /// type characterizing the algorithm used to compute equivalent strain measure
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine, EST_ElasticEnergy, EST_Mises };
