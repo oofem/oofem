@@ -620,7 +620,12 @@ public:
      * @return Pointer to default integration rule.
      * @see giveDefaultIntegrationRule
      */
-    IntegrationRule *giveDefaultIntegrationRulePtr() { return integrationRulesArray [ giveDefaultIntegrationRule() ]; }
+    IntegrationRule *giveDefaultIntegrationRulePtr() {
+        if (this->giveNumberOfIntegrationRules() == 0)
+            return NULL;
+        else
+            return this->integrationRulesArray [ giveDefaultIntegrationRule() ];
+    }
     /// @return Number of integration rules for element.
     int giveNumberOfIntegrationRules() { return this->numberOfIntegrationRules; }
     /**
