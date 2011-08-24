@@ -351,6 +351,14 @@ public:
      */
     void plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV);
     /**
+     * Adds to the receiver the dyadic product @f$ a \otimes a \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
+     * Computes only the upper half of receiver.
+     * @param a Array a in equation.
+     * @param b Array b in equation.
+     * @param dV Scaling factor.
+     */
+    void plusDyadSymmUpper(const FloatArray &a, const FloatArray &b, double dV);
+    /**
      * Adds to the receiver the product @f$a^{\mathrm{T}} \cdot b \mathrm{d}V@f$. If the receiver has zero size, it is expanded.
      * @param a Matrix a in equation.
      * @param b Matrix b in equation.

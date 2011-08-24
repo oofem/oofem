@@ -570,6 +570,21 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 }
 
 
+void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, const FloatArray &b, double dV)
+{
+    if ( !this->isNotEmpty() ) {
+        resize(a.giveSize(), b.giveSize());
+        zero();
+    }
+
+    for ( int i = 1; i <= nRows; i++ ) {
+        for ( int j = i; j <= nColumns; j++ ) {
+            this->at(i, j) += a.at(i)*b.at(j) * dV;
+        }
+    }
+}
+
+
 
 void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV)
 // Adds to the receiver the product  a(transposed).b dV .
