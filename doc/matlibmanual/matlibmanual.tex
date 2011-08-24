@@ -1090,7 +1090,7 @@ $$
 $$
 and thus $w=h\varepsilon_c=h\omega\varepsilon$. Substituting this into
 the cohesive law and combining with the stress-strain law for the damage
-model, we get  a nonlinear equation
+model, we get a nonlinear equation
 $$
 (1-\omega)E\varepsilon = f_t\exp\left(-\frac{h\omega\varepsilon}{w_f}\right)
 $$
@@ -1101,7 +1101,7 @@ $\varepsilon\ge\varepsilon_0$ provided that the element size $h$ does not
 exceed the limit size $h_{max}=w_f/\varepsilon_0$. For larger elements,
 a local snapback in the stress-strain diagram would occur, which is not
 admissible. In terms of the material properties, $h_{max}$ can be expressed
-as $EG_f/f_t^2$, which is related to Irwin's characteristic length. 
+as $EG_f/f_t^2$, which is related to Irwin's characteristic length.
 
 The derivation
 has been performed for monotonic loading and uniaxial tension. Under general
@@ -1119,12 +1119,16 @@ to have a simpler linear form
 $$
 \sigma = f_t\left(1-\frac{w}{w_f}\right)
 $$
-The relation between damage and strain can then be described explicitly
-by the formula
+The relation between damage and strain can then be derived from the cohesive law and 
+substituing $w=h \omega \varepsilon$
+$$
+\sigma = (1-\omega)E\varepsilon =  f_t\left(1-\frac{h \omega \varepsilon}{w_f}\right),
+$$
+which leads to explicit evaluation of the damage variable
 $$
 \omega=\frac{1-\displaystyle\frac{\varepsilon_0}{\varepsilon}}{1-\displaystyle\frac{h\varepsilon_0}{w_f}}
 $$
-and no iteration is needed for damage evaluation. Parameter $w_f$,
+and no iteration is needed. Parameter $w_f$,
 denoted again by keyword {\it wf}, has now the meaning of crack opening
 at complete failure (zero cohesive stress) and is related to fracture energy by
 a modified formula $w_f=2G_f/f_t$.
@@ -1180,7 +1184,24 @@ to the mesh size. These cases are intended to be used in combination
 with a nonlocal formulation. An alternative formulation uses fracture energy
 to determine fracturing strain.
 
-The model parameters are summarized in Table~\ref{id_table}. 
+The model parameters are summarized in Table~\ref{id_table}. Figure~\ref{idm_softening} shows
+three modes of a softening law with corresponding variables.
+
+\begin{figure}[!htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.pdf}}
+\else
+ \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.eps}}
+\fi
+%end{latexonly}
+  \caption{Implemented stress-strain diagrams for isotropic damage material. Fracturing strain $\varepsilon_f$ and crack opening at zero stress $w_f$ are interrelated through effective thickness $h$ of the crack band.}
+  \label{idm_softening}
+\end{figure}
+
 
 \begin{table}[!htb]
 %\begin{center}
