@@ -931,7 +931,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
     int i, j, k, pivRow;
     double piv, linkomb, help;
     FloatMatrix *mtrx, trans;
-    if (transposed) {
+    if (transpose) {
         trans.beTranspositionOf(*this);
         mtrx = &trans;
     } else {
@@ -1025,7 +1025,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     int i, j, k, pivRow, nPs;
     double piv, linkomb, help;
     FloatMatrix *mtrx, trans;
-    if (transposed) {
+    if (transpose) {
         trans.beTranspositionOf(*this);
         mtrx = &trans;
     } else {
