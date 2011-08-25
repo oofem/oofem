@@ -101,11 +101,12 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     /*
      * scatter and gather rhs to global representation
      */
-    engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->createVecGlobal(& globRhsVec);
-    engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterL2G(b, globRhsVec, ADD_VALUES);
- #else
-    VecCreateSeqWithArray(PETSC_COMM_SELF, b->giveSize(), b->givePointer(), & globRhsVec);
+    if (engngModel->isParallel()) {
+        engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->createVecGlobal(& globRhsVec);
+        engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterL2G(b, globRhsVec, ADD_VALUES);
+    } else
  #endif
+    VecCreateSeqWithArray(PETSC_COMM_SELF, b->giveSize(), b->givePointer(), & globRhsVec);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
@@ -115,17 +116,20 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
 
  #ifdef __PARALLEL_MODE
-    engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterG2N(globSolVec, x, INSERT_VALUES);
- #else
-    double *ptr;
-    VecGetArray(globSolVec, & ptr);
-    x->resize(l_eqs);
-    for ( int i = 1; i <= l_eqs; i++ ) {
-        x->at(i) = ptr [ i - 1 ];
-    }
-
-    VecRestoreArray(globSolVec, & ptr);
+    if (engngModel->isParallel())
+        engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterG2N(globSolVec, x, INSERT_VALUES);
+    else
  #endif
+    {
+        double *ptr;
+        VecGetArray(globSolVec, & ptr);
+        x->resize(l_eqs);
+        for ( int i = 1; i <= l_eqs; i++ ) {
+            x->at(i) = ptr [ i - 1 ];
+        }
+
+        VecRestoreArray(globSolVec, & ptr);
+    }
 
     VecDestroy(globSolVec);
     VecDestroy(globRhsVec);
@@ -151,11 +155,12 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     if ( !Lhs->kspInit ) {
-#ifdef __PARALLEL_MODE
-        KSPCreate(PETSC_COMM_WORLD, & Lhs->ksp);
- #else
-        KSPCreate(PETSC_COMM_SELF, & Lhs->ksp);
+ #ifdef __PARALLEL_MODE
+        if (engngModel->isParallel())
+            KSPCreate(PETSC_COMM_WORLD, & Lhs->ksp);
+        else
  #endif
+        KSPCreate(PETSC_COMM_SELF, & Lhs->ksp);
         Lhs->kspInit = true;
     }
 
