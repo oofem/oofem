@@ -65,6 +65,8 @@ extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const
         const double *abstol, int *m, double *w, double *z, const int *ldz,
         double *work, int *lwork, int *iwork, int *ifail, int *info,
         int jobz_len, int range_len, int uplo_len);
+/// Solves system which has been LU-factorized.
+extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info );
 }
 #endif
 
@@ -901,7 +903,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 }
 
 
-void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
+void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose)
 // solves equation b = this * x
 {
 #  ifdef DEBUG
@@ -918,13 +920,23 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
     int info, nrhs = 1;
     IntArray ipiv(this->nRows);
     answer = b;
-    dgesv_( &this->nRows, &nrhs, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    //dgesv_( &this->nRows, &nrhs, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    dgetrf_( &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), &info );
+    if (info == 0)
+        dgetrs_( transpose ? "Transpose" : "No transpose", &this->nRows, &nrhs, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
     if (info != 0) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d  (rcond %e)", info);
+        OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
     }
 #else
     int i, j, k, pivRow;
     double piv, linkomb, help;
+    FloatMatrix *mtrx, trans;
+    if (transposed) {
+        trans.beTranspositionOf(*this);
+        mtrx = &trans;
+    } else {
+        mtrx = this;
+    }
 
     //FloatArray *answer = b -> GiveCopy();
     answer = b;
@@ -933,12 +945,12 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
     // lower triangle elimination by columns
     for ( i = 1; i < nRows; i++ ) {
         // find the suitable row and pivot
-        piv = fabs( this->at(i, i) );
+        piv = fabs( mtrx->at(i, i) );
         pivRow = i;
         for ( j = i + 1; j <= nRows; j++ ) {
-            if ( fabs( this->at(j, i) ) > piv ) {
+            if ( fabs( mtrx->at(j, i) ) > piv ) {
                 pivRow = j;
-                piv = fabs( this->at(j, i) );
+                piv = fabs( mtrx->at(j, i) );
             }
         }
 
@@ -949,8 +961,8 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
         // exchange rows
         if ( pivRow != i ) {
             for ( j = i; j <= nRows; j++ ) {
-                help = this->at(i, j);
-                this->at(i, j) = this->at(pivRow, j);
+                help = mtrx->at(i, j);
+                this->at(i, j) = mtrx->at(pivRow, j);
                 this->at(pivRow, j) = help;
             }
 
@@ -960,9 +972,9 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
         }
 
         for ( j = i + 1; j <= nRows; j++ ) {
-            linkomb = this->at(j, i) / this->at(i, i);
+            linkomb = mtrx->at(j, i) / mtrx->at(i, i);
             for ( k = i; k <= nRows; k++ ) {
-                this->at(j, k) -= this->at(i, k) * linkomb;
+                this->at(j, k) -= mtrx->at(i, k) * linkomb;
             }
 
             answer.at(j) -= answer.at(i) * linkomb;
@@ -973,31 +985,16 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
     for ( i = nRows; i >= 1; i-- ) {
         help = 0.;
         for ( j = i + 1; j <= nRows; j++ ) {
-            help += this->at(i, j) * answer.at(j);
+            help += mtrx->at(i, j) * answer.at(j);
         }
 
-        answer.at(i) = ( answer.at(i) - help ) / this->at(i, i);
+        answer.at(i) = ( answer.at(i) - help ) / mtrx->at(i, i);
     }
 #endif
 }
 
-#if 0
-SUBROUTINE DGESV( N, NRHS, A, LDA, IPIV, B, LDB, INFO )
-*
-*  -- LAPACK driver routine (version 3.2) --
-*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
-*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
-*     November 2006
-*
-*     .. Scalar Arguments ..
-INTEGER            INFO, LDA, LDB, N, NRHS
-*     ..
-*     .. Array Arguments ..
-INTEGER            IPIV( * )
-DOUBLE PRECISION   A( LDA, * ), B( LDB, * )
-#endif
 
-void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
+void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool transpose)
 // solves equation b = this * x
 // returns x. this and b are kept untouched
 //
@@ -1018,13 +1015,22 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
     int info;
     IntArray ipiv(this->nRows);
     answer = b;
-    dgesv_( &this->nRows, &answer.nColumns, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    dgetrf_( &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), &info );
+    if (info == 0)
+        dgetrs_( transpose ? "Transpose" : "No transpose", &this->nRows, &this->nRows, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
     if (info != 0) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d", info);
+        OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
     }
 #else
     int i, j, k, pivRow, nPs;
     double piv, linkomb, help;
+    FloatMatrix *mtrx, trans;
+    if (transposed) {
+        trans.beTranspositionOf(*this);
+        mtrx = &trans;
+    } else {
+        mtrx = this;
+    }
 
     nPs = b.giveNumberOfColumns();
     answer = b;
@@ -1032,12 +1038,12 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
     // lower triangle elimination by columns
     for ( i = 1; i < nRows; i++ ) {
         // find the suitable row and pivot
-        piv = fabs( this->at(i, i) );
+        piv = fabs( mtrx->at(i, i) );
         pivRow = i;
         for ( j = i + 1; j <= nRows; j++ ) {
-            if ( fabs( this->at(j, i) ) > piv ) {
+            if ( fabs( mtrx->at(j, i) ) > piv ) {
                 pivRow = j;
-                piv = fabs( this->at(j, i) );
+                piv = fabs( mtrx->at(j, i) );
             }
         }
 
@@ -1048,9 +1054,9 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
         // exchange rows
         if ( pivRow != i ) {
             for ( j = i; j <= nRows; j++ ) {
-                help = this->at(i, j);
-                this->at(i, j) = this->at(pivRow, j);
-                this->at(pivRow, j) = help;
+                help = mtrx->at(i, j);
+                mtrx->at(i, j) = mtrx->at(pivRow, j);
+                mtrx->at(pivRow, j) = help;
             }
 
             for ( j = 1; j <= nPs; j++ ) {
@@ -1065,9 +1071,9 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
         }
 
         for ( j = i + 1; j <= nRows; j++ ) {
-            linkomb = this->at(j, i) / this->at(i, i);
+            linkomb = mtrx->at(j, i) / mtrx->at(i, i);
             for ( k = i; k <= nRows; k++ ) {
-                this->at(j, k) -= this->at(i, k) * linkomb;
+                mtrx->at(j, k) -= mtrx->at(i, k) * linkomb;
             }
 
             for ( k = 1; k <= nPs; k++ ) {
@@ -1081,10 +1087,10 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
         for ( k = 1; k <= nPs; k++ ) {
             help = 0.;
             for ( j = i + 1; j <= nRows; j++ ) {
-                help += this->at(i, j) * answer.at(j, k);
+                help += mtrx->at(i, j) * answer.at(j, k);
             }
 
-            answer.at(i, k) = ( answer.at(i, k) - help ) / this->at(i, i);
+            answer.at(i, k) = ( answer.at(i, k) - help ) / mtrx->at(i, i);
         }
     }
 #endif

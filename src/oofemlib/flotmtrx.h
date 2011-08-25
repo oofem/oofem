@@ -333,14 +333,16 @@ public:
      * Solves the  system of linear equations @f$ K\cdot a = b @f$ . Uses Gaussian elimination with pivoting directly on receiver.
      * @param b RHS of linear system.
      * @param answer Solution of linear equations.
+     * @param transpose Solves for the transpose of K.
      */
-    void solveForRhs(const FloatArray &b, FloatArray &answer);
+    void solveForRhs(const FloatArray &b, FloatArray &answer, bool transpose = false);
     /**
      * Solves the  system of linear equations @f$ K\cdot A = B @f$ . Uses Gaussian elimination with pivoting directly on receiver.
      * @param B RHS of linear system.
      * @param answer Solution of linear equations, each column corresponding to columns in B.
+     * @param transpose Solves for the transpose of K.
      */
-    void solveForRhs(const FloatMatrix &B, FloatMatrix &answer);
+    void solveForRhs(const FloatMatrix &B, FloatMatrix &answer, bool transpose = false);
     /**
      * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
      * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the

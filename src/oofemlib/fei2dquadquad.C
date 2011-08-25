@@ -83,17 +83,17 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     answer.resize(8, 2);
     int i;
     FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
-    FloatArray nx(8), ny(8);
+    FloatArray dndxi(8), dndeta(8);
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     inv.beInverseOf(jacobianMatrix);
 
-    this->giveDerivativeXi(nx, lcoords);
-    this->giveDerivativeEta(ny, lcoords);
+    this->giveDerivativeXi(dndxi, lcoords);
+    this->giveDerivativeEta(dndeta, lcoords);
 
     for ( i = 1; i <= 8; i++ ) {
-        answer.at(i, 1) = nx.at(i) * inv.at(1, 1) + ny.at(i) * inv.at(1, 2);
-        answer.at(i, 2) = nx.at(i) * inv.at(2, 1) + ny.at(i) * inv.at(2, 2);
+        answer.at(i, 1) = dndxi.at(i) * inv.at(1, 1) + dndeta.at(i) * inv.at(1, 2);
+        answer.at(i, 2) = dndxi.at(i) * inv.at(2, 1) + dndeta.at(i) * inv.at(2, 2);
     }
 }
 
@@ -150,7 +150,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 
         // compute the corrections
         this->giveJacobianMatrixAt(jac, answer, cellgeo);
-        jac.solveForRhs(res, delta);
+        jac.solveForRhs(res, delta, true);
 
         // update guess
         answer.add(delta);

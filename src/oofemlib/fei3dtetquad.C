@@ -72,8 +72,8 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     for (int i = 1; i <= 10; ++i) {
         FloatArray *c = cellgeo.giveVertexCoordinates(i);
         coords.at(i,1) = c->at(1);
-        coords.at(i,1) = c->at(2);
-        coords.at(i,1) = c->at(3);
+        coords.at(i,2) = c->at(2);
+        coords.at(i,3) = c->at(3);
     }
     jacobianMatrix.beProductOf(dNdxi, coords);
     jacobianMatrix.solveForRhs(answer, dNdxi);
@@ -138,11 +138,68 @@ FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     }
 }
 
-int // TODO
-FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo, double time)
+#define POINT_TOL 1e-6
+
+int
+FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
 {
-    OOFEM_ERROR("FEI3dTetQuad :: global2local - Not supported");
-    return -1;
+    FloatArray res, delta, guess, lcoords_guess;
+    FloatMatrix jac;
+    double convergence_limit, error;
+
+    // find a suitable convergence limit
+    convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
+
+    // setup initial guess
+    lcoords_guess.resize(gcoords.giveSize());
+    lcoords_guess.zero();
+
+    // apply Newton-Raphson to solve the problem
+    for (int nite = 0; nite < 10; nite++) {
+        // compute the residual
+        this->local2global(guess, lcoords_guess, cellgeo, time);
+        res.beDifferenceOf(gcoords, guess);
+
+        // check for convergence
+        error = res.computeNorm();
+        if ( error < convergence_limit ) {
+            break;
+        }
+
+        // compute the corrections
+        this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
+        jac.solveForRhs(res, delta, true); // TODO: Check this. Transpose or not?
+
+        // update guess
+        lcoords_guess.add(delta);
+    }
+    if ( error > convergence_limit) { // Imperfect, could give false negatives.
+        //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
+        answer.resize(0);
+        return false;
+    }
+
+    answer.resize(4);
+    answer(0) = lcoords_guess(0);
+    answer(1) = lcoords_guess(1);
+    answer(2) = lcoords_guess(2);
+    answer(3) = 1.0 - lcoords_guess(0) - lcoords_guess(1) - lcoords_guess(2);
+
+    for (int  i = 0; i < 4; i++ ) {
+        if ( answer(i) < ( 0. - POINT_TOL ) ) {
+            return false;
+        } else if ( answer(i) > ( 1. + POINT_TOL ) ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+double
+FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
+{
+    return cellgeo.giveVertexCoordinates(1)->distance(cellgeo.giveVertexCoordinates(2));
 }
 
 

@@ -65,17 +65,17 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     answer.resize(6, 2);
     int i;
     FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
-    FloatArray nx(6), ny(6);
+    FloatArray dndxi(6), dndeta(6);
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     inv.beInverseOf(jacobianMatrix);
 
-    this->giveDerivativeXi(nx, lcoords);
-    this->giveDerivativeEta(ny, lcoords);
+    this->giveDerivativeXi(dndxi, lcoords);
+    this->giveDerivativeEta(dndeta, lcoords);
 
     for ( i = 1; i <= 6; i++ ) {
-        answer.at(i, 1) = nx.at(i) * inv.at(1, 1) + ny.at(i) * inv.at(1, 2);
-        answer.at(i, 2) = nx.at(i) * inv.at(2, 1) + ny.at(i) * inv.at(2, 2);
+        answer.at(i, 1) = dndxi.at(i) * inv.at(1, 1) + dndeta.at(i) * inv.at(1, 2);
+        answer.at(i, 2) = dndxi.at(i) * inv.at(2, 1) + dndeta.at(i) * inv.at(2, 2);
     }
 }
 
@@ -185,8 +185,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 
         // compute the corrections
         this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
-        jacT.beTranspositionOf(jac);
-        jacT.solveForRhs(res, delta);
+        jac.solveForRhs(res, delta, true);
 
         // update guess
         lcoords_guess.add(delta);
@@ -216,8 +215,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 double
 FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    FloatMatrix jacobianMatrix(2, 2);
-
+    FloatMatrix jacobianMatrix;
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     return jacobianMatrix.giveDeterminant();
 }

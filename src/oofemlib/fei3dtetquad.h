@@ -55,6 +55,13 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
 
+    /**
+     * Returns a characteristic length of the geometry, typically a diagonal or edge length.
+     * @param cellgeo Underlying cell geometry.
+     * @return Square root of area.
+     */
+    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
+
     // Edge
     virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
