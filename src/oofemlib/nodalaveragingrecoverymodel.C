@@ -69,7 +69,9 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
     }
 
 #ifdef __PARALLEL_MODE
-    this->initCommMaps();
+    bool parallel = this->domain->giveEngngModel()->isParallel();
+    if (parallel)
+        this->initCommMaps();
 #endif
 
     // clear nodal table
@@ -79,9 +81,11 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
     this->initRegionMap(skipRegionMap, regionRecSize, type);
 
 #ifdef __PARALLEL_MODE
-    // synchronize skipRegionMap over all cpus
-    IntArray temp_skipRegionMap(skipRegionMap);
-    MPI_Allreduce(temp_skipRegionMap.givePointer(), skipRegionMap.givePointer(), nregions, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
+    if (parallel) {
+        // synchronize skipRegionMap over all cpus
+        IntArray temp_skipRegionMap(skipRegionMap);
+        MPI_Allreduce(temp_skipRegionMap.givePointer(), skipRegionMap.givePointer(), nregions, MPI_INT, MPI_LOR, MPI_COMM_WORLD);
+    }
 #endif
 
     // loop over regions
@@ -139,7 +143,8 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
         } // end assemble element contributions
 
 #ifdef __PARALLEL_MODE
-        this->exchangeDofManValues(ireg, lhs, regionDofMansConnectivity, regionNodalNumbers, regionValSize);
+        if (parallel)
+            this->exchangeDofManValues(ireg, lhs, regionDofMansConnectivity, regionNodalNumbers, regionValSize);
 #endif
 
         // solve for recovered values of active region

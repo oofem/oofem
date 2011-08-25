@@ -81,7 +81,9 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     }
 
 #ifdef __PARALLEL_MODE
-    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+    if ( emodel->isParallel() ) {
+        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+    }
 #else
     Vec globX, globY;
     VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
@@ -111,7 +113,9 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     }
 
 #ifdef __PARALLEL_MODE
-    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+    if ( emodel->isParallel() ) {
+        OOFEM_ERROR("PetscSparseMtrx :: timesT - Not implemented");
+    }
 #else
     Vec globX, globY;
     VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
@@ -347,43 +351,32 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
 
 #ifdef __PARALLEL_MODE
-    int rank;
-    PetscNatural2GlobalOrdering *n2g = NULL;
-    rank = eModel->giveRank();
     if ( eModel->isParallel() ) {
+        int rank;
+        PetscNatural2GlobalOrdering *n2g = NULL;
+        rank = eModel->giveRank();
         n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
-    }
 
  #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
+        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
  #endif
 
+        // initialize n2l map
+        PetscNatural2LocalOrdering n2l;
+        n2l.init(eModel, ut, di);
 
-    // initialize n2l map
-    PetscNatural2LocalOrdering n2l;
-    n2l.init(eModel, ut, di);
-
-    // initialize n2g map
-    // n2g.init(eModel, di);
+        // initialize n2g map
+        // n2g.init(eModel, di);
 
 
-    leqs = n2g->giveNumberOfLocalEqs();
-    geqs = n2g->giveNumberOfGlobalEqs();
+        leqs = n2g->giveNumberOfLocalEqs();
+        geqs = n2g->giveNumberOfGlobalEqs();
 
  #ifdef __VERBOSE_PARALLEL
-    OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfEquations(ut) );
+        OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfEquations(ut) );
  #endif
 
-#else
-    leqs = geqs = eModel->giveNumberOfEquations(ut);
-    //map = new LocalizationMap();
-#endif
-
-
-    //determine nonzero structure of a "local (maintained)" part of matrix
-
-#ifdef __PARALLEL_MODE
-    if ( eModel->isParallel() ) {
+        //determine nonzero structure of a "local (maintained)" part of matrix
         int i, ii, j, jj, n;
         Element *elem;
         // allocation map
@@ -444,7 +437,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     } else {
 #endif
 
-
+    leqs = geqs = eModel->giveNumberOfEquations(ut);
     int i, ii, j, jj, n;
     Element *elem;
     // allocation map
@@ -478,7 +471,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
 
 #ifdef __PARALLEL_MODE
-}
+    }
 #endif
 
     nRows = nColumns = geqs;
