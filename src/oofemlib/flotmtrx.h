@@ -367,6 +367,13 @@ public:
      * @param dV Scaling factor.
      */
     void plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV);
+    /**
+     * Adds to the receiver the product @f$a \otimes b \mathrm{d}V@f$. If the receiver has zero size, it is expanded.
+     * @param a Array a in equation.
+     * @param b Array b in equation.
+     * @param dV Scaling factor.
+     */
+    void plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV);
 
     /**
      * Adds matrix to the receiver.

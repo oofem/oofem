@@ -67,7 +67,7 @@ public:
     virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
                    const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void surfaceEvalNormal(FloatArray &answer, int isurf,
+    virtual double surfaceEvalNormal(FloatArray &answer, int isurf,
                    const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);

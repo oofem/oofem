@@ -307,6 +307,9 @@ enum InputFieldType {
     IFT_PointLoad_loadtype,
     IFT_PointLoad_cstype,
 
+    IFT_SurfaceTensionBoundaryCondition_gamma,
+    IFT_SurfaceTensionBoundaryCondition_useTangent,
+
     IFT_InitialCondition_conditions,
 
     IFT_LoadTimeFunction_initialvalue,

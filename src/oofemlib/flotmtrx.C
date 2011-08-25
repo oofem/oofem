@@ -614,11 +614,24 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 }
 
 
+void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
+{
+    if ( !this->isNotEmpty() ) {
+        resize(a.giveSize(), b.giveSize());
+        zero();
+    }
+
+    for ( int i = 1; i <= nRows; i++ ) {
+        for ( int j = 1; j <= nColumns; j++ ) {
+            this->at(i, j) += a(i) * b(j) * dV;
+        }
+    }
+}
+
+
 void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
-
 {
-    //FloatMatrix* answer ;
     double det;
 
 #  ifdef DEBUG

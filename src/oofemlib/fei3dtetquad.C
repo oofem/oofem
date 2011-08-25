@@ -70,7 +70,7 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     FloatMatrix coords(10,3);
     this->evaldNdxi(dNdxi, lcoords);
     for (int i = 1; i <= 10; ++i) {
-        FloatArray *c = cellgeo.giveVertexCoordinates(i);
+        const FloatArray *c = cellgeo.giveVertexCoordinates(i);
         coords.at(i,1) = c->at(1);
         coords.at(i,2) = c->at(2);
         coords.at(i,3) = c->at(3);
@@ -168,7 +168,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 
         // compute the corrections
         this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
-        jac.solveForRhs(res, delta, true); // TODO: Check this. Transpose or not?
+        jac.solveForRhs(res, delta, true);
 
         // update guess
         lcoords_guess.add(delta);
@@ -221,7 +221,7 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
     jacobianMatrix.resize(3,3);
     coords.resize(10,3);
     for (int i = 1; i <= 10; ++i) {
-        FloatArray *c = cellgeo.giveVertexCoordinates(i);
+        const FloatArray *c = cellgeo.giveVertexCoordinates(i);
         coords.at(i,1) = c->at(1);
         coords.at(i,1) = c->at(2);
         coords.at(i,1) = c->at(3);
@@ -233,7 +233,7 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 void
 FEI3dTetQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    double ksi = lcoords.at(1);
+    double xi = lcoords.at(1);
     answer.resize(3);
     answer(0) = 0.5*(xi-1.0)*xi;
     answer(1) = 0.5*(xi+1.0)*xi;
@@ -336,17 +336,17 @@ FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, cons
 }
 
 void
-FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int iedge,
+FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    IntArray nodes(3);
-    FloatArray N(3);
-    this->computeLocalSurfaceMapping(nodes, iedge);
-    this->surfaceEvalN(N, lcoords, cellgeo, 0,0);
+    IntArray nodes;
+    FloatArray N;
+    this->computeLocalSurfaceMapping(nodes, isurf);
+    this->surfaceEvalN(N, lcoords, cellgeo, 0.0);
 
     answer.resize(0);
     for (int i = 0; i < N.giveSize(); ++i) {
-        answer.add( n(i), *cellgeo.giveVertexCoordinates(nodes(i)) );
+        answer.add( N(i), *cellgeo.giveVertexCoordinates(nodes(i)) );
     }
 }
 
@@ -377,14 +377,12 @@ FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray
         lcoords_tet.at(3) = b;
         lcoords_tet.at(1) = c;
     }
-    this->evaldNdx(answer, lcoords_tet, cellgeo, time);
+    this->evaldNdx(answer, lcoords_tet, cellgeo, 0.0);
 }
 
-void
+double
 FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double dNdxi;
-    double dNdeta;
     IntArray snodes(3);
     FloatArray a,b;
     this->computeLocalSurfaceMapping(snodes, isurf);
@@ -411,8 +409,8 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
     dNdeta(5) = -4.0 * l1;
 
     for (int i = 0; i < 6; ++i) {
-        a.add(dNdxi(i),  cellgeo.giveVertexCoordinates(snodes(i)));
-        b.add(dNdeta(i), cellgeo.giveVertexCoordinates(snodes(i)));
+        a.add(dNdxi(i),  *cellgeo.giveVertexCoordinates(snodes(i)));
+        b.add(dNdeta(i), *cellgeo.giveVertexCoordinates(snodes(i)));
     }
     answer.beVectorProductOf(a, b);
     double J = answer.computeNorm();
@@ -431,7 +429,7 @@ FEI3dTetQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
 void
 FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    int aNode = 0, bNode = 0, cNode = 0;
+    int aNode = 0, bNode = 0, cNode = 0, dNode, eNode, fNode;
     surfNodes.resize(3);
 
     if ( isurf == 1 ) {

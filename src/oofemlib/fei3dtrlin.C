@@ -393,7 +393,7 @@ FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &
     this->evaldNdx(answer, lcoords_tet, cellgeo, 0.0);
 }
 
-void
+double
 FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     int n1, n2, n3;
@@ -411,31 +411,17 @@ FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray 
     }
 
     answer.beVectorProductOf(a, b);
+    double J = answer.computeNorm();
+    answer.times(1/J);
+    return J*0.5;
 }
 
 double
 FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                 const FEICellGeometry &cellgeo, double time)
 {
-    int n1, n2, n3;
-    IntArray snodes(3);
-    this->computeLocalSurfaceMapping(snodes, isurf);
-
-    n1 = ( snodes.at(1) );
-    n2 = ( snodes.at(2) );
-    n3 = ( snodes.at(3) );
-
-    FloatArray a(3), b(3), c(3);
-    for ( int i = 1; i <= 3; i++ ) {
-        a.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
-        b.at(i) = cellgeo.giveVertexCoordinates(n3)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
-    }
-
-    c.beVectorProductOf(a, b);
-
-    //FloatArray c;
-    //this->surfaceEvalNormal(c, isurf, lcoords, cellgeo);
-    return 0.5 * c.computeNorm();
+    FloatArray c;
+    return this->surfaceEvalNormal(c, isurf, lcoords, cellgeo);
 }
 
 void

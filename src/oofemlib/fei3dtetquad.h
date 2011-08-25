@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei3dtrlin_h
-#define fei3dtrlin_h
+#ifndef fei3dtetquad_h
+#define fei3dtetquad_h
 
 #include "feinterpol3d.h"
 
@@ -76,7 +76,7 @@ public:
     virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
                    const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void surfaceEvalNormal(FloatArray &answer, int isurf,
+    virtual double surfaceEvalNormal(FloatArray &answer, int isurf,
                    const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
@@ -87,14 +87,10 @@ public:
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 
+    double computeVolume(const FEICellGeometry &cellgeo);
+
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
 };
 } // end namespace oofem
-#endif // fei3dtrlin_h
-
-
-
-
-
-
+#endif // fei3dtetquad_h

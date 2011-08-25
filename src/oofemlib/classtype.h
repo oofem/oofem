@@ -51,6 +51,7 @@ enum classType {
 
     GeneralBoundaryConditionClass,
     ActiveBoundaryConditionClass,
+    SurfaceTensionBoundaryConditionClass,
     LoadClass,
     BoundaryConditionClass,
     PrescribedGradientClass,
@@ -102,6 +103,7 @@ enum classType {
     CBSElementClass,
     SUPGElementClass,
     Tr21StokesElementClass,
+    Tet21StokesElementClass,
     LineSurfaceTensionElementClass,
     Line2SurfaceTensionElementClass,
 

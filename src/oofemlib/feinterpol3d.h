@@ -133,11 +133,13 @@ public:
      * @param isurf Determines the surface number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
+     * @return Surface mapping jacobian.
      */
-    virtual void surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
+    virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
             const FEICellGeometry &cellgeo)
     {
         OOFEM_ERROR("FEInterpolation3D :: surfaceEvalNormal - Not implemented");
+        return -1.0;
     }
 
     /**
