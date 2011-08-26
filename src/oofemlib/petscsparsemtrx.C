@@ -84,7 +84,7 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     if ( emodel->isParallel() ) {
         OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
     }
-#else
+#endif
     Vec globX, globY;
     VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
@@ -102,7 +102,6 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     VecRestoreArray(globY, & ptr);
     VecDestroy(globX);
     VecDestroy(globY);
-#endif
 }
 
 void
@@ -116,7 +115,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     if ( emodel->isParallel() ) {
         OOFEM_ERROR("PetscSparseMtrx :: timesT - Not implemented");
     }
-#else
+#endif
     Vec globX, globY;
     VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
@@ -134,7 +133,6 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     VecRestoreArray(globY, & ptr);
     VecDestroy(globX);
     VecDestroy(globY);
-#endif
 }
 
 
@@ -146,8 +144,10 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
     }
 
 #ifdef __PARALLEL_MODE
-    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
-#else
+    if ( emodel->isParallel() ) {
+        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+    }
+#endif
     // I'm opting to work with a set of vectors, as i think it might be faster and more robust. / Mikael
 
     int nr = this->giveNumberOfRows();
@@ -190,7 +190,6 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
 
     MatDestroy(globB);
     MatDestroy(globC);
-#endif
 }
 
 void
@@ -201,8 +200,10 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
     }
 
 #ifdef __PARALLEL_MODE
-    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
-#else
+    if ( emodel->isParallel() ) {
+        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+    }
+#endif
     int nr = this->giveNumberOfColumns();
     int nc = B.giveNumberOfColumns();
     answer.resize(nr, nc);
@@ -226,7 +227,6 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
 
     MatDestroy(globB);
     MatDestroy(globC);
-#endif
 }
 
 void
@@ -240,8 +240,11 @@ int
 PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
 #ifdef __PARALLEL_MODE
-    OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
-#else
+    if ( eModel->isParallel() ) {
+        OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
+    }
+#endif
+    this->emodel = eModel;
     Domain *domain = eModel->giveDomain(di);
     int nelem;
 
@@ -316,7 +319,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     /*
      * MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
      */
-    MatCreate(PETSC_COMM_WORLD, & mtrx);
+    MatCreate(PETSC_COMM_SELF, & mtrx);
     // Trying to do this with leqs and geqs doesn't make any sense. They can only mean lines if i understand this correctly (local vs global). / Mikael.
     // Besides, geqs is meaningless, as it will always be the number of rows. Why not lRows and lColumns instead?
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
@@ -324,7 +327,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     MatSetFromOptions(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
 
-#endif
     this->newValues = true;
     return true;
 }
@@ -464,7 +466,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     }
 
     //MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
-    MatCreate(PETSC_COMM_WORLD, & mtrx);
+    MatCreate(PETSC_COMM_SELF, & mtrx);
     MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
     MatSetType(mtrx, MATSEQAIJ);
     MatSetFromOptions(mtrx);
