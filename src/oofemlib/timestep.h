@@ -59,7 +59,7 @@ namespace oofem {
  * Engineering model class instance.
  *
  * The class hold target time, which may represent the end of time interval. In addition, there is
- * intrinsic time, which is normally set the same as target time. Intrinsic time is used
+ * intrinsic time, which is normally set the same as target time. Intrinsic (assembly) time is used
  * especially in constitutive laws, where the material law is not meant to be evaluated at target time. Also,
  * imposing boundary conditions occurs at intrinsic time by default. This reflects changes of static system and proper
  * equation numbering during each timeStep.
