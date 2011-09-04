@@ -7,7 +7,6 @@ using namespace boost::python;
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "engngm.h"
-#include "dofmanager.h"
 #include "domain.h"
 #include "sparsemtrx.h"
 #include "load.h"
@@ -24,15 +23,18 @@ using namespace boost::python;
 #include "logger.h"
 #include "util.h"
 #include "problemmode.h"
-
-namespace oofem {
+#include "dofmanager.h"
+#include "elementgeometrytype.h"
+#include "dofmanvalfield.h"
  
+namespace oofem {
+
 /* DefaulT oofem loggers */
 Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
 EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag) {
-  return oofem::InstanciateProblem (dr, mode, contextFlag, 0);
+  return InstanciateProblem (dr, mode, contextFlag, 0);
 }
  
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
@@ -45,16 +47,17 @@ class PyFloatMatrix : public FloatMatrix, public wrapper<FloatMatrix>
 public:
    PyFloatMatrix () : FloatMatrix () {}
    PyFloatMatrix (int a, int b) : FloatMatrix (a,b) {}
+   // 0-index access
    void __setitem__ (object t, double val) {
-    this->at(extract<int>(t[0]), extract<int>(t[1]) ) = val;}
+     this->operator()(extract<int>(t[0]), extract<int>(t[1]) ) = val;}
    double __getitem__ (object t, double val) {
-     return this->at(extract<int>(t[0]), extract<int>(t[1]) );}
+     return this->operator()(extract<int>(t[0]), extract<int>(t[1]) );}
 };
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(floatmatrix_overloads_resize, resize, 2, 3)
 
-void (PyFloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer) = &PyFloatMatrix::solveForRhs;
-void (PyFloatMatrix::*solveForRhs_2)(const FloatMatrix &b, FloatMatrix &answer) = &PyFloatMatrix::solveForRhs;
+void (PyFloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bool) = &PyFloatMatrix::solveForRhs;
+  void (PyFloatMatrix::*solveForRhs_2)(const FloatMatrix &b, FloatMatrix &answer, bool) = &PyFloatMatrix::solveForRhs;
 void (PyFloatMatrix::*assemble_1)(const FloatMatrix &src, const IntArray &loc) = &PyFloatMatrix::assemble;
 void (PyFloatMatrix::*assemble_2)(const FloatMatrix &src, const IntArray &row, const IntArray&col) = &PyFloatMatrix::assemble;
 
@@ -80,8 +83,14 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
     this->get_override("times")();
   }
 
-  int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s) {
-    return this->get_override("buildInternalStructure")();
+
+  int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s) {
+    return this->get_override("buildInternalStructure")(eModel, di, ut, s);
+  }
+
+  int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& r, const UnknownNumberingScheme &s) {
+    if (override f = this->get_override("buildInternalStructure")) {return f(eModel, di, ut, r, s);}
+    return this->get_override("buildInternalStructure")(eModel, di, ut, r, s);
   }
 
   int assemble(const IntArray &loc, const FloatMatrix &mat) {
@@ -134,6 +143,9 @@ void (PySparseMtrx::*sm_times_1)(const FloatArray &x, FloatArray &ans) const  = 
 void (PySparseMtrx::*sm_times_2)(double x) = &PySparseMtrx::times;
 int (PySparseMtrx::*sm_assemble_1)(const IntArray &loc, const FloatMatrix &mat) = &PySparseMtrx::assemble;
 int (PySparseMtrx::*sm_assemble_2)(const IntArray &r, const IntArray& c, const FloatMatrix &mat) = &PySparseMtrx::assemble;
+
+int (PySparseMtrx::*sm_buildInternalStructure_1)(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s) = &PySparseMtrx::buildInternalStructure;
+int (PySparseMtrx::*sm_buildInternalStructure_2)(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) = &PySparseMtrx::buildInternalStructure;
 
 
 class PyEngngModel : public EngngModel, public wrapper<EngngModel>
@@ -214,16 +226,42 @@ public:
     
 };
 
+
+class PyDofManager : public DofManager, public wrapper<DofManager>
+{
+public:
+  PyDofManager (int n, Domain *d) : DofManager (n,d) {}
+  
+  /*
+  void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
+			 EquationID type, ValueModeType mode, TimeStep *stepN) {
+    if (override f = this->get_override("giveUnknownVector")) {
+      f (answer, dofMask, type, mode, stepN); return;}
+    DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);
+  }
+  void computeDofTransformation(FloatMatrix &answer, IntArray &dofIDArry, DofManTransfType mode) {
+    if (override f = this->get_override("computeDofTransformation")) {f(answer, &dofIDArry, mode); return;}
+    DofManager::computeDofTransformation(answer, &dofIDArry, mode);
+  }
+
+  void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
+				 EquationID type, ValueModeType mode, TimeStep *stepN) 
+  {return this->DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);}
+  */
+};
+
 void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
 					EquationID type, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
+
+int (DofManValueField::*evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = 
+  &DofManValueField::evaluateAt;
+
 
 
 BOOST_PYTHON_MODULE (oofemlib)
 {
-  class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
-    ;
 
-  class_<FloatArray>("FloatArray")
+  class_<FloatArray, boost::noncopyable>("FloatArray")
     .def(init< optional<int> >())
     //.def("set", at2, return_internal_reference<>())
     .def("__len__", &FloatArray::giveSize)
@@ -272,9 +310,9 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("assembleu", assemble_2)
     ;
 
-  class_<IntArray>("IntArray")
+  class_<IntArray, boost::noncopyable>("IntArray")
     .def(init< optional<int> >())
-    .def("__len__", &FloatArray::giveSize)
+    .def("__len__", &IntArray::giveSize)
     .def("__getitem__", &IntArray::__getItem__) 
     .def("__setitem__", &IntArray::__setItem__)
     .def("resize", &IntArray::resize, intarray_overloads_resize())
@@ -289,14 +327,21 @@ BOOST_PYTHON_MODULE (oofemlib)
     //.def(init<>())
     .def("times", pure_virtual(sm_times_1))
     .def("timesd", pure_virtual(sm_times_2))
-    .def("buildInternalStructure", &PySparseMtrx::buildInternalStructure)
     .def("assemble", sm_assemble_1)
     .def("assembleu", sm_assemble_2)
+    .def("buildInternalStructure", pure_virtual(sm_buildInternalStructure_1))
+    .def("buildInternalStructure2", sm_buildInternalStructure_2)
+    
     //.def("zero", zero)
     ;
 
-
-
+  class_<SpatialLocalizer, boost::noncopyable>("SpatialLocalizer", no_init)
+    .def("giveElementContainingPoint", &SpatialLocalizer::giveElementContainingPoint, return_internal_reference<>())
+    .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
+    .def("init", &SpatialLocalizer::init)
+    .def("giveClassName", &SpatialLocalizer::giveClassName)
+    ;
+    
   
   class_<PyEngngModel, boost::noncopyable>("EngngModel", no_init)
     //.def(init<int, optional<EngngModel*> > ())
@@ -336,7 +381,6 @@ BOOST_PYTHON_MODULE (oofemlib)
   .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
   .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
   .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
-    .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
   
   .def("checkConsistency", &Domain::checkConsistency)
   .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
@@ -355,26 +399,68 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("_postProcessor", _postProcessor)
     ;
 
-  enum_<DofIDItem>("DofIDItem")
-    .value("D_u", D_u)
-    .value("D_v", D_v)
-    .value("D_w", D_w)
-    .value("R_u", R_u)
-    .value("R_v", R_w)
-    .value("R_v", R_w)
-    .value("T_f", T_f)
-    .value("P_f", P_f)
+  def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
+  //def("make_foo", make_foo, return_value_policy<manage_new_object>())
+    
+  class_<PyElement, boost::noncopyable>("Element", init<int, Domain* >())
+    .def("giveLabel", &Element::giveLabel)
+    .def("giveNumber", &Element::giveNumber)
+    .def("giveLocationArray", &PyElement::giveLocationArray)
+    .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
+    .def("giveCharacteristicMatrix", &PyElement::giveCharacteristicMatrix)
+    .def("giveCharacteristicVector", &PyElement::giveCharacteristicVector)
+    .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
+    .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
+    .def("giveGeometryType", &PyElement::giveGeometryType)
+    .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
+    ;
+
+  class_<DofManager, boost::noncopyable>("DofManager", init<int, Domain* >())
+    .def("hasCoordinates", &DofManager::hasCoordinates)
+    .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
+    .def("giveCoordinate", &DofManager::giveCoordinate)
+    .def("giveLabel", &DofManager::giveLabel)
+    .def("giveUnknownVector", giveUnknownVector_1)
+    .def("computeDofTransformation", &DofManager::computeDofTransformation)
+    ;
+
+  class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
+    .def("giveTargetTime", &TimeStep::giveTargetTime)
+    .def("giveIntrinsicTime", &TimeStep::giveIntrinsicTime)
+    ;
+
+
+  class_<DofManValueField, boost::noncopyable>("DofManValueField", init<FieldType, Domain* >())
+    .def("evaluateAt", evaluateAtPos)
+    .def("setDofManValue",&DofManValueField::setDofManValue)
+    ;
+
+  enum_<Element_Geometry_Type>("Element_Geometry_Type")
+    .value("EGT_line_1", EGT_line_1)
+    .value("EGT_line_2", EGT_line_2) /* line element with three nodes 1---2---3 */	\
+    .value("EGT_triangle_1",EGT_triangle_1) /* triangle element with three nodes */	\
+    .value("EGT_triangle_2", EGT_triangle_2) /* triangle element with 6 nodes */ \
+    .value("EGT_quad_1",EGT_quad_1)   /* quadrialateral with 4 nodes */		\
+    .value("EGT_quad_2", EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */	\
+    .value("EGT_tetra_1", EGT_tetra_1)  /* tetrahedron with 4 nodes */			\
+    .value("EGT_hexa_1", EGT_hexa_1)   /* hexahedron with 8 nodes */			\
+    .value("EGT_hexa_2", EGT_hexa_2)   /* hexahedron with 20 nodes */			\
+    .value("EGT_Composite", EGT_Composite)/* Composite" geometry, vtk export supported by individual elements */ \
+    .value("EGT_unknown", EGT_unknown)  /* unknown" element geometry type */
     ;
 
   enum_<EquationID>("EquationID")
-    .value("EID_MomentumBalance",EID_MomentumBalance)
-    .value("EID_ConservationEquation",EID_ConservationEquation)
-    .value("EID_MomentumBalance_ConservationEquation",EID_MomentumBalance_ConservationEquation)
+    .value("EID_MomentumBalance", EID_MomentumBalance)
+    .value("EID_AuxMomentumBalance", EID_AuxMomentumBalance)
+    .value("EID_ConservationEquation", EID_ConservationEquation)
+    .value("EID_MomentumBalance_ConservationEquation", EID_MomentumBalance_ConservationEquation)
     ;
 
   enum_<ValueModeType>("ValueModeType")
+    .value("VM_Unknown", VM_Unknown)
     .value("VM_Total", VM_Total)
     .value("VM_Velocity", VM_Velocity)
+    .value("VM_Acceleration", VM_Acceleration)
     .value("VM_Incremental", VM_Incremental)
     ;
 
@@ -383,44 +469,30 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("_toNodalCS", _toNodalCS)
     ;
 
-  enum_<Element_Geometry_Type>("Element_Geometry_Type")
-    .value("EGT_point", EGT_point)
-    .value("EGT_line_1", EGT_line_1)
-    .value("EGT_line_2", EGT_line_2)
-    .value("EGT_triangle_1", EGT_triangle_1)
-    .value("EGT_triangle_2", EGT_triangle_2)
-    .value("EGT_quad_1", EGT_quad_1)
-    .value("EGT_quad_2", EGT_quad_2)
-    .value("EGT_tetra_1", EGT_tetra_1)
-    .value("EGT_tetra_2", EGT_tetra_2)
-    .value("EGT_hexa_1", EGT_hexa_1)
-    .value("EGT_hexa_2", EGT_hexa_2)
-    .value("EGT_Composite", EGT_Composite)
-    .value("EGT_unknown", EGT_unknown)
+  enum_<DofIDItem>("DofIDItem")
+    .value("Undef", Undef)
+    .value("D_u", D_u)
+    .value("D_v", D_v)
+    .value("D_w", D_w)
+    .value("R_u", R_u)
+    .value("R_v", R_v)
+    .value("R_w", R_w)
+    .value("V_u", V_u)
+    .value("V_v", V_v)
+    .value("V_w", V_w)
+    .value("T_f", T_f)
+    .value("P_f", P_f)
     ;
 
-  def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
-  //def("make_foo", make_foo, return_value_policy<manage_new_object>())
-    
-  class_<PyElement, boost::noncopyable>("Element", init<int, Domain* >())
-    .def("giveLocationArray", &PyElement::giveLocationArray)
-    .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
-    .def("giveCharacteristicMatrix", &PyElement::giveCharacteristicMatrix)
-    .def("giveCharacteristicVector", &PyElement::giveCharacteristicVector)
-    .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
-    .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
-    .def("giveGeometryType", &PyElement::giveGeometryType)
-    .def("giveLabel", &Element::giveLabel)
-    .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
-    ;
-
-  class_<DofManager, boost::noncopyable>("DofManager", init<int, Domain* >())
-    .def("giveCoordinate", &DofManager::giveCoordinate)
-    .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
-    .def("hasCoordinates", &DofManager::hasCoordinates)
-    .def("giveLabel", &DofManager::giveLabel)
-    .def("giveUnknownVector", giveUnknownVector_1)
-    .def("computeDofTransformation", &DofManager::computeDofTransformation)
+  enum_<FieldType>("FieldType")
+    .value("FT_Unknown", FT_Unknown)
+    .value("FT_Velocity", FT_Velocity)
+    .value("FT_Displacements", FT_Displacements)
+    .value("FT_VelocityPressure", FT_VelocityPressure)
+    .value("FT_Pressure", FT_Pressure)
+    .value("FT_Temperature", FT_Temperature)
+    .value("FT_HumidityConcentration", FT_HumidityConcentration)
+    .value("FT_TransportProblemUnknowns", FT_TransportProblemUnknowns)
     ;
 
 }

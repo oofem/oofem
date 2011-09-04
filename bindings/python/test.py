@@ -6,14 +6,14 @@ ind = oofemlib.IntArray(2);
 
 a.zero();
 b.zero();
-a[2]=15.0;
-a[1]=10.0;
+a[1]=15.0;
+a[0]=10.0;
 print a[1], a[2];
 a.printYourself();
 
 c = oofemlib.FloatMatrix(2,2);
 c.beUnitMatrix();
-c[1,2]=1.0;
+c[0,1]=1.0;
 c.printYourself();
 
 b.beProductOf(c,a);
@@ -21,8 +21,8 @@ b.printYourself();
 
 b.resize(4);
 b.zero();
-ind[1]=1;
-ind[2]=3;
+ind[0]=1;
+ind[1]=3;
 b.assemble(a,ind);
 b.printYourself();
 
