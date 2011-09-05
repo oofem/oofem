@@ -25,7 +25,11 @@ using namespace boost::python;
 #include "problemmode.h"
 #include "dofmanager.h"
 #include "elementgeometrytype.h"
+#include "field.h"
+#include "datastream.h"
 #include "dofmanvalfield.h"
+#include "fieldmanager.h"
+
  
 namespace oofem {
 
@@ -253,8 +257,33 @@ public:
 void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
 					EquationID type, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
 
-int (DofManValueField::*evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = 
-  &DofManValueField::evaluateAt;
+
+class PyField : public Field, public wrapper<Field>
+{
+public:
+  PyField (FieldType b): Field(b) {}
+  int evaluateAt(FloatArray &answer, FloatArray &coords,
+		 ValueModeType mode, TimeStep *atTime) {
+    return this->get_override("evaluateAt")(answer, coords,mode,atTime);
+  }
+  int evaluateAt(FloatArray &answer, DofManager* dman,
+		 ValueModeType mode, TimeStep *atTime) {
+    return this->get_override("evaluateAt")(answer,dman,mode,atTime);
+  }
+  contextIOResultType saveContext(DataStream *stream, ContextMode mode) {
+    return this->get_override("saveContext")(stream, mode);
+  }
+  contextIOResultType restoreContext(DataStream *stream, ContextMode mode) {
+    return this->get_override("restoreContext")(stream, mode);
+  }
+};
+
+int (PyField::*evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = &PyField::evaluateAt;
+int (PyField::*evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &PyField::evaluateAt;
+
+
+
+
 
 
 
@@ -429,6 +458,20 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("giveIntrinsicTime", &TimeStep::giveIntrinsicTime)
     ;
 
+  class_<DataStream, boost::noncopyable>("DataStream", no_init)
+    ;
+  class_<PyField, boost::noncopyable>("Field", init<FieldType >())
+    .def("evaluateAtPos", evaluateAtPos)
+    .def("evaluateAtDman", evaluateAtDman)
+    .def("giveType", &PyField::giveType)
+    ;
+
+  class_<FieldManager, boost::noncopyable>("FieldManager", no_init)
+    .def("registerField", &FieldManager::registerField)
+    .def("isFieldRegistered", &FieldManager::isFieldRegistered)
+    .def("giveField", &FieldManager::giveField, return_internal_reference<>())
+    .def("unregisterField", &FieldManager::unregisterField)
+    ;
 
   class_<DofManValueField, boost::noncopyable>("DofManValueField", init<FieldType, Domain* >())
     .def("evaluateAt", evaluateAtPos)
