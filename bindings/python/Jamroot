@@ -12,7 +12,7 @@ use-project boost
 # boost_python library defined in the project whose global ID is
 # /boost/python.
 project boost-python-quickstart
-  : requirements <library>/boost/python//boost_python  <library>../../targets/oofem-debug/lib/main/usrdefsub.o <library>../../targets/oofem-debug/lib/sm/smlib.a <library>../../targets/oofem-debug/lib/tm/tmlib.a <library>../../targets/oofem-debug/lib/fm/fmlib.a <library>../../targets/oofem-debug/lib/dss/dsslib.a <library>../../targets/oofem-debug/lib/oofemlib/oofemlib.a
+  : requirements <library>/boost/python//boost_python  <library>../../targets/oofem-debug/lib/main/usrdefsub.o <library>../../targets/oofem-debug/lib/sm/smlib.a <library>../../targets/oofem-debug/lib/tm/tmlib.a <library>../../targets/oofem-debug/lib/fm/fmlib.a <library>../../targets/oofem-debug/lib/oofemlib/oofemlib.a
     ;
 
 # Make the definition of the python-extension rule available
