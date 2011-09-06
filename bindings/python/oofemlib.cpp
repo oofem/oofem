@@ -370,7 +370,10 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("init", &SpatialLocalizer::init)
     .def("giveClassName", &SpatialLocalizer::giveClassName)
     ;
-    
+
+  class_<EngngModelContext, boost::noncopyable>("EngngModelContext", no_init)
+    .def("giveFieldManager", &EngngModelContext::giveFieldManager, return_internal_reference<>())
+    ;
   
   class_<PyEngngModel, boost::noncopyable>("EngngModel", no_init)
     //.def(init<int, optional<EngngModel*> > ())
@@ -388,6 +391,7 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("checkProblemConsistency", &PyEngngModel::checkProblemConsistency)
     .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
     .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
+    .def("giveContext", &EngngModel::giveContext, return_internal_reference<>())
     ;
 
   class_<Domain>("Domain", init<int, int, EngngModel* >())
