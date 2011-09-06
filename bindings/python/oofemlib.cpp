@@ -269,7 +269,7 @@ public:
   int evaluateAt(FloatArray &answer, DofManager* dman,
 		 ValueModeType mode, TimeStep *atTime) {
     return this->get_override("evaluateAt")(answer,dman,mode,atTime);
-  }
+  } 
   contextIOResultType saveContext(DataStream *stream, ContextMode mode) {
     return this->get_override("saveContext")(stream, mode);
   }
@@ -416,6 +416,8 @@ BOOST_PYTHON_MODULE (oofemlib)
   .def("giveSpatialLocalizer", &Domain::giveSpatialLocalizer, return_internal_reference<>())
   .def("giveErrorEstimator", &Domain::giveErrorEstimator, return_internal_reference<>())
   .def("giveSmoother", &Domain::giveSmoother, return_internal_reference<>())
+
+  .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
   ;
   
   
