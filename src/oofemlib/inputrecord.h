@@ -44,6 +44,8 @@
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <string.h>
+ #include <vector>
+ #include <string>
 #endif
 
 namespace oofem {
@@ -1220,8 +1222,8 @@ public:
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the FloatMatrix field value.
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString) = 0;
-    //// Reads the array of strings.
-    //virtual IRResultType giveField(std::string *answer, int maxchar, const InputFieldType fieldID, const char *idString) = 0;
+    // Reads the array of strings.
+    virtual IRResultType giveField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the dynaList<Range> field value.
@@ -1247,6 +1249,8 @@ public:
     virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the FloatMatrix field value.
     virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString) = 0;
+    // Reads the array of strings.
+    virtual IRResultType giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the dynaList<Range> field value.

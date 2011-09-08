@@ -37,6 +37,7 @@
  #include <stdio.h>
  #include <string.h>
  #include <ctype.h>
+#include <iostream>
 #endif
 
 namespace oofem {
@@ -270,6 +271,30 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, const InputFieldType field
         }
 
         setReadFlag(indx);
+        return IRRT_OK;
+    } else {
+        return IRRT_NOTFOUND;
+    }
+}
+
+
+IRResultType
+OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString)
+{
+    int size;
+    int indx = this->giveKeywordIndx(idString);
+    if ( indx ) {
+        setReadFlag(indx);
+        if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
+            return IRRT_BAD_FORMAT;
+        }
+        answer.reserve(size);
+        setReadFlag(indx);
+        for ( int i = 1; i <= size; i++ ) {
+            answer.push_back(tokenizer.giveToken(indx + i));
+            setReadFlag(indx + i);
+        }
+
         return IRRT_OK;
     } else {
         return IRRT_NOTFOUND;
@@ -672,6 +697,18 @@ OOFEMTXTInputRecord :: giveOptionalField(IntArray &answer, const InputFieldType 
 
 IRResultType
 OOFEMTXTInputRecord :: giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+
+IRResultType
+OOFEMTXTInputRecord :: giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString)
 {
     IRResultType r = this->giveField(answer, fieldID, idString);
     if ( r == IRRT_NOTFOUND ) {

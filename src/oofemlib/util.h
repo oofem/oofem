@@ -48,7 +48,7 @@ class EngngModel;
  * Reads the input line from file and converts all characters to lower case.
  * @param inputStream Stream to read from.
  * @param line Contains read line.
- * @param len Determines max number of read characters including terminationg '\0'.
+ * @param len Determines max number of read characters including terminating '\0'.
  * @return Newly allocated pointer containing string.
  */
 char *giveLineFromInput(FILE *inputStream, char *line, int len);
@@ -56,7 +56,7 @@ char *giveLineFromInput(FILE *inputStream, char *line, int len);
  * Reads the input line from file.
  * @param inputStream Stream to read from.
  * @param line Contains read line.
- * @param len Determines max number of read characters including terminationg '\0'.
+ * @param len Determines max number of read characters including terminating '\0'.
  * @return Newly allocated pointer containing string.
  */
 char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
@@ -79,7 +79,7 @@ char *giveInputDataFileName(char *dataInputFileName, int maxlen);
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0);
 
 /** 
- * Static storage for temporary strings to solve compiler warnings about onversion from string constant to char*.
+ * Static storage for temporary strings to solve compiler warnings about conversion from string constant to char*.
  * @param src Constant data to be copied over.
  * @return Pointer to static array of data, overwritten with src.
  */

@@ -95,6 +95,7 @@ public:
     virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString);
+    virtual IRResultType giveField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
 
@@ -104,6 +105,7 @@ public:
     virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
 
