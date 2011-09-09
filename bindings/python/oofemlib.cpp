@@ -3,6 +3,9 @@
 //#include <boost/python/manage_new_object.hpp>
 //#include <boost/python/return_value_policy.hpp>
 using namespace boost::python;
+using namespace std;
+
+#include <memory> // for std::auto_ptr<>
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
@@ -281,7 +284,42 @@ public:
 int (PyField::*evaluateAtPos)(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime) = &PyField::evaluateAt;
 int (PyField::*evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime) = &PyField::evaluateAt;
 
+std::auto_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::auto_ptr<Field> ( new DofManValueField(t, d) ); }
 
+
+
+class PyFieldManager;
+//void FieldManager_registerField (FieldManager* fm, std::auto_ptr<Field>& a, FieldType key, bool managedFlag)
+/*
+void FieldManager_registerField (PyFieldManager* fm, DofManValueField* a, FieldType key, bool managedFlag)
+{
+  //fm->registerField(a.get(), key, managedFlag);
+  //a.release();
+  printf("Registering field\n");
+};
+*/
+//void FieldManager_registerField (FieldManager* fm, Field* a, FieldType key, bool managedFlag ) // ok
+void FieldManager_registerField (FieldManager* fm, std::auto_ptr<Field>& a, FieldType key, bool managedFlag ) // ok
+{
+  fm->registerField(a.get(), key, managedFlag);
+  a.release();
+  printf("Registering field\n");
+};
+
+
+class PyFieldManager : public FieldManager, public wrapper<FieldManager>
+{
+public:
+  PyFieldManager (): FieldManager() {}
+  //void myRegisterField(std::auto_ptr<Field>& a, FieldType key, bool managedFlag = false) {
+  void myRegisterField(DofManValueField* a, FieldType key, bool managedFlag = false) {
+    //FieldManager_registerField(this, a, key, managedFlag);
+  }
+  //void registerField(std::auto_ptr<PyField> a, FieldType key, bool managedFlag = false) {
+  //  FieldManager_registerField(*this, a, key, managedFlag);
+  //}
+
+};
 
 
 
@@ -466,23 +504,34 @@ BOOST_PYTHON_MODULE (oofemlib)
 
   class_<DataStream, boost::noncopyable>("DataStream", no_init)
     ;
-  class_<PyField, boost::noncopyable>("Field", init<FieldType >())
+
+  //this class is held by auto_ptr:  to allow for taking ownership of a raw pointer
+  //see http://www.boost.org/doc/libs/1_47_0/libs/python/doc/v2/faq.html#ownership for detail
+  // also see http://stackoverflow.com/questions/4112561/boost-python-ownership-of-pointer-variables
+  class_<Field, PyField, boost::noncopyable>("Field", no_init)
     .def("evaluateAtPos", evaluateAtPos)
     .def("evaluateAtDman", evaluateAtDman)
     .def("giveType", &PyField::giveType)
     ;
 
-  class_<FieldManager, boost::noncopyable>("FieldManager", no_init)
-    .def("registerField", &FieldManager::registerField)
+  class_<FieldManager, PyFieldManager, boost::noncopyable>("FieldManager", no_init)
+    .def("registerField", &PyFieldManager::myRegisterField)
     .def("isFieldRegistered", &FieldManager::isFieldRegistered)
     .def("giveField", &FieldManager::giveField, return_internal_reference<>())
     .def("unregisterField", &FieldManager::unregisterField)
     ;
 
-  class_<DofManValueField, boost::noncopyable>("DofManValueField", init<FieldType, Domain* >())
+  def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
+  def("FieldManager_registerField", &FieldManager_registerField);
+
+  class_<DofManValueField, bases<Field>, boost::noncopyable >("DofManValueField", no_init)
     .def("evaluateAt", evaluateAtPos)
     .def("setDofManValue",&DofManValueField::setDofManValue)
+
     ;
+  implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >(); 
+  register_ptr_to_python< std::auto_ptr<Field> >();
+
 
   enum_<Element_Geometry_Type>("Element_Geometry_Type")
     .value("EGT_line_1", EGT_line_1)
