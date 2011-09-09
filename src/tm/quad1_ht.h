@@ -38,6 +38,7 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
+#include "fei2dquadlin.h"
 
 namespace oofem {
 /**
@@ -47,6 +48,7 @@ class Quad1_ht : public TransportElement, public SpatialLocalizerInterface, publ
 {
 protected:
     int numberOfGaussPoints;
+    static FEI2dQuadLin interpolation;
 
 public:
     Quad1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
@@ -66,6 +68,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    FEInterpolation *giveInterpolation() { return & interpolation; }
 
     Interface *giveInterface(InterfaceType t);
 
@@ -92,10 +95,6 @@ protected:
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
     virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
-
-    void giveDerivativeKsi(FloatArray &answer, double eta);
-    void giveDerivativeEta(FloatArray &answer, double ksi);
-    void computeJacobianMatrix(FloatMatrix &answer, GaussPoint *gp);
 
     void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

@@ -70,10 +70,11 @@ double
 QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    double determinant, weight, volume;
-    FloatMatrix jacobianMtrx;
-    this->computeJacobianMatrix(jacobianMtrx, aGaussPoint);
-    determinant = fabs( jacobianMtrx.giveDeterminant() );
+    double determinant, weight, thickness, volume;
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
+
+
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight * this->computeRadiusAt(aGaussPoint);
 
@@ -83,7 +84,7 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 double
 QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double dx, dy, length, radius;
+    double radius;
     Node *nodeA, *nodeB;
     int aNode = 0, bNode = 0;
     FloatMatrix n;
@@ -101,19 +102,18 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
         aNode = 4;
         bNode = 1;
     } else {
-        _error("computeEdgeVolumeAround: wrong edge number");
+        _error("computeEdgeVolumeAround: wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
     nodeB   = this->giveNode(bNode);
 
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
     this->computeEgdeNMatrixAt(n, gp);
-    radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
 
-    return 0.5 *length *gp->giveWeight() * radius;
+    radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
+    return result*gp->giveWeight()* radius;
 }
 
 double

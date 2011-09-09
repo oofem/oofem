@@ -58,6 +58,9 @@
 #endif
 
 namespace oofem {
+
+FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
+
 Quad1_ht :: Quad1_ht(int n, Domain *aDomain, ElementMode em) :
     TransportElement(n, aDomain, em)
     // Constructor.
@@ -71,45 +74,18 @@ Quad1_ht :: ~Quad1_ht()
 { }
 
 void
-Quad1_ht :: giveDerivativeKsi(FloatArray &answer, double eta)
-{
-    answer.resize(4);
-
-    answer.at(1) =  0.25 * ( 1. + eta );
-    answer.at(2) = -0.25 * ( 1. + eta );
-    answer.at(3) = -0.25 * ( 1. - eta );
-    answer.at(4) =  0.25 * ( 1. - eta );
-}
-
-void
-Quad1_ht :: giveDerivativeEta(FloatArray &answer, double ksi)
-{
-    answer.resize(4);
-
-    answer.at(1) =  0.25 * ( 1. + ksi );
-    answer.at(2) =  0.25 * ( 1. - ksi );
-    answer.at(3) = -0.25 * ( 1. - ksi );
-    answer.at(4) = -0.25 * ( 1. + ksi );
-}
-
-
-
-void
 Quad1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    double ksi, eta;
-
-    ksi = coords->at(1);
-    eta = coords->at(2);
+    FloatArray n(4);
+    this->interpolation.evalN(n, *coords, FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(1, 4);
-
-    answer.at(1, 1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    answer.at(1, 2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    answer.at(1, 3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    answer.at(1, 4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n.at(2);
+    answer.at(1, 3) = n.at(3);
+    answer.at(1, 4) = n.at(4);
 
     return;
 }
@@ -137,55 +113,18 @@ void
 Quad1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {
     int i;
-    FloatArray nk, ne;
-    FloatMatrix jacobianMtrx(2, 2), inv;
-    double ksi = aGaussPoint->giveCoordinate(1);
-    double eta = aGaussPoint->giveCoordinate(2);
-
-    this->giveDerivativeKsi(nk, eta);
-    this->giveDerivativeEta(ne, ksi);
-
-    this->computeJacobianMatrix(jacobianMtrx, aGaussPoint);
-    inv.beInverseOf(jacobianMtrx);
+    FloatMatrix dnx;
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(2, 4);
     answer.zero();
 
     for ( i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = nk.at(i) * inv.at(1, 1) + ne.at(i) * inv.at(1, 2);
-        answer.at(2, i) = nk.at(i) * inv.at(2, 1) + ne.at(i) * inv.at(2, 2);
+      answer.at(1, i) = dnx.at(i,1);
+      answer.at(2, i) = dnx.at(i,2);
     }
 }
 
-
-void
-Quad1_ht :: computeJacobianMatrix(oofem::FloatMatrix& answer, oofem::GaussPoint* aGaussPoint)
-// Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
-{
-    int i;
-    double ksi, eta, x, y;
-    FloatArray nx, ny;
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
-
-    this->giveDerivativeKsi(nx, eta);
-    this->giveDerivativeEta(ny, ksi);
-
-    for ( i = 1; i <= 4; i++ ) {
-        x = this->giveNode(i)->giveCoordinate(1);
-        y = this->giveNode(i)->giveCoordinate(2);
-
-        answer.at(1, 1) += nx.at(i) * x;
-        answer.at(1, 2) += nx.at(i) * y;
-        answer.at(2, 1) += ny.at(i) * x;
-        answer.at(2, 2) += ny.at(i) * y;
-    }
-}
 
 void
 Quad1_ht :: computeGaussPoints()
@@ -251,9 +190,8 @@ Quad1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    FloatMatrix jacobianMtrx;
-    this->computeJacobianMatrix(jacobianMtrx, aGaussPoint);
-    determinant = fabs( jacobianMtrx.giveDeterminant() );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness); // 't'
     volume      = determinant * weight * thickness;
@@ -278,16 +216,14 @@ Quad1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      * without regarding particular side
      */
 
-    double ksi, n1, n2;
+    FloatArray n(2);
+    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+
     answer.resize(1, 2);
     answer.zero();
 
-    ksi = gp->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 2) = n2;
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n.at(2);
 
     return;
 }
@@ -296,34 +232,10 @@ Quad1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double dx, dy, length, thick;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-    thick = this->giveCrossSection()->give(CS_Thickness); // 't'
-    return 0.5 *length *thick *gp->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
+    double thick = this->giveCrossSection()->give(CS_Thickness); // 't'
+    return result*thick *gp->giveWeight();
 }
 
 
@@ -358,35 +270,7 @@ Quad1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 void
 Quad1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    double n1, n2, ksi = gp->giveCoordinate(1);
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
-    } else {
-        _error("computeEdgeIpGlobalCoords: wrong egde number");
-    }
-
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    answer.resize(2);
-    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB->giveCoordinate(1);
-    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB->giveCoordinate(2);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 void
@@ -417,22 +301,7 @@ Quad1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTim
 int
 Quad1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    double ksi, eta, n1, n2, n3, n4;
-
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
-
-    n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    n3 = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
-
-    answer.resize(2);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1) +
-                   n3 *this->giveNode(3)->giveCoordinate(1) + n4 *this->giveNode(4)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2) +
-                   n3 *this->giveNode(3)->giveCoordinate(2) + n4 *this->giveNode(4)->giveCoordinate(2);
-
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -526,131 +395,7 @@ Quad1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 int
 Quad1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    Node *node1, *node2, *node3, *node4;
-    double x1, x2, x3, x4, y1, y2, y3, y4, a1, a2, a3, a4, b1, b2, b3, b4;
-    double a, b, c, ksi1, ksi2, ksi3, eta1 = 0.0, eta2 = 0.0, denom;
-    int nroot;
-
-    answer.resize(2);
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-    node4 = this->giveNode(4);
-
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-    x4 = node4->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-    y4 = node4->giveCoordinate(2);
-
-    a1 = x1 + x2 + x3 + x4;
-    a2 = x1 - x2 - x3 + x4;
-    a3 = x1 + x2 - x3 - x4;
-    a4 = x1 - x2 + x3 - x4;
-
-    b1 = y1 + y2 + y3 + y4;
-    b2 = y1 - y2 - y3 + y4;
-    b3 = y1 + y2 - y3 - y4;
-    b4 = y1 - y2 + y3 - y4;
-
-    a = a2 * b4 - b2 * a4;
-    b = a1 * b4 + a2 * b3 - a3 * b2 - b1 * a4 - b4 * 4.0 * coords.at(1) + a4 * 4.0 * coords.at(2);
-    c = a1 * b3 - a3 * b1 - 4.0 * coords.at(1) * b3 + 4.0 * coords.at(2) * a3;
-
-    // solve quadratic equation for ksi
-    cubic(0.0, a, b, c, & ksi1, & ksi2, & ksi3, & nroot);
-
-    if ( nroot == 0 ) {
-        return 0;
-    }
-
-    if ( nroot ) {
-        denom = ( b3 + ksi1 * b4 );
-        if ( fabs(denom) <= 1.0e-10 ) {
-            eta1 = ( 4.0 * coords.at(1) - a1 - ksi1 * a2 ) / ( a3 + ksi1 * a4 );
-        } else {
-            eta1 = ( 4.0 * coords.at(2) - b1 - ksi1 * b2 ) / denom;
-        }
-    }
-
-    if ( nroot > 1 ) {
-        double diff_ksi1, diff_eta1, diff_ksi2, diff_eta2, diff1, diff2;
-
-        denom = b3 + ksi2 * b4;
-        if ( fabs(denom) <= 1.0e-10 ) {
-            eta2 = ( 4.0 * coords.at(1) - a1 - ksi2 * a2 ) / ( a3 + ksi2 * a4 );
-        } else {
-            eta2 = ( 4.0 * coords.at(2) - b1 - ksi2 * b2 ) / denom;
-        }
-
-        // choose the one which seems to be closer to the parametric space (square <-1;1>x<-1;1>)
-        diff_ksi1 = 0.0;
-        if ( ksi1 > 1.0 ) {
-            diff_ksi1 = ksi1 - 1.0;
-        }
-
-        if ( ksi1 < -1.0 ) {
-            diff_ksi1 = ksi1 + 1.0;
-        }
-
-        diff_eta1 = 0.0;
-        if ( eta1 > 1.0 ) {
-            diff_eta1 = eta1 - 1.0;
-        }
-
-        if ( eta1 < -1.0 ) {
-            diff_eta1 = eta1 + 1.0;
-        }
-
-        diff_ksi2 = 0.0;
-        if ( ksi2 > 1.0 ) {
-            diff_ksi2 = ksi2 - 1.0;
-        }
-
-        if ( ksi2 < -1.0 ) {
-            diff_ksi2 = ksi2 + 1.0;
-        }
-
-        diff_eta2 = 0.0;
-        if ( eta2 > 1.0 ) {
-            diff_eta2 = eta2 - 1.0;
-        }
-
-        if ( eta2 < -1.0 ) {
-            diff_eta2 = eta2 + 1.0;
-        }
-
-        diff1 = diff_ksi1 * diff_ksi1 + diff_eta1 * diff_eta1;
-        diff2 = diff_ksi2 * diff_ksi2 + diff_eta2 * diff_eta2;
-
-        // ksi2, eta2 seems to be closer
-        if ( diff1 > diff2 ) {
-            ksi1 = ksi2;
-            eta1 = eta2;
-        }
-    }
-
-    answer.at(1) = ksi1;
-    answer.at(2) = eta1;
-
-    // test if inside
-    for ( int i = 1; i <= 2; i++ ) {
-        if ( answer.at(i) < ( -1. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
-        }
-    }
-
-    return 1;
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 /*

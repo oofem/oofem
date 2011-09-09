@@ -95,6 +95,8 @@ public:
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     // characteristic length in gp (for some material models)
     double        giveCharacteristicLenght(GaussPoint *, const FloatArray &);
+    // returns interpolation type
+    FEInterpolation *giveInterpolation() { return & interpolation; } 
 
     //
     // definition & identification
@@ -106,6 +108,7 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+
 
     /**
      * @name The element interface required by ZZNodalRecoveryModel
