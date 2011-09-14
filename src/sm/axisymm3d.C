@@ -92,6 +92,8 @@ Axisymm3d :: giveInterface(InterfaceType interface)
         return ( NodalAveragingRecoveryModelInterface * ) this;
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
+        return ( SpatialLocalizerInterface * ) this;
     }
 
     return NULL;
@@ -654,6 +656,39 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     answer.at(2, 2) = dx / length;
 
     return 1;
+}
+
+
+int
+Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+  FloatArray lcoords;
+  return this->interpolation.global2local(lcoords, coords, FEIElementGeometryWrapper(this), 0.0);
+}
+
+double
+Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
+{
+    FloatArray lcoords(3), gcoords;
+    double dist;
+    int size, gsize;
+
+    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
+    this->computeGlobalCoordinates(gcoords, lcoords);
+
+    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+    }
+
+    if ( size == gsize ) {
+        dist = coords.distance(gcoords);
+    } else {
+        FloatArray helpCoords = coords;
+
+        helpCoords.resize(gsize);
+        dist = helpCoords.distance(gcoords);
+    }
+
+    return dist;
 }
 
 

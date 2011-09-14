@@ -45,10 +45,12 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "spatiallocalizer.h"
 
 namespace oofem {
 class Axisymm3d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
+    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+    public SpatialLocalizerInterface
 {
     /*
      * This class implements an triangular three-node finite element
@@ -89,6 +91,7 @@ public:
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
+    FEInterpolation *giveInterpolation() { return & interpolation; }
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
@@ -159,6 +162,17 @@ public:
     int SPRNodalRecoveryMI_giveNumberOfIP();
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    //@}
+    /**
+     * @name The element interface required by SpatialLocalizerInterface
+     */
+    //@{
+    /// Returns reference to corresponding element
+    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    /// Returns nonzero if given element contains given point
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
+    /// Returns distance of given point from element parametric center
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     //@}
 
 
