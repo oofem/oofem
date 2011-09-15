@@ -398,7 +398,7 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
 
 #  ifdef DEBUG
     if ( ( n = fe.giveSize() ) != loc.giveSize() ) {
-        OOFEM_ERROR("FloatArray::assemble : dimensions of 'fe' and 'loc' mismatch");
+        OOFEM_ERROR3("FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch",fe.giveSize(), loc.giveSize());
     }
 
     this->checkSizeTowards(loc);
@@ -407,10 +407,10 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
     n = fe.giveSize();
     for ( i = 1; i <= n; i++ ) {
         ii = loc.at(i);
-        if ( ii ) {                            // if non 0 coefficient,
+        if ( ii ) { // if non 0 coefficient,
             this->at(ii) += fe.at(i);
         }
-    }                                  // then assemble
+    }
 
 }
 
