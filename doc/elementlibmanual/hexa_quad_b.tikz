@@ -1,6 +1,5 @@
-\begin{tikzpicture}[scale=2,>=stealth,
+\begin{tikzpicture}[scale=1.75,>=stealth,
   x={(-0.4cm,-0.3cm)}, y={ (1cm,0cm) }, z={(0cm,1cm)}]
- \tikzstyle{elemnode} = [fill,circle,inner sep=2]
  \tikzstyle{background} = [densely dashed]
  \newcommand{\fs}{0.25}
  

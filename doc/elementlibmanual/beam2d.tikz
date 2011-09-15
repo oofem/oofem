@@ -6,7 +6,7 @@
  \newcommand{\beamlength}{0.4};
 
  \draw[->] (-0.05,0) -- (1.1,0) node[below,at end] {$x_g$};
- \draw[->] (0,0.05) -- (0,-0.5) node[right,at end] {$Z_g$};
+ \draw[->] (0,0.05) -- (0,-0.5) node[right,at end] {$z_g$};
  \draw[very thick] (a) --  +(-30:0.4) 
     node[at start,elemnode] {} node[at start,above right] {1}
     node[at end,elemnode] {} node[at end,above right] {2}

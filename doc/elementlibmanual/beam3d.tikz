@@ -1,7 +1,7 @@
 \tikzstyle{elemnode} = [solid,draw,thin,circle,inner sep=1,fill=white]
 
-\begin{tikzpicture}[scale=7,>=stealth,
-  x={(1cm,0cm)}, y={(-0.5cm,-0.5cm)}, z={(0cm,-1cm)}]
+\begin{tikzpicture}[scale=6,>=stealth,
+  x={(0.8cm,0cm)}, y={(-0.5cm,-0.5cm)}, z={(0cm,-1cm)}]
  %\coordinate (a) at (0.1,-0.2);
  %\coordinate (b) at (0.6,-0.1);
  \newcommand{\beamlength}{0.4};

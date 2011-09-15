@@ -1,13 +1,12 @@
-\tikzstyle{elemnode} = [draw,thin,circle,inner sep=0.5]
-
 \begin{tikzpicture}[scale=7,>=stealth]
+ \tikzstyle{elemnode} = [draw=black,thick,fill=white,circle,inner sep=1]
  \newcommand{\trusslength}{0.5};
 
- \draw[->] (-0.05,0) -- (0.7,0) node[above left,at end] {$X_g$};
- \draw[->] (0,-0.05) -- (0,0.5) node[below right,at end] {$Z_g$};
+ \draw[->] (-0.05,0) -- (0.7,0) node[above left,at end] {$x_g$};
+ \draw[->] (0,-0.05) -- (0,0.5) node[below right,at end] {$z_g$};
  \draw[very thick] (0.1,0.1) --  +(30:\trusslength) 
-    node[at start,yshift=2,above left,elemnode] {1}
-    node[at end,yshift=2,above left,elemnode] {2};
+    node[elemnode,at start] {} node[at start,yshift=2,above left] {1}
+    node[elemnode,at end] {} node[at end,yshift=2,above left] {2};
  %\draw[dotted,->] (0.1,0.1)++(-30:0.42) -- +(-30:0.1) node[below] {$X_1$};
  %\draw[dotted,->] (a)++(-30-90:0.02) -- +(-120:0.1) node[right] {$Z_1$};
 \end{tikzpicture}
