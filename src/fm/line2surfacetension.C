@@ -55,7 +55,11 @@ Line2SurfaceTension :: Line2SurfaceTension(int n, Domain *aDomain) : LineSurface
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 2, _Unknown);
 }
 
-Line2SurfaceTension :: ~Line2SurfaceTension() {}
+Line2SurfaceTension :: ~Line2SurfaceTension()
+{
+    delete integrationRulesArray [ 0 ];
+    delete[] integrationRulesArray;
+}
 
 void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
 {

@@ -34,11 +34,12 @@
 
 #include "line2boundaryelement.h"
 #include "fei2dlinequad.h"
+#include "gaussintegrationrule.h"
 #include "timestep.h"
 #include "mathfem.h"
 
-#include <stdlib.h>
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 
 namespace oofem {
 FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
@@ -46,10 +47,17 @@ FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 3;
-    this->numberOfIntegrationRules = 0;
+    this->numberOfIntegrationRules = 1;
+    integrationRulesArray = new IntegrationRule * [ 1 ];
+    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 2, _Unknown);
 }
 
-Line2BoundaryElement :: ~Line2BoundaryElement() {}
+Line2BoundaryElement :: ~Line2BoundaryElement()
+{
+    delete integrationRulesArray [ 0 ];
+    delete[] integrationRulesArray;
+}
 
 IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
 {
@@ -73,9 +81,14 @@ int Line2BoundaryElement :: computeGlobalCoordinates(FloatArray &answer, const F
     return true;
 }
 
+FEInterpolation * Line2BoundaryElement :: giveInterpolation()
+{
+    return &this->fei;
+}
+
 double Line2BoundaryElement :: computeNXIntegral() const
 {
-    //return this->fei.evalNXIntegral(FEIElementGeometryWrapper(this));
+    //return this->fei.evalNXIntegral(FEIElementGeometryWrapper(this)); // TODO
     Node *node;
     double x1, x2, x3, y1, y2, y3;
 
