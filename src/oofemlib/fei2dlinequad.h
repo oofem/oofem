@@ -64,14 +64,13 @@ public:
     virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0; };
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
-    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) { };
-    virtual void edgeEvaldNds(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
+    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
+    virtual void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo, double time) { return 1.; };
+                                                  const FEICellGeometry &cellgeo, double time);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

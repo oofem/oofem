@@ -121,10 +121,64 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
     return true;
 }
 
+void FEI2dLineQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+{
+    edgeNodes.resize(3); edgeNodes.at(1) = 1; edgeNodes.at(2) = 2; edgeNodes.at(2) = 3;
+}
+
+void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
+    this->evalN(answer, lcoords, cellgeo, time);
+}
+
+void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
+    const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
+    double xi = lcoords(0);
+    answer.resize(3);
+    answer(0) = -0.5 + xi;
+    answer(1) =  0.5 + xi;
+    answer(2) = -2.0 * xi;
+
+    double es1 = answer(0)*cellgeo.giveVertexCoordinates(1)->at(xind) +
+            answer(1)*cellgeo.giveVertexCoordinates(2)->at(xind) +
+            answer(2)*cellgeo.giveVertexCoordinates(3)->at(xind);
+    double es2 = answer(0)*cellgeo.giveVertexCoordinates(1)->at(yind) +
+            answer(1)*cellgeo.giveVertexCoordinates(2)->at(yind) +
+            answer(2)*cellgeo.giveVertexCoordinates(3)->at(yind);
+
+    double J = sqrt(es1*es1+es2*es2);
+    answer.times(1/J);
+    //return J;
+}
+
+void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,
+    const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
+    this->local2global(answer, lcoords, cellgeo, time);
+}
+
+double FEI2dLineQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+    const FEICellGeometry &cellgeo, double time)
+{
+    return this->giveTransformationJacobian(lcoords, cellgeo, time);
+}
+
 double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    OOFEM_ERROR("FEI2DLineQuad :: giveTransformationJacobian - Not implemented");
-    return 1.0;
+    double xi = lcoords(0);
+    double a1 = -0.5 + xi;
+    double a2 =  0.5 + xi;
+    double a3 = -2.0 * xi;
+
+    double es1 = a1*cellgeo.giveVertexCoordinates(1)->at(xind) +
+            a2*cellgeo.giveVertexCoordinates(2)->at(xind) +
+            a3*cellgeo.giveVertexCoordinates(3)->at(xind);
+    double es2 = a1*cellgeo.giveVertexCoordinates(1)->at(yind) +
+            a2*cellgeo.giveVertexCoordinates(2)->at(yind) +
+            a3*cellgeo.giveVertexCoordinates(3)->at(yind);
+
+    return sqrt(es1*es1+es2*es2);
 }
 
 double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
