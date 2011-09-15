@@ -46,20 +46,13 @@
 #include "mathfem.h"
 #include "clock.h"
 #include "datastream.h"
-//#include "linearstatic.h"
-//#include "nlinearstatic.h"
-//#include "eigenvaluedynamic.h"
-//#include "deidynamic.h"
-//#include "nldeidynamic.h"
-//#include "diidynamic.h"
-//#include "creeplinearstatic.h"
-//#include "stationaryflow.h"
 
 #include "femcmpnn.h"
 #include "dofmanager.h"
 #include "node.h"
 #include "elementside.h"
 #include "dof.h"
+#include "activebc.h"
 #include "timestep.h"
 #include "skyline.h"
 #include "verbose.h"
@@ -73,7 +66,7 @@
 #include "contextioerr.h"
 #include "xfemmanager.h"
 #include "material.h"
-#ifdef __CEMHYD_MODULE //OOFEM transport module
+#ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
 #endif
 
@@ -884,7 +877,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
             //elem -> printOutputAt(File, stepN) ;
 
 #ifdef __CEMHYD_MODULE
-            //store temperature and associated volume on earch GP before performing averaging
+            //store temperature and associated volume on each GP before performing averaging
             if ( elem->giveMaterial()->giveClassID() == CemhydMatClass ) {
                 TransportElement *element = ( TransportElement * ) elem;
                 CemhydMat *cem = ( CemhydMat * ) element->giveMaterial();
@@ -1284,46 +1277,23 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
 
-/* huhu
- * void EngngModel :: assemblePrescribedVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
- *                                                         CharType type, ValueModeType mode, Domain *domain)
- * //
- * // assembles matrix answer by  calling
- * // node(i) -> computeLoadVectorAt (tStep);
- * // for each element in domain
- * // and assembling every contribution to answer
- * //
- * //
- * {
- *  int i;
- *  IntArray loc;
- *  FloatArray charVec;
- *  DofManager *node;
- **#ifdef __PARALLEL_MODE
- *  double scale;
- **#endif
- *  int nnode = domain->giveNumberOfDofManagers();
- *
- *  this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
- *  for ( i = 1; i <= nnode; i++ ) {
- *      node = domain->giveDofManager(i);
- *      node->computeLoadVectorAt(charVec, tStep, mode);
- **#ifdef __PARALLEL_MODE
- *      if ( node->giveParallelMode() == DofManager_shared ) {
- *          scale = 1. / ( node->givePartitionsConnectivitySize() );
- *          charVec.times(scale);
- *      }
- *
- **#endif
- *      if ( charVec.giveSize() ) {
- *          node->giveCompletePrescribedLocationArray(loc);
- *          answer.assemble(charVec, loc);
- *      }
- *  }
- *
- *  this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
- * }
- */
+
+void EngngModel :: assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, Domain *domain)
+{
+    int nbc = domain->giveNumberOfBoundaryConditions();
+
+    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(i));
+        if (bc != NULL)
+            bc->assembleVector(answer,tStep, eid, type, mode, s, domain);
+    }
+    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+}
+
+
 void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                               CharType type, ValueModeType mode,
                                               const UnknownNumberingScheme &s, Domain *domain)
