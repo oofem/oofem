@@ -36,9 +36,9 @@ srcs3=
 srcs4=
 srcs5= 
 srcs6= 
-srcs7= 
+srcs7= supg.C supgelement.C supgelement2.C tet1_3d_supg.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C tr1_2d_supg2_axi.C tr21_2d_supg.C quad10_2d_supg.C 
 srcs8= levelsetpcs.C fastmarchingmethod.C
-srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C supgelement2.C py1_3d_supg.C tr21_2d_supg.C q10_2d_supg.C
+srcs9= leplic.C twofluidmaterial.C binghamfluid2.C
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1) 
 

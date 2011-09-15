@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/tr1_ht.C,v 1.2 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "q10_2d_supg.h"
+#include "quad10_2d_supg.h"
+#include "fei2dquadlin.h"
+#include "fei2dquadconst.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -63,24 +64,24 @@
 #endif
 
 namespace oofem {
-FEI2dQuadLin Q10_2D_SUPG :: velocityInterpolation(1, 2);
-FEI2dQuadConst Q10_2D_SUPG :: pressureInterpolation(1, 2);
+FEI2dQuadLin Quad10_2D_SUPG :: velocityInterpolation(1, 2);
+FEI2dQuadConst Quad10_2D_SUPG :: pressureInterpolation(1, 2);
 
 
-Q10_2D_SUPG :: Q10_2D_SUPG(int n, Domain *aDomain) :
+Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain), pressureNode(1, aDomain, this)
     // Constructor.
 {
     numberOfDofMans  = 4;
 }
 
-Q10_2D_SUPG :: ~Q10_2D_SUPG()
+Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
 // Destructor
 { }
 
 
 DofManager *
-Q10_2D_SUPG :: giveInternalDofManager(int i) const
+Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 {
     //_error2("No such DOF available on Element %d", number);
     return ( DofManager * ) & pressureNode;
@@ -88,7 +89,7 @@ Q10_2D_SUPG :: giveInternalDofManager(int i) const
 
 
 
-void Q10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme &s) const
+void Quad10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme &s) const
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
@@ -114,7 +115,7 @@ void Q10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, co
 
 
 int
-Q10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
+Quad10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {
     if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) ||
         ( termType == AdvectionDerivativeTerm_MB ) ) {
@@ -135,7 +136,7 @@ Q10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 }
 
 int
-Q10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
+Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 8;
@@ -150,7 +151,7 @@ Q10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
     return 0;
 }
 void
-Q10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
@@ -168,7 +169,7 @@ Q10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
 }
 
 void
-Q10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
 {
     if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
         answer.resize(0);
@@ -182,7 +183,7 @@ Q10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &ans
 
 
 IRResultType
-Q10_2D_SUPG :: initializeFrom(InputRecord *ir)
+Quad10_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
     SUPGElement2 :: initializeFrom(ir);
     this->pressureNode.initializeFrom(ir);
@@ -191,7 +192,7 @@ Q10_2D_SUPG :: initializeFrom(InputRecord *ir)
 }
 
 void
-Q10_2D_SUPG :: computeGaussPoints()
+Quad10_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -210,7 +211,7 @@ Q10_2D_SUPG :: computeGaussPoints()
 
 
 void
-Q10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
+Quad10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatArray n;
@@ -228,7 +229,7 @@ Q10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-Q10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     int i;
     FloatMatrix n, dn;
@@ -253,7 +254,7 @@ Q10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
 }
 
 void
-Q10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
+Quad10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 2);
@@ -271,7 +272,7 @@ Q10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-Q10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
+Quad10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 2);
@@ -287,7 +288,7 @@ Q10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-Q10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
+Quad10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(1);
     pressureInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
@@ -302,7 +303,7 @@ Q10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-Q10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     int i;
     FloatArray dnx(4), dny(4), u, u1(4), u2(4);
@@ -334,7 +335,7 @@ Q10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep 
 }
 
 void
-Q10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
+Quad10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(1, 2);
     pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
@@ -346,7 +347,7 @@ Q10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-Q10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Quad10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(2, 8);
     answer.zero();
@@ -354,7 +355,7 @@ Q10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 
 
 void
-Q10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
+Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 {
     double Re, norm_un, mu, mu_min, nu, norm_N, norm_N_d, norm_M_d, norm_LSIC, norm_G_c, norm_M_c, norm_N_c, t_p1, t_p2, t_p3, t_s1, t_s2, t_s3, rho;
     FloatMatrix dn, N, N_d, M_d, LSIC, G_c, M_c, N_c;
@@ -450,7 +451,7 @@ Q10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
 
 void
-Q10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
+Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
@@ -474,7 +475,7 @@ Q10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
-Q10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
+Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
@@ -500,7 +501,7 @@ Q10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
-Q10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
+Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b;
     double dV, rho;
@@ -523,7 +524,7 @@ Q10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 }
 
 void
-Q10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
+Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     double dV, rho;
@@ -548,7 +549,7 @@ Q10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
-Q10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
+Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     //  to compute t_pspg
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
@@ -574,7 +575,7 @@ Q10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime
 }
 
 void
-Q10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
+Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 {
     // to compute t_pspg
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
@@ -600,7 +601,7 @@ Q10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 }
 
 int
-Q10_2D_SUPG :: giveNumberOfSpatialDimensions()
+Quad10_2D_SUPG :: giveNumberOfSpatialDimensions()
 {
     return 2;
 }
@@ -608,7 +609,7 @@ Q10_2D_SUPG :: giveNumberOfSpatialDimensions()
 
 
 double
-Q10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
+Quad10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
     /*
      * int i;
@@ -632,25 +633,25 @@ Q10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 
 
 double
-Q10_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
+Quad10_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
 {
     return 0.0;
 }
 
 
 void
-Q10_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
+Quad10_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 { }
 
 
 void
-Q10_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
+Quad10_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 { }
 
 
 
 double
-Q10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
+Quad10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 {
     return 1.e6;
 }
@@ -658,7 +659,7 @@ Q10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 
 
 int
-Q10_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+Quad10_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
         return 4;
@@ -670,7 +671,7 @@ Q10_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-Q10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+Quad10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
@@ -699,7 +700,7 @@ Q10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &
 
 
 void
-Q10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                           InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
@@ -708,7 +709,7 @@ Q10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, in
 }
 
 void
-Q10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                          InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
@@ -725,20 +726,20 @@ Q10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int
 
 
 int
-Q10_2D_SUPG :: checkConsistency()
+Quad10_2D_SUPG :: checkConsistency()
 {
     return SUPGElement :: checkConsistency();
 }
 
 
 void
-Q10_2D_SUPG :: updateYourself(TimeStep *tStep)
+Quad10_2D_SUPG :: updateYourself(TimeStep *tStep)
 {
     SUPGElement :: updateYourself(tStep);
 }
 
 int
-Q10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_VOFFraction ) {
         MaterialInterface *mi = domain->giveEngngModel()->giveMaterialInterface( domain->giveNumber() );
@@ -763,7 +764,7 @@ Q10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Internal
 }
 
 int
-Q10_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
+Quad10_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         answer.resize(1);
@@ -775,7 +776,7 @@ Q10_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 }
 
 InternalStateValueType
-Q10_2D_SUPG :: giveIPValueType(InternalStateType type)
+Quad10_2D_SUPG :: giveIPValueType(InternalStateType type)
 {
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         return ISVT_SCALAR;
@@ -786,7 +787,7 @@ Q10_2D_SUPG :: giveIPValueType(InternalStateType type)
 
 
 int
-Q10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
+Quad10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         return 1;
@@ -797,7 +798,7 @@ Q10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 
 
 //void
-//Q10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
+//Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 //{
 //    SUPGElement :: printOutputAt(file, stepN);
@@ -807,7 +808,7 @@ Q10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 
 
 contextIOResultType
-Q10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+Quad10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -824,7 +825,7 @@ Q10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 
-contextIOResultType Q10_2D_SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType Quad10_2D_SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
@@ -841,7 +842,7 @@ contextIOResultType Q10_2D_SUPG :: restoreContext(DataStream *stream, ContextMod
 
 
 double
-Q10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
+Quad10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
@@ -857,7 +858,7 @@ Q10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 //double
-//Q10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
+//Quad10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 //{
 //  double determinant, weight, volume;
@@ -873,7 +874,7 @@ Q10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 //}
 
 Interface *
-Q10_2D_SUPG :: giveInterface(InterfaceType interface)
+Quad10_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
         return ( LevelSetPCSElementInterface * ) this;
@@ -888,7 +889,7 @@ Q10_2D_SUPG :: giveInterface(InterfaceType interface)
 
 
 void
-Q10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
+Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
     int i;
@@ -908,7 +909,7 @@ Q10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 
 
 void
-Q10_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
+Quad10_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
     map.resize(8);
     int i;
@@ -918,7 +919,7 @@ Q10_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
     }
 }
 void
-Q10_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
+Quad10_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
     map.resize(1);
     map.at(1) = 9;
@@ -928,7 +929,7 @@ Q10_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 
 #ifdef __OOFEG
 int
-Q10_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
+Quad10_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                        int node, TimeStep *atTime)
 {
     return SUPGElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
@@ -937,7 +938,7 @@ Q10_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 
 void
-Q10_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
+Quad10_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -967,7 +968,7 @@ Q10_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void Q10_2D_SUPG :: drawScalar(oofegGraphicContext &context)
+void Quad10_2D_SUPG :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];

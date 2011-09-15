@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.h,v 1.3 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,32 +32,29 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef q10_2d_supg_h
-#define q10_2d_supg_h
+#ifndef quad10_2d_supg_h
+#define quad10_2d_supg_h
 
 #include "supgelement2.h"
-#include "flotmtrx.h"
-#include "fei2dquadlin.h"
-#include "fei2dquadconst.h"
 
-#include "primaryfield.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "sprnodalrecoverymodel.h"
 #include "leplic.h"
 #include "levelsetpcs.h"
 #include "elementinternaldofman.h"
 
 namespace oofem {
 
+class FEI2dQuadLin;
+class FEI2dQuadConst;
+
 /**
- * Class representing 2d triangular element  with quadratic velocity
- * and linear pressure approximations for solving incompressible fluid problems
- * with SUPG solver
- *
+ * Class representing 2d quadrilateral element with linear velocity
+ * and constant pressure approximations for solving incompressible fluid problems
+ * with SUPG solver.
  */
-class Q10_2D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class Quad10_2D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI2dQuadLin velocityInterpolation;
@@ -66,11 +62,11 @@ protected:
     ElementDofManager pressureNode;
 
 public:
-    Q10_2D_SUPG(int n, Domain *d);
-    ~Q10_2D_SUPG();
+    Quad10_2D_SUPG(int n, Domain *d);
+    ~Quad10_2D_SUPG();
 
     // definition
-    const char *giveClassName() const { return "Q10_2D_SUPG"; }
+    const char *giveClassName() const { return "Quad1_2D_SUPG"; }
     classType giveClassID() const { return SUPGElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
     MaterialMode giveMaterialMode() { return _2dFlow; }
@@ -151,9 +147,6 @@ public:
     //virtual int giveNumberOfDofs() { return 1; }
     virtual int giveNumberOfInternalDofManagers() {return 1;}
     virtual DofManager *giveInternalDofManager(int i) const ;
-      //_error2("No such DOF available on Element %d", number);
-      //return pressureDof(dofID P);
-      //}*/
 
     virtual void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const;
 
@@ -179,4 +172,4 @@ protected:
 };
 
 } // end namespace oofem
-#endif // q10_2d_supg_h
+#endif // quad10_supg_h

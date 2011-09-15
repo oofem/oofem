@@ -1,6 +1,7 @@
 \documentclass[a4paper]{article}
 \usepackage{html}
 \usepackage{graphicx}
+\usepackage{tikz}
 \usepackage{ifpdf}
 \usepackage{ifthen}
 \input{include.tex}
@@ -54,11 +55,7 @@
 \begin{document}
 %begin{latexonly}
 \title{
-\ifpdf
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.pdf}}}
-\else
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
-\fi
+\begin{center}\oofemlnk{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}\end{center}
 Element Library Manual}
 \author{\bp \\ \\
 Czech Technical University\\
@@ -86,7 +83,7 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 
 \section{Introduction}
 In this manual the detailed description of available elements 
-is given. The actual availibility of particular elements depends on
+is given. The actual availability of particular elements depends on
 OOFEM configuration. Elements are specified using element records,
 which are part of oofem input file. The general format of element
 record is described in OOFEM input manual. 
@@ -135,17 +132,12 @@ not supported in current implementation.
 Two node linear isoparametric truss element for 2D analysis. The
 element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{truss2d.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{truss2d.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{truss2d.eps}}
-\fi
-%end{latexonly}
-\caption{Truss2d element in (x,z) plane.}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{truss2d.eps}}
+ \end{htmlonly}
+ \input{truss2d.tikz}
+ \caption{Truss2d element in (x,z) plane.}
 \end{figure}
 
 \elemkeyword{truss2d}\\
@@ -155,8 +147,8 @@ element geometry can be specified in (x,z), (x,y), or (y,z) plane.
 Two dofs representing displacements in definition plane are required
 in each node. The element can be used in different planes, default
 definition plane is (x,z). The parameter \param{cs} can be used to
-change default definition plane. The supported values of parametrer
-\param{cs} are following: 0 for (x,z) plane (default), 1 for (x,y)
+change default definition plane. The supported values of \param{cs} 
+are following: 0 for (x,z) plane (default), 1 for (x,y)
 plane, and 3 for (y,z) plane.
 
 \descitem{Approximation} Linear approximation of displacements and geometry.
@@ -206,19 +198,14 @@ system. On output, the local end displacement and local end forces are
 printed. 
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{beam2d.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{beam2d.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{beam2d.eps}}
-\fi
-%end{latexonly}
-\caption{Beam2d element. Definition of local c.s.(a)  and definition of
-local end forces and local element dofs (b).}
-\label{beam2dfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{beam2d.eps}}
+ \end{htmlonly}
+ \input{beam2d.tikz}
+ \caption{Beam2d element. Definition of local c.s.(a)  and definition of
+ local end forces and local element dofs (b).}
+ \label{beam2dfig}
 \end{figure}
 
 \elemkeyword{beam2d}\\
@@ -270,19 +257,14 @@ x-axis direction vector ($\mbf{a_1}$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{beam3d.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{beam3d.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{beam3d.eps}}
-\fi
-%end{latexonly}
-\caption{Beam3d element. Definition of local c.s., local end forces
-and local element dofs numbering.}
-\label{beam3dfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{beam3d.eps}}
+ \end{htmlonly}
+ \input{beam3d.tikz}
+ \caption{Beam3d element. Definition of local c.s., local end forces
+ and local element dofs numbering.}
+ \label{beam3dfig}
 \end{figure}
 
 \elemkeyword{beam3d}\\
@@ -329,19 +311,14 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
-\fi
-%end{latexonly}
-\caption{PlaneStress2d element. Node numbering, Side numbering and
-definition of local edge c.s.(a).}
-\label{Planestress2dfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+ \end{htmlonly}
+ \input{planestress2d.tikz}
+ \caption{PlaneStress2d element. Node numbering, Side numbering and
+ definition of local edge c.s.(a).}
+ \label{Planestress2dfig}
 \end{figure}
 
 \elemkeyword{planestress2d}\\
@@ -381,18 +358,13 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
 {qplanstrssfig}).
 
 \begin{figure}[htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{QPlaneStress element - node numbering.}
-\label{qplanstrssfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.eps}}
+ \end{htmlonly}
+ \input{qplanstrss.tikz}
+ \caption{QPlaneStress element - node numbering.}
+ \label{qplanstrssfig}
 \end{figure}
 
 \elemkeyword{qplanestress2d}\\
@@ -423,18 +395,13 @@ finite element. Each node has 2 degrees of freedom.
 The node numbering is anti-clockwise
 
 \begin{figure}[htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{TrPlaneStress element - node and side numbering.}
-\label{TrPlanestressfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+ \end{htmlonly}
+ \input{trplanstrss.tikz}
+ \caption{TrPlaneStress element - node and side numbering.}
+ \label{TrPlanestressfig}
 \end{figure}
 
 \elemkeyword{trplanestress2d}\\
@@ -469,18 +436,13 @@ element. Each node has 2 degrees of freedom. Node numbering is
 anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}).
 
 \begin{figure}[htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{TrPlaneStress element - node and side numbering.}
-\label{qtrplanstressfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
+ \end{htmlonly}
+ \input{qtrplanstrss.tikz}
+ \caption{QTrPlStr element - node and side numbering.}
+ \label{qtrplanstressfig}
 \end{figure}
 
 \elemkeyword{qtrplstr}\\
@@ -517,7 +479,7 @@ Three dofs (u-displacement, v-displacement, z-rotation) are required in each nod
 
 \descitem{Integration}
 Integration of membrane strain terms using gauss integration formula
-in 4 points (default) or using 1or 7 points (using \param{NIP} parameter).
+in 4 points (default) or using 1 or 7 points (using \param{NIP} parameter).
 Integration of strains associated with rotational field 
 integration using 1 point is default (4 and 7 points rules can be
 specified using \param{NIPRot} parameter).
@@ -538,19 +500,14 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
-\fi
-%end{latexonly}
-\caption{Quad1PlaneStrain element. Node numbering, Side numbering and
-definition of local edge c.s.(a).}
-\label{Quad1PlaneStrainfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+ \end{htmlonly}
+ \input{planestress2d.tikz}
+ \caption{Quad1PlaneStrain element. Node numbering, Side numbering and
+ definition of local edge c.s.(a).}
+ \label{Quad1PlaneStrainfig}
 \end{figure}
 
 \elemkeyword{quad1planestrain}\\
@@ -589,18 +546,13 @@ finite element. Each node has 2 degrees of freedom.
 The node numbering is anti-clockwise
 
 \begin{figure}[htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.eps}}
-\fi
-%end{latexonly}
-\caption{TrplaneStrain element - node and side numbering.}
-\label{TrplaneStrain}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.eps}}
+ \end{htmlonly}
+ \input{trplanstrss.tikz} % Same image for plane stress
+ \caption{TrplaneStrain element - node and side numbering.}
+ \label{TrplaneStrain}
 \end{figure}
 
 \elemkeyword{trplanestrain}\\
@@ -682,7 +634,7 @@ not supported.
 \subsubsection {RerShell Element}
 Combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. The element curvature can be specified. 
-Although element requires generally six dofs per node, no stiffness to
+Although element requires generally six DOFs per node, no stiffness to
 local rotation along z-axis (rotation around element normal) is supplied.
 
 \elemkeyword{rershell}\\
@@ -699,17 +651,13 @@ not supported now.\\
 Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. It comes with complete set of 6 DOFs per node.
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.eps}}
-\fi
-%end{latexonly}
-\caption{Geometry of tr\_shell01 element.}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.eps}}
+ \end{htmlonly}
+ %\input{trshell_lin.tikz}
+ \includegraphics[width=0.7\textwidth]{trshell_lin}
+ \caption{Geometry of tr\_shell01 element.}
 \end{figure}
 
 \elemkeyword{tr\_shell01}\\
@@ -788,18 +736,13 @@ $\gamma_rz$) are integrated using one point integration formula.\\
 Implementation of Linear 3d  eight - node 
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
-\fi
-%end{latexonly}
-\caption{lspace element (Node numbers in black, side numbers in blue,
-and surface numbers in red).}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
+ \end{htmlonly}
+ \input{hexa_lin.tikz}
+ \caption{lspace element (Node numbers in black, side numbers in blue,
+ and surface numbers in red).}
 \end{figure}
 
 \elemkeyword{lspace}\\
@@ -818,23 +761,21 @@ allows to change the integration formula.\\
 
 \subsubsection{LSpaceBB element}
 Implementation of 3d brick  eight - node 
-linear approximation element with selective integration of deviatoric and volumetric strain contributions (B-bar formulation) for incompressible problems. Features and description identical to conventional lspace element, see section ~\ref{lspacesect}.
+linear approximation element with selective integration of deviatoric and volumetric 
+strain contributions (B-bar formulation) for incompressible problems. 
+Features and description identical to conventional lspace element, see section ~\ref{lspacesect}.
 
 \subsubsection{QSpace element}
 Implementation of quadratic 3d  20-node 
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.eps}}
-\fi
-%end{latexonly}
-\caption{qspace element.}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.eps}}
+ \end{htmlonly}
+ \raisebox{-0.5\height}{\input{hexa_quad_a.tikz}}
+ \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
+ \caption{qspace element.}
 \end{figure}
 
 \elemkeyword{qspace}\\
@@ -862,18 +803,13 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
 \end{itemize}
  
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
-\fi
-%end{latexonly}
-\caption{Linear terahedra element. Definition and node numbering convention}
-\label{lintetrahedron_fig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
+ \end{htmlonly}
+ \input{tetrahedra_lin.tikz}
+ \caption{Linear terahedra element. Definition and node numbering convention}
+ \label{lintetrahedron_fig}
 \end{figure}
 
 \elemkeyword{LTRSpace}\\
@@ -894,18 +830,13 @@ Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.eps}}
-\fi
-%end{latexonly}
-\caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
-\label{interf2d_quad_fig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.eps}}
+ \end{htmlonly}
+ \input{interf2d_quad.tikz}
+ \caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
+ \label{interf2d_quad_fig}
 \end{figure}
 
 \elemkeyword{Interface2dquad}\\
@@ -922,21 +853,16 @@ Full integration of all strain components using four point integration formula.
 
 \subsubsection{Interface3dtrlin element}
 Implementation of a three dimensional interface element with linear
-approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared tringular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared triangular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.eps}}
-\fi
-%end{latexonly}
-\caption{3D interface element with linear interpolation. Definition and node numbering convention}
-\label{interf3d_lin_fig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.eps}}
+ \end{htmlonly}
+ \input{interf3d_lin.tikz}
+ \caption{3D interface element with linear interpolation. Definition and node numbering convention}
+ \label{interf3d_lin_fig}
 \end{figure}
 
 \elemkeyword{Interface3dtrlin}\\
@@ -961,9 +887,9 @@ be applied in 1D, 2D, and 3D settings (default).
 
 \elemkeyword{Interface1d}\\
 \descitem{Parameters} \elemparam{refnode}{in}\\
-The \param{refnode} determines the refence node, which is used to
+The \param{refnode} determines the reference node, which is used to
 specify a reference direction (the direction vector is obtained by
-substracting coordinates of first node from refenence node).
+subtracting coordinates of first node from reference node).
 The magnitude of slip is then obtained as relative displacement vector
 of two element nodes projected to reference direction. As a
 consequence, this will lead to linearized geometrical equations, where
@@ -997,7 +923,7 @@ The following record describes the common part of IGA element record:
 The \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters specify  knot vectors in individual parametric directions, considering only distinct knots. Open knot vector is always assumed, so the multiplicity of the first and last knot should be equal to $p+1$, where $p$ is polynomial degree in coresponding direction (determined by \param{degree} parameter, see further).\\
 The knot multiplicity can be set using optional parameters \param{knotmultiplicityu}, \param{knotmultiplicityv}, and \param{knotmultiplicityw}. By default, the open knot vector is assumed and multiplicity of internal knots is assumed to be equal to one. Note, that total number of knots in particular direction (including multiplicity) must be equal to number of control points in this direction increased by degree in this direction plus 1.\\
 The degree of approximation for each parametric direction is determined from \param{degree} array, dimension of which is equal to number of spatial dimensions of the problem.\\
-In case of elements with BSpline or Nurbs interpolation, the nodes forming the rectangular array of control points of the element are ordered in a such way, that u-index is changing most quicly, and w-index (or v-index in case of 2d problems) most slowly. In case of elements with T-spline interpolation, the nodes forming the T-mesh of the element are ordered arbitrarily.
+In case of elements with BSpline or Nurbs interpolation, the nodes forming the rectangular array of control points of the element are ordered in a such way, that u-index is changing most quickly, and w-index (or v-index in case of 2d problems) most slowly. In case of elements with T-spline interpolation, the nodes forming the T-mesh of the element are ordered arbitrarily.
 
 
 The supported \entKeyword{IGAElement} values are following:\\\\
@@ -1040,8 +966,7 @@ The \param{mode} parameter defines the type of spring element (see Table~\ref{sp
 Note: the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.
 
 \begin{table}
-  \label{spring_mode_table}
-  \begin{center}
+  \centering
   \begin{tabular}{lll}
     \hline
     mode & description\\
@@ -1059,8 +984,7 @@ Note: the spring element nodes doesn't need to be coincident, but the spring ori
     & requires R\_u, R\_v, and R\_w DOFs in each node\\
     \hline
   \end{tabular}
-  \caption{Supported spring element modes }
-  \end{center}
+  \caption{Supported spring element modes } \label{spring_mode_table}
 \end{table}
 
 \section{Elements for Transport problems\\(TM Module)}
@@ -1075,19 +999,14 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
-\fi
-%end{latexonly}
-\caption{Quad1ht element. Node numbering, Side numbering and
-definition of local edge c.s.(a).}
-\label{Quad1htfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+ \end{htmlonly}
+ \input{planestress2d.tikz}
+ \caption{Quad1ht element. Node numbering, Side numbering and
+ definition of local edge c.s.(a).}
+ \label{Quad1htfig}
 \end{figure}
 
 \elemkeyword{Quad1ht}\\
@@ -1115,7 +1034,7 @@ Represents isoparametric four-node quadrilateral finite element for
 heat and mass (one constituent) transfer problems. 
 Two dofs (T\_f - temperature and C\_1 - concentration) are required in
 each node. Linear approximation of temperature and mass concentration.
-Other features are simmilar to Quad1 element, see section \ref{Quad1ht}.
+Other features are similar to Quad1 element, see section \ref{Quad1ht}.
 
 \subsubsection{Tr1ht element}
 \label{Tr1ht}
@@ -1124,18 +1043,13 @@ The cross section thickness property is requested form cross section model.
 The node numbering is anti-clockwise
 
 \begin{figure}[htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{TrPlaneStress element - node and side numbering.}
-\label{Tr1htfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+ \end{htmlonly}
+ \input{trplanstrss.tikz}
+ \caption{Tr1ht element - node and side numbering.}
+ \label{Tr1htfig}
 \end{figure}
 
 \elemkeyword{Tr1ht}\\
@@ -1176,19 +1090,14 @@ similar to Tr1ht element, see section \ref{Tr1ht}.
 Represents isoparametric eight-node brick/hexahedron finite element for
 heat transfer problems. Each node has 1 degrees of freedom.
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
-\fi
-%end{latexonly}
-\caption{brick element (Node numbers in black, side numbers in blue,
-and surface numbers in red).}
-\label{Brick1htfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
+ \end{htmlonly}
+ \input{hexa_lin.tikz}
+ \caption{brick element (Node numbers in black, side numbers in blue,
+ and surface numbers in red).}
+ \label{Brick1htfig}
 \end{figure}
 
 \elemkeyword{Brick1ht}\\
@@ -1212,7 +1121,7 @@ Represents isoparametric eight-node quadrilateral finite element for
 heat and mass (one constituent) transfer problems. 
 Two dofs (T\_f - temperature and C\_1 - concentration) are required in
 each node. Linear approximation of temperature and mass concentration.
-Other features are simmilar to Brick1 element, see section \ref{Brick1ht}.
+Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 %\subsection{Other Elements}
 
 \section{Elements for Fluid Dynamics problems\\(FM Module)}
@@ -1226,19 +1135,14 @@ of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{Tr1CBS element. Node numbering, Side numbering and
-definition of local edge c.s.(a).}
-\label{Tr1CBSfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+ \end{htmlonly}
+ \input{trplanstrss.tikz}
+ \caption{Tr1CBS element. Node numbering, Side numbering and
+ definition of local edge c.s.(a).}
+ \label{Tr1CBSfig}
 \end{figure}
 
 \elemkeyword{Tr1CBS}\\
@@ -1282,19 +1186,14 @@ of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{Tr1SUPG element. Node numbering, Side numbering and
-definition of local edge c.s.(a).}
-\label{Tr1SUPG2fig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+ \end{htmlonly}
+ \input{trplanstrss.tikz}
+ \caption{Tr1SUPG element. Node numbering, Side numbering and
+ definition of local edge c.s.(a).}
+ \label{Tr1SUPG2fig}
 \end{figure}
 
 \elemkeyword{Tr1SUPG}\\
@@ -1312,7 +1211,7 @@ exact
 \descitem{Loads} Constant boundary tractions are supported. Body loads
 representing the self-weight load are supported.
 
-\descitem{Multi-fluid analysis} The element has suport for solving
+\descitem{Multi-fluid analysis} The element has support for solving
 problems with two immiscible fluids in
 a fixed spatial domain. In the present implementation, a VOF and LevelSet tracking algorithms
 are used to track the position of interface. In case of VOF tracking, an initial VOF fraction
@@ -1335,18 +1234,13 @@ in edge nodes (two components of velocity only).
 The node numbering is anti-clockwise, vertices are numbered first.
 
 \begin{figure}[htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{Tr21SUPG element - node and side numbering.}
-\label{Tr21SUPGfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
+ \end{htmlonly}
+ \input{qtrplanstrss.tikz}
+ \caption{Tr21SUPG element - node and side numbering.}
+ \label{Tr21SUPGfig}
 \end{figure}
 
 \elemkeyword{Tr21SUPG}\\
@@ -1365,7 +1259,7 @@ submatrices in 3 or 7 points, submatrices connected with pressure in 3 points.
 \descitem{Loads} Constant boundary tractions are supported. Body loads
 representing the self-weight load are supported.
 
-\descitem{Multi-fluid analysis} The element has no suport for solving
+\descitem{Multi-fluid analysis} The element has no support for solving
 problems with two immiscible fluids in a fixed spatial domain.
 
 \subsubsection{Tr1SUPGAxi element}
@@ -1377,19 +1271,14 @@ of freedoms (two components of velocity and pressure). The y-axis is
 axis of ratational symmetry. The node numbering is anti-clockwise
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
-\fi
-%end{latexonly}
-\caption{Tr1SUPGAxi element. Node numbering, Side numbering and
-definition of local edge c.s.(a).}
-\label{Tr1SUPGAxifig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+ \end{htmlonly}
+ \input{trplanstrss.tikz}
+ \caption{Tr1SUPGAxi element. Node numbering, Side numbering and
+ definition of local edge c.s.(a).}
+ \label{Tr1SUPGAxifig}
 \end{figure}
 
 \elemkeyword{Tr1SUPGAxi}\\
@@ -1407,19 +1296,19 @@ Sevent point Gauss integration.
 \descitem{Loads} Constant boundary tractions are supported. Body loads
 representing the self-weight load are supported.
 
-\descitem{Multi-fluid analysis} The element has suport for solving
+\descitem{Multi-fluid analysis} The element has support for solving
 problems with two immiscible fluids in
 a fixed spatial domain. In the present implementation, a VOF tracking algorithm
 is used to track the position of interface. An initial VOF fraction
 (volume fraction of reference fluid) can be specified using
-\param{vof} (default is zero). Element can also be marked as allways
+\param{vof} (default is zero). Element can also be marked as always
 filled with reference fluid (some form of source) using parameter
 \param{pvof} which specifies the permanent VOF value. In this case,
 the material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.
 
 \subsection{3D SUPG/PSGP Elements}
-\subsubsection{PY1\_3D\_SUPG element}
+\subsubsection{Tet1\_3D\_SUPG element}
 \label{PY1_3D_SUPG}
 Represents 3D linear pyramid element for transient
 incompressible flow analysis using SUPG/PSPG stabilization with equal order
@@ -1427,21 +1316,16 @@ approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 
 \begin{figure}[tb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
-\end{htmlonly}
-%begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
-\fi
-%end{latexonly}
-\caption{PY1\_3D\_SUPG element.}
-\label{PY1_3D_SUPGfig}
+ \centering
+ \begin{htmlonly}
+   \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
+ \end{htmlonly}
+ \input{tetrahedra_lin.tikz}
+ \caption{Tet1\_3D\_SUPG element.}
+ \label{PY1_3D_SUPGfig}
 \end{figure}
 
-\elemkeyword{PY1SUPG}\\
+\elemkeyword{TET1SUPG}\\
 \descitem{Parameters} \\
 \descitem{Unknowns}
 Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
@@ -1455,7 +1339,7 @@ exact
 \descitem{Loads} Constant boundary tractions are supported. Body loads
 representing the self-weight load are supported.
 
-\descitem{Multi-fluid analysis} The element has suport for solving
+\descitem{Multi-fluid analysis} The element has support for solving
 problems with two immiscible fluids in
 a fixed spatial domain. In the present implementation, a LevelSet tracking algorithm
 is used to track the position of interface. 

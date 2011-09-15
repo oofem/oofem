@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "py1_3d_supg.h"
+#include "tet1_3d_supg.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -61,23 +61,23 @@
 #endif
 
 namespace oofem {
-FEI3dTrLin PY1_3D_SUPG :: interpolation;
+FEI3dTrLin Tet1_3D_SUPG :: interpolation;
 
-PY1_3D_SUPG :: PY1_3D_SUPG(int n, Domain *aDomain) :
+Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain)
     // Constructor.
 {
     numberOfDofMans  = 4;
 }
 
-PY1_3D_SUPG :: ~PY1_3D_SUPG()
+Tet1_3D_SUPG :: ~Tet1_3D_SUPG()
 // Destructor
 { }
 
 
 int
 
-PY1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
+Tet1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {
     if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) ||
         ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || ( termType == PressureTerm_MB ) ||
@@ -99,7 +99,7 @@ PY1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 
 
 int
-PY1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
+Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 12;
@@ -113,7 +113,7 @@ PY1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 }
 
 void
-PY1_3D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Tet1_3D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
@@ -139,14 +139,14 @@ PY1_3D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
 }
 
 void
-PY1_3D_SUPG ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
+Tet1_3D_SUPG ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
 {
     this->giveDofManDofIDMask(1, ut, answer);
 }
 
 
 IRResultType
-PY1_3D_SUPG :: initializeFrom(InputRecord *ir)
+Tet1_3D_SUPG :: initializeFrom(InputRecord *ir)
 {
     //const char*__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                  // Required by IR_GIVE_FIELD macro
@@ -158,7 +158,7 @@ PY1_3D_SUPG :: initializeFrom(InputRecord *ir)
 }
 
 void
-PY1_3D_SUPG :: computeGaussPoints()
+Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -174,7 +174,7 @@ PY1_3D_SUPG :: computeGaussPoints()
 
 
 Interface *
-PY1_3D_SUPG :: giveInterface(InterfaceType interface)
+Tet1_3D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
         return ( LevelSetPCSElementInterface * ) this;
@@ -185,7 +185,7 @@ PY1_3D_SUPG :: giveInterface(InterfaceType interface)
 
 
 void
-PY1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
+Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatArray n(4);
@@ -204,7 +204,7 @@ PY1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-PY1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     int i;
     FloatMatrix n, dn(4, 3);
@@ -229,7 +229,7 @@ PY1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
 }
 
 void
-PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Tet1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     answer.resize(3, 12);
     answer.zero();
@@ -237,7 +237,7 @@ PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 
 
 void
-PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
+Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     FloatArray u;
     FloatMatrix dn, um(3, 4);
@@ -261,7 +261,7 @@ PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep 
 
 
 void
-PY1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
+Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 3);
@@ -287,7 +287,7 @@ PY1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-PY1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
+Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 3);
@@ -304,7 +304,7 @@ PY1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 void
-PY1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
+Tet1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(4);
     this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
@@ -322,7 +322,7 @@ PY1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-PY1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
+Tet1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
@@ -334,7 +334,7 @@ PY1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-PY1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
+Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 {
     //TR1_2D_SUPG :: updateStabilizationCoeffs (atTime);
     /* UGN-Based Stabilization */
@@ -435,13 +435,13 @@ PY1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 }
 
 int
-PY1_3D_SUPG :: giveNumberOfSpatialDimensions()
+Tet1_3D_SUPG :: giveNumberOfSpatialDimensions()
 {
     return 3;
 }
 
 double
-PY1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
+Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 {
     FloatArray u;
     double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
@@ -498,7 +498,7 @@ PY1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 
 
 double
-PY1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
+Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
@@ -514,7 +514,7 @@ PY1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 double
-PY1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
+Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
     int i, k;
     double answer = 0.0, norm, dV, vol = 0.0;
@@ -549,7 +549,7 @@ PY1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 }
 
 void
-PY1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
+Tet1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
@@ -558,7 +558,7 @@ PY1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 
 
 double
-PY1_3D_SUPG :: LS_PCS_computeVolume()
+Tet1_3D_SUPG :: LS_PCS_computeVolume()
 {
     int k;
     double answer = 0.0;
@@ -574,7 +574,7 @@ PY1_3D_SUPG :: LS_PCS_computeVolume()
 }
 
 double
-PY1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
+Tet1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
 {
     int i;
     FloatArray voff(2), fi(4);
@@ -590,7 +590,7 @@ PY1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
 
 
 void
-PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
+Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 {
     int i, neg = 0, pos = 0, zero = 0, si = 0;
     double x1, y1, z1;
@@ -768,7 +768,7 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
         } else {
-            OOFEM_ERROR("PY1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+            OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
         }
     }
 }
@@ -777,7 +777,7 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void PY1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
+void Tet1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
 {
     WCRec p [ 4 ];
     GraphicObj *go;

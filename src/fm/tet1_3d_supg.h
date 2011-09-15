@@ -32,42 +32,31 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef py1_3d_supg_h
-#define py1_3d_supg_h
+#ifndef tet1_3d_supg_h
+#define tet1_3d_supg_h
 
 #include "supgelement2.h"
 
-#include "spatiallocalizer.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "sprnodalrecoverymodel.h"
 #include "levelsetpcs.h"
 #include "fei3dtrlin.h"
 
 namespace oofem {
-class TimeStep;
-class Node;
-class Material;
-class GaussPoint;
-class FloatMatrix;
-class FloatArray;
-class IntArray;
 
 /**
- * Class representing 3d linear pyramid element
+ * Class representing 3d linear tetrahedral element
  * for solving incompressible fluid with SUPG solver
  */
-class PY1_3D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface
+class Tet1_3D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface
 {
 protected:
     static FEI3dTrLin interpolation;
 
 public:
-    PY1_3D_SUPG(int n, Domain *d);
-    ~PY1_3D_SUPG();
+    Tet1_3D_SUPG(int n, Domain *d);
+    ~Tet1_3D_SUPG();
 
     // definition
-    const char *giveClassName() const { return "PY1_3D_SUPG"; }
+    const char *giveClassName() const { return "Tet1_3D_SUPG"; }
     classType giveClassID() const { return SUPGElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
     MaterialMode giveMaterialMode() { return _3dFlow; }
@@ -108,4 +97,4 @@ protected:
     virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 } // end namespace oofem
-#endif // py1_3d_supg_h
+#endif // tet1_3d_supg_h
