@@ -490,7 +490,9 @@ public:
      * @see IntegrationRule
      * @return Integration domain of element.
      */
-    virtual integrationDomain giveIntegrationDomain() { return _Unknown_integrationDomain; }
+    virtual integrationDomain giveIntegrationDomain() {
+        IntegrationRule *ir = giveDefaultIntegrationRulePtr();
+        return ir ? ir->giveIntegrationDomain() : _Unknown_integrationDomain; }
     /**
      * Returns material mode for receiver integration points. Should be specialized.
      * @return Material mode of element.

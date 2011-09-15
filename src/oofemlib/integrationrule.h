@@ -90,6 +90,8 @@ protected:
     int number;
     /// Element which integration rule is coupled to.
     Element *elem;
+    /// Integration domain
+    integrationDomain intdomain;
 
     /// Array containing integration points.
     GaussPoint **gaussPointArray;
@@ -147,21 +149,21 @@ public:
     int getEndIndexOfLocalStrainWhereApply() { return lastLocalStrainIndx; }
     /**
      * Initializes the receiver. Receiver integration points are created according to given parameters.
-     * @param mode Describes integration domain.
+     * @param intdomain Describes integration domain.
      * @param nPoints Required number of integration points of receiver.
      * @param matMode Material mode of receiver's integration points.
      * @return Number of points.
      */
-    int setUpIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode);
+    int setUpIntegrationPoints(integrationDomain intdomain, int nPoints, MaterialMode matMode);
     /**
      * Initializes the receiver. Receiver integration points are created according to given parameters.
-     * @param mode Describes integration domain.
+     * @param intdomain Describes integration domain.
      * @param nPoints Required number of integration points of receiver.
      * @param matMode Material mode of receiver's integration points.
      * @param coords
      * @return Number of points.
      */
-    int setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
+    int setUpEmbeddedIntegrationPoints(integrationDomain intdomain, int nPoints, MaterialMode matMode,
                                        const FloatArray **coords);
 
     /**
@@ -186,6 +188,7 @@ public:
     FEInterpolation *giveInterpolation(GaussPoint *gp);
     /** Returns receiver number */
     int giveNumber() { return this->number; }
+    integrationDomain giveIntegrationDomain() { return this->intdomain; }
     /**
      * Abstract service.
      * Returns required number of integration points to exactly integrate

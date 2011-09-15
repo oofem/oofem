@@ -51,6 +51,7 @@ IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx
     firstLocalStrainIndx = startIndx;
     lastLocalStrainIndx  = endIndx;
     isDynamic = dynamic;
+    intdomain = _Unknown_integrationDomain;
 }
 
 IntegrationRule :: IntegrationRule(int n, Element *e)
@@ -61,6 +62,7 @@ IntegrationRule :: IntegrationRule(int n, Element *e)
     gaussPointArray = NULL;
     firstLocalStrainIndx = lastLocalStrainIndx = 0;
     isDynamic = false;
+    intdomain = _Unknown_integrationDomain;
 }
 
 
@@ -314,6 +316,8 @@ int
 IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
                                           MaterialMode matMode)
 {
+    intdomain = mode;
+
     switch ( mode ) {
     case _Line:
         return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, matMode, & gaussPointArray) );
@@ -341,6 +345,8 @@ int
 IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
                                                   const FloatArray **coords)
 {
+    intdomain = mode;
+
     switch ( mode ) {
     case _Embedded2dLine:
         return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, & gaussPointArray, coords) );
