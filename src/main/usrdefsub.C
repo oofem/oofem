@@ -83,6 +83,7 @@
 #include "constantsurfaceload.h"
 #include "pointload.h"
 #include "prescribedgradient.h"
+#include "surfacetensionbc.h"
 
 // ltf in OOFEMLIB
 #include "peak.h"
@@ -622,6 +623,8 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *aClass
         newBc = new ConstantSurfaceLoad(number, domain);
     } else if ( !strncasecmp(aClass, "pointload", 9) ) {
         newBc = new PointLoad(number, domain);
+    } else if ( !strncasecmp(aClass, "surfacetension", 14) ) {
+        newBc = new SurfaceTensionBoundaryCondition(number, domain);
     }
 
 #ifdef __SM_MODULE
