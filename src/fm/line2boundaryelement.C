@@ -55,8 +55,6 @@ Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement
 
 Line2BoundaryElement :: ~Line2BoundaryElement()
 {
-    delete integrationRulesArray [ 0 ];
-    delete[] integrationRulesArray;
 }
 
 IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
@@ -105,6 +103,18 @@ double Line2BoundaryElement :: computeNXIntegral() const
     y3 = node->giveCoordinate(2);
 
     return (x1*y2 - x2*y1 + 4*(x3*(y1 - y2) + y3*(x2 - x1)))/3.0;
+}
+
+void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
+{
+    if (eid == EID_MomentumBalance) {
+        nodeDofIDMask.resize(2);
+        nodeDofIDMask.at(1) = V_u;
+        nodeDofIDMask.at(2) = V_v;
+    }
+    else {
+        nodeDofIDMask.resize(0);
+    }
 }
 
 Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)

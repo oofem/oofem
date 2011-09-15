@@ -90,6 +90,8 @@ public:
      */
     virtual double computeNXIntegral() const;
 
+    virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
+
     virtual FEInterpolation *giveInterpolation();
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
     int computeNumberOfDofs(EquationID eid) { return 0; }
