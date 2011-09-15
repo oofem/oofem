@@ -62,6 +62,29 @@ public:
     /// Destructor.
     virtual ~ActiveBoundaryCondition() { }
 
+    IRResultType initializeFrom(InputRecord *ir)
+    {
+        GeneralBoundaryCondition :: initializeFrom(ir);
+
+        const char *__proc = "initializeFrom";
+        IRResultType result;
+        IntArray tempA, tempB, tempC;
+        IR_GIVE_OPTIONAL_FIELD(ir, tempA, IFT_ActiveBoundaryCondition_elements, "elements");
+        for (int i = 0; i < tempA.giveSize(); ++i) {
+            this->addElement(tempA(i));
+        }
+        IR_GIVE_OPTIONAL_FIELD(ir, tempB, IFT_ActiveBoundaryCondition_elementSides, "elementsides");
+        for (int i = 0; i < tempB.giveSize()/2; ++i) {
+            this->addElementSide(tempB(i*2+1),tempB(i*2));
+        }
+        IR_GIVE_OPTIONAL_FIELD(ir, tempC, IFT_ActiveBoundaryCondition_dofManagers, "dofmans");
+        for (int i = 0; i < tempB.giveSize()/2; ++i) {
+            this->addElementSide(tempB(i*2+1),tempB(i*2));
+        }
+
+        return IRRT_OK;
+    }
+
     /**@name Methods supporting classical input files*/
     //{
     /**
@@ -123,7 +146,7 @@ public:
      * @param domain Domain to assemble from.
      */
     virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
-                                    UnknownNumberingScheme &r_s, UnknownNumberingScheme &c_s, Domain *domain);
+                                    UnknownNumberingScheme &r_s, UnknownNumberingScheme &c_s, Domain *domain) {};
 
     classType giveClassID() const { return ActiveBoundaryConditionClass; }
     const char *giveClassName() const { return "ActiveBoundaryCondition"; }

@@ -291,6 +291,9 @@ enum InputFieldType {
     IFT_BoundaryCondition_PrescribedValue,
     IFT_GeneralBoundaryCondition_valType,
     IFT_GeneralBoundaryCondition_defaultDofs,
+    IFT_ActiveBoundaryCondition_elements,
+    IFT_ActiveBoundaryCondition_elementSides,
+    IFT_ActiveBoundaryCondition_dofManagers,
 
     IFT_PrescribedTensor_centercoords,
     IFT_PrescribedTensor_gradient,
