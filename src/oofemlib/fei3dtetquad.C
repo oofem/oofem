@@ -244,7 +244,6 @@ void // TODO
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    double coeff, l, x1, x2, y1, y2, z1, z2;
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     OOFEM_ERROR("FEI3dTetQuad :: edgeEvaldNdx - Not supported");
@@ -279,7 +278,6 @@ FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoo
 void
 FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
-    int aNode = 0, bNode = 0, cNode = 0;
     edgeNodes.resize(3);
 
     if ( iedge == 1 ) { // edge between nodes 1 2
@@ -429,7 +427,7 @@ FEI3dTetQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
 void
 FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    int aNode = 0, bNode = 0, cNode = 0, dNode, eNode, fNode;
+    int aNode = 0, bNode = 0, cNode = 0, dNode = 0, eNode = 0, fNode = 0;
     surfNodes.resize(3);
 
     if ( isurf == 1 ) {
@@ -467,9 +465,9 @@ FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
     surfNodes.at(1) = aNode;
     surfNodes.at(2) = bNode;
     surfNodes.at(3) = cNode;
-    surfNodes.at(4) = aNode;
-    surfNodes.at(5) = bNode;
-    surfNodes.at(6) = cNode;
+    surfNodes.at(4) = dNode;
+    surfNodes.at(5) = eNode;
+    surfNodes.at(6) = fNode;
 
 }
 } // end namespace oofem

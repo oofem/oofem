@@ -72,7 +72,7 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo, double time) {};
+                                                  const FEICellGeometry &cellgeo, double time) { return 0.0; };
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

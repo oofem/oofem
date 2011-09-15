@@ -82,7 +82,7 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 void
 FEI2dTrQuad :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    double x1, x2, x3, y1, y2, y3, y23, x32, y31, x13, y12, x21, area;
+    double x1, x2, x3, y1, y2, y3, y23, x32, y31, x13, area;
 
     answer.resize(6, 3);
 
@@ -101,9 +101,6 @@ FEI2dTrQuad :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const 
 
     y31 = ( y3 - y1 ) / ( 2. * area );
     x13 = ( x1 - x3 ) / ( 2. * area );
-
-    y12 = ( y1 - y2 ) / ( 2. * area );
-    x21 = ( x2 - x1 ) / ( 2. * area );
 
     answer.at(1, 1) = 4 * y23 * y23;
     answer.at(1, 2) = 4 * x32 * x32;
