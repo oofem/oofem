@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -40,6 +40,10 @@
 #include "masterdof.h"
 #include "domain.h"
 #include "nrsolver.h"
+#include "sparsenonlinsystemnm.h"
+#include "meshqualityerrorestimator.h"
+#include "topologydescription.h"
+#include "petsccontext.h"
 
 namespace oofem {
 StokesFlow :: StokesFlow(int i, EngngModel *_master) : EngngModel(i, _master)
@@ -48,6 +52,7 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : EngngModel(i, _master)
     this->ndomains = 1;
     this->hasAdvanced = false;
     this->stiffnessMatrix = NULL;
+    this->meshqualityee = NULL;
 }
 
 StokesFlow :: ~StokesFlow()
@@ -58,6 +63,9 @@ StokesFlow :: ~StokesFlow()
     if ( this->stiffnessMatrix ) {
         delete this->stiffnessMatrix;
     }
+    if ( this->meshqualityee ) {
+        delete this->meshqualityee;
+    }
 }
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
@@ -66,27 +74,47 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     IRResultType result;
     int val;
 
-    EngngModel :: initializeFrom(ir);
-
     val = ( int ) SMT_PetscMtrx;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlow_smtype, "smtype"); // Macro
-    sparseMtrxType = ( SparseMtrxType ) val;
+    this->sparseMtrxType = ( SparseMtrxType ) val;
 
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_StokesFlow_deltat, "deltat"); // Macro
 
-    velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
+    this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
 
-    return IRRT_OK;
+    this->ts = TS_OK;
+
+    this->maxdef = 20; // TODO
+
+    return EngngModel :: initializeFrom(ir);
 }
 
 void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 {
     FloatArray *solutionVector = NULL;
+    parallelFlag = false; // Hack until something nicer is found.
+
+    if ( this->giveDomain(1)->giveNumberOfElements() == 0 && this->giveDomain(1)->giveTopology() ) {
+        this->giveDomain(1)->giveTopology()->replaceFEMesh();
+        this->meshqualityee = new MeshQualityErrorEstimator(1, this->giveDomain(1));
+    }
+
+    if (this->giveDomain(1)->giveTopology() && this->meshqualityee) {
+        // Check the quality of the deformed mesh.
+        double meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
+        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Mesh deformation at %e\n",meshdeformation);
+        if (this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef) {
+            this->giveDomain(1)->giveTopology()->replaceFEMesh();
+            OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created.\n");
+            meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
+            this->giveExportModuleManager()->initialize();
+        }
+    }
 
     int neq = this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
 
-    // Move solution space to current timestep
+    // Move solution space to current time step
     if ( !hasAdvanced ) {
         velocityPressureField->advanceSolution(tStep);
         hasAdvanced = true;
@@ -107,7 +135,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromActiveBC( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
+                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
@@ -132,16 +162,17 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 #else
+    OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving\n");
     SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
     this->updateComponent(tStep, InternalRhs, this->giveDomain(1));
     this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
-    this->internalForces.times(-1);
+    this->internalForces.negated();
     this->internalForces.add(externalForces);
     NM_Status status = linMethod->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
     delete(linMethod);
 #endif
 
-    if ( status == NM_NoSuccess ) {
+    if ( !(status & NM_Success) ) {
         OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
     }
 
@@ -150,34 +181,34 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     int i, nelem = d->giveNumberOfElements();
     for ( i = 1; i <= nelem; ++i ) {
       ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
-    }  
+    }
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-   // update element stabilization 
-   //Domain* d = this->giveDomain(1);
+    // update element stabilization
     int i, nelem = d->giveNumberOfElements();
     for ( i = 1; i <= nelem; ++i ) {
-      ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
-    }  
+        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+    }
 
-  if (cmpn == InternalRhs) {
-    this->internalForces.zero();
-    this->assembleVectorFromElements(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
-				     EModelDefaultEquationNumbering(), d);
+    if (cmpn == InternalRhs) {
+        this->internalForces.zero();
+        this->assembleVectorFromElements(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
+                EModelDefaultEquationNumbering(), d);
+        this->assembleVectorFromActiveBC(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
+                EModelDefaultEquationNumbering(), d);
+        return;
 
-    return;
-    
-  } else if (cmpn == NonLinearLhs) {
-    this->stiffnessMatrix->zero();
-    this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
-		   EModelDefaultEquationNumbering(), d);
-    return;
-    
-  } else {
-    OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
-  }
+    } else if (cmpn == NonLinearLhs) {
+        this->stiffnessMatrix->zero();
+        this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
+                EModelDefaultEquationNumbering(), d);
+        return;
+
+    } else {
+        OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
+    }
 }
 
 void StokesFlow :: updateYourself(TimeStep *tStep)
@@ -190,7 +221,6 @@ void StokesFlow :: updateYourself(TimeStep *tStep)
 int StokesFlow :: forceEquationNumbering(int id)
 {
     // Force numbering of equations. First all velocities on domain, then pressures.
-
     int i, j, k, ndofs, nnodes, nelem;
     DofManager *inode;
     Element* elem;
@@ -233,21 +263,24 @@ int StokesFlow :: forceEquationNumbering(int id)
     }
 
     for ( i = 1; i <= nelem; ++i ) {
-      elem = domain->giveElement(i);
-      for (k=1;k<=elem->giveNumberOfInternalDofManagers(); k++) {
-	ndofs = elem->giveInternalDofManager(k)->giveNumberOfDofs(); //define for element!!! overload for contact
-	for ( j = 1; j <= ndofs; j++ ) {
-	  elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
-	}
-      }
+        elem = domain->giveElement(i);
+        for (k=1;k<=elem->giveNumberOfInternalDofManagers(); k++) {
+            ndofs = elem->giveInternalDofManager(k)->giveNumberOfDofs(); //define for element!!! overload for contact
+            for ( j = 1; j <= ndofs; j++ ) {
+                elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
+            }
+        }
     }
-
 
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
     for ( i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->invalidateLocationArray();
     }
+
+    // Any existing structure is rendered obsolete.
+    this->equationNumberingCompleted = false;
+    if ( this->stiffnessMatrix ) { delete this->stiffnessMatrix; this->stiffnessMatrix = NULL; }
 
     return domainNeqs.at(id);
 }
@@ -264,8 +297,7 @@ double StokesFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, Ti
     return 0;
 }
 
-double    
-StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof) {
+double StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof) {
 
   if (ut==ReynoldsNumber) return 1.0;
   else return 0.0;
@@ -283,7 +315,7 @@ int StokesFlow :: checkConsistency()
         sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
             OOFEM_WARNING2("Element %d has no FMElement base", i);
-            return 0;
+            return false;
         }
     }
 
@@ -307,11 +339,22 @@ void StokesFlow :: updateInternalState(TimeStep *tStep)
     Domain *domain;
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
+        if (domain->giveTopology()) {
+            // Must be done before updating nodal positions
+            this->ts = domain->giveTopology()->updateYourself(tStep);
+        }
         int nelem = domain->giveNumberOfElements();
         for (int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(tStep);
         }
     }
+}
+
+void StokesFlow :: doStepOutput(TimeStep *tStep)
+{
+    TopologyDescription *tp = this->giveDomain(1)->giveTopology();
+    if (tp) tp->doOutput(tStep);
+    EngngModel :: doStepOutput(tStep);
 }
 
 NumericalMethod *StokesFlow :: giveNumericalMethod(TimeStep *tStep)
@@ -336,7 +379,7 @@ TimeStep *StokesFlow :: giveNextStep()
     if ( currentStep == NULL ) {
         int istep = this->giveNumberOfFirstStep();
         // first step -> generate initial step
-	previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
+        previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
         currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
     } else {
         int istep =  currentStep->giveNumber() + 1;
@@ -349,4 +392,5 @@ TimeStep *StokesFlow :: giveNextStep()
 
     return currentStep;
 }
+
 } // end namespace oofem

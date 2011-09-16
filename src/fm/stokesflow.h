@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -37,10 +37,12 @@
 
 #include "engngm.h"
 #include "sparsemtrxtype.h"
-#include "sparsenonlinsystemnm.h"
-//#include "linsystsolvertype.h"
+#include "topologydescription.h"
 
 namespace oofem {
+class SparseNonLinearSystemNM;
+class MeshQualityErrorEstimator;
+
 /**
  * Implements the engineering model to solve incompressible Stokes flow.
  * Stokes flow means acceleration is ignored.
@@ -59,14 +61,22 @@ protected:
     /// Numerical method.
     SparseNonLinearSystemNM *nMethod;
 
+    /// Used for determining if a new mesh must be created.
+    MeshQualityErrorEstimator *meshqualityee;
+    /// Maximum deformation allowed
+    double maxdef;
+
     SparseMtrx *stiffnessMatrix;
     FloatArray internalForces;
     FloatArray externalForces;
     FloatArray incrementOfSolution;
 
-    // Related to homogenization
-    /** Boolean value to keep track of advancing the primary field.
-     * This is necessary when solveYourselfAt might be called several times per timestep. Shouldn't need to do this.
+    /// Topology state, most notably used for determining if there is a need to remesh.
+    TopologyState ts;
+
+    /**
+     * Boolean value to keep track of advancing the primary field.
+     * This is necessary when solveYourselfAt might be called several times per time step. Shouldn't need to do this.
      */
     bool hasAdvanced;
 
@@ -77,55 +87,40 @@ public:
     /// @see EngngModel::solveYourselfAt
     void solveYourselfAt(TimeStep *tStep);
 
-    /** Updates everything for the problem.
+    /**
+     * Updates everything for the problem.
      * Updates the internal state for the elements.
      * Also calls updateNodalPositions.
      */
     virtual void updateYourself(TimeStep *tStep);
 
-    /// @see EngngModel::giveUnknownComponent
     virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
-    virtual double    giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *);
+    virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
 
-    /** Numbers all equations.
+    /**
+     * Numbers all equations.
      * Numbers velocities first for each node in order, then pressures.
-     * @param id Domain id
-     * @return Number of equations for domain id
+     * @param id Domain id.
+     * @return Number of equations for domain id.
      */
     virtual int forceEquationNumbering(int id);
 
-    /** Initialization from given input record.
+    /**
+     * Initialization from given input record.
      * Reads
-     * - mstype Sparse matrix type (enum, optional, default SMT_PetscMtrx)
-     * - deltat Time increment (real, optional, default 1.0)
-     * - nodalupdatescheme How to update nodal positions (enum, optional, default US_None)
+     * - mstype Sparse matrix type (enum, optional, default SMT_PetscMtrx).
+     * - deltat Time increment (real, optional, default 1.0).
+     * - nodalupdatescheme How to update nodal positions (enum, optional, default US_None).
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /// @see EngngModel::checkConsistency
     virtual int checkConsistency();
-
-    /// @see EngngModel::printDofOutput
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
-
-    /** Updates internal state of all gauss points.
-     * @param tStep Current time step
-     */
+    virtual void doStepOutput(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
-
-    /// @see EngngModel::updateComponent
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-
-    /// @see EngngModel::giveNumericalMethod
     NumericalMethod *giveNumericalMethod(TimeStep *tStep);
-
-    /// @see EngngModel::giveNextStep  (i think there should be a default)
     TimeStep *giveNextStep();
-
-    // Shouldn't need to overload. Should be moved to EngngModel::terminate TODO
-    void terminate(TimeStep *tStep) { this->updateYourself(tStep);
-                                      this->doStepOutput(tStep);
-                                      this->saveStepContext(tStep); }
 
     const char *giveClassName() const { return "StokesFlow"; }
     classType giveClassID() const { return StokesFlowClass; }
