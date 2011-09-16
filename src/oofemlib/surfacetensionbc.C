@@ -48,6 +48,7 @@
 
 #include <utility>
 #include <list>
+#include <cmath>
 
 namespace oofem {
 
