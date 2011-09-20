@@ -187,6 +187,31 @@ OOFEMTXTInputRecord :: giveField(char *answer, int maxchar, const InputFieldType
 }
 
 IRResultType
+OOFEMTXTInputRecord :: giveField(std::string &answer, const InputFieldType fieldI, const char *idString)
+{
+    int indx = 0;
+    if ( idString ) {
+        if ( ( indx = this->giveKeywordIndx(idString) ) == 0 ) {
+            return IRRT_NOTFOUND;
+        }
+
+        setReadFlag(indx);
+        indx++;
+    } else {
+        indx = 1;
+    }
+
+    const char *_token = tokenizer.giveToken(indx);
+    if ( _token ) {
+        answer = std::string(tokenizer.giveToken(indx));
+        return IRRT_OK;
+    } else {
+        answer = "";
+        return IRRT_NOTFOUND;
+    }
+}
+
+IRResultType
 OOFEMTXTInputRecord :: giveField(IntArray &answer, const InputFieldType fieldID, const char *idString)
 {
     int value, size;
@@ -672,6 +697,19 @@ OOFEMTXTInputRecord :: giveOptionalField(char *answer, int maxchar, const InputF
         return r;
     }
 }
+
+
+IRResultType
+OOFEMTXTInputRecord :: giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
 
 IRResultType
 OOFEMTXTInputRecord :: giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString)

@@ -92,6 +92,7 @@ public:
     virtual IRResultType giveField(int &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(char *answer, int maxchar, const InputFieldType fieldI, const char *idString);
+    virtual IRResultType giveField(std::string &answer, const InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString);
@@ -102,6 +103,7 @@ public:
     virtual IRResultType giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString);

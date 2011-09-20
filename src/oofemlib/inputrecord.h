@@ -295,6 +295,8 @@ enum InputFieldType {
     IFT_ActiveBoundaryCondition_elementSides,
     IFT_ActiveBoundaryCondition_dofManagers,
 
+    IFT_StressTensorLoad_stressTensor,
+
     IFT_PrescribedTensor_centercoords,
     IFT_PrescribedTensor_gradient,
 
@@ -471,6 +473,10 @@ enum InputFieldType {
     IFT_IsotropicLinearElasticMaterial_e,
     IFT_IsotropicLinearElasticMaterial_n,
     IFT_IsotropicLinearElasticMaterial_talpha,
+
+    IFT_AbaqusUserMaterial_numState,
+    IFT_AbaqusUserMaterial_properties,
+    IFT_AbaqusUserMaterial_userMaterial,
 
     IFT_SurfaceTensionMaterial_isotropic,
 
@@ -1188,7 +1194,6 @@ enum InputFieldType {
  */
 class InputRecord
 {
-protected:
 public:
     /// Constructor. Creates an empty input record.
     InputRecord();
@@ -1219,6 +1224,8 @@ public:
     virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the char* field value.
     virtual IRResultType giveField(char *answer, int maxchar, const InputFieldType fieldI, const char *idString) = 0;
+    /// Reads the string field value.
+    virtual IRResultType giveField(std::string &answer, const InputFieldType fieldI, const char *idString) = 0;
     /// Reads the FloatArray field value.
     virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString) = 0;
     /// Reads the IntArray field value.
@@ -1246,6 +1253,8 @@ public:
     virtual IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the char* field value.
     virtual IRResultType giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString) = 0;
+    /// Reads the string field value.
+    virtual IRResultType giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the FloatArray field value.
     virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the IntArray field value.
