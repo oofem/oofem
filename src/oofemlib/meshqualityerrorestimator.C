@@ -36,10 +36,12 @@
 #include "element.h"
 #include "elementgeometrytype.h"
 #include "mathfem.h"
+#include "node.h"
 
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "gausspnt.h"
+
 
 namespace oofem {
 

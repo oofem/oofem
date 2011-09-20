@@ -259,6 +259,8 @@ enum classType {
     TrabBoneEmbedClass,
     ConcreteDPMClass,
     FE2SinteringMaterialClass,
+    AbaqusUserMaterialClass,
+    AbaqusUserMaterialStatusClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,

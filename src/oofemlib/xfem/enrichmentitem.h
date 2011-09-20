@@ -37,12 +37,11 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
-#include "geometry.h"
 #include "flotmtrx.h"
 #include "enrichmentfunction.h"
 
 namespace oofem {
-class Geometry;
+class BasicGeometry;
 
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)

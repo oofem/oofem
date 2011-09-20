@@ -34,6 +34,7 @@
 
 #include "feinterpol.h"
 #include "element.h"
+#include "node.h"
 
 namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }

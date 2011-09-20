@@ -68,6 +68,14 @@ public:
      */
     virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
+     * Evaluates the normal on the given edge.
+     * @param answer Contains the evaluated normal.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void edgeEvalNormal(FloatArray &normal, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEInterpolation2d :: edgeEvalNormal - Not implemented in subclass."); }
+    /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).
      * @param answer Contains resulting array of derivatives, the member at i position contains value of @f$ \frac{\mathrm{d}N_i}{\mathrm{d}s} @f$.

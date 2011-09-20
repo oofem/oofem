@@ -37,6 +37,7 @@
 #include "domain.h"
 #include "integrationrule.h"
 #include "gausspnt.h"
+#include "node.h"
 
 namespace oofem {
 

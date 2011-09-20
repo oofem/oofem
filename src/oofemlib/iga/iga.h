@@ -44,6 +44,7 @@
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
+#include "feinterpol.h"
 
 namespace oofem {
 #ifdef __OOFEG

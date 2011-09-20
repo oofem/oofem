@@ -55,6 +55,7 @@ enum EntityRenumberingScheme {
 class EntityRenumberingFunctor
 {
 public:
+    virtual ~EntityRenumberingFunctor() {}
     // two possible functions to call member function. virtual cause derived
     // classes will use a pointer to an object and a pointer to a member function
     // to make the function call
