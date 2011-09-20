@@ -55,6 +55,7 @@ class FEICellGeometry
 {
 public:
     FEICellGeometry() {}
+    virtual ~FEICellGeometry() {}
     virtual int giveNumberOfVertices() const = 0;
     virtual const FloatArray *giveVertexCoordinates(int i) const = 0;
 };
@@ -68,6 +69,7 @@ class FEIVoidCellGeometry : public FEICellGeometry
 {
 public:
     FEIVoidCellGeometry() : FEICellGeometry() {}
+    virtual ~FEIVoidCellGeometry() {}
     int giveNumberOfVertices() const { OOFEM_ERROR("FEIVoidCellGeometry: no reference geometry");
                                        return 0; }
     const FloatArray *giveVertexCoordinates(int i) const {
@@ -85,6 +87,7 @@ protected:
     const Element *elem;
 public:
     FEIElementGeometryWrapper(const Element *elem) : FEICellGeometry() { this->elem = elem; }
+    virtual ~FEIElementGeometryWrapper() {}
     int giveNumberOfVertices() const;
     const FloatArray *giveVertexCoordinates(int i) const;
 };
@@ -102,6 +105,7 @@ public:
     FEIVertexListGeometryWrapper(int nvertices, const FloatArray **coords) : FEICellGeometry()
     { this->nvertices = nvertices;
       this->coords = coords; }
+    virtual ~FEIVertexListGeometryWrapper() {}
     int giveNumberOfVertices() const { return this->nvertices; }
     const FloatArray *giveVertexCoordinates(int i) const { return this->coords [ i - 1 ]; }
 };

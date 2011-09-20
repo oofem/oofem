@@ -5,10 +5,12 @@
 #include "planstrss.h"
 #include "structuralmaterial.h"
 #include "patchintegrationrule.h"
-#include <math.h>
 #include "interfacetype.h"
 #include "xfemelementinterface.h"
 #include "structuralcrosssection.h"
+#include "enrichmentitem.h"
+
+#include <cmath>
 
 namespace oofem {
 Interface *

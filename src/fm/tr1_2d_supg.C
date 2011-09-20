@@ -48,6 +48,7 @@
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
+#include "geotoolbox.h"
 
 #include "materialinterface.h"
 #ifndef __MAKEDEPEND

@@ -36,8 +36,8 @@
 #define levelsetpcs_h
 
 #include "materialinterface.h"
-#include "mathfem.h"
 #include "geotoolbox.h"
+
 #ifndef __MAKEDEPEND
  #include <vector>
 #endif

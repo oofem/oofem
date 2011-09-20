@@ -3,7 +3,6 @@
 
 #include "planstrss.h"
 #include "xfemelementinterface.h"
-#include "usrdefsub.h"
 
 namespace oofem {
 /** temporary class for testing

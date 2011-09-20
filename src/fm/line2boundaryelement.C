@@ -152,8 +152,8 @@ int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Val
         TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
 {
     FloatArray lcoords, closest;
-    int ok = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
-    if (!ok) {
+    double distance = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
+    if (distance < 0) {
         answer.resize(0);
         return false;
     }

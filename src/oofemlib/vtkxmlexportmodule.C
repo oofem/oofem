@@ -1047,13 +1047,16 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
 #endif
                 gptot = 0;
                 answer.resize(0);
-                for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); ++i) {
-                    gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
-                    elem->giveIPValue(temp, gp, type, tStep);
-                    gptot += gp->giveWeight();
-                    answer.add(gp->giveWeight(), temp);
+                iRule = elem->giveDefaultIntegrationRulePtr();
+                if (iRule) {
+                    for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
+                        gp = iRule->getIntegrationPoint(i);
+                        elem->giveIPValue(temp, gp, type, tStep);
+                        gptot += gp->giveWeight();
+                        answer.add(gp->giveWeight(), temp);
+                    }
+                    answer.times(1/gptot);
                 }
-                answer.times(1/gptot);
                 for (int i = 1; i <= answer.giveSize(); ++i) {
                     fprintf( stream, "%e ", answer.at(i) );
                 }
