@@ -36,6 +36,7 @@
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
+#include "gausspnt.h"
 #include "elementside.h"
 #include "integrationrule.h"
 #include "feinterpol.h"

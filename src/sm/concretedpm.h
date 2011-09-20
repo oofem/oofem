@@ -29,6 +29,7 @@
 #define ConcreteDPM_h
 
 #include "structuralmaterial.h"
+#include "gausspnt.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "cltypes.h"

@@ -43,6 +43,7 @@
 #include "flotmtrx.h"
 #include "loadtime.h"
 #include "engngm.h"
+#include "node.h"
 
 namespace oofem {
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)

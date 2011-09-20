@@ -36,12 +36,15 @@
 #define xfemelementinterface_h
 
 #include "interface.h"
-#include "gausspnt.h"
-#include "xfemmanager.h"
-#include "matresponsemode.h"
-#include "structuralelement.h"
+#include "alist.h"
 
 namespace oofem {
+class FloatArray;
+class FloatMatrix;
+class Triangle;
+class Element;
+class GaussPoint;
+
 /**
  * Provides Xfem interface for an element.
  */

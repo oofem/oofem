@@ -35,15 +35,16 @@
 #ifndef xfemmanager_h
 #define xfemmanager_h
 
-#include "enrichmentitem.h"
 #include "alist.h"
-#include "domain.h"
-#include "delaunay.h"
-#include "gausspnt.h"
-#include "engngm.h"
-#include "patch.h"
 
 namespace oofem {
+class EngngModel;
+class Domain;
+class BasicGeometry;
+class EnrichmentItem;
+class EnrichmentFunction;
+
+
 /**
  * This class manages the xfem part as well as takes over some functions which would appear
  * in the Domain and Node class.

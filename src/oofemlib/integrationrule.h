@@ -35,18 +35,17 @@
 #ifndef integrationrule_h
 #define integrationrule_h
 
-#include "femcmpnn.h"
 #include "materialmode.h"
 #include "integrationdomain.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
-#include "feinterpol.h"
-#include "geometry.h"
+#include "inputrecord.h"
+#include "classtype.h"
 
 namespace oofem {
+class TimeStep;
 class GaussPoint;
 class Element;
-class FEInterpolation;
 
 /**
  * Abstract base class representing integration rule. The integration rule is
@@ -184,10 +183,9 @@ public:
 
     /** Returns reference to element containing receiver */
     Element *giveElement() { return elem; }
-    /** Returns reference to interpolation associated with GaussPoint */
-    FEInterpolation *giveInterpolation(GaussPoint *gp);
     /** Returns receiver number */
     int giveNumber() { return this->number; }
+    /** Returns the domain for the receiver */
     integrationDomain giveIntegrationDomain() { return this->intdomain; }
     /**
      * Abstract service.

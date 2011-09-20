@@ -89,8 +89,6 @@ IntegrationRule :: clear()
 }
 
 
-FEInterpolation *IntegrationRule :: giveInterpolation(GaussPoint *gp) { return elem->giveInterpolation(); }
-
 GaussPoint *
 IntegrationRule :: getIntegrationPoint(int i)
 {

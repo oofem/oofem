@@ -33,10 +33,10 @@
  */
 
 #include "linesurfacetension.h"
+#include "node.h"
 #include "domain.h"
 #include "material.h"
 #include "mathfem.h"
-#include <math.h>
 
 namespace oofem {
 

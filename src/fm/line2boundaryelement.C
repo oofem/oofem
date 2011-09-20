@@ -33,13 +33,11 @@
  */
 
 #include "line2boundaryelement.h"
+#include "node.h"
 #include "fei2dlinequad.h"
 #include "gaussintegrationrule.h"
 #include "timestep.h"
 #include "mathfem.h"
-
-#include <cstdlib>
-#include <cmath>
 
 namespace oofem {
 FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);

@@ -33,9 +33,17 @@
  */
 
 #include "xfemelementinterface.h"
+#include "enrichmentitem.h"
+#include "engngm.h"
+#include "gausspnt.h"
+#include "materialmode.h"
 #include "fei2dquadlin.h"
 #include "patch.h"
 #include "patchintegrationrule.h"
+#include "delaunay.h"
+#include "xfemmanager.h"
+#include "flotarry.h"
+#include "flotmtrx.h"
 
 namespace oofem {
 void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)

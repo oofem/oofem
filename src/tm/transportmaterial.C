@@ -33,6 +33,7 @@
  */
 
 #include "transportmaterial.h"
+#include "gausspnt.h"
 #include "contextioerr.h"
 
 namespace oofem {

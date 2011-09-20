@@ -33,6 +33,7 @@
  */
 
 #include "nlstructuralelement.h"
+#include "feinterpol.h"
 #include "structuralms.h"
 #include "domain.h"
 #include "timestep.h"

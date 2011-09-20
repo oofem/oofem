@@ -35,8 +35,11 @@
 #include "enrichmentfunction.h"
 #include "enrichmentitem.h"
 #include "domain.h"
+#include "gausspnt.h"
 #include "xfemmanager.h"
 #include "mathfem.h"
+#include "geometry.h"
+#include "feinterpol.h"
 
 namespace oofem {
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)

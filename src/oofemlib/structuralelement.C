@@ -33,6 +33,7 @@
  */
 
 #include "structuralelement.h"
+#include "feinterpol.h"
 #include "domain.h"
 #include "timestep.h"
 #include "node.h"

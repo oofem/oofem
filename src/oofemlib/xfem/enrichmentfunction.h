@@ -36,11 +36,11 @@
 #define enrichmentfunction_h
 
 #include "femcmpnn.h"
-#include "gausspnt.h"
 
 namespace oofem {
 class EnrichmentItem;
 class BasicGeometry;
+class GaussPoint;
 
 /**
  * Abstract class representing global shape function

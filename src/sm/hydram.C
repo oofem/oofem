@@ -26,6 +26,7 @@
  */
 
 #include "hydram.h"
+#include "gausspnt.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>

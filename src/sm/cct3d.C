@@ -41,7 +41,7 @@
 //   25.5.2010
 
 #include "cct3d.h"
-
+#include "node.h"
 #include "domain.h"
 #include "load.h"
 #include "structuralms.h"

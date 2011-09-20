@@ -38,6 +38,7 @@
 #include "node.h"
 #include "elementside.h"
 #include "element.h"
+#include "gausspnt.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "mathfem.h"

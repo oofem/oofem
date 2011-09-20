@@ -47,6 +47,7 @@
 #include "trplanrot3d.h"
 
 #include "engngm.h"
+#include "node.h"
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"

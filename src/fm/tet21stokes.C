@@ -34,6 +34,7 @@
 
 #include "tet21stokes.h"
 #include "fmelement.h"
+#include "node.h"
 #include "domain.h"
 #include "equationid.h"
 #include "gaussintegrationrule.h"

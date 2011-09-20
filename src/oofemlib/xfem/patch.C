@@ -38,13 +38,13 @@
 #include "patch.h"
 #include "gaussintegrationrule.h"
 #include "delaunay.h"
-#include <math.h>
 #include "fei2dtrlin.h"
 #include "crosssection.h"
 #include "enrichmentitem.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "geometry.h"
+#include <cmath>
 
 namespace oofem {
 Patch :: Patch(Element *parent) : BasicGeometry()

@@ -35,13 +35,14 @@
 #ifndef patch_h
 #define patch_h
 
-#include "delaunay.h"
-#include "gausspnt.h"
-#include "element.h"
+#include "geometry.h"
 #include "fei2dtrlin.h"
-#include "node.h"
 
 namespace oofem {
+class Element;
+class GaussPoint;
+class Node;
+
 /**
  * Abstract representation of a part of element after subdivision.
  * @author chamrova
