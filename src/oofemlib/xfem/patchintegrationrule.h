@@ -35,12 +35,11 @@
 #ifndef patchintegrationrule_h
 #define patchintegrationrule_h
 
-#include "integrationrule.h"
-#include "patch.h"
-#include "alist.h"
 #include "gaussintegrationrule.h"
+#include "patch.h"
 
 namespace oofem {
+
 /**
  * Represents an IntegrationRule for an interacted element
  * the standard integration is replaced by an integration over a

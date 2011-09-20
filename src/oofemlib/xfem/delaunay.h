@@ -35,11 +35,12 @@
 #ifndef delaunay_h
 #define delaunay_h
 
-#include "flotarry.h"
 #include "alist.h"
-#include "geometry.h"
 
 namespace oofem {
+class FloatArray;
+class Triangle;
+
 /**
  * O(n4) algorithm, only for testing purposes.
  * @author chamrova
