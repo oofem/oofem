@@ -211,7 +211,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
         } // end loop over nodes
 
         if ( twostage ) {
-            this->pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetUpdate);
+	    //this->pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetUpdate); // ?
 
             for ( inode = 1; inode <= ndofman; inode++ ) {
                 if ( w.at(inode) > 0.0 ) {
@@ -414,23 +414,23 @@ LevelSetPCS :: redistance(TimeStep *atTime)
         }
 
         if ( twostage ) {
-            this->pcs_stage1(d, fs, w, atTime, PCS_levelSetRedistance);
-            cm = 0.0;
-            for ( inode = 1; inode <= ndofman; inode++ ) {
-                if ( _boundary.at(inode) ) {
-                    continue;
-                }
-
-                if ( w.at(inode) > 0.0 ) {
-                    //two stage integration
-                    // update
-                    d.at(inode) = 0.5 * ( d_old.at(inode) + d.at(inode) ) -
-                                  0.5 *dt *fs.at(inode) / w.at(inode);
-                    cm = max( cm, fabs( d.at(inode) - d_old.at(inode) ) );
-                }
-            }
+	  // this->pcs_stage1(d, fs, w, atTime, PCS_levelSetRedistance); //?
+	  cm = 0.0;
+	  for ( inode = 1; inode <= ndofman; inode++ ) {
+	    if ( _boundary.at(inode) ) {
+	      continue;
+	    }
+	    
+	    if ( w.at(inode) > 0.0 ) {
+	      //two stage integration
+	      // update
+	      d.at(inode) = 0.5 * ( d_old.at(inode) + d.at(inode) ) -
+		0.5 *dt *fs.at(inode) / w.at(inode);
+	      cm = max( cm, fabs( ( d.at(inode) - d_old.at(inode) ) / d_old.at(inode) ) );
+	    }
+	  }
         }
-    } while ( ( cm > this->reinit_err ) && ( ++nite < 200 ) );
+    } while ( ( cm > this->reinit_err ) && ( ++nite < 2000 ) );
 
     //} while ((++nite < 200));
     printf("LS reinit: error %le in %d iterations\n", cm, nite);
@@ -489,7 +489,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                 if ( gfi_norm > 1.e-12 ) {
                     // evaluate i-th normal (correcponding to side opposite to i-th vertex)
                     for ( j = 1; j <= nsd; j++ ) {
-                        n.at(j) = nsd * dN.at(i, j) * volume;
+		        n.at(j) = nsd * dN.at(i, j) * volume; //?
                     }
 
                     k.at(i) = F * dotProduct(gfi, n, nsd) / ( nsd * gfi_norm );
@@ -630,6 +630,10 @@ LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
+    if ( !stream->write(& levelSetVersion, 1) ) {
+      THROW_CIOERR(iores);
+    }
+
     if ( ( iores = levelSetValues.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -642,9 +646,17 @@ LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
+    if ( !stream->read(&levelSetVersion, 1) ) {
+       THROW_CIOERR(iores);
+    }
+
     if ( ( iores = levelSetValues.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    previousLevelSetValues=levelSetValues;
+#ifdef LevelSetPCS_CACHE_ELEMENT_VOF
+    elemVofLevelSetVersion = 0;
+#endif
 
     return CIO_OK;
 }
