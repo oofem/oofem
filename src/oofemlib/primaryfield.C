@@ -86,7 +86,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &ans
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 {
-    int eq = dof->__giveEquationNumber();
+  int eq = dof->giveEquationNumber(emodel->giveUnknownNumberingScheme(this->ut));
     if ( eq == 0 ) {
         _error("giveUnknownValue: invalid equation number");
     }

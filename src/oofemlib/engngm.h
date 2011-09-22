@@ -208,6 +208,11 @@ protected:
     /// Receivers id.
     int number;
 
+    //DefaultEquationNumbering
+    EModelDefaultEquationNumbering defaultNumberingScheme;
+    // DefaultPrescribedEquationNumbering
+    EModelDefaultPrescribedEquationNumbering defaultPrescribedNumberingScheme;
+
     /// Path to output stream.
     char *dataOutputFileName;
     /// Output stream.
@@ -708,6 +713,13 @@ public:
      * actual one to avoid storage of complete history.
      */
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return 0; }
+    /**
+     * Returns UnknownNUmberingScheme related to given EquationID
+     */
+    virtual UnknownNumberingScheme& giveUnknownNumberingScheme(EquationID type) {
+      return this->defaultNumberingScheme;
+    }
+
 
     // we don't directly call element ->GiveCharacteristicMatrix() function, because some
     // engngm classes may require special modification of base types supported on
