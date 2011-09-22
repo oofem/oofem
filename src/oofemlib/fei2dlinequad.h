@@ -74,6 +74,7 @@ public:
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
+    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif // fei2dlinequad_h

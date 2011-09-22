@@ -181,6 +181,30 @@ double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, co
     return sqrt(es1*es1+es2*es2);
 }
 
+void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    double xi = lcoords(0);
+    double dN1dxi = -0.5 + xi;
+    double dN2dxi =  0.5 + xi;
+    double dN3dxi = -2.0 * xi;
+
+    double es1 = dN1dxi*cellgeo.giveVertexCoordinates(1)->at(xind) +
+            dN2dxi*cellgeo.giveVertexCoordinates(2)->at(xind) +
+            dN3dxi*cellgeo.giveVertexCoordinates(3)->at(xind);
+    double es2 = dN1dxi*cellgeo.giveVertexCoordinates(1)->at(yind) +
+            dN2dxi*cellgeo.giveVertexCoordinates(2)->at(yind) +
+            dN3dxi*cellgeo.giveVertexCoordinates(3)->at(yind);
+
+    double J = sqrt(es1*es1+es2*es2);
+
+    // Only used for determined deformation of element, not sure about the transpose here;
+    jacobianMatrix.resize(2,2);
+    jacobianMatrix(0,0) = es1/J;
+    jacobianMatrix(0,1) = es2/J;
+    jacobianMatrix(1,0) = -es2;
+    jacobianMatrix(1,1) = es1;
+}
+
 double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2DLineQuad :: edgeComputeLength - Not implemented");
