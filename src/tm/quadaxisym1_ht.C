@@ -70,7 +70,7 @@ double
 QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    double determinant, weight, thickness, volume;
+    double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this), 0.0) );
 

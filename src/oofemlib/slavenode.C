@@ -63,7 +63,6 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 int SlaveNode :: checkConsistency()
 {
     bool result = true;
-    Node *master;
 
     result = result && Node :: checkConsistency();
 
@@ -79,7 +78,6 @@ int SlaveNode :: checkConsistency()
 
 void SlaveNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    int i;
     for ( int i = 1; i <= masterDofManagers.giveSize(); ++i) {
         masterDofManagers.at(i) = f(masterDofManagers.at(i), ERS_DofManager);
     }
