@@ -297,7 +297,7 @@ const char *__EquationIDToString(EquationID _value) {
         OOFEM_ERROR2("Can not convert string %s to value", _value);\
         return FieldType(0);
 
-const FieldType __StringToFieldType(const char * _value) {
+FieldType __StringToFieldType(const char * _value) {
     TO_STRING_BODY(FieldType_DEF)
 }
 

@@ -61,7 +61,7 @@ enum FieldType {
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
 
-const FieldType __StringToFieldType(std::string _value);
+FieldType __StringToFieldType(std::string _value);
 
 /**
  * Abstract class representing field. Field represent the spatial distribution of certain variable.

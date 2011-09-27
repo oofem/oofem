@@ -72,9 +72,9 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
-    virtual double **const giveKnotVector() { return this->knotVector; }
-    virtual IntArray *const giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
-    virtual FloatArray *const giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
+    virtual const double * const * giveKnotVector() { return this->knotVector; }
+    virtual const IntArray * giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
+    virtual const FloatArray * giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);

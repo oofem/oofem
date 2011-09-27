@@ -73,11 +73,11 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
     } else if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
-	numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV;
-        IntArray *const knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
-        IntArray *const knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
-        FloatArray *const knotValuesU = this->giveInterpolation()->giveKnotValues(1);
-        FloatArray *const knotValuesV = this->giveInterpolation()->giveKnotValues(2);
+        numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV;
+        const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
+        const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
+        const FloatArray * knotValuesU = this->giveInterpolation()->giveKnotValues(1);
+        const FloatArray * knotValuesV = this->giveInterpolation()->giveKnotValues(2);
 
         newgpcoords.resize(2);
         knotSpan.resize(2);
@@ -115,13 +115,13 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
         int numberOfKnotSpansW = this->giveInterpolation()->giveNumberOfKnotSpans(3);
-	numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV*numberOfKnotSpansW;
-        IntArray *const knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
-        IntArray *const knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
-        IntArray *const knotMultiplicityW = this->giveInterpolation()->giveKnotMultiplicity(3);
-        FloatArray *const knotValuesU = this->giveInterpolation()->giveKnotValues(1);
-        FloatArray *const knotValuesV = this->giveInterpolation()->giveKnotValues(2);
-        FloatArray *const knotValuesW = this->giveInterpolation()->giveKnotValues(3);
+        numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV*numberOfKnotSpansW;
+        const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
+        const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
+        const IntArray * knotMultiplicityW = this->giveInterpolation()->giveKnotMultiplicity(3);
+        const FloatArray * knotValuesU = this->giveInterpolation()->giveKnotValues(1);
+        const FloatArray * knotValuesV = this->giveInterpolation()->giveKnotValues(2);
+        const FloatArray * knotValuesW = this->giveInterpolation()->giveKnotValues(3);
 
         newgpcoords.resize(3);
         knotSpan.resize(3);
@@ -222,10 +222,10 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir) {
     if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
-        IntArray *const knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
-        IntArray *const knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
-        FloatArray *const knotValuesU = this->giveInterpolation()->giveKnotValues(1);
-        FloatArray *const knotValuesV = this->giveInterpolation()->giveKnotValues(2);
+        const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
+        const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
+        const FloatArray * knotValuesU = this->giveInterpolation()->giveKnotValues(1);
+        const FloatArray * knotValuesV = this->giveInterpolation()->giveKnotValues(2);
 
         newgpcoords.resize(2);
         knotSpan.resize(2);
@@ -309,7 +309,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
  #endif
 
     int numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
-    double **const knotVector = interp->giveKnotVector();
+    const double *const* knotVector = interp->giveKnotVector();
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, nsd = this->giveNsd();
@@ -1027,7 +1027,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
  #endif
 
     int numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
-    double **const knotVector = interp->giveKnotVector();
+    const double *const* knotVector = interp->giveKnotVector();
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, nsd = interp->giveNsd();

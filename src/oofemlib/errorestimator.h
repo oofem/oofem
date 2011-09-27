@@ -133,7 +133,7 @@ public:
     /**
      * Returns error estimation type of receiver.
      */
-    const ErrorEstimatorType giveErrorEstimatorType() { return eeType; }
+    ErrorEstimatorType giveErrorEstimatorType() const { return eeType; }
 
     /**
      * Returns nonzero if region has been skipped in error estimation (user option).

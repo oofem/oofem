@@ -203,7 +203,7 @@ public:
     /**
      * Returns the subdivision of patch parametric space
      */
-    virtual double **const giveKnotVector() { return NULL; }
+    virtual const double * const * giveKnotVector() { return NULL; }
     /**
      * Returns the number of knot spans of the receiver.
      */
@@ -211,11 +211,11 @@ public:
     /**
      * Returns the knot values of the receiver.
      */
-    virtual FloatArray *const giveKnotValues(int dim) { return NULL; }
+    virtual const FloatArray * giveKnotValues(int dim) { return NULL; }
     /**
      * Returns the knot multiplicity of the receiver.
      */
-    virtual IntArray *const giveKnotMultiplicity(int dim) { return NULL; }
+    virtual const IntArray * giveKnotMultiplicity(int dim) { return NULL; }
     /**
      * Returns number of spatial dimensions.
      */

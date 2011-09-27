@@ -75,10 +75,10 @@ public:
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const double giveTempDevStressMagnitude() { return temp_devStressMagnitude; }
-    const double giveTempDevStrainMagnitude() { return temp_devStrainMagnitude; }
-    const double giveDevStressMagnitude() { return devStressMagnitude; }
-    const double giveDevStrainMagnitude() { return devStrainMagnitude; }
+    double giveTempDevStressMagnitude() const { return temp_devStressMagnitude; }
+    double giveTempDevStrainMagnitude() const { return temp_devStrainMagnitude; }
+    double giveDevStressMagnitude() const { return devStressMagnitude; }
+    double giveDevStrainMagnitude() const { return devStrainMagnitude; }
 
     void letTempDevStrainMagnitudeBe(double _val) { temp_devStrainMagnitude = _val; }
     void letTempDevStressMagnitudeBe(double _val) { temp_devStressMagnitude = _val; }
