@@ -219,7 +219,7 @@ public:
     /**
      * Returns number of spatial dimensions.
      */
-    virtual int const giveNsd() = 0;
+    virtual int giveNsd() = 0;
     //@}
 
     // Needs the jacobian matrix to determine the condition number.

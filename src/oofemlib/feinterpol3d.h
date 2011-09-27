@@ -45,7 +45,7 @@ class FEInterpolation3d : public FEInterpolation
 {
 public:
     FEInterpolation3d(int o) : FEInterpolation(o) { };
-    int const giveNsd() { return 3; }
+    int giveNsd() { return 3; }
 
     /**@name Edge interpolation services */
     //@{

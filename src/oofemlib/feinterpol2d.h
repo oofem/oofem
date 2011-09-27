@@ -46,7 +46,7 @@ class FEInterpolation2d : public FEInterpolation
 public:
     FEInterpolation2d(int o) : FEInterpolation(o) { }
 
-    int const giveNsd() { return 2; }
+    int giveNsd() { return 2; }
 
     /**@name Edge interpolation services. */
     //@{

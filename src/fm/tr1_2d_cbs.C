@@ -203,7 +203,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     // calculates advection component for (*) velocities
 
     double ar12, ar3, dudx, dudy, dvdx, dvdy;
-    double usum, vsum, umean, vmean;
+    double usum, vsum;
     double adu11, adu21, adu31, adv11, adv21, adv31;
     double adu12, adu22, adu32, adv12, adv22, adv32;
     double dt = stepN->giveTimeIncrement();
@@ -228,10 +228,6 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
 
     usum = u.at(1) + u.at(3) + u.at(5);
     vsum = u.at(2) + u.at(4) + u.at(6);
-    //umean = usum/3.0;
-    //vmean = vsum/3.0;
-    umean = usum;
-    vmean = vsum;
 
     // compute Cu*U term
 

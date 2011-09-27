@@ -68,7 +68,7 @@ public:
     BSplineInterpolation(int nsd) : FEInterpolation(0) { this->nsd = nsd; }
     ~BSplineInterpolation();
 
-    int const giveNsd() { return nsd; }
+    int giveNsd() { return nsd; }
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }

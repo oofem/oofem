@@ -45,7 +45,7 @@ class FEInterpolation1d : public FEInterpolation
 {
 public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
-    int const giveNsd() { return 1; }
+    int giveNsd() { return 1; }
 };
 } // end namespace oofem
 #endif // feinterpol1d_h
