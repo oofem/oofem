@@ -349,7 +349,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 }
 
 void
-FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
     double a, b, c;

@@ -364,7 +364,7 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int iedge,
 }
 
 void
-FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
     double a, b, c;

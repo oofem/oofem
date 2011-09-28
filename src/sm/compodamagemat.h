@@ -157,9 +157,6 @@ public:
      */
     int giveInputRecordString(std :: string &str, bool keyword = true);
 
-
-    /// updates nonTemp variables when equilibrium reached
-    void updateYourself(TimeStep *); // update after new equilibrium state reached
     /// Creates corresponding material status
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
 

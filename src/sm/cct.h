@@ -97,7 +97,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // midPlaneNormal computation
-    virtual void computeMidPlaneNormal(FloatArray &answer, GaussPoint *gp);
+    virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
 
     // characteristic length in gp (for some material models)
     double giveCharacteristicLenght(GaussPoint *, const FloatArray &);

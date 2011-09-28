@@ -143,7 +143,7 @@ RankinePlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, Ga
 
 
 MaterialStatus *
-RankinePlasticMaterial :: CreateStatus(GaussPoint *gp)
+RankinePlasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
     MPlasticMaterialStatus *status;
 

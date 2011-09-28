@@ -415,7 +415,7 @@ CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 
 
 void
-CCTPlate :: computeMidPlaneNormal(FloatArray &answer, GaussPoint *gp)
+CCTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 // returns normal vector to midPlane in GaussPoinr gp of receiver
 {
     Node *n1, *n2, *n3;

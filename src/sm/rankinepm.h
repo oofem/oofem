@@ -64,7 +64,7 @@ public:
     const char *giveClassName() const { return "RankinePlasticMaterial"; }
     classType giveClassID()         const { return PerfectlyPlasticMaterialClass; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
 

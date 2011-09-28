@@ -51,11 +51,10 @@ LobattoIntegrationRule :: ~LobattoIntegrationRule()
 
 
 int
-LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, Element *elem,
-                                            MaterialMode mode, GaussPoint ***arry)
+LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Lobatto Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
-//   store corrdinates and weights)
+//   store coordinates and weights)
 {
     int i;
     double weight;
@@ -220,8 +219,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, Element *elem,
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnTriagle(int nPoints, Element *elem,
-                                               MaterialMode mode, GaussPoint ***arry)
+LobattoIntegrationRule :: SetUpPointsOnTriagle(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Gauss Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
 //   store corrdinates and weights)
@@ -231,8 +229,7 @@ LobattoIntegrationRule :: SetUpPointsOnTriagle(int nPoints, Element *elem,
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, Element *elem,
-                                              MaterialMode mode, GaussPoint ***arry)
+LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Gauss Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
 //   store corrdinates and weights)
@@ -242,8 +239,7 @@ LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, Element *elem,
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, Element *elem,
-                                            MaterialMode mode, GaussPoint ***arry)
+LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Gauss Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
 //   store corrdinates and weights)
@@ -254,8 +250,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, Element *elem,
 
 
 int
-LobattoIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, Element *elem,
-                                                  MaterialMode mode, GaussPoint ***arry)
+LobattoIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Gauss Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
 //   store corrdinates and weights)

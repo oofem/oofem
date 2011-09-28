@@ -65,11 +65,11 @@ public:
     int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
 protected:
-    int SetUpPointsOnLine(int, Element *, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnTriagle(int, Element *, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnSquare(int, Element *, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnCube(int, Element *, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnTetrahedra(int, Element *, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnTriagle(int, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp);
 };
 } // end namespace oofem
 #endif // lobattoir_h
