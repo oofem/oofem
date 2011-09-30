@@ -60,6 +60,7 @@ protected:
     double hum_increment;
     double T;
     double T_increment;
+    double T_max;
     /// hidden variable - equivalent time: necessary to compute solidified volume
     double equivalentTime;
     double equivalentTimeTemp;
@@ -92,6 +93,9 @@ public:
 
     double giveTIncrement(void) { return T_increment; }
     void setTIncrement(const double src) { T_increment = src; }
+
+    double giveTmax(void) { return T_max; }
+    void setTmax(const double src) { T_max = src; }
 
     /// HIDDEN VARIABLES
     double giveEquivalentTime(void) { return equivalentTime; }
@@ -138,6 +142,10 @@ protected:
     double kSh;
     /// fluidity parameter used in viscosity evolution equation
     double muS;
+    /// kappaT replaces ln(h) on RHS of the differential equation describing evolution of MPS
+    double kappaT;
+    /// parameter reducing creep effects of thermal cycling
+    double cyclicTparam;
     /// reference room temperature for MPS algorithm [K]
     double roomTemperature;
     /// activation energies

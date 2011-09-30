@@ -569,6 +569,8 @@ enum InputFieldType {
     IFT_MPSMaterial_alphar,
     IFT_MPSMaterial_alphas,
     IFT_MPSMaterial_mus,
+    IFT_MPSMaterial_kappat,
+    IFT_MPSMaterial_cyclictparam,
 
     IFT_CebFip78Material_e28,
     IFT_CebFip78Material_fibf,

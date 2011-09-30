@@ -173,6 +173,10 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         // muS- the only parameter necessary for evaluation of the flow-term viscosity
         // muS = c0 * c1 * q4 [1/(MPa * day)]
         IR_GIVE_FIELD(ir, muS, IFT_MPSMaterial_mus, "mus");
+        IR_GIVE_FIELD(ir, kappaT, IFT_MPSMaterial_kappat, "kappat"); //[-] replaces ln(h) in diff equation for MPS
+	this->cyclicTparam = 0.;
+	IR_GIVE_OPTIONAL_FIELD(ir, cyclicTparam, IFT_MPSMaterial_cyclictparam, "cyclictparam");
+
         // age when drying or thermal changes begin [days] - necessary to determine initial viscosity
         IR_GIVE_FIELD(ir, t0, IFT_MPSMaterial_t0, "t0");
         this->kSh = 0.;
@@ -547,6 +551,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
     double prevEta, PsiS, A, B, e, dt;
     double T_new, T_old, H_new, H_old;
+    double reductFactor;
 
     if ( this->CoupledAnalysis == Basic ) {
         tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
@@ -576,7 +581,19 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
             PsiS = this->computePsiS(gp, atTime); // evaluated in the middle of the time step
 
-            A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
+	    // original version
+	    //A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
+	    
+	    if ( this->cyclicTparam == 0. ) {
+	      reductFactor = 1.;
+	    } else if ( ( status->giveTmax() - T_new < 0. ) || atTime->isTheFirstStep() ) {
+	      status->setTmax(T_new);
+	      reductFactor = 1.;   
+	    } else {         
+	      reductFactor = exp( - this->cyclicTparam * fabs (T_new - status->giveTmax() ) );
+	    }
+
+            A = sqrt( muS * ( kappaT * reductFactor * fabs(T_new - T_old) + 0.5*(T_new + T_old) * fabs(log(H_new) - log(H_old)) ) / ( dt * this->roomTemperature ) );
             B = sqrt(PsiS * 1.e6 / this->q4);
 
             if ( ( A * B * dt ) > 1.e-6 ) {
