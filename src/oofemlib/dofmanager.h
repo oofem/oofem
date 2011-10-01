@@ -93,25 +93,11 @@ class IntArray;
  * - calculating its nodal vector.
  * - printing and updating at end of step .
  * - managing its swapping to and from disk.
+ * - managing the list of subjected loads (typically, concentrated forces and moments).
+ * - constructing the location array for assembling loads (also used by elements for assembling matrices).
  */
 class DofManager : public FEMComponent
 {
-    /*
-     * This class implements abstract class - a  dof manager in a finite element mesh.
-     * It is a base class for FEM nodes and element sides, having dofs.
-     * A dof manager  and its children (nodes, element sides) are
-     * attributes of a domain.
-     * They are  usually also attributes of a few elements.
-     * DESCRIPTION
-     * The DofManager possesses 'numberOfDofs' degrees of freedom, stored in 'dofArray'.
-     * In 'loadArray' it stores the number of every  load it is subjected to
-     * (typically, concentrated forces and moments).
-     * In 'locationArray' the manager stores the equation number of each of its dofs.
-     * This location array is used by the manager for assembling its load vector to
-     * the right-hand side of the linear system ; it is also used by elements for
-     * calculating their own location arrays.
-     */
-
 protected:
     /// Total number of DOFs.
     int numberOfDofs;

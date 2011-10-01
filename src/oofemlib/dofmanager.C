@@ -78,9 +78,9 @@ DofManager :: DofManager(int n, Domain *aDomain) :
     dofArray      = NULL;
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
-    // locationArray = NULL ;
 #ifdef __PARALLEL_MODE
     partitions.resize(0);
+    parallel_mode = DofManager_local;
 #endif
 }
 
@@ -99,10 +99,6 @@ DofManager :: ~DofManager()
 
         delete[] dofArray;
     }
-
-    // delete locationArray ;
-#ifdef __PARALLEL_MODE
-#endif
 }
 
 
