@@ -54,7 +54,7 @@ public:
     /// Constructor.
     BasicGeometry();
     /// Destructor.
-    ~BasicGeometry();
+    virtual ~BasicGeometry();
     /// computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(FloatArray *point) { return 0; }
     /// checks whether an element is interacted, Element reference will be later replaced by Geometry.
@@ -86,7 +86,7 @@ class Line : public BasicGeometry
 {
 public:
     Line() : BasicGeometry() { }
-    ~Line() { }
+    virtual ~Line() { }
     Line(FloatArray *pointA, FloatArray *pointB);
     /// Computes normal distance to a point
     double computeDistanceTo(FloatArray *point);
@@ -108,6 +108,7 @@ class Triangle : public BasicGeometry
 {
 public:
     Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3);
+    virtual ~Triangle() { }
     double getArea();
     void computeBarycentrCoor(FloatArray &answer);
     double getRadiusOfCircumCircle();
@@ -124,7 +125,7 @@ protected:
     double radius;
 public:
     Circle() : BasicGeometry() { }
-    ~Circle() { }
+    virtual ~Circle() { }
     Circle(FloatArray *center, double radius);
     /// Computes the normal distance to the surface not to the center.
     double computeDistanceTo(FloatArray *point);

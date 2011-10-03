@@ -349,7 +349,7 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
     }
 
     ly.zero();
-    if ( abs( lx.at(1) ) > abs( lx.at(2) ) ) {
+    if ( fabs( lx.at(1) ) > fabs( lx.at(2) ) ) {
         ly.at(2) = 1.;
     } else {
         ly.at(1) = 1.;

@@ -69,7 +69,7 @@ public:
     /// Computes intersection points with Element.
     void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element);
     /// Computes number intersection points with Element.
-    double computeNumberOfIntersectionPoints(Element *element);
+    int computeNumberOfIntersectionPoints(Element *element);
     /// Accessor.
     EnrichmentFunction *giveEnrichmentFunction();
     /// Gives number of dofs.

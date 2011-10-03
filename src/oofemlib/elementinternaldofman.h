@@ -57,7 +57,7 @@ class IntArray;
 class ElementDofManager : public DofManager
 {
 private:
-  Element* element;
+    Element* element;
 
 public:
     /**

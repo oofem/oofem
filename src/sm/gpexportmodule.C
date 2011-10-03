@@ -53,7 +53,7 @@
 namespace oofem {
 GPExportModule :: GPExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    ncoords = -1.; // means: export as many coordinates as available
+    ncoords = -1; // means: export as many coordinates as available
 }
 
 

@@ -145,7 +145,7 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
     Domain *d = this->giveDomain();
     ConnectivityTable *ct = d->giveConnectivityTable();
     DirectErrorIndicatorRCInterface *interface;
-    double indicatorVal;
+    double indicatorVal = 0.0;
 
     con = ct->giveDofManConnectivityArray(inode);
     isize = con->giveSize();

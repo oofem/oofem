@@ -93,7 +93,7 @@ void EnrichmentItem :: computeIntersectionPoints(AList< FloatArray > *intersecti
     this->giveGeometry()->computeIntersectionPoints(element, intersectionPoints);
 }
 
-double EnrichmentItem :: computeNumberOfIntersectionPoints(Element *element)
+int EnrichmentItem :: computeNumberOfIntersectionPoints(Element *element)
 {
     return this->giveGeometry()->computeNumberOfIntersectionPoints(element);
 }
