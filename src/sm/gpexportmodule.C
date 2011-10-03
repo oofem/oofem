@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -159,15 +159,15 @@ GPExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, "\n");
         }
 
-        /*
-         * // for CST elements write also nodal coordinates
-         * // (non-standard part, used only exceptionally)
-         * int nnode = elem->giveNumberOfNodes();
-         * if (nnode==3){
-         * for (int inod=1; inod<=3; inod++)
-         * fprintf (stream, "%f %f ",elem->giveNode(inod)->giveCoordinate(1),elem->giveNode(inod)->giveCoordinate(2));
-         * }
-         */
+#if 0
+        // for CST elements write also nodal coordinates
+        // (non-standard part, used only exceptionally)
+        int nnode = elem->giveNumberOfNodes();
+        if (nnode==3){
+            for (int inod=1; inod<=3; inod++)
+                fprintf (stream, "%f %f ",elem->giveNode(inod)->giveCoordinate(1),elem->giveNode(inod)->giveCoordinate(2));
+        }
+#endif
     }
 
     fclose(stream);
