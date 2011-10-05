@@ -67,8 +67,9 @@ public:
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
     virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) { };
+    virtual void edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,

@@ -177,6 +177,21 @@ FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
     answer.at(2) =  1.0 / l;
 }
 
+void FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    double dx, dy, L;
+    IntArray edgeNodes;
+    this->computeLocalEdgeMapping(edgeNodes, iedge);
+
+    dx = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind);
+    dy = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) - cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind);
+    L = sqrt(dx * dx + dy * dy);
+
+    normal.resize(2);
+    normal.at(1) = dy/L;
+    normal.at(2) = -dx/L;
+}
+
 void
 FEI2dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
@@ -188,9 +203,9 @@ FEI2dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
+                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
+                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
 }
 
 

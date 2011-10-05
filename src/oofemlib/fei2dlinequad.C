@@ -141,15 +141,36 @@ void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
     answer(2) = -2.0 * xi;
 
     double es1 = answer(0)*cellgeo.giveVertexCoordinates(1)->at(xind) +
-            answer(1)*cellgeo.giveVertexCoordinates(2)->at(xind) +
-            answer(2)*cellgeo.giveVertexCoordinates(3)->at(xind);
+                 answer(1)*cellgeo.giveVertexCoordinates(2)->at(xind) +
+                 answer(2)*cellgeo.giveVertexCoordinates(3)->at(xind);
+
     double es2 = answer(0)*cellgeo.giveVertexCoordinates(1)->at(yind) +
-            answer(1)*cellgeo.giveVertexCoordinates(2)->at(yind) +
-            answer(2)*cellgeo.giveVertexCoordinates(3)->at(yind);
+                 answer(1)*cellgeo.giveVertexCoordinates(2)->at(yind) +
+                 answer(2)*cellgeo.giveVertexCoordinates(3)->at(yind);
 
     double J = sqrt(es1*es1+es2*es2);
     answer.times(1/J);
     //return J;
+}
+
+void FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    double xi = lcoords(0);
+    double dN1dxi = -0.5 + xi;
+    double dN2dxi =  0.5 + xi;
+    double dN3dxi = -2.0 * xi;
+
+    normal.resize(2);
+
+    normal.at(1) = dN1dxi*cellgeo.giveVertexCoordinates(1)->at(yind) +
+                   dN2dxi*cellgeo.giveVertexCoordinates(2)->at(yind) +
+                   dN3dxi*cellgeo.giveVertexCoordinates(3)->at(yind);
+
+    normal.at(2) = -dN1dxi*cellgeo.giveVertexCoordinates(1)->at(xind) +
+                   -dN2dxi*cellgeo.giveVertexCoordinates(2)->at(xind) +
+                   -dN3dxi*cellgeo.giveVertexCoordinates(3)->at(xind);
+
+    normal.normalize();
 }
 
 void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,

@@ -83,6 +83,38 @@ int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, 
     return true;
 }
 
+void FEI2dLineLin :: edgeEvaldNds(FloatArray &answer, int iedge,
+    const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
+    double xi = lcoords(0);
+    answer.resize(2);
+    answer(0) = -0.5*xi;
+    answer(1) =  0.5*xi;
+
+    double es1 = answer(0)*cellgeo.giveVertexCoordinates(1)->at(xind) +
+            answer(1)*cellgeo.giveVertexCoordinates(2)->at(xind);
+    double es2 = answer(0)*cellgeo.giveVertexCoordinates(1)->at(yind) +
+            answer(1)*cellgeo.giveVertexCoordinates(2)->at(yind);
+
+    double J = sqrt(es1*es1+es2*es2);
+    answer.times(1/J);
+    //return J;
+}
+
+void FEI2dLineLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    double dx, dy;
+
+    dx = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
+    dy = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
+
+    double L = sqrt(dx*dx + dy*dy);
+
+    normal.resize(2);
+    normal.at(1) = dy/L;
+    normal.at(2) = -dx/L;
+}
+
 double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     double x2_x1, y2_y1;
