@@ -146,7 +146,7 @@ public:
      * @param domain Domain to assemble from.
      */
     virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
-                                    UnknownNumberingScheme &r_s, UnknownNumberingScheme &c_s, Domain *domain) {};
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
 
     classType giveClassID() const { return ActiveBoundaryConditionClass; }
     const char *giveClassName() const { return "ActiveBoundaryCondition"; }

@@ -82,7 +82,7 @@ public:
                                 const UnknownNumberingScheme &s, Domain *domain);
 
     virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
-                                    UnknownNumberingScheme &r_s, UnknownNumberingScheme &c_s, Domain *domain);
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
     classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }
     const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }

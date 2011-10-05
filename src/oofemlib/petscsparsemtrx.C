@@ -38,6 +38,7 @@
 #include "petscsparsemtrx.h"
 #include "petscordering.h"
 #include "engngm.h"
+#include "activebc.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -51,7 +52,7 @@ namespace oofem {
 SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {
-  
+
   PetscSparseMtrx* answer = new PetscSparseMtrx(nRows, nColumns);
   if (answer) {
     MatDuplicate(this->mtrx, MAT_COPY_VALUES, &(answer->mtrx));
@@ -62,7 +63,7 @@ PetscSparseMtrx :: GiveCopy() const
     answer->di       = this->di;
     answer->ut       = this->ut;
     answer->emodel   = this->emodel;
-    answer->kspInit  = false; 
+    answer->kspInit  = false;
     answer->newValues= this->newValues;
 
     return answer;
@@ -155,27 +156,27 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
     answer.resize(nr, nc);
     double *aptr = answer.givePointer();
 
-    /*
-     *      // Approach using several vectors. Not sure if it is optimal, but it includes petsc calls which i suspect are inefficient. / Mikael
-     *      // UNTESTED!
-     *  Vec globX, globY;
-     *  VecCreate(PETSC_COMM_SELF, &globY);
-     *  VecSetType(globY, VECSEQ);
-     *  VecSetSizes(globY, PETSC_DECIDE, nr);
-     *  int nrB = B.giveNumberOfRows();
-     *  for (int k = 0; k < nc; k++) {
-     *      double colVals[nrB];
-     *      for (int i = 0; i < nrB; i++) colVals[i] = B(i,k); // B.copyColumn(Bk,k);
-     *      VecCreateSeqWithArray(PETSC_COMM_SELF, nrB, colVals, &globX);
-     *      MatMult(this->mtrx, globX, globY );
-     *              double *ptr;
-     *              VecGetArray(globY, &ptr);
-     *              for (int i = 0; i < nr; i++) *aptr++ = ptr[i]; // answer.setColumn(Ak,k);
-     *              VecRestoreArray(globY, &ptr);
-     *              VecDestroy(globX);
-     *  }
-     *  VecDestroy(globY);
-     */
+#if 0
+     // Approach using several vectors. Not sure if it is optimal, but it includes petsc calls which i suspect are inefficient. / Mikael
+     // UNTESTED!
+     Vec globX, globY;
+     VecCreate(PETSC_COMM_SELF, &globY);
+     VecSetType(globY, VECSEQ);
+     VecSetSizes(globY, PETSC_DECIDE, nr);
+     int nrB = B.giveNumberOfRows();
+     for (int k = 0; k < nc; k++) {
+         double colVals[nrB];
+         for (int i = 0; i < nrB; i++) colVals[i] = B(i,k); // B.copyColumn(Bk,k);
+         VecCreateSeqWithArray(PETSC_COMM_SELF, nrB, colVals, &globX);
+         MatMult(this->mtrx, globX, globY );
+                 double *ptr;
+                 VecGetArray(globY, &ptr);
+                 for (int i = 0; i < nr; i++) *aptr++ = ptr[i]; // answer.setColumn(Ak,k);
+                 VecRestoreArray(globY, &ptr);
+                 VecDestroy(globX);
+     }
+     VecDestroy(globY);
+#endif
 
     Mat globB, globC;
     MatCreateSeqDense(PETSC_COMM_SELF, B.giveNumberOfRows(), B.giveNumberOfColumns(), B.givePointer(), & globB);
@@ -307,6 +308,38 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             }
         }
     }
+
+    // Structure from active boundary conditions.
+    AList<IntArray> r_locs, c_locs;
+    for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
+        ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
+        if (activebc) {
+            // TODO: Deal with the CharType here.
+            activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s, domain);
+            for (int k = 1; k < r_locs.giveSize(); k++) {
+                IntArray *krloc = r_locs.at(k);
+                IntArray *kcloc = c_locs.at(k);
+                for ( i = 1; i <= r_loc.giveSize(); i++ ) {
+                    if ( ( ii = krloc->at(i) ) ) {
+                        if ( ii > nRows ) {
+                            nRows = ii;
+                        }
+                        for ( j = 1; j <= kcloc->giveSize(); j++ ) {
+                            if ( ( jj = kcloc->at(j) ) ) {
+                                rows [ ii - 1 ].insert(jj - 1);
+                            }
+                        }
+                    }
+                }
+                for ( j = 1; j <= kcloc->giveSize(); j++ ) {
+                    if ( (jj = kcloc->at(j)) > nColumns ) {
+                        nColumns = jj;
+                    }
+                }
+            }
+        }
+    }
+
 
     geqs = leqs = nRows;
 
@@ -461,6 +494,28 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         }
     }
 
+    // Structure from active boundary conditions.
+    AList<IntArray> locs, temp;
+    for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
+        ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
+        if (activebc) {
+            // TODO: Deal with the CharType here.
+            activebc->giveLocationArrays(locs, temp, ut, TangentStiffnessMatrix, s, s, domain);
+            for (int k = 1; k < locs.giveSize(); k++) {
+                IntArray *kloc = locs.at(k);
+                for ( i = 1; i <= kloc->giveSize(); i++ ) {
+                    if ( ( ii = kloc->at(i) ) ) {
+                        for ( j = 1; j <= kloc->giveSize(); j++ ) {
+                            if ( ( jj = kloc->at(j) ) ) {
+                                rows [ ii - 1 ].insert(jj - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     for ( i = 0; i < leqs; i++ ) {
         d_nnz(i) = rows [ i ].size();
     }
@@ -607,6 +662,10 @@ PetscSparseMtrx :: at(int i, int j) const
 {
     OOFEM_ERROR("PetscSparseMtrx::at(i,j) - unsupported");
     return 0;
+    //double value;
+    //int row = i-1, col = j-1;
+    //MatGetValues(this->mtrx, 1, &row, 1, &col, &value);
+    //return value;
 }
 
 void
