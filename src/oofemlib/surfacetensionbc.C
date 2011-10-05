@@ -70,7 +70,7 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 }
 
 void SurfaceTensionBoundaryCondition :: giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
-                                UnknownNumberingScheme &r_s, UnknownNumberingScheme &c_s, Domain *domain)
+                                const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
     if (!this->useTangent || type != TangentStiffnessMatrix)
         return;
