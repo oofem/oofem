@@ -66,7 +66,6 @@ enum RemeshingStrategy { NoRemeshing_RS, RemeshingFromCurrentState_RS, Remeshing
 class RemeshingCriteria : public FEMComponent
 {
 protected:
-
     ErrorEstimator *ee;
 
 #ifdef __PARALLEL_MODE
@@ -83,7 +82,8 @@ public:
     RemeshingCriteria(int n, ErrorEstimator *e);
     /// Destructor
     virtual ~RemeshingCriteria();
-    /** Returns the required mesh size n given dof manager.
+    /**
+     * Returns the required mesh size n given dof manager.
      * The mesh density is defined as a required element size
      * (in 1D the element length, in 2D the square from element area).
      * @param num Dofman number.

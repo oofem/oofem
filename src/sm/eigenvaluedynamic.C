@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/eigenvaluedynamic.C,v 1.5.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// file eigenvaluedynamic.cc
-//
 
 #include "eigenvaluedynamic.h"
 #include "nummet.h"
@@ -87,7 +82,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, IFT_EigenValueDynamic_nroot, "nroot"); // Macro
 
-    // numberOfSteps set artifficially to numberOfRequiredEigenValues
+    // numberOfSteps set artificially to numberOfRequiredEigenValues
     // in order to allow
     // use restoreContext function for different eigenValues
     // numberOfSteps = numberOfRequiredEigenValues;
@@ -119,7 +114,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
 
 double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                                   TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, eigen value.
+// returns unknown quantity like displacement, eigenvalue.
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
@@ -187,7 +182,7 @@ TimeStep *EigenValueDynamic :: giveNextStep()
 
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    // time and dt variables are set eq to 0 for statics - has no meaning
 
     return currentStep;
 }
@@ -399,7 +394,7 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream *stream, Context
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }

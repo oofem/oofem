@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/combinedzzsiee.C,v 1.5 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *

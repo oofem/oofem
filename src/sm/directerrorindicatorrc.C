@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/directerrorindicatorrc.C,v 1.7.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -56,7 +55,8 @@ DirectErrorIndicatorRC :: ~DirectErrorIndicatorRC()
 }
 
 void
-DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity) {
+DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity)
+{
     int isize;
     const IntArray *con;
     Domain *d = this->giveDomain();
@@ -74,7 +74,8 @@ DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indic
 
 
 double
-DirectErrorIndicatorRC :: giveDofManDensity(int num) {
+DirectErrorIndicatorRC :: giveDofManDensity(int num)
+{
 #ifdef __PARALLEL_MODE
     Domain *d = this->giveDomain();
     if ( d->giveDofManager(num)->isShared() ) {
@@ -122,7 +123,8 @@ DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
 
 
 double
-DirectErrorIndicatorRC :: giveDofManIndicator(int num, TimeStep *tStep) {
+DirectErrorIndicatorRC :: giveDofManIndicator(int num, TimeStep *tStep)
+{
 #ifdef __PARALLEL_MODE
     Domain *d = this->giveDomain();
     if ( d->giveDofManager(num)->isShared() ) {
@@ -171,7 +173,8 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
 
 
 int
-DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep) {
+DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep)
+{
     Domain *d = this->giveDomain();
     int inode, nnodes = d->giveNumberOfDofManagers();
     double indicatorVal, currDensity, proposedDensity;
@@ -233,7 +236,8 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep) {
 
 
 double
-DirectErrorIndicatorRC :: giveRequiredDofManDensity(int num, TimeStep *tStep, int relative) {
+DirectErrorIndicatorRC :: giveRequiredDofManDensity(int num, TimeStep *tStep, int relative)
+{
     this->estimateMeshDensities(tStep);
     if ( relative ) {
         double currDens;

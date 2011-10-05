@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/concrete2.C,v 1.5 2003/05/19 13:03:59 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file concrete2.cc
-
 #include "concrete2.h"
 #include "material.h"
 #include "domain.h"
@@ -46,12 +43,6 @@
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
- #include <stdio.h>
-#endif
 
 namespace oofem {
 Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d)

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/concrete2.h,v 1.5 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   ****************************************************************************
-//       CLASS CONCRETE2 - NonLinear elasto-plastic material model with hardening
-//                         Plane stress or uniaxial stress + transverse shear in
-//                         concrete layers with transverse stirrups.
-//   ****************************************************************************
 
 #ifndef concrete2_h
 #define concrete2_h
@@ -70,41 +63,23 @@ namespace oofem {
 #define c2_IS_PLASTIC_FLOW 315
 #define c2_IFAD  316
 
-
-
-
+/**
+ * This class implements associated Material Status to Concrete2Material.
+ */
 class Concrete2MaterialStatus : public StructuralMaterialStatus
 {
-    /*
-     * This class implements associated Material Status to Concrete2Material.
-     * It is atribute of matStatusDictionary at every GaussPoint, for which this material
-     * is active.
-     * DESCRIPTION:
-     *  This class contains state variables of the materil (layer)
-     *
-     * VARIABLE DESCRIPTION:
-     *  SCCM      current pressure strenght
-     * EPM       max. eff. plastic strain
-     * SCTM      current tension strenght
-     * E0PM      max. vol. plastic strain
-     * SRF       current stress in stirrups
-     * SEZ       current strain in transverse (z) direction.
-     *
-     * TASK:
-     *
-     *  returning and setting variables
-     * printing
-     * saving & restoring context
-     */
 protected:
-
     FloatArray plasticStrainVector; // full form
     FloatArray plasticStrainIncrementVector;
 
     double tempSCCM, tempEPM, tempSCTM, tempE0PM, tempSRF, tempSEZ;
-    double SCCM, EPM, SCTM, E0PM, SRF, SEZ;
 
-
+    double SCCM; ///< Current pressure strength.
+    double EPM;  ///< Max. eff. plastic strain.
+    double SCTM; ///< Current tension strength.
+    double E0PM; ///< Max. vol. plastic strain.
+    double SRF;  ///< current stress in stirrups.
+    double SEZ;  ///< Current strain in transverse (z) direction.
 
 public:
     Concrete2MaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -115,9 +90,9 @@ public:
     void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
     void givePlasticStrainIncrementVector(FloatArray &answer) const
     { answer = plasticStrainIncrementVector; }
-    void         letPlasticStrainVectorBe(FloatArray &v)
+    void letPlasticStrainVectorBe(FloatArray &v)
     { plasticStrainVector = v; }
-    void         letPlasticStrainIncrementVectorBe(FloatArray &v)
+    void letPlasticStrainIncrementVectorBe(FloatArray &v)
     { plasticStrainIncrementVector = v; }
 
     double &giveTempCurrentPressureStrength() { return tempSCCM; }
@@ -137,86 +112,65 @@ public:
 
 
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *tStep);
 
     // saves current context(state) into stream
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
     const char *giveClassName() const { return "Concrete2MaterialStatus"; }
-    classType             giveClassID() const { return Concrete2MaterialStatusClass; }
+    classType giveClassID() const { return Concrete2MaterialStatusClass; }
 };
 
 
-
-/* Material constant description:
- * SCCC  - pressure strength
- * SCCT  - tension strength
- * EPP   - treshold eff. plastic strain for softening in compress.
- * EPU   - ultimate eff. pl. strain
- * EOPP  - threshold vlumetric plastic strain for soft. in tension
- * EOPU  - ultimate vol. pl. strain
- * SHEARTOL -  threshold value of the relative shear deformation
- *           (psi**2/eef) at which shear is considered in layers. for
- *           lower r.s.d. the transverse shear remains elastic decoupled
- *           from bending. default value SHEARTOL = 0.01
- * IS_PLASTIC_FLOW
- * indicates that plastic flow (not deformation theory)
- * is used in pressure.
- * IFAD
- * IFAD<=0 STATE VARIABLES WILL NOT BE UPDATED
- *     >0 UPDATE S.V.
- *
- * STIRR_MAT - material id num for stirrups
+/**
+ * NonLinear elasto-plastic material model with hardening.
+ * Plane stress or uniaxial stress + transverse shear in
+ * concrete layers with transverse stirrups.
  */
-
-
 class Concrete2 : public DeformationTheoryMaterial
 {
-    /*
-     * This class implements a Concrete2 material in a finite element problem. A material
-     * is an attribute of a domain. It is usually also attribute of many elements.
-     * DESCRIPTION
-     *   Plane stress or uniaxial stress + transverse shear in
-     *   concrete layers with transverse stirrups.
-     *
-     * The attribute 'propertyDictionary' contains all the properties of a mate-
-     * rial, like its Young modulus, its mass density or poisson ratio.
-     * TASK
-     * - Returning standard material marices (like 3dstress-strain, 2d plane , plate,
-     *   3dbeam, 2d beam ..) according to current state determined by using data stored
-     *   in Gausspoint.
-     * - Returning a material property (method 'give'). Only for non-standard elements.
-     *   In this case such element is fully responsible to compute material matrix, handle
-     *   material nonlinearity and so on.
-     */
 private:
-    double SCCC, SCCT, EPP, EPU, EOPP, EOPU, SHEARTOL;
+    double SCCC; ///< Pressure strength.
+    double SCCT; ///< Tension strength.
+    double EPP;  ///< Threshold eff. plastic strain for softening in compress.
+    double EPU;  ///< Ultimate eff. pl. strain.
+    double EOPP; ///< Threshold volumetric plastic strain for soft. in tension.
+    double EOPU; ///< Ultimate vol. pl. strain.
+    /**
+     * Threshold value of the relative shear deformation
+     * (psi^2/eef) at which shear is considered in layers. for
+     * lower r.s.d. the transverse shear remains elastic decoupled
+     * from bending. default value SHEARTOL = 0.01
+     */
+    double SHEARTOL;
+
     double E, n;
     // stirrups
     double stirrE, stirrFt, stirrA, stirrTOL, stirrEREF, stirrLAMBDA;
-    int IS_PLASTIC_FLOW, IFAD;
+    /// Indicates that plastic flow (not deformation theory) is used in pressure.
+    int IS_PLASTIC_FLOW;
+    /// Determines if state variables should be updated or not (>0 updates).
+    int IFAD;
 
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-
     Concrete2(int n, Domain *d);
     ~Concrete2();
 
-    virtual void giveRealStressVector(FloatArray & answer, MatResponseForm, GaussPoint *,
-                                      const FloatArray &, TimeStep * atTime);
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                      const FloatArray &, TimeStep *atTime);
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * atTime);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseForm form, MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *atTime);
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-
     void  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                        const FloatArray &strain, TimeStep *atTime);
     void  dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
@@ -228,22 +182,18 @@ protected:
                   double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
 
     // two functions used to initialize and updating temporary variables in
-    // gp's status. These variables are used to controll process, when
-    // we try to find equlibrium state.
-
+    // gp's status. These variables are used to control process, when
+    // we try to find equilibrium state.
     void updateStirrups(GaussPoint *gp, FloatArray *strainIncrement);
-public:
 
-    // non-standard
-    double   give(int, GaussPoint *);
+public:
+    double give(int, GaussPoint *gp);
 
     // identification and auxiliary functions
-
-    int       hasNonLinearBehaviour()     { return 1; }
-    const char *giveClassName()   const { return "Concrete2"; }
-    classType giveClassID()            const { return Concrete2Class; }
+    int hasNonLinearBehaviour() { return 1; }
+    const char *giveClassName() const { return "Concrete2"; }
+    classType giveClassID() const { return Concrete2Class; }
     IRResultType initializeFrom(InputRecord *ir);
-    //      void     printYourself () ;
 };
 } // end namespace oofem
 #endif // concrete2_h

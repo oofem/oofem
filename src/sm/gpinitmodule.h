@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,20 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// Initialization module reading data related to Gauss points from a specified file
-
-//
-// class gpInitModule
-//
-
 #ifndef gpinitmodule_h
+#define gpinitmodule_h
 
- #ifndef __MAKEDEPEND
-  #include <stdio.h>
- #endif
- #include "initmodule.h"
- #include "domain.h"
- #include "engngm.h"
+#include "initmodule.h"
+#include "domain.h"
+#include "engngm.h"
 
 namespace oofem {
 /**
@@ -64,26 +56,10 @@ public:
     /// Destructor
     ~GPInitModule();
 
-    /// Initializes receiver acording to object description stored in input record
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Reads the specific data (initial state of individual Gauss points)
-     * from a file. Each Gauss point is represented by one line in that file.
-     * The line should contain the following data:
-     * element number
-     * Gauss point number
-     * coordinates (array, first number of coordinates, then individual coordinates)
-     * number of (groups of) variables that will follow
-     * for each group:
-     *   variable identification number (according to internalstatetype.h)
-     *   variable values (array, first number of variables, then their values)
-     */
     void doInit();
-    /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "GPInitModuleClass"; }
 };
 
- #define gpinitmodule_h
-#endif
 } // namespace oofem
-
+#endif

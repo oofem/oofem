@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*  Created by Milan Jirasek on 1 Feb 2010 */
-
-//
-// class DofManExportModule
-//
-
 #ifndef dmexportmodule_h
 #define dmexportmodule_h
 
@@ -54,6 +48,7 @@ namespace oofem {
  * This module writes the coordinates of all dof managers
  * along with the values of displacements
  * for further processing.
+ * @author Milan Jirasek
  */
 class DofManExportModule : public ExportModule
 {
@@ -66,19 +61,12 @@ public:
     /// Destructor
     ~DofManExportModule();
 
-    /// Initializes receiver acording to object description stored in input record
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Writes the output.
-     * @param tStep time step.
-     */
     void doOutput(TimeStep *tStep);
-    /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "DofManExportModuleClass"; }
 
 protected:
-    /// returns the output stream for given solution step
-    FILE *giveOutputStream(TimeStep *);
+    FILE *giveOutputStream(TimeStep *tStep);
 };
 } // end namespace
 #endif

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/linearstatic.C,v 1.6.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// file linearstatic.cc
-//
-
 #include "linearstatic.h"
 #include "nummet.h"
 #include "timestep.h"
@@ -45,19 +39,13 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "elementside.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #include "verbose.h"
 #include "conTable.h"
-//#include "skyline.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
 #include "usrdefsub.h"
 #include "datastream.h"
-//#include "compcol.h"
-//#include "dyncompcol.h"
 #include "contextioerr.h"
 
 #ifdef __PETSC_MODULE
@@ -83,7 +71,9 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
 
 LinearStatic :: ~LinearStatic()
 {
-    delete stiffnessMatrix;
+    if (stiffnessMatrix) {
+        delete stiffnessMatrix;
+    }
     if ( nMethod ) {
         delete nMethod;
     }
@@ -144,7 +134,7 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 
 double LinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                              TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
+// returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
@@ -223,7 +213,8 @@ void LinearStatic :: solveYourself()
 
 
 
-void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
+void LinearStatic :: solveYourselfAt(TimeStep *tStep)
+{
     //
     // creates system of governing eq's and solves them at given time step
     //
@@ -237,19 +228,10 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         //
         // first step  assemble stiffness Matrix
         //
-        /*
-         * IntArray* mht = this -> GiveBanWidthVector ();
-         * stiffnessMatrix = new Skyline ();
-         * stiffnessMatrix ->  checkSizeTowardsBanWidth (mht) ;
-         * delete mht;
-         */
-        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType); // new Skyline ();
+        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
-
-        //stiffnessMatrix = new DynCompCol ();
-        //stiffnessMatrix = new CompCol ();
 
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
@@ -257,7 +239,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
-        // alocate space for displacementVector
+        // allocate space for displacementVector
         //
         //displacementVector = new FloatArray (this->giveNumberOfEquations());
         displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
@@ -324,13 +306,8 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         //
         this->giveNumericalMethod(tStep);
 
-        /*
-         * nMethod -> setSparseMtrxAsComponent ( LinearEquationLhs , stiffnessMatrix) ;
-         * nMethod -> setFloatArrayAsComponent ( LinearEquationRhs , &loadVector) ;
-         * nMethod -> setFloatArrayAsComponent ( LinearEquationSolution, &displacementVector) ;
-         */
         //
-        // call numerical model to solve arised problem
+        // call numerical model to solve arose problem
         //
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Solving ...\n");
@@ -381,7 +358,7 @@ contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode 
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    }
 
     return CIO_OK;
 }
@@ -422,13 +399,10 @@ contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMo
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    }
 
     return CIO_OK;
 }
-
-
-
 
 
 void
@@ -437,7 +411,6 @@ LinearStatic :: terminate(TimeStep *tStep)
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
 }
-
 
 
 int
@@ -518,7 +491,7 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
         }
 
         // --------------------------------------------------------------------------------
-        // only pcount is relevant here, since only prescribed componnts are exchanged !!!!
+        // only pcount is relevant here, since only prescribed components are exchanged !!!!
         // --------------------------------------------------------------------------------
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
