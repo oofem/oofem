@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/qspace.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,13 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************
-//   *** CLASS QUADRATIC 3D Element   ***
-//   ************************************
-
-//
-//  Recasted by L. Svoboda
-//
 #ifndef qspace_h
 #define qspace_h
 
@@ -52,116 +44,68 @@
 #include "sprnodalrecoverymodel.h"
 
 namespace oofem {
+/**
+ * This class implements an Quadratic 3d  20 - node element. Each node has 3 degrees of freedom.
+ *
+ * One single additional attribute is needed for Gauss integration purpose :
+ * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
+ * Tasks:
+ * - calculating its Gauss points
+ * - calculating its B,D,N matrices and dV
+ *
+ * @author L. Svoboda
+ */
 class QSpace : public StructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
-
 {
-    /*
-     * This class implements an Quadratic 3d  20 - node
-     * elasticity finite element. Each node has 3 degrees of freedom.
-     * DESCRIPTION :
-     * One single additional attribute is needed for Gauss integration purpose :
-     * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
-     * TASKS :
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
     int numberOfGaussPoints;
     static FEI3dHexaQuad interpolation;
 
 public:
-    QSpace(int, Domain *);   // constructor
-    ~QSpace()  {}            // destructor
+    QSpace(int, Domain *);
+    ~QSpace() {}
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    double       computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *);
 
     /**
      * Computes the global coordinates from given element's local coordinates.
      * Required by nonlocal material models.
      * @returns nonzero if successful
      */
-    virtual int  computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     /// characteristic length in gp (for some material models)
-    double       giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    /// Interface requesting service
     Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
+
     int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-
-    /// Returns the corresponding element to interface
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    /// Evaluates N matrix (interpolation estimated stress matrix).
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
-    //@}
 
-    /**
-     * @name The element interface required by SPRNodalRecoveryModelInterface
-     */
-    //@{
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     int SPRNodalRecoveryMI_giveNumberOfIP();
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    //@}
 
-    /**
-     * @name The element interface required by NodalAveragingRecoveryModel
-     */
-    //@{
-    /**
-     * Computes the element value in given node.
-     * @param answer contains the result
-     * @param node element node number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-
-    /**
-     * Computes the element value in given side.
-     * @param answer contains the result
-     * @param side element side number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    //@}
 
-    //
     // definition & identification
-    //
     const char *giveClassName() const { return "QSpace"; }
-    classType   giveClassID() const { return QSpaceClass; }
+    classType giveClassID() const { return QSpaceClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
-    virtual int  computeNumberOfDofs(EquationID ut) { return 60; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 60; }
 
-    integrationDomain  giveIntegrationDomain() { return _Cube; }
-    MaterialMode          giveMaterialMode()  { return _3dMat; }
+    integrationDomain giveIntegrationDomain() { return _Cube; }
+    MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
     void computeGaussPoints();
@@ -170,24 +114,19 @@ protected:
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
 
-
-
-
-
     int giveApproxOrder() { return 2; }
     int giveNumberOfIPForMassMtrxIntegration() { return 27; }
 
-    //@}
     /**
      * @name Surface load support
      */
     //@{
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    virtual void   computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    virtual void   giveSurfaceDofMapping(IntArray &answer, int) const;
-    virtual double computeSurfaceVolumeAround(GaussPoint *, int);
-    virtual void   computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *, int);
-    virtual int    computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);
+    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     //@}
 };
 } // end namespace oofem

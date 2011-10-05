@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/cebfip78.h,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,47 +32,37 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ******************************************
-//   *** CLASS CEB-FIP 78 rheologic model *****
-//   ******************************************
 #ifndef cebfip78_h
 #define cebfip78_h
-
 
 #include "maxwellChM.h"
 
 namespace oofem {
+
+/**
+ * This class implements a CEB-FIP 78 rheologic Maxwell chain model in a finite
+ * element problem.
+ */
 class CebFip78Material : public MaxwellChainMaterial
 {
-    /*
-     * This class implements a rheologic Maxwelll chain model in a finite
-     * element problem.
-     *
-     * DESCRIPTION
-     * TASK
-     */
 protected:
-    double E28;  // Young modulus at age of 28 days [MPa]
-    double fibf; // basic creep coefficient
-    double kap_a; // coefficient of hydrometric conditions
-    double kap_c; // coefficient of type of cement
-    double kap_tt; // coeeficient of temperature effects
-    double u;    // surface imposed to environment [mm^2]; temporary here ; should be
-                 // in crosssection level
-
+    double E28;    ///< Young modulus at age of 28 days [MPa].
+    double fibf;   ///< Basic creep coefficient.
+    double kap_a;  ///< Coefficient of hydrometric conditions.
+    double kap_c;  ///< Coefficient of type of cement.
+    double kap_tt; ///< Coefficient of temperature effects.
+    double u;      ///< Surface imposed to environment [mm^2]; temporary here ; should be in crosssection level.
 
 public:
     CebFip78Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
     ~CebFip78Material() { }
 
-
-
     const char *giveClassName() const { return "CebFip78Material"; }
-    classType giveClassID()         const { return CebFip78MaterialClass; }
+    classType giveClassID() const { return CebFip78MaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
-protected:
 
-    virtual double  computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
+protected:
+    virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 };
 } // end namespace oofem
 #endif // cebfip78_h

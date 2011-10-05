@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,13 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/* Author: L. Svoboda */
-
-//   ****************************
-//   *** CLASS CCTPlate in 3d ***
-//   ****************************
-//   25.5.2010
 
 #ifndef cct3d_h
 #define cct3d_h
@@ -69,29 +62,24 @@ enum CharTensor {
  * This class implements a triangular three-node plate CCT finite element.
  * Each node has 3 degrees of freedom.
  *
+ * Tasks:
+ * - calculating its B,D,N matrices and dV.
+ *
  * @author L. Svoboda
  * @date 2010-5-25
  */
 class CCTPlate3d : public CCTPlate
 {
-    /*
-     * This class implements an triangular three-node plate CCT finite element.
-     * Each node has 3 degrees of freedom.
-     * DESCRIPTION :
-     *
-     * TASKS :
-     *
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
-    // Transformation Matrix form GtoL(3,3) is stored
-    // at the element level for computation efficiency
+    /**
+     * Transformation Matrix form GtoL(3,3) is stored
+     * at the element level for computation efficiency.
+     */
     FloatMatrix *GtoLRotationMatrix;
 
 public:
-    CCTPlate3d(int, Domain *);                     // constructor
-    ~CCTPlate3d() { delete GtoLRotationMatrix; }   // destructor
+    CCTPlate3d(int n, Domain *d);
+    ~CCTPlate3d() { delete GtoLRotationMatrix; }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
@@ -110,11 +98,9 @@ protected:
     friend  class TR_SHELL01;
 
 public:
-    //
     // definition & identification
-    //
     const char *giveClassName() const { return "CCTPlate3d"; }
-    classType giveClassID()   const { return CCTPlate3dClass; }
+    classType giveClassID() const { return CCTPlate3dClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual int computeNumberOfL2GDofs(EquationID ut) { return 18; }
@@ -125,10 +111,6 @@ public:
 
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
-    /**
-     * Computes the element local (iso) coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     int giveLocalCoordinateSystem(FloatMatrix &answer)

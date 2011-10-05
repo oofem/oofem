@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/deidynamic.C,v 1.4.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//
-// file deidynamic.cc
-//
 
 #include "deidynamic.h"
 #include "nummet.h"
@@ -91,7 +85,7 @@ DEIDynamic :: initializeFrom(InputRecord *ir)
 
 double DEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                            TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
+// returns unknown quantity like displacement, velocity of equation eq
 // in time t
 // This function translates this request to numerical method language
 {
@@ -154,10 +148,10 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     //
     // creates system of governing eq's and solves them at given time step
     //
-    // this is an explicit problem: we assemble governing equatin at time t
+    // this is an explicit problem: we assemble governing equating at time t
     // and solution is obtained for time t+dt
     //
-    // first assemble problem at current time step to obtain results in folloving
+    // first assemble problem at current time step to obtain results in following
     // time step.
     // and then print results for this step also.
     // for first time step we need special start code
@@ -197,7 +191,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
 
             //
-            // assemble it manualy
+            // assemble it manually
             //
 #ifdef DEBUG
             if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
@@ -237,7 +231,6 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         // if init - try to determine the best deltaT
         if ( init ) {
-            // PI = 3.1415926535897932384626383279; PI =  3.1415926535897931160E0
             maxDt = 2 / sqrt(maxOm);
             if ( deltaT > maxDt ) {
                 OOFEM_LOG_RELEVANT("DEIDynamic: deltaT reduced to %e\n", maxDt);
@@ -334,8 +327,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
                 }
 
                 //
-                // if init step - find minimun period of vibration in order to
-                // determine maximal admisible time step
+                // if init step - find minimum period of vibration in order to
+                // determine maximal admissible time step
                 //
                 //maxOmi =  charMtrx.at(j,j)/massMatrix.at(jj) ;
                 //if (init) maxOm = (maxOm > maxOmi) ? (maxOm) : (maxOmi) ;
@@ -355,12 +348,12 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     //
     // set-up numerical model
     //
-    /* it is not necesary to call numerical method
+    /* it is not necessary to call numerical method
      * approach used here is not good, but effective enough
      * inverse of diagonal mass matrix is done here
      */
     //
-    // call numerical model to solve arised problem - done localy here
+    // call numerical model to solve arose problem - done locally here
     //
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
