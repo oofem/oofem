@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/adaptlinearstatic.h,v 1.5 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,63 +32,53 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// Class AdaptiveLinearStatic
-//
-
 #ifndef adaptlinearstatic_h
 #define adaptlinearstatic_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "linearstatic.h"
 #include "meshpackagetype.h"
 
 namespace oofem {
+
+/**
+ * This class implements an adaptive linear static engineering problem.
+ * Multiple loading cases are not supported.
+ * Due to linearity of a problem, the complete reanalysis from the beginning
+ * is done after adaptive remeshing.
+ * Solution steps represent a series of adaptive analyses.
+ */
 class AdaptiveLinearStatic : public LinearStatic
 {
-    /*
-     * This class implements Adaptive LinearStatic Engineering problem.
-     * Multiple loading cases are not supported.
-     * Due to linearity of a problem, the complete reanalysis from the beginning
-     * is done after adaptive remeshing.
-     * Solution Steps represent a seriaes of adaptive analyses.
-     */
-
 protected:
-
+    /// Error estimator used for determining the need for refinements.
     ErrorEstimator *ee;
+    /// Meshing package used for refinements.
     MeshPackageType meshPackage;
 
 public:
     AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { ee = NULL; }
     ~AdaptiveLinearStatic() { }
-    // solving
-    void solveYourselfAt(TimeStep *);
+
+    void solveYourselfAt(TimeStep *tStep);
+
     /**
-     * Initializes the newly generated discretization state acording to previous solution.
+     * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int                initializeAdaptive(int stepNumber);
-    /**
-     * Restores the  state of model from output stream. Restores not only the receiver state,
-     * but also same function is invoked for all DofManagers and Elements in associated
-     * domain. Note that by restoring element  context also contexts of all associated
-     * integration points (and material statuses) are restored.
-     */
-    virtual contextIOResultType                restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual int initializeAdaptive(int stepNumber);
+
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     void updateDomainLinks();
 
     IRResultType initializeFrom(InputRecord *ir);
-    /** Service for accessing ErrorEstimator corresponding to particular domain */
+
     ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
 
     // identification
     const char *giveClassName() const { return "AdaptiveLinearStatic"; }
-    classType giveClassID()      const { return AdaptiveLinearStaticClass; }
+    classType giveClassID() const { return AdaptiveLinearStaticClass; }
 };
 } // end namespace oofem
 #endif // adaptlinearstatic_h

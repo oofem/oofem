@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/axisymm3d.C,v 1.6.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,13 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file AXISYMM.CC
-//
-//  triangular element with rotational degrees of freedom
-//  for axisymmetric continuum
-//
-// 9.5.1995
 
 #include "axisymm3d.h"
 #include "node.h"
@@ -74,9 +66,8 @@ Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
 {
     numberOfDofMans = 3;
     area = -1;
-
-    numberOfGaussPoints      = 1;
-    numberOfFiAndShGaussPoints    = 1;
+    numberOfGaussPoints = 1;
+    numberOfFiAndShGaussPoints = 1;
 }
 
 Axisymm3d :: ~Axisymm3d()

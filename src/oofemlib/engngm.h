@@ -317,7 +317,7 @@ public:
     //char* giveInputDataFileName () ;
     /// Returns file descriptor of output file.
     FILE *giveOutputStream();
-    /** 
+    /**
      * Returns base output file name
      * to which extensions, like .out .vtk .osf should be added.
      * In current implementation, output file name is simply returned.
@@ -325,8 +325,8 @@ public:
      * @param n Not more than n bytes of src are copied
      */
     char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n - 1); }
-    /** 
-     * Sets the base output file name. 
+    /**
+     * Sets the base output file name.
      * @see giveOutputBaseFileName
      * @param src Output file name.
      */
@@ -878,14 +878,14 @@ protected:
     void petsc_assemblePrescribedVectorFromElements(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
 #endif
 #ifdef __PARALLEL_MODE
-    /** 
+    /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
      * Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
      * are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
      * data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
      */
     virtual void packMigratingData(TimeStep *) { }
-    /** 
+    /**
      * Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
      * Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
      * are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
@@ -896,17 +896,17 @@ protected:
 public:
 
     // consistency check
-    /** 
+    /**
      * Allows programmer to test some receiver's internal data, before computation begins.
      * @return Nonzero if receiver check is o.k.
      */
     virtual int checkConsistency() { return 1; }
-    /** 
+    /**
      * Allows programmer to test problem its internal data, before computation begins.
      * @return Nonzero if receiver check is o.k.
      */
     int checkProblemConsistency();
-    /** 
+    /**
      * Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
      * invoke initialization by individual init modules.
      */
@@ -993,9 +993,9 @@ public:
      * Then the local update and renumbering is necessary to get consistent data structure.
      */
     virtual void balanceLoad(TimeStep *);
-    /** returns reference to receiver's load balancer*/
+    /** Returns reference to receiver's load balancer*/
     virtual LoadBalancer *giveLoadBalancer() { return NULL; }
-    /** returns reference to receiver's load balancer monitor*/
+    /** Returns reference to receiver's load balancer monitor*/
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor() { return NULL; }
 
 

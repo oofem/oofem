@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/Attic/interfaceelem1d.h,v 1.1.2.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,81 +35,62 @@
 #ifndef interfaceelement1d_h
 #define interfaceelement1d_h
 
-
 #include "structuralelement.h"
-#include "gaussintegrationrule.h"
 
 namespace oofem {
+/**
+ * This class implements a 1D dimensional interface element connecting two nodes (with the same position)
+ * In order to compute normal and tangential direction of the slip plane, a reference node is needed.
+ */
 class InterfaceElem1d : public StructuralElement
 {
-    /*
-     * This class implements a 1D dimensional interface element connecting two nodes (with the same position)
-     * In order to compute normal and tangential direction of the slip plane, a reference node is needed.
-     */
 
 protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
     int referenceNode;
 
 public:
-    InterfaceElem1d(int, Domain *);                     // constructor
-    ~InterfaceElem1d()   { }                            // destructor
+    InterfaceElem1d(int n, Domain *d);
+    ~InterfaceElem1d() { }
 
-    void          computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void          computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)  { computeLumpedMassMatrix(answer, tStep); }
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     *
-     */
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)  { computeLumpedMassMatrix(answer, tStep); }
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    virtual int            computeNumberOfDofs(EquationID ut);
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual int computeNumberOfDofs(EquationID ut);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    double        computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
 
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType) { return NULL; }
+    Interface *giveInterface(InterfaceType it) { return NULL; }
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void          drawScalar(oofegGraphicContext &context);
+    void drawScalar(oofegGraphicContext &context);
 #endif
-    //
+
     // definition & identification
-    //
     const char *giveClassName() const { return "InterfaceElem1d"; }
-    classType            giveClassID() const { return InterfaceElem1dClass; }
+    classType giveClassID() const { return InterfaceElem1dClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
-    integrationDomain  giveIntegrationDomain() { return _Point; }
-    MaterialMode          giveMaterialMode()  { return _1dInterface; }
+    integrationDomain giveIntegrationDomain() { return _Point; }
+    MaterialMode giveMaterialMode() { return _1dInterface; }
 
 protected:
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &) { }
-    void          computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    void computeGaussPoints();
 
-    int           giveApproxOrder() { return 1; }
-    /*
-     * internal
-     * Note: this is not overloaded computeGtoLRotationMatrix
-     * the gp parameter is needed, since element geometry can be (in general) curved
-     *
-     * //void          computeGtoLRotationMatrix(FloatMatrix& answer, GaussPoint* gp);
-     */
+    int giveApproxOrder() { return 1; }
+
     void computeLocalSlipDir(FloatArray &grad);
     cmode giveCoordMode() const { return this->mode; }
 };

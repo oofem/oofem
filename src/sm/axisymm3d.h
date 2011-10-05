@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/axisymm3d.h,v 1.5.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************************************************************
-//   *** CLASS AXISYMMETRIC CONTINUUM
-//   ********************************************************************
-
 #ifndef axisymm3d_h
 #define axisymm3d_h
 
@@ -48,21 +43,17 @@
 #include "spatiallocalizer.h"
 
 namespace oofem {
+/**
+ * This class implements an triangular three-node finite element for axisymmetric continuum.
+ * Each node has 2 degrees of freedom.
+ *
+ * Tasks:
+ * - calculating its B,D,N matrices and dV.
+ */
 class Axisymm3d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
 {
-    /*
-     * This class implements an triangular three-node finite element
-     * for axisymmetric continuum
-     * Each node has 2 degrees of freedom.
-     *
-     * DESCRIPTION :
-     *
-     * TASKS :
-     *
-     * - calculating its B,D,N matrices and dV.
-     */
 
 protected:
     static FEI2dTrLin interpolation;
@@ -71,90 +62,42 @@ protected:
     double area;
 
 public:
-    Axisymm3d(int, Domain *);                        // constructor
-    ~Axisymm3d();                                    // destructor
+    Axisymm3d(int n, Domain *d);
+    ~Axisymm3d();
 
-    virtual int        computeNumberOfDofs(EquationID ut) { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     // characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *, const FloatArray &);
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
     double giveArea();
-    double computeVolumeAround(GaussPoint *);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
-    int     computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    void    computeStrainVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    double computeVolumeAround(GaussPoint *gp);
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+    Interface *giveInterface(InterfaceType it);
     FEInterpolation *giveInterpolation() { return & interpolation; }
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
-    void          drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void  drawScalar(oofegGraphicContext &context);
-    // void          drawInternalState (oofegGraphicContext&);
-
+    void drawRawGeometry(oofegGraphicContext &);
+    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &context);
+    //void drawInternalState(oofegGraphicContext&);
 #endif
 
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
     int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    /**
-     * Returns the corresponding element to interface
-     */
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    /**
-     * Evaluates N matrix (interpolation estimated stress matrix).
-     */
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
-    //@}
-    /**
-     * @name The element interface required by NodalAveragingRecoveryModel
-     */
-    //@{
-    /**
-     * Computes the element value in given node.
-     * @param answer contains the result
-     * @param node element node number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
+
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    /**
-     * Computes the element value in given side.
-     * @param answer contains the result
-     * @param node element side number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    //@}
-    /**
-     * @name The element interface required by SPRNodalRecoveryModelInterface
-     */
-    //@{
+
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
@@ -162,43 +105,32 @@ public:
     int SPRNodalRecoveryMI_giveNumberOfIP();
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    //@}
-    /**
-     * @name The element interface required by SpatialLocalizerInterface
-     */
-    //@{
-    /// Returns reference to corresponding element
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    /// Returns nonzero if given element contains given point
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
-    /// Returns distance of given point from element parametric center
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-    //@}
 
 
-    //
-    // definition & identification
-    //
     const char *giveClassName() const { return "Axisymm3d"; }
-    classType     giveClassID() const { return Axisymm3dClass; }
+    classType giveClassID() const { return Axisymm3dClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     IRResultType initializeFrom(InputRecord *ir);
 
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()   { return _3dMat; }
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void               computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeGaussPoints();
 
     // edge load support
-    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double        computeEdgeVolumeAround(GaussPoint *, int);
-    void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
+    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &, int iEdge, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // axisymm3d_h

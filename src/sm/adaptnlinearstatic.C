@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/adaptnlinearstatic.C,v 1.15.4.2 2004/04/09 12:01:10 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file adaptivenlinearstatic.cc
-//
-
 #include "mathfem.h"
 #include "adaptnlinearstatic.h"
 #include "verbose.h"
@@ -54,8 +49,6 @@
 #include "calmls.h"
 #include "nrsolver.h"
 
-#include "skyline.h"
-#include "skylineu.h"
 #include "outputmanager.h"
 
 #include "remeshingcrit.h"

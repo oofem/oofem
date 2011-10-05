@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/b3mat.C,v 1.4.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,12 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ****************************************************
-//   *** CLASS B3 Material (concrete creep and shrinkage)
-//   ****************************************************
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 #include "b3mat.h"
 #include "mathfem.h"
 #include "gausspnt.h"

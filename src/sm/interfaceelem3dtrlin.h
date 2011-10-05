@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -35,13 +35,11 @@
 #ifndef interfaceelem3dtrlin_h
 #define interfaceelem3dtrlin_h
 
-
 #include "structuralelement.h"
-#include "gaussintegrationrule.h"
 #include "fei2dtrlin.h"
 
 namespace oofem {
-/*
+/**
  * This class implements 3d triangular surface interface element with linear interpolation.
  */
 class InterfaceElement3dTrLin : public StructuralElement
@@ -50,64 +48,45 @@ protected:
     static FEI2dTrLin interpolation;
 
 public:
-    InterfaceElement3dTrLin(int, Domain *);                     // constructor
-    ~InterfaceElement3dTrLin()   { }                            // destructor
+    InterfaceElement3dTrLin(int n, Domain *d);
+    ~InterfaceElement3dTrLin() { }
 
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     *
-     */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 18; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual int computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    double        computeVolumeAround(GaussPoint *);
-
+    double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-    /** Interface requesting service */
     Interface *giveInterface(InterfaceType) { return NULL; }
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    void          drawScalar(oofegGraphicContext &context);
+    void drawScalar(oofegGraphicContext &context);
 #endif
-    //
+
     // definition & identification
-    //
     const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
-    classType            giveClassID() const { return InterfaceElement3dTrLinClass; }
+    classType giveClassID() const { return InterfaceElement3dTrLinClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()  { return _3dInterface; }
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    MaterialMode giveMaterialMode()  { return _3dInterface; }
 
 protected:
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &) { }
-    void          computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    void computeGaussPoints();
 
-    int           giveApproxOrder() { return 1; }
-    /*
-     * internal
-     * Note: this is not overloaded computeGtoLRotationMatrix
-     * the gp parameter is needed, since element geometry can be (in general) curved
-     *
-     * //void          computeGtoLRotationMatrix(FloatMatrix& answer, GaussPoint* gp);
-     */
-    int          computeGtoLRotationMatrix(FloatMatrix &answer);
-    void         computeLCS(FloatMatrix &answer);
+    int giveApproxOrder() { return 1; }
+
+    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    void computeLCS(FloatMatrix &answer);
 };
 } // end namespace oofem
 #endif // interfaceelem3dtrlin_h
