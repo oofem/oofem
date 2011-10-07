@@ -131,11 +131,11 @@ public:
     /**
      * Computes Lhs terms due to boundary conditions - velocity.
      */
-    virtual void computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
-  /**
+    virtual void computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    /**
      * Computes Lhs terms due to boundary conditions - pressure.
      */
-    virtual void computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+    virtual void computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
     /**
      * Computes Rhs terms due to boundary conditions.
      */
@@ -144,6 +144,29 @@ public:
      * Computes Rhs terms due to boundary conditions.
      */
     virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime) = 0;
+    /**
+     * Computes Lhs term due to applied slip with friction bc.
+     */
+    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime) {
+      _warning("computeSlipWithFrictionBCTerm_MB not implemented");
+      answer.resize(0,0); 
+    }
+    /**
+     * Computes Lhs contribution due to applied Penetration bc.
+     */
+    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime){
+      _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
+      answer.resize(0,0); 
+    }
+    /**
+     * Computes Lhs contribution due to outflow BC.
+     */
+    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime){
+      _warning("computeOutFlowBCTerm_MB not implemented");
+      answer.resize(0,0); 
+    }
+  		
+
 
     /// Computes the critical time increment.
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;

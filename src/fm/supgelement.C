@@ -219,6 +219,9 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 }
 
 
+
+
+
 void
 SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -229,6 +232,89 @@ SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
     // call material to compute stress
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
+
+
+
+void
+SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+{
+    bcType boundarytype;
+    int i, n, side;
+    int nLoads = 0;
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
+    // loop over boundary load array
+    helpMatrix.resize(undofs, undofs);
+    helpMatrix.zero();
+
+    answer.resize(undofs, undofs);
+    answer.zero();
+
+    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+
+    if ( nLoads ) {
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            side    = boundaryLoadArray.at(i * 2);
+            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+            boundarytype = load->giveType();
+            if ( boundarytype == SlipWithFriction ) {
+                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+            } else if ( boundarytype == PenetrationWithResistance ) {
+                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+            } else {
+                helpMatrix.resize(undofs, undofs);
+                helpMatrix.zero();
+                // _error("computeForceLoadVector : unsupported load type class");
+            }
+
+            answer.add(helpMatrix);
+        }
+    }
+}
+
+
+void
+SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+{
+    bcType boundarytype;
+    int i, n, side;
+    int nLoads = 0;
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
+    // loop over boundary load array
+    helpMatrix.resize(undofs, pndofs);
+    helpMatrix.zero();
+
+    answer.resize(undofs, pndofs);
+    answer.zero();
+
+    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+
+    if ( nLoads ) {
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            side    = boundaryLoadArray.at(i * 2);
+            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+            boundarytype = load->giveType();
+            if ( boundarytype == OutFlowBC ) {
+                this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+            } else {
+                helpMatrix.resize(undofs, pndofs);
+                helpMatrix.zero();
+		//_warning("computeForceLoadVector : unsupported load type class");
+            }
+
+            answer.add(helpMatrix);
+        }
+    }
+}
+
 
 
 

@@ -102,8 +102,6 @@ public:
      void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
      void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
      void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
-     void  computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-     void  computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
 
     void updateStabilizationCoeffs(TimeStep *tStep);
     double computeCriticalTimeStep(TimeStep *tStep);
