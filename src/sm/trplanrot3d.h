@@ -32,19 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* Author: L. Svoboda */
-
-//   ****************************************************************
-//   *** CLASS PLANE STRAIN WITH INDEPENDENT ROTATION FIELD in 3d ***
-//   ****************************************************************
-//   25.5.2010
-
 #ifndef trplanrot3d_h
 #define trplanrot3d_h
 
 #include "trplanrot.h"
 
 namespace oofem {
+
 #ifndef __CHARTENSOR
  #define __CHARTENSOR
 enum CharTensor {
@@ -62,7 +56,7 @@ enum CharTensor {
 
 /**
  * This class represent triangular plane stress element with rotational degree of freedom around normal
- * that can be arbitrary oriented in space, in contract to base TrPlaneStrRot element that is
+ * that can be arbitrary oriented in space, in contrast to base TrPlaneStrRot element that is
  * defined in xy-plane.
  *
  * Each node has 3 degrees of freedom.
@@ -72,17 +66,6 @@ enum CharTensor {
  */
 class TrPlaneStrRot3d : public TrPlaneStrRot
 {
-    /*
-     * This class implements an triangular three-node plane-stress elasticity finite element
-     * with independent rotation field.
-     * Each node has 3 degrees of freedom.
-     * DESCRIPTION :
-     *
-     * TASKS :
-     *
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
     /**
      * Transformation Matrix form GtoL(3,3) is stored
@@ -91,8 +74,8 @@ protected:
     FloatMatrix *GtoLRotationMatrix;
 
 public:
-    TrPlaneStrRot3d(int, Domain *);                     // constructor
-    ~TrPlaneStrRot3d() { delete GtoLRotationMatrix; }   // destructor
+    TrPlaneStrRot3d(int n, Domain *d);
+    ~TrPlaneStrRot3d() { delete GtoLRotationMatrix; }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
@@ -109,9 +92,8 @@ protected:
     friend class TR_SHELL01;
 
 public:
-    //
+
     // definition & identification
-    //
     const char *giveClassName() const { return "TrPlaneStrRot3d"; }
     classType giveClassID() const { return TrPlaneStrRot3dClass; }
 

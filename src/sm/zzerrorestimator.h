@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/zzerrorestimator.h,v 1.5 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   *************************************************************************
-//   *** CLASS ERROR ESTIMATOR (INDICATOR) ACORDING TO ZIENKIEWICZ AND ZHU ***
-//   *************************************************************************
 
 #ifndef zzerrorestimator_h
 #define zzerrorestimator_h
@@ -69,26 +64,26 @@ class GaussPoint;
 class ZZErrorEstimator : public ErrorEstimator
 {
 public:
-    // type of norm used
+    /// Type of norm used.
     enum NormType { L2Norm, EnergyNorm };
-    // nodal recovery type
+    /// Nodal recovery type.
     enum NodalRecoveryType { ZZRecovery, SPRRecovery };
 
 protected:
-    /// global error norm
+    /// Global error norm.
     double globalENorm;
-    /// global norm of quantity which error is evaluated
+    /// Global norm of quantity which error is evaluated.
     double globalSNorm;
 #ifdef ZZErrorEstimator_ElementResultCashed
-    /// cache storing element norms
+    /// Cache storing element norms.
     FloatArray eNorms;
 #endif
-    /// type of norm used
+    /// Type of norm used.
     NormType normType;
-    /// nodal recovery type
+    /// Nodal recovery type.
     NodalRecoveryType nodalRecoveryType;
 
-    /// actual state counter.
+    /// Actual state counter.
     StateCounterType stateCounter;
 
 public:
@@ -101,43 +96,16 @@ public:
     }
     /// Destructor
     ~ZZErrorEstimator() { }
-    /** Returns the element error of requested type. The estimateError service should be called before.
-     * @param type error type
-     * @param elem element for which error requested
-     * @param tStep time step
-     */
+
     virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
-    /** Returns the characteristic value of given type.
-     * The estimateError service should be called before. Intended to be used by remeshingCriterias to querry
-     * various values provided by specific error estimator.
-     * @param type value type
-     * @param tStep time step
-     */
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
 
-    /**
-     * Estimates the error on associated domain at given timeSte.
-     * @param tStep time step
-     */
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
-    /** Returns reference to associated remeshing criteria.
-     */
     virtual RemeshingCriteria *giveRemeshingCrit();
-    /** Initializes receiver acording to object description stored in input record.
-     * This function is called immediately after creating object using
-     * constructor. InitString can be imagined as data record in component database
-     * belonging to receiver. Receiver may use value-name extracting functions
-     * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "ZZErrorEstimator"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return ZZErrorEstimatorClass; }
 
-protected:
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const { return "ZZErrorEstimator"; }
+    classType giveClassID() const { return ZZErrorEstimatorClass; }
 };
 
 
@@ -173,33 +141,30 @@ public:
  * (Assumes that error is equally distributed between elements, then the requirement for max. permissible error
  * can be translated into placing a limit on the error on each element.)
  * The basic task is to evaluate the required mesh density (at nodes) on given domain,
- * based on informations provided by the compatible error ertimator.
- *
+ * based on informations provided by the compatible error estimator.
  *
  * The remeshing criteria is maintained by the corresponding error estimator. This is mainly due to fact, that is
  * necessary for given EE to create compatible RC. In our concept, the EE is responsible.
- *
  */
 class ZZRemeshingCriteria : public RemeshingCriteria
 {
 public:
-    /// mode of receiver, allows to use it in more general situations
+    /// Mode of receiver, allows to use it in more general situations.
     enum ZZRemeshingCriteriaModeType { stressBased };
 
 protected:
-    /// Array of nodal mesh densities
+    /// Array of nodal mesh densities.
     FloatArray nodalDensities;
-    /// Remeshing strategy proposed
+    /// Remeshing strategy proposed.
     RemeshingStrategy remeshingStrategy;
-    /// actual values (densities) state counter.
+    /// Actual values (densities) state counter.
     StateCounterType stateCounter;
-    /// mode of receiver
+    /// Mode of receiver.
     ZZRemeshingCriteriaModeType mode;
-    /// required error to obtain
+    /// Required error to obtain.
     double requiredError;
-    /// minimum element size alloved
+    /// Minimum element size allowed.
     double minElemSize;
-
 
 public:
     /// Constructor
@@ -207,44 +172,15 @@ public:
     /// Destructor
     ~ZZRemeshingCriteria() { }
 
-    /** Returns the required mesh size n given dof manager.
-     * The mesh density is defined as a required element size
-     * (in 1D the element length, in 2D the square from element area).
-     * @param num dofman  number
-     * @param tStep time step
-     * @param relative if zero, then actual density is returned, otherwise the relative density to current is returned.
-     */
+
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
-    /**
-     * Returns existing mesh size for given dof manager.
-     * @param num dofMan number
-     */
     virtual double giveDofManDensity(int num);
-    /**
-     * Determines, if the remeshing is needed, and if nedded, the type of strategy used
-     */
     virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
-    /**
-     * Estimates the nodal densities.
-     * @param tStep time step
-     */
     virtual int estimateMeshDensities(TimeStep *tStep);
-    /** Initializes receiver acording to object description stored in input record.
-     * This function is called immediately after creating object using
-     * constructor. InitString can be imagined as data record in component database
-     * belonging to receiver. Receiver use value-name extracting functions
-     * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /// Returns "ZZErrorEstimator" - class name of the receiver.
     const char *giveClassName() const { return "ZZErrorEstimator"; }
-    /** Returns ZZRemeshingCriteriaClass - classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return ZZRemeshingCriteriaClass; }
-
-protected:
+    classType giveClassID() const { return ZZRemeshingCriteriaClass; }
 };
 
 /**

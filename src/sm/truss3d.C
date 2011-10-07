@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss3d.C,v 1.5 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file Truss3d.C
 
 #include "truss3d.h"
 #include "domain.h"
@@ -58,7 +55,7 @@
 
 namespace oofem {
 //
-// upravit teplota u geom. nelinearity
+// adjust the temperature at geom. nonlinearities
 //
 
 Truss3d :: Truss3d(int n, Domain *aDomain) :
@@ -67,7 +64,6 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 {
     numberOfDofMans     = 2;
     length              = 0.;
-    //  referenceNode       - 0  ;
 }
 
 Interface *
@@ -153,9 +149,7 @@ Truss3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     y2 = this->giveNode(2)->giveCoordinate(2);
     z2 = this->giveNode(2)->giveCoordinate(3);
 
-    // answer = new FloatMatrix(1,4);
     answer.resize(1, 6);
-
     answer.at(1, 1) = x1 - x2;
     answer.at(1, 2) = y1 - y2;
     answer.at(1, 3) = z1 - z2;
@@ -252,12 +246,10 @@ Truss3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
-    //FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
-    //answer = new FloatMatrix(2,4) ;
     answer.resize(3, 6);
     answer.zero();
 
@@ -301,18 +293,13 @@ double Truss3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 double Truss3d :: giveLength()
 // Returns the length of the receiver.
 {
-    double dx, dy, dz;
     Node *nodeA, *nodeB;
 
     if ( length == 0. ) {
         nodeA   = this->giveNode(1);
         nodeB   = this->giveNode(2);
-        dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-        dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-        dz      = nodeB->giveCoordinate(3) - nodeA->giveCoordinate(3);
-        length  = sqrt(dx * dx + dy * dy + dz * dz);
+        length  = nodeB->giveCoordinates()->distance(*nodeA->giveCoordinates());
     }
-
     return length;
 }
 
@@ -324,7 +311,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
 //
 {
-    FloatArray lx(3), ly(3), lz(3), help(3);
+    FloatArray lx, ly(3), lz(3), help(3);
     double length = this->giveLength();
     Node *nodeA, *nodeB;
     int i;
@@ -338,10 +325,8 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeB  = this->giveNode(2);
     // refNode= this->giveDomain()->giveNode (this->referenceNode);
 
-    for ( i = 1; i <= 3; i++ ) {
-        lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
-        // help.at(i)=(refNode->giveCoordinate(i)-nodeA->giveCoordinate(i));
-    }
+    lx.beDifferenceOf(*nodeB->giveCoordinates(),*nodeA->giveCoordinates());
+    lx.times(1/length);
 
     int minIndx = 1;
     for ( i = 2; i <= 3; i++ ) {
@@ -377,19 +362,17 @@ Truss3d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Truss3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
+    // DofId mask array determines the dof ordering requested from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
-    answer.resize(3);
 
+    answer.resize(3);
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-
-    return;
 }
 
 
@@ -403,7 +386,7 @@ Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      * we assemble locally this matrix for only nonzero
      * shape functions.
      * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
+     * necessary for linear plane stress triangle edge).
      * These nonzero shape functions are then mapped to
      * global element functions.
      *
@@ -412,7 +395,6 @@ Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -436,8 +418,6 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     answer.at(4) = 4;
     answer.at(5) = 5;
     answer.at(6) = 6;
-
-    return;
 }
 
 double
@@ -474,7 +454,7 @@ void Truss3d :: drawRawGeometry(oofegGraphicContext &gc)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
@@ -501,7 +481,7 @@ void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }

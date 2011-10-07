@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.C,v 1.6 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file Truss1d.C
-
 #include "truss1d.h"
 #include "domain.h"
 #include "node.h"
@@ -46,13 +43,8 @@
 #include "flotarry.h"
 #include "intarray.h"
 
-#include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
-
 #ifdef __OOFEG
+ #include "engngm.h"
  #include "oofeggraphiccontext.h"
 #endif
 
@@ -79,7 +71,6 @@ Truss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 //
 {
     double l, x1, x2;
-    // FloatMatrix* answer;
     l = this->giveLength();
 
     x1 = this->giveNode(1)->giveCoordinate(1);
@@ -89,8 +80,6 @@ Truss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 
     answer.at(1, 1) = ( x1 - x2 ) / l / l;
     answer.at(1, 2) = ( x2 - x1 ) / l / l;
-
-    return;
 }
 
 void Truss1d :: computeGaussPoints()
@@ -121,31 +110,24 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
-
-    //if (this->updateRotationMatrix()) answer.rotatedWith(*this->rotationMatrix) ;
-    return;
 }
 
 
 void
 Truss1d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// Returns the displacement interpolation matrix {N} of the receiver,
+// evaluated at aGaussPoint.
 {
     double ksi, n1, n2;
-    //FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
-    //answer = new FloatMatrix(2,4) ;
     answer.resize(1, 2);
     answer.zero();
 
     answer.at(1, 1) = n1;
     answer.at(1, 2) = n2;
-
-    return;
 }
 
 int
@@ -202,16 +184,15 @@ Truss1d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Truss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
     //IntArray* answer = new IntArray (2);
     answer.resize(1);
-
     answer.at(1) = D_u;
-    return;
 }
 
 
@@ -267,7 +248,7 @@ void Truss1d :: drawRawGeometry(oofegGraphicContext &gc)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
@@ -294,7 +275,7 @@ void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
@@ -504,15 +485,6 @@ Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
     GaussPoint *gp;
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-    /*
-     * if (type == IST_StressTensor) {
-     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStressVector();
-     * } else if (type == IST_StrainTensor) {
-     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStrainVector();
-     * }else answer.resize(0);
-     */
 }
 
 void
@@ -646,7 +618,5 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
     for ( i = 1; i <= n; i++ ) {
         answer.at(i) = n1 * list.at(1)->at(i) + n2 *list.at(2)->at(i);
     }
-
-    return;
 }
 } // end namespace oofem

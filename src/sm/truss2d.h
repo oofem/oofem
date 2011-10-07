@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss2d.h,v 1.6 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,104 +32,82 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************
-//   *** CLASS TRUSS2D ***
-//   *********************
-
-/*
- * Contributions:
- * Peter Grassl - has added cs_mode, allowing the put this element in xy, xz, or yz planes
- */
-
 #ifndef truss2d_h
 #define truss2d_h
 
-
 #include "nlstructuralelement.h"
-#include "gaussintegrationrule.h"
-#include "gausspnt.h"
 
 namespace oofem {
+
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
- * DESCRIPTION :
+ *
  * A truss bar element is characterized by its 'length' and its 'pitch'. The
- * pitch is the angle in radians between the X-axis anf the axis of the
+ * pitch is the angle in radians between the X-axis and the axis of the
  * element (oriented node1 to node2).
+ *
+ * Can be used in xy, xz or yz planes.
+ *
+ * @author Peter Grassl
  */
 class Truss2d : public NLStructuralElement
 {
 protected:
     double length;
     double pitch;
-    // FloatMatrix*  rotationMatrix ;
     int cs_mode;
+
 public:
+    Truss2d(int n, Domain *d);
+    ~Truss2d() { }
 
-    Truss2d(int, Domain *);                     // constructor
-    ~Truss2d()   { }                            // destructor
-
-    // FloatArray*   ComputeBodyLoadVectorAt (TimeStep*) ;
-    void          computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void          computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    // FloatArray*   ComputeResultingBodyForceAt (TimeStep*) ;
-    // FloatMatrix*  computeStiffnessMatrix () ;
-    // FloatArray*   ComputeStrainVector (GaussPoint*,TimeStep*) ;
-    // FloatArray*   ComputeInitialStrainVector (TimeStep* );
-    int              giveLocalCoordinateSystem(FloatMatrix &answer);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
+    int giveLocalCoordinateSystem(FloatMatrix &answer);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 4; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual int computeNumberOfDofs(EquationID ut) { return 4; }
+    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
-    // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &)
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
     { return this->giveLength(); }
 
-    double        computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    //int    hasEdgeLoadSupport () {return 1;}
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
-    //
+
     // definition & identification
-    //
     const char *giveClassName() const { return "Truss2d"; }
-    classType            giveClassID() const { return Truss2dClass; }
+    classType giveClassID() const { return Truss2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-    integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  { return _1dMat; }
+    integrationDomain giveIntegrationDomain() { return _Line; }
+    MaterialMode giveMaterialMode() { return _1dMat; }
 
 protected:
     // edge load support
     void resolveCoordIndices(int &c1, int &c2);
-    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double        computeEdgeVolumeAround(GaussPoint *, int);
-    void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *, int);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    //  int           computeGtoNRotationMatrix (FloatMatrix&);
-    void          computeGaussPoints();
+    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int) const;
+    double computeEdgeVolumeAround(GaussPoint *gp, int);
+    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
+    void computeGaussPoints();
 
-    double        giveLength();
-    double        givePitch();
-    int           giveApproxOrder() { return 1; }
+    double giveLength();
+    double givePitch();
+    int giveApproxOrder() { return 1; }
 };
 } // end namespace oofem
 #endif // truss2d_h

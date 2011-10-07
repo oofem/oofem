@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,17 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   **********************************************************
-//   *** CLASS PLANE STRAIN WITH INDEPENDENT ROTATION FIELD ***
-//   **********************************************************
-//   5.5.1995 / 25.5.2010
-
 #ifndef trplanrot_h
 #define trplanrot_h
 
 #include "trplanstrss.h"
-
 
 namespace oofem {
 /**
@@ -57,13 +49,13 @@ protected:
     int numberOfRotGaussPoints;
 
 public:
-    TrPlaneStrRot(int, Domain *);          // constructor
-    ~TrPlaneStrRot() { }                   // destructor
+    TrPlaneStrRot(int, Domain *);
+    ~TrPlaneStrRot() { }
 
 protected:
     void computeGaussPoints();
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual double giveArea();
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
@@ -71,11 +63,9 @@ protected:
     void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
 
 public:
-    //
     // definition & identification
-    //
     const char *giveClassName() const { return "TrPlaneStrRot"; }
-    classType    giveClassID()   const { return TrPlaneStrRotClass; }
+    classType giveClassID() const { return TrPlaneStrRotClass; }
     IRResultType initializeFrom(InputRecord *ir);
     MaterialMode giveMaterialMode() { return _PlaneStressRot; }
     integrationDomain giveIntegrationDomain() { return _Triangle; }
@@ -83,20 +73,16 @@ public:
     virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    // characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *, const FloatArray &) { return 0.; }
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
 
-    //
     FloatArray *GivePitch();
-    FloatArray *GiveDerivativeUX(GaussPoint *);
-    FloatArray *GiveDerivativeVX(GaussPoint *);
-    FloatArray *GiveDerivativeUY(GaussPoint *);
-    FloatArray *GiveDerivativeVY(GaussPoint *);
-    void computeStrainVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    FloatArray *GiveDerivativeUX(GaussPoint *gp);
+    FloatArray *GiveDerivativeVX(GaussPoint *gp);
+    FloatArray *GiveDerivativeUY(GaussPoint *gp);
+    FloatArray *GiveDerivativeVY(GaussPoint *gp);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    //
     virtual int testElementExtension(ElementExtension ext) { return 0; }
-    //int    hasEdgeLoadSupport () {return 0;}
 };
 } // end namespace oofem
 #endif //  trplanrot_h

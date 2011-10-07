@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss2d.C,v 1.4 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file Truss2d.CC
-
 #include "truss2d.h"
 #include "domain.h"
 #include "node.h"
@@ -46,13 +43,8 @@
 #include "flotarry.h"
 #include "intarray.h"
 
-#include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
-
 #ifdef __OOFEG
+ #include "engngm.h"
  #include "oofeggraphiccontext.h"
 #endif
 
@@ -79,18 +71,16 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 // Returns the linear part of the B matrix
 //
 {
-    double coeff, l, x1, x2, z1, z2;
+    double l, x1, x2, z1, z2;
     //determine in which plane the truss is defined
     int c1, c2;
     resolveCoordIndices(c1, c2);
 
-    // FloatMatrix* answer;
     x1 = this->giveNode(1)->giveCoordinate(c1);
     z1 = this->giveNode(1)->giveCoordinate(c2);
     x2 = this->giveNode(2)->giveCoordinate(c1);
     z2 = this->giveNode(2)->giveCoordinate(c2);
 
-    // answer = new FloatMatrix(1,4);
     answer.resize(1, 4);
 
     answer.at(1, 1) = x1 - x2;
@@ -99,10 +89,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.at(1, 4) = z2 - z1;
 
     l = this->giveLength();
-    coeff = 1.0 / l / l;
-    answer.times(coeff);
-
-    return;
+    answer.times( 1.0 / l / l );
 }
 
 void
@@ -181,21 +168,17 @@ Truss2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
-    //FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
-    //answer = new FloatMatrix(2,4) ;
+
     answer.resize(2, 4);
     answer.zero();
-
     answer.at(1, 1) = n1;
     answer.at(1, 3) = n2;
     answer.at(2, 2) = n1;
     answer.at(2, 4) = n2;
-
-    return;
 }
 
 int
@@ -444,9 +427,10 @@ Truss2d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
+    // DofId mask array determines the dof ordering requested from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
     //IntArray* answer = new IntArray (2);
@@ -465,7 +449,11 @@ Truss2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const 
     return;
 }
 
-
+void
+Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
+}
 
 void
 Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
@@ -485,7 +473,6 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -507,8 +494,6 @@ Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     answer.at(2) = 2;
     answer.at(3) = 3;
     answer.at(4) = 4;
-
-    return;
 }
 
 double
@@ -558,7 +543,7 @@ void Truss2d :: drawRawGeometry(oofegGraphicContext &gc)
 
     GraphicObj *go;
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
@@ -605,7 +590,7 @@ void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }

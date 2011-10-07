@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/trplanstrss.C,v 1.7.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file TRPLANSTRSS.CC
-
 #include "trplanstrss.h"
 #include "node.h"
 #include "structuralmaterial.h"
@@ -42,31 +39,25 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-// #include "polynoxy.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
 #include "verbose.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 #include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "conTable.h"
  #include "oofegutils.h"
-  #include "rcm2.h"
 #endif
 
 namespace oofem {
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
-    , DirectErrorIndicatorRCInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
+    DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
     // Constructor.
@@ -189,7 +180,6 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 // Returns the [3x6] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    // FloatMatrix *answer ;
     Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -207,8 +197,6 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 
     area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
-
-    // answer = new FloatMatrix(3,6) ;
     answer.resize(3, 6);
 
     answer.at(1, 1) = y2 - y3;
@@ -227,7 +215,6 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
     answer.at(3, 6) = y1 - y2;
 
     answer.times( 1. / ( 2. * area ) );
-    return;
 }
 
 
@@ -320,7 +307,6 @@ TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoi
 
     delete b;
     delete c;
-    return;
 }
 
 void TrPlaneStress2d :: computeGaussPoints()
@@ -341,13 +327,11 @@ TrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 // luated at aGaussPoint.
 {
     double l1, l2, l3;
-    // FloatMatrix* answer ;
 
     l1 = aGaussPoint->giveCoordinate(1);
     l2 = aGaussPoint->giveCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
-    //answer = new FloatMatrix(2,6) ;
     answer.resize(2, 6);
     answer.zero();
 
@@ -358,8 +342,6 @@ TrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
     answer.at(2, 2) = l1;
     answer.at(2, 4) = l2;
     answer.at(2, 6) = l3;
-
-    return;
 }
 
 
@@ -373,7 +355,7 @@ TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussP
      * we assemble locally this matrix for only nonzero
      * shape functions.
      * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
+     * necessary for linear plane stress triangle edge).
      * These nonzero shape functions are then mapped to
      * global element functions.
      *
@@ -394,8 +376,6 @@ TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussP
     answer.at(1, 3) = n2;
     answer.at(2, 2) = n1;
     answer.at(2, 4) = n2;
-
-    return;
 }
 
 void
@@ -425,12 +405,10 @@ TrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
 
 double
-TrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+TrPlaneStress2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double dx, dy, length;
     Node *nodeA, *nodeB;
@@ -460,7 +438,7 @@ TrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 
 
 void
-TrPlaneStress2d ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+TrPlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     double n1, n2, ksi = gp->giveCoordinate(1);
     Node *nodeA, *nodeB;
@@ -690,7 +668,8 @@ TrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &no
 
 
 void
-TrPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -701,8 +680,6 @@ TrPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 

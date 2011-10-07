@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,16 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **********************************************************
-//   *** CLASS PLANE STRAIN WITH INDEPENDENT ROTATION FIELD ***
-//   **********************************************************
-//
-//   triangular element with rotational degrees of freedom
-//   for plane stress
-//
-//   5.5.1995 / 25.5.2010
-//
-
 #include "trplanrot.h"
 
 #include "node.h"
@@ -58,11 +47,6 @@
 #include "verbose.h"
 #include "engngm.h"
 #include "load.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
-
 
 namespace oofem {
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :

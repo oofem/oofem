@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/zzerrorestimator.C,v 1.10.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -84,7 +83,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         _error("estimateError: unknown nodal recovery type");
     }
 
-    // first set the domain Smoother to suitable one, keep old one to berecovered
+    // first set the domain Smoother to suitable one, keep old one to be recovered
     oldSmoother = this->domain->giveSmoother();
     this->domain->setSmoother(rm, 0); // do not delete old one
 

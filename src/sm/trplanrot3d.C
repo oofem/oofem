@@ -32,18 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* Author: L. Svoboda */
-
-//   ****************************************************************
-//   *** CLASS PLANE STRAIN WITH INDEPENDENT ROTATION FIELD in 3D ***
-//   ****************************************************************
-//
-//   triangular element with rotational degrees of freedom
-//   for plane stress
-//
-//   25.5.2010
-//
-
 #include "trplanrot3d.h"
 
 #include "engngm.h"
@@ -52,11 +40,6 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
-
 
 namespace oofem {
 TrPlaneStrRot3d :: TrPlaneStrRot3d(int n, Domain *aDomain) : TrPlaneStrRot(n, aDomain)
@@ -127,8 +110,6 @@ TrPlaneStrRot3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
 
 
@@ -367,8 +348,6 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     } else {
         answer.resize(0);          // nil resultant
     }
-
-    return;
 }
 
 
