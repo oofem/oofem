@@ -112,8 +112,12 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->computeAccelerationTerm_MC(answer, tStep);
     } else if ( mtrx == PressureTerm_MC ) {
         this->computePressureTerm_MC(answer, tStep);
+    } else if ( mtrx == BCLhsTerm_MB ) {
+      this->computeBCLhsTerm_MB(answer, tStep);
+    } else if ( mtrx == BCLhsPressureTerm_MB ) {
+      this->computeBCLhsPressureTerm_MB(answer, tStep);
     } else if ( mtrx == LSICStabilizationTerm_MB ) {
-        this->computeLSICStabilizationTerm_MB(answer, tStep);
+      this->computeLSICStabilizationTerm_MB(answer, tStep);
     } else if ( mtrx == StiffnessMatrix) {
         // support for stokes solver
         IntArray vloc, ploc;
@@ -122,14 +126,16 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size,size); answer.zero();
-        this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
+        //this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
         this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep); answer.assemble(h, vloc);
         this->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
         this->computeLinearAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
-        this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
+	this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
+	this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
+        //this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
@@ -175,7 +181,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         this->giveLocalVelocityDofMap(vloc);
         this->giveLocalPressureDofMap(ploc);
         answer.resize(size); answer.zero();
-        this->computeAdvectionTerm_MB(h, tStep); answer.assemble(h, vloc);
+        //this->computeAdvectionTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc);
         this->computeDiffusionTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeDiffusionTerm_MC(h, tStep); answer.assemble(h, ploc);
@@ -183,11 +189,11 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         FloatMatrix m1;
         FloatArray v,p;
         // add lsic stabilization term
-        this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
+        //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
-        h.beProductOf(m1, v);
-        answer.assemble(h, vloc);
+        //h.beProductOf(m1, v);
+        //answer.assemble(h, vloc);
         this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
         //m1.times( 1. / ( dscale * uscale ) );
         h.beProductOf(m1, v);

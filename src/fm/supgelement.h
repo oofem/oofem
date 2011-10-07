@@ -129,6 +129,14 @@ public:
      */
     virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
+     * Computes Lhs terms due to boundary conditions - velocity.
+     */
+    virtual void computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+  /**
+     * Computes Lhs terms due to boundary conditions - pressure.
+     */
+    virtual void computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
+    /**
      * Computes Rhs terms due to boundary conditions.
      */
     virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime) = 0;

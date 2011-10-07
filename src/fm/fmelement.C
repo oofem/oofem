@@ -52,9 +52,9 @@ FMElement :: initializeFrom(InputRecord *ir)
 
     Element :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_SUPGElement_bsides, "bsides"); // Macro
-    if ( !boundarySides.isEmpty() ) {
-        IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, "bcodes"); // Macro
-    }
+    // if ( !boundarySides.isEmpty() ) {
+    //  IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, "bcodes"); // Macro
+    //}
 
     return IRRT_OK;
 }

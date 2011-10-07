@@ -450,8 +450,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     //previousAccelerationVector=accelerationVector;
 
     // evaluate element supg and sppg stabilization coeffs
-    this->evaluateElementStabilizationCoeffs( tStep->givePreviousStep() );
-
+    this->evaluateElementStabilizationCoeffs( tStep);
 
     //
     // predictor
@@ -531,7 +530,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            // conservation eq part
+	    this->assemble( lhs, tStep, EID_MomentumBalance, BCLhsTerm_MB,
+	                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+	    this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, BCLhsPressureTerm_MB,
+	                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+	    // conservation eq part
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC,
@@ -1162,7 +1165,8 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         ( type == DiffusionDerivativeTerm_MB ) ||
         ( type == TangentDiffusionDerivativeTerm_MB ) ||
         ( type == SecantDiffusionDerivativeTerm_MB ) ||
-        ( type == InitialDiffusionDerivativeTerm_MB ) ) {
+        ( type == InitialDiffusionDerivativeTerm_MB ) ||
+	 (type == BCLhsTerm_MB )) {
         answer.times( alpha * tStep->giveTimeIncrement() );
     } else if ( type == LSICStabilizationTerm_MB ) {
         double coeff = lscale / ( dscale * uscale * uscale );
@@ -1202,6 +1206,9 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.add(h);
+	eptr->giveCharacteristicMatrix(m1, BCLhsTerm_MB, tStep);
+	h.beProductOf(m1, v);
+	answer.add(h);
         // add pressure term
         eptr->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
         eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
@@ -1209,7 +1216,10 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
 	//h.beProductOf(m1,vp); // term due to prescribed pressure
         answer.add(h);
-        answer.times(-1.0);
+        eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MB, tStep);
+	h.beProductOf(m1, v);
+	answer.add(h);
+	answer.times(-1.0);
     } else if ( type == AlgorithmicRhsTerm_MC ) {
         Element *eptr = domain->giveElement(num);
         FloatMatrix m1, m2;
