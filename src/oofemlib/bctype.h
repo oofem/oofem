@@ -42,6 +42,9 @@ enum bcType {
     DirichletBT,    ///< Prescribed value.
     TransmissionBC, ///< Neumann type (prescribed flux).
     ConvectionBC,   ///< Newton type.
+    SlipWithFriction,
+    PenetrationWithResistance,
+    OutFlowBC
 };
 } // end namespace oofem
 #endif // bctype_h

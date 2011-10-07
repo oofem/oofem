@@ -91,6 +91,8 @@ namespace oofem {
     ENUM_ITEM(DiffusionDerivativeTerm_MC)                                 \
     ENUM_ITEM(DiffusionTerm_MC)                                           \
     ENUM_ITEM(PressureTerm_MC)                                            \
+    ENUM_ITEM(BCLhsTerm_MB)                                               \
+    ENUM_ITEM(BCLhsPressureTerm_MB)                                       \
     ENUM_ITEM(BCRhsTerm_MB)                                               \
     ENUM_ITEM(BCRhsTerm_MC)                                               \
     ENUM_ITEM(AlgorithmicRhsTerm_MB)                                      \
