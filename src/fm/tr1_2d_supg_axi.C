@@ -796,6 +796,241 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
     }
 }
 
+
+void
+TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+{
+    bcType boundarytype;
+    int i, n, side;
+    int nLoads = 0;
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
+    // loop over boundary load array
+    helpMatrix.resize(6, 6);
+    helpMatrix.zero();
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+
+    if ( nLoads ) {
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            side    = boundaryLoadArray.at(i * 2);
+            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+            boundarytype = load->giveType();
+            if ( boundarytype == SlipWithFriction ) {
+                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+            } else if ( boundarytype == PenetrationWithResistance ) {
+                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+            } else {
+                answer.resize(6, 6);
+                answer.zero();
+                // _error("computeForceLoadVector : unsupported load type class");
+            }
+
+            answer.add(helpMatrix);
+        }
+    }
+}
+
+
+void
+TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime)
+{
+    //answer.resize(6, 6);
+    //answer.zero();
+
+    int node1, node2, node3, i, j, ip;
+    double l, t1, t2, _t1, _t2, dV;
+    double alpha, beta;
+    GaussPoint *gp;
+    FloatArray nt(6), n(3);
+    answer.resize(6, 6);
+    answer.zero();
+
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    beta = edgeLoad->giveProperty('a');
+    node1 = side;
+    node2 = ( node1 == 3 ? 1 : node1 + 1 );
+
+    node3 = ( node2 == 3 ? 1 : node2 + 1 );
+
+    _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
+    _t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
+    l = sqrt(_t1 * _t1 + _t2 * _t2);
+
+    t1 = _t1 / l;
+    t2 = _t2 / l;
+
+    for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
+        dV = this->computeVolumeAround(gp);
+        computeNVector(n, gp);
+
+        nt.at(1) = n.at(1) * t1;
+        nt.at(2) = n.at(1) * t2;
+        nt.at(3) = n.at(2) * t1;
+        nt.at(4) = n.at(2) * t2;
+        nt.at(5) = n.at(3) * t1;
+        nt.at(6) = n.at(3) * t2;
+
+        for ( i = 1; i <= 6; i++ ) {
+            for ( j = 1; j <= 6; j++ ) {
+                answer.at(i, j) += nt.at(i) * nt.at(j);
+            }
+        }
+
+        answer.times(beta * dV);
+    }
+}
+
+void
+TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime)
+{
+    //answer.resize(6, 6);
+    //answer.zero();
+
+    int node1, node2, node3, i, j, ip;
+    double l, n1, n2, _t1, _t2, dV;
+    double alpha, beta;
+    FloatArray nt(6), n(3);
+    GaussPoint *gp;
+    answer.resize(6, 6);
+    answer.zero();
+
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    alpha = edgeLoad->giveProperty('a');
+    node1 = side;
+    node2 = ( node1 == 3 ? 1 : node1 + 1 );
+
+    node3 = ( node2 == 3 ? 1 : node2 + 1 );
+
+
+    _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
+    _t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
+    l = sqrt(_t1 * _t1 + _t2 * _t2);
+
+    //t1 = _t1 / l;
+    //t2 = _t2 / l;
+
+    n1 = _t2 / l;
+    n2 = -_t1 / l;
+
+
+    for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
+        dV = this->computeVolumeAround(gp);
+        this->computeNVector(n, gp);
+
+        nt.at(1) = n.at(1) * n1;
+        nt.at(2) = n.at(1) * n2;
+        nt.at(3) = n.at(2) * n1;
+        nt.at(4) = n.at(2) * n2;
+        nt.at(5) = n.at(3) * n1;
+        nt.at(6) = n.at(3) * n2;
+
+        for ( i = 1; i <= 6; i++ ) {
+            for ( j = 1; j <= 6; j++ ) {
+                answer.at(i, j) += nt.at(i) * nt.at(j);
+            }
+        }
+
+        answer.times( ( 1 / alpha ) * dV );
+    }
+}
+
+void
+TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime)
+{
+    int node1, node2, node3, j, i, ip;
+    double l, n1, n2, t1, t2, dV;
+    FloatArray nt(6), n(3);
+    GaussPoint *gp;
+    answer.resize(6, 3);
+    answer.zero();
+    //beta
+    //area
+    node1 = side;
+    node2 = ( node1 == 3 ? 1 : node1 + 1 );
+
+    node3 = ( node2 == 3 ? 1 : node2 + 1 );
+
+
+    t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
+    t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
+    l = sqrt(t1 * t1 + t2 * t2);
+
+    n1 = t2 / l;
+    n2 = -t1 / l;
+
+
+    for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
+        dV = this->computeVolumeAround(gp);
+        computeNVector(n, gp);
+
+        nt.at(1) = n.at(1) * n1;
+        nt.at(2) = n.at(1) * n2;
+        nt.at(3) = n.at(2) * n1;
+        nt.at(4) = n.at(2) * n2;
+        nt.at(5) = n.at(3) * n1;
+        nt.at(6) = n.at(3) * n2;
+
+        for ( i = 1; i <= 6; i++ ) {
+            for ( j = 1; j <= 3; j++ ) {
+                answer.at(i, j) += nt.at(i) * n.at(j);
+            }
+        }
+
+        answer.times(dV);
+    }
+
+    answer.times(-1.0);
+}
+
+
+
+void
+TR1_2D_SUPG_AXI :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+{
+    bcType boundarytype;
+    int i, n, side;
+    int nLoads = 0;
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
+    // loop over boundary load array
+    helpMatrix.resize(6, 3);
+    helpMatrix.zero();
+
+    answer.resize(6, 3);
+    answer.zero();
+
+    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+
+    if ( nLoads ) {
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            side    = boundaryLoadArray.at(i * 2);
+            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+            boundarytype = load->giveType();
+            if ( boundarytype == OutFlowBC ) {
+                this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+            } else {
+                answer.resize(6, 3);
+                answer.zero();
+                // _error("computeForceLoadVector : unsupported load type class");
+            }
+
+            answer.add(helpMatrix);
+        }
+    }
+}
+
+
 double
 TR1_2D_SUPG_AXI :: computeRadiusAt(GaussPoint *gp)
 {
@@ -909,7 +1144,7 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
     u.times(uscale);
     double nu;
 
@@ -921,7 +1156,7 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+    nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = atTime->giveTimeIncrement() * tscale;
@@ -944,7 +1179,7 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         vnorm = max( vnorm, sqrt(u_1 * u_1 + u_2 * u_2) );
     }
 
-    if ( ( vnorm == 0.0 ) || ( sum == 0.0 ) ) {
+    if ( ( vnorm == 0.0 ) || ( sum <  vnorm * 1e-10 ) ) {
         //t_sugn1 = inf;
         t_sugn2 = dt / 2.0;
         //t_sugn3 = inf;
@@ -962,7 +1197,8 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
 
         Re_ugn = vnorm * h_ugn / ( 2. * nu );
         z = ( Re_ugn <= 3. ) ? Re_ugn / 3. : 1.0;
-        this->t_lsic = h_ugn * vnorm * z / 2.0;
+        //this->t_lsic = h_ugn * vnorm * z / 2.0;
+        this->t_lsic = 0.0;
     }
 
     this->t_supg *= uscale / lscale;

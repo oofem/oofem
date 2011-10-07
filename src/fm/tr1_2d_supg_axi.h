@@ -75,6 +75,13 @@ public:
     void updateStabilizationCoeffs(TimeStep *tStep);
     void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
     void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
+    
+    void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+    void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+    void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
+    void  computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    void  computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    
 
     double computeVolumeAround(GaussPoint *gp);
 

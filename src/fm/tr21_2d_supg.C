@@ -369,7 +369,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     nu = mu_min / rho;
 
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
 
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');

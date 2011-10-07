@@ -99,6 +99,12 @@ public:
     void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
     void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
 
+     void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+     void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+     void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
+     void  computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+     void  computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+
     void updateStabilizationCoeffs(TimeStep *tStep);
     double computeCriticalTimeStep(TimeStep *tStep);
 
@@ -142,6 +148,7 @@ public:
     virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag);
     virtual Element *giveElement() { return this; }
     virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
+    virtual double  computeVolumeAround(GaussPoint *aGaussPoint);
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep);
 
     int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);

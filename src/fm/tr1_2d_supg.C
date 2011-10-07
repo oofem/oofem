@@ -674,6 +674,327 @@ TR1_2D_SUPG :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 
 
 void
+TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime)
+{
+    //answer.resize(6, 6);
+    //answer.zero();
+
+    int node1, node2, node3, i;
+    int d1 = 1;
+    int d2 = 1;
+    int d3 = 1;
+    double l, t1, t2, _t1, _t2;
+    double alpha, beta;
+
+    answer.resize(6, 6);
+    answer.zero();
+    //beta
+    //area
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    beta = edgeLoad->giveProperty('a');
+    node1 = side;
+    node2 = ( node1 == 3 ? 1 : node1 + 1 );
+
+    node3 = ( node2 == 3 ? 1 : node2 + 1 );
+
+    switch ( node3 ) {
+    case 1:
+        d1 = 0;
+    case 2:
+        d2 = 0;
+    case 3:
+        d3 = 0;
+    }
+
+    _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
+    _t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
+    l = sqrt(_t1 * _t1 + _t2 * _t2);
+
+    t1 = _t1 / l;
+    t2 = _t2 / l;
+
+    answer.at(1, 1) += ( l / 3 ) * beta * d1 * t1 * t1;
+    answer.at(1, 2) += ( l / 3 ) * beta * d1 * t1 * t2;
+    answer.at(2, 1) += ( l / 3 ) * beta * d1 * t1 * t2;
+    answer.at(2, 2) += ( l / 3 ) * beta * d1 * t2 * t2;
+
+    answer.at(1, 3) += ( l / 6 ) * beta * d1 * d2 * t1 * t1;
+    answer.at(1, 4) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
+    answer.at(2, 3) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
+    answer.at(2, 4) += ( l / 6 ) * beta * d1 * d2 * t2 * t2;
+
+    answer.at(1, 5) += ( l / 6 ) * beta * d1 * d3 * t1 * t1;
+    answer.at(1, 6) += ( l / 6 ) * beta * d1 * d3 * t1 * t2;
+    answer.at(2, 5) += ( l / 6 ) * beta * d1 * d3 * t1 * t2;
+    answer.at(2, 6) += ( l / 6 ) * beta * d1 * d3 * t2 * t2;
+
+    answer.at(3, 1) += ( l / 6 ) * beta * d1 * d2 * t1 * t1;
+    answer.at(3, 2) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
+    answer.at(4, 1) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
+    answer.at(4, 2) += ( l / 6 ) * beta * d1 * d2 * t2 * t2;
+
+    answer.at(3, 3) += ( l / 3 ) * beta * d2 * t1 * t1;
+    answer.at(3, 4) += ( l / 3 ) * beta * d2 * t1 * t2;
+    answer.at(4, 3) += ( l / 3 ) * beta * d2 * t1 * t2;
+    answer.at(4, 4) += ( l / 3 ) * beta * d2 * t2 * t2;
+
+    answer.at(3, 5) += ( l / 6 ) * beta * d2 * d3 * t1 * t1;
+    answer.at(3, 6) += ( l / 6 ) * beta * d2 * d3 * t1 * t2;
+    answer.at(4, 5) += ( l / 6 ) * beta * d2 * d3 * t1 * t2;
+    answer.at(4, 6) += ( l / 6 ) * beta * d2 * d3 * t2 * t2;
+
+    answer.at(5, 1) += ( l / 6 ) * beta * d3 * d1 * t1 * t1;
+    answer.at(5, 2) += ( l / 6 ) * beta * d3 * d1 * t1 * t2;
+    answer.at(6, 1) += ( l / 6 ) * beta * d3 * d1 * t1 * t2;
+    answer.at(6, 2) += ( l / 6 ) * beta * d3 * d1 * t2 * t2;
+
+    answer.at(5, 3) += ( l / 6 ) * beta * d3 * d2 * t1 * t1;
+    answer.at(5, 4) += ( l / 6 ) * beta * d3 * d2 * t1 * t2;
+    answer.at(6, 3) += ( l / 6 ) * beta * d3 * d2 * t1 * t2;
+    answer.at(6, 4) += ( l / 6 ) * beta * d3 * d2 * t2 * t2;
+
+    answer.at(5, 5) += ( l / 3 ) * beta * d3 * t1 * t1;
+    answer.at(5, 6) += ( l / 3 ) * beta * d3 * t1 * t2;
+    answer.at(6, 5) += ( l / 3 ) * beta * d3 * t1 * t2;
+    answer.at(6, 6) += ( l / 3 ) * beta * d3 * t2 * t2;
+
+    //answer.times(-1.0);
+}
+
+
+void
+TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime)
+{
+    //answer.resize(6, 6);
+    //answer.zero();
+
+    int node1, node2, node3, i;
+    int d1 = 1;
+    int d2 = 1;
+    int d3 = 1;
+    double l, n1, n2, _t1, _t2;
+    double alpha, beta;
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    alpha = edgeLoad->giveProperty('a');
+    node1 = side;
+    node2 = ( node1 == 3 ? 1 : node1 + 1 );
+
+    node3 = ( node2 == 3 ? 1 : node2 + 1 );
+
+    switch ( node3 ) {
+    case 1:
+        d1 = 0;
+    case 2:
+        d2 = 0;
+    case 3:
+        d3 = 0;
+    }
+
+    _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
+    _t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
+    l = sqrt(_t1 * _t1 + _t2 * _t2);
+
+    //t1 = _t1 / l;
+    //t2 = _t2 / l;
+
+    n1 = _t2 / l;
+    n2 = -_t1 / l;
+
+    answer.at(1, 1) += ( l / 3 ) * ( 1 / alpha ) * d1 * n1 * n1;
+    answer.at(1, 2) += ( l / 3 ) * ( 1 / alpha ) * d1 * n1 * n2;
+    answer.at(2, 1) += ( l / 3 ) * ( 1 / alpha ) * d1 * n1 * n2;
+    answer.at(2, 2) += ( l / 3 ) * ( 1 / alpha ) * d1 * n2 * n2;
+
+    answer.at(1, 3) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n1;
+    answer.at(1, 4) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
+    answer.at(2, 3) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
+    answer.at(2, 4) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n2 * n2;
+
+    answer.at(1, 5) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n1 * n1;
+    answer.at(1, 6) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n1 * n2;
+    answer.at(2, 5) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n1 * n2;
+    answer.at(2, 6) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n2 * n2;
+
+    answer.at(3, 1) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n1;
+    answer.at(3, 2) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
+    answer.at(4, 1) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
+    answer.at(4, 2) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n2 * n2;
+
+    answer.at(3, 3) += ( l / 3 ) * ( 1 / alpha ) * d2 * n1 * n1;
+    answer.at(3, 4) += ( l / 3 ) * ( 1 / alpha ) * d2 * n1 * n2;
+    answer.at(4, 3) += ( l / 3 ) * ( 1 / alpha ) * d2 * n1 * n2;
+    answer.at(4, 4) += ( l / 3 ) * ( 1 / alpha ) * d2 * n2 * n2;
+
+    answer.at(3, 5) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n1 * n1;
+    answer.at(3, 6) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n1 * n2;
+    answer.at(4, 5) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n1 * n2;
+    answer.at(4, 6) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n2 * n2;
+
+    answer.at(5, 1) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n1 * n1;
+    answer.at(5, 2) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n1 * n2;
+    answer.at(6, 1) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n1 * n2;
+    answer.at(6, 2) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n2 * n2;
+
+    answer.at(5, 3) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n1 * n1;
+    answer.at(5, 4) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n1 * n2;
+    answer.at(6, 3) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n1 * n2;
+    answer.at(6, 4) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n2 * n2;
+
+    answer.at(5, 5) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n1;
+    answer.at(5, 6) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n2;
+    answer.at(6, 5) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n2;
+    answer.at(6, 6) += ( l / 3 ) * ( 1 / alpha ) * d3 * n2 * n2;
+
+    //answer.times(-1.0);
+}
+
+void
+TR1_2D_SUPG :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime)
+{
+    int node1, node2, node3, i;
+    int d1 = 1;
+    int d2 = 1;
+    int d3 = 1;
+    double l, n1, n2, t1, t2;
+
+    answer.resize(6, 3);
+    answer.zero();
+    //beta
+    //area
+    node1 = side;
+    node2 = ( node1 == 3 ? 1 : node1 + 1 );
+
+    node3 = ( node2 == 3 ? 1 : node2 + 1 );
+
+    switch ( node3 ) {
+    case 1:
+        d1 = 0;
+    case 2:
+        d2 = 0;
+    case 3:
+        d3 = 0;
+    }
+
+
+    t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
+    t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
+    l = sqrt(t1 * t1 + t2 * t2);
+
+    n1 = t2 / l;
+    n2 = -t1 / l;
+
+    answer.at(1, 1) += ( l / 3 ) * d1 * d1 * n1;
+    answer.at(1, 2) += ( l / 6 ) * d1 * d2 * n1;
+    answer.at(1, 3) += ( l / 6 ) * d1 * d3 * n1;
+    answer.at(2, 1) += ( l / 3 ) * d1 * d1 * n2;
+    answer.at(2, 2) += ( l / 6 ) * d1 * d2 * n2;
+    answer.at(2, 3) += ( l / 6 ) * d1 * d3 * n2;
+
+    answer.at(3, 1) += ( l / 6 ) * d2 * d1 * n1;
+    answer.at(3, 2) += ( l / 3 ) * d2 * d2 * n1;
+    answer.at(3, 3) += ( l / 6 ) * d2 * d3 * n1;
+    answer.at(4, 1) += ( l / 6 ) * d2 * d1 * n2;
+    answer.at(4, 2) += ( l / 3 ) * d2 * d2 * n2;
+    answer.at(4, 3) += ( l / 6 ) * d2 * d3 * n2;
+
+    answer.at(5, 1) += ( l / 6 ) * d3 * d1 * n1;
+    answer.at(5, 2) += ( l / 6 ) * d3 * d2 * n1;
+    answer.at(5, 3) += ( l / 3 ) * d3 * d3 * n1;
+    answer.at(6, 1) += ( l / 6 ) * d3 * d1 * n2;
+    answer.at(6, 2) += ( l / 6 ) * d3 * d2 * n2;
+    answer.at(6, 3) += ( l / 3 ) * d3 * d3 * n2;
+
+    answer.times(-1.0);
+}
+
+
+
+
+
+
+void
+TR1_2D_SUPG :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+{
+    bcType boundarytype;
+    int i, n, side;
+    int nLoads = 0;
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
+    // loop over boundary load array
+    helpMatrix.resize(6, 6);
+    helpMatrix.zero();
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+
+    if ( nLoads ) {
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            side    = boundaryLoadArray.at(i * 2);
+            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+            boundarytype = load->giveType();
+            if ( boundarytype == SlipWithFriction ) {
+                this->computeSlipWithFrictionBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+            } else if ( boundarytype == PenetrationWithResistance ) {
+                this->computePenetrationWithResistanceBCTerm_MB(helpMatrix, ( Load * ) load, side, atTime);
+            } else {
+                answer.resize(6, 6);
+                answer.zero();
+                // _error("computeForceLoadVector : unsupported load type class");
+            }
+
+            answer.add(helpMatrix);
+        }
+    }
+}
+
+
+void
+TR1_2D_SUPG :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
+{
+    bcType boundarytype;
+    int i, n, side;
+    int nLoads = 0;
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
+    // loop over boundary load array
+    helpMatrix.resize(6, 3);
+    helpMatrix.zero();
+
+    answer.resize(6, 3);
+    answer.zero();
+
+    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+
+    if ( nLoads ) {
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            side    = boundaryLoadArray.at(i * 2);
+            load  = dynamic_cast< Load * >( domain->giveLoad(n) );
+            boundarytype = load->giveType();
+            if ( boundarytype == OutFlowBC ) {
+                this->computeOutFlowBCTerm_MB(helpMatrix, side, atTime);
+            } else {
+                answer.resize(6, 3);
+                answer.zero();
+                // _error("computeForceLoadVector : unsupported load type class");
+            }
+
+            answer.add(helpMatrix);
+        }
+    }
+}
+
+
+void
 TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
     answer.resize(6);
@@ -716,50 +1037,45 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     int j, n1, n2, code, sid;
     double tx, ty, l, nx, ny;
     //IntArray nodecounter (3);
-    for ( j = 1; j <= boundarySides.giveSize(); j++ ) {
-        code = boundaryCodes.at(j);
-        sid = boundarySides.at(j);
-        if ( ( code & FMElement_PrescribedTractionBC ) ) {
-            FloatArray t, coords(1);
-            int nLoads, n, id;
-            BoundaryLoad *load;
-            // integrate tractions
-            n1 = sid;
+
+    if (  1 ) {
+        FloatArray t, coords(1);
+        int nLoads, n, id;
+        BoundaryLoad *load;
+        bcType loadtype;
+        // integrate tractions
+
+        // if no traction bc applied but side marked as with traction load
+        // then zero traction is assumed !!!
+
+        // loop over boundary load array
+        nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
+        for ( i = 1; i <= nLoads; i++ ) {
+            n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            id    = boundaryLoadArray.at(i * 2);
+
+            n1 = id;
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
 
             tx = giveNode(n2)->giveCoordinate(1) - giveNode(n1)->giveCoordinate(1);
             ty = giveNode(n2)->giveCoordinate(2) - giveNode(n1)->giveCoordinate(2);
             l = sqrt(tx * tx + ty * ty);
-            nx = ty / l;
-            ny = -tx / l;
 
-            // if no traction bc applied but side marked as with traction load
-            // then zero traction is assumed !!!
+            load  = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
+            loadtype = load->giveType();
+            if ( loadtype == TransmissionBC ) {
+                load->computeValueAt(t, atTime, coords, VM_Total);
 
-            // loop over boundary load array
-            nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( i = 1; i <= nLoads; i++ ) {
-                n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-                id    = boundaryLoadArray.at(i * 2);
-                if ( id != sid ) {
-                    continue;
-                }
+                // here it is assumed constant traction, one point integration only
+                // n1 (u,v)
+                answer.at( ( n1 - 1 ) * 2 + 1 ) += t.at(1) * l / 2.;
+                answer.at(n1 * 2)       += t.at(2) * l / 2.;
+                // n2 (u,v)
+                answer.at( ( n2 - 1 ) * 2 + 1 ) += t.at(1) * l / 2.;
+                answer.at(n2 * 2)       += t.at(2) * l / 2.;
 
-                load  = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
-                if ( load ) {
-                    load->computeValueAt(t, atTime, coords, VM_Total);
-
-                    // here it is assumed constant traction, one point integration only
-                    // n1 (u,v)
-                    answer.at( ( n1 - 1 ) * 2 + 1 ) += t.at(1) * l / 2.;
-                    answer.at(n1 * 2)       += t.at(2) * l / 2.;
-                    // n2 (u,v)
-                    answer.at( ( n2 - 1 ) * 2 + 1 ) += t.at(1) * l / 2.;
-                    answer.at(n2 * 2)       += t.at(2) * l / 2.;
-
-                    //answer.at(n1)+= (t.at(1)*nx + t.at(2)*ny) * l/2.;
-                    //answer.at(n2)+= (t.at(1)*nx + t.at(2)*ny) * l/2.;
-                }
+                //answer.at(n1)+= (t.at(1)*nx + t.at(2)*ny) * l/2.;
+                //answer.at(n2)+= (t.at(1)*nx + t.at(2)*ny) * l/2.;
             }
         }
     }
@@ -817,12 +1133,12 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
-    rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
+    rho = this->giveMaterial()->giveCharacteristicValue( MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime->givePreviousStep() );
 
     //this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime->givePreviousStep(),un) ;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Acceleration, atTime, a);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Acceleration, atTime->givePreviousStep(), a);
 
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
@@ -1046,7 +1362,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
     }
@@ -1062,7 +1378,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
         gp = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
     }
 
-    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+    nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, atTime->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     dt = atTime->giveTimeIncrement() * tscale;
@@ -1085,7 +1401,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
         vnorm = max( vnorm, sqrt(u_1 * u_1 + u_2 * u_2) );
     }
 
-    if ( ( vnorm == 0.0 ) || ( sum == 0.0 ) ) {
+    if ( ( vnorm == 0.0 ) || ( sum <  vnorm * 1e-10 ) ) {
         //t_sugn1 = inf;
         t_sugn2 = dt / 2.0;
         //t_sugn3 = inf;
@@ -1192,10 +1508,10 @@ TR1_2D_SUPG :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lc
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+    l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+    l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -1337,6 +1653,10 @@ TR1_2D_SUPG :: initGeometry()
     y3 = node3->giveCoordinate(2);
 
     this->area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+
+    if ( area < 0.0 ) {
+        _error("Area is negative, check element numbering orientation");
+    }
 
     b [ 0 ] = ( y2 - y3 ) / ( 2. * area );
     c [ 0 ] = ( x3 - x2 ) / ( 2. * area );
@@ -1617,6 +1937,22 @@ TR1_2D_SUPG :: computeMyVolume(LEPlic *matInterface, bool updFlag)
 }
 
 double
+TR1_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
+// Returns the portion of the receiver which is attached to aGaussPoint.
+{
+    double determinant, weight, volume;
+
+    determinant = fabs( 4 * area * area * ( c [ 1 ] * b [ 0 ] - c [ 0 ] * b [ 1 ] ) );
+
+
+    weight      = aGaussPoint->giveWeight();
+    volume      = determinant * weight;
+
+    return volume;
+}
+
+
+double
 TR1_2D_SUPG :: computeCriticalLEPlicTimeStep(TimeStep *tStep)
 {
     FloatArray u;
@@ -1773,7 +2109,7 @@ TR1_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         return 1;
     } else {
-      return SUPGElement::giveIPValueSize(type, gp);
+        return SUPGElement :: giveIPValueSize(type, gp);
     }
 }
 

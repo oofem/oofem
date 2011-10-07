@@ -350,7 +350,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
     }
@@ -365,7 +365,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     gp = iRule->getIntegrationPoint(0);
-    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime->givePreviousStep());
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
@@ -398,7 +398,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
         vnorm = max( vnorm, sqrt(u_1 * u_1 + u_2 * u_2 + u_3 * u_3) );
     }
 
-    if ( ( vnorm == 0.0 ) || ( sum == 0.0 ) ) {
+    if ( ( vnorm == 0.0 ) || ( sum <  vnorm * 1e-10  ) ) {
         //t_sugn1 = inf;
         t_sugn2 = dt / 2.0;
         //t_sugn3 = inf;
