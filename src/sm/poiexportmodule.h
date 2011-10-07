@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,16 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// class poiExportModule
-//
-
 #ifndef poiexportmodule_h
 #define poiexportmodule_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "exportmodule.h"
 #include "domain.h"
 #include "engngm.h"
@@ -57,68 +50,53 @@ namespace oofem {
 class POIExportModule : public ExportModule
 {
 protected:
-    /// POIs data structure
+    /// POIs data structure.
     struct POI_dataType {
         int id;
         double x, y, z;
         int region;
     };
 
-    /// list of InternalStateType values, identifying the selected vars for export
+    /// List of InternalStateType values, identifying the selected vars for export.
     IntArray internalVarsToExport;
-    /// list of primary unknowns to export
+    /// List of primary unknowns to export.
     IntArray primaryVarsToExport;
-    /// list of POIs
+    /// List of POIs.
     dynaList< POI_dataType >POIList;
 
-    /// smoother type
+    /// Smoother type.
     enum POIEM_MapperType { POI_CPT, POI_SFT, POI_LST } mtype;
-    /// Mapper
+    /// Mapper.
     MaterialMappingAlgorithm *mapper;
 
 public:
-
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     POIExportModule(int n, EngngModel *e);
     /// Destructor
-    ~POIExportModule();
-    /// Initializes receiver acording to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Writes the output. Abstract service.
-     * @param tStep time step.
-     */
-    void              doOutput(TimeStep *tStep);
-    /**
-     * Initializes receiver.
-     * The init file messages should be printed.
-     */
-    void              initialize();
-    /**
-     * Terminates the receiver.
-     * The terminating messages should be printed.
-     * All the streams should be closed.
-     */
-    void              terminate();
-    /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "POIExportModule"; }
+    virtual ~POIExportModule();
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    void doOutput(TimeStep *tStep);
+    void initialize();
+    void terminate();
+    virtual const char *giveClassName() const { return "POIExportModule"; }
 
 protected:
     void readPOIFile(char *poiFileName);
-    /// returns the output stream for given solution step
-    FILE *giveOutputStream(TimeStep *);
+    /// Returns the output stream for given solution step
+    FILE *giveOutputStream(TimeStep *tStep);
     /**
-     * export internal variables
+     * Export internal variables.
      */
     void exportIntVars(FILE *stream, TimeStep *tStep);
     /**
-     * export primary variables
+     * Export primary variables.
      */
     void exportPrimaryVars(FILE *stream, TimeStep *tStep);
-    /** exports single variable */
+    /** Exports single variable */
     void exportIntVarAs(InternalStateType valID, FILE *stream, TimeStep *tStep);
-    /** exports single variable */
+    /** Exports single variable */
     void exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep);
     MaterialMappingAlgorithm *giveMapper();
 };

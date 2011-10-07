@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/ltrspace.C,v 1.11 2003/04/23 14:20:49 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,15 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file LTRSPACE.CC
-
 #include "ltrspace.h"
 #include "node.h"
 #include "material.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "structuralms.h"
-// #include "polynoxy.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
@@ -49,9 +45,6 @@
 #include "verbose.h"
 #include "load.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -160,8 +153,6 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(2, 3 * i - 1)  = n.at(i);
         answer.at(3, 3 * i - 0)  = n.at(i);
     }
-
-    return;
 }
 
 void
@@ -211,8 +202,6 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
             }
         }
     }
-
-    return;
 }
 
 double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -343,8 +332,6 @@ LTRSpace ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-
-    return;
 }
 
 

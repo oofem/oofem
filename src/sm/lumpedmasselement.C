@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.C,v 1.6 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file lumpedmasselement.C
-
 #include "lumpedmasselement.h"
 #include "domain.h"
 #include "node.h"
@@ -45,10 +42,6 @@
 #include "intarray.h"
 
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -56,7 +49,7 @@
 
 namespace oofem {
 LumpedMassElement :: LumpedMassElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-    // Constructor.
+// Constructor.
 {
     numberOfDofMans     = 1;
 }
@@ -74,15 +67,13 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     for ( _i = 1; _i <= _ndofs; _i++ ) {
         answer.at(_i, _i) = this->components.at(_i);
     }
-
-    return;
 }
 
 IRResultType
 LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, components, IFT_LumpedMassElement_components, "components"); // Macro
@@ -129,7 +120,8 @@ LumpedMassElement :: computeNumberOfDofs(EquationID ut)
 
 
 void
-LumpedMassElement ::   giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const {
+LumpedMassElement ::   giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -147,8 +139,6 @@ LumpedMassElement ::   giveDofManDofIDMask(int inode, EquationID eid, IntArray &
             answer.followedBy(_dofid);
         }
     }
-
-    return;
 }
 
 #ifdef __OOFEG
@@ -200,8 +190,6 @@ void LumpedMassElement :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 
 void LumpedMassElement :: drawScalar(oofegGraphicContext &context)
 {}
-
-
 
 #endif
 } // end namespace oofem
