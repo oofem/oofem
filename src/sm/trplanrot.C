@@ -47,6 +47,7 @@
 #include "verbose.h"
 #include "engngm.h"
 #include "load.h"
+#include "mathfem.h"
 
 namespace oofem {
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
