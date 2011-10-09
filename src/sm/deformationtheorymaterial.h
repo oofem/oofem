@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/deformationtheorymaterial.h,v 1.3 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,55 +32,27 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *******************************************
-//   *** CLASS MATERIAL - DEFORMATION THEORY ***
-//   *******************************************
-
 #ifndef deformationtheorymaterial_h
 #define deformationtheorymaterial_h
-
-#include "femcmpnn.h"
 
 #include "structuralmaterial.h"
 
 namespace oofem {
+
+/**
+ * This class implements an abstract base material, which behaves
+ * according to deformation theory.
+ */
 class DeformationTheoryMaterial : public StructuralMaterial
 {
-    /*
-     * This class implements an abstract class material, which behaves
-     * according to deformation theory.
-     *
-     * DESCRIPTION
-     * The attribute 'propertyDictionary' possibly contains all the properties of a mate-
-     * rial, like its Young modulus, its mass density or poisson ratio.
-     * TASK
-     * - Returning standard material stiffness and flexibility marices for 3d-case.
-     * according to current state determined by using data stored
-     * in Gausspoint.
-     * - Returning standard material stiffness for other stress states for point
-     * in 3d continua - (2dPlanaStress, 2dPlaneStrain, 1dStress);
-     * - Returning a material property (method 'give'). Only for non-standard elements.
-     * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     * - Imposing constrains according to stressStrain mode in gp to 3dstiffmessMatrix
-     * (function reduceTo).
-     * - storing / restoring (possible) Status stored (if defined) in gp->matStatusDict
-     *   with key = (int)obj->giveClassID(), where
-     * obj is instance of material, yield crit which is associated with this gp.
-     * if no material status is necessary material doesn'n derive it own instance of
-     * material Status class and also then saving & restoring context is
-     * function with no code.
-     */
-protected:
-
 public:
-
     DeformationTheoryMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
     ~DeformationTheoryMaterial()  { }
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour()   { return 1; }
-    const char *giveClassName()  const { return "DeformationTheoryMaterial"; }
-    classType giveClassID()          const { return DeformationTheoryMaterialClass; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    const char *giveClassName() const { return "DeformationTheoryMaterial"; }
+    classType giveClassID() const { return DeformationTheoryMaterialClass; }
 };
 } // end namespace oofem
 #endif // deformationtheorymaterial_h

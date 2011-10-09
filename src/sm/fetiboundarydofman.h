@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/fetiboundarydofman.h,v 1.2 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,44 +31,42 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #ifndef fetiboundarydofman_h
 #define fetiboundarydofman_h
 
 #ifdef __PARALLEL_MODE
 
- #include "intarray.h"
- #ifndef __MAKEDEPEND
-  #include <map>
- #endif
-using namespace std;
-
 namespace oofem {
+
 /**
- * Represent the abstraction for dof manager. This dof manager is on partition boudary and
+ * Represent the abstraction for DOF manager. This DOF manager is on partition boundary and
  * influences to master equations. It is typically shared by two or more partitions.
  * It keeps its associated global number, number of partitions sharing it, and corresponding
  * number of DOFs (only those with associate equation are taken into account).
- * If n partitions share the dof manager, then on master level n-1 different code numbers for each DOF
- * must be maintained. The compatibility is then enforced using lagrange multipliers.
- * It is necessary to select one partition (reference one), to which other partitions DOFS are
- * "linked" through lagrange multipliers. Such partition contributes to all sharing partitions DOFs.
+ * If n partitions share the DOF manager, then on master level n-1 different code numbers for each DOF
+ * must be maintained. The compatibility is then enforced using Lagrange multipliers.
+ * It is necessary to select one partition (reference one), to which other partitions DOFs are
+ * "linked" through Lagrange multipliers. Such partition contributes to all sharing partitions DOFs.
  * Such partition contribute to all allocated cod numbers. The partition with lowest rank is
- * selected as refence one.
+ * selected as reference one.
  */
 class FETIBoundaryDofManager
 {
 protected:
-    /// Associated global number of dofManager
+    /// Associated global number of dofManager.
     int globalNumber;
-    /// Total number of partitions sharing receiver
+    /// Total number of partitions sharing receiver.
     int numberOfPartitions;
-    // number of nonprescribed dofs, i.e, those, for which equation is necessary
+    /// Number of nonprescribed dofs, i.e, those, for which equation is necessary
     int ndofs;
-    // reference partition is partition to which other partitions sharing the dof manager
-    // are linked using lagrange multipliers. We use the partition, which has its number
-    // the lowest from all sharing partitions.
+    /**
+     * Reference partition is partition to which other partitions sharing the dof manager
+     * are linked using lagrange multipliers. We use the partition, which has its number
+     * the lowest from all sharing partitions.
+     */
     int referencePartition;
-    /// List of partitions sharing dof manager
+    /// List of partitions sharing dof manager.
     IntArray partitions;
     /**
      * Contains code numbers for each linked partition for each DOF (ndofs*(numberOfPartitions-1) DOFs).
@@ -79,49 +76,50 @@ protected:
      * in codeNumbers array.
      */
     IntArray codeNumbers;
+
 public:
     FETIBoundaryDofManager();
-    FETIBoundaryDofManager(int, int, int);
+    FETIBoundaryDofManager(int num, int part, int ndof);
     FETIBoundaryDofManager(const FETIBoundaryDofManager &);
 
-    /// Returns number of partitions sharing receiver
+    /// Returns number of partitions sharing receiver.
     int giveNumberOfSharedPartitions() { return numberOfPartitions; }
-    /// Returns number of DOFs (with associated equation) of receiver
+    /// Returns number of DOFs (with associated equation) of receiver.
     int giveNumberOfDofs() { return ndofs; }
-    /// Returns correcponding global number of receiver
+    /// Returns corresponding global number of receiver.
     int giveGlobalNumber() { return globalNumber; }
-    /// Returns reference partition number of receiver
+    /// Returns reference partition number of receiver.
     int giveReferencePratition() { return referencePartition; }
-    /// Returns number of i-th shared partition of receiver
+    /// Returns number of i-th shared partition of receiver.
     int giveSharedPartition(int i) { return partitions.at(i); }
     /**
      * Returns code number corresponding to partition number partition_num and to dof_num-th DOF
-     * @param partition_num partition number for which code number is required
-     * @param dof_num the specifies the particular DOF
-     * @return value of correspong code number, zero if such partition does not share
+     * @param partition_num Partition number for which code number is required.
+     * @param dof_num Specifies the particular DOF.
+     * @return Value of correspong code number, zero if such partition does not share.
      * the receiver or if code number for reference partition is requested.
      */
     int giveCodeNumber(int partition_num, int dof_num);
     /**
      * Returns code numbers for all DOFs associated with shared partition.
-     * @param rank partition number
-     * @param locArray the location array of size ndof
-     * @return nonzero if o.k, zero if no such partition shared or if
+     * @param rank Partition number.
+     * @param locArray The location array of size ndof.
+     * @return Nonzero if o.k, zero if no such partition shared or if
      * code numbers for reference partition required.
      */
     int giveCompleteLocationArray(int rank, IntArray &locationArray);
     /**
      * Adds partition to list of partitions, sharing this dof manager.
      * The referencePartition is updated if necessary.
-     * @param partitionNumber new partition number (0..size-1)
+     * @param partitionNumber New partition number (0..size-1)
      */
     void addPartition(int partitionNumber);
     /**
      * Associates the equation numbers to particular DOFs.
-     * @param equationCounter current equation counter, updated
-     * @return new value of equationCounter
+     * @param equationCounter Current equation counter, updated.
+     * @return New value of equationCounter.
      */
-    int  setCodeNumbers(int &equationCounter);
+    int setCodeNumbers(int &equationCounter);
 };
 } // end namespace oofem
 

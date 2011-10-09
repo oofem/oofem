@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/druckerPragerPlasticitySM.C,v 1.2.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,19 +31,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- *  Author: Simon Rolshoven
- */
-
-// file : DruckerPragerPlasticitySM.C
-//   ********************************************************************
-//   *** CLASS DRUCKER-PRAGER PLASTICITY STRUCTURAL MATERIAL STATUS   ***
-//   ********************************************************************
 
 #include "druckerPragerPlasticitySM.h"
+
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "intarray.h"

@@ -35,12 +35,7 @@
 #ifndef gpexportmodule_h_
 #define gpexportmodule_h_
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 
 namespace oofem {
 /**

@@ -36,8 +36,6 @@
 #define gpinitmodule_h
 
 #include "initmodule.h"
-#include "domain.h"
-#include "engngm.h"
 
 namespace oofem {
 /**

@@ -40,6 +40,7 @@
 #include "integrationrule.h"
 #include "material.h"
 
+#include "domain.h"
 #include "timestep.h"
 #include "engngm.h"
 #include "strreader.h"

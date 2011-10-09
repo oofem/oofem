@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/fetisolver.C,v 1.5.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
@@ -40,7 +40,7 @@
 #include "mathfem.h"
 #include "fetisolver.h"
 #include "compiler.h"
-
+#include "skyline.h"
 #include "verbose.h"
 #include "dofmanager.h"
 #include "engngm.h"

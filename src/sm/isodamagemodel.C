@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/isodamagemodel.C,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// file: isodamagemodel.C
-
-
 #include "isodamagemodel.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
@@ -47,9 +43,9 @@
 
 namespace oofem {
 IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
     linearElasticMaterial = NULL;
     llcriteria = idm_strainLevelCR;

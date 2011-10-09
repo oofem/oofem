@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/huertaerrorestimator.h,v 1.2.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   *************************************************************************
-//   *** CLASS ERROR ESTIMATOR (INDICATOR) ACORDING TO ZIENKIEWICZ AND ZHU ***
-//   *************************************************************************
 
 #ifndef huertaerrorestimator_h
 #define huertaerrorestimator_h
@@ -73,31 +68,31 @@ public:
     enum AnalysisMode { HEE_linear, HEE_nlinear };
 
 protected:
-    /// global error norm
+    /// Global error norm.
     double globalENorm;
-    /// global weighted error norm
+    /// Global weighted error norm.
     double globalWENorm;
-    /// global norm of primary unknown
+    /// Global norm of primary unknown.
     double globalUNorm;
-    /// cache storing element norms
+    /// Cache storing element norms.
     FloatArray eNorms;
-    /// type of norm used
+    /// Type of norm used.
     NormType normType;
-    /// actual state counter.
+    /// Actual state counter.
     StateCounterType stateCounter;
-    /// primary unknown nodal error
+    /// Primary unknown nodal error.
     FloatArray primaryUnknownError;
-    /// refinement level
+    /// Refinement level.
     int refineLevel;
-    /// fine mesh
+    /// Fine mesh.
     AList< RefinedElement >refinedElementList;
-    /// mesh refinement
+    /// Mesh refinement.
     RefinedMesh refinedMesh;
-    /// linear analysis flag
+    /// Linear analysis flag.
     AnalysisMode mode;
-    /// required error to obtain
+    /// Required error to obtain.
     double requiredError;
-    /// weighted error flag
+    /// Weighted error flag.
     bool wError;
 
     double lastError;
@@ -117,8 +112,10 @@ public:
         lastError = -1.0;
         stepsToSkip = skippedSteps = initialSkipSteps = 0;
     }
+
     /// Destructor
     ~HuertaErrorEstimator() { }
+
     /** Returns refinement level
      */
     int giveRefinementLevel(void) { return this->refineLevel; }
@@ -226,7 +223,7 @@ private:
 class HuertaErrorEstimatorInterface : public Interface
 {
 public:
-    // mode for problem setup
+    /// Mode for problem setup.
     enum SetupMode { CountMode = 0, NodeMode = 1, ElemMode = 2, BCMode = 3 };
 
 public:
@@ -277,36 +274,35 @@ protected:
 /**
  * The class representing Huerta remeshing criteria.
  * The basic task is to evaluate the required mesh density (at nodes) on given domain,
- * based on informations provided by the compatible error ertimator.
+ * based on information provided by the compatible error estimator.
  *
  * The remeshing criteria is maintained by the corresponding error estimator. This is mainly due to fact, that is
  * necessary for given EE to create compatible RC. In our concept, the EE is responsible.
- *
  */
 class HuertaRemeshingCriteria : public RemeshingCriteria
 {
 public:
-    /// mode of receiver, allows to use it in more general situations
+    /// Mode of receiver, allows to use it in more general situations.
     enum HuertaRemeshingCriteriaModeType { primaryUnknownBased };
 
 protected:
-    /// Array of nodal mesh densities
+    /// Array of nodal mesh densities.
     FloatArray nodalDensities;
-    /// Remeshing strategy proposed
+    /// Remeshing strategy proposed.
     RemeshingStrategy remeshingStrategy;
-    /// actual values (densities) state counter.
+    /// Actual values (densities) state counter.
     StateCounterType stateCounter;
-    /// mode of receiver
+    /// Mode of receiver.
     HuertaRemeshingCriteriaModeType mode;
-    /// required error to obtain
+    /// Required error to obtain.
     double requiredError;
-    /// minimum element size alloved
+    /// Minimum element size alloved.
     double minElemSize;
-    /// refinement coefficient
+    /// Refinement coefficient.
     double refineCoeff;
-    /// remeshing flag
+    /// Remeshing flag.
     bool noRemesh;
-    /// weighted error flag
+    /// Weighted error flag.
     bool wError;
 
 public:
@@ -315,7 +311,8 @@ public:
     /// Destructor
     ~HuertaRemeshingCriteria() { }
 
-    /** Returns the required mesh size n given dof manager.
+    /**
+     * Returns the required mesh size n given dof manager.
      * The mesh density is defined as a required element size
      * (in 1D the element length, in 2D the square from element area).
      * @param num dofman  number
@@ -337,7 +334,8 @@ public:
      * @param tStep time step
      */
     virtual int estimateMeshDensities(TimeStep *tStep);
-    /** Initializes receiver acording to object description stored in input record.
+    /**
+     * Initializes receiver acording to object description stored in input record.
      * This function is called immediately after creating object using
      * constructor. InitString can be imagined as data record in component database
      * belonging to receiver. Receiver use value-name extracting functions
@@ -350,16 +348,16 @@ public:
     /** Returns HuertaRemeshingCriteriaClass - classType id of receiver.
      * @see FEMComponent::giveClassID
      */
-    classType                giveClassID() const { return HuertaRemeshingCriteriaClass; }
+    classType giveClassID() const { return HuertaRemeshingCriteriaClass; }
 
 protected:
 };
+
 
 /**
  * The corresponding element interface to HuertaRemeshingCriteria class.
  * Declares the necessary services, which have to be provided by particular elements.
  */
-
 class HuertaRemeshingCriteriaInterface : public Interface
 {
 public:

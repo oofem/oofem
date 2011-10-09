@@ -47,6 +47,7 @@
 #include "structuralms.h"
 #ifndef __MAKEDEPEND
  #include <vector>
+ #include <stdio.h>
 #endif
 
 

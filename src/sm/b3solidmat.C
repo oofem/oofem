@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2009   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,13 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *******************************************************************
-//   *** CLASS B3 Solidification Material (concrete creep and shrinkage)
-//   *******************************************************************
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 #include "b3solidmat.h"
 #include "mathfem.h"
 #include "gausspnt.h"
@@ -332,7 +325,7 @@ B3SolidMaterial :: computeCharTimes()
 
     j = 1;
     //while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
-    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow(10.0, (double) (j-1)) ) {  
+    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow(10.0, (double) (j-1)) ) {
       j++;
     }
 

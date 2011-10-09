@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/freeminterface.h,v 1.3 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *****************************
-//   *** CLASS FREEM INTERFACE ***
-//   *****************************
-
 #ifndef freeminterface_h
 #define freeminterface_h
 
@@ -48,10 +43,10 @@ class TimeStep;
 
 /**
  * This class represents the interface to freem mesh generation package.
- * This interface is primarly responsible for two main tasks:
- * - to create input mesher file, containing all informations including the mesh density informations
- * based on informations from remeshing criteria.
- * - possibly to launch the mesher and transform its output to oofem input
+ * This interface is primarily responsible for two main tasks:
+ * - To create input mesher file, containing all information including the mesh density information
+ *   based on the remeshing criteria.
+ * - Possibly to launch the mesher and transform its output to oofem input.
  */
 class FreemInterface : public MesherInterface
 {
@@ -61,15 +56,13 @@ public:
     /// Destructor
     virtual ~FreemInterface() { }
 
-    /// Runs the mesh generation, mesh will be written to corresponding domain din file
     virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
 
-
 protected:
-    /// Creates the mesher input, containing the required mesh density informations.
+    /// Creates the mesher input, containing the required mesh density information.
     int createInput(Domain *d, TimeStep *stepN);
-    /// service for smoothing the densities for freem
-    void smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *stepN);
+    /// Service for smoothing the densities for freem.
+    void smoothNodalDensities(Domain *d, FloatArray &nodalDensities, TimeStep *stepN);
 };
 } // end namespace oofem
 #endif // freeminterface_h

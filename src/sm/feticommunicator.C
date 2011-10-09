@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/feticommunicator.C,v 1.2.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -253,91 +252,5 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 #endif
 }
 
-
-
-// ==================================================================================================== //
-
-/*
- * int
- * PNlDEIDynamicCommunicator :: setDomainCommunicatorToSendArry (DomainCommunicator<PNlDEIDynamic>* domainComm, IntArray& map)
- * {
- * if ((this->mode == PNlDEIDynamicCommunicator__NODE_CUT))
- * sortCommMap (map, &PNlDEIDynamicCommunicator::DofManCmp);
- * else if ((this->mode == PNlDEIDynamicCommunicator__REMOTE_ELEMENT_MODE)
- || (this->mode == PNlDEIDynamicCommunicator__ELEMENT_CUT))
- * sortCommMap (map, &PNlDEIDynamicCommunicator::ElemCmp);
- * else _error ("setDomainCommunicatorToSendArry: unknown mode");
- *
- * domainComm->setToSendArry (engngModel, map, this->mode);
- * return 1;
- * }
- *
- * int
- * PNlDEIDynamicCommunicator :: setDomainCommunicatorToRecvArry (DomainCommunicator<PNlDEIDynamic>* domainComm, IntArray& map)
- * {
- * if ((this->mode == PNlDEIDynamicCommunicator__NODE_CUT))
- * sortCommMap (map, &PNlDEIDynamicCommunicator::DofManCmp);
- * else if ((this->mode == PNlDEIDynamicCommunicator__REMOTE_ELEMENT_MODE) ||
- *    (this->mode == PNlDEIDynamicCommunicator__ELEMENT_CUT))
- * sortCommMap (map, &PNlDEIDynamicCommunicator::ElemCmp);
- * else _error ("setDomainCommunicatorToRecvArry: unknown mode");
- *
- * domainComm->setToRecvArry (engngModel, map, this->mode);
- * return 1;
- * }
- *
- *
- *
- * void
- * PNlDEIDynamicCommunicator :: sortCommMap (IntArray& map, int (PNlDEIDynamicCommunicator::*cmp) (int,int))
- * {
- * this->quickSortCommMap (map, 1, map.giveSize(), cmp);
- * }
- *
- *
- * void
- * PNlDEIDynamicCommunicator :: quickSortCommMap (IntArray& map, int l, int r, int (PNlDEIDynamicCommunicator::*cmp) (int,int))
- * {
- * if (r<=l) return;
- * int i = quickSortPartition (map, l, r, cmp);
- * quickSortCommMap (map, l, i-1, cmp);
- * quickSortCommMap (map, i+1, r, cmp);
- * }
- *
- *#define GLOBNUM(locnum) (engngModel->giveDomain()->giveDofManager(locnum)->giveGlobalNumber())
- *
- *
- * int
- * PNlDEIDynamicCommunicator :: quickSortPartition (IntArray& map, int l, int r, int (PNlDEIDynamicCommunicator::*cmp) (int,int))
- * {
- * int i=l-1, j=r;
- * int v = map.at(r);
- * int swap;
- *
- * for (;;) {
- * while (((this->*cmp) (map.at(++i), v)) < 0 );
- * while (((this->*cmp) (v, map.at(--j))) < 0 ) if (j==l) break;
- * if (i >= j) break;
- * swap = map.at(i); map.at(i) = map.at(j); map.at(j) = swap;
- * }
- * swap = map.at(i); map.at(i) = map.at(r); map.at(r) = swap;
- * return i;
- * }
- *
- *#undef GLOBNUM
- *
- * int
- * PNlDEIDynamicCommunicator :: DofManCmp (int i, int j)
- * {
- * return (engngModel->giveDomain()->giveDofManager(i)->giveGlobalNumber() -
- *   engngModel->giveDomain()->giveDofManager(j)->giveGlobalNumber());
- * }
- * int
- * PNlDEIDynamicCommunicator :: ElemCmp (int i, int j)
- * {
- * return (engngModel->giveDomain()->giveElement(i)->giveGlobalNumber() -
- *   engngModel->giveDomain()->giveElement(j)->giveGlobalNumber());
- * }
- */
 } // end namespace oofem
 #endif

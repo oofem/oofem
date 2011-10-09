@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/fetisolver.h,v 1.6.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **********************************
-//   *** CLASS FETI PARALLEL SOLVER ***
-//   **********************************
-
 #ifndef fetisolver_h
 #define fetisolver_h
 
@@ -45,8 +40,6 @@
  #include "sparselinsystemnm.h"
  #include "sparsemtrx.h"
  #include "flotarry.h"
-
- #include "skyline.h"
  #include "flotmtrx.h"
  #include "processcomm.h"
  #include "feticommunicator.h"
@@ -62,37 +55,32 @@ class EngngModel;
 
 
  #define FETISOLVER_MAX_RBM 6
-/// computer zero
+ /// computer zero
  #define FETISOLVER_ZERONUM 1.e-40
 
+/**
+ * This class implements the class NumericalMethod instance FETI
+ * linear algebraic equation parallel solver.
+ */
 class FETISolver : public SparseLinearSystemNM
 {
-    /*
-     * This class implements the class NumericalMethod instance FETI
-     * linear algebraic equation parallel solver
-     */
 private:
     int nse;
-    /// max number of iterations
+    /// Max number of iterations.
     int ni;
-    /// max allowed error
+    /// Max allowed error.
     double err;
-    /// linear dep/indep. trigger
+    /// Linear dep./indep. trigger.
     double limit;
-    //Skyline* partitionStiffness;
-    //FloatArray* partitionLoad;
-    //FloatArray* partitionSolution;
-    /// rigid body motions
+    /// Rigid body motions.
     FloatMatrix rbm;
-    /// rigid body motiona of all partitions. On master only
+    /// Rigid body motions of all partitions. On master only.
     FloatMatrix l;
-    /// indexes of singular equations
+    /// Indices of singular equations.
     IntArray se;
-    // List of local nodes participating in communication (list of boundary dof managers).
-    // IntArray    commMap;
-    /// Adresses of initial partititon contribution to rbm matrix
+    /// Addresses of initial partition contribution to rbm matrix.
     IntArray rbmAddr;
-    /*  vektor neznamych  */
+    /// Primary unknowns.
     FloatArray w;
     //
     FloatArray qq, q, dd, g, d, p, pp, gamma, localGammas;
@@ -101,44 +89,38 @@ private:
     ///
     ProcessCommunicatorBuff pcbuff;
     ProcessCommunicator processCommunicator;
-    ///
-    /// Common Communicator buffer
+    /// Common Communicator buffer.
     CommunicatorBuff *commBuff;
     FETICommunicator *masterCommunicator;
     /// List of local nodes (at master) participating in communication (list of boundary dof managers).
     IntArray masterCommMap;
-    /// flag indicating computation of energy norm
+    /// Flag indicating computation of energy norm.
     int energyNorm_comput_flag;
 public:
     FETISolver(int i, Domain *d, EngngModel *m);
-    // constructor
-    ~FETISolver();                    // destructor
+    ~FETISolver();
 
     /**
      * Solves the given linear system by LDL^T factorization.
      * Implementation rely on factorization support provided by mapped sparse matrix.
      * It calls Lhs->factorized()->backSubstitutionWith(*solutionArray). Sets solved flag to 1 if o.k.
-     * @param A coefficient matrix
-     * @param b right hand side
-     * @param x solution array
+     * @param A Coefficient matrix
+     * @param b Right hand side
+     * @param x Solution array
      * @return NM_Status value
-     * @param tNow time step
      */
     NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    int                estimateMaxPackSize(IntArray &, CommunicationBuffer &, int &);
+    int estimateMaxPackSize(IntArray &, CommunicationBuffer &, int &);
     /// Sets up the communication maps
-    void               setUpCommunicationMaps();
-    // management  components
+    void setUpCommunicationMaps();
 
-    //      void               instanciateFromString (char* initString) {}
     IRResultType initializeFrom(InputRecord *ir);
 
     // identification
     const char *giveClassName() const { return "FETISolver"; }
     classType giveClassID() const { return NumericalMethodClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_Feti; }
-
 
     void projection(FloatArray &v, FloatMatrix &l, FloatMatrix &l1);
 

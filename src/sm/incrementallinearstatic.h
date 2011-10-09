@@ -35,11 +35,7 @@
 #ifndef incrementallinearstatic_h
 #define incrementallinearstatic_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "structengngmodel.h"
-#include "sparselinsystemnm.h"
 #include "sparselinsystemnm.h"
 
 namespace oofem {

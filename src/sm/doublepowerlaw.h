@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/doublepowerlaw.h,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,28 +32,20 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************************
-//   *** CLASS RHEOLOGIC DOUBLE POWER LAW Material
-//   *********************************************
 #ifndef doublepowerlaw_h
 #define doublepowerlaw_h
-
 
 #include "maxwellChM.h"
 
 namespace oofem {
+/**
+ * This class implements a rheologic double power law material model.
+ */
 class DoublePowerLawMaterial : public MaxwellChainMaterial
 {
-    /*
-     * This class implements a rheologic Maxwelll chain model in a finite
-     * element problem.
-     *
-     * DESCRIPTION
-     * TASK
-     */
 protected:
-    double E28; // Young modulus at age of 28 days [MPa]
-    double fi1; // basic creep coefficient
+    double E28; ///< Young modulus at age of 28 days [MPa].
+    double fi1; ///< Basic creep coefficient.
     double m, n;
     double alpha;
 
@@ -62,14 +53,12 @@ public:
     DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
     ~DoublePowerLawMaterial() { }
 
-
-
     const char *giveClassName() const { return "DoublePowerLawMaterial"; }
-    classType giveClassID()         const { return DoublePowerLawMaterialClass; }
+    classType giveClassID() const { return DoublePowerLawMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
-protected:
 
-    virtual double  computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
+protected:
+    virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 };
 } // end namespace oofem
 #endif // doublepowerlaw_h

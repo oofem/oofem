@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/doublepowerlaw.C,v 1.3 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,12 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************************
-//   *** CLASS RHEOLOGIC DOUBLE POWER LAW Material
-//   *********************************************
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 #include "doublepowerlaw.h"
 #include "mathfem.h"
 #include "gausspnt.h"

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/fetiboundarydofman.C,v 1.3.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,6 +35,10 @@
 
 #include "fetiboundarydofman.h"
 #include "error.h"
+#include "intarray.h"
+
+using namespace std;
+
 
 namespace oofem {
 FETIBoundaryDofManager :: FETIBoundaryDofManager() : partitions(), codeNumbers()  {
