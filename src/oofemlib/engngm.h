@@ -978,11 +978,11 @@ public:
     /**
      * Determines the space necessary for send/receive buffer.
      * It uses related communication map pattern to determine the maximum size needed.
-     * @param commMap communication map used to send/receive messages
-     * @param buff communication buffer
-     * @param packUnpackType determines the type of packed quantity, used by receiver
+     * @param commMap Communication map used to send/receive messages.
+     * @param buff Communication buffer.
+     * @param packUnpackType Determines the type of packed quantity, used by receiver
      * to estimate the size of pack/unpack buffer accordingly.
-     * @return upper bound of space needed
+     * @return Upper bound of space needed.
      */
     virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType) { return 0; }
     /**
@@ -992,26 +992,21 @@ public:
      * dof related staff, which can later help in renumbering after rebalancing) and to send/receive all data.
      * Then the local update and renumbering is necessary to get consistent data structure.
      */
-    virtual void balanceLoad(TimeStep *);
-    /** Returns reference to receiver's load balancer*/
+    virtual void balanceLoad(TimeStep *tStep);
+    /** Returns reference to receiver's load balancer. */
     virtual LoadBalancer *giveLoadBalancer() { return NULL; }
-    /** Returns reference to receiver's load balancer monitor*/
+    /** Returns reference to receiver's load balancer monitor. */
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor() { return NULL; }
-
-
-#endif
-
-#ifdef __PARALLEL_MODE
 
     /// Returns domain rank in a group of collaborating processes (0..groupSize-1)
     int giveRank() { return rank; }
-    /// Returns the number of collaborating processes
+    /// Returns the number of collaborating processes.
     int giveNumberOfProcesses() { return numProcs; }
     /// Request domain rank and problem size
     void initParallel();
     /// Returns reference to itself -> required by comunicator.h
     EngngModel *giveEngngModel() { return this; }
-    // returns Communicator mode. Determines current domain-decomposition strategy used.
+    /// Returns Communicator mode. Determines current domain-decomposition strategy used.
     ProblemCommunicatorMode giveProblemCommMode() { return this->commMode; }
 #endif
 

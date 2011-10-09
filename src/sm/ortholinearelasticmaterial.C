@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/ortholinearelasticmaterial.C,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file ortholinearelasticmaterial.cc
 
 #include "linearelasticmaterial.h"
 #include "ortholinearelasticmaterial.h"
@@ -390,119 +387,6 @@ OrthotropicLinearElasticMaterial :: giveRotationMatrix(FloatMatrix &answer, Gaus
     this->giveStrainVectorTranformationMtrx(answer, t);
 }
 
-
-/*
- * FloatMatrix*
- * IsotropicLinearElasticMaterial :: GivePlaneStressStiffMtrx (MatResponseForm form,
- *                  GaussPoint* gp,
- *                  FloatArray* strainIncrement,
- *                  TimeStep* atTime)
- * //
- * // strainIncrement may be used for loading/unloading criteria
- * // in this simple material it is not necessary
- * //
- * {
- * FloatMatrix* constitutiveMatrix ;
- * double e,nu,ee,shear ;
- *
- * e     = this -> give('E') ;
- * nu    = this -> give('n') ;
- * ee    = e/(1.-nu*nu);
- * shear = e/(2.0*(1.+nu));
- *
- * if (form == FullForm) {
- * constitutiveMatrix = new FloatMatrix(6,6);
- *
- * constitutiveMatrix->at(1,1) = ee;
- * constitutiveMatrix->at(1,2) = nu*ee;
- * constitutiveMatrix->at(2,1) = nu*ee;
- * constitutiveMatrix->at(2,2) = ee;
- * constitutiveMatrix->at(6,6) = shear;
- * } else {
- * constitutiveMatrix = new FloatMatrix(3,3);
- *
- * constitutiveMatrix->at(1,1) = ee;
- * constitutiveMatrix->at(1,2) = nu*ee;
- * constitutiveMatrix->at(2,1) = nu*ee;
- * constitutiveMatrix->at(2,2) = ee;
- * constitutiveMatrix->at(3,3) = shear;
- * }
- * return constitutiveMatrix ;
- * }
- *
- *
- *
- * FloatMatrix*
- * IsotropicLinearElasticMaterial :: GivePlaneStrainStiffMtrx  (MatResponseForm form,
- *                   GaussPoint* gp,
- *                   FloatArray* strainIncrement,
- *                   TimeStep* atTime)
- * //
- * // strainIncrement may be used for loading/unloading criteria
- * // in this simple material it is not necessary
- * //
- * {
- * FloatMatrix* constitutiveMatrix;
- * double e,nu,ee,shear;
- *
- * e     = this -> give('E');
- * nu    = this -> give('n');
- * ee    = e/(1.0+nu)/(1.-2.0*nu);
- * shear = e/(2.0*(1.+nu)) ;
- *
- * if (form == FullForm) {
- * constitutiveMatrix = new FloatMatrix(6,6);
- *
- * constitutiveMatrix->at(1,1) = ee*(1.0-nu);
- * constitutiveMatrix->at(1,2) = nu*ee;
- * constitutiveMatrix->at(2,1) = nu*ee;
- * constitutiveMatrix->at(2,2) = ee*(1.0-nu);
- * constitutiveMatrix->at(3,1) = nu*ee;
- * constitutiveMatrix->at(3,2) = nu*ee;
- * constitutiveMatrix->at(1,3) = nu*ee;
- * constitutiveMatrix->at(2,3) = nu*ee;
- * constitutiveMatrix->at(6,6) = shear;
- * } else {
- * constitutiveMatrix = new FloatMatrix(3,3);
- *
- * constitutiveMatrix->at(1,1) = ee*(1.0-nu);
- * constitutiveMatrix->at(1,2) = nu*ee;
- * constitutiveMatrix->at(2,1) = nu*ee;
- * constitutiveMatrix->at(2,2) = ee*(1.0-nu);
- * constitutiveMatrix->at(3,3) = shear;
- * }
- *
- * return constitutiveMatrix ;
- * }
- *
- *
- * FloatMatrix*
- * IsotropicLinearElasticMaterial :: Give1dStressStiffMtrx (MatResponseForm form,
- *                 GaussPoint* gp,
- *                 FloatArray* strainIncrement,
- *                 TimeStep* atTime)
- * //
- * // strainIncrement may be used for loading/unloading criteria
- * // in this simple material it is not necessary
- * //
- * {
- * FloatMatrix* constitutiveMatrix ;
- * double e,nu,ee,shear ;
- *
- * e     = this -> give('E') ;
- *
- * if (form == FullForm) {
- * constitutiveMatrix = new FloatMatrix(6,6);
- *
- * constitutiveMatrix->at(1,1) = e;
- * } else {
- * constitutiveMatrix = new FloatMatrix(1,1);
- *
- * constitutiveMatrix->at(1,1) = e;
- * }
- * return constitutiveMatrix ;
- * }
- */
 
 void
 OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,

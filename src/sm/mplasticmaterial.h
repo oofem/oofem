@@ -59,8 +59,8 @@ class GaussPoint;
  * -# state at previous equilibrium state (variables without temp)
  * -# state during searching new equilibrium (variables with temp)
  *    when we start search new state from previous equilibrium one we copy
- *    non-tem variables into temp ones. And after we reach new equilibrium
- *    (now decribed by temp variables) we copy tem-var into non-tepm ones
+ *    non-temp variables into temp ones. And after we reach new equilibrium
+ *    (now described by temp variables) we copy temp-var into non-temp ones
  *    (see function updateYourself).
  */
 class MPlasticMaterialStatus : public StructuralMaterialStatus

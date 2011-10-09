@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/ortholinearelasticmaterial.h,v 1.5 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **************************************************
-//   *** CLASS ORTHOTROPIC LINEAR ELACSTIC MATERIAL ***
-//   **************************************************
-
 #ifndef ortholinearelasticmaterial_h
 #define ortholinearelasticmaterial_h
 
@@ -51,42 +46,40 @@
 namespace oofem {
 class GaussPoint;
 
+/// Coordinate system type.
+enum CS_type {
+    unknownCS, ///< Unknown coordinate system.
+    localCS, ///< Coordinate system of principal axes is specified in global coordinate system (general).
+    /**
+     * coordinate system of principal axes is specified in shell  coordinate system
+     * this is defined as follows: principal z-axis is perpendicular to mid-section *
+     * x-axis is perpendicular to z-axis and normal to user specified vector n.
+     * (so x-axis is parallel to plane, with n being normal to this plane).
+     * y-axis is then perpendicular both to x and z axes.
+     * @note This definition of cs is valid only for plates and shells
+     * when vector n is parallel to z-axis an error occurs and program is terminated.
+     */
+    shellCS,
+};
 
-enum CS_type { unknownCS, localCS, shellCS };
-//
-// localCS  - coordinate system of principal axes is specified in global coordinate system (general)
-// shellCS  - coordinate system of principal axes is specified in shell  coordinate system
-//            this is defined as follows: principal z-axis is perpendicular to mid-section
-//            x-axis is perpendicular to z-axis and normal to user specified vector n.
-//            (so x-axis is parallel to plane, with n beeing normal to this plane).
-//            y-axis is then perpendicular both to x and z axes.
-//            WARNING: this definition of cs is valid only for plates and shells
-//            when vector n is paralel to z-axis an error occurs and program is terminated.
-//
-
+/**
+ * This class implements a orthotropic linear elastic material in a finite
+ * element problem.
+ *
+ * Tasks:
+ * - Returning standard material stiffness marix for 3d-case.
+ *   according to current state determined by using data stored
+ *   in Gausspoint, and local coordinate system defined in gp.
+ * - Methods Give2dPlaneStressMtrx, GivePlaneStrainMtrx, Give1dStressMtrx are
+ *   overloaded since form of this matrices is well known, and for
+ *   faster response mainly in linear elastic problems.
+ * - Returning a material property (method 'give'). Only for non-standard elements.
+ * - Returning real stress state vector(tensor) at gauss point for 3d - case.
+ * - Transforming stiffness from principal orhotrophy axes to
+ *   system used in given GaussPoint.
+ */
 class OrthotropicLinearElasticMaterial : public LinearElasticMaterial
 {
-    /*
-     * This class implements a orthotropic linear elastic material in a finite
-     * element problem. A material
-     * is an attribute of a domain. It is usually also attribute of many elements.
-     *
-     * DESCRIPTION
-     * ORTHOTROPIC Linear Elastic Material
-     *
-     * TASK
-     * - Returning standard material stiffness marix for 3d-case.
-     * according to current state determined by using data stored
-     * in Gausspoint, and local coordinate system defined in gp.
-     * - methods Give2dPlaneStressMtrx, GivePlaneStrainMtrx, Give1dStressMtrx are
-     * overloaded since form of this matrices is well known, and for
-     * faster response mainly in linear elastic problems.
-     * - Returning a material property (method 'give'). Only for non-standard elements.
-     * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     * - Transforming stiffness from principal orhotrophy axes to
-     * system used in given GaussPoint.
-     */
-
 protected:
     CS_type cs_type;
     FloatMatrix *localCoordinateSystem;
@@ -107,42 +100,32 @@ public:
     {
         if ( localCoordinateSystem ) { delete localCoordinateSystem; }
 
-        if ( helpPlaneNormal ) { delete helpPlaneNormal; } }
+        if ( helpPlaneNormal ) { delete helpPlaneNormal; }
+    }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
     const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
-    classType giveClassID()         const { return OrthotropicLinearElasticMaterialClass; }
+    classType giveClassID() const { return OrthotropicLinearElasticMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
-    // non-standard - returns time independent material constant
-    double   give(int, GaussPoint *);
+    double give(int aProperty, GaussPoint *gp);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseForm, MatResponseMode, GaussPoint * gp,
-                                       TimeStep * atTime);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseForm form, MatResponseMode mode, GaussPoint * gp,
+                                       TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    /// Computes local 3d stiffness matirx of the receiver
-    void give3dLocalMaterialStiffnessMatrix(FloatMatrix & answer,
-                                            MatResponseForm, MatResponseMode, GaussPoint * gp,
-                                            TimeStep * atTime);
-
+    /// Computes local 3d stiffness matrix of the receiver.
+    void give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
+                                            MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                            TimeStep *tStep);
 
 protected:
-    /*
-     * FloatMatrix* GivePlaneStressStiffMtrx (MatResponseForm,MatResponseMode,GaussPoint* gp,
-     *                                      FloatArray* strainIncrement, TimeStep* atTime);
-     * FloatMatrix* GivePlaneStrainStiffMtrx (MatResponseForm,MatResponseMode, GaussPoint* gp,
-     *            FloatArray* strainIncrement, TimeStep* atTime);
-     * FloatMatrix* Give1dStressStiffMtrx (MatResponseForm,MatResponseMode,GaussPoint* gp,
-     *           FloatArray* strainIncrement, TimeStep* atTime);
-     */
     void giveTensorRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
     void giveRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
-    /* Diferent response for every element */
 
     friend class CrossSection;
 };

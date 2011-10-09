@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/perfectlyplasticmaterial.C,v 1.6 2003/04/23 14:20:49 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file PERFECTLY PLASTIC MATERIAL.CC
-
 
 #include "perfectlyplasticmaterial.h"
 //#include "yieldcriteria.h"

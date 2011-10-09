@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/nlinearstatic.C,v 1.17.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file nlinearstatic.cc
-//
-
 #include "mathfem.h"
 #include "verbose.h"
 #include "nlinearstatic.h"
@@ -56,16 +51,13 @@
 #include "calmls.h"
 #include "nrsolver.h"
 #include "nrsolver2.h" // experimental support for direct displacement control
-//#include "calm2.h"
 #include "nlstructuralelement.h"
-//#include "skyline.h"
-//#include "skylineu.h"
 #include "outputmanager.h"
 #include "datastream.h"
-//#include "dyncompcol.h"
 #include "usrdefsub.h"
 #include "clock.h"
 #include "contextioerr.h"
+#include "sparsemtrx.h"
 
 #ifdef TIME_REPORT
  #ifndef __MAKEDEPEND
@@ -104,7 +96,8 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
 }
 
 
-NonLinearStatic :: ~NonLinearStatic() {
+NonLinearStatic :: ~NonLinearStatic()
+{
     //
     // destructor
     //
@@ -732,31 +725,13 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     // set-up numerical model
     //
     this->giveNumericalMethod(tStep);
-    /*
-     * nMethod -> setSparseMtrxAsComponent (NonLinearLhs, stiffnessMatrix) ;
-     * nMethod -> setFloatArrayAsComponent (NonLinearRhs_Total, &loadVector) ;
-     * if (controllMode == nls_loadControll)
-     * nMethod -> setFloatArrayAsComponent (NonLinearRhs_Incremental, &incrementalLoadVector) ;
-     *
-     * if (initialLoadVector.isNotEmpty())
-     * nMethod -> setFloatArrayAsComponent (InitialNonLinearRhs, &initialLoadVector);
-     * else
-     * nMethod -> setFloatArrayAsComponent (InitialNonLinearRhs, NULL);
-     * nMethod -> setFloatArrayAsComponent (TotalNonLinearSolution, &totalDisplacement);
-     * nMethod -> setDoubleAsComponent (CurrentLevel, loadLevel) ;
-     * // nMethod -> setDoubleAsComponent (StepLength, currentStepLength);
-     * nMethod -> setDoubleAsComponent (PrescribedTolerancy, rtolv ) ;
-     * nMethod -> setFloatArrayAsComponent (InternalRhs, &internalForces);
-     * nMethod -> setFloatArrayAsComponent (IncrementOfNonlinearSolution, &incrementOfDisplacement);
-     */
     //
-    // call numerical model to solve arised problem
+    // call numerical model to solve arise problem
     //
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %5d.%d]\n", tStep->giveNumber(), tStep->giveVersion() );
 #endif
 
-    //nMethod -> solveYourselfAt(tStep) ;
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
@@ -784,11 +759,9 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 void NonLinearStatic :: updateYourself(TimeStep *stepN)
 {
     //
-    // The following line is potentialy serious performance leak.
+    // The following line is potentially serious performance leak.
     // The numerical method may compute their internal forces - thus causing
     // internal state to be updated, while checking equilibrium.
-
-    // this->updateInternalState(stepN);
     // update internal state only if necessary
     this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
