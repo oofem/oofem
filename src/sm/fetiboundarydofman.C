@@ -35,19 +35,20 @@
 
 #include "fetiboundarydofman.h"
 #include "error.h"
-#include "intarray.h"
 
 using namespace std;
 
 
 namespace oofem {
-FETIBoundaryDofManager :: FETIBoundaryDofManager() : partitions(), codeNumbers()  {
+FETIBoundaryDofManager :: FETIBoundaryDofManager() : partitions(), codeNumbers()
+{
     globalNumber = 0;
     numberOfPartitions = 0;
     ndofs = 0;
 }
 
-FETIBoundaryDofManager :: FETIBoundaryDofManager(int num, int part, int ndof) : partitions(part), codeNumbers(part * ndof)  {
+FETIBoundaryDofManager :: FETIBoundaryDofManager(int num, int part, int ndof) : partitions(part), codeNumbers(part * ndof)
+{
     globalNumber = num;
     numberOfPartitions = part;
     ndofs = ndof;
@@ -55,7 +56,8 @@ FETIBoundaryDofManager :: FETIBoundaryDofManager(int num, int part, int ndof) : 
 
 
 
-FETIBoundaryDofManager :: FETIBoundaryDofManager(const FETIBoundaryDofManager &src) {
+FETIBoundaryDofManager :: FETIBoundaryDofManager(const FETIBoundaryDofManager &src)
+{
     globalNumber = src.globalNumber;
     numberOfPartitions = src.numberOfPartitions;
     ndofs = src.ndofs;

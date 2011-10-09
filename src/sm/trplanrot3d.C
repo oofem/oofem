@@ -40,6 +40,7 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
+#include "mathfem.h"
 
 namespace oofem {
 TrPlaneStrRot3d :: TrPlaneStrRot3d(int n, Domain *aDomain) : TrPlaneStrRot(n, aDomain)

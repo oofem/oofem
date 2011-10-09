@@ -35,6 +35,8 @@
 #ifndef fetiboundarydofman_h
 #define fetiboundarydofman_h
 
+#include "intarray.h"
+
 #ifdef __PARALLEL_MODE
 
 namespace oofem {

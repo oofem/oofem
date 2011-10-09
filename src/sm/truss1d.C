@@ -42,6 +42,7 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
