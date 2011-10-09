@@ -56,6 +56,11 @@ public:
     MaterialModelMapperInterface() : Interface() { }
     /// Destructor.
     virtual ~MaterialModelMapperInterface() { }
+
+    /**
+     * @name The interface required by MaterialModelMapperInterface
+     */
+    //@{
     /**
      * Maps the required internal state variables from
      * old mesh oldd to given ip. The result is stored in gp status.
@@ -86,8 +91,7 @@ public:
      * but their finish is invoked by all members.
      */
     virtual int MMI_finish(TimeStep *tStep) = 0;
-
-protected:
+    //@}
 };
 } // end namespace oofem
 #endif // materialmapperinterface_h

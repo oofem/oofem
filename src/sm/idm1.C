@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/idm1.C,v 1.8.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-// file: idm1.C
-
 
 #include "idm1.h"
 #include "isolinearelasticmaterial.h"
@@ -69,9 +65,9 @@ MMALeastSquareProjection IsotropicDamageMaterial1 :: mapper;
 
 IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d),
     RandomMaterialExtensionInterface()
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
     // deleted by paren, where linearElasticMaterial instance declared
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
@@ -276,7 +272,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
         this->computePrincipalValues(principalStrains, fullstrain, principal_strain);
         double I1e, J2e;
-        this->computeStrainInvariants(& principalStrains, & I1e, & J2e);
+        this->computeStrainInvariants(principalStrains, I1e, J2e);
         double a, b, c;
         a = ( k - 1 ) * I1e / ( 2 * k * ( 1 - 2 * nu ) );
         b = ( k - 1 ) * ( k - 1 ) * I1e * I1e / ( ( 1 - 2 * nu ) * ( 1 - 2 * nu ) );
@@ -288,13 +284,13 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 }
 
 void
-IsotropicDamageMaterial1 :: computeStrainInvariants(FloatArray *strainVector, double *I1e, double *J2e)
+IsotropicDamageMaterial1 :: computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e)
 {
-    * I1e = strainVector->at(1) + strainVector->at(2) + strainVector->at(3);
-    double s1 = strainVector->at(1) * strainVector->at(1);
-    double s2 = strainVector->at(2) * strainVector->at(2);
-    double s3 = strainVector->at(3) * strainVector->at(3);
-    * J2e = 1. / 2. * ( s1 + s2 + s3 ) - 1. / 6. * ( ( * I1e ) * ( * I1e ) );
+    I1e = strainVector.at(1) + strainVector.at(2) + strainVector.at(3);
+    double s1 = strainVector.at(1) * strainVector.at(1);
+    double s2 = strainVector.at(2) * strainVector.at(2);
+    double s3 = strainVector.at(3) * strainVector.at(3);
+    J2e = 1./2. * ( s1 + s2 + s3 ) - 1./6. * ( I1e*I1e );
 }
 
 /* OLD VERSION, ABANDONED ON 20 JULY 2010

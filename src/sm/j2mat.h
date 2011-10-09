@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/Attic/j2mat.h,v 1.1.2.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *******************************
-//   *** CLASS J2 plastic material
-//   *******************************
-
 #ifndef j2mat_h
 #define j2mat_h
 
@@ -45,40 +40,28 @@
 namespace oofem {
 class Domain;
 
+/**
+ * This class implements a isotropic plastic linear material (J2 plasticity condition is used).
+ * in a finite element problem.
+ * Both kinematic and isotropic hardening is supported.
+ */
 class J2Mat : public MPlasticMaterial2
 {
-    /*
-     * This class implements a isotropic  plastic linear material (J2 plasticity condition is used)
-     * in a finite element problem. A material
-     * is an attribute of a domain. It is usually also attribute of many elements.
-     *
-     * DESCRIPTION
-     * ISOTROPIC PLASTIC Material with J2 plastic condition
-     *
-     * TASK
-     * - Returning standard material stiffness marix for 3d-case.
-     * according to current state determined by using data stored
-     * in Gausspoint.
-     * - Returning a material property (method 'give'). Only for non-standard elements.
-     * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     */
-
 protected:
     int kinematicHardeningFlag, isotropicHardeningFlag;
     double kinematicModuli, isotropicModuli;
-    //double E, nu; // isotropic material constants
     double k;
-public:
 
+public:
     J2Mat(int n, Domain *d);
     ~J2Mat();
 
     IRResultType initializeFrom(InputRecord *ir);
     const char *giveClassName() const { return "J2Mat"; }
-    classType giveClassID()         const { return J2MatClass; }
+    classType giveClassID() const { return J2MatClass; }
 
-    virtual int         giveSizeOfFullHardeningVarsVector();
-    virtual int         giveSizeOfReducedHardeningVarsVector(GaussPoint *);
+    virtual int giveSizeOfFullHardeningVarsVector();
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
@@ -86,9 +69,6 @@ public:
 protected:
     virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 2; }
 
-    //
-    // yield(YC-like functions) and loading(LC-like functions) criteria specific section
-    //
     virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
                                        const FloatArray &strainSpaceHardeningVars);
 
@@ -110,9 +90,6 @@ protected:
                                                         const FloatArray &fullStressVector,
                                                         const FloatArray &strainSpaceHardeningVars,
                                                         const FloatArray &gamma);
-    /**
-     * Indicates, whether receiver model has hardening/softening behaviour or behaves according to perfect plasticity theory
-     */
     virtual int hasHardening();
     /* virtual void  computeReducedGradientMatrix (FloatMatrix& answer, int isurf,
      *                                          GaussPoint *gp,
@@ -124,9 +101,9 @@ protected:
                                                  const FloatArray &strainSpaceHardeningVariables);
 
     // auxiliary function
-    double      computeJ2InvariantAt(const FloatArray &);
-    double      giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
-    void        giveStressBackVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
+    static double computeJ2InvariantAt(const FloatArray &stressVector);
+    double giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
+    void giveStressBackVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
 };
 } // end namespace oofem
 #endif // j2mat_h
