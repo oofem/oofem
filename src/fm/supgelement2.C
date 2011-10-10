@@ -117,6 +117,10 @@ SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
         this->computeAccelerationTerm_MC(answer, tStep);
     } else if ( mtrx == PressureTerm_MC ) {
         this->computePressureTerm_MC(answer, tStep);
+    } else if ( mtrx == BCLhsTerm_MB ) {
+      this->computeBCLhsTerm_MB(answer, tStep);
+    } else if ( mtrx == BCLhsPressureTerm_MB ) {
+      this->computeBCLhsPressureTerm_MB(answer, tStep);
     } else if ( mtrx == LSICStabilizationTerm_MB ) {
         this->computeLSICStabilizationTerm_MB(answer, tStep);
     } else if ( mtrx == StiffnessMatrix ) {
