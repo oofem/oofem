@@ -679,12 +679,12 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     //answer.resize(6, 6);
     //answer.zero();
 
-    int node1, node2, node3, i;
+    int node1, node2, node3;
     int d1 = 1;
     int d2 = 1;
     int d3 = 1;
     double l, t1, t2, _t1, _t2;
-    double alpha, beta;
+    double beta;
 
     answer.resize(6, 6);
     answer.zero();
@@ -768,12 +768,12 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     //answer.resize(6, 6);
     //answer.zero();
 
-    int node1, node2, node3, i;
+    int node1, node2, node3;
     int d1 = 1;
     int d2 = 1;
     int d3 = 1;
     double l, n1, n2, _t1, _t2;
-    double alpha, beta;
+    double alpha;
 
     answer.resize(6, 6);
     answer.zero();
@@ -855,7 +855,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
 void
 TR1_2D_SUPG :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime)
 {
-    int node1, node2, node3, i;
+    int node1, node2, node3 ;
     int d1 = 1;
     int d2 = 1;
     int d3 = 1;
@@ -952,8 +952,8 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     }
 
     // loop over sides
-    int j, n1, n2, code, sid;
-    double tx, ty, l, nx, ny;
+    int n1, n2;
+    double tx, ty, l;
     //IntArray nodecounter (3);
 
     if (  1 ) {

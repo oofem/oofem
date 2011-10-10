@@ -845,7 +845,7 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
 
     int node1, node2, node3, i, j, ip;
     double l, t1, t2, _t1, _t2, dV;
-    double alpha, beta;
+    double beta;
     GaussPoint *gp;
     FloatArray nt(6), n(3);
     answer.resize(6, 6);
@@ -895,7 +895,7 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
 
     int node1, node2, node3, i, j, ip;
     double l, n1, n2, _t1, _t2, dV;
-    double alpha, beta;
+    double alpha;
     FloatArray nt(6), n(3);
     GaussPoint *gp;
     answer.resize(6, 6);
