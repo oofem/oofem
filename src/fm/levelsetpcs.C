@@ -102,7 +102,7 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
         initialRefMatFlag = true;
     }
 
-    reinit_alg = 0;
+    reinit_alg = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, reinit_alg, IFT_LSPCS_reinit_alg, "lsra");
 
     reinit_dt = 0.0;
@@ -330,13 +330,17 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
 void
 LevelSetPCS :: reinitialization(TimeStep *atTime)
 {
-    if ( reinit_alg == 1 ) {
+     if ( reinit_alg == 0 ) {
+        return;
+     } else if ( reinit_alg == 1 ) {
+        this->redistance(atTime);
+     } else if ( reinit_alg == 2 ) {
         FloatArray ls1;
         this->FMMReinitialization(ls1);
         levelSetValues = ls1;
-    } else {
-        this->redistance(atTime);
-    }
+     } else {
+        OOFEM_ERROR2("LevelSetPCS::reinitialization: unknown reinitialization scheme (%d)", reinit_alg);
+     }
 }
 
 
