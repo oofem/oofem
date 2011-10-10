@@ -84,6 +84,7 @@ public:
     
 
     double computeVolumeAround(GaussPoint *gp);
+    void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
     // definition
     const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }

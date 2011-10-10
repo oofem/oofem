@@ -1636,6 +1636,11 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
  */
 
 
+/* Note this LEPLIC implementation will not work for axi elements as the true volume
+   is not taken into account (the effect of radius) !
+*/
+
+
 double
 TR1_2D_SUPG :: computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag)
 {

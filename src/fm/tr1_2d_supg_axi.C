@@ -1207,4 +1207,98 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //this->t_lsic = 0.0;
 }
+
+void
+TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
+{
+    int i, neg = 0, pos = 0, zero = 0, si = 0;
+    double x1, x2, x3, y1, y2, y3;
+
+    answer.resize(2);
+    for ( i = 1; i <= 3; i++ ) {
+        if ( fi.at(i) >= 0. ) {
+            pos++;
+        }
+
+        if ( fi.at(i) < 0.0 ) {
+            neg++;
+        }
+
+        if ( fi.at(i) == 0. ) {
+            zero++;
+        }
+    }
+
+    if ( neg == 0 ) { // all level set values positive
+        answer.at(1) = 1.0;
+        answer.at(2) = 0.0;
+    } else if ( pos == 0 ) { // all level set values negative
+        answer.at(1) = 0.0;
+        answer.at(2) = 1.0;
+    } else if ( zero == 3 ) {
+        // ???????
+        answer.at(1) = 1.0;
+        answer.at(2) = 0.0;
+    } else {
+        // zero level set inside
+        // find the vertex with level set sign different from other two
+        for ( i = 1; i <= 3; i++ ) {
+            if ( ( pos > neg ) && ( fi.at(i) < 0.0 ) ) {
+                si = i;
+                break;
+            }
+
+            if ( ( pos < neg ) && ( fi.at(i) >= 0.0 ) ) {
+                si = i;
+                break;
+            }
+        }
+
+        if ( si && ( ( pos + neg ) == 3 ) ) {
+            x1 = this->giveNode(si)->giveCoordinate(1);
+            y1 = this->giveNode(si)->giveCoordinate(2);
+
+            // compute intersections
+            int prev_node = ( si > 1 ) ? si - 1 : 3;
+            int next_node = ( si < 3 ) ? si + 1 : 1;
+
+            double l = this->giveNode(si)->giveCoordinates()->distance( this->giveNode(next_node)->giveCoordinates() );
+            double t = fi.at(si) / ( fi.at(si) - fi.at(next_node) );
+            x2 = x1 + t * ( this->giveNode(next_node)->giveCoordinate(1) - this->giveNode(si)->giveCoordinate(1) );
+            y2 = y1 + t * ( this->giveNode(next_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );
+
+            l = this->giveNode(si)->giveCoordinates()->distance( this->giveNode(prev_node)->giveCoordinates() );
+            t = fi.at(si) / ( fi.at(si) - fi.at(prev_node) );
+            x3 = x1 + t * ( this->giveNode(prev_node)->giveCoordinate(1) - this->giveNode(si)->giveCoordinate(1) );
+            y3 = y1 + t * ( this->giveNode(prev_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );
+
+
+	    // compute volume associated to traingle (x1,y1; x2,y2; x3,y3)
+            double __volume = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) * ((x1+x2+x3)/3.);
+	    double volume = this->area*((this->giveNode(1)->giveCoordinate(1)+this->giveNode(2)->giveCoordinate(1)+this->giveNode(3)->giveCoordinate(1))/3.);
+            if ( fabs(__volume) / volume > 1.00001 ) {
+                OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+            }
+
+            // prevent some roundoff errors
+            if ( fabs(__volume) > volume ) {
+                __volume = sgn(__volume) * volume;
+            }
+
+            if ( pos > neg ) {
+                // negative area computed
+                answer.at(2) = fabs(__volume) / volume;
+                answer.at(1) = 1.0 - answer.at(2);
+            } else {
+                // postive area computed
+                answer.at(1) = fabs(__volume) / volume;
+                answer.at(2) = 1.0 - answer.at(1);
+            }
+        } else {
+            OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+        }
+    }
+}
+
+
 } // end namespace oofem
