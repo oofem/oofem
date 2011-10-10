@@ -669,20 +669,20 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 }
 
                 if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
-                    OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                    OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
                 }
 
                 if ( pos > neg ) {
                     // negative vol computed
-                    answer.at(2) = fabs(__vol) / vol;
+		    answer.at(2) = min(fabs(__vol) / vol, 1.0);
                     answer.at(1) = 1.0 - answer.at(2);
                 } else {
                     // postive vol computed
-                    answer.at(1) = fabs(__vol) / vol;
+		    answer.at(1) = min(fabs(__vol) / vol, 1.0);
                     answer.at(2) = 1.0 - answer.at(1);
                 }
             } else {
-                OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
         } else if ( max(pos, neg) == 2 ) {
             // two vertices positive; two negative; compute positive volume
@@ -758,14 +758,14 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 double __vol = fabs(__v1) + fabs(__v2) + fabs(__v3);
                 double vol = LS_PCS_computeVolume();
 
-                if ( ( __vol < 0 ) || ( __vol > vol ) ) {
-                    OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+		if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
+                    OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
                 }
 
-                answer.at(1) = fabs(__vol) / vol;
+                answer.at(1) = min (fabs(__vol) / vol, 1.0);
                 answer.at(2) = 1.0 - answer.at(1);
             } else {
-                OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
         } else {
             OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
