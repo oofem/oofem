@@ -59,6 +59,9 @@ protected:
     VecScatter n2gvecscat;
     VecScatter l2gvecscat;
  #ifdef __PARALLEL_MODE
+    /// Communicator used for parallel objects.
+    MPI_Comm comm;
+
     PetscNatural2GlobalOrdering n2g;
     PetscNatural2LocalOrdering n2l;
 
@@ -76,18 +79,28 @@ public:
     int giveNumberOfGlobalEqs();
     int giveNumberOfNaturalEqs();
 
-
     /// Scatters global vector to natural one.
     int scatterG2N(Vec src, Vec dest, InsertMode mode);
     int scatterG2N(Vec src, FloatArray *dest, InsertMode mode);
     /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
     int scatterN2G(Vec src, Vec dest, InsertMode mode);
-    int scatterN2G(FloatArray *src, Vec dest, InsertMode mode);
+    int scatterN2G(const FloatArray *src, Vec dest, InsertMode mode);
     /**
      * Scatters and gathers vector in natural ordering to global (parallel) one,
      * but only local entries are processed.
      */
-    int scatterL2G(FloatArray *src, Vec dest, InsertMode mode);
+    int scatterL2G(const FloatArray *src, Vec dest, InsertMode mode);
+
+    /**
+     * Convenience function for computing the norm for a naturally distributed array
+     * Common for convergence criterion and such.
+     */
+    double naturalNorm(const FloatArray &src);
+    /**
+     * Convenience function for computing the norm for a locally distributed array
+     * Common for convergence criterion and such.
+     */
+    double localNorm(const FloatArray &src);
 
     void createVecGlobal(Vec *answer);
 

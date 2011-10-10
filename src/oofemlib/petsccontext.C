@@ -46,6 +46,7 @@ PetscContext :: PetscContext(EngngModel *e, EquationID ut)
 {
     this->emodel = e;
     this->ut = ut;
+    this->comm = PETSC_COMM_WORLD;
     n2gvecscat = NULL;
 }
 
@@ -129,8 +130,8 @@ PetscContext :: scatterG2N(Vec src, Vec dest, InsertMode mode)
         if ( n2gvecscat == NULL ) {
             //
             IS naturalIS, globalIS;
-            ISCreateGeneral(PETSC_COMM_WORLD, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), & globalIS);
-            ISCreateStride(PETSC_COMM_WORLD, neqs, 0, 1, & naturalIS);
+            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), & globalIS);
+            ISCreateStride(comm, neqs, 0, 1, & naturalIS);
             VecScatterCreate(dest, naturalIS, src, globalIS, & n2gvecscat);
         }
 
@@ -193,8 +194,8 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
         if ( n2gvecscat == NULL ) {
             //
             IS naturalIS, globalIS;
-            ISCreateGeneral(PETSC_COMM_WORLD, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), & globalIS);
-            ISCreateStride(PETSC_COMM_WORLD, neqs, 0, 1, & naturalIS);
+            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), & globalIS);
+            ISCreateStride(comm, neqs, 0, 1, & naturalIS);
             VecScatterCreate(src, naturalIS, dest, globalIS, & n2gvecscat);
         }
 
@@ -211,7 +212,7 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
 
 
 int
-PetscContext :: scatterN2G(FloatArray *src, Vec dest, InsertMode mode)
+PetscContext :: scatterN2G(const FloatArray *src, Vec dest, InsertMode mode)
 {
     PetscScalar *ptr;
     int i;
@@ -251,7 +252,7 @@ PetscContext :: scatterN2G(FloatArray *src, Vec dest, InsertMode mode)
 
 
 int
-PetscContext :: scatterL2G(FloatArray *src, Vec dest, InsertMode mode)
+PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
 {
     PetscScalar *ptr;
     int i;
@@ -291,20 +292,57 @@ PetscContext :: scatterL2G(FloatArray *src, Vec dest, InsertMode mode)
 }
 
 
+double
+PetscContext :: localNorm(const FloatArray &src)
+{
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        double norm2, norm2_tot;
+        int size = src.giveSize();
+        PetscNatural2LocalOrdering *n2l = this->giveN2Lmap();
+        for ( int i = 0; i < size; i++ ) {
+            if ( n2l->giveNewEq(i + 1) ) {
+                norm2 += src(i)*src(i);
+            }
+        }
+        MPI_Allreduce(&norm2, &norm2_tot, 1, MPI_DOUBLE, MPI_SUM, comm);
+        return sqrt(norm2_tot);
+    }
+#else
+    return src.computeNorm();
+#endif
+}
+
+
+double
+PetscContext :: naturalNorm(const FloatArray &src)
+{
+#ifdef __PARALLEL_MODE
+    double norm;
+    Vec temp;
+    this->scatterN2G(&src, temp, ADD_VALUES);
+    VecNorm(temp, NORM_2, &norm);
+    return norm;
+#else
+    return src.computeNorm();
+#endif
+}
+
+
 
 void
 PetscContext :: createVecGlobal(Vec *answer)
 {
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        VecCreate(PETSC_COMM_WORLD, answer);
+        VecCreate(comm, answer);
         VecSetSizes( * answer, giveNumberOfLocalEqs(), giveNumberOfGlobalEqs() );
         VecSetFromOptions(* answer);
     } else {
 #endif
     VecCreateSeq(PETSC_COMM_SELF, giveNumberOfNaturalEqs(), answer);
 #ifdef __PARALLEL_MODE
-}
+    }
 #endif
 }
 } // end namespace oofem
