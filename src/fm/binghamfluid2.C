@@ -56,9 +56,10 @@ BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( ( mode == _2dFlow ) ) {
+    if ( ( mode == _2dFlow ) || ( mode == _3dFlow ) ) {
         return 1;
-    }
+    } 
+      
 
     return 0;
 }
@@ -363,7 +364,55 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 
             return;
         }
-    } else {
+
+    } else if ( gp->giveMaterialMode() == _3dFlow ) {
+
+        answer.resize(6, 6);
+        answer.zero();
+
+	int i;
+	FloatArray dgde (6);
+        double dmudg, mu, c23, c43;
+
+	c43 = 4. / 3.;
+	c23 = 2. / 3.;
+
+	if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
+	  dmudg = 0.0;
+	  dgde.zero();
+	  mu = computeActualViscosity(tau_0, gamma);
+	} else {
+	  dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
+	    tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate *gamma) / gamma;
+	  mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
+	  
+	  dgde.at(1) = 2.0 * epsd.at(1) / gamma;
+	  dgde.at(2) = 2.0 * epsd.at(2) / gamma;
+	  dgde.at(3) = 2.0 * epsd.at(3) / gamma;
+	  dgde.at(4) = 1.0 * epsd.at(4) / gamma;
+	  dgde.at(5) = 1.0 * epsd.at(5) / gamma;
+	  dgde.at(6) = 1.0 * epsd.at(6) / gamma;
+	}
+
+	for (i=1;i<=6;i++) {
+	  answer.at(1,i) = fabs( 2.0 * epsd.at(1) * dmudg * dgde.at(i) );
+	  answer.at(2,i) = fabs( 2.0 * epsd.at(2) * dmudg * dgde.at(i) );
+	  answer.at(3,i) = fabs( 2.0 * epsd.at(3) * dmudg * dgde.at(i) );
+	  answer.at(4,i) = fabs( epsd.at(4) * dmudg * dgde.at(i) );
+	  answer.at(5,i) = fabs( epsd.at(5) * dmudg * dgde.at(i) );
+	  answer.at(6,i) = fabs( epsd.at(6) * dmudg * dgde.at(i) );
+	}
+	
+	answer.at(1,1) += 2.0 * mu;
+	answer.at(2,2) += 2.0 * mu;
+	answer.at(3,3) += 2.0 * mu;
+	answer.at(4,4) += mu;
+	answer.at(5,5) += mu;
+	answer.at(6,6) += mu;
+	
+	return;
+
+    }  else {
         _error("giveDeviatoricStiffnessMatrix: unsupportted material mode");
     }
 }
@@ -412,6 +461,9 @@ BinghamFluidMaterial2 :: computeDevStrainMagnitude(MaterialMode mmode, const Flo
     } else if ( mmode == _2dAxiFlow ) {
         _val = 2.0 * ( epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) +
                       epsd.at(3) * epsd.at(3) ) + epsd.at(4) * epsd.at(4);
+    } else if ( mmode == _3dFlow ) {
+        _val = 2.0 * (epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) + epsd.at(3) * epsd.at(3) ) 
+	  + epsd.at(4) * epsd.at(4) + epsd.at(5) * epsd.at(5) + epsd.at(6) * epsd.at(6);
     } else {
         _error("computeDevStrainMagnitude: unsupported material mode");
     }
@@ -430,6 +482,9 @@ BinghamFluidMaterial2 :: computeDevStressMagnitude(MaterialMode mmode, const Flo
                       sigd.at(2) * sigd.at(2) +
                       sigd.at(3) * sigd.at(3) +
                       2.0 * sigd.at(4) * sigd.at(4) );
+    } else if ( mmode == _3dFlow ) {
+        _val = 0.5 * ( sigd.at(1) * sigd.at(1) + sigd.at(2) * sigd.at(2) + sigd.at(3) * sigd.at(3) +
+		       2.0 * sigd.at(4) * sigd.at(4) + 2.0 * sigd.at(5) * sigd.at(5) + 2.0 * sigd.at(6) * sigd.at(6) );
     } else {
         _error("computeDevStrainMagnitude: unsupported material mode");
     }
@@ -457,6 +512,17 @@ BinghamFluidMaterial2 :: computeDeviatoricStrain(FloatArray &answer, const Float
         answer.at(2) = eps.at(2) - ekk;
         answer.at(3) = eps.at(3) - ekk;
         answer.at(4) = eps.at(4);
+    } else if ( mmode == _3dFlow ) {
+        //double ekk=(eps.at(1)+eps.at(2)+eps.at(3))/3.0;
+        double ekk = 0.0;
+
+        answer.resize(6);
+        answer.at(1) = eps.at(1) - ekk;
+        answer.at(2) = eps.at(2) - ekk;
+        answer.at(3) = eps.at(3) - ekk;
+        answer.at(4) = eps.at(4);
+        answer.at(5) = eps.at(5);
+        answer.at(6) = eps.at(6);
     } else {
         _error("computeDeviatoricStrain: unsupported material mode");
     }
@@ -476,6 +542,13 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
         answer.at(2) = 2.0 * _nu * ( deps.at(2) );
         answer.at(3) = 2.0 * _nu * ( deps.at(3) );
         answer.at(4) = deps.at(4) * _nu;
+    } else if ( mmode == _3dFlow ) {
+        answer.at(1) = 2.0 * _nu * ( deps.at(1) );
+        answer.at(2) = 2.0 * _nu * ( deps.at(2) );
+        answer.at(3) = 2.0 * _nu * ( deps.at(3) );
+        answer.at(4) = deps.at(4) * _nu;
+        answer.at(5) = deps.at(5) * _nu;
+        answer.at(6) = deps.at(6) * _nu;
     } else {
         _error("computeDeviatoricStrain: unsuported material mode");
     }
@@ -504,6 +577,8 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
         _size = 3;
     } else if ( mmode == _2dAxiFlow ) {
         _size = 4;
+    } else if ( mmode == _3dFlow ) {
+        _size = 6;
     } else {
         _error("BinghamFluidMaterial2Status: unsupported material mode");
     }
