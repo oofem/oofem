@@ -91,16 +91,36 @@ public:
      */
     int scatterL2G(const FloatArray *src, Vec dest, InsertMode mode);
 
+    ///@name Convenience functions for working with distributed arrays.
+    //@{
     /**
-     * Convenience function for computing the norm for a naturally distributed array
+     * Norm for a naturally distributed array
      * Common for convergence criterion and such.
      */
     double naturalNorm(const FloatArray &src);
     /**
-     * Convenience function for computing the norm for a locally distributed array
+     * Norm for a locally distributed array
      * Common for convergence criterion and such.
      */
     double localNorm(const FloatArray &src);
+
+    /**
+     * Dot product for a locally distributed array.
+     * Common for convergence criterion and such.
+     */
+    double localDotProduct(const FloatArray &a, const FloatArray &b);
+
+    /**
+     * Dot product for a naturally distributed array.
+     * Common for convergence criterion and such.
+     */
+    double naturalDotProduct(const FloatArray &a, const FloatArray &b);
+
+    /**
+     * Accumulates the global value.
+     */
+    double accumulate(double local);
+    //@}
 
     void createVecGlobal(Vec *answer);
 

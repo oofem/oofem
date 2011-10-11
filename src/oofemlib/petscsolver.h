@@ -34,13 +34,8 @@
 #ifndef petscsolver_h
 #define petscsolver_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
 #include "petscsparsemtrx.h"
-#include "flotarry.h"
 
 #ifdef __PETSC_MODULE
  #ifndef __MAKEDEPEND
@@ -59,20 +54,6 @@ class FloatMatrix;
  */
 class PetscSolver : public SparseLinearSystemNM
 {
-private:
-#ifdef __PETSC_MODULE
-    /// Last mapped Lhs matrix
-    //PetscSparseMtrx *Lhs;
-    /// Last mapped matrix version.
-    //SparseMtrx :: SparseMtrxVersionType lhsVersion;
-
-    /// Linear solver context.
-    //KSP ksp;
-    /// Flag if context initialized.
-    //bool kspInit;
-
-#endif
-
 public:
     /**
      * Constructor.
@@ -86,10 +67,7 @@ public:
     ~PetscSolver();
 
     NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
-//#ifndef __PARALLEL_MODE
-#if 0
-    NM_Status solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X);
-#endif
+
 #ifdef __PETSC_MODULE
     /**
      * Solves the given linear system.

@@ -280,6 +280,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     Element *elem;
     IntArray r_loc, c_loc;
     std :: vector< std :: set< int > >rows(totalEquations);
+    std :: vector< std :: set< int > >rows_sym(totalEquations); // Only the symmetric part
     nRows = nColumns = 0;
 
     nelem = domain->giveNumberOfElements();
@@ -293,8 +294,12 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                     nRows = ii;
                 }
                 for ( j = 1; j <= c_loc.giveSize(); j++ ) {
-                    if ( ( jj = c_loc.at(j) ) ) {
+                    jj = c_loc.at(j);
+                    if ( jj ) {
                         rows [ ii - 1 ].insert(jj - 1);
+                        if ( jj >= ii ) {
+                            rows_sym [ ii - 1 ].insert(jj - 1);
+                        }
                     }
                 }
             }
@@ -325,8 +330,12 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                             nRows = ii;
                         }
                         for ( j = 1; j <= kcloc->giveSize(); j++ ) {
-                            if ( ( jj = kcloc->at(j) ) ) {
+                            jj = kcloc->at(j);
+                            if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
+                                if ( jj >= ii ) {
+                                    rows_sym [ ii - 1 ].insert(jj - 1);
+                                }
                             }
                         }
                     }
@@ -344,21 +353,23 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     geqs = leqs = nRows;
 
     IntArray d_nnz(leqs);
+    IntArray d_nnz_sym(leqs);
     for ( i = 0; i < leqs; i++ ) {
         d_nnz(i) = rows [ i ].size();
+        d_nnz_sym(i) = rows_sym [ i ].size();
     }
 
     // create PETSc mat
-    /*
-     * MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
-     */
     MatCreate(PETSC_COMM_SELF, & mtrx);
-    // Trying to do this with leqs and geqs doesn't make any sense. They can only mean lines if i understand this correctly (local vs global). / Mikael.
-    // Besides, geqs is meaningless, as it will always be the number of rows. Why not lRows and lColumns instead?
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
     MatSetType(mtrx, MATSEQAIJ);
+    //MatSetType(mtrx, MATSEQSBAIJ);
     MatSetFromOptions(mtrx);
+
+	//The incompatible preallocations are ignored automatically.
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
+    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); // TODO: Not sure about PETSC_DECIDE here.
+    //MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() ); // Symmetry should practically never apply here.
 
     this->newValues = true;
     return true;
@@ -415,9 +426,10 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         int i, ii, j, jj, n;
         Element *elem;
         // allocation map
-        std :: vector< std :: set< int > >rows(leqs);  // ??
+        std :: vector< std :: set< int > >d_rows(leqs);  // diagonal sub-matrix allocation
+        std :: vector< std :: set< int > >o_rows(leqs);  // off-diagonal allocation
 
-        IntArray d_nnz(leqs), lloc;
+        IntArray d_nnz(leqs), o_nnz(leqs), lloc;
 
         //fprintf (stderr,"[%d] n2l map: ",rank);
         //for (n=1; n<=n2l.giveN2Lmap()->giveSize(); n++) fprintf (stderr, "%d ", n2l.giveN2Lmap()->at(n));
@@ -433,38 +445,35 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                     for ( j = 1; j <= lloc.giveSize(); j++ ) {
                         if ( ( jj = lloc.at(j) ) ) {
                             //fprintf (stderr, "{[%d] %d-%d %d-%d} ", rank, loc.at(i),ii-1,loc.at(j),jj-1);
-                            rows [ ii - 1 ].insert(jj - 1);
+                            // TODO: Split this. How do i find the appropriate columns indices?
+                            // This should be on the safe side for now;
+                            d_rows [ ii - 1 ].insert(jj - 1);
+                            o_rows [ ii - 1 ].insert(jj - 1);
                         }
                     }
                 }
             }
-
             //fprintf (stderr, "\n");
         }
 
         for ( i = 0; i < leqs; i++ ) {
-            d_nnz(i) = rows [ i ].size();
+            d_rows [ i ].insert( i ); // Diagonal must always be allocated.
+            d_nnz(i) = d_rows [ i ].size();
+            o_nnz(i) = o_rows [ i ].size();
         }
 
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Profile ...",rank);
         //for (i=0; i<leqs; i++) fprintf(stderr, "%d ", d_nnz(i));
-
-
-
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Creating MPIAIJ Matrix ...\n",rank);
 
         // create PETSc mat
-        /*
-         * MatCreateMPIAIJ(PETSC_COMM_WORLD,leqs,leqs,geqs,geqs,
-         *              leqs,d_nnz.givePointer(), // counted
-         *              6,PETSC_NULL, // guess
-         *              &mtrx);
-         */
         MatCreate(PETSC_COMM_WORLD, & mtrx);
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         MatSetFromOptions(mtrx);
-        MatMPIAIJSetPreallocation(mtrx, 1, d_nnz.givePointer(), 6, PETSC_NULL);
+        MatMPIAIJSetPreallocation(mtrx, 0, d_nnz.givePointer(), 0, o_nnz.givePointer());
+        //MatMPIBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer(), onz, onnz );
+        //MatMPISBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer(), onz, onnz );
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
@@ -476,8 +485,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     int i, ii, j, jj, n;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > >rows(leqs);  // ??
-    IntArray d_nnz(leqs);
+    std :: vector< std :: set< int > >rows(leqs);
+    std :: vector< std :: set< int > >rows_sym(leqs);
 
     nelem = domain->giveNumberOfElements();
     for ( n = 1; n <= nelem; n++ ) {
@@ -486,8 +495,12 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
                 for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    if ( ( jj = loc.at(j) ) ) {
+                    jj = loc.at(j);
+                    if ( jj ) {
                         rows [ ii - 1 ].insert(jj - 1);
+                        if ( jj >= ii ) {
+                            rows_sym [ ii - 1 ].insert(jj - 1);
+                        }
                     }
                 }
             }
@@ -506,8 +519,12 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                 for ( i = 1; i <= kloc->giveSize(); i++ ) {
                     if ( ( ii = kloc->at(i) ) ) {
                         for ( j = 1; j <= kloc->giveSize(); j++ ) {
-                            if ( ( jj = kloc->at(j) ) ) {
+                            jj = kloc->at(j);
+                            if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
+                                if ( jj >= ii ) {
+                                    rows_sym [ ii - 1 ].insert(jj - 1);
+                                }
                             }
                         }
                     }
@@ -516,16 +533,22 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         }
     }
 
+    IntArray d_nnz(leqs);
+    IntArray d_nnz_sym(leqs);
     for ( i = 0; i < leqs; i++ ) {
         d_nnz(i) = rows [ i ].size();
+        d_nnz_sym(i) = rows_sym [ i ].size();
     }
 
-    //MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
     MatCreate(PETSC_COMM_SELF, & mtrx);
     MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
     MatSetType(mtrx, MATSEQAIJ);
+    //MatSetType(mtrx, MATSBAIJ);
     MatSetFromOptions(mtrx);
+
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
+    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() );
+    MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() );
 
 #ifdef __PARALLEL_MODE
     }

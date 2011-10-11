@@ -41,12 +41,11 @@ namespace oofem {
 
 PetscContext :: PetscContext(EngngModel *e, EquationID ut)
 #ifdef __PARALLEL_MODE
-    : n2g(), n2l()
+    : n2g(), n2l(), comm(PETSC_COMM_WORLD)
 #endif
 {
     this->emodel = e;
     this->ut = ut;
-    this->comm = PETSC_COMM_WORLD;
     n2gvecscat = NULL;
 }
 
@@ -308,9 +307,29 @@ PetscContext :: localNorm(const FloatArray &src)
         MPI_Allreduce(&norm2, &norm2_tot, 1, MPI_DOUBLE, MPI_SUM, comm);
         return sqrt(norm2_tot);
     }
-#else
-    return src.computeNorm();
 #endif
+    return src.computeNorm();
+}
+
+
+double
+PetscContext :: localDotProduct(const FloatArray &a, const FloatArray &b)
+{
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        double val = 0.0, val_tot = 0.0;
+        int size = a.giveSize();
+        PetscNatural2LocalOrdering *n2l = this->giveN2Lmap();
+        for ( int i = 0; i < size; i++ ) {
+            if ( n2l->giveNewEq(i + 1) ) {
+                val += a(i)*b(i);
+            }
+        }
+        MPI_Allreduce(&val, &val_tot, 1, MPI_DOUBLE, MPI_SUM, comm);
+        return val_tot;
+    }
+#endif
+    return a.dotProduct(b);
 }
 
 
@@ -318,14 +337,48 @@ double
 PetscContext :: naturalNorm(const FloatArray &src)
 {
 #ifdef __PARALLEL_MODE
-    double norm;
-    Vec temp;
-    this->scatterN2G(&src, temp, ADD_VALUES);
-    VecNorm(temp, NORM_2, &norm);
-    return norm;
-#else
-    return src.computeNorm();
+    if ( emodel->isParallel() ) {
+        double norm = 0.0;
+        Vec temp;
+        createVecGlobal(&temp);
+        this->scatterN2G(&src, temp, ADD_VALUES);
+        VecNorm(temp, NORM_2, &norm);
+        return norm;
+    }
 #endif
+    return src.computeNorm();
+}
+
+double
+PetscContext :: naturalDotProduct(const FloatArray &a, const FloatArray &b)
+{
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        Vec A, B;
+        createVecGlobal(&A);
+        createVecGlobal(&B);
+        this->scatterN2G(&a, A, ADD_VALUES);
+        this->scatterN2G(&a, B, ADD_VALUES);
+        double val = 0.0;
+        VecDot(A, B, &val);
+        return val;
+    }
+#endif
+    return a.dotProduct(b);
+}
+
+
+double
+PetscContext :: accumulate(double local)
+{
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        double global;
+        MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, comm);
+        return global;
+    }
+#endif
+    return local;
 }
 
 
