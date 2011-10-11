@@ -425,7 +425,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
 	      continue;
 	    }
 	    
-	    if ( w.at(inode) > 0.0 ) {
+	    if ( fabs( w.at(inode) ) > 0.0 ) {
 	      //two stage integration
 	      // update
 	      d.at(inode) = 0.5 * ( d_old.at(inode) + d.at(inode) ) -

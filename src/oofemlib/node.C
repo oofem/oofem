@@ -60,6 +60,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
+ #include "enrichmentitem.h"
 #endif
 
 namespace oofem {
