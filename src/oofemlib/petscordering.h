@@ -47,7 +47,6 @@
 namespace oofem {
 class PetscOrdering_Base : public ApplicationOrdering
 {
-protected:
 public:
     PetscOrdering_Base() : ApplicationOrdering() { }
 

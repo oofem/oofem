@@ -346,6 +346,22 @@ bool IntArray :: containsOnlyZeroes() const
 }
 
 
+int IntArray :: minimum() const
+{
+    if (size == 0) {
+        OOFEM_ERROR("IntArray :: minimum - Empty array.");
+    }
+    int x = values[0];
+    for ( int i = 1; i < size; ++i ) {
+        if (values[i] < x) {
+            x = values[i];
+        }
+    }
+    return x;
+
+}
+
+
 void IntArray :: printYourself() const
 // Prints the receiver on screen.
 {

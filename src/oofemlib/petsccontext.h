@@ -37,16 +37,17 @@
 
 #ifdef __PETSC_MODULE
 
- #ifndef __MAKEDPEND
-  #include "petscksp.h"
-  #include "petscordering.h"
+ #ifndef __MAKE_DEPEND
+  #include <petscksp.h>
  #endif
 
+ #include "petscordering.h"
  #include "equationid.h"
 
 namespace oofem {
 class EngngModel;
 class FloatArray;
+class DofManager;
 
 /**
  * This class provides an communication context to PETSc library.
@@ -93,6 +94,7 @@ public:
 
     ///@name Convenience functions for working with distributed arrays.
     //@{
+    bool isLocal(DofManager *dman);
     /**
      * Norm for a naturally distributed array
      * Common for convergence criterion and such.

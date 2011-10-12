@@ -34,8 +34,6 @@
 
 #ifdef __PARALLEL_MODE
 
-//#define __VERBOSE_PARALLEL
-
 #include "engngm.h"
 #include "petscordering.h"
 #include "combuff.h"
@@ -43,7 +41,8 @@
 
 namespace oofem {
 bool
-PetscOrdering_Base :: isLocal(DofManager *dman) {
+PetscOrdering_Base :: isLocal(DofManager *dman)
+{
     int myrank = dman->giveDomain()->giveEngngModel()->giveRank();
     if ( dman->giveParallelMode() == DofManager_local ) {
         return true;
@@ -52,16 +51,7 @@ PetscOrdering_Base :: isLocal(DofManager *dman) {
     if ( dman->giveParallelMode() == DofManager_shared ) {
         // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to
         // deliver number
-        const IntArray *plist = dman->givePartitionList();
-        int n = plist->giveSize();
-        int minrank = myrank;
-        for ( int j = 1; j <= n; j++ ) {
-            minrank = min( minrank, plist->at(j) );
-        }
-
-        if ( minrank == myrank ) {
-            return true;
-        }
+        return  myrank <= dman->givePartitionList()->minimum();
     }
 
     return false;

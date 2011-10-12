@@ -201,6 +201,11 @@ public:
      */
     int findSorted(int value) const;
     /**
+     * Finds the minimum component in the array.
+     * @return Minimum of array or prints error is array is empty.
+     */
+    int minimum() const;
+    /**
      * Checks if sorted receiver contains a given value.
      * @return True if receiver contains given value.
      */

@@ -35,13 +35,14 @@
 #ifdef __PETSC_MODULE
 #include "petsccontext.h"
 #include "engngm.h"
+#include "dofmanager.h"
 
 namespace oofem {
 //#define PetscContext_debug_print
 
 PetscContext :: PetscContext(EngngModel *e, EquationID ut)
 #ifdef __PARALLEL_MODE
-    : n2g(), n2l(), comm(PETSC_COMM_WORLD)
+    : comm(PETSC_COMM_WORLD), n2g(), n2l()
 #endif
 {
     this->emodel = e;
@@ -213,32 +214,22 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
 int
 PetscContext :: scatterN2G(const FloatArray *src, Vec dest, InsertMode mode)
 {
-    PetscScalar *ptr;
-    int i;
-
+    OOFEM_ERROR("HONK3");
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        int size = src->giveSize();
         Vec natVec;
         VecCreateSeq(PETSC_COMM_SELF, giveNumberOfNaturalEqs(), & natVec);
-
-        ptr = src->givePointer();
-        for ( i = 0; i < size; i++ ) {
-            VecSetValues(natVec, 1, & i, ptr + i, ADD_VALUES);
-        }
-
-        VecAssemblyBegin(natVec);
-        VecAssemblyEnd(natVec);
-        //VecView(natVec,PETSC_VIEWER_STDOUT_SELF);
-
+        VecPlaceArray(natVec, src->givePointer());
         this->scatterN2G(natVec, dest, mode);
+        VecResetArray(natVec);
         VecDestroy(natVec);
     } else {
 #endif
     int size = src->giveSize();
-    ptr = src->givePointer();
-    for ( i = 0; i < size; i++ ) {
-        VecSetValues(dest, 1, & i, ptr + i, ADD_VALUES);
+    PetscScalar *ptr = src->givePointer();
+    for ( int i = 0; i < size; i++ ) {
+        //VecSetValues(dest, 1, & i, ptr + i, mode);
+        VecSetValue(dest, i, ptr[i], mode);
     }
 
     VecAssemblyBegin(dest);
@@ -275,11 +266,12 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
         //VecView(natVec,PETSC_VIEWER_STDOUT_SELF);
     } else {
 #endif
-
+    OOFEM_ERROR("HONK1");
     int size = src->giveSize();
     ptr = src->givePointer();
     for ( i = 0; i < size; i++ ) {
-        VecSetValues(dest, 1, & i, ptr + i, ADD_VALUES);
+        //VecSetValues(dest, 1, & i, ptr + i, mode);
+        VecSetValue(dest, i, ptr[i], mode);
     }
 
     VecAssemblyBegin(dest);
@@ -288,6 +280,20 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
 }
 #endif
     return 1;
+}
+
+
+bool
+PetscContext :: isLocal(DofManager *dman)
+{
+    OOFEM_ERROR("HONK3");
+#ifdef __PARALLE_MODE
+    if ( emodel->isParallel() ) {
+	    return this->giveN2GMap()->isLocal(dman); // Either map is fine.
+	}
+#else
+    return true;
+#endif
 }
 
 
