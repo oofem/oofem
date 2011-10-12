@@ -140,9 +140,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     bool converged, errorOutOfRangeFlag;
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    // HUHU hard wired domain no 1
-    int i;
-    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
+    PetscContext *parallel_context  = engngModel->givePetscContext(1, ut); // TODO hard wired domain no 1
  #endif
 #endif
 
@@ -184,16 +182,8 @@ restart:
     //engngModel->updateComponent (tNow, NonLinearRhs_Total);
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    double myRRT = 0.0;
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myRRT += RT.at(i) * RT.at(i);
-        }
-    }
-
-    MPI_Allreduce(& myRRT, & RRT, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
+    RRT = parallel_context->localNorm(RT);
+    RRT *= RRT;
 #else
     RRT = RT.computeSquaredNorm();
 #endif
@@ -213,12 +203,6 @@ restart:
             }
         }
 
-        /*
-         * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,&rhs);
-         * linSolver -> setFloatArrayAsComponent (LinearEquationSolution,&deltaR);
-         * linSolver -> solveYourselfAt (tNow);
-         * linSolver -> updateYourselfExceptLhs ();
-         */
         /*
          * if ((nite == 1) && (numberOfPrescribedDofs)) {
          * // modify t
@@ -245,7 +229,7 @@ restart:
         // update solution
         //
         if ( this->lsFlag && ( nite != 1 ) ) {
-            // linesearch
+            // line search
             LineSearchNM :: LS_status status;
             double eta;
             this->giveLineSearchSolver()->solve(r, & deltaR, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
@@ -255,7 +239,7 @@ restart:
             DeltaR->add(deltaR);
             tNow->incrementStateCounter();     // update solution state counter
             //
-            // convergency check
+            // convergence check
             //
             //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
             engngModel->updateComponent(tNow, InternalRhs, domain);
@@ -269,7 +253,7 @@ restart:
             rhs.at( prescribedEqs.at(ii) ) = 0.0;
         }
 
-        // convergency check
+        // convergence check
         converged = this->checkConvergence(RT, * F, rhs, deltaR, * r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
 
 
@@ -333,7 +317,7 @@ restart:
     status |= NM_Success;
     solved = 1;
 
-    // Modify Load vector to include "quasi rection"
+    // Modify Load vector to include "quasi reaction"
     if ( R0 ) {
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
             R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
@@ -346,7 +330,7 @@ restart:
 
     this->lastReactions.resize(numberOfPrescribedDofs);
 #ifdef VERBOSE
-    // print quasi reactions if direct displacement controll used
+    // print quasi reactions if direct displacement control used
     OOFEM_LOG_INFO("\n  Quasi reaction table:\n\n");
     OOFEM_LOG_INFO("  node  dof   displacement         force\n");
     OOFEM_LOG_INFO("========================================\n");
@@ -475,7 +459,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
         rtolf.resize(1);
         rtold.resize(1);
         // read relative error tolerances of the solver
-        // if common rtolv provided, set to this tolerace both rtolf and rtold
+        // if common rtolv provided, set to this tolerance both rtolf and rtold
         IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtolf, "rtolv"); // Macro
         rtolf.at(1) = rtold.at(1) = _rtol;
         IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtolf, "rtolf"); // Macro
@@ -825,18 +809,18 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
   #ifdef __PETSC_MODULE
     int i;
     // HUHU hard wired domain no 1
-    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
-    //PetscNatural2LocalOrdering *n2l_prescribed = engngModel->givePetscContext(1, ut)->giveN2LPrescribedmap();
+    PetscContext *parallel_context = engngModel->givePetscContext(1, ut);
+    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
   #endif
  #endif
 
     /*
-     * The force arrors are (if possible) evaluated as relative errors.
+     * The force errors are (if possible) evaluated as relative errors.
      * If the norm of applied load vector is zero (one may load by temperature, etc)
      * then the norm of reaction forces is used in relative norm evaluation.
      *
      * Note: This is done only when all dofs are included (nccdg = 0). Not implemented if
-     * multiple convergence criteia are used.
+     * multiple convergence criteria are used.
      *
      */
 
@@ -853,7 +837,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         for ( _idofman = 1; _idofman <= ndofman; _idofman++ ) {
             _idofmanptr = domain->giveDofManager(_idofman);
  #ifdef __PARALLEL_MODE
-            if ( !_idofmanptr->isLocal() ) {
+            if ( !parallel_context->isLocal(_idofmanptr) ) {
                 continue;
             }
 
@@ -870,13 +854,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                         _eq = _idofptr->giveEquationNumber(dn);
 
                         if ( _eq ) {
- #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-                            if ( !n2l->giveNewEq(_eq) ) {
-                                continue;
-                            }
-
- #endif
-
                             _val = rhs.at(_eq);
                             dg_forceErr.at(_dg) += _val * _val;
                             _val = deltaR.at(_eq);
@@ -903,18 +880,19 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
 
  #endif
-	    // loop over element internal Dofs
-	    for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
-	      _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
-	      // loop over individual dofs
-	      for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+        // Aren't internal dofmanagers listed along with all the other dofmanagers, and included in the loop above? / Mikael
+        // loop over element internal Dofs
+        for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
+            _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
+            // loop over individual dofs
+            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
                 _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
                 // loop over dof groups
                 for ( _dg = 1; _dg <= _ng; _dg++ ) {
-		  // test if dof ID is in active set
-		  if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+                    // test if dof ID is in active set
+                    if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
                         _eq = _idofptr->giveEquationNumber(dn);
-			
+
                         if ( _eq ) {
  #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
                             if ( !n2l->giveNewEq(_eq) ) {
@@ -933,13 +911,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                             _val = r.at(_eq);
                             dg_totalDisp.at(_dg) += _val * _val;
                         }
-		  }
+                    }
                 } // end loop over dof groups
-		
-	      } // end loop over DOFs
-	    } // end loop over element internal dofmans
-	      
-	} // end loop over elements
+            } // end loop over DOFs
+       } // end loop over element internal dofmans
+    } // end loop over elements
 
  #ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)

@@ -134,7 +134,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
     double Bergan_k0 = 1.0;
     double rr, RR, RR0, rR, p = 0.0, bk;
     double deltaLambda, Lambda, eta, DeltaLambdam1, DeltaLambda = 0.0;
-    double __rIterIncr, __rIncr, drProduct = 0.0;
+    double drProduct = 0.0;
     int neq = Ri->giveSize();
     int irest = 0;
     int HPsize, i, ind;
@@ -191,30 +191,20 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    // HUHU hard wired domain no 1
-    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
-    if ( R0 ) {
-        double myRR0 = 0.0;
-        for ( i = 1; i <= neq; i++ ) {
-            if ( n2l->giveNewEq(i) ) {
-                myRR0 += R0->at(i) * R0->at(i);
-            }
-        }
-
-        MPI_Allreduce(& myRR0, & RR0, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    } else {
-        RR0 = 0.0;
-    }
-
+    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); // TODO: hard wired domain no 1
  #endif
-#else
+#endif
+
     if ( R0 ) {
+#ifdef __PARALLEL_MODE
+        RR0 = parallel_context->localNorm(*R0);
+        RR0 *= RR0;
+#else
         RR0 = R0->computeSquaredNorm();
+#endif
     } else {
         RR0 = 0.0;
     }
-
-#endif
 
     //
     // A  initial step (predictor)
@@ -252,32 +242,16 @@ restart:
     //
     // A2:
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    double myRR = 0.0;
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myRR += R->at(i) * R->at(i);
-        }
-    }
-
-    MPI_Allreduce(& myRR, & RR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
+    RR = parallel_context->localNorm(*R);
+    RR *= RR;
 #else
     RR = R->computeSquaredNorm();
 #endif
 
     if ( calm_Controll == calm_hpc_off ) {
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double myrr = 0.0;
-        for ( i = 1; i <= neq; i++ ) {
-            if ( n2l->giveNewEq(i) ) {
-                myrr += deltaRt.at(i) * deltaRt.at(i);
-            }
-        }
-
-        MPI_Allreduce(& myrr, & rr, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
+        rr = parallel_context->localNorm(deltaRt);
+        rr *= rr;
 #else
         rr = deltaRt.computeSquaredNorm();
 #endif
@@ -315,26 +289,16 @@ restart:
         }
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double my_p = p;
-        MPI_Allreduce(& my_p, & p, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
+        p = parallel_context->accumulate(p);
 #endif
     }
 
 
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    double myrR = 0.0;
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myrR += deltaRt.at(i) * R->at(i);
-        }
-    }
-
-    MPI_Allreduce(& myrR, & rR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
+    //rR = parallel_context->localDotProduct(deltaRt, *R); // This is what the old code did? But its not the same as the sequential version. // Mikael
+    rR = parallel_context->localNorm(deltaRt);
+    rR *= rR;
 #else
     rR = deltaRt.computeSquaredNorm();
 #endif
@@ -489,38 +453,22 @@ restart:
             //
             // update solution vectors
             //
-            drProduct = 0.0; // dotproduct of iterative displacement increment vector
+            deltaR.resize(0);
+            deltaR.add(eta*deltaLambda, deltaRt);
+            deltaR.add(eta, deltaR_);
+            *DeltaR = DeltaRm1;
+            DeltaR->add(deltaR);
+            *r = rInitial;
+            r->add(*DeltaR);
+
+            // dotproduct of iterative displacement increment vector
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-            double my_drProduct = 0.0;
-            for ( i = 1; i <= neq; i++ ) {
-                __rIterIncr = eta * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-                __rIncr = DeltaRm1.at(i) +  __rIterIncr;
-
-                DeltaR->at(i) = __rIncr;
-                deltaR.at(i) = __rIterIncr;
-                r->at(i) = rInitial.at(i) + __rIncr;
-                if ( n2l->giveNewEq(i) ) {
-                    my_drProduct += __rIterIncr * __rIterIncr;
-                }
-            }
-
-            MPI_Allreduce(& my_drProduct, & drProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
- #endif
+            drProduct = parallel_context->localNorm(deltaR);
+            drProduct *= drProduct;
 #else
-            for ( i = 1; i <= neq; i++ ) {
-                __rIterIncr = eta * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-                __rIncr = DeltaRm1.at(i) +  __rIterIncr;
-
-                DeltaR->at(i) = __rIncr;
-                deltaR.at(i) = __rIterIncr;
-                r->at(i) = rInitial.at(i) + __rIncr;
-
-                drProduct += __rIterIncr * __rIterIncr;
-            }
-
+            drProduct = deltaR.computeSquaredNorm();
 #endif
+            //printf("drProduct2 = %e\n",drProduct);
             tNow->incrementStateCounter();     // update solution state counter
             //
             // B.6.
@@ -585,21 +533,9 @@ restart:
     /* compute Bergan's parameter of current stiffness */
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    double myp [ 2 ] = {
-        0., 0.
-    }, colp [ 2 ];
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myp [ 0 ] += R->at(i) * DeltaR->at(i);
-            myp [ 1 ] += DeltaR->at(i) * DeltaR->at(i);
-        }
-    }
-
-    MPI_Allreduce(myp, colp, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    bk = DeltaLambda * colp [ 0 ];
-    bk = bk / colp [ 1 ];
- #endif
+    double RDR = parallel_context->localDotProduct(*R,*DeltaR);
+    double DR = parallel_context->localNorm(*DeltaR);
+    bk = DeltaLambda * RDR/(DR*DR);
 #else
     bk = DeltaLambda * DeltaR->dotProduct(*R) / DeltaR->computeSquaredNorm();
 #endif
