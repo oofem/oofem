@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -37,7 +37,6 @@
 #include "nodload.h"
 #include "boundary.h"
 #include "initial.h"
-//#include "temperatureload.h"
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "timestep.h"
@@ -67,17 +66,8 @@ void
 Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Returns an array, the force induced at stepN by the receiver.
 {
-    // FloatArray* force ;
     double factor;
 
-    /*
-     * factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
-     * if ((mode!=VM_Incremental)&&(mode!=VM_Total))
-     * _error ("computeComponentArrayAt: unknown mode");
-     * if ((mode==VM_Incremental) && (!stepN->isTheFirstStep()))
-     * //   factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement());
-     */
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer  = this->giveComponentArray();
     answer.times(factor);

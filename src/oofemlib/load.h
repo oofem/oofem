@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -54,7 +54,7 @@ namespace oofem {
 class Load : public GeneralBoundaryCondition
 {
 protected:
-    /// Components of boundary condition
+    /// Components of boundary condition.
     FloatArray componentArray;
     /**
      * The load is specified for all dofs of object to which is associated.
@@ -67,8 +67,8 @@ protected:
      * is set to zero.
      */
     IntArray dofExcludeMask;
-public:
 
+public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
      * @param n Boundary condition number
@@ -89,16 +89,22 @@ public:
     virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
-     * Default implementation computes product of approximation matrix (computeNArray service) and
+     * Default implementation computes product of approximation matrix and
      * with "vertex" value array attribute and the result is then multiplied by
      * corresponding load time function value respecting load response mode.
      * @param answer Component values at given point and time.
      * @param tStep Time step representing time.
-     * @param coords Global (or local) problem coordinates, which are used to 
+     * @param coords Global (or local) problem coordinates, which are used to
      * evaluate components values.
-     * @param mode determines response mode.
+     * @param mode Determines response mode.
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) = 0;
+    /**
+     * Sets a new value for the component array.
+     * Overloading methods might need to make sure the size if correct.
+     * @param v New component array for the load.
+     */
+    virtual void setComponentArray(const FloatArray &v) { componentArray = v; }
     /**
      * Returns the value of dofExcludeMask corresponding to given index.
      * See the description of dofExcludeMask attribute for more details.
