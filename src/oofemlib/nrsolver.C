@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file nrsolver2.C
-//
-
 #include "nrsolver.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -520,28 +516,24 @@ NRSolver :: initPrescribedEqs()
     EModelDefaultEquationNumbering dn;
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
  #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
-    PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1, ut)->giveN2Gmap();
+    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); // TODO hard wired domain no 1
  #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
 
     for ( j = 1; j <= ndofman; j++ ) {
+#ifdef __PARALLEL_MODE
+        if ( !parallel_context->isLocal(domain->giveNode(j)) ) {
+            continue;
+        }
+#endif
         jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
             inode = prescribedDofs.at(2 * i - 1);
             idof  = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
- #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
-                // HUHU hard wired domain no 1
-                if ( n2lpm->isLocal( domain->giveNode(j) ) ) {
-                    localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
-                }
-
- #else
                 localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
- #endif
-
                 continue;
             }
         }
@@ -651,7 +643,8 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         PetscScalar *ptr;
         int eq, res;
 
-        engngModel->givePetscContext(1, ut)->createVecGlobal(& diag);
+        PetscContext *parallel_context = engngModel->givePetscContext(1, ut);
+        parallel_context->createVecGlobal(& diag);
         MatGetDiagonal(* lhs->giveMtrx(), diag);
         VecGetArray(diag, & ptr);
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
@@ -766,7 +759,7 @@ void
 NRSolver :: printState(FILE *outputStream)
 {
 #ifdef VERBOSE
-    // print quasi reactions if direct displacement controll used
+    // print quasi reactions if direct displacement control used
     fprintf(outputStream, "\nQuasi reaction table:\n\n");
     fprintf(outputStream, "  node  dof            force\n");
     fprintf(outputStream, "============================\n");
@@ -920,14 +913,10 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
  #ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
         FloatArray collectiveErr(_ng);
-        MPI_Allreduce(dg_forceErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        dg_forceErr = collectiveErr;
-        MPI_Allreduce(dg_dispErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        dg_dispErr = collectiveErr;
-        MPI_Allreduce(dg_totalLoadLevel.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        dg_totalLoadLevel = collectiveErr;
-        MPI_Allreduce(dg_totalDisp.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        dg_totalDisp = collectiveErr;
+        parallel_context->accumulate(dg_forceErr,       collectiveErr); dg_forceErr       = collectiveErr;
+        parallel_context->accumulate(dg_dispErr,        collectiveErr); dg_dispErr        = collectiveErr;
+        parallel_context->accumulate(dg_totalLoadLevel, collectiveErr); dg_totalLoadLevel = collectiveErr;
+        parallel_context->accumulate(dg_totalDisp,      collectiveErr); dg_totalDisp      = collectiveErr;
  #endif
 
         OOFEM_LOG_INFO("%-5d %-5d ", ( int ) tNow->giveTargetTime(), nite);
@@ -966,24 +955,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     } else { // nccdg == 0 -> all dofs included
         double drr, drdr;
  #ifdef __PARALLEL_MODE
-  #ifdef __PETSC_MODULE
-        int neq = r.giveSize();
-        double myerr [ 3 ] = {
-            0., 0., 0.
-        }, colerr [ 3 ];
-        for ( i = 1; i <= neq; i++ ) {
-            if ( n2l->giveNewEq(i) ) {
-                myerr [ 0 ] += rhs.at(i) * rhs.at(i);
-                myerr [ 1 ] += r.at(i) * r.at(i);
-                myerr [ 2 ] += deltaR.at(i) * deltaR.at(i);
-            }
-        }
-
-        MPI_Allreduce(myerr, colerr, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        forceErr = colerr [ 0 ];
-        drr = colerr [ 1 ];
-        drdr = colerr [ 2 ];
-  #endif
+        forceErr  = parallel_context->localNorm(rhs); forceErr *= forceErr;
+        drr = parallel_context->localNorm(r); drr *= drr;
+        drdr = parallel_context->localNorm(deltaR); drdr *= drdr;
  #else
         forceErr = rhs.computeSquaredNorm();
         drr = r.computeSquaredNorm();
@@ -1047,11 +1021,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         //
         // err is relative displacement change
         if ( drr < nrsolver_ERROR_NORM_SMALL_NUM ) {
-            dispErr = drdr;
-            dispErr = sqrt(dispErr);
+            dispErr = sqrt(drdr);
         } else {
-            dispErr = drdr / drr;
-            dispErr = sqrt(dispErr);
+            dispErr = sqrt(drdr / drr);
         }
 
         if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||

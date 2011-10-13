@@ -214,7 +214,6 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
 int
 PetscContext :: scatterN2G(const FloatArray *src, Vec dest, InsertMode mode)
 {
-    OOFEM_ERROR("HONK3");
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         Vec natVec;
@@ -266,7 +265,7 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
         //VecView(natVec,PETSC_VIEWER_STDOUT_SELF);
     } else {
 #endif
-    OOFEM_ERROR("HONK1");
+
     int size = src->giveSize();
     ptr = src->givePointer();
     for ( i = 0; i < size; i++ ) {
@@ -286,7 +285,6 @@ PetscContext :: scatterL2G(const FloatArray *src, Vec dest, InsertMode mode)
 bool
 PetscContext :: isLocal(DofManager *dman)
 {
-    OOFEM_ERROR("HONK3");
 #ifdef __PARALLE_MODE
     if ( emodel->isParallel() ) {
 	    return this->giveN2GMap()->isLocal(dman); // Either map is fine.
@@ -387,6 +385,24 @@ PetscContext :: accumulate(double local)
     return local;
 }
 
+
+
+void
+PetscContext :: accumulate(const FloatArray &local, FloatArray &global)
+{
+    int size = local.giveSize();
+#ifdef __PARALLEL_MODE
+    if ( emodel->isParallel() ) {
+        global.resize(size);
+        MPI_Allreduce(local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, comm);
+    }
+    else {
+#endif
+        global = local;
+#ifdef __PARALLEL_MODE
+    }
+#endif
+}
 
 
 void

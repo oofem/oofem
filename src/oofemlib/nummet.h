@@ -45,12 +45,6 @@
 #include "femcmpnn.h"
 #include "alist.h"
 
-#include "classtype.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 class EngngModel;
 

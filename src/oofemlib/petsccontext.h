@@ -122,6 +122,10 @@ public:
      * Accumulates the global value.
      */
     double accumulate(double local);
+    /**
+     * Accumulates the global value.
+     */
+    void accumulate(const FloatArray &local, FloatArray &global);
     //@}
 
     void createVecGlobal(Vec *answer);
