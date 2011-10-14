@@ -72,10 +72,13 @@ CBSElement :: ~CBSElement()
 IRResultType
 CBSElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                               // Required by IR_GIVE_FIELD macro
 
     FMElement :: initializeFrom(ir);
+    if ( !boundarySides.isEmpty() ) {
+      IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, "bcodes"); // Macro
+    }
 
     this->computeGaussPoints();
     return IRRT_OK;
