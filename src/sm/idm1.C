@@ -65,9 +65,9 @@ MMALeastSquareProjection IsotropicDamageMaterial1 :: mapper;
 
 IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d),
     RandomMaterialExtensionInterface()
-//
-// constructor
-//
+    //
+    // constructor
+    //
 {
     // deleted by paren, where linearElasticMaterial instance declared
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
@@ -290,7 +290,7 @@ IsotropicDamageMaterial1 :: computeStrainInvariants(const FloatArray &strainVect
     double s1 = strainVector.at(1) * strainVector.at(1);
     double s2 = strainVector.at(2) * strainVector.at(2);
     double s3 = strainVector.at(3) * strainVector.at(3);
-    J2e = 1./2. * ( s1 + s2 + s3 ) - 1./6. * ( I1e*I1e );
+    J2e = 1. / 2. * ( s1 + s2 + s3 ) - 1. / 6. * ( I1e * I1e );
 }
 
 /* OLD VERSION, ABANDONED ON 20 JULY 2010
@@ -544,6 +544,14 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         // remember le in corresponding status
         status->setLe(le);
 
+        // compute and store the crack angle (just for postprocessing)
+        double ca = 3.1415926 / 2.;
+        if ( crackPlaneNormal.at(1) != 0.0 ) {
+            ca = atan( crackPlaneNormal.at(2) / crackPlaneNormal.at(1) );
+        }
+
+        status->setCrackAngle(ca);
+
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
             _warning3("Fracturing strain %f is lower than the elastic strain e0=%f, possible snap-back.", wf / le, e0);
         } else if ( wf == 0. && e0 >= ef ) {
@@ -684,9 +692,7 @@ IsotropicDamageMaterial1 :: MMI_finish(TimeStep *tStep)
 
 IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g) :
     IsotropicDamageMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface()
-{
-    le = 0.0;
-}
+{}
 
 void
 IsotropicDamageMaterial1Status :: initTempStatus()

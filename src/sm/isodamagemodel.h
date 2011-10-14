@@ -63,6 +63,13 @@ protected:
     double damage;
     /// Non-equilibrated damage level of material.
     double tempDamage;
+    /** Characteristic element length,
+     *  computed when damage initialized from direction of
+     *  maximum positive principal strain. Fixed during further loading.
+     */
+    double le;
+    /// Angle characterizing the crack direction.
+    double crack_angle;
 
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
@@ -95,6 +102,15 @@ public:
     double giveTempDamage() { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
+
+    /// Returns characteristic length stored in receiver.
+    double giveLe() { return le; }
+    /// Sets characteristic length to given value.
+    void setLe(double ls) { le = ls; }
+    /// Returns crack angle stored in receiver.
+    double giveCrackAngle() { return crack_angle; }
+    /// Sets crack angle to given value.
+    void setCrackAngle(double ca) { crack_angle = ca; }
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.

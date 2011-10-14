@@ -124,8 +124,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_VolumetricPlasticStrain, 74) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStrain, 75) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStress, 76) \
-    ENUM_ITEM_WITH_VALUE(IST_Viscosity, 77)	\
-      
+    ENUM_ITEM_WITH_VALUE(IST_Viscosity, 77)                     \
+    ENUM_ITEM_WITH_VALUE(IST_CharacteristicLength, 78)  \
+
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.

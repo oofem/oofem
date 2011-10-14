@@ -81,23 +81,11 @@ namespace oofem {
  */
 class IsotropicDamageMaterial1Status : public IsotropicDamageMaterialStatus, public RandomMaterialStatusExtensionInterface
 {
-protected:
-    /**
-     * Characteristic element length, computed when damage initialized from direction of max. positive
-     * principal strain. Fixed during further loading.
-     */
-    double le;
-
 public:
     /// Constructor
     IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g);
     /// Destructor
     ~IsotropicDamageMaterial1Status() { }
-
-    /// Returns characteristic length stored in receiver.
-    double giveLe() { return le; }
-    /// Sets characteristic length to given value.
-    void setLe(double ls) { le = ls; }
 
     // definition
     const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
