@@ -142,9 +142,12 @@ protected:
 
     /// Remporary parameter reading type of softening law, used in other isotropic damage material models.
     int damageLaw;
+    
+    /** Type characterizing the formula for the damage law. For example, linear softening can be specified
+    *   with fracturing strain or crack opening.
+    */
+    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage };
 
-    /// Type characterizing the formula for the damage law.
-    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack };
     /// Parameter specifying the type of softening (damage law).
     SofteningType softType;
 

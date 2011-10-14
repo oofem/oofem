@@ -12,13 +12,13 @@
  #define M_PI 3.1415926535897932384626433832795029L /* pi */
 #endif
 
-#ifdef __TINYXML_MODULE
- #define TINYXML //read CEMHYD3D input file through tinyXML library
- #include "tinyxml.h"
-#else
- #define CMLFILE //read CEMHYD3D input file through cmlfile library - outdated, use XML
- #include "cmlfile.h"
-#endif
+//#ifdef __TINYXML_MODULE
+#define TINYXML //read CEMHYD3D input file through tinyXML library
+#include "tinyxml.h"
+//#else
+// #define CMLFILE //read CEMHYD3D input file through cmlfile library - outdated, use XML
+// #include "cmlfile.h"
+//#endif
 
 #ifdef __TM_MODULE //OOFEM transport module
  #include "domain.h"

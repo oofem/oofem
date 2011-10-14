@@ -58,8 +58,9 @@ class QTrPlaneStress2d : public StructuralElement, public SpatialLocalizerInterf
     public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
 {
     /*
-     * This class implements an triangular three-node  plane-
+     * This class implements a quadratic triangular three-node plane-
      * stress elasticity finite element. Each node has 2 degrees of freedom.
+     * Element has 6 nodes.
      *
      * DESCRIPTION :
      *
@@ -82,9 +83,8 @@ public:
     virtual int  computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     // characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    }
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    
     /**
      * Computes the global coordinates from given element's local coordinates.
      * Required by nonlocal material models.

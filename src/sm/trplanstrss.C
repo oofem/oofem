@@ -664,7 +664,11 @@ TrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &no
 // for crack formed in plane with normal normalToCrackPlane.
 //
 {
-    return this->giveLenghtInDir(normalToCrackPlane);
+    if ( normalToCrackPlane.at(3) < 0.999999 ){//ensure that characteristic length is in the plane of element
+        return this->giveLenghtInDir(normalToCrackPlane);
+    } else {//otherwise compute out-of-plane characteristic length from element area
+        return sqrt ( this->computeVolumeAreaOrLength() );
+    }
 }
 
 

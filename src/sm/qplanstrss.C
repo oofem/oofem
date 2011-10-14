@@ -191,6 +191,17 @@ QPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray 
     return 1;
 }
 
+double
+QPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+{
+    if ( normalToCrackPlane.at(3) < 0.999999 ){//ensure that characteristic length is in the plane of element
+        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
+    } else {//otherwise compute out-of-plane characteristic length from element area
+        return sqrt ( this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints );
+    }
+}
+
+
 
 #ifdef __OOFEG
 void QPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)

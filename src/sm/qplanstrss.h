@@ -95,9 +95,7 @@ public:
      * given direction. Required by material models relying on crack-band approach to achieve
      * objectivity with respect to mesh size
      */
-    double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    }
+    double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     /**
      * @name The element interface required by ZZNodalRecoveryModel

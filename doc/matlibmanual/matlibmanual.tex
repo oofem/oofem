@@ -1245,12 +1245,13 @@ of equivalent strain:
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
 &- \param{damlaw} allows to choose from different damage laws:
 \begin{itemize}\setlength{\itemsep}{-3pt}
-\item[0 -] exponential softening (default) with parameters e0 and wf $\vert$ ef
-\item[1 -] linear softening with parameters e0 and wf $\vert$ ef
+\item[0 -] exponential softening (default) with parameters e0 and wf $\vert$ ef $\vert$ gf
+\item[1 -] linear softening with parameters e0 and wf $\vert$ ef $\vert$ gf
 \item[2 -] bilinear softening with gf, gft, ek
 \item[3 -] Hordijk softening (not implemented yet)
 \item[4 -] Mazars damage law with parameters At and Bt
 \item[5 -] smooth stress-strain curve with parameters e0 and md
+\item[6 -] disable damage (dummy linear elastic material)
 \end{itemize}\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\

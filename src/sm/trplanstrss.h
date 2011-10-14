@@ -52,7 +52,7 @@ namespace oofem {
 /**
  * This class implements an triangular three-node plane-stress
  * elasticity finite element. Each node has 2 degrees of freedom.
- *
+ * Element has 3 nodes and 6 DoFs.
  * Tasks:
  * - calculating its B,D,N matrices and dV.
  */
