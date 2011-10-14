@@ -595,7 +595,7 @@ patch100.out
 
 def process_file (infilename, parentfilename):
     #parentfilename name of master file name, none otherwise
-    global userrec, recval, mode, tolerance, recursion_level
+    global userrec, mode, tolerance, recursion_level
     context = Context();
     
     result = 0
@@ -667,8 +667,9 @@ def process_file (infilename, parentfilename):
     if debug: print "Opening oofem output file:", oofemoutfilename.rstrip('\r\n')
     context.infile = open(oofemoutfilename.rstrip('\r\n'))
 
-    for i in range(len(userrec)):
-        recVal[i]='--'
+    for i in range(len(context.userrec)):
+        context.recVal[i]='--'
+    #print context.recVal
 
     #parse output file
     for line in context.infile:
