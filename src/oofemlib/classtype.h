@@ -208,6 +208,7 @@ enum classType {
     SpoolesSolverClass,
     PetscSolverClass,
     SlepcSolverClass,
+    PETScSNESNMClass,
 
     MaterialClass,
     DummyMaterialClass,

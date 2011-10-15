@@ -40,11 +40,18 @@
 namespace oofem {
 //#define PetscContext_debug_print
 
-PetscContext :: PetscContext(EngngModel *e, EquationID ut)
+PetscContext :: PetscContext(EngngModel *e, EquationID ut, bool naturalVectors)
 #ifdef __PARALLEL_MODE
-    : comm(PETSC_COMM_WORLD), n2g(), n2l()
+    : n2g(), n2l()
 #endif
 {
+#ifdef __PARALLEL_MODE
+    if ( e->isParallel() )
+        comm = PETSC_COMM_WORLD;
+    else
+#endif
+        comm = PETSC_COMM_SELF;
+    this->naturalVectors = true;
     this->emodel = e;
     this->ut = ut;
     n2gvecscat = NULL;
@@ -117,6 +124,17 @@ int
 PetscContext :: giveNumberOfNaturalEqs()
 {
     return emodel->giveNumberOfEquations(ut);
+}
+
+
+int
+PetscContext :: scatter2G(const FloatArray *src, Vec dest, InsertMode mode)
+{
+    if ( this->naturalVectors ) {
+        return this->scatterN2G(src, dest, mode);
+    } else {
+        return this->scatterL2G(src, dest, mode);
+    }
 }
 
 

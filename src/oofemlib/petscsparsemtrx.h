@@ -113,6 +113,7 @@ public:
     int giveDomainIndex() { return di; }
 
     friend class PetscSolver;
+    friend class PETScSNESNM;
 };
 } // end namespace oofem
 #endif

@@ -59,10 +59,13 @@ protected:
     EquationID ut;
     VecScatter n2gvecscat;
     VecScatter l2gvecscat;
- #ifdef __PARALLEL_MODE
+    // True if vectors are assumed to be natural distribution.
+    bool naturalVectors;
+
     /// Communicator used for parallel objects.
     MPI_Comm comm;
 
+#ifdef __PARALLEL_MODE
     PetscNatural2GlobalOrdering n2g;
     PetscNatural2LocalOrdering n2l;
 
@@ -71,10 +74,12 @@ protected:
  #endif
 
 public:
-    PetscContext(EngngModel *e, EquationID ut);
+    PetscContext(EngngModel *e, EquationID ut, bool naturalVectors = true);
     ~PetscContext();
 
     void init(int di);
+
+    MPI_Comm giveComm() { return comm; };
 
     int giveNumberOfLocalEqs();
     int giveNumberOfGlobalEqs();
@@ -83,6 +88,10 @@ public:
     /// Scatters global vector to natural one.
     int scatterG2N(Vec src, Vec dest, InsertMode mode);
     int scatterG2N(Vec src, FloatArray *dest, InsertMode mode);
+
+    /// Scatters vectors (natural or local) to a global one. Uses the naturalVectors variable to determine.
+    int scatter2G(const FloatArray *src, Vec dest, InsertMode mode);
+
     /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
     int scatterN2G(Vec src, Vec dest, InsertMode mode);
     int scatterN2G(const FloatArray *src, Vec dest, InsertMode mode);

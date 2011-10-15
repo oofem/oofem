@@ -50,7 +50,7 @@
  #endif
 
 namespace oofem {
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
+PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m), useLocal(true) { }
 
 
 PetscSolver :: ~PetscSolver() { }
@@ -103,7 +103,10 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
      */
     if (engngModel->isParallel()) {
         engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->createVecGlobal(& globRhsVec);
-        engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterL2G(b, globRhsVec, ADD_VALUES);
+        if (useLocal)
+            engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterL2G(b, globRhsVec, ADD_VALUES);
+        else
+            engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterN2G(b, globRhsVec, ADD_VALUES);
     } else
  #endif
     VecCreateSeqWithArray(PETSC_COMM_SELF, b->giveSize(), b->givePointer(), & globRhsVec);
@@ -113,7 +116,6 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     //VecView(globRhsVec,PETSC_VIEWER_STDOUT_WORLD);
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
-
 
  #ifdef __PARALLEL_MODE
     if (engngModel->isParallel())
@@ -206,7 +208,13 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     KSPSolve(Lhs->ksp, b, x);
     KSPGetConvergedReason(Lhs->ksp, & reason);
     KSPGetIterationNumber(Lhs->ksp, & nite);
-    OOFEM_LOG_INFO("PetscSolver::petsc_solve KSPConvergedReason: %d, number of iterations: %d\n", reason, nite); // To verbose for multiscale.
+
+    if (reason >= 0) {
+        OOFEM_LOG_INFO("PetscSolver::petsc_solve - Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+    } else {
+        OOFEM_WARNING3("PetscSolver::petsc_solve - Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+    }
+
 
  #ifdef TIME_REPORT
     oofem_timeval ut;

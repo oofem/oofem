@@ -41,21 +41,14 @@
 #ifndef sparsenonlinsystemnm_h
 #define sparsenonlinsystemnm_h
 
-
 #include "nummet.h"
-
 #include "equationid.h"
 #include "nmstatus.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
-
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse
@@ -76,8 +69,8 @@ public:
      * The initialLoadVector describes the part of loading which does not scale.
      */
     enum referenceLoadInputModeType {
-        rlm_total=0, /// The reference incremental load vector is defined as totalLoadVector assembled at given time.
-        rlm_inceremental=1, /// The reference load vector is obtained as incremental load vector at given time.
+        rlm_total=0, ///< The reference incremental load vector is defined as totalLoadVector assembled at given time.
+        rlm_inceremental=1, ///< The reference load vector is obtained as incremental load vector at given time.
     };
 
 protected:
@@ -138,8 +131,6 @@ public:
     // Overloaded methods:
     const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
     classType giveClassID() const { return SparseNonLinearSystemNMClass; }
-
-public:
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h
