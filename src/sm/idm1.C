@@ -536,7 +536,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
 
     crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
 
-    if ( ( kappa > e0 ) && ( status->giveLe() == 0. ) ) {
+    if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
         // find index of max positive principal strain
         for ( i = 2; i <= 3; i++ ) {
