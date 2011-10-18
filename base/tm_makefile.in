@@ -9,7 +9,7 @@ PETSC_ARCH = @PETSC_ARCH@
 BOPT       = @PETSC_BOPT@
 @PETSC_MAKE_INCLUDE@
 
-INCLUDE_DIR= @TARGET_CONFIG_INCLUDES@ @OOFEMLIB_INCLUDES@ @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
+INCLUDE_DIR= @TARGET_CONFIG_INCLUDES@ @OOFEMLIB_INCLUDES@ @IML_INCLUDES@ @TINYXML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
 SYMBOLS    = @MODULE_SYMBOLS@
 #   Libraries
 LOCAL_LIBS = @ELIXIR_LIBS@ @CKIT_LIB@
@@ -42,11 +42,10 @@ srcs6=
 srcs7= 
 srcs8= 
 srcs9=
-tinyxmlsrc=tinystr.C tinyxml.C tinyxmlerror.C tinyxmlparser.C
 # parallel sources
 psrc1= 
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1) $(tinyxmlsrc)
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1)
 ## object files
 tmLib_objs := $(all_src:.C=.o)
 ## dependency files

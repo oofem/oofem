@@ -5,6 +5,7 @@ dnl
 dnl Module options
 dnl
 dnl   --enable-iml           --disable-iml
+dnl   --enable-tinyxml       --disable-tinyxml
 dnl   --enable-sm            --disable-sm
 dnl   --enable-tm            --disable-tm
 dnl   --enable-fm            --disable-fm
@@ -37,6 +38,7 @@ sm_module=yes
 tm_module=yes
 fm_module=yes
 iml_module=no
+tinyxml_module=no
 spooles_module=no
 petsc_module=no
 slepc_module=no
@@ -324,6 +326,25 @@ AC_ARG_WITH(IMLDIR, [  --with-IMLDIR=dir       allows to specify IML_DIR] ,
 )
 
 dnl --------------------------------------------------------------------
+dnl Check for tinyxml module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(tinyxml, [  --enable-tinyxml            adds tinyxml module],
+    [
+        tinyxml_module=$enableval
+    ],
+    [
+        tinyxml_module=no
+    ]
+)
+
+AC_ARG_WITH(TINYXMLDIR, [  --with-TINYXMLDIR=dir       allows to specify TINYXML_DIR] , 
+   [
+       TINYXML_DIR=$withval
+   ]
+)
+
+
+dnl --------------------------------------------------------------------
 dnl Check for spooles module
 dnl --------------------------------------------------------------------
 AC_ARG_ENABLE(spooles, [  --enable-spooles        adds spooles module support],
@@ -504,7 +525,7 @@ if test x$iml_module = xyes; then
         IML_INCLUDES="-I${PWD}"
     elif test -f $IML_DIR/iml/gmres.h; then
           IML_INCLUDES="-I${IML_DIR}"
-          AC_MSG_RESULT(${PWD}/iml)
+          AC_MSG_RESULT(${IML_DIR}/iml)
     else
         while true; do
             read -p "Type in IML directory (use absolute path, excluding the last iml/ directory):" IML_DIR
@@ -517,7 +538,6 @@ if test x$iml_module = xyes; then
         done
     fi
 fi
-
 
 DSS_MAKEFILE=""
 dnl --------------------------------------------------------------------
@@ -934,7 +954,7 @@ dnl
 
 
 TARGET_CONFIG_INCLUDES="-I$OOFEM_DIR/targets/$OOFEM_TARGET/include"
-OOFEMLIB_SUBMODULE_INCLUDES="-I$PWD/src/oofemlib/xfem -I$PWD/src/oofemlib/iga -I$PWD/src/tm/cemhyd -I$PWD/src/tm/cemhyd/tinyxml"
+OOFEMLIB_SUBMODULE_INCLUDES="-I$PWD/src/oofemlib/xfem -I$PWD/src/oofemlib/iga -I$PWD/src/tm/cemhyd"
 OOFEMLIB_INCLUDES="-I$PWD/src/oofemlib $OOFEMLIB_SUBMODULE_INCLUDES"
 
 SM_INCLUDES="-I$PWD/src/sm"
@@ -946,7 +966,7 @@ OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/oofemlib/oofemlib.a"
 
 MODULE_LIST="oofemlib"
 MODULE_TOBUILD="oofemlib"    
-MODULE_SYMBOLS="$MODULE_SYMBOLS -D__OOFEMLIB_MODULE -DTIXML_USE_STL"
+MODULE_SYMBOLS="$MODULE_SYMBOLS -D__OOFEMLIB_MODULE"
 
 if test x$sm_module = xyes; then
     MODULE_LIST="$MODULE_LIST sm"
@@ -960,7 +980,8 @@ fi
 if test x$tm_module = xyes; then
     MODULE_LIST="$MODULE_LIST tm"
     MODULE_TOBUILD="$MODULE_TOBUILD tm"
-    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE -D__CEMHYD_MODULE -D__TINYXML_MODULE -DTIXML_USE_STL"
+    tinyxml_module=yes
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE -D__CEMHYD_MODULE"
     MODULE_INCLUDES="$MODULE_INCLUDES $TM_INCLUDES"
     OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/tm/tmlib.a $OOFEM_LIBS"    
     TEST_TARGETS="$TEST_TARGETS tm"
@@ -984,6 +1005,38 @@ if test x$iml_module = xyes; then
     MODULE_LIST="$MODULE_LIST iml"
     MODULE_SYMBOLS="$MODULE_SYMBOLS -D__IML_MODULE"
     IML_MODULE_SYMBOL="-D__IML_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES $IML_INCLUDES"
+fi
+
+dnl --------------------------------------------------------------------
+dnl Search for tinyxml module - required also by tm module
+dnl --------------------------------------------------------------------
+if test x$tinyxml_module = xyes; then
+    AC_MSG_CHECKING(TINYXML module location)
+    if test -f ${PWD}/tinyxml/tinyxml.h && test -z ${TINYXML_DIR} ; then
+        AC_MSG_RESULT(${PWD}/tinyxml)
+        TINYXML_INCLUDES="-I${PWD}"
+        TINYXML_DIR="${PWD}"
+    elif test -f $TINYXML_DIR/tinyxml/tinyxml.h; then
+          TINYXML_INCLUDES="-I${TINYXML_DIR}"
+          AC_MSG_RESULT(${TINYXML_DIR}/tinyxml)
+    else
+        while true; do
+            read -p "Type in tinyxml directory (use absolute path, excluding the last tinyxml/ directory):" TINYXML_DIR
+            if test -e ${TINYXML_DIR}/tinyxml/tinyxml.h ; then
+                TINYXML_INCLUDES="-I${TINYXML_DIR}"
+                break;
+            else
+                echo "tinyxml includes not found under ${TINYXML_DIR}/tinyxml"
+            fi
+        done
+    fi
+fi
+
+if test x$tinyxml_module = xyes; then
+    MODULE_LIST="$MODULE_LIST tinyxml"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TINYXML_MODULE -DTIXML_USE_STL"
+    IML_MODULE_SYMBOL="-D__TINYXML_MODULE"
     MODULE_INCLUDES="$MODULE_INCLUDES $IML_INCLUDES"
 fi
 
@@ -1059,6 +1112,8 @@ AC_SUBST(SM_INCLUDES)
 AC_SUBST(TM_INCLUDES)
 AC_SUBST(FM_INCLUDES)
 AC_SUBST(IML_INCLUDES)
+AC_SUBST(TINYXML_INCLUDES)
+AC_SUBST(TINYXML_DIR)
 AC_SUBST(DSS_INCLUDES)
 AC_SUBST(SPOOLES_INCLUDES)
 

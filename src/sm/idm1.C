@@ -703,7 +703,7 @@ IsotropicDamageMaterial1 :: MMI_finish(TimeStep *tStep)
 IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g) :
     IsotropicDamageMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface()
 {
-    le = 0.0;//must be initialized, checked for crack initiation
+    le = 0.0;
 }
 
 void

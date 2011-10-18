@@ -82,11 +82,19 @@ OOFEM_TOP_DIR
 The oofem requires the GNU make tool and C++ compiler with STL support 
 (Standard Template Library).
 
+XML parser is supported through tinyXML library. The library is required
+for tm module, particularly for CEMHYD3D model. Please download from
+http://sourceforge.net/projects/tinyxml/
+and place *.cpp and *.h files under tinyxml/ directory under OOFEM root.
+Other location can be specified using --with-TINYXMLDIR=" " directive.
+
 The oofem contains interface to IML++ library. It is the C++ templated 
 library of modern iterative methods for solving both symmetric and 
 non-symmetric linear systems of equations, written by 
 Roldan Pozo. It can be downloaded from http://math.nist.gov/iml++/. 
 It is recommended to install IML++ and compile OOFEM with IML++ support.
+Please place *.h files under iml/ directory under OOFEM root.
+Other location can be specified using --with-IMLDIR=" " directive.
 
 The graphical post-processor (oofeg) requires the ELIXIR and Ckit libraries
 by Petr Krysl (http://www.multires.caltech.edu/~pkrysl/), to be installed. 

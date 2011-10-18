@@ -276,8 +276,8 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             fei3d->surfaceEvaldNdx(dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e), 0.0);
             fei3d->surfaceEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-            double J = fei3d->surfaceGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e), 0.0);
-            double dV = gamma * J * gp->giveWeight();
+            //double J = fei3d->surfaceGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e), 0.0);
+            //double dV = gamma * J * gp->giveWeight();
 
             for (int i = 0; i < nodes; i++) {
                 //tmp(3*i+0) = dNdx(i,0) - (dNdx(i,0)*n(0)* + dNdx(i,1)*n(1) + dNdx(i,2)*n(2))*n(0);
