@@ -193,7 +193,7 @@ PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
     dest->resize(neqs);
     VecGetArray(src, & ptr);
     for ( i = 0; i < neqs; i++ ) {
-        dest->at(i + 1) = ptr [ i ];
+        (*dest)(i) = ptr [ i ];
     }
 
     VecRestoreArray(src, & ptr);
@@ -408,9 +408,9 @@ PetscContext :: accumulate(double local)
 void
 PetscContext :: accumulate(const FloatArray &local, FloatArray &global)
 {
-    int size = local.giveSize();
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
+        int size = local.giveSize();
         global.resize(size);
         MPI_Allreduce(local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, comm);
     }
