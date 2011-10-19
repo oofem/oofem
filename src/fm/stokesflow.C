@@ -142,7 +142,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
 
-#if 1
+    OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
+
+#if 0
     this->giveNumericalMethod(tStep);
     double loadLevel, ebenorm;
     int currentIterations;
@@ -162,7 +164,6 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 #else
-    OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving\n");
     SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
     this->updateComponent(tStep, InternalRhs, this->giveDomain(1));
     this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
@@ -297,11 +298,26 @@ double StokesFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, Ti
     return 0;
 }
 
-double StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof) {
-
-  if (ut==ReynoldsNumber) return 1.0;
-  else return 0.0;
+double StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof)
+{
+    if (ut==ReynoldsNumber)
+        return 1.0;
+    else
+        return 0.0;
 } // bp
+
+
+#ifdef __PETSC_MODULE
+void StokesFlow :: initPetscContexts()
+{
+    PetscContext *petscContext;
+    petscContextList->growTo(ndomains);
+    for ( int i = 1; i <= this->ndomains; i++ ) {
+        petscContext =  new PetscContext(this, EID_MomentumBalance_ConservationEquation);
+        petscContextList->put(i, petscContext);
+    }
+}
+#endif
 
 int StokesFlow :: checkConsistency()
 {

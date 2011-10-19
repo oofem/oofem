@@ -759,7 +759,7 @@ public:
      */
     virtual PetscContext *givePetscContext(int n, EquationID eid);
     /**
-     * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is reqired
+     * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
      * for context creation.
      */
     virtual void initPetscContexts();
