@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/linearstability.C,v 1.6.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -34,17 +33,13 @@
  */
 
 //
-// file linearstability.cc
-//
-
-//
 // W A R N I N G :
 //
 // Warning: current implementation optimized for use
 // ldlt factorization and subspace iteration as numerical
 // methods to solve governing equations.
 // If you want use another numerical method,
-// you must uncoment marked section in source code
+// you must uncomment marked section in source code
 // inside this file to obtain full independency of
 // used numerical method.
 
@@ -232,12 +227,6 @@ TimeStep *LinearStability :: giveNextStep()
 
 void LinearStability :: solveYourself()
 {
-    //  this -> giveNumericalMethod ();
-    // this -> giveNumericalMethodForLinStaticProblem ();
-
-
-    //MetaStep* activeMStep;
-    //activeMStep = this->giveMetaStep(1);
     // update state ccording to new meta step
     this->giveNextStep();
     this->updateAttributes( this->giveCurrentStep() );
@@ -246,7 +235,8 @@ void LinearStability :: solveYourself()
 }
 
 
-void LinearStability :: solveYourselfAt(TimeStep *tStep) {
+void LinearStability :: solveYourselfAt(TimeStep *tStep)
+{
     //
     // creates system of governing eq's and solves them at given time step
     //
@@ -257,17 +247,17 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
 
     if ( tStep->giveNumber() == 1 ) {
         //
-        // first step - slove linear static problem
+        // first step - solve linear static problem
         //
         stiffnessMatrix = new Skyline();
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //
-        // alocate space for displacementVector
+        // allocate space for displacementVector
         //
         displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         //
-        // alocate space for load vector
+        // allocate space for load vector
         //
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     }
@@ -300,14 +290,6 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    //
-    // set-up numerical model
-    //
-    /*
-     * nMethodLS -> setSparseMtrxAsComponent ( LinearEquationLhs , stiffnessMatrix) ;
-     * nMethodLS -> setFloatArrayAsComponent ( LinearEquationRhs , &loadVector) ;
-     * nMethodLS -> setFloatArrayAsComponent ( LinearEquationSolution, &displacementVector) ;
-     */
     //
     // call numerical model to solve arised problem
     //
@@ -353,17 +335,6 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     eigVec.zero();
     eigVal.zero();
 
-    //
-    // set-up numerical model
-    //
-    /*
-     * nMethod -> setSparseMtrxAsComponent ( AEigvMtrx , stiffnessMatrix) ;
-     * nMethod -> setSparseMtrxAsComponent ( BEigvMtrx , initialStressMatrix) ;
-     * nMethod -> setDoubleAsComponent ( NumberOfEigenValues , numberOfRequiredEigenValues) ;
-     * nMethod -> setDoubleAsComponent ( PrescribedTolerancy , rtolv) ;
-     * nMethod -> setFloatMatrixAsComponent ( EigenVectors,  &eigVec);
-     * nMethod -> setFloatArrayAsComponent ( EigenValues, &eigVal);
-     */
     //
     // call numerical model to solve arised problem
     //

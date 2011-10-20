@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/microplane.C,v 1.2 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,9 +37,6 @@
 #include "domain.h"
 #include "matstatus.h"
 #include "material.h"
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 
 namespace oofem {
 Microplane :: Microplane(IntegrationRule *ir, int n, MaterialMode mode) :

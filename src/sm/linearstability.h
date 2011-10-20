@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/linearstability.h,v 1.7 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,16 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// Class LinearStability
-//
-
 #ifndef linearstability_h
 #define linearstability_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "structengngmodel.h"
 #include "geneigvalsolvertype.h"
 #include "sparsegeneigenvalsystemnm.h"
@@ -53,21 +45,20 @@
 #include "nummet.h"
 
 namespace oofem {
+/**
+ * This class implements way for examining critical load of structure.
+ *
+ * Solution of this problem is base on equation in the form of: @f$ K\cdot y=w (K_\sigma)y @f$.
+ * Currently eigenvalue problem is solved using subspace iteration.
+ * The linear static solution, determining normal forces is done in time = 0.
+ *
+ * Tasks:
+ * - Assembling the governing equation in the form.
+ * - Creating Numerical method for @f$ K\cdot y=w(K_\sigma)y @f$.
+ * - Interfacing Numerical method to Elements.
+ */
 class LinearStability : public StructuralEngngModel
 {
-    /*
-     * This class implements way for examining critical load of structure.
-     * DESCRIPTION:
-     * Solution of this problem is base on equation in the form of: Ky=w(K_sigma)y
-     * Currently eigen value problem is solved using subspace iteration.
-     * The linear static solution, determining normal forces is done in time = 0.
-     * TASK:
-     * Assembling the governing equation in the form  Ky=w(K_sigma)y
-     * Creating Numerical method for Ky=w(K_sigma)y
-     * Interfacing Numerical method to Elements
-     */
-
-
 private:
     SparseMtrx *stiffnessMatrix;
     SparseMtrx *initialStressMatrix;
@@ -76,11 +67,11 @@ private:
     FloatMatrix eigVec;
     FloatArray eigVal;
     int numberOfRequiredEigenValues;
-    double rtolv;           // precision
-    /// Numerical method used to solve the problem
+    double rtolv;
+    /// Numerical method used to solve the problem.
     GenEigvalSolverType solverType;
     SparseGeneralEigenValueSystemNM *nMethod;
-    /// Numerical method used to solve the static problem
+    /// Numerical method used to solve the static problem.
     SparseLinearSystemNM *nMethodLS;
 
 public:
@@ -98,45 +89,37 @@ public:
         delete  stiffnessMatrix;
         delete initialStressMatrix;
         if ( nMethodLS ) { delete nMethodLS; }
+        if ( nMethod ) { delete nMethod; }
+    }
 
-        if ( nMethod ) { delete nMethod; } }
-    // solving
     void solveYourself();
-    void solveYourselfAt(TimeStep *);
+    void solveYourselfAt(TimeStep *tStep);
 
-    void terminate(TimeStep *);
-    void terminateLinStatic(TimeStep *);
+    void terminate(TimeStep *tStep);
+    void terminateLinStatic(TimeStep *tStep);
     int requiresNewLsh() { return 0; }
-    virtual void               updateYourself(TimeStep *);
+    virtual void updateYourself(TimeStep *tStep);
 
     // the intrinsic time of time step defines active eigen value and corresponding vector,
     // for which values can be requested using
     // giveUnknownComponent method.
     // When DisplacementVector is requested, then if time==0 linear elastic solution displacement are returned,
     // otherwise corresponding eigen vector is considered as displacement vector
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
-    double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *);
+    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     IRResultType initializeFrom(InputRecord *ir);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     TimeStep *giveNextStep();
 
-    NumericalMethod *giveNumericalMethod(TimeStep *);
-    SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *);
+    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);
 
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream output stream
-     * @param iDof dof to be processed
-     * @param atTime solution step
-     */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
-
 
     // identification
     const char *giveClassName() const { return "LinearStability"; }
-    classType giveClassID()      const { return LinearStabilityClass; }
+    classType giveClassID() const { return LinearStabilityClass; }
     fMode giveFormulation() { return TL; }
 };
 } // end namespace oofem

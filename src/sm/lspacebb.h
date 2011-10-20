@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/lspace.h,v 1.6 2003/05/19 13:04:00 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *******************************************************************************
-//   ***      CLASS 3D Brick linear Element (with bBar for incompressibility   ) ***
-//   *******************************************************************************
-
 #ifndef lspacebb_h
 #define lspacebb_h
 
@@ -50,16 +45,15 @@ namespace oofem {
  */
 class LSpaceBB  : public LSpace
 {
-protected:
 public:
-    LSpaceBB(int, Domain *);                        // constructor
-    ~LSpaceBB()  { }                                // destructor
+    LSpaceBB(int n, Domain *d);
+    ~LSpaceBB() { }
 
     const char *giveClassName() const { return "LSpaceBB"; }
-    classType             giveClassID()  const { return LSpaceBBClass; }
+    classType giveClassID() const { return LSpaceBBClass; }
 
 protected:
-    void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 };
 } // end namespace oofem
 #endif // lspacebb_h

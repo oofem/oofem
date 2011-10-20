@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/microplane.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   ************************
-//   *** CLASS MICROPLANE ***
-//   ************************
 
 #ifndef microplane_h
 #define microplane_h
@@ -63,7 +58,7 @@ class LayeredCrossSection;
  * Thus requests for microplane integration weights and normal are forwarded
  * to corresponding material model.
  *
- * Generally, every integretion point must hold
+ * Generally, every integration point must hold
  * its own copy of history variables (which are related to corresponding
  * material model used). These material type dependent history variables
  * are stored in material type related material status, which can be
@@ -79,38 +74,30 @@ class LayeredCrossSection;
  */
 class Microplane : public GaussPoint
 {
-protected:
-
 public:
     /**
-     * Constructor.  Creates microplane integration point belonging
+     * Creates microplane integration point belonging
      * to given element, with given number, integration weight, coordinates and material mode.
-     * @param e element to which integration point belongs to.
-     * @param n integration point number
-     * @param mode material mode
+     * @param e Element to which integration point belongs to.
+     * @param n Integration point number.
+     * @param mode Material mode.
      */
     Microplane(IntegrationRule *ir, int n, MaterialMode mode);
     /// Destructor
-    ~Microplane();                                  // destructor
+    ~Microplane();
 
-    /// Returns  integration weight of receiver.
-    double       giveWeight()
+    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+
+    double giveWeight()
     { return ( ( MicroplaneMaterial * ) this->giveMaterial() )->giveMicroplaneIntegrationWeight(this); }
     /// Returns normal of microplane.
     void giveMicroplaneNormal(FloatArray &answer)
     { ( ( MicroplaneMaterial * ) this->giveMaterial() )->giveMicroplaneNormal(answer, this); }
-    /**
-     * Prints output of receiver to file. Corresponding printOutputAt  function for
-     * associated status is called. Overloaded in order to avoid report microplane state.
-     */
-    void         printOutputAt(FILE *, TimeStep *);
 
-    /// Returns classType id of receiver.
+    void printOutputAt(FILE *file, TimeStep *tStep);
+
     classType giveClassID() const { return MicroplaneClass; }
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "Microplane"; }
-    ///Initializes receiver acording to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // microplane_h

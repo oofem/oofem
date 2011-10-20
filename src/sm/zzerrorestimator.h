@@ -122,17 +122,18 @@ public:
     /// Returns reference to corresponding element
     virtual Element *ZZErrorEstimatorI_giveElement() = 0;
     /// Computes the interpolation matrix used for recovered values
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatMatrix & answer, GaussPoint * gp,
-                                                                           InternalStateType) = 0;
+    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp,
+                                                                           InternalStateType type) = 0;
     /**
      * Computes the element contributions to global norms.
-     * @param eNorm element contribution to error norm
-     * @param sNorm element contribution to norm of quantity which error is evaluated
-     * @param norm determines the type of norm to evaluate
-     * @param tStep time Step
+     * @param eNorm Element contribution to error norm.
+     * @param sNorm Element contribution to norm of quantity which error is evaluated.
+     * @param norm Determines the type of norm to evaluate.
+     * @param type Determines the type of internal state to compute for.
+     * @param tStep Time step.
      */
-    virtual void ZZErrorEstimatorI_computeElementContributions(double &eNorm, double &sNorm, ZZErrorEstimator :: NormType,
-                                                               InternalStateType type, TimeStep *);
+    virtual void ZZErrorEstimatorI_computeElementContributions(double &eNorm, double &sNorm, ZZErrorEstimator :: NormType norm,
+                                                               InternalStateType type, TimeStep *tStep);
 };
 
 

@@ -37,12 +37,12 @@
 
 #ifdef __PARALLEL_MODE
 
- #include "communicator.h"
- #include "fetiboundarydofman.h"
- #include "error.h"
- #ifndef __MAKEDEPEND
-  #include <vector>
- #endif
+#include "communicator.h"
+#include "fetiboundarydofman.h"
+#include "error.h"
+#ifndef __MAKEDEPEND
+ #include <vector>
+#endif
 
 using namespace std;
 
@@ -75,11 +75,11 @@ protected:
 
 public:
     /**
-     * Constructor. Creates new communicator associated
-     * to master  with rank 0.
-     * @param irank Rank of associated partition.
+     * Creates new communicator.
+     * @param emodel Engineering model for communication.
+     * @param b Communicator buffer.
+     * @param rank Rank of associated partition.
      * @param size Number of collaborating processes.
-     * @param mode Communicator mode.
      */
     FETICommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size);
     /// Destructor

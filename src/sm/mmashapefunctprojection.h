@@ -68,6 +68,11 @@ public:
 
     /// Constructor
     MMAShapeFunctProjectionInterface() { }
+
+    /**
+     * @name The element interface required by MMAShapeFunctProjectionInterface
+     */
+    //@{
     /**
      * Interpolates the internal variables, using given nodal values
      * to given point (given by global coordinates) using element shape functions.
@@ -81,6 +86,7 @@ public:
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep) = 0;
+    //@}
 };
 
 

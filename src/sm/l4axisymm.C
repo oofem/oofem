@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/l4axisymm.C,v 1.3.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file L4AXISYMM.CC
-// 9.5.1995
-//
 
 #include "l4axisymm.h"
 #include "node.h"
@@ -370,7 +365,8 @@ L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 }
 
 void
-L4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -380,8 +376,6 @@ L4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 int
@@ -427,7 +421,9 @@ L4Axisymm :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 
 int
 L4Axisymm :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
+{
+    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+}
 
 
 void

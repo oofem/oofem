@@ -54,7 +54,7 @@ class DirectErrorIndicatorRCInterface : public Interface
 public:
     /// Constructor
     DirectErrorIndicatorRCInterface() : Interface() { }
-    /*
+    /**
      * Determines the characteristic size of element. This quantity is defined as follows:
      * For 1D it is the element length, for 2D it is the square root of element area.
      */
@@ -120,15 +120,16 @@ protected:
     /**
      * Returns dof man indicator values.
      * @param num DofMan number.
+     * @param tStep Time step.
      */
-    double giveDofManIndicator(int num, TimeStep *);
-    double giveLocalDofManIndicator(int num, TimeStep *);
+    double giveDofManIndicator(int num, TimeStep *tStep);
+    double giveLocalDofManIndicator(int num, TimeStep *tStep);
 #ifdef __PARALLEL_MODE
     void exchangeDofManDensities();
     int packSharedDofManLocalDensities(ProcessCommunicator &processComm);
     int unpackSharedDofManLocalDensities(ProcessCommunicator &processComm);
 
-    void exchangeDofManIndicatorVals(TimeStep *);
+    void exchangeDofManIndicatorVals(TimeStep *tStep);
     int packSharedDofManLocalIndicatorVals(ProcessCommunicator &processComm);
     int unpackSharedDofManLocalIndicatorVals(ProcessCommunicator &processComm);
 #endif

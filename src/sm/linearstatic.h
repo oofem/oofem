@@ -42,7 +42,7 @@
 namespace oofem {
 
 /**
- * This class implements LinearStatic Engineering problem.
+ * This class implements linear static engineering problem.
  * Multiple loading works only if linear elastic material (such as isoLE)  is used.
  * (Other non-linear materials keep load history, so such multiple loading
  * will cause that next step will be assumed as new load increment,
@@ -52,7 +52,7 @@ namespace oofem {
  * Solution of this problem is series of loading cases, maintained as sequence of
  * time-steps. This solution is in form of linear equation system Ax=b
  * Tasks:
- * - Creating Numerical method for solving @f$ K\cdot x=b@f$.
+ * - Creating Numerical method for solving @f$ K\cdot x=b @f$.
  * - Interfacing Numerical method to Elements.
  * - Managing time steps.
  */

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/libeam2dnl.h,v 1.6 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************
-//   *** CLASS LIBeam2dNL ***
-//   ************************
-
 #ifndef libeam2dnl_h
 #define libeam2dnl_h
 
@@ -44,81 +39,70 @@
 #include "layeredcrosssection.h"
 
 namespace oofem {
+/**
+ * This class implements a 2-dimensional Linear Isoparametric
+ * Mindlin theory beam element, with reduced integration.
+ * Geometric nonlinearities are taken into account.
+ */
 class LIBeam2dNL : public NLStructuralElement, public LayeredCrossSectionInterface
 {
-    /*
-     * This class implements a 2-dimensional Linear Isoparametric
-     * Mindlin theory beam element, with reduced integration.
-     * Geometric nonlinearities are taken into account.
-     */
-
-public:
+protected:
     double pitch, length;
 
+public:
+    LIBeam2dNL(int n, Domain *d);
+    ~LIBeam2dNL() { }
 
-    LIBeam2dNL(int, Domain *);                     // constructor
-    ~LIBeam2dNL()  { }                             // destructor
-
-    // FloatMatrix*  ComputeConstitutiveMatrixAt (GaussPoint*) ;
-    // FloatArray*   ComputeResultingBodyForceAt (TimeStep*) ;
-    void          computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void          computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    int           computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
-    void          computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * @returns nonzero if successful
-     */
+    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    //
     // layered cross section support functions
-    //
-    void          computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                             GaussPoint *slaveGp, TimeStep *tStep);
+    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+                                            GaussPoint *slaveGp, TimeStep *tStep);
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType it);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double        computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
 
-    //
     // definition & identification
-    //
     const char *giveClassName() const { return "LIBeam2dNL"; }
-    classType             giveClassID()          const { return LIBeam2dClass; }
+    classType giveClassID() const { return LIBeam2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  { return _2dBeam; }
+    integrationDomain giveIntegrationDomain() { return _Line; }
+    MaterialMode giveMaterialMode() { return _2dBeam; }
 
 protected:
     // edge load support
-    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double        computeEdgeVolumeAround(GaussPoint *, int);
-    void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
+    void giveEdgeDofMapping(IntArray &answer, int) const;
+    double computeEdgeVolumeAround(GaussPoint *, int);
+    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    int  computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
-    //void          computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    //void computeTemperatureStrainVectorAt(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     // nonlinear part of geometrical eqs. for i-th component of strain vector.
-    void          computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *, int);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void          computeGaussPoints();
-    double        giveLength();
-    double        givePitch();
+    void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeGaussPoints();
+    double giveLength();
+    double givePitch();
 };
 } // end namespace oofem
 #endif // libeam2dnl_h

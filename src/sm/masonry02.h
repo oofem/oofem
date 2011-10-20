@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/Attic/masonry02.h,v 1.1.2.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -52,29 +51,29 @@ class Domain;
 class Masonry02 : public MPlasticMaterial2
 {
 protected:
-    /// tensile strength
+    /// Tensile strength.
     double ft0;
-    /// mode I GF
+    /// Mode I GF.
     double gfI;
-    /// mode II GF
+    /// Mode II GF.
     double gfII;
-    /// residual friction angle
+    /// Residual friction angle.
     double tanfir;
-    /// initial friction angle
+    /// Initial friction angle.
     double tanfi0;
-    /// initial cohesion of joint
+    /// Initial cohesion of joint.
     double c0;
-    /// cap mode parameters
+    /// Cap mode parameters.
     double Cnn, Css, Cn;
     // double fm;
 
-    /// elastic properties
+    /// Elastic properties.
     double kn, ks;
 
-    /// dilatancy angle
+    /// Dilatancy angle.
     double tanpsi;
 
-    /// cap mode parameters
+    /// Cap mode parameters.
     double sic, spc, smc, src;
     double kp, km, kr;
 public:
@@ -86,23 +85,23 @@ public:
     int hasMaterialModeCapability(MaterialMode mode);
 
     const char *giveClassName() const { return "Masonry02"; }
-    classType giveClassID()         const { return PerfectlyPlasticMaterialClass; }
+    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+                                          MatResponseForm form,
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
     virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
     virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
     virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
+    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *,
-                                      const FloatArray &);
+    void giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &strainVector);
 
-    virtual int         giveSizeOfFullHardeningVarsVector()  { return 3; }
-    virtual int         giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 3; }
+    virtual int giveSizeOfFullHardeningVarsVector()  { return 3; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 3; }
 
     /**
      *  Returns true if stiffness matrix of receiver is symmetric
@@ -119,7 +118,6 @@ protected:
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
-    /// Computes the value of yield function
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
                                const FloatArray &stressSpaceHardeningVars);
 
@@ -155,7 +153,7 @@ protected:
                                              TimeStep *atTime);
 
 
-    /// cap mode related functions
+    /// Cap mode related functions.
     double computeF3HardeningLaw(double k);
     double computeF3HardeningGradient(double k);
 };

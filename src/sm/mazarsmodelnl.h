@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/mazarsmodelnl.h,v 1.8 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************************************
-//   *** CLASS NONLOCAL MAZARS MODEL FOR CONCRETE ************
-//   *********************************************************
-
 #ifndef mazarsmodelnl_h
 #define mazarsmodelnl_h
 
@@ -52,60 +47,31 @@ class GaussPoint;
 class MazarsNLMaterialStatus : public MazarsMaterialStatus, public StructuralNonlocalMaterialStatusExtensionInterface
 {
 protected:
-
-    /// Equivalent strain for avaraging
+    /// Equivalent strain for averaging.
     double localEquivalentStrainForAverage;
 
 public:
-
-    /// constructor
+    /// Constructor
     MazarsNLMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
     ~MazarsNLMaterialStatus();
 
-    /// Prints the receiver state to given stream
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep);
 
-    /// Returns the local  equivalent strain to be averaged
-    double giveLocalEquivalentStrainForAverage()     { return localEquivalentStrainForAverage; }
-    /// Sets the localEquivalentStrainForAverage to given value
-    void   setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
+    /// Returns the local equivalent strain to be averaged.
+    double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
+    /// Sets the local equivalent strain for average to given value.
+    void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
     // definition
     const char *giveClassName() const { return "MazarsNLMaterialStatus"; }
-    classType             giveClassID() const { return IsotropicDamageMaterialStatusClass; }
+    classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
-
-    /**
-     * Initializes the temporary internal variables, describing the current state according to
-     * previously reached equilibrium internal variables.
-     */
     virtual void initTempStatus();
-    /**
-     * Update equilibrium history variables according to temp-variables.
-     * Invoked, after new equilibrium state has been reached.
-     */
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *tStep);
 
-    // saves current context(state) into stream
-    /**
-     * Stores context of receiver into given stream.
-     * Corresponding parent method invoked.
-     * @param stream stream where to write data
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     */
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Restores context of receiver from given stream.
-     * Corresponding parent method invoked.
-     * @param stream stream where to read data
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     */
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Interface requesting service.
      * In the case of nonlocal constitutive models,
@@ -117,7 +83,7 @@ public:
      * returning adress of component or using pointer conversion from receiver to base class
      * NonlocalMaterialStatusExtension. If no nonlocal extension exists, NULL pointer is returned.
      */
-    virtual Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType it);
 };
 
 
@@ -132,7 +98,6 @@ protected:
     double R;
 
 public:
-
     /// Constructor
     MazarsNLMaterial(int n, Domain *d);
     /// Destructor
@@ -140,55 +105,24 @@ public:
 
     // identification and auxiliary functions
     const char *giveClassName() const { return "MazarsNLMaterial"; }
-    classType giveClassID()         const { return MazarsMaterialClass; }
+    classType giveClassID() const { return MazarsMaterialClass; }
 
-    /// Initializes the receiver from given record
     IRResultType initializeFrom(InputRecord *ir);
-    /** Interface requesting service */
-    virtual Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType it);
 
-
-    /**
-     * Computes the equivalent nonlocal strain measure from given strain vector (full form).
-     * @param kappa return param, comtaining the corresponding equivalent strain
-     * @param strain total strain vector in full form
-     * @param gp integration point
-     * @param atTime time step
-     */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     /**
      * Computes the equivalent local strain measure from given strain vector (full form).
-     * @param kappa return param, comtaining the corresponding equivalent strain
-     * @param strain total strain vector in full form
-     * @param gp integration point
-     * @param atTime time step
+     * @param[out] kappa Return parameter, containing the corresponding equivalent strain
+     * @param strain Total strain vector in full form
+     * @param gp Integration point.
+     * @param tStep Time step.
      */
-    void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
-    { MazarsMaterial :: computeEquivalentStrain(kappa, strain, gp, atTime); }
+    void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    { MazarsMaterial :: computeEquivalentStrain(kappa, strain, gp, tStep); }
 
-    /**
-     * Implements the service updating local variables in given integration points,
-     * which take part in nonlocal average process. Actually, no update is necessary,
-     * because the value used for nonlocal averaging is strain vector used for nonlocal secant stiffness
-     * computation. It is therefore necessary only to store local strain in corresponding status.
-     * This service is declared at StructuralNonlocalMaterial level.
-     * @param equivalentStrain equivalent strain vector in given integration point.
-     * @param gp integration point to update.
-     * @param atTime solution step indicating time of update.
-     */
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
-
-    /**
-     * Computes the value of nonlocal weight function in given point.
-     * @param src coordinates of source point.
-     * @param coord coordinates of point, where nonlocal weight function is evaluated.
-     * @return value of weight function.
-     */
+    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
     virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
-    /**
-     * Determines, whether receiver has bounded weighting function (limited support)
-     * @return true if weighting function bounded, zero otherwise
-     */
     virtual int hasBoundedSupport() { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
@@ -196,43 +130,14 @@ public:
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
 #ifdef __PARALLEL_MODE
-    /**
-     * Updates domain before nonloc average (using updateDomainBeforeNonlocAverage service)
-     * to ensure, that the localStrainVectorForAverage variable is correctly updated and
-     * pack this localStrainVectorForAverage into given buffer.
-     * @see Material::packUnknowns for description.
-     * @param buff communication buffer
-     * @param stepN solution step
-     * @param ip integration point
-     */
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    /**
-     * Unpack localStrainVectorForAverage value from given buffer.
-     * @see Material::unpackAndUpdateUnknowns service.
-     * @param buff communication buffer
-     * @param stepN solution step.
-     * @param ip integration point
-     */
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    /**
-     * Estimates the necessary pack size to hold all packed data of receiver.
-     */
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 
-    /// Creates the corresponding material status
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
 
 protected:
-    /**
-     *  Perfoms initialization, when damage first appear. The Le characteristic length is
-     *  set equal to 1.0, it doesnot matter - nonlocal approach is used. The only
-     *  same value with reference length (which is used in local model, which
-     *  computeDmaga function is reused).
-     *  @param kappa scalar measure of strain level
-     *  @param totalStrainVector current total strain vector
-     *  @param gp integration point
-     */
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 };
 } // end namespace oofem

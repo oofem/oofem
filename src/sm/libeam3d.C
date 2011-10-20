@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/libeam3d.C,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file libeam3d.cc
 
 #include "libeam3d.h"
 #include "node.h"
@@ -439,7 +436,6 @@ LIBeam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 }
 
 
-
 int
 LIBeam3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
@@ -454,7 +450,7 @@ LIBeam3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     return 0;
 }
 
-void 
+void
 LIBeam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);

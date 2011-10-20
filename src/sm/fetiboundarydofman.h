@@ -98,14 +98,14 @@ public:
      * Returns code number corresponding to partition number partition_num and to dof_num-th DOF
      * @param partition_num Partition number for which code number is required.
      * @param dof_num Specifies the particular DOF.
-     * @return Value of correspong code number, zero if such partition does not share.
+     * @return Value of corresponding code number, zero if such partition does not share.
      * the receiver or if code number for reference partition is requested.
      */
     int giveCodeNumber(int partition_num, int dof_num);
     /**
      * Returns code numbers for all DOFs associated with shared partition.
      * @param rank Partition number.
-     * @param locArray The location array of size ndof.
+     * @param locationArray The location array of size ndof.
      * @return Nonzero if o.k, zero if no such partition shared or if
      * code numbers for reference partition required.
      */

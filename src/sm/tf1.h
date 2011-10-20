@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/tf1.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************************
-//   *** CLASS USER DEFINED TEMPERATURE FIELD Tf1 ***
-//   ************************************************
-
-
 #ifndef tf1_h
 #define tf1_h
 
@@ -46,48 +40,32 @@
 
 namespace oofem {
 /**
- * Class representing usr defined temparature field.
+ * Class representing user defined temperature field.
  * No user input. The expression is hard - coded in the class body
  * as a function of global x,y and z coordinates and time t.
  *
- * THE LOAD TIME FUNCTION is not used here, the function provided is
+ * The load time function is not used here, the function provided is
  * supposed to be function of time and coordinates.
- *
  */
 class TF1 : public StructuralTemperatureLoad
 {
-private:
 public:
-
     /**
      * Constructor. Creates temperature load function with given number, belonging to given domain.
-     * @param n load time function number
-     * @param d domain to which new object will belongs.
+     * @param n Load time function number.
+     * @param d Domain to which new object will belongs.
      */
-    TF1(int i, Domain *d) : StructuralTemperatureLoad(i, d) { }
+    TF1(int n, Domain *d) : StructuralTemperatureLoad(n, d) { }
     /// Destructor
     virtual ~TF1()  { }
 
-    // computations
-    /**
-     * Computes components values of temperature field at given point (coordinates given in Global c.s.).
-     * taking into account corresponding load time function value respecting load response mode.
-     * @param answer component values at given point and time
-     * @param stepN time step representing time
-     * @param coords gp global coordinates, which are used to evaluate components values.
-     * @param mode determines response mode.
-     */
-    virtual void         computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
-
-    /// Returns classType id of receiver.
-    classType   giveClassID() const { return UserDefinedTemperatureFieldClass; }
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "TF1"; }
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     * Must be implemented in derived classes
-     */
     IRResultType initializeFrom(InputRecord *ir);
+
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+
+    classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
+    const char *giveClassName() const { return "TF1"; }
+
 };
 } // end namespace oofem
 #endif // tf1_h

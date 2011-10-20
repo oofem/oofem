@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/l4axisymm.h,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **************************
-//   *** CLASS PLANE STRAIN ***
-//   **************************
-// 9.5.1995
-//
 #ifndef l4axisymm_h
 #define l4axisymm_h
 
@@ -48,92 +42,50 @@
 #include "spatiallocalizer.h"
 
 namespace oofem {
+
+/**
+ * This class implements an isoparametric four-node quadrilateral axisymmetric
+ * finite element. Each node has 2 degrees of freedom.
+ */
 class L4Axisymm : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
 {
-    /*
-     * This class implements an isoparametric four-node quadrilateral axisymme-
-     * tric finite element. Each node has 2 degrees of freedom.
-     *
-     * DESCRIPTION :
-     *
-     * One single additional attribute is needed for Gauss integration purpose :
-     * 'jacobianMatrix'. This 2x2 matrix contains polynomials.
-     *
-     * TASKS :
-     *
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
-
     static FEI2dQuadLin interpolation;
     int numberOfGaussPoints, numberOfFiAndShGaussPoints;
 
 public:
+    L4Axisymm(int n, Domain *d);
+    ~L4Axisymm();
 
-    L4Axisymm(int, Domain *);                    // constructor
-    ~L4Axisymm();                                // destructor
 
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    double computeVolumeAround(GaussPoint *gp);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 8; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double                computeVolumeAround(GaussPoint *);
-    void                  computeStrainVector(FloatArray &answer, GaussPoint *, TimeStep *);
-
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (point inside); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &);
-    // returns interpolation type
-    FEInterpolation *giveInterpolation() { return & interpolation; } 
 
-    //
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
+
+    FEInterpolation *giveInterpolation() { return & interpolation; }
+
+    Interface *giveInterface(InterfaceType it);
+
     // definition & identification
-    //
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
     const char *giveClassName() const { return "L4Axisymm"; }
-    classType     giveClassID() const { return L4AxisymmClass; }
+    classType giveClassID() const { return L4AxisymmClass; }
+
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
-
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
     int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    /**
-     * Returns the corresponding element to interface
-     */
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    /**
-     * Evaluates N matrix (interpolation estimated stress matrix).
-     */
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
-    //@}
-    /**
-     * @name The element interface required by SPRNodalRecoveryModelInterface
-     */
-    //@{
+
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
@@ -142,39 +94,31 @@ public:
     //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    //@}
-    /**
-     * @name The element interface required by SpatialLocalizerInterface
-     */
-    //@{
-    /// Returns reference to corresponding element
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    /// Returns nonzero if given element contains given point
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
-    //@}
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
-    void          drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void  drawScalar(oofegGraphicContext &context);
-    // void          drawInternalState (oofegGraphicContext&);
-
+    void drawRawGeometry(oofegGraphicContext &);
+    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &context);
+    //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  { return _3dMat; }
+    integrationDomain giveIntegrationDomain() { return _Square; }
+    MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void                  computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void                  computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void                  computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeGaussPoints();
 
     // edge load support
-    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double        computeEdgeVolumeAround(GaussPoint *, int);
-    void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int   computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
+    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // l4axisymm_h

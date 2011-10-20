@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/micromaterial.h,v 1.9 2009/09/20 14:08:25 vs Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ***************************
-//   *** CLASS MICROMATERIAL ***
-//   ***************************
-
 #ifndef micromaterial_h
 #define micromaterial_h
 
@@ -58,41 +52,37 @@
 #include "error.h"
 
 namespace oofem {
-/**
- * MacroLspace needs stiffness matrix derived from this microproblem. For this purpose, natural boundary conditions on microproblem have to be excluded. All DoFs have to be included. The static condensation of full microscale matrix follows.
- */
 
 class UnknownNumberingScheme;
 class MicroMaterial;
 class MacroLSpace;
 
-
 class MicroMaterialStatus : public StructuralMaterialStatus
 {
 public:
-    /// constructor
+    /// Constructor
     MicroMaterialStatus(int, Domain *d, GaussPoint *gp);
 
-    /// destructor
+    /// Destructor
     ~MicroMaterialStatus();
-    void  initTempStatus();
-    void  updateYourself(TimeStep *atTime);
-    void  printOutputAt(FILE *file, TimeStep *tStep);
+    void initTempStatus();
+    void updateYourself(TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep);
 
     const char *giveClassName() const { return "MicroMaterialStatus"; }
-    classType  giveClassID() const { return MicroMaterialStatusClass; }
+    classType giveClassID() const { return MicroMaterialStatusClass; }
 
-
-    contextIOResultType  saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-    contextIOResultType  restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-protected:
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
 /**
- * This class is a base class for microproblem. The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions. Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
+ * This class is a base class for microproblem.
+ * The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions.
+ * MacroLspace needs stiffness matrix derived from this microproblem.
+ * For this purpose, natural boundary conditions on microproblem have to be excluded.
+ * Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
  */
 class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 {
@@ -106,64 +96,59 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
 
-    //int MicroMaterial :: hasMaterialModeCapability(MaterialMode mode);
-
     const char *giveClassName() const { return "MicroMaterial"; }
-
 
     void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
 
-
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
 
     void giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, MatResponseMode rMode, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
     void setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
-    ///pointer to the underlying micro problem
+    /// Pointer to the underlying micro problem.
     EngngModel *problemMicro;
 
-    ///pointer to the macroscale domain
+    /// Pointer to the macroscale domain.
     Domain *macroDomain;
 
-    ///pointer to the macroscale element
+    /// Pointer to the macroscale element.
     MacroLSpace *macroLSpaceElement;
 
-    ///related to numbering scheme
+    /// Related to numbering scheme.
     void init(void);
     int giveDofEquationNumber(Dof *dof) const;
     virtual bool isDefault() const { return isDefaultNumbering; }
     virtual int giveRequiredNumberOfDomainEquation() const;
     //friend class EngngModel;-not here but define in EngngModel class
-    ///Array containing coordinates of 8 master nodes of microproblem
+    /// Array containing coordinates of 8 master nodes of microproblem.
     const FloatArray *microMasterCoords [ 8 ];
-    ///Array containing equation numbers for boundary nodes [DofManagerNumber][DOF]
+    /// Array containing equation numbers for boundary nodes [DofManagerNumber][DOF].
     int **microBoundaryDofs;
-    ///Array of equation numbers associated to boundary nodes
+    /// Array of equation numbers associated to boundary nodes.
     IntArray microBoundaryDofsArr;
-    ///Array containing equation numbers for internal nodes to be condensed out [DofManagerNumber][DOF]
+    /// Array containing equation numbers for internal nodes to be condensed out [DofManagerNumber][DOF].
     int **microInternalDofs;
-    ///Array of equation numbers associated to internal nodes
+    /// Array of equation numbers associated to internal nodes.
     IntArray microInternalDofsArr;
-    ///Array containing default equation numbers for all nodes [DofManagerNumber][DOF]
+    /// Array containing default equation numbers for all nodes [DofManagerNumber][DOF].
     int **microDefaultDofs;
-    ///Flag signalizing whether micromaterial is used by other element
+    /// Flag signalizing whether micromaterial is used by other element.
     bool microMatIsUsed;
 
 protected:
     bool isDefaultNumbering;
-    ///The maximum DOFs corresponding to released all of the boudary conditions
+    /// The maximum DOFs corresponding to released all of the boundary conditions.
     int maxNumberOfDomainEquation;
-    ///required number of domain equations
+    /// Required number of domain equations.
     int reqNumberOfDomainEquation;
-    ///number of DOF Managers
+    /// Number of DOF Managers.
     int NumberOfDofManagers;
     enum EquationNumbering { AllNodes, BoundaryNodes, InteriorNodes };
     EquationNumbering DofEquationNumbering;
-    ///number of equations associated with boundary nodes
+    /// Number of equations associated with boundary nodes.
     int totalBoundaryDofs;
-    ///number of equations associated with boundary nodes
+    /// Number of equations associated with boundary nodes.
     int totalInternalDofs;
 };
 } // end namespace oofem

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/macrolspace.C,v 1.9 2009/09/20 13:04:00 vs Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Vit Smilauer
+ *               Copyright (C) 1993 - 2011   Vit Smilauer
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file MACROLSPACE.CC
-
 #include "macrolspace.h"
 #include "micromaterial.h"
 #include "lspace.h"
@@ -45,7 +42,6 @@
 #include "oofem_terminate.h"
 #include "oofemtxtdatareader.h"
 #include "oofemtxtinputrecord.h"
-
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/libeam3d.h,v 1.6 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **********************
-//   *** CLASS LIBeam3d ***
-//   **********************
-
 #ifndef libeam3d_h
 #define libeam3d_h
 
@@ -44,83 +39,71 @@
 #include "fiberedcs.h"
 
 namespace oofem {
+/*
+ * This class implements a 3-dimensional mindlin theory Linear Isoparametric
+ * beam element, with reduced integration.
+ */
 class LIBeam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
-    /*
-     * This class implements a 3-dimensional mindlin theory  Linear Isoparametric
-     * beam element, with reduced integration.
-     */
 private:
     double length;
     int referenceNode;
 
-
 public:
-    LIBeam3d(int, Domain *);                       // constructor
-    ~LIBeam3d()  { }                               // destructor
+    LIBeam3d(int n, Domain *d);
+    ~LIBeam3d() { }
 
-    // FloatMatrix*  ComputeConstitutiveMatrixAt (GaussPoint*) ;
-    // FloatArray*   ComputeResultingBodyForceAt (TimeStep*) ;
-    void          computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void          computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    IRResultType initializeFrom(InputRecord *ir);
+
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    void          computeStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseMode rMode, TimeStep *tStep);
-    int           computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    int computeGtoLRotationMatrix(FloatMatrix &answer);
 
     virtual int testElementExtension(ElementExtension ext);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double        computeVolumeAround(GaussPoint *);
-    int           giveLocalCoordinateSystem(FloatMatrix &answer);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * @returns nonzero if successful
-     */
+    virtual int computeNumberOfDofs(EquationID ut) { return 12; }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    double computeVolumeAround(GaussPoint *gp);
+    int giveLocalCoordinateSystem(FloatMatrix &answer);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    //
-    // fibered cross section support functions
-    //
+    // Fibered cross section support functions
     void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, GaussPoint *masterGp,
                                                                  GaussPoint *slaveGp, TimeStep *tStep);
 
+    Interface *giveInterface(InterfaceType it);
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
-
-    //
     // definition & identification
-    //
     const char *giveClassName() const { return "LIBeam3d"; }
-    classType             giveClassID()          const { return LIBeam3dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    classType giveClassID() const { return LIBeam3dClass; }
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  { return _3dBeam; }
+    integrationDomain giveIntegrationDomain() { return _Line; }
+    MaterialMode giveMaterialMode() { return _3dBeam; }
 
 protected:
     // edge load support
-    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double        computeEdgeVolumeAround(GaussPoint *, int);
-    void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void  giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    int  computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
-    //void          computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void          computeGaussPoints();
-    double        giveLength();
+    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeGaussPoints();
+    double giveLength();
 };
 } // end namespace oofem
 #endif // libeam3d_h

@@ -1,27 +1,36 @@
 /*
  *
- *                       Author: Peter Grassl
- *                                (C) 2003-2009
- *
- *                                 NOTICE
- *
- * Permission to use, copy, modify, and distribute this software and
- * its documentation for any purpose and without fee is hereby granted
- * provided that the above copyright notice appear in all copies and
- * that both the copyright notice and this permission notice appear in
- * supporting documentation.
- *
- * Neither the Institution (Czech Technical University) nor the Authors
- *      make any representations about the suitability of this software for
- * any purpose.  This software is provided ``as is''without expressed
- *      or implied warranty.
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
  *
  *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-// file : concretedpm.C
-//   ********************************************************************
-//   *** CLASS CONCRETE PLASTICITY ISOTROPIC DAMAGE MATERIAL STATUS   ***
-//   ********************************************************************
 
 #include "concretedpm.h"
 #include "flotarry.h"
@@ -39,8 +48,6 @@
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
-
-
 
 namespace oofem {
 ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
@@ -364,7 +371,7 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
-    if ( ir->hasField(IFT_ConcreteDPM_ef, "wf") ) {    
+    if ( ir->hasField(IFT_ConcreteDPM_ef, "wf") ) {
       IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_ef, "wf");
       // fracture energy
     } else {
@@ -1908,7 +1915,7 @@ int
 ConcreteDPM :: giveIPValueSize(InternalStateType type,
                                GaussPoint *gp)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {      
+    if ( ( type == IST_PlasticStrainTensor ) ) {
       return 6;
     } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
       return 1;
@@ -1960,7 +1967,7 @@ ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
 InternalStateValueType
 ConcreteDPM :: giveIPValueType(InternalStateType type)
 {
-    if ( type == IST_PlasticStrainTensor ) {      
+    if ( type == IST_PlasticStrainTensor ) {
     return ISVT_TENSOR_S3E;
   } else if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
     return ISVT_TENSOR_S3;

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/layeredcrosssection.h,v 1.5 2003/04/14 16:01:01 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***********************************
-//   *** CLASS LAYERED CROSSSECTOION ***
-//   ***********************************
-
 #ifndef layeredcrosssection_h
 #define layeredcrosssection_h
 
@@ -57,19 +52,18 @@ class LayeredCrossSectionModelInterface;
  * section  is an attribute of a domain. It is usually also attribute of many
  * elements.
  *
- * DESCRIPTION
  * The attribute 'propertyDictionary' contains all the properties of a
  * layered cross section, like thickness and width of each layer.
- * The atribute 'layerMaterials' contains an array of Materials corresponding
+ * The attribute 'layerMaterials' contains an array of Materials corresponding
  * to each layer.
  *
- * it uses master - slave GaussPoint approach, where master gp has more slaves gp.
+ * It uses master - slave GaussPoint approach, where master gp has more slaves gp.
  * slave gp represent for each layer material point. It's coordinate sections
- * conteins z-coordinate (-1,1) from mid-section. the slaves are manageg completely
+ * contains z-coordinate (-1,1) from mid-section. the slaves are manageg completely
  * ( created, saved their context.,,,) from this class. Master gp only deletes
  * slaves in destructor.
  *
- * TASK
+ * Tasks:
  * - Returning standard material stiffness marices (like 3dstress-strain, 2d plane ,
  *   plate, 3dbeam, 2d beam ..) according to current state determined by parametr
  *   StressMode by calling gp->material->GiveMaterialStiffnessMatrix (....) and by
@@ -82,15 +76,14 @@ class LayeredCrossSectionModelInterface;
 class LayeredCrossSection : public StructuralCrossSection
 {
 protected:
-    IntArray layerMaterials; // material of each layer
-    FloatArray layerThicks; // thikness for each layer
-    FloatArray layerWidths; // width for each layer
+    IntArray layerMaterials; ///< Material of each layer.
+    FloatArray layerThicks; ///< Thickness for each layer.
+    FloatArray layerWidths; ///< Width for each layer.
     int numberOfLayers;
     double midSurfaceZcoordFromBottom, totalThick;
     double area;
 
 public:
-
     LayeredCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
     {
         numberOfLayers = 0;
@@ -98,24 +91,23 @@ public:
         area = -1.0;
     }
 
-    ~LayeredCrossSection()  { }
+    ~LayeredCrossSection() { }
 
-    void giveRealStresses(FloatArray & answer, MatResponseForm, GaussPoint *,
-                          const FloatArray &, TimeStep * tStep);
+    IRResultType initializeFrom(InputRecord *ir);
 
-    // updates gp - record
-    // stressMode is stored in gp
+    void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                          const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseMode rMode,
-                                         GaussPoint *,
+                                         MatResponseMode mode,
+                                         GaussPoint *gp,
                                          TimeStep *tStep);
-    // next function is intendet to be used if we would like to obtain
+
+    // next function is intended to be used if we would like to obtain
     // char matrix form different material which is not associated with gp and its element.
     // (mainly for obtaining linear elastic matrix)
     // stress-strain mode is taken from gp.
     // NORMALLY - PLEASE USE GiveCharMaterialStiffnessMatrix function
-    //
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                                    MatResponseForm form, MatResponseMode rMode,
                                                    GaussPoint *, StructuralMaterial *,
@@ -123,86 +115,52 @@ public:
 
 
 
-    void    giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
-                                            const FloatArray &charVector3d);
-    void    giveFullCharacteristicVector(FloatArray &answer,
-                                         GaussPoint *, const FloatArray &);
-    FloatArray *imposeStressConstrainsOnGradient(GaussPoint *, FloatArray *);
-    FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *, FloatArray *);
+    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
+                                         const FloatArray &charVector3d);
+    void giveFullCharacteristicVector(FloatArray &answer,
+                                      GaussPoint *gp, const FloatArray &strainVector);
+
+    FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
+    FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
+
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                       MaterialMode mmode, StructuralMaterial *mat) const;
     virtual void giveLayerMaterialStiffnessMatrix(FloatMatrix &layerMatrix, MatResponseForm FullForm,
                                                   MatResponseMode rMode, GaussPoint *layerGp,
                                                   TimeStep *tStep);
 
-    /**
-     * Computes strain vector not dependent on sresses in given integration point. Returned vector is
-     * generated by temperature or shrinkage effects, for example.
-     * The load mode (Incremental or Total Load form) passed as parameter is taken into account.
-     * Depend on load form, tre resulting strain is total strain or its increment from previous
-     * step. Overloaded to support beams, paltes and shells.
-     * @param answer stress independent strain vector
-     * @param gp integration point
-     * @param mode determines load mode
-     * @param stepN time step (most models are able to respond only when atTime is current time step)
-     * @param mode determines the response mode.
-     */
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
+                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    /// @see CrossSection :: give
-    double   give(CrossSectionProperty a);
+    double give(CrossSectionProperty a);
+
+    /// Returns the total thickness of all layers.
+    double computeIntegralThick();
 
     // identification and auxiliary functions
     const char *giveClassName() const { return "LayeredCrossSection"; }
-    classType giveClassID()         const { return LayeredCrossSectionClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    void     printYourself();
-    /// Returns the total thickness of all layers.
-    double   computeIntegralThick();
+    classType giveClassID() const { return LayeredCrossSectionClass; }
+    void printYourself();
+
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
-    GaussPoint *giveSlaveGaussPoint(GaussPoint *, int);
+    GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex);
 
-
-    // store & restore context functions
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __PARALLEL_MODE
-    /**
-     * Pack all necessary data of integration point (according to element parallel_mode)
-     * into given communication buffer. The corresponding material model service for particular integration point
-     * is invoked. The nature of packed data is material model dependent.
-     * Typically, for material of "local" response (response depeneds only on integration point local state)
-     * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
-     * undergo averaging is performed between local and corressponding remote elements.
-     * @param buff communication buffer
-     * @param stepN solution step
-     * @param ip integration point
-     */
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {
         _error("packUnknowns: not implemented");
         return 0;
     }
-    /**
-     * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
-     * into given communication buffer.
-     * @see packUnknowns service.
-     * @param buff communication buffer
-     * @param stepN solution step.
-     * @param ip integration point
-     */
+
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     {
         _error("unpackAndUpdateUnknowns: not implemented");
         return 0;
     }
-    /**
-     * Estimates the necessary pack size to hold all packed data of receiver.
-     * The corresponding material model  service is invoked. The
-     * nature of packed data is typically material model dependent.
-     */
+
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     {
         _error("estimatePackSize: not implemented");
@@ -213,39 +171,38 @@ public:
 protected:
     virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                                MatResponseForm form,
-                                               MatResponseMode rMode,
+                                               MatResponseMode mode,
                                                GaussPoint *gp,
                                                StructuralMaterial *mat,
                                                TimeStep *tStep);
     void giveDerivedMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseForm form,
-                                            MatResponseMode rMode,
+                                            MatResponseMode mode,
                                             GaussPoint *, StructuralMaterial *mat,
                                             TimeStep *tStep);
 
     void give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseForm form,
-                                            MatResponseMode rMode,
+                                            MatResponseMode mode,
                                             GaussPoint *gp,
                                             StructuralMaterial *mat,
                                             TimeStep *tStep);
     void give3dShellMaterialStiffness(FloatMatrix &answer,
                                       MatResponseForm form,
-                                      MatResponseMode rMode,
+                                      MatResponseMode mode,
                                       GaussPoint *gp,
                                       StructuralMaterial *mat,
                                       TimeStep *tStep);
     void give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
-                                           MatResponseMode rMode,
+                                           MatResponseMode mode,
                                            GaussPoint *gp,
                                            StructuralMaterial *mat,
                                            TimeStep *tStep);
 
     FloatArray *GiveIntegrated3dShellStress(GaussPoint *gp);
-    double       giveArea();
 
-
+    double giveArea();
 
     friend class Material;
 };
@@ -258,16 +215,15 @@ class LayeredCrossSectionInterface : public Interface
 public:
     LayeredCrossSectionInterface() { }
 
-
     /**
-     * Computes full 3d strain vector in element layer. This function is necesary
+     * Computes full 3D strain vector in element layer. This function is necessary
      * if layered cross section is specified. If it is implemented, the testElementExtension
-     * servise should return nonzero for Element_LayeredSupport parameter. This service is used by
+     * service should return nonzero for Element_LayeredSupport parameter. This service is used by
      * layered cross section models.
-     * @param answer full layer starin vector
-     * @param masterGp element integration point
-     * @param slaveGp slave integration point representing particular layer
-     * @tStep time step
+     * @param answer Full layer strain vector.
+     * @param masterGp Element integration point.
+     * @param slaveGp Slave integration point representing particular layer.
+     * @param tStep Time step.
      */
     virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                             GaussPoint *slaveGp, TimeStep *tStep) = 0;

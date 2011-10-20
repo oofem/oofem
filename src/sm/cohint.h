@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *************************************************************************
-//   *** CLASS COHESIVE INTERFACE FOR THE COHESIVE PARTICLE MODEL ************
-//   *************************************************************************
-
 #ifndef cohint_h
 #define cohint_h
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/m4.h,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//*************************************************************************
-//*** ABSTRACT CLASS MICROPLANE MATERIAL ACCORDING TO BAZANTS APPROACH ***
-//*************************************************************************
-
 #ifndef m4_h
 #define m4_h
 
@@ -52,37 +47,19 @@ namespace oofem {
 
 class M4MaterialStatus : public StructuralMaterialStatus
 {
-protected:
-    // add history variables declaration here
-
-
-
 public:
     M4MaterialStatus(int n, Domain *d, GaussPoint *g);
     ~M4MaterialStatus();
 
-    // add declaration of access and update functions for history variables
-
     // definition
-    /// Returns class name of receiver
     const char *giveClassName() const { return "M4MaterialStatus"; }
-    /// Returns class ID of receiver
-    classType             giveClassID() const { return M4MaterialStatusClass; }
+    classType giveClassID() const { return M4MaterialStatusClass; }
 
-    /**
-     * Initializes temporary history variables of receiver to previous equilibrium values.
-     */
     virtual void initTempStatus();
-    /**
-     * Updates history variables after new equilibrium state has been reached.
-     * (e.g. temporary variables are copied into equilibrium values
-     */
-    virtual void updateYourself(TimeStep *);
+    virtual void updateYourself(TimeStep *tStep);
 
-    /// Stores receiver's state to stream
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /// Restores receiver's state from stream
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -101,51 +78,25 @@ protected:
     double talpha;
 
 public:
-
     /**
      * Constructor. Creates  Bazant's Boundary Curve Microplane Material belonging
      * to domain d, with number n.
-     * @param n material number
-     * @param d domain to which newly created material belongs
+     * @param n Material number.
+     * @param d Domain to which newly created material belongs.
      */
     M4Material(int n, Domain *d);
     /// Destructor.
     ~M4Material() { }
 
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+                                          MatResponseForm form,
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
-    /**
-     * Computes characteristic matrix of receiver.
-     */
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
-    /**
-     * Returns a vector of coefficients of thermal dilatation in direction
-     * of each material principal (local) axis.
-     * @param answer vector of thermal dilatation coefficients
-     * @param gp integration point
-     * @param tStep time step (most models are able to respond only when atTime is current time step)
-     */
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    /**
-     * Computes real stress vector (the meaning of  values depends on particular implementaion,
-     * e.g, can contain volumetric, devatoric normal srtresses and shear streses on microplane)
-     * for given increment of microplane strains.
-     * @param answer computed result
-     * @param mplane pointer to microplane object, for which response is computed
-     * @param strain strain vector
-     * @param tStep time step
-     */
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane, const FloatArray &strain, TimeStep *tStep);
-
-    /**
-     * Tests, if material supports material mode.
-     * @param mode required material mode
-     * @return nonzero if supported, zero otherwise
-     */
 
     double macbra(double x);
     double FVplus(double ev, double k1, double c13, double c14, double c15, double Ev);
@@ -162,15 +113,11 @@ public:
     virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    /// Instanciates receiver from input record.
     IRResultType initializeFrom(InputRecord *ir);
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "M4Material"; }
-    /// Returns classType id of receiver.
-    classType giveClassID()         const { return M4MaterialClass; }
+    classType giveClassID() const { return M4MaterialClass; }
 
 protected:
-
     MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) { return new M4MaterialStatus(1, domain, gp); }
 };
 } // end namespace oofem

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/libeam3d2.C,v 1.6 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file libeam3d2.cc
 
 #include "libeam3d2.h"
 #include "node.h"
@@ -475,7 +472,7 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     ;
 }
 
-void 
+void
 LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
@@ -626,7 +623,8 @@ LIBeam3d2 :: updateRotationMatrix()
 
 
 void
-LIBeam3d2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
+LIBeam3d2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+{
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
 
@@ -656,7 +654,8 @@ LIBeam3d2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
 
 
 void
-LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec) {
+LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
+{
     if ( vec.giveSize() != 3 ) {
         _error("computeSMtrx: vec param size mismatch");
     }

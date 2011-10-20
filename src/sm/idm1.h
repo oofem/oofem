@@ -142,7 +142,7 @@ protected:
 
     /// Remporary parameter reading type of softening law, used in other isotropic damage material models.
     int damageLaw;
-    
+
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
     *   with fracturing strain or crack opening.
     */
@@ -197,7 +197,7 @@ public:
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
-     * @param[out] kappa Return param, comtaining the corresponding equivalent strain.
+     * @param[out] kappa Return param, containing the corresponding equivalent strain.
      * @param strain Total strain vector in full form.
      * @param gp Integration point.
      * @param tStep Time step.
@@ -208,6 +208,7 @@ public:
      * based on a given value of equivalent strain
      * @param[out] omega Contains the resulting damage.
      * @param kappa Equivalent strain measure.
+     * @param strain Strain vector.
      * @param gp Integration point.
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);

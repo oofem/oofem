@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/macrolspace.h,v 1.9 2009/09/20 13:04:00 vs Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ***************************************
-//   *** Macro Linear Hexahedral element ***
-//   ***************************************
-
 #ifndef macrolspace_h
 #define macrolspace_h
 
@@ -54,15 +48,15 @@
 namespace oofem {
 class MicroMaterial;
 
+/**
+ * This class implements a macroelement. It is derived from eight-node brick element.
+ * The stiffness matrix is computed from underlying RVE and is condensed to 24 DoFs to corner nodes.
+ */
 class MacroLSpace : public LSpace
 {
-    /*
-     * This class implements a macroelement. It is derived from eight-node brick element. The stiffness matrix is computed from underlying RVE and is condensed to 24 DoFs to corner nodes.
-     */
-
 public:
-    MacroLSpace(int, Domain *);                   // constructor
-    ~MacroLSpace();                               // destructor
+    MacroLSpace(int n, Domain *d);
+    ~MacroLSpace();
 
     const char *giveClassName() const { return "MacroLSpace"; }
 
@@ -70,29 +64,23 @@ public:
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
-    ///related to setting the boundary conditions of micro problem
+    /// Related to setting the boundary conditions of micro problem.
     virtual void changeMicroBoundaryConditions(TimeStep *tStep);
 
-    /**
-     * Evaluates nodal representation of real internal forces obtained from microProblem
-     * @param answer equivalent nodal forces vector
-     * @param tStep time step
-     * @param useUpdatedGpRecord if equal to zero, the stresses in integration points are computed (slow but safe), else if
-     */
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
     /**
-     * Evaluates shape function at a given pointnodal representation of real internal forces obtained from microProblem
-     * @param answer array of shape function values at given node
-     * @param coords coordinates of nodes defining the interpolation geometry
-     * @param gcoords global coordinates of point of interest
+     * Evaluates shape function at a given pointnodal representation of real internal forces obtained from microProblem.
+     * @param answer Array of shape function values at given node.
+     * @param coords Coordinates of nodes defining the interpolation geometry.
+     * @param gcoords Global coordinates of point of interest.
      */
     virtual void evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords);
 
     virtual void updateYourself(TimeStep *tStep);
 
 protected:
-    ///Array containing the node mapping from microscale (which microMasterNodes corresponds to which macroNode)
+    /// Array containing the node mapping from microscale (which microMasterNodes corresponds to which macroNode)
     IntArray microMasterNodes;
     IntArray microBoundaryNodes;
     IntArray microDOFs;
@@ -100,16 +88,16 @@ protected:
     MicroMaterial *microMaterial;
     Domain *microDomain;
     EngngModel *microEngngModel;
-    ///Information of iteration number
+    /// Information of iteration number.
     int iteration;
-    ///stores node number on the boundary in the triplets
+    /// Stores node number on the boundary in the triplets.
     IntArray microBoundaryDofManager;
     FloatMatrix stiffMatrix;
-    ///process with external file for the storage of stiffness matrix 0-None, 1-read, 2-write
+    /// Process with external file for the storage of stiffness matrix 0-None, 1-read, 2-write.
     int stiffMatrxFileNoneReadingWriting;
-    ///Array containg the force vector from nodes (if condensation is skipped, use this vector)
+    /// Array containg the force vector from nodes (if condensation is skipped, use this vector).
     FloatArray internalMacroForcesVector;
-    ///last time step when stiffness matrix was assembled
+    /// Last time step when stiffness matrix was assembled.
     TimeStep *lastStiffMatrixTimeStep;
 };
 } // end namespace oofem

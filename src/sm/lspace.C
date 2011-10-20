@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/lspace.C,v 1.8.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file LSPACE.CC
 
 #include "lspace.h"
 #include "node.h"
@@ -64,8 +61,8 @@ namespace oofem {
 FEI3dHexaLin LSpace :: interpolation;
 
 LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
-    , EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
+    EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -291,7 +288,8 @@ LSpace :: initializeFrom(InputRecord *ir)
 }
 
 void
-LSpace ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+LSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -1151,7 +1149,7 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-LSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LSpace :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this), 0.0);
@@ -1160,7 +1158,7 @@ LSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 
 
 void
-LSpace ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+LSpace :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }

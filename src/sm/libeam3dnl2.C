@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/libeam3dnl2.C,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file libeam3dnl2.cc
 
 #include "libeam3dnl2.h"
 #include "node.h"
@@ -89,7 +86,8 @@ LIBeam3dNL2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec) {
 }
 
 void
-LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
+LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+{
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
 
@@ -117,7 +115,8 @@ LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
 }
 
 void
-LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep) {
+LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
+{
     // test if not previously updated temporary quaternion
     if ( tStep->giveSolutionStateCounter() != tempQCounter ) {
         // update temporary quaternion
@@ -161,7 +160,8 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep) {
 
 
 void
-LIBeam3dNL2 :: computeRotMtrxFromQuaternion(FloatMatrix &answer, FloatArray &q) {
+LIBeam3dNL2 :: computeRotMtrxFromQuaternion(FloatMatrix &answer, FloatArray &q)
+{
     answer.resize(3, 3);
 
     answer.at(1, 1) = q.at(4) * q.at(4) + q.at(1) * q.at(1) - 0.5;
@@ -180,7 +180,8 @@ LIBeam3dNL2 :: computeRotMtrxFromQuaternion(FloatMatrix &answer, FloatArray &q) 
 }
 
 void
-LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R) {
+LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R)
+{
     // Spurrier's algorithm
 
     int i, ii;
@@ -228,7 +229,8 @@ LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R) 
 
 
 void
-LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) {
+LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
     FloatArray ui(3), xd(3), eps(3), curv(3), ac(3);
     FloatMatrix sc(3, 3), tmid(3, 3), tempTc;
     IntArray mask(1);
@@ -257,7 +259,8 @@ LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep 
 }
 
 void
-LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep) {
+LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
+{
     int i, j;
     FloatArray xd(3);
     FloatMatrix s(3, 3);
@@ -281,8 +284,8 @@ LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep) {
 }
 
 void
-LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer,
-                                        TimeStep *tStep, int useUpdatedGpRecord) {
+LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
     int i, j, GNTflag;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -327,7 +330,8 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer,
 
 
 void
-LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep) {
+LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep)
+{
     FloatArray u(3);
 
     answer.resize(3);
@@ -345,13 +349,11 @@ LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep) {
                    ( this->giveNode(1)->giveCoordinate(2) + u.at(2) );
     answer.at(3) = ( this->giveNode(2)->giveCoordinate(3) + u.at(9) ) -
                    ( this->giveNode(1)->giveCoordinate(3) + u.at(3) );
-
-    return;
 }
 
 void
-LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode rMode, TimeStep *tStep) {
+LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
     int i, j, k;
     double s1, s2;
     FloatMatrix d, x, xt(12, 6), dxt, xtt, sn, sm, sxd, y, tempTc;
@@ -577,7 +579,8 @@ LIBeam3dNL2 :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam3dNL2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+LIBeam3dNL2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -805,7 +808,7 @@ LIBeam3dNL2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Ga
 
 
 
-void 
+void
 LIBeam3dNL2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
