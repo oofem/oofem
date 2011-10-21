@@ -1,4 +1,3 @@
-/* $Header$ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   ******************************************
-//   *** CLASS Rivara Subdivision algorithm ***
-//   ******************************************
 
 #ifndef subdivision_h
 #define subdivision_h
@@ -78,7 +73,7 @@ protected:
     class RS_Mesh;
     class RS_Node
     {
-protected:
+    protected:
         FloatArray coords;
         double requiredDensity;
         int number;
@@ -100,7 +95,7 @@ protected:
          */
         IntArray partitions;
 #endif
-public:
+    public:
         RS_Node(int n, Subdivision :: RS_Mesh *m, int parent, FloatArray &c, double rd, bool boundary) {
             this->number = n;
             this->mesh = m;
@@ -146,9 +141,9 @@ public:
 
     class RS_IrregularNode : public RS_Node
     {
-protected:
+    protected:
         int iNode, jNode; // parent edge nodes
-public:
+    public:
         RS_IrregularNode(int n, Subdivision :: RS_Mesh *mesh, int parent, FloatArray &c, double rd, bool boundary) : RS_Node(n, mesh, parent, c, rd, boundary) {}
         void setEdgeNodes(int i, int j) { iNode = i;
                                           jNode = j; }
@@ -159,7 +154,7 @@ public:
 
     class RS_Element
     {
-protected:
+    protected:
         int number;
         // element regular nodes
         IntArray nodes;
@@ -183,7 +178,7 @@ protected:
         // numbers of shared edges
         IntArray shared_edges;
 #endif
-public:
+    public:
         RS_Element(int number, Subdivision :: RS_Mesh *m, int parent, IntArray &nodes) {
             this->number = number;
             this->nodes = nodes;

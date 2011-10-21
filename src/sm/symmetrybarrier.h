@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/Attic/symmetrybarrier.h,v 1.1.2.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// class PolylineNonlocalBarrier
-//
 #ifndef symmetrybarrier_h
 #define symmetrybarrier_h
 
@@ -48,11 +43,10 @@
 
 namespace oofem {
 /**
- * Implementation of symmetry nonlocal barier.
+ * Implementation of symmetry nonlocal barrier.
  * It allows to specify up to three planes (orthogonal ones) of symmetry
  * It then modifies the integration weights of source points to take into account
  * symmetry of the averaged field.
- * @see NonlocalBarrier class.
  */
 class SymmetryBarrier : public NonlocalBarrier
 {
@@ -66,36 +60,19 @@ public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
      * @param n Element's number
-     * @param aDomain Pointer to the domain to which element belongs.
+     * @param d Pointer to the domain to which element belongs.
      */
-    SymmetryBarrier(int n, Domain *aDomain);  // constructors
-    /// Virtual destructor.
-    virtual ~SymmetryBarrier();                // destructor
+    SymmetryBarrier(int n, Domain *d);
+    /// Destructor.
+    virtual ~SymmetryBarrier();
 
-    /**
-     * Abstract method modifying the integration weight between master (c1) and source (c2) point.
-     * @param c1 coordinates of master point
-     * @param c2 coordinates of source point
-     * @param weight original integration weight; on output modified weight
-     * @param shieldFlag (output param; set to true if shielding is activated)
-     */
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, NonlocalMaterialExtensionInterface *nei);
-    /** Initializes receiver acording to object description stored in input record.
-     * This function is called immediately after creating object using
-     * constructor. Input record can be imagined as data record in component database
-     * belonging to receiver. Receiver may use value-name extracting functions
-     * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
+
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "SymmetryBarrier"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return NonlocalBarrierClass; }
+    classType giveClassID() const { return NonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // symmetrybarrier_h

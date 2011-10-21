@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/steel1.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************************************************
-//   *** CLASS STEEL1 - Lineary elastic - perfectly plastic Hook  Material
-//   *********************************************************************
-
 #ifndef steel1_h
 #define steel1_h
 
@@ -45,35 +40,20 @@
 
 namespace oofem {
 class Domain;
-
+/**
+ * This class implements a isotropic perfectly plastic linear material in a finite
+ * element problem.
+ */
 class Steel1 : public PerfectlyPlasticMaterial
 {
-    /*
-     * This class implements a isotropic perfectly plastic linear material in a finite
-     * element problem. A material
-     * is an attribute of a domain. It is usually also attribute of many elements.
-     *
-     * DESCRIPTION
-     * ISOTROPIC PERFECTLY PLASTIC Material with HMH plastic condition
-     *
-     * TASK
-     * - Returning standard material stiffness marix for 3d-case.
-     * according to current state determined by using data stored
-     * in Gausspoint.
-     * - Returning a material property (method 'give'). Only for non-standard elements.
-     * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     */
-
-protected:
 public:
-
     Steel1(int n, Domain *d);
     ~Steel1() { }
 
     IRResultType initializeFrom(InputRecord *ir);
     const char *giveClassName() const { return "Steel1MaterialClass"; }
-    classType giveClassID()         const { return Steel1MaterialClass; }
-    void  updateIfFailure(GaussPoint *, FloatArray *, FloatArray *) { }
+    classType giveClassID() const { return Steel1MaterialClass; }
+    void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) { }
 protected:
 
     //
@@ -90,7 +70,7 @@ protected:
     // update during computation
 
     // auxiliary function
-    double      computeJ2InvariantAt(FloatArray *);
+    double computeJ2InvariantAt(FloatArray *);
 };
 } // end namespace oofem
 #endif // steel1_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/targe2interface.h,v 1.3 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ******************************
-//   *** CLASS TARGE2 INTERFACE ***
-//   ******************************
-
 #ifndef targe2interface_h
 #define targe2interface_h
 
@@ -47,9 +42,9 @@ class TimeStep;
 
 /**
  * This class represents the interface to Targe2 mesh generation package.
- * This interface is primarly responsible for two main tasks:
- * - to create input mesher file, containing all informations including the mesh density informations
- * based on informations from remeshing criteria.
+ * This interface is primarily responsible for two main tasks:
+ * - to create input mesher file, containing all information including the mesh density information
+ *   based on information from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input (using targe2oofem)
  */
 class Targe2Interface : public MesherInterface
@@ -60,9 +55,7 @@ public:
     /// Destructor
     virtual ~Targe2Interface() { }
 
-    /// Runs the mesh generation, mesh will be written to corresponding domain din file
     virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
-
 
 protected:
     /// Creates the mesher input, containing the required mesh density informations.

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,13 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* Author: L. Svoboda */
-
-//   ************************
-//   *** CLASS TR01_SHELL ***
-//   ************************
-//   1.6.2010
-
 #ifndef tr_shell01_h
 #define tr_shell01_h
 
@@ -48,26 +40,25 @@
 #include "cct3d.h"
 #include "trplanrot3d.h"
 
-
 namespace oofem {
+
+/**
+ * This class implements an triangular three-node shell finite element, composed of
+ * cct3d and trplanrot3d elements.
+ * Each node has 6 degrees of freedom.
+ * @author L. Svoboda
+ */
 class TR_SHELL01 : public StructuralElement
 {
-    /*
-     * This class implements an triangular three-node shell finite element, composed of
-     * cct3d and trplanrot3d elements.
-     * Each node has 6 degrees of freedom.
-     *
-     */
-
 protected:
-    /// Pointer to plate element
+    /// Pointer to plate element.
     CCTPlate3d *plate;
-    /// pointer to membrane (plane stress) element
+    /// Pointer to membrane (plane stress) element.
     TrPlaneStrRot3d *membrane;
 
 public:
     /// Constructor
-    TR_SHELL01(int, Domain *);
+    TR_SHELL01(int n, Domain *d);
     /// Destructor
     ~TR_SHELL01() {
         delete plate;
@@ -78,34 +69,27 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { plate->giveDofManDofIDMask(inode, ut, answer); }
 
-    //
-    //// definition & identification
-    //
+    // definition & identification
     const char *giveClassName() const { return "TR_SHELL01"; }
-    classType   giveClassID()   const { return TR_SHELL01Class; }
+    classType giveClassID() const { return TR_SHELL01Class; }
     IRResultType initializeFrom(InputRecord *ir);
 
     void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
 
     void updateYourself(TimeStep *tStep);
-    void updateInternalState(TimeStep *stepN);
+    void updateInternalState(TimeStep *tStep);
     void printOutputAt(FILE *file, TimeStep *tStep);
 
-    //
-    // io routines
-    //
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
-    void          drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    //virtual void  drawScalar(oofegGraphicContext &context);
-    //void          drawInternalState (oofegGraphicContext&);
+    void drawRawGeometry(oofegGraphicContext &);
+    void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
+    //virtual void drawScalar(oofegGraphicContext &context);
+    //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    integrationDomain giveIntegrationDomain()
-    { return _Triangle; }
-    MaterialMode          giveMaterialMode()
-    { return _Unknown; }
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    MaterialMode giveMaterialMode() { return _Unknown; }
 
 protected:
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
@@ -113,8 +97,7 @@ protected:
     void computeNmatrixAt(GaussPoint *, FloatMatrix &)
     { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
 
-
-    /// casem smazat
+    /// @todo In time delete
 protected:
     void computeGaussPoints()
     { _error("TR_SHELL01 :: computeGaussPoints: calling of this function is not allowed"); }

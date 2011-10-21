@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/t3dinterface.h,v 1.3.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,25 +32,21 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***************************
-//   *** CLASS T3D INTERFACE ***
-//   ***************************
-
 #ifndef t3dinterface_h
 #define t3dinterface_h
 
 #include "mesherinterface.h"
 
 namespace oofem {
-#define BMF_FILENAME    "t3d.bmf"
+#define BMF_FILENAME "t3d.bmf"
 
 class TimeStep;
 
 /**
  * This class represents the interface to t3d mesh generation package.
- * This interface is primarly responsible for two main tasks:
- * - to create input mesher file, containing all informations including the mesh density informations
- * based on informations from remeshing criteria.
+ * This interface is primarily responsible for two main tasks:
+ * - to create input mesher file, containing all information including the mesh density information
+ *   based on information from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input (using t3d2oofem)
  */
 class T3DInterface : public MesherInterface
@@ -62,12 +57,10 @@ public:
     /// Destructor
     virtual ~T3DInterface() { }
 
-    /// Runs the mesh generation, mesh will be written to corresponding domain din file
     virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
 
-
 protected:
-    /// Creates the mesher input, containing the required mesh density informations.
+    /// Creates the mesher input, containing the required mesh density information.
     int createInput(Domain *d, TimeStep *stepN);
 };
 } // end namespace oofem
