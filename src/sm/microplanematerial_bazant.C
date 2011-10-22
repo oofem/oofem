@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/microplanematerial_bazant.C,v 1.2 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-// file: MicroplaneMaterial_Bazant.C
-
 
 #include "microplanematerial_bazant.h"
 #include "gausspnt.h"
@@ -159,6 +155,5 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer, MatRespons
     // stressIncrement.subtract (status -> giveStressVector());
     // status -> letStressIncrementVectorBe (stressIncrement);
     status->letTempStressVectorBe(answer);
-    return;
 }
 } // end namespace oofem

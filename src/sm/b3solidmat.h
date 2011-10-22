@@ -110,7 +110,7 @@ public:
     void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                           GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     const char *giveClassName() const { return "B3SolidMaterial"; }
     classType giveClassID() const { return B3SolidMaterialClass; }
@@ -121,31 +121,29 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    /** if only incremental shrinkage strain formulation is provided, then total shrinkage strain must be tracked
-     * in status in order to be able to compute total value. */
     virtual int hasIncrementalShrinkageFormulation() { return 1; }
 
     void computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                                  GaussPoint *gp, TimeStep *atTime);
+                                                  GaussPoint *gp, TimeStep *tStep);
 
     /// Evaluation of the shrinkageStrainVector. Shrinkage is fully dependent on humidity rate in given GP
     void computePointShrinkageStrainVectorMPS(FloatArray &answer, MatResponseForm form,
-                                              GaussPoint *gp, TimeStep *atTime);
+                                              GaussPoint *gp, TimeStep *tStep);
 
     void computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
-                                      GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
     double computeNonAgingCreepFunction(GaussPoint *gp, double loadDuration);
 
     /// Evaluation of the relative volume of the solidified material.
-    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime);
+    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep);
 
     /// Evaluation of the flow term viscosity.
-    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime);
+    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
+    virtual double computeCreepFunction(GaussPoint *gp, double tStep, double ofAge);
 
     double inverse_sorption_isotherm(double w);
 
@@ -154,26 +152,28 @@ protected:
 
     virtual void computeCharTimes();
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                        GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     /**
      * Computes microprestress at given time step and GP.
+     * @param gp Gauss point to compute at.
+     * @param tStep Time step to compute for.
      * @param option If 0, microprestress is evaluated in the middle of the time step (used for stiffnesses).
      * If 1, MPS is evaluated at the end of the time step. (Used for updating).
      */
-    double computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int option);
+    double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option);
 
     /// Computes initial value of the MicroPrestress
     double giveInitMicroPrestress(void);
 
     /// Computes relative humidity at given time step and GP
-    double giveHumidity(GaussPoint *gp, TimeStep *atTime);
+    double giveHumidity(GaussPoint *gp, TimeStep *tStep);
 
     /// Computes relative humidity increment at given time step and GP
-    double giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime);
+    double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);
 };
 
 } // end namespace oofem

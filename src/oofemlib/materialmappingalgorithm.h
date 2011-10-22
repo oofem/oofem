@@ -78,8 +78,6 @@ class GaussPoint;
  */
 class MaterialMappingAlgorithm
 {
-protected:
-
 public:
     /// Constructor.
     MaterialMappingAlgorithm() { }
@@ -114,6 +112,7 @@ public:
      * Typically some mappers require to compute some global mesh data related to
      * current step, which are valid for all IPs - so they are computed only once for
      * all IPs.
+     * @param tStep Time step.
      */
     virtual void finish(TimeStep *tStep) = 0;
     /**

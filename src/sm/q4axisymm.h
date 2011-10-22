@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/q4axisymm.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,70 +32,51 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************
-//   *** CLASS QUADRATIC PLANE STRAIN ***
-//   ************************************
-//
 #ifndef q4axisymm_h
 #define q4axisymm_h
 
 #include "structuralelement.h"
 
 namespace oofem {
+
+/**
+ * This class implements an Quadratic isoparametric eight-node quadrilateral -
+ * elasticity finite element for axisimmetric 3d continuum.
+ * Each node has 2 degrees of freedom.
+ * @todo Use FEI classes.
+ */
 class Q4Axisymm : public StructuralElement
 {
-    /*
-     * This class implements an Quadratic isoparametric eight-node quadrilateral -
-     *  elasticity finite element for axisimmetric 3d continuum.
-     * Each node has 2 degrees of freedom.
-     *
-     * DESCRIPTION :
-     *
-     * One single additional attribute is needed for Gauss integration purpose :
-     * 'jacobianMatrix'. This 2x2 matrix contains polynomials.
-     *
-     * TASKS :
-     *
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
-
     int numberOfGaussPoints, numberOfFiAndShGaussPoints;
 
 public:
+    Q4Axisymm(int n, Domain *d);
+    ~Q4Axisymm();
 
-    Q4Axisymm(int, Domain *); // constructor
-    ~Q4Axisymm();             // destructor
-
-
-    virtual int            computeNumberOfDofs(EquationID ut) { return 16; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 16; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double          computeVolumeAround(GaussPoint *);
-    void             computeStrainVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    double computeVolumeAround(GaussPoint *gp);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    //
+
     // definition & identification
-    //
     Interface *giveInterface(InterfaceType) { return NULL; }
     const char *giveClassName() const { return "Q4axisymm"; }
-    classType       giveClassID()   const { return Q4AxisymmClass; }
+    classType giveClassID() const { return Q4AxisymmClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  { return _3dMat; }
+    integrationDomain giveIntegrationDomain() { return _Square; }
+    MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void             computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void            computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void            computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeGaussPoints();
 
     FloatArray *GiveDerivativeKsi(double, double);
     FloatArray *GiveDerivativeEta(double, double);
-    void             computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *);
-    // FloatMatrix*    ComputeConstitutiveMatrixAt (GaussPoint*);
-    //
+    void computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // q4axisymm_h

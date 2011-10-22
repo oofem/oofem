@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/nldeidynamic.h,v 1.5.4.1 2004/05/14 13:45:45 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -52,37 +51,31 @@
 namespace oofem {
 #define LOCAL_ZERO_MASS_REPLACEMENT 1
 
+/**
+ * This class implements NonLinear (- may be changed) solution of dynamic
+ * problems using Direct Explicit Integration scheme - Central Difference
+ * Method. For efficiency reasons it uses diagonal mass matrix. It is formulated
+ * in increments of displacements rather than in total variables.
+ *
+ * Description:
+ * Solution of this problem is series of loading cases, maintained as sequence of
+ * time-steps. For obtaining diagonal mass matrix from possibly non-diagonal one
+ * returned from Element::giveMassMatrix() a FloatMatrix::Lumped() is called
+ * to obtain diagonal form.
+ *
+ * We start assemble governing equations at time step 0 ( 0 given by boundary and initial cond.)
+ * they result in response at time step 1.
+ * for time step 0 we need special start code.
+ * so we obtain solution for time step 1 and next.
+ * because this method is explicit, when solving equations for step t, we obtain
+ * solution in step t+dt. But printing is performed for step t.
+ * see diidynamic.h for difference.
+ * So, when You specify initial conditions, you specify them in time step 0.
+ *
+ * WARNING - FloatMatrix::Lumped() works only for elements with Linear displacement filed !
+ */
 class NlDEIDynamic : public StructuralEngngModel
 {
-    /*
-     * This class implements NonLinear (- may be changed) solution of dynamic
-     * problems using Direct Explicit Integration scheme - Central Difference
-     * Method. For efficiency reasons it uses diagonal mass matrix. It is formulated
-     * in increments of displacements rather than in total variables.
-     *
-     * DESCRIPTION:
-     * Solution of this problem is series of loading cases, maintained as sequence of
-     * time-steps. For obtaining diagonal mass matrix from possibly non-diagonal one
-     * returned from Element::giveMassMatrix() a FloatMatrix::Lumped() is called
-     * to obtain diagonal form.
-     *
-     * we start assemble governing equations at time step 0 ( 0 given by boundary and initial cond.)
-     * they result in response at time step 1.
-     * for time step 0 we need special start code.
-     * so we obtain solution for time step 1 and next.
-     * because this method is explicit, when solving equations for step t, we obtain
-     * solution in step t+dt. But printing is performed for step t.
-     * see diidynamic.h for difference.
-     * So, when You specify initial conditions, you specify them in time step 0.
-     *
-     * WARNING - FloatMatrix::Lumped() works only for elements with Linear displacement filed !
-     *
-     * TASK:
-     * Creating Numerical method for solving Ax=b
-     * Interfacing Numerical method to Elements
-     * Managing time  steps
-     */
-
 protected:
     FloatArray massMatrix;
     FloatArray loadVector;
@@ -93,18 +86,18 @@ protected:
     /// Flag indicating the need for initialization
     int initFlag;
 
-    // dynamic relaxation specifiv vars
-    /// flag indicating whether dynamic relaxation takes place
+    // dynamic relaxation specific vars
+    /// Flag indicating whether dynamic relaxation takes place
     int drFlag;
-    /// reference load vector
+    /// Reference load vector
     FloatArray loadRefVector;
-    /// parameter determining rate of the loading process
+    /// Parameter determining rate of the loading process.
     double c;
-    /// end of time interval
+    /// End of time interval.
     double Tau;
-    /// estimate of loadRefVector^T*displacementVector(Tau)
+    /// Estimate of loadRefVector^T*displacementVector(Tau).
     double pyEstimate;
-    /// product of p^tM^(-1)p; where p is reference load vector
+    /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
 
 public:
@@ -115,28 +108,20 @@ public:
         initFlag = 1;
     }
     ~NlDEIDynamic();
-    // solving
-    //void solveYourself ();
-    void solveYourselfAt(TimeStep *);
-    //int requiresNewLhs () {return 0;}
-    virtual void               updateYourself(TimeStep *);
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+
+    void solveYourselfAt(TimeStep *tStep);
+
+    virtual void updateYourself(TimeStep *tStep);
+    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     IRResultType initializeFrom(InputRecord *ir);
     TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *);
+    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void    terminate(TimeStep *);
-    void    giveInternalForces(FloatArray &answer, TimeStep *stepN);
+    void terminate(TimeStep *tStep);
+    void giveInternalForces(FloatArray &answer, TimeStep *tStep);
 
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream output stream
-     * @param iDof dof to be processed
-     * @param atTime solution step
-     */
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
 
@@ -145,8 +130,8 @@ public:
     classType giveClassID() const { return NlDEIDynamicClass; }
     fMode giveFormulation() { return nonLinFormulation; }
 
-    virtual int        giveNumberOfFirstStep() { return 0; }
-    virtual int        giveNumberOfTimeStepWhenIcApply() { return 0; }
+    virtual int giveNumberOfFirstStep() { return 0; }
+    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
 };
 } // end namespace oofem
 #endif // nldeidynamic_h

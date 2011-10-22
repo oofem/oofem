@@ -39,7 +39,7 @@
 
 namespace oofem {
 
-/*
+/**
  * This class implements associated Material Status to MaxwellChainMaterial.
  */
 class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
@@ -84,35 +84,15 @@ public:
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    /**
-     * Computes, for the given integration point,
-     * the strain vector induced by stress-independent shrinkage
-     * @param answer returned strain vector
-     * @param form material response form
-     * @param gp integration point
-     * @param atTime time step (most models are able to respond only when atTime is current time step)
-     * @param determines response mode (Total or incremental)
-     */
-
     virtual void giveShrinkageStrainVector(FloatArray &answer,
                                            MatResponseForm form,
                                            GaussPoint *gp,
-                                           TimeStep *atTime,
+                                           TimeStep *tStep,
                                            ValueModeType mode)
     { answer.resize(0); }
 
-
-    /**
-     * Computes, for the given integration point,
-     * the strain vector induced by the stress history (typically creep strain)
-     * @param answer computed strains
-     * @param form material response form
-     * @param gp integration point
-     * @param atTime time step (most models are able to respond only when atTime is the current time step)
-     * @param mode determines response mode
-     */
     virtual void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                       GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

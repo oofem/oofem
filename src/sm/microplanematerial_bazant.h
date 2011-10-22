@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/microplanematerial_bazant.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *************************************************************************
-//   *** ABSTRACT CLASS MICROPLANE MATERIAL ACCORDING TO BAZANT'S APPROACH ***
-//   *************************************************************************
-
 #ifndef microplanematerial_bazant_h
 #define microplanematerial_bazant_h
 
@@ -50,46 +45,33 @@ namespace oofem {
  * Micro strains on microplane are described using magnitude of normal strain,
  * volumetric normal component and by two orthogonal shear components
  * (m and l direction) in microplane.
- *
  */
 class MicroplaneMaterial_Bazant : public MicroplaneMaterial
 {
-protected:
-
 public:
     /**
      * Constructor. Creates Abstract Bazant's Microplane Material belonging
      * to domain d, with number n.
-     * @param n material number
-     * @param d domain to which newly created material belongs
+     * @param n Material number.
+     * @param d Domain to which newly created material belongs.
      */
     MicroplaneMaterial_Bazant(int n, Domain *d);
     /// Destructor.
-    ~MicroplaneMaterial_Bazant()                { }
+    ~MicroplaneMaterial_Bazant() { }
 
-
-    /**
-     * Computes real macro stress in corresponding macro integration point for
-     * given macroscopic strain  vector.
-     */
-    virtual void giveRealStressVector(FloatArray & answer, MatResponseForm, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
-
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
 
     /**
      * Updates the volumetric stress component after computing real stress microplane vectors.
      */
-    virtual void  updateVolumetricStressTo(Microplane *mPlane, double sigv) = 0;
+    virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv) = 0;
 
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "MicroplaneMaterial_Bazant"; }
-    /// Returns classType id of receiver.
-    classType giveClassID()         const { return MicroplaneMaterial_BazantClass; }
+    classType giveClassID() const { return MicroplaneMaterial_BazantClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralMaterialStatus(1, domain, gp); }
-
-protected:
 };
 } // end namespace oofem
 #endif // microplanematerial_bazant_h

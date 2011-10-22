@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/scalarerrorindicator.h,v 1.5 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,24 +32,15 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************
-//   *** CLASS SCALAR ERROR INDICATOR ***
-//   ************************************
-
 #ifndef scalarerrorindicator_h
 #define scalarerrorindicator_h
 
 #include "compiler.h"
-
 #include "errorestimator.h"
 #include "internalstatetype.h"
 
 namespace oofem {
-class Domain;
-class Element;
-class TimeStep;
 class RemeshingCriteria;
-
 
 /**
  * The class representing scalar error indicator.
@@ -60,46 +50,26 @@ class RemeshingCriteria;
 class ScalarErrorIndicator : public ErrorEstimator
 {
 protected:
-    /// type of internal variable to be indicator (type for temp and nontemp varsion)
+    /// Type of internal variable to be indicator (type for temp and nontemp version).
     int indicatorType;
-    /// corresponding internal state type
+    /// Corresponding internal state type.
     InternalStateType varType;
+
 public:
     /// Constructor
     ScalarErrorIndicator(int n, Domain *d) : ErrorEstimator(n, d) { eeType = EET_SEI; }
     /// Destructor
     virtual ~ScalarErrorIndicator() { }
-    /** Returns the element error of requested type.
-     * @param type error type
-     * @param elem element for which error requested
-     * @param tStep time step
-     */
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
-    /** Returns the global domain value of given type.
-     * @param type error type
-     * @param tStep time step
-     */
-    virtual double giveValue(EE_ValueType type, TimeStep *tStep) { return 0.0; }
-    /**
-     * Estimates the error on associated domain at given timeSte.
-     * Empty implementation, the indicator value is assumed to be directly the scalar internal variable
-     * obtained from elements andcorresponding IP.
-     * @param tStep time step
-     */
-    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
-    /** Returns reference to associated remeshing criteria.
-     */
-    virtual RemeshingCriteria *giveRemeshingCrit();
-    /* Initalizes the receiver from input record */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "ScalarErrorIndicator"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return ScalarErrorIndicatorClass; }
 
-protected:
+    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    virtual double giveValue(EE_ValueType type, TimeStep *tStep) { return 0.0; }
+    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
+    virtual RemeshingCriteria *giveRemeshingCrit();
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    const char *giveClassName() const { return "ScalarErrorIndicator"; }
+    classType giveClassID() const { return ScalarErrorIndicatorClass; }
 };
 } // end namespace oofem
 #endif // scalarerrorindicator_h

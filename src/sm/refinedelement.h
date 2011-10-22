@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/refinedelement.h,v 1.2.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -49,15 +48,12 @@ class Node;
 class RefinedElement
 {
 protected:
-
     int elementId;
     AList< IntArray >fineNodeList;
     IntArray boundaryFlag;
 
 public:
-
     RefinedElement(Domain *d, int elem, int level);
-
     ~RefinedElement();
 
     IntArray *giveFineNodeArray(int node);
@@ -74,20 +70,20 @@ public:
     bool giveBcDofArray3D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
                           AList< IntArray > &faceBcDofIdList, IntArray &faceNumBc, TimeStep *tStep);
 
-
 protected:
-    /** Extract from dofArray of slave_node those Dofs that have compatible BCs with master_node
-     * @param master_node node to which Dof compatibility will be compared
-     * @param slave_node node with original Dofs
-     * @param dofArray array of ids of Dofs of slave_node to chose from
-     * @param dofs number of Dofs in dofArray
-     * @param answer array of ids of Dofs in dofArray with compatible BCs
-     * @return number of Dofs with compatible BCs
+    /**
+     * Extract from dofArray of slave_node those Dofs that have compatible BCs with master_node
+     * @param master_node Node to which Dof compatibility will be compared.
+     * @param slave_node Node with original Dofs.
+     * @param dofArray Array of ids of Dofs of slave_node to chose from.
+     * @param dofs Number of Dofs in dofArray.
+     * @param answer Array of ids of Dofs in dofArray with compatible BCs.
+     * @return Number of Dofs with compatible BCs.
      */
     int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray *answer,
                                  ValueModeType mode, TimeStep *tStep);
 
-    /// prints simple error message and exits
+    /// Prints simple error message and exits.
     void error(const char *file, int line, const char *format, ...) const;
 };
 } // end namespace oofem

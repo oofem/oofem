@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/planstrss.C,v 1.7.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file PLANSTRSS.CC
-
 
 #include "planstrss.h"
 #include "node.h"
@@ -66,11 +62,10 @@ FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
 PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
-    , DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
+    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
-
-    // Constructor.
+// Constructor.
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -248,8 +243,6 @@ PlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
         answer.at(8, 6) = b4 * c3 + b3 * c4;
         answer.at(8, 8) = b4 * c4 + b4 * c4;
     }
-
-    return;
 }
 
 void

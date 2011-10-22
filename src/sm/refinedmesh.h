@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/refinedmesh.h,v 1.2 2003/05/19 13:04:00 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,18 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-
 #ifndef refinedmesh_h
 #define refinedmesh_h
 
 #include "alist.h"
 
 namespace oofem {
-//#define DEBUG                      /* debug prints and checks */
-
 #define SAVE                       /* memory savings */
-
 //#define COMPLETE_DATA_STRUCTURE    /* only for 2-manifolds */
 
 #ifdef SAVE
@@ -57,14 +51,11 @@ class RefinedElement;
 class RefinedMesh
 {
 public:
-
     int completed;
     int nodes, elems;
     int edges, quads, hexas;
 
-
 private:
-
     typedef struct fine_edge_rec {
         long *fine_id;
     } fine_edge_rec;
@@ -76,7 +67,6 @@ private:
     typedef struct fine_hexa_rec {
         long *fine_id;
     } fine_hexa_rec;
-
 
 
     typedef struct fe_node_rec {
@@ -149,11 +139,7 @@ private:
     } tmp_hexa_rec;
 
 
-
-    /* there is only one public method for global mesh refinement */
-
 public:
-
     RefinedMesh() {
         completed = 0;
         nodes = edges = quads = hexas = 0;

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.h,v 1.8 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************
-//   *** CLASS TRUSS2D ***
-//   *********************
-
-
 #ifndef qtruss1d_h
 #define qtruss1d_h
 
@@ -46,78 +40,64 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+/**
+ * This class implements a two-node truss bar element for two-dimensional
+ * analysis.
+ *
+ * A truss bar element is characterized by its 'length' and its 'pitch'. The
+ * pitch is the angle in radians between the X-axis and the axis of the
+ * element (oriented node1 to node2).
+ * The 'rotationMatrix' R is such that u{loc}=R*u{glob}.
+ * Note: element is formulated in global c.s.
+ * Tasks:
+ * - calculating its Gauss points ;
+ * - calculating its B,D,N matrices and dV ;
+ * - expressing M,K,f,etc, in global axes. Methods like 'computeStiffness-
+ *   Matrix' of class Element are here overloaded in order to account for
+ *   rotational effects.
+ */
 class QTruss1d : public StructuralElement
 {
-    /*
-     * This class implements a two-node truss bar element for two-dimensional
-     * analysis.
-     * DESCRIPTION :
-     * A truss bar element is characterized by its 'length' and its 'pitch'. The
-     * pitch is the angle in radians between the X-axis anf the axis of the
-     * element (oriented node1 to node2).
-     * The 'rotationMatrix' R is such that u{loc}=R*u{glob}.
-     * Note: element is formulated in global c.s.
-     * TASKS :
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV ;
-     * - expressing M,K,f,etc, in global axes. Methods like 'computeStiffness-
-     *   Matrix' of class Element are here overloaded in order to account for
-     *   rotational effects.
-     */
-
 protected:
     double length;
     static FEI1dQuad interpolation;
     int numberOfGaussPoints;
-    // FloatMatrix*  rotationMatrix ;
 
 public:
-    QTruss1d(int, Domain *);                         // constructor
-    ~QTruss1d()   { }                                // destructor
+    QTruss1d(int n, Domain *d);
+    ~QTruss1d() { }
 
-  
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
+    IRResultType initializeFrom(InputRecord *ir);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 3; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 3; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &)
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
     { return this->giveLength(); }
 
-    double        computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
     // definition & identification
-    //
     const char *giveClassName() const { return "QTruss1d"; }
-    classType            giveClassID() const { return QTruss1dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    classType giveClassID() const { return QTruss1dClass; }
 
-    integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  { return _1dMat; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    integrationDomain giveIntegrationDomain() { return _Line; }
+    MaterialMode giveMaterialMode() { return _1dMat; }
 
 protected:
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    //  int           computeGtoNRotationMatrix (FloatMatrix&);
-    void          computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeGaussPoints();
 
-    double        giveLength();
-    double        givePitch();
-    int           giveApproxOrder() { return 2; }
+    double giveLength();
+    double givePitch();
+    int giveApproxOrder() { return 2; }
 };
 } // end namespace oofem
 #endif // truss1d_h

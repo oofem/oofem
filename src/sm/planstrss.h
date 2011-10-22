@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/planstrss.h,v 1.6.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **************************
-//   *** CLASS PLANE STRAIN ***
-//   **************************
-
 #ifndef planstrss_h
 #define planstrss_h
 
@@ -53,45 +48,32 @@
 namespace oofem {
 /// Comment or uncomment the following line to force full or reduced integration
 #define PlaneStress2d_reducedShearIntegration
-
+/**
+ * This class implements an isoparametric four-node quadrilateral plane-
+ * stress elasticity finite element. Each node has 2 degrees of freedom.
+ */
 class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public SpatialLocalizerInterface
-    , public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+    public SpatialLocalizerInterface,
+    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
-    /*
-     * This class implements an isoparametric four-node quadrilateral plane-
-     * stress elasticity finite element. Each node has 2 degrees of freedom.
-     *
-     * DESCRIPTION :
-     *
-     * TASKS :
-     *
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
     static FEI2dQuadLin interpolation;
     int numberOfGaussPoints;
 
 public:
-    PlaneStress2d(int, Domain *); // constructor
-    ~PlaneStress2d();           // destructor
+    PlaneStress2d(int n, Domain *d);
+    ~PlaneStress2d();
 
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    // characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *, const FloatArray &);
-
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType it);
 
-    //int    hasEdgeLoadSupport () {return 1;}
-    double                computeVolumeAround(GaussPoint *);
+    double computeVolumeAround(GaussPoint *gp);
     /**
      * Computes the global coordinates from given element's local coordinates.
      * Required by nonlocal material models.
@@ -103,18 +85,11 @@ public:
      * @returns nonzero if successful (point inside); zero otherwise
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    // returns interpolation type
-    FEInterpolation *giveInterpolation() { return & interpolation; } // rch
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
+
+    FEInterpolation *giveInterpolation() { return & interpolation; }
+
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    //@}
-    /**
-     * @name The element interface required by SPRNodalRecoveryModelInterface
-     */
-    //@{
+
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
@@ -123,26 +98,12 @@ public:
     //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    //@}
-    /**
-     * @name The element interface required by SpatialLocalizerInterface
-     */
-    //@{
-    /// Returns reference to corresponding element
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    /// Returns nonzero if given element contains given point
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
-    /// Returns distance of given point from element parametric center
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-    //@}
 
-
-    /**
-     * @name The element interface required by HuertaErrorEstimatorInterface and HuertaRemeshingCriteriaInterface
-     */
-    //@{
     virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }
-
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
@@ -157,76 +118,42 @@ public:
     // HuertaRemeshingCriteriaInterface
     virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
-    //@}
 
-
-    /**
-     * @name The element interface required by SDirectErrorIndicatorRCInterface
-     */
-    //@{
-    /*
-     * Determines the characteristic size of element. This quantity is defined as follows:
-     * For 1D it is the element length, for 2D it is the square root of element area.
-     */
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-    //@}
-    /**
-     * @name The element interface required by EIPrimaryUnknownMapperInterface
-     */
-    //@{
-    /**
-     * Computes the element vector of primary unknowns at given point. Similar to computeVectorOf,
-     * but the interpolation from element DOFs to given point using element shape function is done.
-     * The method should work also for point outside the volume of element (adaptivity mapping).
-     * @param u    Identifies mode of unknown (eg. total value or velocity of unknown).
-     * @param stepN Time step, when vector of unknowns is requested.
-     * @param coords global coordinates of point of interest
-     * @param answer vector of unknowns.
-     */
+
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
                                                                  TimeStep *stepN, const FloatArray &coords,
                                                                  FloatArray &answer);
-    /**
-     * Returns the dof meaning of element vector of primary unknowns.
-     * @param answer contains values of DofIDItem type that identify physical meaning of DOFs
-     */
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
-    //@}
-
-
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void  drawScalar(oofegGraphicContext &context);
-    virtual void  drawSpecial(oofegGraphicContext &);
-    //     void          drawInternalState (oofegGraphicContext&);
+    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawSpecial(oofegGraphicContext &);
+    //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    //
     // definition & identification
-    //
     const char *giveClassName() const { return "PlaneStress2d"; }
-    classType             giveClassID()          const { return PlaneStress2dClass; }
+    classType giveClassID() const { return PlaneStress2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  { return _PlaneStress; }
+    integrationDomain giveIntegrationDomain() { return _Square; }
+    MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
     // edge load support
-    void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double computeEdgeVolumeAround(GaussPoint *, int);
-    void  computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
+    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    // give Transformation matrix from global coord. syst. to local coordinate system in nodes.
-    // i.e. r(n)=T r(g)
-    // int   computeGtoNRotationMatrix (FloatMatrix&);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+
     void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }

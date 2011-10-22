@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/mmaclosestiptransfer.h,v 1.6 2003/05/19 13:04:00 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***************************************************
-//   *** CLASS CLOSEST IP TRANSFER MAPPING ALGORITHM ***
-//   ***************************************************
-
 #ifndef mmaclosestiptransfer_h
 #define mmaclosestiptransfer_h
 
@@ -55,51 +50,19 @@ class TimeStep;
 class MMAClosestIPTransfer : public MaterialMappingAlgorithm
 {
 protected:
-
     GaussPoint *source;
-    // GaussPoint* recv;
-    // FloatArray rc;
-public:
-    /** Constructor
-     * @param gp Integration point belonging to new domain to which mapping occur
-     * @param oldd old mesh reference
-     */
-    MMAClosestIPTransfer();
-    /**
-     * Initializes the receiver state before mapping. The idea is to place some
-     * comon global oprerations before mapping particular IP's if necessary.
-     * Stores Times stamp of last initialization, so multiple calls for same step
-     * do not initialize receiver again.
-     * @note new domain can be obtained from given ip.
-     * @param dold old domain
-     * @param varTypes array of InternalStateType values, identifiing all vars to be mapped
-     * @param coords coordinates of the receiver point
-     * @param region if > 0 region id of receiver point,, if < 0 ignore regions.
-     * @param tStep time step
-     */
-    void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
-    /**
-     * Finishes the mapping for given time step. Used to perform cleanup.
-     * Typically some mappers reguire to compute some global mesh data related to
-     * current step, which are valid for all IPs - so they are computed only once for
-     * all IPs.
-     */
-    void finish(TimeStep *tStep) { };
-    /** Maps and update the unknown of given type from
-     * old mesh oldd to new mesh to which gp belongs to. The result is stored in answer array.
-     * The closest IP point to specified one is found and its state variable is
-     * returned as a result.
-     * @param answer contains result
-     * @param type determines the type of internal variable
-     * @param coords coordinates of receiver to which mapping occur
-     * @param tStep time step
-     * @return nonzero if o.k.
-     */
-    virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
-    /** Returns class name of the receiver */
-    const char *giveClassName() const { return "MMAClosestIPTransfer"; }
 
-protected:
+public:
+    /// Constructor
+    MMAClosestIPTransfer();
+
+    void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
+
+    void finish(TimeStep *tStep) { };
+
+    virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
+
+    const char *giveClassName() const { return "MMAClosestIPTransfer"; }
 };
 } // end namespace oofem
 #endif // mmaclosestiptransfer_h

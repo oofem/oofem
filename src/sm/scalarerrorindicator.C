@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/scalarerrorindicator.C,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "scalarerrorindicator.h"
 #include "directerrorindicatorrc.h"
 #include "element.h"
@@ -42,7 +40,8 @@
 
 namespace oofem {
 int
-ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep) {
+ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
+{
     if ( indicatorType == 1 ) {
         if ( mode == equilibratedEM ) {
             varType = IST_PrincipalDamageTensor;
@@ -55,7 +54,8 @@ ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep) {
 }
 
 double
-ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep) {
+ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
+{
     FloatArray val;
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
     int i, result = 1, nip = iRule->getNumberOfIntegrationPoints();
@@ -102,7 +102,8 @@ ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 }
 
 RemeshingCriteria *
-ScalarErrorIndicator :: giveRemeshingCrit() {
+ScalarErrorIndicator :: giveRemeshingCrit()
+{
     if ( this->rc ) {
         return this->rc;
     }

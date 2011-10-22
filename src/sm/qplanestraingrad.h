@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.h,v 1.8 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************
-//   *** CLASS TRUSS2D ***
-//   *********************
-
-
 #ifndef qplanestraingrad_h
 #define qplanestraingrad_h
 #include "structuralelement.h"
@@ -50,34 +44,33 @@ namespace oofem {
 class QPlaneStrainGrad : public QPlaneStrain, public GradDpElement
 {
 protected:
-
     int numberOfGaussPoints;
     static FEI2dQuadLin interpolation;
 
 public:
-    QPlaneStrainGrad(int, Domain *);                         // constructor
-    ~QPlaneStrainGrad()   { }                                // destructor
+    QPlaneStrainGrad(int n, Domain *d);
+    ~QPlaneStrainGrad() { }
 
-
-
-    const char *giveClassName() const { return "QPlaneStrainGrad"; }
-    classType            giveClassID() const { return QPlaneStrainGradClass; }
-    //IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  { return _PlaneStrainGrad; }
-    virtual int  computeNumberOfDofs(EquationID ut) { return 20; }
     IRResultType initializeFrom(InputRecord *ir);
 
+    const char *giveClassName() const { return "QPlaneStrainGrad"; }
+    classType giveClassID() const { return QPlaneStrainGradClass; }
+
+
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+    integrationDomain  giveIntegrationDomain() { return _Square; }
+    MaterialMode giveMaterialMode() { return _PlaneStrainGrad; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 20; }
+
 protected:
-    virtual void          computeBkappaMatrixAt(GaussPoint *, FloatMatrix &);
-    virtual void          computeNkappaMatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
     virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, stepN, mode); }
-    void          computeGaussPoints();
-    void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    void computeGaussPoints();
+    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     StructuralElement *giveStructuralElement() { return this; }
 };
 } // end namespace oofem

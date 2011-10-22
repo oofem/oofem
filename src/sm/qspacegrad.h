@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/QSpace.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,13 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************
-//   *** CLASS QUADRATIC 3D Element   ***
-//   ************************************
-
-//
-//  Recasted by L. Svoboda
-//
 #ifndef qspacegrad_h
 #define qspacegrad_h
 #include "qspace.h"
@@ -51,35 +43,37 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
-
 namespace oofem {
 
-class QSpaceGrad : public QSpace,public GradDpElement {
- protected:
-  int numberOfGaussPoints;
-  static FEI3dHexaLin interpolation;
+/**
+ * Quadratic 3d  20 - node element with quadratic approximation of displacements and linear approximation of gradient
+ * @author L. Svoboda
+ */
+class QSpaceGrad : public QSpace, public GradDpElement
+{
+protected:
+    int numberOfGaussPoints;
+    static FEI3dHexaLin interpolation;
 
- public:
-  QSpaceGrad (int,Domain*) ;     // constructor
-  ~QSpaceGrad ()  {}             // destructor
+public:
+    QSpaceGrad(int n,Domain *d);
+    ~QSpaceGrad() {}
 
-IRResultType initializeFrom (InputRecord* ir);
-  virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
-  //
-  // definition & identification
-  //
-  const char* giveClassName () const { return "QSpaceGrad"; }
-  classType   giveClassID   () const { return QSpaceGradClass; }
-  virtual int  computeNumberOfDofs (EquationID ut) {return 68;}
-  
- protected:
- ///////////////////////////////////////////////////////////////////////////////
-   void computeGaussPoints ();
-   void computeNkappaMatrixAt(GaussPoint*,FloatMatrix&);
-   void computeBkappaMatrixAt(GaussPoint*,FloatMatrix&);
-   StructuralElement* giveStructuralElement(){return this;}
+    IRResultType initializeFrom (InputRecord* ir);
+    virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
+
+    // definition & identification
+    const char* giveClassName () const { return "QSpaceGrad"; }
+    classType giveClassID () const { return QSpaceGradClass; }
+    virtual int computeNumberOfDofs (EquationID ut) {return 68;}
+
+protected:
+    void computeGaussPoints ();
+    void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    StructuralElement* giveStructuralElement() { return this; }
 };
- 
+
 }
 #endif // end namespace oofem
 

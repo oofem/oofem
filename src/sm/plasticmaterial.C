@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/plasticmaterial.C,v 1.5.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// file : PlasticMaterial.C
-
-
 #include "plasticmaterial.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
@@ -55,9 +51,9 @@ namespace oofem {
 #define PLASTIC_MATERIAL_MAX_ITERATIONS 40
 
 PlasticMaterial :: PlasticMaterial(int n, Domain *d)  : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
     linearElasticMaterial = NULL;
 }

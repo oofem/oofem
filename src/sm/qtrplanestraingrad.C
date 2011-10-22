@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.C,v 1.6 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file Truss1d.C
 
 #include "qtrplanestraingrad.h"
 #include "domain.h"
@@ -56,68 +53,64 @@
 #endif
 
 namespace oofem {
-  
-  QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrain( n,aDomain),GradDpElement()
- // Constructor.
+
+QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrain( n,aDomain),GradDpElement()
+// Constructor.
 {
-  nPrimNodes = 6; 
+  nPrimNodes = 6;
   nPrimVars = 2;
   nSecNodes = 3;
   nSecVars = 1;
   totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
   locSize   = nPrimVars*nPrimNodes;
   nlSize    = nSecVars*nSecNodes;
-  
-    
+
+
 }
 
- 
+
 void
 QTrPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-
 {
 
-  if(inode<=nSecNodes)
-    {
-      answer.resize(3);
-      answer.at(1) = D_u;
-      answer.at(2) = D_v;
-      answer.at(3) = G_0;
+    if ( inode<=nSecNodes ) {
+        answer.resize(3);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
+        answer.at(3) = G_0;
     }
-  else
-    {
-      answer.resize(2);
-      answer.at(1) = D_u;
-      answer.at(2) = D_v;
+    else {
+        answer.resize(2);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
     }
-  return;
 }
 IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
-  //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  //IRResultType result;                 // Required by IR_GIVE_FIELD macro
-  this->StructuralElement :: initializeFrom(ir);
-  numberOfGaussPoints = 4;
-  //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStrain_nip, "nip"); // Macro
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    this->StructuralElement :: initializeFrom(ir);
+    numberOfGaussPoints = 4;
+    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStrain_nip, "nip"); // Macro
 
-    
-  this->computeGaussPoints();
-  return IRRT_OK;
-  this->computeGaussPoints();
-  return IRRT_OK;
+
+    this->computeGaussPoints();
+    return IRRT_OK;
+    this->computeGaussPoints();
+    return IRRT_OK;
 }
 
-void 
+void
 QTrPlaneStrainGrad :: computeGaussPoints()
 {
 
-  if ( !integrationRulesArray ) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStrainGrad);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStrainGrad);
+    }
 }
 
 void
@@ -137,8 +130,6 @@ QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 void
@@ -175,8 +166,7 @@ QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 
 
     answer.times( 1. / ( 2. * area ) );
-    return;
 }
 
 }
- 
+

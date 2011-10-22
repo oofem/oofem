@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -46,10 +46,6 @@
 #ifndef __MAKEDEPEND
  #include <stdlib.h>
  #include <math.h>
-#endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {

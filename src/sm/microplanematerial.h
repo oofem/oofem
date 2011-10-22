@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/microplanematerial.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   *****************************************
-//   *** CLASS GENERAL MICROPLANE MATERIAL ***
-//   *****************************************
 
 #ifndef microplanematerial_h
 #define microplanematerial_h
@@ -61,15 +56,15 @@ class Microplane;
 class MicroplaneMaterial : public StructuralMaterial
 {
 protected:
-    /// Number of microplanes;
+    /// Number of microplanes.
     int numberOfMicroplanes;
 
-    /// Integration weights of microplanes
+    /// Integration weights of microplanes.
     double microplaneWeights [ MAX_NUMBER_OF_MICROPLANES ];
     /// Normals of microplanes.
     double microplaneNormals [ MAX_NUMBER_OF_MICROPLANES ] [ 3 ];
 
-    /** kronecker's delta */
+    /// Kronecker's delta.
     double Kronecker [ 6 ];
 
     /**
@@ -92,22 +87,22 @@ public:
 
     /**
      * Constructor. Creates Microplane Material belonging to domain d, with number n.
-     * @param n material number
-     * @param d domain to which newly created material belongs
+     * @param n Material number.
+     * @param d Domain to which newly created material belongs.
      */
     MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) { numberOfMicroplanes = 0; }
     /// Destructor.
-    ~MicroplaneMaterial()                { }
+    ~MicroplaneMaterial() { }
 
     /**
      * Computes real stress vector on given microplane
-     * (the meaning of  values depends on particular implementaion,
-     * e.g, can contain volumetric, devatoric normal srtresses and shear streses on microplane)
+     * (the meaning of  values depends on particular implementation,
+     * e.g, can contain volumetric, deviatoric normal stresses and shear stresses on microplane)
      * for given increment of microplane strains.
-     * @param answer computed result
-     * @param mplane pointer to microplane object, for which response is computed
-     * @param strain strain vector
-     * @param tStep time step
+     * @param answer Computed result.
+     * @param mplane Pointer to microplane object, for which response is computed.
+     * @param strain Strain vector.
+     * @param tStep Time step.
      */
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
                                                 const FloatArray &strain, TimeStep *tStep) = 0;
@@ -142,14 +137,14 @@ public:
 
     /**
      * Computes normal of given microplane.
-     * @param answer normal of given microplane
-     * @mplane microplane, which normal will be computed
+     * @param answer Normal of given microplane.
+     * @param mplane Microplane, which normal will be computed.
      */
     virtual void giveMicroplaneNormal(FloatArray &answer, Microplane *mplane);
     /**
      * Returns microplane integration weight.
-     * @param mplane microplane
-     * @return integration weight of given microplane
+     * @param mplane Microplane.
+     * @return Integration weight of given microplane.
      */
     virtual double giveMicroplaneIntegrationWeight(Microplane *mplane);
 
@@ -158,8 +153,8 @@ public:
 
     /**
      * Initializes internal data (integration weights,
-     * microplane normals and computes projection tensors)
-     * @param numberOfMicroplanes number of required microplanes
+     * microplane normals and computes projection tensors).
+     * @param numberOfMicroplanes Number of required microplanes.
      */
     virtual void initializeData(int numberOfMicroplanes);
 
@@ -168,47 +163,19 @@ public:
      */
     virtual MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode masterMode);
 
-    // store & restore context functions
-    /**
-     * Stores context of receiver into given stream. This method is called from
-     * integration point saveContext function, to store material related status in
-     * integration point. Integration point passes itself as obj parameter, when
-     * invokes this method. This implementation loops over all slaves ip (microplanes)
-     * and saves their satuses as wel as status of master is saved.
-     * @param stream stream where to write data
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     */
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Restores context of receiver from given stream. This method is called from
-     * integration point restoeContext function, to restore material related status in
-     * integration point. Integration point passes itself as obj parameter, when
-     * invokes this method. This implementation loops over all slaves ip (microplanes)
-     * and loads their satuses as wel as status of master is loaded.
-     * @param stream stream where to read data
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     */
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    /// Instanciates receiver from input record.
+
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     // identification and auxiliary functions
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "MicroplaneMaterial"; }
-    /// Returns classType id of receiver.
-    classType giveClassID()         const { return MicroplaneMaterialClass; }
+    classType giveClassID() const { return MicroplaneMaterialClass; }
 
     virtual MaterialStatus *giveMicroplaneStatus(GaussPoint *gp);
+
 protected:
     virtual MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) = 0;
     virtual void initTempStatus(GaussPoint *gp);

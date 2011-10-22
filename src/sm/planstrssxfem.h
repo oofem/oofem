@@ -5,7 +5,8 @@
 #include "xfemelementinterface.h"
 
 namespace oofem {
-/** temporary class for testing
+/**
+ * Temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
  * there will be the standard PlaneStress2d
  */
@@ -16,8 +17,8 @@ public:
     PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this) { }
     /// Destructor
     ~PlaneStress2dXfem() { };
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+
+    Interface *giveInterface(InterfaceType it);
 
     /// computes the enriched part of the location array
     void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
@@ -35,11 +36,11 @@ public:
     double computeArea() const;
 
 #ifdef __OOFEG
-    void          drawRawGeometry(oofegGraphicContext &);
+    void drawRawGeometry(oofegGraphicContext &);
     //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void  drawScalar(oofegGraphicContext &context);
-    //virtual void  drawSpecial(oofegGraphicContext &);
-    //     void          drawInternalState (oofegGraphicContext&);
+    virtual void drawScalar(oofegGraphicContext &context);
+    //virtual void drawSpecial(oofegGraphicContext &);
+    //void drawInternalState(oofegGraphicContext&);
 #endif
 };
 } // end namespace oofem
