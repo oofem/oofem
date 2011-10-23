@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/vtkexportmodule.h,v 1.9 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,16 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// class vtkExportModule
-//
-
 #ifndef vtkexportmodule_h
 #define vtkexportmodule_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "exportmodule.h"
 #include "domain.h"
 #include "engngm.h"
@@ -51,82 +43,68 @@
 
 namespace oofem {
 /**
- * Represents VTK (Visualization Toolkit) export module. It uses vtk file format, Unstructured grid dataset.
- * There is built in support for Region By Region otput, taking care about possible nonsmooth character of
- * some internal variables at region boundaries. This, hovewer, is rathrer complication and since application
- * of vtk is naturally in 3d, the corresponding sections are commented out.
- *
+ * Represents VTK (Visualization Toolkit) export module. It uses VTK file format, Unstructured grid dataset.
+ * There is built in support for Region By Region output, taking care about possible nonsmooth character of
+ * some internal variables at region boundaries. This, however, is rather complication and since application
+ * of VTK is naturally in 3D, the corresponding sections are commented out.
  */
 class VTKExportModule : public ExportModule
 {
 protected:
-
-    /// list of InternalStateType values, identifying the selected vars for export
+    /// List of InternalStateType values, identifying the selected vars for export.
     IntArray internalVarsToExport;
-    /// list of primary unknowns to export
+    /// List of primary unknowns to export.
     IntArray primaryVarsToExport;
-    /// list of cell data to export
+    /// List of cell data to export.
     IntArray cellVarsToExport;
 
-    enum modeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
+    /// Determines how regions should be exported.
+    enum modeType {
+        wdmode, ///< Whole domain
+        rbrmode ///< Region by region.
+
+    };
+
     modeType outMode;
     modeType mode;
 
-    /// smoother type
+    /// Smoother type.
     NodalRecoveryModel::NodalRecoveryModelType stype;
-    /// smoother
+    /// Smoother.
     NodalRecoveryModel *smoother;
-    /// list of regions to skip
+    /// List of regions to skip.
     IntArray regionsToSkip;
 
-
 public:
-
     /// Constructor. Creates empty Output Manager with number n. By default all components are selected.
     VTKExportModule(int n, EngngModel *e);
     /// Destructor
     ~VTKExportModule();
-    /// Initializes receiver acording to object description stored in input record.
+
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Writes the output. Abstract service.
-     * @param tStep time step.
-     */
-    void              doOutput(TimeStep *tStep);
-    /**
-     * Initializes receiver.
-     * The init file messages should be printed.
-     */
-    void              initialize();
-    /**
-     * Terminates the receiver.
-     * The terminating messages should be printed.
-     * All the streams should be closed.
-     */
-    void              terminate();
-    /// Returns class name of the receiver.
+
+    void doOutput(TimeStep *tStep);
+    void initialize();
+    void terminate();
     virtual const char *giveClassName() const { return "VTKExportModule"; }
 
-
-
-
 protected:
-    /// returns the internal smoother
+    /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
 
-    /// returns the output stream for given solution step
-    FILE *giveOutputStream(TimeStep *);
+    /// Returns the output stream for given solution step.
+    FILE *giveOutputStream(TimeStep *tStep);
     /**
      * Returns corresponding element cell_type.
      * Some common element types are supported, others can be supported via interface concept.
      */
-    int   giveCellType(Element *);
+    int giveCellType(Element *tStep);
     /**
-     * Returns the number of elements vtk cells
+     * Returns the number of elements vtk cells.
      */
     int giveNumberOfElementCells(Element *);
     /**
-     * Returns number of nodes correpsonding to cell type
+     * Returns number of nodes corresponding to cell type.
      */
     int giveNumberOfNodesPerCell(int cellType);
     /**
@@ -134,18 +112,24 @@ protected:
      */
     void giveElementCell(IntArray &answer, Element *elem, int cell);
     /**
-     * export internal variables
+     * Export internal variables.
      */
     void exportIntVars(FILE *stream, TimeStep *tStep);
     /**
-     * export primary variables
+     * Export primary variables.
      */
     void exportPrimaryVars(FILE *stream, TimeStep *tStep);
-    /** exports single variable */
+    /**
+     * Exports single variable.
+     */
     void exportIntVarAs(InternalStateType valID, InternalStateValueType type, FILE *stream, TimeStep *tStep);
-    /** exports single variable */
+    /**
+     * Exports single variable.
+     */
     void exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep);
-    /** export variables defined on cells */
+    /**
+     * Export variables defined on cells.
+     */
     void exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep);
 
     /**

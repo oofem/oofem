@@ -91,7 +91,7 @@ public:
      * Adds element for active boundary condition.
      * @param elem Element number.
      */
-    virtual void addElement(int n) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
+    virtual void addElement(int elem) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
 
     /**
      * Adds element for active boundary condition.
@@ -127,6 +127,7 @@ public:
      * @param tStep Active time step.
      * @param eid Equation ID.
      * @param type Type of matrix to assemble.
+     * @param mode Mode of value.
      * @param s Numbering scheme.
      * @param domain Domain to assemble from.
      */

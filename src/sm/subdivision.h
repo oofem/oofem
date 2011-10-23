@@ -404,18 +404,19 @@ protected:
     void bisectMesh();
     void smoothMesh();
 #ifdef __PARALLEL_MODE
-    /** Exchanges the shared irregulars between partitions. Returns true if any shared irregular has been
-     *  exchanged between any partitions.
+    /**
+     * Exchanges the shared irregulars between partitions. Returns true if any shared irregular has been
+     * exchanged between any partitions.
      */
     bool exchangeSharedIrregulars();
-    int  packSharedIrregulars(Subdivision *s, ProcessCommunicator &pc);
-    int  unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc);
+    int packSharedIrregulars(Subdivision *s, ProcessCommunicator &pc);
+    int unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc);
     void assignGlobalNumbersToSharedIrregulars();
     int packIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator &pc);
     int unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator &pc);
     void exchangeSharedEdges();
-    int  packSharedEdges(Subdivision *s, ProcessCommunicator &pc);
-    int  unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc);
+    int packSharedEdges(Subdivision *s, ProcessCommunicator &pc);
+    int unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc);
 
     bool isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank);
     /// Returns true if receiver is irregular, shared node locally maintatined

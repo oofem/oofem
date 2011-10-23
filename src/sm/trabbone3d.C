@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/trplanstrss.C,v 1.7.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -43,35 +42,10 @@
 #include "contextioerr.h"
 
 namespace oofem {
-/////////////////////////////////////////////////////////////////
-////////////////TRABECULAR BONE MATERIAL/////////////////////////
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-//
 
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
-
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: MODE COMPATIBILITY
-// returns whether receiver supports given mode
 
 int
 TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
@@ -83,14 +57,6 @@ TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 
-//
-// END: MODE COMPATIBILITY
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF PLASTIC ENERGY DENSITY EVALUATION
-//
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
 {
@@ -115,14 +81,6 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
     status->setTempPSED(tempPSED);
 }
 
-//
-// END:  SUBROUTINE OF PLASTIC ENERGY DENSITY EVALUATION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: EVALUATION OF STIFFNESS MATRIX
-//
 
 void
 TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -185,23 +143,13 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     status->setSmtrx(answer);
 }
 
-//
-// END: EVALUATION OF STIFFNESS MATRIX
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF PLASTIC RETURN ALGORITHM
-//
-
-//double
-//TrabBone3D :: evaluateYieldFunction(const double kappa)
 
 double
 TrabBone3D :: evaluateCurrentYieldStress(const double kappa)
 {
     return ( 1.0 + plasHardFactor * ( 1.0 - exp(-kappa * expPlasHard) ) );
 }
+
 
 double
 TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
@@ -388,6 +336,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
     return convergence;
 }
 
+
 void
 TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
@@ -460,14 +409,6 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     }
 }
 
-//
-// END: SUBROUTINE OF PLASTIC RETURN ALGORITHM
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: FUNCTION FOR DAMAGE PARAMETER
-//
 
 double
 TrabBone3D :: computeDamageParam(double tempKappa, GaussPoint *gp)
@@ -482,14 +423,6 @@ TrabBone3D :: computeDamageParam(double tempKappa, GaussPoint *gp)
     return tempDam;
 }
 
-//
-// END: FUNCTION FOR DAMAGE PARAMETER
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: FUNCTION FOR DAMAGE EVALUATION
-//
 
 double
 TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
@@ -503,14 +436,6 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
     return tempDam;
 }
 
-//
-// END: FUNCTION FOR DAMAGE EVALUATION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF ALPHA EVALUATION
-//
 
 void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
 {
@@ -518,14 +443,6 @@ void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, Time
     tempKappa = status->giveTempKappa();
 }
 
-//
-// END: SUBROUTINE OF ALPHA EVALUATION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF DENSIFICATOR EVALUATION
-//
 
 void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
@@ -556,18 +473,13 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
     }
 }
 
-//
-// END: SUBROUTINE OF ALPHA EVALUATION
-/////////////////////////////////////////////////////////////////
 
 
-/////////////////////////////////////////////////////////////////
 // BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
 // strain increment, the only way, how to correctly update gp records
 //
-
 void
 TrabBone3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                    const FloatArray &totalStrain, TimeStep *atTime)
@@ -691,14 +603,7 @@ TrabBone3D :: constructNormAdjustTensor(FloatMatrix &answer)
 
     return;
 }
-//
-// END: MATRIX DEFINITION
-/////////////////////////////////////////////////////////////////
 
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PARAMETERS OF INPUT FILE
-//
 
 IRResultType
 TrabBone3D :: initializeFrom(InputRecord *ir)
@@ -758,14 +663,6 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     return StructuralMaterial :: initializeFrom(ir);
 }
 
-//
-// END: PARAMETERS OF INPUT FILE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: VTK Output
-//
 
 int
 TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
@@ -869,19 +766,6 @@ TrabBone3D :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
     }
 }
 
-//
-// END: PARAMETERS OF INPUT FILE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-//////////////////TRABECULAR BONE STATUS/////////////////////////
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-// init state variables
 
 TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
@@ -902,26 +786,10 @@ TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : Structur
     nss = 1;
 }
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
 
 TrabBone3DStatus :: ~TrabBone3DStatus()
 {}
 
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DEFINITION OF "GIVE PARAMETER"
-//
 
 double
 TrabBone3DStatus :: giveKappa()
@@ -1001,14 +869,6 @@ TrabBone3DStatus :: giveSSaTensor()
     return & SSaTensor;
 }
 
-//
-// END: DEFINITION OF "GIVE PARAMETER"
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: OUTPUT
-// print state to output stream
 
 void
 TrabBone3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -1020,14 +880,6 @@ TrabBone3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
-//
-// END: OUTPUT
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-// initialize temporary state variables according to equilibriated state vars
 
 void
 TrabBone3DStatus :: initTempStatus()
@@ -1035,14 +887,6 @@ TrabBone3DStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 }
 
-//
-// END: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-// Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
 void
 TrabBone3DStatus :: updateYourself(TimeStep *atTime)
@@ -1055,14 +899,6 @@ TrabBone3DStatus :: updateYourself(TimeStep *atTime)
     nss = 1;
 }
 
-//
-// END: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERRUPT RESTART UTILITY - SAVE
-//
 
 contextIOResultType
 TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1077,14 +913,6 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     return CIO_OK;
 }
 
-//
-// END: INTERRUPT RESTART UTILITY - SAVE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERRUPT RESTART UTILITY - RESTORE
-//
 
 contextIOResultType
 TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1100,14 +928,6 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     return CIO_OK;
 }
 
-//
-// END: INTERRUPT RESTART UTILITY - RESTORE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CREATE STATUS
-//
 
 MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
 {
@@ -1116,7 +936,4 @@ MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
     return status;
 }
 
-//
-// END: CREATE STATUS
-/////////////////////////////////////////////////////////////////
 }

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/t3dinterface.C,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -56,7 +55,8 @@ T3DInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, 
 }
 
 int
-T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
+T3DInterface :: createInput(Domain *d, TimeStep *stepN)
+{
     int i, j;
     int nnodes = d->giveNumberOfDofManagers(), nelem = d->giveNumberOfElements();
     double density;

@@ -165,14 +165,14 @@ protected:
      * Returns 3D material stiffness matrix [6x6] in unrotated form.
      * The matrix is reduced by by omega variables.
      * @param answer Full symmetric matrix.
+     * @param mode Material mode of stiffness matrix (elastic, secant).
      * @param gp Integration point.
      */
     void giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp);
     /**
      * Returns [6x6] rotation matrix in the global coordinate system.
      * The matrix relates local c.s. to global c.s. Local c.s. can be specified with 'mcs' flag defined on element.
-     * @param answer Full symmetric matrix [6x6].
-     * @param mode Material mode of stiffness matrix (elastic, secant).
+     * @param answer Rotation matrix [3x3].
      * @param gp Integration point.
      * @return 0 if no lcs is defined on element, 1 if defined.
      */

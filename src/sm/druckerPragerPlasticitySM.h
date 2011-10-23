@@ -281,6 +281,7 @@ public:
      * @param meanStress 1/3 of trace of sigma.
      * @param JTwo Second deviatoric invariant.
      * @param kappa Hardening variable.
+     * @param eM Elasticity modulus.
      * @return Yield value.
      */
     double computeYieldValue(double meanStress,

@@ -62,9 +62,9 @@ class GaussPoint;
 class HuertaErrorEstimator : public ErrorEstimator
 {
 public:
-    // type of norm used
+    /// Type of norm used.
     enum NormType { L2Norm, EnergyNorm };
-    // mode of analysis
+    /// Mode of analysis.
     enum AnalysisMode { HEE_linear, HEE_nlinear };
 
 protected:
@@ -116,95 +116,67 @@ public:
     /// Destructor
     ~HuertaErrorEstimator() { }
 
-    /** Returns refinement level
-     */
-    int giveRefinementLevel(void) { return this->refineLevel; }
-    /** Returns the element error of requested type. The estimateError service should be called before.
-     * @param type error type
-     * @param elem element for which error requested
-     * @param tStep time step
-     */
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
-    /** Returns the characteristic value of given type.
-     * The estimateError service should be called before. Intended to be used by remeshingCriterias to query
-     * various values provided by specific error estimator.
-     * @param type value type
-     * @param tStep time step
-     */
-    virtual double giveValue(EE_ValueType type, TimeStep *tStep);
     /**
-     * Estimates the error on associated domain at given timeStep.
-     * @param tStep time step
+     * Returns refinement level
      */
+    int giveRefinementLevel() { return this->refineLevel; }
+
+    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+
+    virtual double giveValue(EE_ValueType type, TimeStep *tStep);
+
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
-    /** Returns reference to associated remeshing criteria.
-     */
+
     virtual RemeshingCriteria *giveRemeshingCrit();
-    /** Initializes receiver according to object description stored in input record.
-     * This function is called immediately after creating object using
-     * constructor. InitString can be imagined as data record in component database
-     * belonging to receiver. Receiver may use value-name extracting functions
-     * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
+
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /// Returns class name of the receiver.
+
     const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return HuertaErrorEstimatorClass; }
+    classType giveClassID() const { return HuertaErrorEstimatorClass; }
 
     AnalysisMode giveAnalysisMode() { return mode; }
 
-    /**
-     * Stores context of receiver into given stream.
-     * Only non-temp internal history variables are stored.
-     * @param stream stream where to write data
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     */
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Restores context of receiver from given stream.
-     * @param stream stream where to read data
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 private:
-    /** Builds refined mesh
+    /**
+     * Builds refined mesh
      */
-    void buildRefinedMesh(void);
+    void buildRefinedMesh();
 
-    /** Solves the refined element problem.
-     * @param elemId element id
-     * @param localNodeIdArray array of local problem node ids
-     * @param globalNodeIdArray array of global problem node ids
-     * @param tStep time step
+    /**
+     * Solves the refined element problem.
+     * @param elemId Element id.
+     * @param localNodeIdArray Array of local problem node ids.
+     * @param globalNodeIdArray Array of global problem node ids.
+     * @param tStep Time step.
      */
     void solveRefinedElementProblem(int elemId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                     TimeStep *tStep);
-    /** Solves the refined patch problem.
-     * @param nodeId node id
-     * @param localNodeIdArray array of local problem node ids
-     * @param globalNodeIdArray array of global problem node ids
-     * @param tStep time step
+    /**
+     * Solves the refined patch problem.
+     * @param nodeId Node id.
+     * @param localNodeIdArray Array of local problem node ids.
+     * @param globalNodeIdArray Array of global problem node ids.
+     * @param tStep Time step.
      */
     void solveRefinedPatchProblem(int nodeId, IntArray &localNodeIdArray,
                                   IntArray &globalNodeIdArray, TimeStep *tStep);
-    /** Solves the refined whole problem.
-     * @param localNodeIdArray array of local problem node ids
-     * @param globalNodeIdArray array of global problem node ids
-     * @param tStep time step
+    /**
+     * Solves the refined whole problem.
+     * @param localNodeIdArray Array of local problem node ids.
+     * @param globalNodeIdArray Array of global problem node ids.
+     * @param tStep Time step.
      */
     void solveRefinedWholeProblem(IntArray &localNodeIdArray, IntArray &globalNodeIdArray, TimeStep *tStep);
-    /** Extracts nodal vector from global vector for each dof of all element nodes
-     * @param element element
-     * @param vector global vector
-     * @param answer element nodal vector
-     * @param dofs number of dofs at each node
-     * @param tStep time step
+    /**
+     * Extracts nodal vector from global vector for each dof of all element nodes.
+     * @param element Element.
+     * @param vector Global vector.
+     * @param answer Element nodal vector.
+     * @param dofs Number of dofs at each node.
+     * @param tStep Time step.
      */
     void extractVectorFrom(Element *element, FloatArray &vector, FloatArray &answer, int dofs, TimeStep *tStep);
 
@@ -311,46 +283,14 @@ public:
     /// Destructor
     ~HuertaRemeshingCriteria() { }
 
-    /**
-     * Returns the required mesh size n given dof manager.
-     * The mesh density is defined as a required element size
-     * (in 1D the element length, in 2D the square from element area).
-     * @param num dofman  number
-     * @param tStep time step
-     * @param relative if zero, then actual density is returned, otherwise the relative density to current is returned.
-     */
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
-    /**
-     * Returns existing mesh size for given dof manager.
-     * @param num dofMan number
-     */
     virtual double giveDofManDensity(int num);
-    /**
-     * Determines, if the remeshing is needed, and if nedded, the type of strategy used
-     */
     virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
-    /**
-     * Estimates the nodal densities.
-     * @param tStep time step
-     */
     virtual int estimateMeshDensities(TimeStep *tStep);
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     * This function is called immediately after creating object using
-     * constructor. InitString can be imagined as data record in component database
-     * belonging to receiver. Receiver use value-name extracting functions
-     * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /// Returns "HuertaErrorEstimator" - class name of the receiver.
     const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    /** Returns HuertaRemeshingCriteriaClass - classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
     classType giveClassID() const { return HuertaRemeshingCriteriaClass; }
-
-protected:
 };
 
 

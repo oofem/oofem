@@ -47,7 +47,7 @@
 #include "mathfem.h"
 
 namespace oofem {
-/*
+/**
  * This class implements a quadratic triangular 6-node plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */

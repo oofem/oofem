@@ -132,6 +132,7 @@ protected:
     void updateTempQuaternion(TimeStep *tStep);
     /**
      * Compute the temporary curvature at the centre to the state identified by given solution step.
+     * @param answer Computed curvature.
      * @param tStep Solution step identifying reached state.
      */
     void computeTempCurv(FloatArray &answer, TimeStep *tStep);

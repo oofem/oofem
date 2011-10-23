@@ -169,7 +169,7 @@ public:
     /**
      * Computes the "remote" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp Remote integration point.
-     * @param loc Remote element code numbers.
+     * @param rloc Remote element code numbers.
      * @param s Determines the equation numbering scheme.
      * @param rcontrib "Remote" contribution.
      * @param tStep Time step.

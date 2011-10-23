@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2009   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -45,6 +45,7 @@
 #include "datastream.h"
 
 namespace oofem {
+
 /****************************************************************************************/
 /**************     MPSMaterialStatus     ***********************************************/
 
@@ -583,13 +584,13 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
 	    // original version
 	    //A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
-	    
+
 	    if ( this->cyclicTparam == 0. ) {
 	      reductFactor = 1.;
 	    } else if ( ( status->giveTmax() - T_new < 0. ) || atTime->isTheFirstStep() ) {
 	      status->setTmax(T_new);
-	      reductFactor = 1.;   
-	    } else {         
+	      reductFactor = 1.;
+	    } else {
 	      reductFactor = exp( - this->cyclicTparam * fabs (T_new - status->giveTmax() ) );
 	    }
 

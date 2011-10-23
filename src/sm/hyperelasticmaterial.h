@@ -67,8 +67,8 @@ public:
 class HyperElasticMaterial : public StructuralMaterial
 {
 protected:
-    double K; ///< Bulk modulus
-    double G; ///< Shear modulus
+    double K; ///< Bulk modulus.
+    double G; ///< Shear modulus.
 
 public:
     HyperElasticMaterial(int n, Domain *d);

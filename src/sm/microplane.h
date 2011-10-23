@@ -78,7 +78,7 @@ public:
     /**
      * Creates microplane integration point belonging
      * to given element, with given number, integration weight, coordinates and material mode.
-     * @param e Element to which integration point belongs to.
+     * @param ir Integration rule to which integration point belongs to.
      * @param n Integration point number.
      * @param mode Material mode.
      */

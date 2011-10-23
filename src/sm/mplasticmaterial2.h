@@ -62,7 +62,7 @@ class GaussPoint;
  * -# state during searching new equilibrium (variables with temp)
  *    when we start search new state from previous equilibrium one we copy
  *    non-tem variables into temp ones. And after we reach new equilibrium
- *    (now decribed by temp variables) we copy tem-var into non-tepm ones
+ *    (now described by temp variables) we copy tem-var into non-tepm ones
  *    (see function updateYourself).
  */
 class MPlasticMaterial2Status : public StructuralMaterialStatus
@@ -279,10 +279,11 @@ protected:
     /**
      * Computes the increment of strain-space hardening variables.
      * @param answer Result.
+     * @param gp Gauss point to compute at.
      * @param stress Updated stress (corresponds to newly reached state).
      * @param dlambda Increment of consistency parameters.
      * @param dplasticStrain Actual plastic strain increment.
-     * @param activeConditionMas Array of active yield conditions.
+     * @param activeConditionMap Array of active yield conditions.
      */
     virtual void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                                      const FloatArray &stress, const FloatArray &dlambda,

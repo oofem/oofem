@@ -78,6 +78,8 @@ protected:
      * @param dofArray Array of ids of Dofs of slave_node to chose from.
      * @param dofs Number of Dofs in dofArray.
      * @param answer Array of ids of Dofs in dofArray with compatible BCs.
+     * @param mode Mode of Dof values.
+     * @param tStep Active time step.
      * @return Number of Dofs with compatible BCs.
      */
     int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray *answer,

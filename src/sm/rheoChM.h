@@ -279,7 +279,7 @@ protected:
      * @param answer Returned strain vector.
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     * @param determines Response mode (Total or incremental).
+     * @param mode Determines response mode (Total or incremental).
      */
     void computeTrueStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp,
                                                   TimeStep *tStep, ValueModeType mode);

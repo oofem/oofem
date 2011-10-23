@@ -122,7 +122,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @param time Time.
      */
-    virtual void surfaceEvaldNdx (FloatMatrix&answer, int iedge,
+    virtual void surfaceEvaldNdx (FloatMatrix&answer, int isurf,
             const FloatArray& lcoords, const FEICellGeometry& cellgeo, double time)
     {
         OOFEM_ERROR("FEInterpolation3D :: surfaceEvaldNdx - Not implemented");

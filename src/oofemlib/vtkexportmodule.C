@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/vtkexportmodule.C,v 1.11.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -1094,7 +1093,7 @@ VTKExportModule :: giveSmoother()
 	this->smoother-> setRecoveryMode ((-1)*d->giveNumberOfRegions(), vrmap);
       }
     }
-    
+
     return this->smoother;
 }
 

@@ -1,36 +1,35 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/isodamagemodel.C,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
- *****    *****   ******  ******  ***   ***
- **   **  **   **  **      **      ** *** **
- **   **  **   **  ****    ****    **  *  **
- **   **  **   **  **      **      **     **
- **   **  **   **  **      **      **     **
- *****    *****   **      ******  **     **
- *****
- *****
- *****         OOFEM : Object Oriented Finite Element Code
- *****
- *****           Copyright (C) 1993 - 2000   Borek Patzak
- *****
- *****
- *****
- *****   Czech Technical University, Faculty of Civil Engineering,
- *****Department of Structural Mechanics, 166 29 Prague, Czech Republic
- *****
- *****This program is free software; you can redistribute it and/or modify
- *****it under the terms of the GNU General Public License as published by
- *****the Free Software Foundation; either version 2 of the License, or
- *****(at your option) any later version.
- *****
- *****This program is distributed in the hope that it will be useful,
- *****but WITHOUT ANY WARRANTY; without even the implied warranty of
- *****MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *****GNU General Public License for more details.
- *****
- *****You should have received a copy of the GNU General Public License
- *****along with this program; if not, write to the Free Software
- *****Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #include "trabboneembed.h"
@@ -42,35 +41,10 @@
 #include "contextioerr.h"
 
 namespace oofem {
-/////////////////////////////////////////////////////////////////
-///////////TRABECULAR BONE EMBEDDING MATERIAL////////////////////
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-//
 
 TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
-
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: MODE COMPATIBILITY
-// returns whether receiver supports given mode
 
 int
 TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
@@ -82,28 +56,12 @@ TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 
-//
-// END: MODE COMPATIBILITY
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF ALPHA EVALUATION
-//
 
 void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *atTime)
 {
     tempAlpha = 0.;
 }
 
-//
-// END: SUBROUTINE OF ALPHA EVALUATION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: EVALUATION OF STIFFNESS MATRIX
-//
 
 void
 TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -123,14 +81,6 @@ TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     status->setSmtrx(answer);
 }
 
-//
-// END: EVALUATION OF STIFFNESS MATRIX
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF PLASTIC RETURN ALGORITHM
-//
 
 void
 TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
@@ -147,14 +97,6 @@ TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &total
     status->setTempAlpha(tempAlpha);
 }
 
-//
-// END: SUBROUTINE OF PLASTIC RETURN ALGORITHM
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: FUNCTION FOR DAMAGE PARAMETER
-//
 
 double
 TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp)
@@ -163,15 +105,7 @@ TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp)
 
     return tempDam;
 }
-//
-//
-// END: FUNCTION FOR DAMAGE PARAMETER
-/////////////////////////////////////////////////////////////////
 
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: FUNCTION FOR DAMAGE EVALUATION
-//
 
 double
 TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
@@ -187,17 +121,6 @@ TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
     return tempDam;
 }
 
-//
-// END: FUNCTION FOR DAMAGE EVALUATION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
 
 void
 TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
@@ -237,13 +160,6 @@ TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     status->setTempTSED(tempTSED);
 }
 
-//
-// END: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: MATRIX DEFINITION
 
 void
 TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0, const double nu0)
@@ -259,14 +175,6 @@ TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0,
     return;
 }
 
-//
-// END: MATRIX DEFINITION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PARAMETERS OF INPUT FILE
-//
 
 IRResultType
 TrabBoneEmbed :: initializeFrom(InputRecord *ir)
@@ -274,7 +182,7 @@ TrabBoneEmbed :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    /// Read material properties here
+    // Read material properties here
 
     IR_GIVE_FIELD(ir, eps0, IFT_TrabBoneEmbed_eps0, "eps0"); // Macro
     IR_GIVE_FIELD(ir, nu0, IFT_TrabBoneEmbed_nu0, "nu0"); // Macro
@@ -282,13 +190,6 @@ TrabBoneEmbed :: initializeFrom(InputRecord *ir)
     return StructuralMaterial :: initializeFrom(ir);
 }
 
-//
-// END: PARAMETERS OF INPUT FILE
-/////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: VTK Output
-//
 
 int
 TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
@@ -326,6 +227,7 @@ TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
     }
 }
 
+
 InternalStateValueType
 TrabBoneEmbed :: giveIPValueType(InternalStateType type)
 {
@@ -337,6 +239,7 @@ TrabBoneEmbed :: giveIPValueType(InternalStateType type)
         return StructuralMaterial :: giveIPValueType(type);
     }
 }
+
 
 int
 TrabBoneEmbed :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
@@ -391,19 +294,9 @@ TrabBoneEmbed :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint
     }
 }
 
-//
-// END: PARAMETERS OF INPUT FILE
-/////////////////////////////////////////////////////////////////
-
-
 /////////////////////////////////////////////////////////////////
 //////////////////TRABECULAR BONE STATUS/////////////////////////
 /////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-// init state variables
 
 TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
@@ -416,26 +309,10 @@ TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : St
     smtrx.resize(6, 6);
 }
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
 
 TrabBoneEmbedStatus :: ~TrabBoneEmbedStatus()
 {}
 
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DEFINITION OF "GIVE PARAMETER"
-//
 
 double
 TrabBoneEmbedStatus :: giveTempTSED()
@@ -443,14 +320,6 @@ TrabBoneEmbedStatus :: giveTempTSED()
     return tempTSED;
 }
 
-//
-// END: DEFINITION OF "GIVE PARAMETER"
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: OUTPUT
-// print state to output stream
 
 void
 TrabBoneEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -462,14 +331,6 @@ TrabBoneEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
-//
-// END: OUTPUT
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-// initialize temporary state variables according to equilibriated state vars
 
 void
 TrabBoneEmbedStatus :: initTempStatus()
@@ -481,14 +342,6 @@ TrabBoneEmbedStatus :: initTempStatus()
     this->tempPlasDef = this->plasDef;
 }
 
-//
-// END: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-// Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
 void
 TrabBoneEmbedStatus :: updateYourself(TimeStep *atTime)
@@ -500,14 +353,6 @@ TrabBoneEmbedStatus :: updateYourself(TimeStep *atTime)
     this->plasDef = this->tempPlasDef;
 }
 
-//
-// END: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERRUPT RESTART UTILITY - SAVE
-//
 
 contextIOResultType
 TrabBoneEmbedStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -526,14 +371,6 @@ TrabBoneEmbedStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
     return CIO_OK;
 }
 
-//
-// END: INTERRUPT RESTART UTILITY - SAVE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERRUPT RESTART UTILITY - RESTORE
-//
 
 contextIOResultType
 TrabBoneEmbedStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
@@ -552,14 +389,6 @@ TrabBoneEmbedStatus :: restoreContext(DataStream *stream, ContextMode mode, void
     return CIO_OK;
 }
 
-//
-// END: INTERRUPT RESTART UTILITY - RESTORE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CREATE STATUS
-//
 
 MaterialStatus *TrabBoneEmbed :: CreateStatus(GaussPoint *gp) const
 {
@@ -568,7 +397,4 @@ MaterialStatus *TrabBoneEmbed :: CreateStatus(GaussPoint *gp) const
     return status;
 }
 
-//
-// END: CREATE STATUS
-/////////////////////////////////////////////////////////////////
 } // end namespace oofem

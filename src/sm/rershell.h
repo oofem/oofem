@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **************************
-//   *** CLASS   RerShell   ***
-//   **************************
 #ifndef rershell_h
 #define rershell_h
 
@@ -63,9 +60,7 @@ enum CharTensor {
  */
 class RerShell : public CCTPlate
 {
-
 protected:
-
     double Rx, Ry, Rxy;
     FloatMatrix *GtoLRotationMatrix;
 
@@ -74,8 +69,8 @@ protected:
     // efficiency
 
 public:
-    RerShell(int, Domain *);                            // constructor
-    ~RerShell()  { delete GtoLRotationMatrix; }         // destructor
+    RerShell(int n, Domain *d);
+    ~RerShell() { delete GtoLRotationMatrix; }
 
     // FloatMatrix* ComputeConstitutiveMatrixAt (GaussPoint *) ;
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -84,111 +79,61 @@ public:
     //void printOutputAt (TimeStep*) ;
     FloatMatrix *computeGtoLRotationMatrix();
     int giveLocalCoordinateSystem(FloatMatrix &answer);
-    void giveLocalCoordinates(FloatArray &answer, FloatArray &);
-    /**
-     * Computes the element local (iso) coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
+    void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
+
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     //
-    void giveCharacteristicTensor(FloatMatrix & answer, CharTensor, GaussPoint *, TimeStep *);
-    void printOutputAt(FILE *, TimeStep *);
-    //
+    void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep);
+
     // layered cross section support functions
-    //
     void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                                   GaussPoint *slaveGp, TimeStep *tStep);
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
+
     int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    /**
-     * Returns the corresponding element to interface
-     */
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    /**
-     * Evaluates N matrix (interpolation estimated stress matrix).
-     */
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
-    //@}
-    /**
-     * @name The element interface required by NodalAveragingRecoveryModel
-     */
-    //@{
-    /**
-     * Computes the element value in given node.
-     * @param answer contains the result
-     * @param node element node number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
+
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    /**
-     * Computes the element value in given side.
-     * @param answer contains the result
-     * @param node element side number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    //@}
 
-    /* The element interface required by SPRNodalRecoveryModelInterface not implemented
-     * because the least square fit must be made in local shell coordinate system-not implemented
-     */
 
-    //
     // io routines
-    //
 #ifdef __OOFEG
-    //   void          drawRawGeometry (oofegGraphicContext&);
-    //   void          drawDeformedGeometry(oofegGraphicContext&);
-    //     virtual void  drawScalar   (oofegGraphicContext& context);
-    // void          drawInternalState (oofegGraphicContext&);
+    //void drawRawGeometry(oofegGraphicContext &);
+    //void drawDeformedGeometry(oofegGraphicContext &);
+    //virtual void drawScalar(oofegGraphicContext &context);
+    //void drawInternalState(oofegGraphicContext &);
 #endif
-    //
-    //
+
     // definition & identification
-    //
     const char *giveClassName() const { return "RerShell"; }
     classType giveClassID() const { return RerShellClass; }
+
     IRResultType initializeFrom(InputRecord *ir);
 
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode()  { return _3dShell; }
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    MaterialMode giveMaterialMode() { return _3dShell; }
 
 protected:
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    int computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
-    //int computeGtoNRotationMatrix (FloatMatrix&);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    int computeGtoLRotationMatrix(FloatMatrix &answer);
     void computeGaussPoints();
     double giveArea();
 };

@@ -63,9 +63,10 @@ protected:
     double damage;
     /// Non-equilibrated damage level of material.
     double tempDamage;
-    /** Characteristic element length,
-     *  computed when damage initialized from direction of
-     *  maximum positive principal strain. Fixed during further loading.
+    /**
+     * Characteristic element length,
+     * computed when damage initialized from direction of
+     * maximum positive principal strain. Fixed during further loading.
      */
     double le;
     /// Angle characterizing the crack direction.
@@ -209,6 +210,8 @@ public:
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.
      * @param kappa Equivalent strain measure.
+     * @param strain Total strain in full form.
+     * @param gp Integration point.
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) = 0;
     /**

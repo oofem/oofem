@@ -40,7 +40,7 @@
 namespace oofem {
 /**
  * Class representing a 2d line quadratic interpolation.
- * @todo{Some more routines to be implemented here}
+ * @todo Some more routines to be implemented here.
  * @author Mikael Öhman
  */
 class FEI2dLineQuad : public FEInterpolation2d

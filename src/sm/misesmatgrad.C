@@ -1,16 +1,16 @@
 /*
  *
- *****    *****   ******  ******  ***   ***
- **   **  **   **  **      **      ** *** **
- **   **  **   **  ****    ****    **  *  **
- **   **  **   **  **      **      **     **
- **   **  **   **  **      **      **     **
- *****    *****   **      ******  **     **
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
  *
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2000   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 
 #include "misesmatgrad.h"
 #include "stressvector.h"
@@ -64,30 +63,17 @@ double sig(double number) {
         return 0;
     }
 }
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-//
 
 MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d)
 {
     R = 0.;
 }
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
 
 MisesMatGrad :: ~MisesMatGrad()
 {}
 
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
+
 int
 MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 {
@@ -168,11 +154,6 @@ MisesMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
 }
 
 
-
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: EVALUATION OF LOCAL STIFFNESS MATRIX
 
 void
 MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
@@ -571,26 +552,10 @@ MisesMatGradStatus :: MisesMatGradStatus(int n, Domain *d, GaussPoint *g) :
     MisesMatStatus(n, d, g)
 {}
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
 
 MisesMatGradStatus :: ~MisesMatGradStatus()
 {}
 
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PRINTOUT
-//
 
 void
 MisesMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep)

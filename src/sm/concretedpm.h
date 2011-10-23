@@ -269,7 +269,7 @@ public:
 
     /**
      * Assign the temp value of the hardening variable of the plasticity model.
-     * @v new temp value of the hardening variable
+     * @param v New temp value of the hardening variable
      */
     void  letTempKappaPBe(const double v)
     { tempKappaP = v; }
@@ -434,24 +434,18 @@ public:
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-
-    /**
-     * Computes real macro stress in corresponding macro integration point for
-     * given macroscopic strain vector.
-     */
-    void  giveRealStressVector(FloatArray &answer,
-                               MatResponseForm form,
-                               GaussPoint *gp,
-                               const FloatArray &strainVector,
-                               TimeStep *atTime);
+    void giveRealStressVector(FloatArray &answer,
+                              MatResponseForm form,
+                              GaussPoint *gp,
+                              const FloatArray &reducedStrain,
+                              TimeStep *tStep);
 
 
     /**
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.
      */
-    void  performPlasticityReturn(GaussPoint *gp,
-                                  StrainVector &strain);
+    void performPlasticityReturn(GaussPoint *gp, StrainVector &strain);
 
     /**
      * Check if the trial stress state falls within the vertex region of the plasticity model at the apex of triaxial extension or triaxial compression.
@@ -476,7 +470,7 @@ public:
 
     /**
      * Perform stress return for vertex case of the plasticity model, i.e. if the trial stress state lies within the vertex region.
-     * @param strain Strain vector of this Gauss point.
+     * @param stress Stress vector of this Gauss point.
      * @param apexStress Volumetric stress at the apex of the yield surface.
      * @param gp Gauss point.
      */
@@ -642,9 +636,10 @@ public:
      * Perform stress return for the damage model, i.e. if the trial stress state does not violate the plasticity surface.
      * @param strain Strain.
      * @param gp Gauss point.
+     * @param tStep Time step.
      * @return Damage.
      */
-    double computeDamage(const StrainVector &strain, GaussPoint *gp, TimeStep *atTime);
+    double computeDamage(const StrainVector &strain, GaussPoint *gp, TimeStep *tStep);
 
 
 
@@ -655,7 +650,7 @@ public:
     double computeInverseDamage(double dam, GaussPoint *gp);
 
     /// Compute equivalent strain value.
-    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &elasticStrain, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &elasticStrain, GaussPoint *gp, TimeStep *tStep);
 
 
     /// Compute the ductility measure for the damage model.
@@ -701,7 +696,7 @@ public:
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,
-                    TimeStep *atTime);
+                    TimeStep *tStep);
 
     int giveIPValueSize(InternalStateType type,
                         GaussPoint *gp);

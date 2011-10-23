@@ -76,12 +76,12 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     const char *giveClassName() const { return "KelvinChainSolidMaterial"; }
-    classType giveClassID()         const { return KelvinChainSolidMaterialClass; }
+    classType giveClassID() const { return KelvinChainSolidMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
                                             MatResponseForm form,
@@ -102,14 +102,14 @@ protected:
     /// Evaluation of the creep compliance function - function useless here
     virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime);
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
 
     /// Evaluation of the relative volume of the solidified material
-    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime) = 0;
+    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) = 0;
 
     /// factors for exponential algorithm
-    virtual double computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu);
-    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *atTime, double Mu);
+    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, double Mu);
+    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, double Mu);
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

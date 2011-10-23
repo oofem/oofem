@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -424,7 +423,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
 	    if ( _boundary.at(inode) ) {
 	      continue;
 	    }
-	    
+
 	    if ( fabs( w.at(inode) ) > 0.0 ) {
 	      //two stage integration
 	      // update

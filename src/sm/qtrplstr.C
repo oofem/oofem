@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/qtrplstr.C,v 1.5 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -72,9 +71,9 @@ Interface *
 QTrPlaneStress2d :: giveInterface(InterfaceType interface)
 {
   /*
-    Note ZZNodalRecoveryModelInterface disabled, as the 
+    Note ZZNodalRecoveryModelInterface disabled, as the
     sum of row entries is zero for (N^T)N matrix for vertices,
-    yielding zero entries in lumped form. 
+    yielding zero entries in lumped form.
 
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;

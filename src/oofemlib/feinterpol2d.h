@@ -74,7 +74,7 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    virtual void edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("FEInterpolation2d :: edgeEvalNormal - Not implemented in subclass."); }
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.

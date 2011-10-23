@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/Attic/rankinepm.h,v 1.1.2.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **********************************
-//   *** CLASS Rankine plastic material
-//   **********************************
-
 #ifndef rankinepm_h
 #define rankinepm_h
 
@@ -47,22 +42,22 @@ class Domain;
 
 /**
  * This class implements a isotropic  plastic linear material (J2 plasticity condition is used)
- *      in a finite element problem. A material
- * is an attribute of a domain. It is usually also attribute of many elements.
+ * in a finite element problem.
  */
 class RankinePlasticMaterial : public MPlasticMaterial
 {
 protected:
-    /// yield value
+    /// Yield value.
     double k;
-public:
 
+public:
     RankinePlasticMaterial(int n, Domain *d);
     ~RankinePlasticMaterial();
 
     IRResultType initializeFrom(InputRecord *ir);
+
     const char *giveClassName() const { return "RankinePlasticMaterial"; }
-    classType giveClassID()         const { return PerfectlyPlasticMaterialClass; }
+    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
@@ -72,7 +67,6 @@ protected:
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
-    /// Computes the value of yield function
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
                                const FloatArray &stressSpaceHardeningVars);
 

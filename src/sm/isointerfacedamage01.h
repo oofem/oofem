@@ -171,6 +171,7 @@ public:
      * computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.
      * @param kappa Equivalent strain measure.
+     * @param strain Total strain vector in full form. (unnecessary?)
      * @param gp Integration point.
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);

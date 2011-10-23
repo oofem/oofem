@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/polylinenonlocalbarrier.h,v 1.2.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// class PolylineNonlocalBarrier
-//
 #ifndef polylinenonlocalbarrier_h
 #define polylinenonlocalbarrier_h
 
@@ -47,7 +42,7 @@
 
 namespace oofem {
 /**
- * Implemantation of polyline nonlocal barier.
+ * Implemantation of polyline nonlocal barrier.
  * It is a composite one-dimensional cell consisting of one or more connected lines.
  * The polyline is defined by an ordered list of n+1 vertices (nodes),
  * where n is the number of lines in the polyline.
@@ -60,15 +55,15 @@ namespace oofem {
  * remote point has nonzero value. The barrier allows to exclude additional points,
  * which may be close enough, but due to several reasons there is no influence
  * between these points (for example, they can be  separated by a notch).
- *
- * @see NonlocalBarrier class.
  */
 class PolylineNonlocalBarrier : public NonlocalBarrier
 {
 protected:
-    /// local coordinate indexes
-    int localXCoordIndx, localYCoordIndx;
-    /// list of polyline vertices
+    /// Local x-coordinate index.
+    int localXCoordIndx;
+    /// Local y-coordinate index.
+    int localYCoordIndx;
+    /// List of polyline vertices.
     IntArray vertexNodes;
 
 public:
@@ -77,43 +72,19 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    PolylineNonlocalBarrier(int n, Domain *aDomain);  // constructors
+    PolylineNonlocalBarrier(int n, Domain *aDomain);
     /// Virtual destructor.
-    virtual ~PolylineNonlocalBarrier();                // destructor
+    virtual ~PolylineNonlocalBarrier();
 
-    /**
-     * Returns true if the barrier is activated
-     * by interaction of two given points. In this case the nonlocal influence
-     * is not considered. Otherwise returns false.
-     * @param c1 coordinates of first point
-     * @param c2 coordinates of second point
-     * @return true if barrier is activated, false otherwise
-     */
     virtual bool isActivated(const FloatArray &c1, const FloatArray &c2);
-    /**
-     * Abstract method modifying the integration weight between master (c1) and source (c2) point.
-     * @param c1 coordinates of master point
-     * @param c2 coordinates of source point
-     * @param weight original integration weight; on output modified weight
-     * @param shieldFlag (output param; set to true if shielding is activated)
-     */
+
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, NonlocalMaterialExtensionInterface *nei);
-    /** Initializes receiver acording to object description stored in input record.
-     * This function is called immediately after creating object using
-     * constructor. Input record can be imagined as data record in component database
-     * belonging to receiver. Receiver may use value-name extracting functions
-     * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
+
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "PolylineNonlocalBarrier"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return PolylineNonlocalBarrierClass; }
+    classType giveClassID() const { return PolylineNonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // polylinenonlocalbarrier_h

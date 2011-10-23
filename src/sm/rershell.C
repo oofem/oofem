@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -608,7 +608,7 @@ RerShell ::  computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatri
 
 
 void
-RerShell :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
+RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 //
 // Returns global coordinates given in global vector
 // transformed into local coordinate system of the

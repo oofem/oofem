@@ -448,7 +448,8 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
 }
 
 //returns material rotation stiffness matrix [6x6]
-int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp) {
+int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
+{
     FloatMatrix t(3, 3);
     StructuralElement *element = ( StructuralElement * ) gp->giveElement();
     MaterialMode mMode = gp->giveMaterialMode();
