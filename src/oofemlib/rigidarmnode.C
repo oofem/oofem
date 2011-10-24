@@ -81,11 +81,11 @@ RigidArmNode :: deallocAuxArrays(void)
         delete masterContribution [ i ];
     }
 
-    delete masterDofID;
-    delete masterContribution;
+    delete[] masterDofID;
+    delete[] masterContribution;
 
     // only delete
-    delete masterNode;
+    delete[] masterNode;
 }
 
 
