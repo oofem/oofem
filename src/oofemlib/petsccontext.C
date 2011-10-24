@@ -51,7 +51,7 @@ PetscContext :: PetscContext(EngngModel *e, EquationID ut, bool naturalVectors)
     else
 #endif
         comm = PETSC_COMM_SELF;
-    this->naturalVectors = true;
+    this->naturalVectors = naturalVectors;
     this->emodel = e;
     this->ut = ut;
     n2gvecscat = NULL;
@@ -193,7 +193,7 @@ PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
     dest->resize(neqs);
     VecGetArray(src, & ptr);
     for ( i = 0; i < neqs; i++ ) {
-        (*dest)(i) = ptr [ i ];
+        dest->at(i + 1) = ptr [ i ];
     }
 
     VecRestoreArray(src, & ptr);

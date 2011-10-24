@@ -38,7 +38,7 @@
 #ifdef __PETSC_MODULE
 
  #ifndef __MAKE_DEPEND
-  #include <petscksp.h>
+  #include <petscvec.h>
  #endif
 
  #include "petscordering.h"
@@ -51,6 +51,10 @@ class DofManager;
 
 /**
  * This class provides an communication context to PETSc library.
+ * Tasks:
+ * - Keeping track of the parallel communicator.
+ * - Creating suitable parallel objects.
+ * - Determining owner for shared dof managers.
  */
 class PetscContext
 {
@@ -74,11 +78,26 @@ protected:
  #endif
 
 public:
-    PetscContext(EngngModel *e, EquationID ut, bool naturalVectors = true);
+    /**
+     * Creates a context belonging to a system of equations in a given engineering model.
+     * @param e Engineering model to work with.
+     * @param eid Equation ID to work with.
+     * @param naturalVectors Should be true if shared dofs only contain the local contributions.
+     * Some engineering models manually scatter local vectors to their global value, in which case this would be false.
+     */
+    PetscContext(EngngModel *e, EquationID eid, bool naturalVectors = true);
     ~PetscContext();
 
+    /**
+     * Initiates the mapping for given domain.
+     * @param di Domain index.
+     */
     void init(int di);
 
+    /**
+     * Gives the communicator for parallel (if active).
+     * @return Parallel communicator object (typically PETSC_COMM_WORLD). Gives the self communicator if engineering problem isn't parallel.
+     */
     MPI_Comm giveComm() { return comm; };
 
     int giveNumberOfLocalEqs();
@@ -87,6 +106,7 @@ public:
 
     /// Scatters global vector to natural one.
     int scatterG2N(Vec src, Vec dest, InsertMode mode);
+    /// Scatters global vector to natural one.
     int scatterG2N(Vec src, FloatArray *dest, InsertMode mode);
 
     /// Scatters vectors (natural or local) to a global one. Uses the naturalVectors variable to determine.
@@ -94,7 +114,9 @@ public:
 
     /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
     int scatterN2G(Vec src, Vec dest, InsertMode mode);
+    /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
     int scatterN2G(const FloatArray *src, Vec dest, InsertMode mode);
+
     /**
      * Scatters and gathers vector in natural ordering to global (parallel) one,
      * but only local entries are processed.
