@@ -314,6 +314,17 @@ PetscContext :: isLocal(DofManager *dman)
 
 
 double
+PetscContext :: norm(const FloatArray &src)
+{
+    if ( this->naturalVectors ) {
+        return this->naturalNorm(src);
+    } else {
+        return this->localNorm(src);
+    }
+}
+
+
+double
 PetscContext :: localNorm(const FloatArray &src)
 {
 #ifdef __PARALLEL_MODE
@@ -370,6 +381,18 @@ PetscContext :: naturalNorm(const FloatArray &src)
 #endif
     return src.computeNorm();
 }
+
+
+double
+PetscContext :: dotProduct(const FloatArray &a, const FloatArray &b)
+{
+    if ( this->naturalVectors ) {
+        return this->naturalDotProduct(a, b);
+    } else {
+        return this->localDotProduct(a, b);
+    }
+}
+
 
 double
 PetscContext :: naturalDotProduct(const FloatArray &a, const FloatArray &b)

@@ -127,22 +127,31 @@ public:
     //@{
     bool isLocal(DofManager *dman);
     /**
-     * Norm for a naturally distributed array
+     * Norm for a distributed array.
+     * Common for convergence criterion and such.
+     */
+    double norm(const FloatArray &src);
+    /**
+     * Norm for a naturally distributed array.
      * Common for convergence criterion and such.
      */
     double naturalNorm(const FloatArray &src);
     /**
-     * Norm for a locally distributed array
+     * Norm for a locally distributed array.
      * Common for convergence criterion and such.
      */
     double localNorm(const FloatArray &src);
 
     /**
+     * Dot product for a distributed array.
+     * Common for convergence criterion and such.
+     */
+    double dotProduct(const FloatArray &a, const FloatArray &b);
+    /**
      * Dot product for a locally distributed array.
      * Common for convergence criterion and such.
      */
     double localDotProduct(const FloatArray &a, const FloatArray &b);
-
     /**
      * Dot product for a naturally distributed array.
      * Common for convergence criterion and such.
