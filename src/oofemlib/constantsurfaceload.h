@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***********************************
-//   *** CLASS CONSTANT SURFACE LOAD ***
-//   ***********************************
-
 #ifndef constantsurfaceload_h
 #define constantsurfaceload_h
 
@@ -43,8 +39,6 @@
 #include "gausspnt.h"
 
 namespace oofem {
-class TimeStep;
-
 
 /**
  * This class implements a boundary load (force, moment,...) that acts
@@ -71,8 +65,14 @@ public:
     ConstantSurfaceLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
 
     // Overloaded methods:
-    void computeValueAt(FloatArray &answer, TimeStep *, FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     int giveApproxOrder() { return 0; }
+
+    /**
+     * Sets a new load vector.
+     * @param newValue New load.
+     */
+    void updateLoad(const FloatArray newValue) { componentArray = newValue; };
 
     IRResultType initializeFrom(InputRecord *ir);
     bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }

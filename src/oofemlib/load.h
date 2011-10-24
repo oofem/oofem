@@ -100,12 +100,6 @@ public:
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) = 0;
     /**
-     * Sets a new value for the component array.
-     * Overloading methods might need to make sure the size if correct.
-     * @param v New component array for the load.
-     */
-    virtual void setComponentArray(const FloatArray &v) { componentArray = v; }
-    /**
      * Returns the value of dofExcludeMask corresponding to given index.
      * See the description of dofExcludeMask attribute for more details.
      * @param index Index to check at.
