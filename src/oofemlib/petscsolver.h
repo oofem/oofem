@@ -55,8 +55,6 @@ class FloatMatrix;
 class PetscSolver : public SparseLinearSystemNM
 {
 public:
-    bool useLocal; // Temporary fix for determining local or natural load vectors.
-
     /**
      * Constructor.
      * @param i Solver number.

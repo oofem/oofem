@@ -241,7 +241,6 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // allocate space for displacementVector
         //
-        //displacementVector = new FloatArray (this->giveNumberOfEquations());
         displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         displacementVector.zero();
 
@@ -259,62 +258,39 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling load\n");
 #endif
 
-#ifdef __PETSC_MODULE
-    // direct interface to PETSC
-    if ( solverType == ST_Petsc ) {
-        VecSetOption(_loadVec, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
-        this->petsc_assembleVectorFromElements( _loadVec, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1) );
-        this->petsc_assembleVectorFromElements( _loadVec, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1) );
-        this->petsc_assembleVectorFromDofManagers( _loadVec, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1) );
-        VecAssemblyBegin(_loadVec);
-        VecAssemblyEnd(_loadVec);
-        this->giveNumericalMethod(tStep);
- #ifdef VERBOSE
-        OOFEM_LOG_INFO("Solving ...\n");
- #endif
+    //
+    // assembling the element part of load vector
+    //
+    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    loadVector.zero();
 
-        //nMethod -> solveYourselfAt(tStep);
-        PetscSolver *ps = dynamic_cast< PetscSolver * >(nMethod);
-        PetscSparseMtrx *psm = dynamic_cast< PetscSparseMtrx * >(stiffnessMatrix);
-        ps->petsc_solve(psm, _loadVec, _dispVec);
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-        this->givePetscContext(1, EID_MomentumBalance)->scatterG2N(_dispVec, & displacementVector, INSERT_VALUES);
-    } else
-#endif
-    {
-        //
-        // assembling the element part of load vector
-        //
-        //loadVector = new FloatArray (this->giveNumberOfEquations());
-        loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-        loadVector.zero();
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    //
+    // assembling the nodal part of load vector
+    //
+    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    //
+    // set-up numerical model
+    //
+    this->giveNumericalMethod(tStep);
 
-        //
-        // assembling the nodal part of load vector
-        //
-        this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-        //
-        // set-up numerical model
-        //
-        this->giveNumericalMethod(tStep);
-
-        //
-        // call numerical model to solve arose problem
-        //
+    //
+    // call numerical model to solve arose problem
+    //
 #ifdef VERBOSE
-        OOFEM_LOG_INFO("Solving ...\n");
+    OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-        //nMethod -> solveYourselfAt(tStep);
-        nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
+    NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
+    if ( !(s & NM_Success) ) {
+        OOFEM_ERROR("LinearStatic :: solverYourselfAt - No success in solving system.");
     }
 
     tStep->incrementStateCounter();            // update solution state counter

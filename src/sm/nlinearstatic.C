@@ -1037,7 +1037,8 @@ contextIOResultType NonLinearStatic :: restoreContext(DataStream *stream, Contex
 
 
 void
-NonLinearStatic :: updateDomainLinks() {
+NonLinearStatic :: updateDomainLinks()
+{
     LinearStatic :: updateDomainLinks();
 
     this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
@@ -1049,6 +1050,17 @@ NonLinearStatic :: updateDomainLinks() {
 #endif
 }
 
+
+#ifdef __PETSC_MODULE
+void
+NonLinearStatic :: initPetscContexts()
+{
+    petscContextList->growTo(ndomains);
+    for ( int i = 1; i <= this->ndomains; i++ ) {
+        petscContextList->put(i, new PetscContext(this, EID_MomentumBalance, false)); // false == using local vectors.
+    }
+}
+#endif
 
 void
 NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,

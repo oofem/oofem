@@ -50,7 +50,7 @@
  #endif
 
 namespace oofem {
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m), useLocal(true) { }
+PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
 
 
 PetscSolver :: ~PetscSolver() { }
@@ -66,7 +66,7 @@ IRResultType PetscSolver :: initializeFrom(InputRecord *ir)
 
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
-    int neqs, l_eqs;
+    int neqs;
 
     // first check whether Lhs is defined
     if ( !A ) {
@@ -92,24 +92,18 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     }
 
     PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
-    l_eqs = Lhs->giveLeqs();
 
     Vec globRhsVec;
     Vec globSolVec;
 
- #ifdef __PARALLEL_MODE
+    // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
+    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() );
+
     /*
      * scatter and gather rhs to global representation
      */
-    if (engngModel->isParallel()) {
-        engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->createVecGlobal(& globRhsVec);
-        if (useLocal)
-            engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterL2G(b, globRhsVec, ADD_VALUES);
-        else
-            engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterN2G(b, globRhsVec, ADD_VALUES);
-    } else
- #endif
-    VecCreateSeqWithArray(PETSC_COMM_SELF, b->giveSize(), b->givePointer(), & globRhsVec);
+    context->createVecGlobal(& globRhsVec);
+    context->scatter2G(b, globRhsVec, ADD_VALUES);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
@@ -117,21 +111,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
- #ifdef __PARALLEL_MODE
-    if (engngModel->isParallel())
-        engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterG2N(globSolVec, x, INSERT_VALUES);
-    else
- #endif
-    {
-        double *ptr;
-        VecGetArray(globSolVec, & ptr);
-        x->resize(l_eqs);
-        for ( int i = 1; i <= l_eqs; i++ ) {
-            x->at(i) = ptr [ i - 1 ];
-        }
-
-        VecRestoreArray(globSolVec, & ptr);
-    }
+    context->scatterG2N(globSolVec, x, INSERT_VALUES);
 
     VecDestroy(globSolVec);
     VecDestroy(globRhsVec);
@@ -143,6 +123,7 @@ NM_Status
 PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 {
     int nite;
+    PetscErrorCode err;
     KSPConvergedReason reason;
     if ( Lhs->giveType() != SMT_PetscMtrx ) {
         _error("petsc_solve: PetscSparseMtrx Expected");
@@ -157,12 +138,8 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     if ( !Lhs->kspInit ) {
- #ifdef __PARALLEL_MODE
-        if (engngModel->isParallel())
-            KSPCreate(PETSC_COMM_WORLD, & Lhs->ksp);
-        else
- #endif
-        KSPCreate(PETSC_COMM_SELF, & Lhs->ksp);
+        MPI_Comm comm = engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->giveComm();
+        KSPCreate(comm, & Lhs->ksp);
         Lhs->kspInit = true;
     }
 
@@ -203,9 +180,10 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      *  Solve the linear system
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
-    //KSPSetRhs(Lhs->ksp,b);
-    //KSPSetSolution(Lhs->ksp,x);
-    KSPSolve(Lhs->ksp, b, x);
+    err = KSPSolve(Lhs->ksp, b, x);
+    if (err != 0) {
+	    OOFEM_ERROR2("PetscSolver::petsc_solve - Error when solving: %d\n", err);
+    }
     KSPGetConvergedReason(Lhs->ksp, & reason);
     KSPGetIterationNumber(Lhs->ksp, & nite);
 

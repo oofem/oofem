@@ -249,7 +249,10 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
-    nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
+    NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
+    if ( !(s & NM_Success) ) {
+        OOFEM_ERROR("IncrementalLinearStatic :: solverYourselfAt - No success in solving system.");
+    }
 }
 
 

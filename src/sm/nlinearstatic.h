@@ -183,6 +183,11 @@ public:
 
     virtual LoadBalancer *giveLoadBalancer();
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
+
+#endif
+
+#ifdef __PETSC_MODULE
+    virtual void initPetscContexts();
 #endif
 
 protected:
