@@ -222,8 +222,8 @@ void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Fl
     jacobianMatrix.resize(2,2);
     jacobianMatrix(0,0) = es1/J;
     jacobianMatrix(0,1) = es2/J;
-    jacobianMatrix(1,0) = -es2;
-    jacobianMatrix(1,1) = es1;
+    jacobianMatrix(1,0) = -es2/J;
+    jacobianMatrix(1,1) = es1/J;
 }
 
 double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
