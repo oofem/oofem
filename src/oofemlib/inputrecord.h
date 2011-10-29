@@ -501,6 +501,11 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_rho_gws,
 
     IFT_CemhydMatInputFileName,
+    IFT_CemhydMat_conductivitytype,
+    IFT_CemhydMat_capacitytype,
+    IFT_CemhydMat_densitytype,
+    IFT_CemhydMat_eachgp,
+    IFT_CemhydMat_nowarnings,
 
     IFT_B3Material_mode,
     IFT_B3Material_emodulimode,
@@ -866,6 +871,12 @@ enum InputFieldType {
 
     IFT_HydrationModelInterface_hydration,
     IFT_HydrationModelInterface_castAt,
+    
+    IFT_HydratingConcreteMat_castAt,
+    IFT_HydratingConcreteMat_hydrationModelType,
+    IFT_HydratingConcreteMat_conductivitytype,
+    IFT_HydratingConcreteMat_capacitytype,
+    IFT_HydratingConcreteMat_densitytype,
 
     IFT_TrabBoneMaterial_E0,
     IFT_TrabBoneMaterial_Eil,

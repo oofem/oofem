@@ -201,7 +201,7 @@ TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType 
 int
 TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    int size;
+    int size=0;
     MaterialMode mMode = aGaussPoint->giveMaterialMode();
     switch  ( mMode ) {
     case _2dHeat:

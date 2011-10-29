@@ -189,7 +189,11 @@ IGAElement::giveKnotSpanParallelMode(int knotSpanIndex) const
     return Element_remote;
   } else if (emode == Element_local) {
     return (elementParallelMode) this->knotSpanParallelMode.at(knotSpanIndex+1);
-  }
+  } else {
+    _error("Cannot determine elementParallelMode");
+  }  
+  
+  return Element_local;//to make compiler happy
 }
 
 #endif // __PARALLEL_MODE

@@ -270,6 +270,7 @@ enum classType {
     HydratingIsoHeatMaterialClass,
     HydratingTransportMaterialStatusClass,
     HydratingHeMoMaterialClass,
+    HydratingConcreteMatClass,
 
     HellmichMaterialClass,
     HellmichMaterialStatusClass,

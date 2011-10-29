@@ -74,7 +74,7 @@ TrAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 *area *weight *this->computeRadiusAt(aGaussPoint);
+    return 2.0 * area * weight * this->computeRadiusAt(aGaussPoint);
 }
 
 double
@@ -106,7 +106,7 @@ TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     length = sqrt(dx * dx + dy * dy);
     this->computeEgdeNMatrixAt(n, gp);
     radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
-    return 0.5 *length *radius *gp->giveWeight();
+    return 0.5 * length * radius * gp->giveWeight();
 }
 
 double

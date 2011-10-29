@@ -94,12 +94,11 @@ CemhydMat :: ~CemhydMat()
     /// destructor
 }
 
-///return incremental hydration heat since the last time step [J/m3].
-//Although mode = VM_total, this function return increment from the last call.
+///returns hydration power [W/m3 of concrete]
 void
 CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode) {
     double averageTemperature;
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     val.resize(1);
 
     if ( eachGP || ms == MasterCemhydMatStatus ) {
@@ -127,13 +126,13 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
 
 void
 CemhydMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     ms->letTempStateVectorBe(vec);
 }
 
 
 int CemhydMat :: giveCycleNumber(GaussPoint *gp) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -142,7 +141,7 @@ int CemhydMat :: giveCycleNumber(GaussPoint *gp) {
 }
 
 double CemhydMat :: giveTimeOfCycle(GaussPoint *gp) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -153,7 +152,7 @@ double CemhydMat :: giveTimeOfCycle(GaussPoint *gp) {
 
 
 double CemhydMat :: giveDoHActual(GaussPoint *gp) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -163,7 +162,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp) {
 
 //standard units are [Wm-1K-1]
 double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double conduct;
 
     if ( MasterCemhydMatStatus ) {
@@ -193,7 +192,7 @@ double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
 
 //normally it returns J/kg/K of concrete
 double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double capacityConcrete;
 
     if ( MasterCemhydMatStatus ) {
@@ -223,7 +222,7 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
 }
 
 double CemhydMat :: giveConcreteDensity(GaussPoint *gp) {
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double concreteBulkDensity;
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -288,7 +287,7 @@ CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeS
         double lastEquilibratedTemperature = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector().at(1);
         //double dt = atTime->giveTimeIncrement();
         double krate, EaOverR, val;
-        CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+        CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
         if ( MasterCemhydMatStatus ) {
             ms = MasterCemhydMatStatus;
         }
@@ -326,7 +325,7 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     } else {
-        ms = ( CemhydMatStatus * ) aGaussPoint->giveMaterialStatus();
+        ms = ( CemhydMatStatus * ) this->giveStatus(aGaussPoint);
     }
 
     if ( type == IST_HydrationDegree ) {
@@ -433,7 +432,7 @@ void CemhydMat :: clearWeightTemperatureProductVolume(Element *element) {
 
     for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
-        ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+        ms = ( CemhydMatStatus * ) this->giveStatus(gp);
         ms->setAverageTemperatureVolume(0.0, 0.0);
     }
 }
@@ -450,7 +449,7 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
     if ( !eachGP ) {
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
-            ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
+            ms = ( CemhydMatStatus * ) this->giveStatus(gp);
             //when more GPs are lumped to a master GP
             dV  = element->computeVolumeAround(gp);
             element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
@@ -486,11 +485,11 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 
     reinforcementDegree = 0.;
     //if you want computation of material properties directly from CEMHYD3D, sum up 1 for density, 2 for conductivity, 4 for capacity
-    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_HydratingIsoHeatMaterial_hydration, "conductivitytype"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_HydratingIsoHeatMaterial_hydration, "capacitytype"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_HydratingIsoHeatMaterial_hydration, "densitytype"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_HydratingIsoHeatMaterial_hydration, "eachgp"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_HydratingIsoHeatMaterial_hydration, "nowarnings"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_CemhydMat_conductivitytype, "conductivitytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_CemhydMat_capacitytype, "capacitytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_CemhydMat_densitytype, "densitytype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_CemhydMat_eachgp, "eachgp"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_CemhydMat_nowarnings, "nowarnings"); // Macro
     if ( nowarnings.giveSize() != 4 ) {
         OOFEM_ERROR2( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
@@ -7381,6 +7380,7 @@ double CemhydMatStatus :: GiveIncrementalHeat(double GiveTemp, double TargTime) 
     double castingTime = 0.;
 #endif
 
+    //do not calculate anything before casting time 
     if ( TargTime - castingTime <= 0 ) {
         PartHeat = 0.;
         LastCallTime = castingTime;
@@ -7390,7 +7390,7 @@ double CemhydMatStatus :: GiveIncrementalHeat(double GiveTemp, double TargTime) 
     LastTargTime = TargTime;
 
     if ( TargTime < LastCallTime ) {
-        printf("Cannot go backwards in hydration, time_now = %f s < last_time = %f s\n", TargTime, LastCallTime);
+        printf("Cannot go backwards in hydration, TargTime = %f s < LastCallTime = %f s\n", TargTime, LastCallTime);
         exit(0);
     }
 
@@ -14304,7 +14304,7 @@ CemhydMatStatus :: updateYourself(TimeStep *atTime) {
 
 double CemhydMatStatus :: giveAverageTemperature(void) {
     CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
-    CemhydMatStatus *ms = ( CemhydMatStatus * ) this->gp->giveMaterialStatus();
+    CemhydMatStatus *ms = ( CemhydMatStatus * ) cemhydmat->giveStatus(gp);
     double ret;
 
     if ( !cemhydmat->eachGP ) {
@@ -14335,7 +14335,7 @@ CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
 
 
     if ( !cemhydmat->eachGP ) {
-        if ( this->gp->giveMaterialStatus() == cemhydmat->MasterCemhydMatStatus ) {
+        if ( cemhydmat->giveStatus(gp) == cemhydmat->MasterCemhydMatStatus ) {
             fprintf( file, " master material %d", cemhydmat->giveNumber() );
         } else {
             fprintf( file, " slave of material %d", cemhydmat->giveNumber() );

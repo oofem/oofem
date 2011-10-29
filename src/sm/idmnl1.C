@@ -141,7 +141,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     elem->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
     double xtarget = coords.at(1);
 
-    double w, wsum = 0., x, xprev, damage, damageprev;
+    double w, wsum = 0., x, xprev, damage, damageprev=0.;
     int n;
     Element *nearElem;
 

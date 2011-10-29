@@ -39,7 +39,8 @@
 
 namespace oofem {
 /**
- * Class representing a 2d isoparametric linear interpolation based on natural coordinates.
+ * Class representing a 2d isoparametric linear interpolation based on natural coordinates 
+ * for quadrilateral elements.
  */
 class FEI2dQuadLin : public FEInterpolation2d
 {

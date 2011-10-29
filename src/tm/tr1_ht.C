@@ -208,7 +208,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 *area *weight *this->giveCrossSection()->give(CS_Thickness);
+    return 2.0 * area * weight * this->giveCrossSection()->give(CS_Thickness);
 }
 
 void

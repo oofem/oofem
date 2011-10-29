@@ -39,7 +39,7 @@
 
 namespace oofem {
 /**
- * Triangular axisymmetric element with linear approximation for heat transfer.
+ * Triangular axisymmetric element with linear approximation for moisture/heat transfer.
  */
 class TrAxisym1_ht : public Tr1_ht
 {

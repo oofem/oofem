@@ -800,7 +800,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     EModelDefaultEquationNumbering dn;
  #ifdef __PARALLEL_MODE
   #ifdef __PETSC_MODULE
-    int i;
     // HUHU hard wired domain no 1
     PetscContext *parallel_context = engngModel->givePetscContext(1, ut);
     PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();

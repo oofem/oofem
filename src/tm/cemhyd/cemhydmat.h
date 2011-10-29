@@ -26,8 +26,16 @@ typedef struct FCOMPLEX {
 
 namespace oofem {
 /**
- * CemhydMat is a general class of the hydration model CEMHYD3D, version 3.0. The model has been developed at NIST under the leadership of D.P. Bentz and E.J. Garboczi. The class CemhydMat shares one input file, specifying initial conditions and microstructure of hydration.
- * The implementation of the hydration model is given in class CemhydMatStatus, which is generally linked with an integration point on an element. It is possible to assign one hydration model (with one digital microstructure) to each integration point, to one finite element (aligned with one CemhydMat) or to a group of finite elements (aligned with one CemhydMat). During the execution, temperatures from relevant integration points are averaged and stored in class CemhydMatStatus.
+ * CemhydMat is a general class of the hydration model CEMHYD3D, version 3.0. 
+ * The model has been developed at NIST under the leadership of D.P. Bentz and E.J. Garboczi. 
+ * The class CemhydMat shares one input file, specifying initial conditions and microstructure 
+ * of hydration.
+ * The implementation of the hydration model is given in class CemhydMatStatus, which is 
+ * generally linked with an integration point on an element. It is possible to assign one 
+ * hydration model (with one digital microstructure) to each integration point, to one 
+ * finite element (aligned with one CemhydMat) or to a group of finite elements (aligned 
+ * with one CemhydMat). During the execution, temperatures from relevant integration points are 
+ * averaged and stored in class CemhydMatStatus.
  */
 
 class CemhydMatStatus;
