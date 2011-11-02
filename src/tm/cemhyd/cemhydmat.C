@@ -494,13 +494,13 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR2( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, scaling, IFT_HydratingIsoHeatMaterial_hydration, "scaling"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, scaling, IFT_CemhydMat_scaling, "scaling"); // Macro
     if ( scaling.giveSize() != 3 ) {
         OOFEM_ERROR2( "Incorrect size %d of scaling", nowarnings.giveSize() );
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_HydratingIsoHeatMaterial_hydration, "reinforcementdegree"); // Macro
-    IR_GIVE_FIELD2(ir, XMLfileName, IFT_CemhydMatInputFileName, "file", MAX_FILENAME_LENGTH);
+    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_CemhydMat_reinforcementDegree, "reinforcementdegree"); // Macro
+    IR_GIVE_FIELD2(ir, XMLfileName, IFT_CemhydMat_inputFileName, "file", MAX_FILENAME_LENGTH);
 
     return IRRT_OK;
 }
