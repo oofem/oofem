@@ -506,6 +506,9 @@ enum InputFieldType {
     IFT_CemhydMat_densitytype,
     IFT_CemhydMat_eachgp,
     IFT_CemhydMat_nowarnings,
+    IFT_CemhydMat_scaling,
+    IFT_CemhydMat_reinforcementDegree,
+    IFT_CemhydMat_inputFileName,
 
     IFT_B3Material_mode,
     IFT_B3Material_emodulimode,
@@ -877,6 +880,8 @@ enum InputFieldType {
     IFT_HydratingConcreteMat_conductivitytype,
     IFT_HydratingConcreteMat_capacitytype,
     IFT_HydratingConcreteMat_densitytype,
+    IFT_HydratingConcreteMat_activationEnergy,
+    IFT_HydratingConcreteMat_reinforcementDegree,
 
     IFT_TrabBoneMaterial_E0,
     IFT_TrabBoneMaterial_Eil,
