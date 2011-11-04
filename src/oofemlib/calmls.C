@@ -244,6 +244,21 @@ restart:
 #ifdef __PARALLEL_MODE
     RR = parallel_context->localNorm(*R);
     RR *= RR;
+
+    // Old version:
+    double myRR = 0.0, oldRR;
+    for ( i = 1; i <= neq; i++ ) {
+        if ( n2l->giveNewEq(i) ) {
+            myRR += R->at(i) * R->at(i);
+        }
+    }
+
+    MPI_Allreduce(& myRR, & oldRR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    if (fabs(oldRR - RR) > 1e-6 ) {
+        OOFEM_ERROR("CALMLS :: solve - New RR is different!");
+    }
+    RR = oldRR;
+    // End of old version;
 #else
     RR = R->computeSquaredNorm();
 #endif
@@ -299,6 +314,20 @@ restart:
     //rR = parallel_context->localDotProduct(deltaRt, *R); // This is what the old code did? But its not the same as the sequential version. // Mikael
     rR = parallel_context->localNorm(deltaRt);
     rR *= rR;
+
+    // Old version
+    double myrR = 0.0, oldrR;
+    for ( i = 1; i <= neq; i++ ) {
+        if ( n2l->giveNewEq(i) ) {
+            myrR += deltaRt.at(i) * R->at(i);
+        }
+    }
+
+    MPI_Allreduce(& myrR, & oldrR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    if (fabs(oldrR - rR) >= 1e-6)
+        OOFEM_ERROR("CALMLS :: solve - New rR is different!");
+    rR = oldrR;
+    // End of old version
 #else
     rR = deltaRt.computeSquaredNorm();
 #endif
@@ -461,10 +490,30 @@ restart:
             *r = rInitial;
             r->add(*DeltaR);
 
-            // dotproduct of iterative displacement increment vector
 #ifdef __PARALLEL_MODE
             drProduct = parallel_context->localNorm(deltaR);
             drProduct *= drProduct;
+
+            // Old version
+            double my_drProduct = 0.0, olddrProduct, __rIterIncr, __rIncr;
+            for ( i = 1; i <= neq; i++ ) {
+                __rIterIncr = eta * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
+                __rIncr = DeltaRm1.at(i) +  __rIterIncr;
+
+                DeltaR->at(i) = __rIncr;
+                deltaR.at(i) = __rIterIncr;
+                r->at(i) = rInitial.at(i) + __rIncr;
+                if ( n2l->giveNewEq(i) ) {
+                    my_drProduct += __rIterIncr * __rIterIncr;
+                }
+            }
+
+            MPI_Allreduce(& my_drProduct, & olddrProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            if (fabs(olddrProduct - drProduct) > 1e-6) {
+                OOFEM_ERROR("CALMLS :: solve - drProduct is different!");
+            }
+            drProduct = olddrProduct;
+            // End of old version
 #else
             drProduct = deltaR.computeSquaredNorm();
 #endif
@@ -536,6 +585,26 @@ restart:
     double RDR = parallel_context->localDotProduct(*R,*DeltaR);
     double DR = parallel_context->localNorm(*DeltaR);
     bk = DeltaLambda * RDR/(DR*DR);
+
+    // Old version
+    double oldbk;
+    double myp [ 2 ] = {
+        0., 0.
+    }, colp [ 2 ];
+    for ( i = 1; i <= neq; i++ ) {
+        if ( n2l->giveNewEq(i) ) {
+            myp [ 0 ] += R->at(i) * DeltaR->at(i);
+            myp [ 1 ] += DeltaR->at(i) * DeltaR->at(i);
+        }
+    }
+
+    MPI_Allreduce(myp, colp, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    oldbk = DeltaLambda * colp [ 0 ];
+    oldbk = oldbk / colp [ 1 ];
+    if (fabs(oldbk - bk) >= 1e-6)
+        OOFEM_ERROR("CALMLS :: solve - New bk is different");
+    bk = oldbk;
+    // End of old version
 #else
     bk = DeltaLambda * DeltaR->dotProduct(*R) / DeltaR->computeSquaredNorm();
 #endif
@@ -720,7 +789,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
 			_val = R0->at(_eq);
 			dg_totalLoadLevel.at(_dg) += _val * _val;
 		      }
-		      
+
 		      _val = R.at(_eq);
 		      dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
 		      _val = r.at(_eq);
