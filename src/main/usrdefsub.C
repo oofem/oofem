@@ -240,6 +240,7 @@
  #include "zzerrorestimator.h"
  #include "combinedzzsiee.h"
  #include "huertaerrorestimator.h"
+ #include "simpleinterfacemat.h"
 
 // export modules
  #include "poiexportmodule.h"
@@ -766,6 +767,8 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new ConcreteDPM(number, domain);
     } else if ( !strncasecmp(aClass, "cohint", 6) ) {
         newMaterial = new CohesiveInterfaceMaterial(number, domain);
+    } else if ( !strncasecmp(aClass, "simpleintermat", 14) ) {
+        newMaterial = new SimpleInterfaceMaterial(number, domain);
     }
 
 #endif //__SM_MODULE

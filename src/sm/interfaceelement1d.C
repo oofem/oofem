@@ -62,8 +62,59 @@ InterfaceElem1d :: InterfaceElem1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
     numberOfDofMans       = 2;
-    mode = ie1d_3d;
+    referenceNode = 0;
+    normal.resize(3);
+    normal.zero();
 }
+
+void
+InterfaceElem1d :: setCoordMode()
+{
+    switch ( domain->giveDomainType() ) {
+    case _2dPlaneStressMode:
+        this->mode = ie1d_2d;
+        break;
+    case _PlaneStrainMode:
+        this->mode = ie1d_2d;
+        break;
+    case _3dMode:
+        this->mode = ie1d_3d;
+        break;
+    case _3dAxisymmMode:
+        this->mode = ie1d_3d;
+        break;
+    case _2dTrussMode:
+        this->mode = ie1d_2d;
+        break;
+    case _1dTrussMode:
+        this->mode = ie1d_1d;
+        break;
+    case _2dBeamMode:
+        this->mode = ie1d_2d;
+        break;
+    default:
+        _error("setCoordMode: Unsupported domain type")
+    }
+
+    return;
+}
+
+MaterialMode
+InterfaceElem1d :: giveMaterialMode()
+{
+    setCoordMode();
+    switch ( mode ) {
+    case ie1d_1d: return _1dInterface;
+
+    case ie1d_2d: return _2dInterface;
+
+    case ie1d_3d: return _3dInterface;
+
+    default: _error("giveMaterialMode: Unsupported coord mode");
+    }
+    return _1dInterface; // to make the compiler happy
+}
+
 
 void
 InterfaceElem1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -84,37 +135,101 @@ InterfaceElem1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 // Returns the linear part of the B matrix
 //
 {
-    cmode mode = giveCoordMode();
-    FloatArray grad(3);
-    this->computeLocalSlipDir(grad);
-    if ( mode == ie1d_1d ) {
-        answer.resize(1, 2);
-        answer.at(1, 1) = -1.0;
-        answer.at(1, 2) = +1.0;
-    } else if ( mode == ie1d_2d ) {
-        answer.resize(1, 4);
-        answer.at(1, 1) = -grad.at(1);
-        answer.at(1, 2) = -grad.at(2);
-
-        answer.at(1, 3) =  grad.at(1);
-        answer.at(1, 4) =  grad.at(2);
+    setCoordMode();
+    double area = this->giveCrossSection()->give(CS_Area);
+    this->computeLocalSlipDir(normal);
+    FloatMatrix bLoc, lcs;
+    evaluateLocalCoordinateSystem(lcs);
+    switch ( mode ) {
+    case ie1d_1d:
+        bLoc.resize(1, 2);
+        bLoc.at(1, 1) = -1.0;
+        bLoc.at(1, 2) = +1.0;
+        break;
+    case ie1d_2d:
+        bLoc.resize(2, 4);
+        bLoc.zero();
+        bLoc.at(1, 1) = -1.0;
+        bLoc.at(1, 3) = +1.0;
+        bLoc.at(2, 2) = -1.0;
+        bLoc.at(2, 4) = +1.0;
+        break;
+    case ie1d_3d:
+        bLoc.resize(3, 6);
+        bLoc.zero();
+        bLoc.at(1, 1) = -1.0;
+        bLoc.at(1, 4) = +1.0;
+        bLoc.at(2, 2) = -1.0;
+        bLoc.at(2, 5) = +1.0;
+        bLoc.at(3, 3) = -1.0;
+        bLoc.at(3, 6) = +1.0;
+        break;
+    default:
+        _error("giveDofManDofIDMask: unsupported mode");
     }
 
-    if ( mode == ie1d_3d ) {
-        answer.resize(1, 6);
-        answer.at(1, 1) = -grad.at(1);
-        answer.at(1, 2) = -grad.at(2);
-        answer.at(1, 3) = -grad.at(3);
+    bLoc.times(area);
+    answer.beProductOf(lcs, bLoc);
 
-        answer.at(1, 4) =  grad.at(1);
-        answer.at(1, 5) =  grad.at(2);
-        answer.at(1, 6) =  grad.at(3);
-    } else {
+    return;
+}
+
+void
+InterfaceElem1d :: evaluateLocalCoordinateSystem(FloatMatrix &lcs)
+//
+// Computes unit vectors of local coordinate system, stored by rows.
+//
+{
+    setCoordMode();
+    switch ( mode ) {
+    case ie1d_1d:
+        lcs.resize(1, 1);
+        lcs.at(1, 1) = 1.;
+        return;
+
+    case ie1d_2d:
+        lcs.resize(2, 2);
+        lcs.at(1, 1) =  normal.at(1);
+        lcs.at(1, 2) =  normal.at(2);
+        lcs.at(2, 1) = -normal.at(2);
+        lcs.at(2, 2) =  normal.at(1);
+        return;
+
+    case ie1d_3d:
+    {
+        FloatArray ly(3), lz(3);
+        normal.normalize();
+        ly.zero();
+        if ( abs( normal.at(1) ) > abs( normal.at(2) ) ) {
+            ly.at(2) = 1.;
+        } else {
+            ly.at(1) = 1.;
+        }
+
+        lz.beVectorProductOf(normal, ly);
+        lz.normalize();
+        ly.beVectorProductOf(lz, normal);
+        ly.normalize();
+
+        lcs.resize(3, 3);
+        int i;
+        for ( i = 1; i <= 3; i++ ) {
+            lcs.at(1, i) = normal.at(i);
+            lcs.at(2, i) = ly.at(i);
+            lcs.at(3, i) = lz.at(i);
+        }
+
+        return;
+    }
+
+    default:
         _error("giveDofManDofIDMask: unsupported mode");
     }
 
     return;
 }
+
+
 
 void
 InterfaceElem1d :: computeGaussPoints()
@@ -124,6 +239,7 @@ InterfaceElem1d :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+	//        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, this->giveMaterialMode());
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dInterface);
     }
 }
@@ -167,9 +283,10 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode"); // Macro
-    if ( referenceNode == 0 ) {
-        _error("instanciateFrom: wrong reference node specified");
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_Node_coords, "normal");
+    if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
+        _error("instanciateFrom: wrong reference node or normal specified");
     }
 
     this->computeGaussPoints();
@@ -179,15 +296,16 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
 int
 InterfaceElem1d :: computeNumberOfDofs(EquationID)
 {
-    cmode mode = giveCoordMode();
-    if ( mode == ie1d_1d ) {
-        return 2;
-    } else if ( mode == ie1d_2d ) {
-        return 4;
-    } else if ( mode == ie1d_3d ) {
-        return 6;
-    } else {
-        _error("giveDofManDofIDMask: unsupported mode");
+    setCoordMode();
+    switch (mode) {
+        case ie1d_1d:
+            return 2;
+        case ie1d_2d:
+            return 4;
+        case ie1d_3d:
+            return 6;
+        default:
+            _error("giveDofManDofIDMask: unsupported mode");
     }
 
     return 0; // to supress compiler warning
@@ -201,20 +319,59 @@ InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
     //IntArray* answer = new IntArray (2);
-    cmode mode = giveCoordMode();
-    if ( mode == ie1d_1d ) {
-        answer.resize(1);
-        answer.at(1) = D_u;
-    } else if ( mode == ie1d_2d ) {
+    /*
+     * cmode mode = giveCoordMode();
+     * if ( mode == ie1d_1d ) {
+     * answer.resize(1);
+     * answer.at(1) = D_u;
+     * } else if ( mode == ie1d_2d ) {
+     * answer.resize(2);
+     * answer.at(1) = D_u;
+     * answer.at(2) = D_v;
+     * } else if ( mode == ie1d_3d ) {
+     * answer.resize(3);
+     * answer.at(1) = D_u;
+     * answer.at(2) = D_v;
+     * answer.at(3) = D_w;
+     * } else {
+     */
+    switch ( domain->giveDomainType() ) {
+    case _2dPlaneStressMode:
         answer.resize(2);
         answer.at(1) = D_u;
         answer.at(2) = D_v;
-    } else if ( mode == ie1d_3d ) {
+        break;
+    case _PlaneStrainMode:
+        answer.resize(2);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
+        break;
+    case _3dMode:
         answer.resize(3);
         answer.at(1) = D_u;
         answer.at(2) = D_v;
         answer.at(3) = D_w;
-    } else {
+        break;
+    case _3dAxisymmMode:
+        answer.resize(2);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
+        break;
+    case _2dTrussMode:
+        answer.resize(2);
+        answer.at(1) = D_u;
+        answer.at(2) = D_w;
+        break;
+    case _1dTrussMode:
+        answer.resize(1);
+        answer.at(1) = D_u;
+        break;
+    case _2dBeamMode:
+        answer.resize(2);
+        answer.at(1) = D_u;
+        answer.at(2) = D_w;
+        break;
+    default:
         _error("giveDofManDofIDMask: unsupported mode");
     }
 
@@ -223,14 +380,21 @@ InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 
 
 void
-InterfaceElem1d :: computeLocalSlipDir(FloatArray &grad)
+InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 {
-    grad.resize(3);
-    // tangent
-    grad.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);
-    grad.at(2) = domain->giveNode(this->referenceNode)->giveCoordinate(2) - this->giveNode(1)->giveCoordinate(2);
-    grad.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
-    grad.normalize();
+    normal.resize(3);
+    if ( this->referenceNode ) {
+        // tangent
+        normal.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);
+        normal.at(2) = domain->giveNode(this->referenceNode)->giveCoordinate(2) - this->giveNode(1)->giveCoordinate(2);
+        normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
+    } else   {
+        if ( normal.at(1) == 0 && normal.at(2) == 0 && normal.at(3) == 0 ) {
+            _error("computeLocalSlipDir: normal is not defined (referenceNode=0,normal=(0,0,0))");
+        }
+    }
+
+    normal.normalize();
 }
 
 
@@ -248,9 +412,9 @@ void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
-    p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
-    p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
-    p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
+    p [ 0 ].x = ( FPNum )( this->giveNode(1)->giveCoordinate(1) );
+    p [ 0 ].y = ( FPNum )( this->giveNode(1)->giveCoordinate(2) );
+    p [ 0 ].z = ( FPNum )( this->giveNode(1)->giveCoordinate(3) );
 
     EASValsSetMType(CIRCLE_MARKER);
     go = CreateMarker3D(p);
@@ -313,9 +477,9 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
         p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale) +
                                      this->giveNode(2)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale) );
     } else {
-        p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
-        p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
-        p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
+        p [ 0 ].x = ( FPNum )( this->giveNode(1)->giveCoordinate(1) );
+        p [ 0 ].y = ( FPNum )( this->giveNode(1)->giveCoordinate(2) );
+        p [ 0 ].z = ( FPNum )( this->giveNode(1)->giveCoordinate(3) );
     }
 
     result += giveIPValue(v1, iRule->getIntegrationPoint(0), context.giveIntVarType(), tStep);

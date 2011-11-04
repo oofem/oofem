@@ -36,11 +36,12 @@
 #define interfaceelement1d_h
 
 #include "structuralelement.h"
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 /**
- * This class implements a 1D dimensional interface element connecting two nodes (with the same position)
- * In order to compute normal and tangential direction of the slip plane, a reference node is needed.
+ * This class implements a one-dimensional interface element connecting two nodes (with the same position)
+ * In order to compute normal and tangential direction of the slip plane, a reference node or specific direction is needed.
  */
 class InterfaceElem1d : public StructuralElement
 {
@@ -48,6 +49,7 @@ class InterfaceElem1d : public StructuralElement
 protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
     int referenceNode;
+    FloatArray normal;
 
 public:
     InterfaceElem1d(int n, Domain *d);
@@ -56,7 +58,17 @@ public:
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)  { computeLumpedMassMatrix(answer, tStep); }
 
+    /**
+     * Computes the global coordinates from given element's local coordinates.
+     * Required by nonlocal material models.
+     * @returns nonzero if successful
+     *
+     */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    /**
+     * Computes the element local coordinates from given global coordinates.
+     * @returns nonzero if successful (if point is inside element); zero otherwise
+     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int computeNumberOfDofs(EquationID ut);
@@ -67,6 +79,7 @@ public:
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
+    /** Interface requesting service */
     Interface *giveInterface(InterfaceType it) { return NULL; }
 
 #ifdef __OOFEG
@@ -82,17 +95,19 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
     integrationDomain giveIntegrationDomain() { return _Point; }
-    MaterialMode giveMaterialMode() { return _1dInterface; }
+    MaterialMode giveMaterialMode();
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
     void computeGaussPoints();
+    void          evaluateLocalCoordinateSystem(FloatMatrix &);
 
     int giveApproxOrder() { return 1; }
 
-    void computeLocalSlipDir(FloatArray &grad);
+    void computeLocalSlipDir(FloatArray &normal);
     cmode giveCoordMode() const { return this->mode; }
+    void setCoordMode();
 };
 } // end namespace oofem
 #endif // interfaceelement1d_h

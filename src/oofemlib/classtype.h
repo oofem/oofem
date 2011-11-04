@@ -322,6 +322,9 @@ enum classType {
 
     SurfaceTensionMaterialClass,
     SurfaceTensionMaterialStatusClass,
+    
+    SimpleInterfaceMaterialClass,
+    SimpleInterfaceMaterialStatusClass,
 
     CrossSectionClass,
     StructuralCrossSectionClass,
