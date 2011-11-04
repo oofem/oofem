@@ -180,8 +180,6 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
 
     status = NM_None;
     this->giveLinearSolver();
-    // NumericalMethod* linSolver =
-    //   new LDLTFactorization (this->giveNumber()+1,this->giveDomain(), engngModel);
 
     // create HPC Map if needed
     if ( calm_hpc_init ) {
@@ -217,16 +215,6 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
 restart:
     //DeltaR -> zero();
 
-    /*
-     * linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
-     *
-     * // if (tNow ->giveNumber() == 1) {
-     * deltaRt = new FloatArray (R->giveSize());
-     * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,R);
-     * linSolver -> setFloatArrayAsComponent (LinearEquationSolution,deltaRt);
-     * linSolver -> solveYourselfAt (tNow);
-     * linSolver -> updateYourselfExceptLhs ();
-     */
     deltaRt.resize( R->giveSize() );
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
@@ -244,21 +232,6 @@ restart:
 #ifdef __PARALLEL_MODE
     RR = parallel_context->localNorm(*R);
     RR *= RR;
-
-    // Old version:
-    double myRR = 0.0, oldRR;
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myRR += R->at(i) * R->at(i);
-        }
-    }
-
-    MPI_Allreduce(& myRR, & oldRR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    if (fabs(oldRR - RR) > 1e-6 ) {
-        OOFEM_ERROR("CALMLS :: solve - New RR is different!");
-    }
-    RR = oldRR;
-    // End of old version;
 #else
     RR = R->computeSquaredNorm();
 #endif
@@ -311,23 +284,9 @@ restart:
 
 
 #ifdef __PARALLEL_MODE
-    //rR = parallel_context->localDotProduct(deltaRt, *R); // This is what the old code did? But its not the same as the sequential version. // Mikael
-    rR = parallel_context->localNorm(deltaRt);
-    rR *= rR;
-
-    // Old version
-    double myrR = 0.0, oldrR;
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myrR += deltaRt.at(i) * R->at(i);
-        }
-    }
-
-    MPI_Allreduce(& myrR, & oldrR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    if (fabs(oldrR - rR) >= 1e-6)
-        OOFEM_ERROR("CALMLS :: solve - New rR is different!");
-    rR = oldrR;
-    // End of old version
+    rR = parallel_context->localDotProduct(deltaRt, *R); // This is what the old code did? But its not the same as the sequential version. // Mikael
+    //rR = parallel_context->localNorm(deltaRt);
+    //rR *= rR;
 #else
     rR = deltaRt.computeSquaredNorm();
 #endif
@@ -358,24 +317,14 @@ restart:
     }
 
     // DeltaR -> zero();
-    /*
-     * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,&rhs);
-     * linSolver -> setFloatArrayAsComponent (LinearEquationSolution,DeltaR);
-     * linSolver -> solveYourselfAt (tNow);
-     */
     linSolver->solve(k, & rhs, DeltaR);
     r->add(*DeltaR);
-    //linSolver -> updateYourselfExceptLhs ();
-
-    //delete rhs; rhs = NULL;
 
     nite = 0;
 
     // update solution state counter
     tNow->incrementStateCounter();
     engngModel->updateComponent(tNow, InternalRhs, domain);
-
-    //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
 
     do {
         nite++;
@@ -398,14 +347,6 @@ restart:
             //
             // compute deltaRt for i-th iteration
             //
-            /*
-             * linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
-             *
-             * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,R);
-             * linSolver -> setFloatArrayAsComponent (LinearEquationSolution,deltaRt);
-             * linSolver -> solveYourselfAt (tNow);
-             * linSolver -> updateYourselfExceptLhs ();
-             */
             linSolver->solve(k, R, & deltaRt);
         }
 
@@ -420,12 +361,6 @@ restart:
 
         rhs.subtract(*F);
         deltaR_.resize(neq);
-        /*
-         * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,&rhs);
-         * linSolver -> setFloatArrayAsComponent (LinearEquationSolution,deltaR_);
-         * linSolver -> solveYourselfAt (tNow);
-         * linSolver -> updateYourselfExceptLhs ();
-         */
         linSolver->solve(k, & rhs, & deltaR_);
         eta = 1.0;
         //
@@ -503,14 +438,14 @@ restart:
                 DeltaR->at(i) = __rIncr;
                 deltaR.at(i) = __rIterIncr;
                 r->at(i) = rInitial.at(i) + __rIncr;
-                if ( n2l->giveNewEq(i) ) {
+                if ( parallel_context->giveN2Lmap()->giveNewEq(i) ) {
                     my_drProduct += __rIterIncr * __rIterIncr;
                 }
             }
 
             MPI_Allreduce(& my_drProduct, & olddrProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
             if (fabs(olddrProduct - drProduct) > 1e-6) {
-                OOFEM_ERROR("CALMLS :: solve - drProduct is different!");
+                OOFEM_WARNING3("CALMLS :: solve - drProduct is different! (%e, %e)",olddrProduct, drProduct);
             }
             drProduct = olddrProduct;
             // End of old version
@@ -585,26 +520,6 @@ restart:
     double RDR = parallel_context->localDotProduct(*R,*DeltaR);
     double DR = parallel_context->localNorm(*DeltaR);
     bk = DeltaLambda * RDR/(DR*DR);
-
-    // Old version
-    double oldbk;
-    double myp [ 2 ] = {
-        0., 0.
-    }, colp [ 2 ];
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myp [ 0 ] += R->at(i) * DeltaR->at(i);
-            myp [ 1 ] += DeltaR->at(i) * DeltaR->at(i);
-        }
-    }
-
-    MPI_Allreduce(myp, colp, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    oldbk = DeltaLambda * colp [ 0 ];
-    oldbk = oldbk / colp [ 1 ];
-    if (fabs(oldbk - bk) >= 1e-6)
-        OOFEM_ERROR("CALMLS :: solve - New bk is different");
-    bk = oldbk;
-    // End of old version
 #else
     bk = DeltaLambda * DeltaR->dotProduct(*R) / DeltaR->computeSquaredNorm();
 #endif
@@ -682,7 +597,6 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
 
     answer = true;
     errorOutOfRange = false;
-
 
     // compute residual vector
     rhs =  R;

@@ -329,7 +329,7 @@ PetscContext :: localNorm(const FloatArray &src)
 {
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        double norm2, norm2_tot;
+        double norm2 = 0.0, norm2_tot;
         int size = src.giveSize();
         PetscNatural2LocalOrdering *n2l = this->giveN2Lmap();
         for ( int i = 0; i < size; i++ ) {
