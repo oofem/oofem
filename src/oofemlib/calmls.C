@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -51,12 +51,6 @@
 #include "usrdefsub.h"
 #include "contextioerr.h"
 
-#ifdef __PARALLEL_MODE
- #ifndef __MAKEDEPEND
-  #include "mpi.h"
- #endif
-#endif
-
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
 #define CALM_MAX_RESTARTS 4
@@ -70,12 +64,6 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
     //
     // constructor
     //
-    //k      = NULL ;
-    //Rt     = NULL ;
-    //R0     = NULL ;
-    //DeltaR = NULL ;
-    //deltaRt= NULL ;
-    //F      = NULL ;
 
     nsmax  = 60;       // default maximum number of sweeps allowed
     numberOfRequiredIterations = 3;
@@ -108,15 +96,21 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
     nccdg = 0;
 
     minIterations = 0;
+
+#ifdef __PARALLEL_MODE
+#ifdef __PETSC_MODULE
+    parallel_context = engngModel->givePetscContext(d->giveNumber(), ut);
+#endif
+#endif
+
 }
 
-CylindricalALM ::  ~CylindricalALM() {
+
+CylindricalALM ::  ~CylindricalALM()
+{
     //
     // destructor
     //
-
-    //if (deltaRt) delete deltaRt;
-
     delete linSolver;
 }
 
@@ -130,7 +124,6 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
     FloatArray rhs, *R, deltaRt, deltaR_, DeltaRm1;
     FloatArray rInitial;
     FloatArray deltaR; // total increment of displacements in iteration
-    //FloatArray F;
     double Bergan_k0 = 1.0;
     double rr, RR, RR0, rR, p = 0.0, bk;
     double deltaLambda, Lambda, eta, DeltaLambdam1, DeltaLambda = 0.0;
@@ -142,7 +135,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
     // print iteration header
-    OOFEM_LOG_INFO("CALM: Initial step length: %-15e\n", deltaL);
+    OOFEM_LOG_INFO("CALMLS :: solve - Initial step length: %-15e\n", deltaL);
     if ( nccdg == 0 ) {
         OOFEM_LOG_INFO("Iter  LoadLevel       ForceError      DisplError\n__________________________________________________________\n");
     } else {
@@ -187,12 +180,6 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
         calm_hpc_init = 0;
     }
 
-#ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); // TODO: hard wired domain no 1
- #endif
-#endif
-
     if ( R0 ) {
 #ifdef __PARALLEL_MODE
         RR0 = parallel_context->localNorm(*R0);
@@ -222,8 +209,6 @@ restart:
  #endif
 #endif
     linSolver->solve(k, R, & deltaRt);
-
-    // }
 
     //
     // A.2.   We assume positive-definitive (0)Kt (tangent stiffness mtrx).
@@ -256,14 +241,13 @@ restart:
         }
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double my_rrRR [ 2 ], colected_rrRR [ 2 ];
-        my_rrRR [ 0 ] = _rr;
-        my_rrRR [ 1 ] = _RR;
-        MPI_Allreduce(my_rrRR, colected_rrRR, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        _rr = colected_rrRR [ 0 ];
-        _RR = colected_rrRR [ 1 ];
- #endif
+        FloatArray rrRR(2), collected_rrRR;
+        rrRR(0) = _rr;
+        rrRR(1) = _RR;
+
+        parallel_context->accumulate(rrRR, collected_rrRR);
+        _rr = collected_rrRR(0);
+        _RR = collected_rrRR(1);
 #endif
 
         p = sqrt(_rr + Psi * Psi * _RR);
@@ -301,15 +285,6 @@ restart:
     // A.3.
     //
 
-    // if (stepN->giveNumber() == 1)
-    // {
-    //  // first load step
-    //  ls -> giveRhs()->times(deltaLambda) ;
-    // } else
-    // {
-    //  F = this -> giveInternalForces(deltar,stepN);
-    //  ls -> giveRhs()->add (F->GiveCopy()->negated()) ;
-    // }
     rhs = * R;
     rhs.times(DeltaLambda);
     if ( R0 ) {
@@ -387,7 +362,7 @@ restart:
                 //delete F;
                 //delete deltaR_;
 
-                OOFEM_LOG_INFO("calm iteration Reset ...\n");
+                OOFEM_LOG_INFO("CALMLS :: solve - Iteration Reset ...\n");
 
                 calm_NR_OldMode  = calm_NR_Mode;
                 calm_NR_Mode     = calm_fullNRM;
@@ -395,7 +370,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                _error("solve: calm - can't continue further");
+                OOFEM_ERROR("CALMLS :: solve - can't continue further");
             }
         }
 
@@ -428,31 +403,9 @@ restart:
 #ifdef __PARALLEL_MODE
             drProduct = parallel_context->localNorm(deltaR);
             drProduct *= drProduct;
-
-            // Old version
-            double my_drProduct = 0.0, olddrProduct, __rIterIncr, __rIncr;
-            for ( i = 1; i <= neq; i++ ) {
-                __rIterIncr = eta * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-                __rIncr = DeltaRm1.at(i) +  __rIterIncr;
-
-                DeltaR->at(i) = __rIncr;
-                deltaR.at(i) = __rIterIncr;
-                r->at(i) = rInitial.at(i) + __rIncr;
-                if ( parallel_context->giveN2Lmap()->giveNewEq(i) ) {
-                    my_drProduct += __rIterIncr * __rIterIncr;
-                }
-            }
-
-            MPI_Allreduce(& my_drProduct, & olddrProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-            if (fabs(olddrProduct - drProduct) > 1e-6) {
-                OOFEM_WARNING3("CALMLS :: solve - drProduct is different! (%e, %e)",olddrProduct, drProduct);
-            }
-            drProduct = olddrProduct;
-            // End of old version
 #else
             drProduct = deltaR.computeSquaredNorm();
 #endif
-            //printf("drProduct2 = %e\n",drProduct);
             tNow->incrementStateCounter();     // update solution state counter
             //
             // B.6.
@@ -467,7 +420,7 @@ restart:
         //
         // B.7.
         //
-        // convergency check
+        // convergence check
         //
 
         converged = this->checkConvergence(* R, R0, * F, * r, deltaR, Lambda, RR0, RR, drProduct,
@@ -493,7 +446,7 @@ restart:
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
                 //delete F; F = NULL;
 
-                OOFEM_LOG_INFO("calm iteration Reset ...\n");
+                OOFEM_LOG_INFO("CALMLS :: solve - Iteration Reset ...\n");
 
                 calm_NR_OldMode  = calm_NR_Mode;
                 calm_NR_Mode     = calm_fullNRM;
@@ -501,7 +454,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                _warning2("CALM - convergence not reached after %d iterations", nsmax);
+                OOFEM_WARNING2("CALMLS :: solve - Convergence not reached after %d iterations", nsmax);
                 // exit(1);
                 break;
             }
@@ -553,7 +506,7 @@ restart:
         deltaL = minStepLength;
     }
 
-    OOFEM_LOG_INFO("CALM: Adjusted step length: %-15e\n", deltaL);
+    OOFEM_LOG_INFO("CALMLS :: solve - Adjusted step length: %-15e\n", deltaL);
 
     // delete proportional load vector (if allocated)
     // if (R0 && (refLoadInputMode == rlm_total)) delete R;
@@ -589,9 +542,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
     EModelDefaultEquationNumbering dn;
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    int _i;
-    // HUHU hard wired domain no 1
-    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
+    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
 #endif
 
@@ -636,11 +587,10 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
                         _eq = _idofptr->giveEquationNumber(dn);
 
                         if ( _eq ) {
-#if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
+#ifdef __PARALLEL_MODE
                             if ( !n2l->giveNewEq(_eq) ) {
                                 continue;
                             }
-
 #endif
 
                             _val = rhs.at(_eq);
@@ -674,59 +624,56 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
             }
 
 #endif
-	    // loop over element internal Dofs
-	    for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
-	      _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
-	      // loop over individual dofs
-	      for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
-                // loop over dof groups
-                for ( _dg = 1; _dg <= _ng; _dg++ ) {
-		  // test if dof ID is in active set
-		  if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
-		    _eq = _idofptr->giveEquationNumber(dn);
+            // loop over element internal Dofs
+            for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
+                _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
+                // loop over individual dofs
+                for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+                    _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
+                    // loop over dof groups
+                    for ( _dg = 1; _dg <= _ng; _dg++ ) {
+                        // test if dof ID is in active set
+                        if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+                            _eq = _idofptr->giveEquationNumber(dn);
 
-		    if ( _eq ) {
-#if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-		      if ( !n2l->giveNewEq(_eq) ) {
-			continue;
-		      }
-
+                            if ( _eq ) {
+#ifdef __PARALLEL_MODE
+                                if ( !n2l->giveNewEq(_eq) ) {
+                                    continue;
+                                }
 #endif
 
-		      _val = rhs.at(_eq);
-		      dg_forceErr.at(_dg) += _val * _val;
-		      _val = rIterIncr.at(_eq);
-		      dg_dispErr.at(_dg)  += _val * _val;
-		      // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-		      if ( R0 ) {
-			_val = R0->at(_eq);
-			dg_totalLoadLevel.at(_dg) += _val * _val;
-		      }
+                                _val = rhs.at(_eq);
+                                dg_forceErr.at(_dg) += _val * _val;
+                                _val = rIterIncr.at(_eq);
+                                dg_dispErr.at(_dg)  += _val * _val;
+                                // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+                                if ( R0 ) {
+                                    _val = R0->at(_eq);
+                                    dg_totalLoadLevel.at(_dg) += _val * _val;
+                                }
 
-		      _val = R.at(_eq);
-		      dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
-		      _val = r.at(_eq);
-		      dg_totalDisp.at(_dg) += _val * _val;
-		    }
-		  }
-                } // end loop over dof groups
-
-	      } // end loop over DOFs
-	    } // end loop over internal element dofmans
-
-        } // end loop over dof managers
+                                _val = R.at(_eq);
+                                dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
+                                _val = r.at(_eq);
+                                dg_totalDisp.at(_dg) += _val * _val;
+                            }
+                        }
+                    } // end loop over dof groups
+                } // end loop over DOFs
+            } // end loop over internal element dofmans
+        } // end loop over elements
 
 #ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
         FloatArray collectiveErr(_ng);
-        MPI_Allreduce(dg_forceErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        parallel_context->accumulate(dg_forceErr, collectiveErr);
         dg_forceErr = collectiveErr;
-        MPI_Allreduce(dg_dispErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        parallel_context->accumulate(dg_dispErr, collectiveErr);
         dg_dispErr = collectiveErr;
-        MPI_Allreduce(dg_totalLoadLevel.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        parallel_context->accumulate(dg_totalLoadLevel, collectiveErr);
         dg_totalLoadLevel = collectiveErr;
-        MPI_Allreduce(dg_totalDisp.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        parallel_context->accumulate(dg_totalDisp, collectiveErr);
         dg_totalDisp = collectiveErr;
 #endif
 
@@ -773,22 +720,8 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
         //
         double drr;
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double myerr [ 2 ] = {
-            0., 0.
-        }, colerr [ 2 ];
-        for ( _i = 1; _i <= _neq; _i++ ) {
-            if ( n2l->giveNewEq(_i) ) {
-                myerr [ 0 ] += rhs.at(_i) * rhs.at(_i);
-                myerr [ 1 ] += r.at(_i) * r.at(_i);
-            }
-        }
-
-        MPI_Allreduce(myerr, colerr, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        forceErr = colerr [ 0 ];
-        drr = colerr [ 1 ];
-
- #endif
+        forceErr = parallel_context->localNorm(rhs); forceErr *= forceErr;
+        drr = parallel_context->localNorm(r); drr *= drr;
 #else
         // err is relative error of unbalanced forces
         forceErr = rhs.computeSquaredNorm();
@@ -1083,9 +1016,9 @@ void CylindricalALM  :: convertHPCMap()
             inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
             idof  = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
- #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
+ #ifdef __PARALLEL_MODE
                 // HUHU hard wired domain no 1
-                if ( engngModel->givePetscContext(1, ut)->giveN2Gmap()->isLocal( domain->giveNode(j) ) ) {
+                if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
                     indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
                     if ( calm_Controll == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
@@ -1199,13 +1132,12 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
     int i, ind, HPsize = 0;
     FloatArray help;
 #ifndef __PARALLEL_MODE
-    double rr, *p1, *p2;
+    double rr;
 #endif
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    // HUHU hard wired domain no 1
-    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
+    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
 #endif
     //
@@ -1213,28 +1145,18 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
     //
     if ( ( calm_Controll == calm_hpc_off ) || ( calm_Controll == calm_hpc_on ) ) {
         if ( calm_Controll == calm_hpc_off ) {
-            // this two lines are necesarry if NRM is used
+            // this two lines are necessary if NRM is used
             // (for MNRM they can be computed at startup A1).
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-            double my_prod [ 6 ] = {
-                0., 0., 0., 0., 0., 0.
-            }, prod [ 6 ];
+            double prod[6];
+            prod[0] = parallel_context->localNorm(deltaRt); prod[0] *= prod[0];
+            prod[1] = parallel_context->localDotProduct(DeltaR, deltaRt);
+            prod[2] = parallel_context->localDotProduct(deltaR_, deltaRt);
+            prod[3] = parallel_context->localNorm(DeltaR); prod[3] *= prod[3];
+            prod[4] = parallel_context->localDotProduct(DeltaR, deltaR_);
+            prod[5] = parallel_context->localNorm(deltaR_); prod[5] *= prod[5];
 
-            for ( i = 1; i <= neq; i++ ) {
-                if ( n2l->giveNewEq(i) ) {
-                    my_prod [ 0 ] += deltaRt.at(i) * deltaRt.at(i); //rr
-                    my_prod [ 1 ] += DeltaR.at(i) * deltaRt.at(i);
-                    my_prod [ 2 ] += deltaR_.at(i) * deltaRt.at(i);
-                    my_prod [ 3 ] += DeltaR.at(i) * DeltaR.at(i);
-                    my_prod [ 4 ] += DeltaR.at(i) * deltaR_.at(i);
-                    my_prod [ 5 ] += deltaR_.at(i) * deltaR_.at(i);
-                }
-            }
-
-            MPI_Allreduce(my_prod, prod, 6, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD); // master will receive
-
-            a1 = eta * eta * prod [ 0 ] + Psi * Psi * RR;
+            a1 = eta * eta * prod[0] + Psi * Psi * RR;
             a2 = RR * Psi * Psi * DeltaLambda0 * 2.0;
             a2 += 2.0 * eta * prod [ 1 ];
             a2 += 2.0 * eta * eta * prod [ 2 ];
@@ -1242,9 +1164,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
             a3 += 2.0 * eta * prod [ 4 ];
             a3 += eta * eta * prod [ 5 ];
             a3 += DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
- #endif
 #else
-            p1 = deltaRt.givePointer();
             rr = deltaRt.computeSquaredNorm();
             a1 = eta * eta * rr + Psi * Psi * RR;
             a2 = RR * Psi * Psi * DeltaLambda0 * 2.0;
@@ -1271,18 +1191,17 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
             }
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-            double my_ [ 4 ] = {
-                _rr, _RR, _a2, _a3
-            }, col_ [ 4 ];
-            MPI_Allreduce(my_, col_, 4, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD); // master will receive
-            a1 = eta * eta * col_ [ 0 ] + Psi * Psi * col_ [ 1 ];
+            FloatArray my_(4), col_;
+            my_(0) = _rr;
+            my_(1) = _RR;
+            my_(2) = _a2;
+            my_(3) = _a3;
+            parallel_context->accumulate(my_, col_);
+            a1 = eta * eta * col_(0) + Psi * Psi * col_(1);
             a2 = _RR * Psi * Psi * DeltaLambda0 * 2.0;
-            a2 += 2.0 * col_ [ 2 ];
-            a3 = col_ [ 3 ] - deltaL * deltaL + DeltaLambda0 * DeltaLambda0 * col_ [ 1 ] * Psi * Psi;
- #endif
+            a2 += 2.0 * col_(2);
+            a3 = col_(3) - deltaL * deltaL + DeltaLambda0 * DeltaLambda0 * col_(1) * Psi * Psi;
 #else
-
             a1 = eta * eta * _rr + Psi * Psi * _RR;
             a2 = _RR * Psi * Psi * DeltaLambda0 * 2.0;
             a2 += 2.0 * _a2;
@@ -1291,7 +1210,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
             //printf ("\na1=%e, a2=%e, a3=%e", a1,a2,a3);
         }
 
-        // solution of kvdratic eqn.
+        // solution of quadratic eqn.
         double discr = a2 * a2 - 4.0 * a1 * a3;
         if ( discr < 0.0 ) {
             _error("computeDeltaLambda: discriminant is negative, solution failed");
@@ -1301,34 +1220,18 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
         lam1 = ( -a2 + discr ) / 2. / a1;
         lam2 = ( -a2 - discr ) / 2. / a1;
 
-        // select better lam (acording to angle between deltar0 and deltar1(2).
+        // select better lam (according to angle between deltar0 and deltar1(2).
         //
         // up to there rewritten
         //
         if ( calm_Controll == calm_hpc_off ) {
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-            double myp [ 3 ] = {
-                0., 0., 0.
-            }, colp [ 3 ];
-            for ( i = 1; i <= neq; i++ ) {
-                if ( n2l->giveNewEq(i) ) {
-                    myp [ 0 ] += DeltaR.at(i) * deltaR_.at(i);
-                    myp [ 1 ] += DeltaR.at(i) * DeltaR.at(i);
-                    myp [ 2 ] += DeltaR.at(i) * deltaRt.at(i);
-                }
-            }
-
-            MPI_Allreduce(myp, colp, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD); // master will receive
-            a4 = eta * colp [ 0 ] + colp [ 1 ];
-            a5 = eta * colp [ 2 ];
- #endif
+            double tmp = parallel_context->localNorm(DeltaR); tmp *= tmp;
+            a4 = eta*parallel_context->localDotProduct(DeltaR, deltaR_) + tmp;
+            a5 = eta*parallel_context->localDotProduct(DeltaR, deltaRt);
 #else
-            p1 = DeltaR.givePointer();
-            p2 = deltaR_.givePointer();
-            a4 = eta * dotProduct(p1, p2, neq) + dotProduct(p1, p1, neq);
-            p2 = deltaRt.givePointer();
-            a5 = eta * dotProduct(p1, p2, neq);
+            a4 = eta * DeltaR.dotProduct(deltaR_) + DeltaR.computeSquaredNorm();
+            a5 = eta * DeltaR.dotProduct(deltaRt);
 #endif
         } else {
             a4 = 0.;
@@ -1341,14 +1244,12 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
             }
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-            double mya [ 2 ] = {
-                a4, a5
-            }, cola [ 2 ];
-            MPI_Allreduce(mya, cola, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD); // master will receive
-            a4 = cola [ 0 ];
-            a5 = cola [ 1 ];
- #endif
+            FloatArray mya(2), cola;
+            mya(0) = a4;
+            mya(1) = a5;
+            parallel_context->accumulate(mya, cola);
+            a4 = cola(0);
+            a5 = cola(1);
 #endif
         }
 
@@ -1374,14 +1275,10 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
         }
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double myv [ 2 ] = {
-            nom, denom
-        }, colv [ 2 ];
-        MPI_Allreduce(myv, colv, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD); // master will receive
-        nom = colv [ 0 ];
-        denom = colv [ 1 ];
- #endif
+        FloatArray myv(2), colv(2);
+        parallel_context->accumulate(myv, colv);
+        nom = colv(0);
+        denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
             _error("\ncalm: zero denominator in linearized controll");
@@ -1443,7 +1340,7 @@ CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double am
 
         // interpolate to get step-length
         double etaint = ( prod.at(ineg) * eta.at(ipos) - prod.at(ipos) * eta.at(ineg) ) / ( prod.at(ineg) - prod.at(ipos) );
-        // alternativelly get eta ensuring reasonable change
+        // alternatively get eta ensuring reasonable change
         double etaalt = eta.at(ipos) + 0.2 * ( eta.at(ineg) - eta.at(ipos) );
         etaint = max(etaint, etaalt);
         if ( etaint < minetalim ) {
@@ -1509,27 +1406,12 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-
-    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
-
-    double myd [ 4 ] = {
-        0., 0., 0., 0.
-    }, cold [ 4 ];
-    for ( i = 1; i <= neq; i++ ) {
-        if ( n2l->giveNewEq(i) ) {
-            myd [ 0 ] += deltaR_.at(i) * F.at(i);
-            myd [ 1 ] += deltaRt.at(i) * F.at(i);
-            myd [ 2 ] += deltaR_.at(i) * R.at(i);
-            myd [ 3 ] += deltaRt.at(i) * R.at(i);
-        }
-    }
-
-    MPI_Allreduce(myd, cold, 4, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    d6 = cold [ 0 ];
-    d7 = cold [ 1 ];
-    d8 = cold [ 2 ];
-    d9 = cold [ 3 ];
+    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
+    d6 = parallel_context->localDotProduct(deltaR_, F);
+    d7 = parallel_context->localDotProduct(deltaRt, F);
+    d8 = -1.0 * parallel_context->localDotProduct(deltaR_, R);
+    d9 = -1.0 * parallel_context->localDotProduct(deltaRt, R);
 #else
     d6 = deltaR_.dotProduct(F);
     d7 = deltaRt.dotProduct(F);
@@ -1545,24 +1427,11 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
 
     if ( R0 ) {
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double myd [ 2 ] = {
-            0., 0.
-        }, cold [ 2 ];
-        for ( i = 1; i <= neq; i++ ) {
-            if ( n2l->giveNewEq(i) ) {
-                myd [ 0 ] += deltaR_.at(i) * R0->at(i);
-                myd [ 1 ] += deltaRt.at(i) * R0->at(i);
-            }
-        }
-
-        MPI_Allreduce(myd, cold, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        d10 = -1.0 * cold [ 0 ];
-        d11 = -1.0 * cold [ 1 ];
- #endif
+        d10 = -1.0 * parallel_context->localDotProduct(deltaR_, *R0);
+        d11 = -1.0 * parallel_context->localDotProduct(deltaRt, *R0);
 #else
-        d10 = -1.0 * dotProduct(deltaR_, * R0, neq);
-        d11 = -1.0 * dotProduct(deltaRt, * R0, neq);
+        d10 = -1.0 * deltaR_.dotProduct(*R0);
+        d11 = -1.0 * deltaRt.dotProduct(*R0);
 #endif
     }
 
@@ -1580,32 +1449,17 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
     for ( int ils = 2; ils <= ls_maxiter; ils++ ) {
         // update displacements
         drProduct = 0.0; // dotproduct of iterative displacement increment vector
+
+        deltaR.resize(0);
+        deltaR.add(eta.at(ils)*deltaLambda, deltaRt);
+        deltaR.add(eta.at(ils), deltaR_);
+        DeltaR = DeltaRm1;
+        DeltaR.add(deltaR);
+
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double my_drProduct = 0.0;
-        for ( i = 1; i <= neq; i++ ) {
-            __rIterIncr = eta.at(ils) * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-            r.at(i) = rInitial.at(i) + DeltaRm1.at(i) + __rIterIncr;
-            DeltaR.at(i) = DeltaRm1.at(i) + __rIterIncr;
-            deltaR.at(i) = __rIterIncr;
-            if ( n2l->giveNewEq(i) ) {
-                my_drProduct += __rIterIncr * __rIterIncr;
-            }
-        }
-
-        MPI_Allreduce(& my_drProduct, & drProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
+        drProduct = parallel_context->localNorm(deltaR); drProduct *= drProduct;
 #else
-        for ( i = 1; i <= neq; i++ ) {
-            __rIterIncr = eta.at(ils) * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-            r.at(i) = rInitial.at(i) + DeltaRm1.at(i) + __rIterIncr;
-            DeltaR.at(i) = DeltaRm1.at(i) + __rIterIncr;
-            deltaR.at(i) = __rIterIncr;
-            drProduct += __rIterIncr * __rIterIncr;
-            //r.at(i) = rInitial.at(i) + DeltaRm1.at(i) + eta.at(ils)*(deltaLambda*deltaRt.at(i) + deltaR_.at(i));
-            //DeltaR.at(i) = DeltaRm1.at(i) + eta.at(ils)*(deltaLambda*deltaRt.at(i) + deltaR_.at(i));
-        }
-
+        drProduct = deltaR.computeSquaredNorm();
 #endif
 
         tNow->incrementStateCounter(); // update solution state counter
@@ -1613,21 +1467,8 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
         engngModel->updateComponent(tNow, InternalRhs, domain);
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double mye [ 2 ] = {
-            0., 0.
-        }, cole [ 2 ];
-        for ( i = 1; i <= neq; i++ ) {
-            if ( n2l->giveNewEq(i) ) {
-                mye [ 0 ] += deltaR_.at(i) * F.at(i);
-                mye [ 1 ] += deltaRt.at(i) * F.at(i);
-            }
-        }
-
-        MPI_Allreduce(mye, cole, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        e1 = cole [ 0 ];
-        e2 = cole [ 1 ];
- #endif
+        e1 = parallel_context->localDotProduct(deltaR_, F);
+        e2 = parallel_context->localDotProduct(deltaRt, F);
 #else
         e1 = deltaR_.dotProduct(F);
         e2 = deltaRt.dotProduct(F);
@@ -1697,30 +1538,14 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
         deltaLambda = deltaLambdaForEta1;
         drProduct = 0.0; // dotproduct of iterative displacement increment vector
 
+        deltaR.resize(0);
+        deltaR.add(deltaLambda, deltaRt);
+        deltaR.add(deltaR_);
+        DeltaR = DeltaRm1;
+        DeltaR.add(deltaR);
+
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-        double my_drProduct = 0.0;
-        for ( i = 1; i <= neq; i++ ) {
-            __rIterIncr = 1.0 * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-            r.at(i) = rInitial.at(i) + DeltaRm1.at(i) + __rIterIncr;
-            DeltaR.at(i) = DeltaRm1.at(i) + __rIterIncr;
-            deltaR.at(i) = __rIterIncr;
-            if ( n2l->giveNewEq(i) ) {
-                my_drProduct += __rIterIncr * __rIterIncr;
-            }
-        }
-
-        MPI_Allreduce(& my_drProduct, & drProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
-#else
-        for ( i = 1; i <= neq; i++ ) {
-            __rIterIncr = 1.0 * ( deltaLambda * deltaRt.at(i) + deltaR_.at(i) );
-            r.at(i) = rInitial.at(i) + DeltaRm1.at(i) + __rIterIncr;
-            DeltaR.at(i) = DeltaRm1.at(i) + __rIterIncr;
-            deltaR.at(i) = __rIterIncr;
-            drProduct += __rIterIncr * __rIterIncr;
-        }
-
+        drProduct = parallel_context->localNorm(deltaR); drProduct *= drProduct;
 #endif
         tNow->incrementStateCounter(); // update solution state counter
         engngModel->updateComponent(tNow, InternalRhs, domain);
@@ -1729,11 +1554,11 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
 
         //printf ("\ncalm fi...eta = %e, err=%d, ", 1.0,ls_failed);
         //printf ("dLambda=%e, lerr=%d", deltaLambda, dl_failed);
-        OOFEM_LOG_INFO("LS: err_id=%d, eta=%e, dlambda=%e\n", ls_failed, 1.0, deltaLambda);
+        OOFEM_LOG_INFO("CALMLS :: do_lineSearch - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, 1.0, deltaLambda);
     } else {
         //printf ("\ncalm fi...eta = %e, err=%d, ", currEta,ls_failed);
         //printf ("dLambda=%e, lerr=%d", deltaLambda, dl_failed);
-        OOFEM_LOG_INFO("LS: err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
+        OOFEM_LOG_INFO("CALMLS :: do_lineSearch - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
     }
 }
 } // end namespace oofem

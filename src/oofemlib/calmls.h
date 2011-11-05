@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -48,6 +48,7 @@
 namespace oofem {
 class Domain;
 class EngngModel;
+class PetscContext;
 
 #define calm_SMALL_NUM 1.e-20
 #define calm_SMALL_ERROR_NUM 1.e-6
@@ -186,6 +187,12 @@ protected:
     /// Relative iterative displacement change tolerance for each group.
     FloatArray rtold;
 
+#ifdef __PARALLEL_MODE
+#ifdef __PETSC_MODULE
+    /// Parallel context for computing norms, dot products and such.
+    PetscContext *parallel_context;
+#endif
+#endif
 
 public:
     CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
