@@ -134,7 +134,7 @@ public:
     TimeStep *givePreviousStep();
     /// Returns target time.
     double giveTargetTime() { return targetTime; }
-    /// Returns intrinsic time.
+    /// Returns intrinsic time, e.g. time in which constitutive model is evaluated.
     double giveIntrinsicTime() { return intrinsicTime; }
     /// Returns solution step associated time increment.
     double giveTimeIncrement() { return deltaT; }

@@ -64,6 +64,9 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
+    
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
     classType giveClassID() const { return IsotropicHeatTransferMaterialClass; }
 

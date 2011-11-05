@@ -106,7 +106,7 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
         if ( mode == VM_Total ) {
             //for nonlinear solver, return the last value even no time has elapsed
             if ( atTime->giveTargetTime() != ms->LastCallTime ) {
-                val.at(1) = ms->GiveIncrementalHeat( averageTemperature, atTime->giveTargetTime() );
+                val.at(1) = ms->GivePower( averageTemperature, atTime->giveTargetTime() );
             } else {
                 val.at(1) = ms->PartHeat;
             }
@@ -7373,7 +7373,7 @@ void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int fl
  */
 
 ///GiveTemp in [C], TargTime in [s]
-double CemhydMatStatus :: GiveIncrementalHeat(double GiveTemp, double TargTime) {
+double CemhydMatStatus :: GivePower(double GiveTemp, double TargTime) {
 #ifdef __TM_MODULE //OOFEM transport module
     double castingTime = this->gp->giveMaterial()->giveCastingTime();
 #else
@@ -7519,7 +7519,7 @@ int CemhydMatStatus :: MoveToDoH(double GiveTemp, double DesiredDoH, int maxcyc)
 //move to desired Time[h] (the next time in CEMHYD3D cycle, no interpolation)
 //no cycle limit is specified (any time can be reached)
 int CemhydMatStatus :: MoveToTime(double GiveTemp, double TargTime) {
-    GiveIncrementalHeat(GiveTemp, 3600. * TargTime);
+    GivePower(GiveTemp, 3600. * TargTime);
     return 0;
 }
 

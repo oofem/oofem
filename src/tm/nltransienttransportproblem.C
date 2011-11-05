@@ -54,9 +54,15 @@
 
 namespace oofem {
 
-NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master) {}
+NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master) 
+{
+//constructor
+}
 
-NLTransientTransportProblem :: ~NLTransientTransportProblem() {}
+NLTransientTransportProblem :: ~NLTransientTransportProblem() 
+{
+//destructor
+}
 
 IRResultType
 NLTransientTransportProblem :: initializeFrom(InputRecord *ir)

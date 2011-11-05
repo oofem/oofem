@@ -42,7 +42,7 @@
 namespace oofem {
 /**
  * This class implements various phenomenological and affinity hydration models. No coupling with relative humidity
- * is considered. Heat capacity and thermal conductivity can be set constant or concrete may be treated as 5-component
+ * is considered. Heat capacity and thermal conductivity can be set constant or concrete may be treated as a 5-component
  * evolving material.  
  */
 class HydratingConcreteMat : public IsotropicHeatTransferMaterial
@@ -70,28 +70,40 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+    virtual double giveConcreteConductivity(GaussPoint *gp);
+    virtual double giveConcreteCapacity(GaussPoint *gp);
+    virtual double giveConcreteDensity(GaussPoint *gp);
+    ///type of hydration model, e.g. exponential curve, Cervera's model
+    int hydrationModelType;
+    double maxModelIntegrationTime;
+    ///minimum number of integration steps for hydration model within a given timeStep
+    double minModelTimeStepIntegrations;
+    ///Potential heat of hdyration, for ordinary Portland cement approximately 500 J/g
+    double Qpot;
+    ///mass of cement in kg per 1m3 of concrete
+    double massCement;
+    ///activation energy of concrete (default 38400 J/mol/K)
+    double activationEnergy;
+    /**Parameters for affinity hydration model inspired by Cervera et al.
+    * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
+    */
+    double B1, B2, eta, DoHInf;
     
 protected:
     ///material casting time, no hydration occurs before this time
     double castAt;
-    ///type of hydration model, e.g. exponential curve, Cervera's model
-    int hydrationModelType;
     ///use different methods to evaluate material conductivity, capacity, or density
     int conductivityType, capacityType, densityType;
     ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
     int reinforcementDegree;
-    ///activation energy of concrete (default 38400 J/kg/K)
-    double activationEnergy;
+    ///maximum integration time for hydration model within a given timeStep 
+    
     ///create material status
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    virtual double giveConcreteConductivity(GaussPoint *gp);
-    virtual double giveConcreteCapacity(GaussPoint *gp);
-    virtual double giveConcreteDensity(GaussPoint *gp);
-    
 };
 
 /**
@@ -103,12 +115,16 @@ public:
     HydratingConcreteMatStatus(int n, Domain *d, GaussPoint *g);
     ~HydratingConcreteMatStatus();
     ///The last incremental heat returned from a GP
-    double PartHeat;
-    double LastCallTime, LastTargTime;
-    double GiveIncrementalHeat(double TargTime);
+    double lastCallTime, lastTargTime, power;
+    double GivePower(TimeStep *atTime);
+    double degreeOfHydration, lastDegreeOfHydration;
     /// Returns actual DogiveDoHActualH
     virtual double giveDoHActual(void);
-    void updateYourself(TimeStep *atTime);
+    virtual void updateYourself(TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+  protected:
+    double lastIntrinsicTime;
+    
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h

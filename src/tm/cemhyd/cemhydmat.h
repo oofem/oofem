@@ -125,7 +125,7 @@ public:
      * Invoked, after new equilibrium state has been reached.
      */
     virtual void updateYourself(TimeStep *atTime);
-    void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *atTime);
 #endif
 
 #ifdef CEMPY
@@ -139,7 +139,7 @@ public:
 FILE *in;
 void initializeMicrostructure(void);
 void read(char *inp);
-double GiveIncrementalHeat(double GiveTemp, double TargTime);
+double GivePower(double GiveTemp, double TargTime);
 double MoveCycles(double GiveTemp, int cycles);
 int MoveToDoH(double GiveTemp, double DesiredDoH, int maxcyc);
 int MoveToTime(double GiveTemp, double TargTime);

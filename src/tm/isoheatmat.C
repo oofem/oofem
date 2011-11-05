@@ -120,4 +120,29 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
     return 0.;
 }
+
+int
+IsotropicHeatTransferMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
+    if ( type == IST_HydrationDegree ) {
+        return 1;
+    } else {
+        return TransportMaterial :: giveIPValueSize(type, aGaussPoint);
+    }
+}
+
+
+int
+IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime){
+  if (  type == IST_HydrationDegree ) {
+    answer.resize(1);
+    answer.at(1)=0.;
+    return 1;
+  }
+  
+  return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+}
+
+
+
 } // end namespace oofem
