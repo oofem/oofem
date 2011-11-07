@@ -86,7 +86,7 @@ public:
     }
 
     /**@name Methods supporting classical input files*/
-    //{
+    //@{
     /**
      * Adds element for active boundary condition.
      * @param elem Element number.
@@ -105,7 +105,7 @@ public:
      * @param dman Dof manager number.
      */
     virtual void addDofman(int dman) { OOFEM_ERROR2("%s :: addElement - Not supported", giveClassName()); }
-    //}
+    //@}
 
     /**
      * Assembles B.C. contributions to specified matrix.

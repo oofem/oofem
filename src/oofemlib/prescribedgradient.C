@@ -56,8 +56,8 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     }
 
     // Reminder: u_i = d_ij . (x_j - xb_j) = d_ij . dx_j
-    FloatArray dx(*coords);
-    dx -= this->centerCoord;
+    FloatArray dx;
+    dx.beDifferenceOf(*coords, this->centerCoord);
 
     FloatArray u;
     u.beProductOf(gradient, dx);

@@ -94,12 +94,6 @@ public:
      */
     virtual void updateCoefficientMatrix(FloatMatrix &C);
 
-    /**
-     * Setups the input record string of receiver.
-     * keyword parameter is ignored as I don't know what it does (nor is it documented).
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     virtual void scale(double s) { gradient.times(s); }
