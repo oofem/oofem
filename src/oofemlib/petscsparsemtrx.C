@@ -101,8 +101,8 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     }
 
     VecRestoreArray(globY, & ptr);
-    VecDestroy(globX);
-    VecDestroy(globY);
+    VecDestroy(&globX);
+    VecDestroy(&globY);
 }
 
 void
@@ -132,8 +132,8 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     }
 
     VecRestoreArray(globY, & ptr);
-    VecDestroy(globX);
-    VecDestroy(globY);
+    VecDestroy(&globX);
+    VecDestroy(&globY);
 }
 
 
@@ -189,8 +189,8 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
         }
     }
 
-    MatDestroy(globB);
-    MatDestroy(globC);
+    MatDestroy(&globB);
+    MatDestroy(&globC);
 }
 
 void
@@ -226,8 +226,8 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
         }
     }
 
-    MatDestroy(globB);
-    MatDestroy(globC);
+    MatDestroy(&globB);
+    MatDestroy(&globC);
 }
 
 void
@@ -250,11 +250,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     int nelem;
 
     if ( mtrx ) {
-        MatDestroy(mtrx);
+        MatDestroy(&mtrx);
     }
 
     if ( this->kspInit ) {
-      KSPDestroy(ksp);
+      KSPDestroy(&ksp);
       this->kspInit  = false; // force ksp to be initialized
     }
 
@@ -361,6 +361,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     // create PETSc mat
     MatCreate(PETSC_COMM_SELF, & mtrx);
+    // To allow the insertion of values using MatSetValues in column major order
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
     MatSetType(mtrx, MATSEQAIJ);
     //MatSetType(mtrx, MATSEQSBAIJ);
@@ -383,11 +385,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     int nelem;
 
     if ( mtrx ) {
-        MatDestroy(mtrx);
+        MatDestroy(&mtrx);
     }
 
     if ( this->kspInit ) {
-      KSPDestroy(ksp);
+      KSPDestroy(&ksp);
       this->kspInit  = false; // force ksp to be initialized
     }
 
@@ -573,8 +575,6 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
         //fprintf (stderr, "[?] gloc=");
         //for (int i=1; i<=ndofe; i++) fprintf (stderr, "%d ", gloc.at(i));
 
-        // To allow the insertion of values using MatSetValues in column major order
-        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
         MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
     } else {
 #endif
@@ -583,8 +583,6 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
         gloc.at(i) = loc.at(i) - 1;
     }
 
-    // To allow the insertion of values using MatSetValues in column major order
-    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
     MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
 
     //mat.printYourself();
@@ -608,8 +606,6 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
         emodel->givePetscContext(this->di, ut)->giveN2Gmap()->map2New(grloc, rloc, 0);
         emodel->givePetscContext(this->di, ut)->giveN2Gmap()->map2New(gcloc, cloc, 0);
 
-        // To allow the insertion of values using MatSetValues in column major order
-        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
         MatSetValues(this->mtrx, grloc.giveSize(), grloc.givePointer(),
                      gcloc.giveSize(), gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
     } else {
@@ -624,8 +620,6 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
         gcloc.at(i) = cloc.at(i) - 1;
     }
 
-    // To allow the insertion of values using MatSetValues in column major order
-    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
     MatSetValues(this->mtrx, rsize, grloc.givePointer(),
                  csize, gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
 
@@ -656,7 +650,7 @@ void
 PetscSparseMtrx :: zero()
 {
     // test if receiver is already assembled
-    PetscTruth assembled;
+    PetscBool assembled;
     MatAssembled(this->mtrx, & assembled);
     if ( assembled ) {
         MatZeroEntries(this->mtrx);

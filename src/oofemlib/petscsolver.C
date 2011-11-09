@@ -113,8 +113,8 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     context->scatterG2N(globSolVec, x, INSERT_VALUES);
 
-    VecDestroy(globSolVec);
-    VecDestroy(globRhsVec);
+    VecDestroy(&globSolVec);
+    VecDestroy(&globRhsVec);
 
     return s;
 }

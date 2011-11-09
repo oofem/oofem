@@ -141,6 +141,12 @@ public:
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
+
+
 protected:
     double computeActualViscosity(double Tau, double shearRate);
     double computeDevStrainMagnitude(MaterialMode mmode, const FloatArray &epsd);

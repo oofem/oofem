@@ -48,7 +48,7 @@
 
 namespace oofem {
 #define BINGHAM_ALT 1
-#define BINGHAM_MIN_SHEAR_RATE     1.e-10
+#define BINGHAM_MIN_SHEAR_RATE     1.e-12
 
 int
 BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
@@ -226,10 +226,9 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
     MaterialMode mmode = gp->giveMaterialMode();
     const FloatArray &epsd = status->giveTempDeviatoricStrainVector(); //status->giveTempDeviatoricStrainVector();
     double tau = status->giveTempDevStressMagnitude();
-    double temp_tau = tau; //status->giveTempDevStressMagnitude();
     double gamma = status->giveTempDevStrainMagnitude(); //status->giveTempDevStrainMagnitude();
     // determine actual viscosity
-    double _nu = this->computeActualViscosity(temp_tau, gamma);
+    double _nu;
     double gamma2 = gamma * gamma;
 
     if ( mmode == _2dFlow ) {
@@ -259,10 +258,12 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
             c43 = 4. / 3.;
             c23 = 2. / 3.;
 
+#ifdef BINGHAM_MIN_SHEAR_RATE
             if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
                 dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
                 mu = computeActualViscosity(tau_0, gamma);
             } else {
+#endif
                 dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
                         tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate *gamma) / gamma;
                 mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
@@ -276,7 +277,9 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
                 dgde2 = 2.0 * epsd.at(2) / gamma;
                 dgde3 = 1.0 * epsd.at(3) / gamma;
 #endif
+#ifdef BINGHAM_MIN_SHEAR_RATE
             }
+#endif
 
             answer.at(1, 1) = 2.0 * epsd.at(1) * dmudg * dgde1 + 2.0 * mu;
             answer.at(1, 2) = 2.0 * epsd.at(1) * dmudg * dgde2;
@@ -300,6 +303,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         double dgde1, dgde2, dgde3, dgde4;
         double dmudg, mu, c23, c43;
 
+
         if ( 0 ) {
             _nu = computeActualViscosity(tau_0, gamma);
 
@@ -320,26 +324,30 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
             c43 = 4. / 3.;
             c23 = 2. / 3.;
 
+#ifdef BINGHAM_MIN_SHEAR_RATE
             if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
                 dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
-                mu = computeActualViscosity(tau_0, gamma);
+                mu = computeActualViscosity(tau_0, BINGHAM_MIN_SHEAR_RATE);
             } else {
+#endif
                 dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
                         tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate *gamma) / gamma;
                 mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
 
 #if 1
-                dgde1 = 2.0 * fabs( epsd.at(1) ) / gamma;
-                dgde2 = 2.0 * fabs( epsd.at(2) ) / gamma;
-                dgde3 = 2.0 * fabs( epsd.at(3) ) / gamma;
-                dgde4 = 1.0 * fabs( epsd.at(4) ) / gamma;
+                dgde1 = (1./6.)*2.0*fabs( epsd.at(1) );
+                dgde2 = (1./6.)*2.0*fabs( epsd.at(2) );
+                dgde3 = (1./6.)*2.0*fabs( epsd.at(3) );
+                dgde4 = (1./6.)*2.0*fabs( epsd.at(4) );
 #else
                 dgde1 = 2.0 * epsd.at(1) / gamma;
                 dgde2 = 2.0 * epsd.at(2) / gamma;
                 dgde3 = 2.0 * epsd.at(3) / gamma;
                 dgde4 = 1.0 * epsd.at(4) / gamma;
 #endif
+#ifdef BINGHAM_MIN_SHEAR_RATE
             }
+#endif
 
             answer.at(1, 1) = 2.0 * epsd.at(1) * dmudg * dgde1 + 2.0 * mu;
             answer.at(1, 2) = 2.0 * epsd.at(1) * dmudg * dgde2;
@@ -377,11 +385,13 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 	c43 = 4. / 3.;
 	c23 = 2. / 3.;
 
+#ifdef BINGHAM_MIN_SHEAR_RATE
 	if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
 	  dmudg = 0.0;
 	  dgde.zero();
 	  mu = computeActualViscosity(tau_0, gamma);
 	} else {
+#endif
 	  dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
 	    tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate *gamma) / gamma;
 	  mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
@@ -392,7 +402,9 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 	  dgde.at(4) = 1.0 * epsd.at(4) / gamma;
 	  dgde.at(5) = 1.0 * epsd.at(5) / gamma;
 	  dgde.at(6) = 1.0 * epsd.at(6) / gamma;
+#ifdef BINGHAM_MIN_SHEAR_RATE
 	}
+#endif
 
 	for (i=1;i<=6;i++) {
 	  answer.at(1,i) = fabs( 2.0 * epsd.at(1) * dmudg * dgde.at(i) );
@@ -438,7 +450,9 @@ double
 BinghamFluidMaterial2 :: computeActualViscosity(double Tau, double shearRate)
 {
 #ifdef BINGHAM_ALT
+#ifdef BINGHAM_MIN_SHEAR_RATE
     shearRate = max(shearRate, BINGHAM_MIN_SHEAR_RATE);
+#endif
     return ( mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * shearRate) ) / shearRate );
 
 #else
@@ -457,10 +471,10 @@ BinghamFluidMaterial2 :: computeDevStrainMagnitude(MaterialMode mmode, const Flo
 {
     double _val = 0.0;
     if ( mmode == _2dFlow ) {
-        _val = 2.0 * ( epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) ) + epsd.at(3) * epsd.at(3);
+      _val = (1/6.)*((epsd.at(1)-epsd.at(2))*(epsd.at(1)-epsd.at(2))+ epsd.at(3)*epsd.at(3)/4.0 ) ;
     } else if ( mmode == _2dAxiFlow ) {
-        _val = 2.0 * ( epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) +
-                      epsd.at(3) * epsd.at(3) ) + epsd.at(4) * epsd.at(4);
+      _val = (1/6.)*((epsd.at(1)-epsd.at(2))*(epsd.at(1)-epsd.at(2)) + (epsd.at(2)-epsd.at(3))*(epsd.at(2)-epsd.at(3)) +
+		     (epsd.at(3)-epsd.at(1))*(epsd.at(3)-epsd.at(1)) + epsd.at(4) * epsd.at(4)/4.0);
     } else if ( mmode == _3dFlow ) {
         _val = 2.0 * (epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) + epsd.at(3) * epsd.at(3) ) 
 	  + epsd.at(4) * epsd.at(4) + epsd.at(5) * epsd.at(5) + epsd.at(6) * epsd.at(6);
@@ -476,12 +490,11 @@ BinghamFluidMaterial2 :: computeDevStressMagnitude(MaterialMode mmode, const Flo
 {
     double _val = 0.0;
     if ( mmode == _2dFlow ) {
-        _val = 0.5 * ( sigd.at(1) * sigd.at(1) + sigd.at(2) * sigd.at(2) + 2.0 * sigd.at(3) * sigd.at(3) );
+        _val = (1/6.)*((sigd.at(1)-sigd.at(2))*(sigd.at(1)-sigd.at(2))+ sigd.at(3)*sigd.at(3)) ;
     } else if ( mmode == _2dAxiFlow ) {
-        _val = 0.5 * ( sigd.at(1) * sigd.at(1) +
-                      sigd.at(2) * sigd.at(2) +
-                      sigd.at(3) * sigd.at(3) +
-                      2.0 * sigd.at(4) * sigd.at(4) );
+      _val = (1/6.)*((sigd.at(1)-sigd.at(2))*(sigd.at(1)-sigd.at(2)) + (sigd.at(2)-sigd.at(3))*(sigd.at(2)-sigd.at(3)) +
+		     (sigd.at(3)-sigd.at(1))*(sigd.at(3)-sigd.at(1)) + sigd.at(4) * sigd.at(4));
+
     } else if ( mmode == _3dFlow ) {
         _val = 0.5 * ( sigd.at(1) * sigd.at(1) + sigd.at(2) * sigd.at(2) + sigd.at(3) * sigd.at(3) +
 		       2.0 * sigd.at(4) * sigd.at(4) + 2.0 * sigd.at(5) * sigd.at(5) + 2.0 * sigd.at(6) * sigd.at(6) );
@@ -496,16 +509,16 @@ void
 BinghamFluidMaterial2 :: computeDeviatoricStrain(FloatArray &answer, const FloatArray &eps, MaterialMode mmode)
 {
     if ( mmode ==  _2dFlow ) {
-        //double ekk=(eps.at(1)+eps.at(2))/3.0;
-        double ekk = 0.0;
+        double ekk=(eps.at(1)+eps.at(2))/3.0;
+        //double ekk = 0.0;
 
         answer.resize(3);
         answer.at(1) = eps.at(1) - ekk;
         answer.at(2) = eps.at(2) - ekk;
         answer.at(3) = eps.at(3);
     } else if ( mmode == _2dAxiFlow ) {
-        //double ekk=(eps.at(1)+eps.at(2)+eps.at(3))/3.0;
-        double ekk = 0.0;
+        double ekk=(eps.at(1)+eps.at(2)+eps.at(3))/3.0;
+        //double ekk = 0.0;
 
         answer.resize(4);
         answer.at(1) = eps.at(1) - ekk;
@@ -622,6 +635,11 @@ BinghamFluidMaterial2Status :: updateYourself(TimeStep *tStep)
     devStrainMagnitude = temp_devStrainMagnitude;
     devStressMagnitude = temp_devStressMagnitude;
     deviatoricStrainVector = temp_deviatoricStrainVector;
+
+    // huhu (forcing initial viscosity at the beginning of each time step)
+    temp_devStrainMagnitude = 0.0;
+    temp_devStressMagnitude = 0.0;
+    
 }
 
 
@@ -710,6 +728,7 @@ void
 BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
 {
     FloatArray eps_i(3), eps(3), tau(3), tau_p(3), tau_t(3);
+
     FloatMatrix d;
     int i, nincr = 10000;
 
@@ -730,4 +749,51 @@ BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
         tau_p = tau_t;
     }
 }
+
+int
+BinghamFluidMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
+  BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(aGaussPoint) );
+  if (type == IST_DeviatoricStressMeasure) {
+    return status->giveDevStressMagnitude();
+  } else {
+    return FluidDynamicMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+  }
+}
+
+InternalStateValueType
+BinghamFluidMaterial2 :: giveIPValueType(InternalStateType type)
+{
+  if (type == IST_DeviatoricStressMeasure ) {
+    return ISVT_SCALAR;
+  } else {
+    return FluidDynamicMaterial :: giveIPValueType(type);
+  }
+}
+
+
+int
+BinghamFluidMaterial2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
+    if (type == IST_DeviatoricStressMeasure ) {
+        answer.resize(1); answer.at(1) = 1;
+        return 1;
+    }  else {
+        return FluidDynamicMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+    }
+}
+
+
+int
+BinghamFluidMaterial2 :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
+    if (type == IST_DeviatoricStressMeasure ) {
+        return 1;
+    } else {
+        return FluidDynamicMaterial :: giveIPValueSize(type, aGaussPoint);
+    }
+}
+
+
+
 } // end namespace oofem

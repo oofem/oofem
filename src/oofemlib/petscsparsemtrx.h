@@ -72,9 +72,9 @@ public:
         mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true)  {}
 
     ~PetscSparseMtrx() {
-        MatDestroy(this->mtrx);
+        MatDestroy(&this->mtrx);
         if ( this->kspInit ) {
-            KSPDestroy(this->ksp);
+            KSPDestroy(&this->ksp);
         }
     }
 
@@ -107,7 +107,7 @@ public:
     // Internals (should be documented)
     Mat *giveMtrx() { return & this->mtrx; }
     bool giveSymmetryFlag() const { return symmFlag; }
-    int setOption(MatOption op, PetscTruth flag) { return MatSetOption(this->mtrx, op, flag); }
+    int setOption(MatOption op, PetscBool flag) { return MatSetOption(this->mtrx, op, flag); }
     EquationID giveEquationID() { return ut; }
     int giveLeqs() { return leqs; }
     int giveDomainIndex() { return di; }

@@ -60,7 +60,7 @@ PetscContext :: PetscContext(EngngModel *e, EquationID ut, bool naturalVectors)
 PetscContext :: ~PetscContext()
 {
     if ( n2gvecscat ) {
-        VecScatterDestroy(n2gvecscat);
+        VecScatterDestroy(&n2gvecscat);
     }
 }
 
@@ -82,7 +82,7 @@ PetscContext :: init(int di)
 
 #endif
     if ( n2gvecscat ) {
-        VecScatterDestroy(n2gvecscat);
+        VecScatterDestroy(&n2gvecscat);
         n2gvecscat = NULL;
     }
 }
@@ -148,7 +148,7 @@ PetscContext :: scatterG2N(Vec src, Vec dest, InsertMode mode)
         if ( n2gvecscat == NULL ) {
             //
             IS naturalIS, globalIS;
-            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), & globalIS);
+            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
             ISCreateStride(comm, neqs, 0, 1, & naturalIS);
             VecScatterCreate(dest, naturalIS, src, globalIS, & n2gvecscat);
         }
@@ -186,7 +186,7 @@ PetscContext :: scatterG2N(Vec src, FloatArray *dest, InsertMode mode)
         }
 
         VecRestoreArray(natVec, & ptr);
-        VecDestroy(natVec);
+        VecDestroy(&natVec);
     } else {
 #endif
     int neqs = giveNumberOfNaturalEqs();
@@ -212,7 +212,7 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
         if ( n2gvecscat == NULL ) {
             //
             IS naturalIS, globalIS;
-            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), & globalIS);
+            ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
             ISCreateStride(comm, neqs, 0, 1, & naturalIS);
             VecScatterCreate(src, naturalIS, dest, globalIS, & n2gvecscat);
         }
@@ -239,7 +239,7 @@ PetscContext :: scatterN2G(const FloatArray *src, Vec dest, InsertMode mode)
         VecPlaceArray(natVec, src->givePointer());
         this->scatterN2G(natVec, dest, mode);
         VecResetArray(natVec);
-        VecDestroy(natVec);
+        VecDestroy(&natVec);
     } else {
 #endif
     int size = src->giveSize();

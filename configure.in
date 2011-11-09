@@ -660,7 +660,7 @@ if test x$petsc_module = xyes; then
   dnl PETSC_ARCH=`PETSC_DIR=${PETSC_DIR} ${PETSC_DIR}/bin/petscarch`
   dnl PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/conf/base"
   PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/conf/variables ${PETSC_DIR}/conf/rules"    
-  PETSC_INCLUDES="\${PETSC_INCLUDE}"
+  PETSC_INCLUDES="\${PETSC_CC_INCLUDES}"
   AC_MSG_CHECKING(PETSC_ARCH)
   if test -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.a; then
     AC_MSG_RESULT(${PETSC_ARCH})
@@ -1053,7 +1053,7 @@ if test x$petsc_module = xyes; then
     MODULE_LIST="$MODULE_LIST petsc"
     MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PETSC_MODULE"
     SPOOLES_MODULE_SYMBOL="-D__PETSC_MODULE"
-    MODULE_INCLUDES="$MODULE_INCLUDES \${PETSC_INCLUDE}"
+    MODULE_INCLUDES="$MODULE_INCLUDES \${PETSC_INCLUDES}"
     LOCAL_LIBS="$LOCAL_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
 fi
 

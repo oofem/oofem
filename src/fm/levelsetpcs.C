@@ -349,7 +349,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
     int nite = 0, inode, i, inodes;
     int ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
-    bool twostage = true;
+    bool twostage = false;
     double dt, c, cm;
 
     FloatArray fs(ndofman), w(ndofman), d_old, d;
@@ -397,7 +397,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
     do {
         d_old = d;
         //levelSetValues = d;     // updated sign funtion
-        pcs_stage1(d, fs, w, atTime, PCS_levelSetRedistance);
+        pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetRedistance);
 
         // update level set values
         // single stage integration
@@ -409,8 +409,8 @@ LevelSetPCS :: redistance(TimeStep *atTime)
 
             if ( fabs( w.at(inode) ) > 0.0 ) {
                 c = dt * fs.at(inode) / w.at(inode);
-                d.at(inode) = d_old.at(inode) - c;
-                cm = max( cm, fabs(c) / d_old.at(inode) );
+		cm = max( cm, fabs(c / levelSetValues.at(inode)) );
+                levelSetValues.at(inode) = levelSetValues.at(inode) - c;
             } else {
                 //printf ("(%d) ", inode);
             }
@@ -438,7 +438,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
     //} while ((++nite < 200));
     printf("LS reinit: error %le in %d iterations\n", cm, nite);
 
-    levelSetValues = d;
+    //levelSetValues = d;
 }
 
 

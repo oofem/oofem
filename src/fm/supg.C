@@ -394,7 +394,12 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray rhs(neq);
-
+    int j,jj,ndofs, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
+    double val,rnorm_mb, rnorm_mc;
+    DofManager* inode;
+    Dof* jDof;
+    DofIDItem type;
+    
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
@@ -631,8 +636,29 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
         this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	       this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-	                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
+	this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
+        // check convergence and repeat iteration if desired
+	rnorm_mb = rnorm_mc = 0.0;
+	for ( i = 1; i <= nnodes; i++ ) {
+	  inode = this->giveDomain(1)->giveDofManager(i);
+	  ndofs = inode->giveNumberOfDofs();
+	  for ( j = 1; j <= ndofs; j++ ) {
+            jDof  =  inode->giveDof(j);
+            type  =  jDof->giveDofID();
+	    if ((jj = jDof->__giveEquationNumber())) {
+	      val = rhs.at(jj);
+	      if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+		rnorm_mb+=val*val;
+	      } else {
+		rnorm_mc+=val*val;
+	      }
+	    }
+	  }
+	}
+	rnorm_mb=sqrt(rnorm_mb);
+	rnorm_mc=sqrt(rnorm_mc);
 
         rnorm = rhs.computeNorm();
 
@@ -644,7 +670,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         if ( requiresUnknownsDictionaryUpdate() ) {
             OOFEM_LOG_INFO("%-10d       n/a       %-15e %-15e\n", nite, rnorm, _absErrResid);
         } else {
-            OOFEM_LOG_INFO("%-10d %-15e %-15e %-15e\n", nite, err, rnorm, _absErrResid);
+	  OOFEM_LOG_INFO("%-10d %-15e %-15e (%-15e, %-15e) %-15e\n", nite, err, rnorm, rnorm_mb, rnorm_mc, _absErrResid);
         }
 
         if ( 0 ) {

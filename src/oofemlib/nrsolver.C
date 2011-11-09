@@ -107,7 +107,7 @@ NRSolver ::  ~NRSolver() {
 #ifdef __PETSC_MODULE
  #ifdef __PARALLEL_MODE
     if ( prescribedEgsIS_defined ) {
-        ISDestroy(prescribedEgsIS);
+        ISDestroy(&prescribedEgsIS);
     }
 
  #endif
@@ -655,7 +655,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         MatAssemblyBegin(* lhs->giveMtrx(), MAT_FINAL_ASSEMBLY);
         MatAssemblyEnd(* lhs->giveMtrx(), MAT_FINAL_ASSEMBLY);
         VecRestoreArray(diag, & ptr);
-        VecDestroy(diag);
+        VecDestroy(&diag);
         if ( numberOfPrescribedDofs ) {
             this->smConstraintVersion = k->giveVersion();
         }
@@ -738,7 +738,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
             return;
 
             VecRestoreArray(diag, & ptr);
-            VecDestroy(diag);
+            VecDestroy(&diag);
         }
 
  #endif
