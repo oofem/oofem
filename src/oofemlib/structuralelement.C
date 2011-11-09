@@ -1486,7 +1486,10 @@ StructuralElement :: updateRotationMatrix()
 
 #ifdef DEBUG
     if ( isT_GtoL ) {
-        if ( T_GtoL.giveNumberOfColumns() != this->computeNumberOfDofs(EID_MomentumBalance) ) {
+        if ( T_GtoL.giveNumberOfColumns() != this->computeGlobalNumberOfDofs(EID_MomentumBalance) ) {
+            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
+        }
+        if ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) {
             _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
         }
     }
