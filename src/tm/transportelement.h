@@ -61,8 +61,8 @@ public:
     TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
     ~TransportElement();
 
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType type, TimeStep *tStep);
-    void giveCharacteristicVector(FloatArray & answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     /** Computes the capacity matrix of the receiver */
     virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);

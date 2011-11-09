@@ -54,6 +54,7 @@ public:
 protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     double computeRadiusAt(GaussPoint *gp);
+    int giveApproxOrder(int unknownIndx) { return 2; }
 };
 } // end namespace oofem
 #endif // traxisym1_ht_h

@@ -1,0 +1,32 @@
+quadaxisym03.out
+Test of one QuadAxisym1_ht element, stationary case, prescribed temperature at right edge
+StationaryProblem nsteps 1 nmodules 0
+#vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1
+node 1 coords 3 0.1 0.3 0.0 bc 1 1 
+node 2 coords 3 1.1 0.3 0.0 bc 1 2
+node 3 coords 3 1.1 1.5 0.0 bc 1 2
+node 4 coords 3 0.1 1.5 0.0 bc 1 1
+quadaxisym1ht 1 nodes 4 1 2 3 4 crosssect 1 mat 1
+#quadaxisym1ht 1 nodes 4 1 2 3 4 crosssect 1 mat 1 BoundaryLoads 2 2 2
+#quad1ht 1 nodes 4 1 2 3 4 crosssect 1 mat 1 BoundaryLoads 2 2 2
+SimpleCS 1 thick 0.6
+IsoHeat 1 d 2400. k 1.5 c 800.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 20.0
+# Newton bc
+#constantedgeload 3 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.85 loadtype 3
+# Neumann bc
+constantedgeload 3 loadTimeFunction 1 ndofs 1 components 1 -15.0 loadtype 2
+ConstantFunction 1 f(t) 1.0
+
+#Exact solution T(r)=20*(1-log(1.1/r)/log(1.1/0.1)), but here linear interpolation of temperature
+#%BEGIN_CHECK%
+#ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 2 keyword "flow" component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 3 keyword "flow" component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 4 keyword "flow" component 1 value -3.0000e+01
+#%END_CHECK%
+

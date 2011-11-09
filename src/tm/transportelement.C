@@ -761,56 +761,52 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
 void
 TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
-    int i, j;
-    IntegrationRule *iRule;
+    //int i, j;
+    //IntegrationRule *iRule;
     FloatArray r, br;
     FloatMatrix b, d;
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
-            this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
-            this->computeGradientMatrixAt(b, gp);
+    this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
+    this->computeGradientMatrixAt(b, gp);
 
-            if ( emode == HeatTransferEM ) {
-                this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, stepN);
-                br.beProductOf(b, r);
-                answer.beProductOf(d, br);
-            } else if ( emode == HeatMass1TransferEM ) {
-                FloatArray r_h, r_w;
-                FloatMatrix b_tot, d_hh, d_hw, d_wh, d_ww;
-                r_h.resize(r.giveSize() / 2);
-                r_h.zero();
-                r_w.resize(r.giveSize() / 2);
-                r_w.zero();
+    if ( emode == HeatTransferEM ) {
+        this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, stepN);
+        br.beProductOf(b, r);
+        answer.beProductOf(d, br);
+    } else if ( emode == HeatMass1TransferEM ) {
+        FloatArray r_h, r_w;
+        FloatMatrix b_tot, d_hh, d_hw, d_wh, d_ww;
+        r_h.resize(r.giveSize() / 2);
+        r_h.zero();
+        r_w.resize(r.giveSize() / 2);
+        r_w.zero();
 
-                this->computeConstitutiveMatrixAt(d_hh, Conductivity_hh, gp, stepN);
-                this->computeConstitutiveMatrixAt(d_hw, Conductivity_hw, gp, stepN);
-                this->computeConstitutiveMatrixAt(d_wh, Conductivity_wh, gp, stepN);
-                this->computeConstitutiveMatrixAt(d_ww, Conductivity_ww, gp, stepN);
-                d.resize( 2 * d_hh.giveNumberOfRows(), 2 * d_hh.giveNumberOfColumns() );
-                d.zero();
+        this->computeConstitutiveMatrixAt(d_hh, Conductivity_hh, gp, stepN);
+        this->computeConstitutiveMatrixAt(d_hw, Conductivity_hw, gp, stepN);
+        this->computeConstitutiveMatrixAt(d_wh, Conductivity_wh, gp, stepN);
+        this->computeConstitutiveMatrixAt(d_ww, Conductivity_ww, gp, stepN);
+        d.resize( 2 * d_hh.giveNumberOfRows(), 2 * d_hh.giveNumberOfColumns() );
+        d.zero();
 
-                b_tot.resize( 2 * b.giveNumberOfRows(), 2 * b.giveNumberOfColumns() );
-                b_tot.zero();
-                b_tot.addSubMatrix(b, 1, 1);
-                b_tot.addSubMatrix(b, b.giveNumberOfRows() + 1, b.giveNumberOfColumns() + 1);
-                br.beProductOf(b_tot, r);
+        b_tot.resize( 2 * b.giveNumberOfRows(), 2 * b.giveNumberOfColumns() );
+        b_tot.zero();
+        b_tot.addSubMatrix(b, 1, 1);
+        b_tot.addSubMatrix(b, b.giveNumberOfRows() + 1, b.giveNumberOfColumns() + 1);
+        br.beProductOf(b_tot, r);
 
-                d.addSubMatrix(d_hh, 1, 1);
-                d.addSubMatrix(d_hw, 1, d_hh.giveNumberOfColumns() + 1);
-                d.addSubMatrix(d_wh, d_hh.giveNumberOfRows() + 1, 1);
-                d.addSubMatrix(d_ww, d_hh.giveNumberOfRows() + 1, d_wh.giveNumberOfColumns() + 1);
+        d.addSubMatrix(d_hh, 1, 1);
+        d.addSubMatrix(d_hw, 1, d_hh.giveNumberOfColumns() + 1);
+        d.addSubMatrix(d_wh, d_hh.giveNumberOfRows() + 1, 1);
+        d.addSubMatrix(d_ww, d_hh.giveNumberOfRows() + 1, d_wh.giveNumberOfColumns() + 1);
 
-                answer.beProductOf(d, br);
-            } else {
-                OOFEM_ERROR1("Unknown element mode");
-            }
-
-            answer.times(-1.);
-        }
+        answer.beProductOf(d, br);
+    } else {
+        OOFEM_ERROR1("Unknown element mode");
     }
+
+    answer.times(-1.);
+    //         }
+    //     }
 }
 
 
@@ -866,16 +862,16 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
 
                 answer.at(i) = sum;
             } else {
-	        //_error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
-	      answer.at(i) = 0.0;
+                //_error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
+                answer.at(i) = 0.0;
             }
         }
-	return 0; // ok
+
+        return 0; // ok
     } else {
-      _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
-      return 1; // failed
+        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+        return 1; // failed
     }
-    
 }
 
 

@@ -88,14 +88,19 @@ public:
     double massCement;
     ///activation energy of concrete (default 38400 J/mol/K)
     double activationEnergy;
+    ///reference temperature for hydration model
+    double referenceTemperature;
+    /**Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard: 
+    * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
+    */
+    double tau, beta;
+    
     /**Parameters for affinity hydration model inspired by Cervera et al.
     * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
     */
     double B1, B2, eta, DoHInf;
     
 protected:
-    ///material casting time, no hydration occurs before this time
-    double castAt;
     ///use different methods to evaluate material conductivity, capacity, or density
     int conductivityType, capacityType, densityType;
     ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
@@ -124,6 +129,7 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
   protected:
     double lastIntrinsicTime;
+    double scaleTemperature(void);
     
 };
 } // end namespace oofem

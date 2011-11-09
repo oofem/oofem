@@ -65,19 +65,27 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     // set conductivity k and capacity c
     IsotropicHeatTransferMaterial :: initializeFrom(ir);
     
-    castAt = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, castAt, IFT_HydratingConcreteMat_castAt, "castat"); // Macro
+    referenceTemperature = 25.;
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, IFT_HydratingConcreteMat_referenceTemperature, "referencetemperature"); // Macro
     
     IR_GIVE_FIELD(ir, hydrationModelType, IFT_HydratingConcreteMat_hydrationModelType, "hydrationmodeltype");
     
-    /*hydrationModelType==2: affinity hydration model inspired by Miguel Cervera and Javier Oliver and Tomas Prato:Thermo-chemo-mechanical model 
-    for concrete. I: Hydration and aging, Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999
+    /*hydrationModelType==1:exponential hydration model, summarized in A.K. Schindler and K.J. Folliard: Heat of Hydration Models for Cementitious 
+        Materials, ACI Materials Journal, 2005
+    hydrationModelType==2: affinity hydration model inspired by Miguel Cervera and Javier Oliver and Tomas Prato:Thermo-chemo-mechanical model 
+        for concrete. I: Hydration and aging, Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999
     */
-    if (hydrationModelType == 2){
+    if (hydrationModelType == 1){
+        IR_GIVE_FIELD(ir, tau, IFT_HydratingConcreteMat_tau, "tau");// [s]
+        IR_GIVE_FIELD(ir, beta, IFT_HydratingConcreteMat_beta, "beta");// [-]
+        IR_GIVE_FIELD(ir, DoHInf, IFT_HydratingConcreteMat_DoHInf, "dohinf");
+    } else if (hydrationModelType == 2){
         IR_GIVE_FIELD(ir, B1, IFT_HydratingConcreteMat_B1, "b1");// [1/s]
         IR_GIVE_FIELD(ir, B2, IFT_HydratingConcreteMat_B2, "b2");
         IR_GIVE_FIELD(ir, eta, IFT_HydratingConcreteMat_eta, "eta");
         IR_GIVE_FIELD(ir, DoHInf, IFT_HydratingConcreteMat_DoHInf, "dohinf");
+    } else {
+        OOFEM_ERROR2("Unknown hdyration model type %d", hydrationModelType);
     }
     
     IR_GIVE_FIELD(ir, Qpot, IFT_HydratingConcreteMat_qpot, "qpot");// [1/s]
@@ -344,6 +352,7 @@ double HydratingConcreteMatStatus :: GivePower( TimeStep *atTime)
   double time = lastCallTime;
   double timeStep;
   double affinity;
+  double temp;
   
   
   //do not calculate anything before casting time
@@ -380,11 +389,18 @@ double HydratingConcreteMatStatus :: GivePower( TimeStep *atTime)
         } else {
             time += timeStep;
         }
-
-        if (mat->hydrationModelType == 2){//affinity hydration model inspired by Miguel Cervera et al.
+        if (mat->hydrationModelType == 1){//exponential affinity hydration model
+            temp = pow(mat->tau/time, mat->beta);
+            if(time == 0.){
+                affinity = 0.;
+            } else {
+                affinity = mat->DoHInf / time * mat->beta * temp * exp(-temp);
+            }
+            degreeOfHydration += affinity*timeStep*scaleTemperature();
+        } else if (mat->hydrationModelType == 2){//affinity hydration model inspired by Miguel Cervera et al.
             affinity = mat->B1*(mat->B2/mat->DoHInf + degreeOfHydration)*(mat->DoHInf-degreeOfHydration)*exp(-mat->eta*degreeOfHydration/mat->DoHInf);
             //scale from 25C to arbitrary temperature
-            affinity *= exp ( mat->activationEnergy/8.314* (1./(273.15+25.)-1./(273.15+this->giveStateVector().at(1))) );
+            affinity *= scaleTemperature();
             degreeOfHydration += affinity*timeStep;
         } else {
             OOFEM_ERROR2("Unknown hydration model type %d", mat->hydrationModelType);
@@ -400,6 +416,11 @@ double HydratingConcreteMatStatus :: GivePower( TimeStep *atTime)
     lastIntrinsicTime = intrinsicTime;
  
     return power;
+}
+
+double HydratingConcreteMatStatus :: scaleTemperature(void){
+    HydratingConcreteMat *mat = (HydratingConcreteMat *) this->gp->giveMaterial();
+    return exp( mat->activationEnergy/8.314* (1./(273.15+mat->referenceTemperature)-1./(273.15+this->giveStateVector().at(1))) );
 }
 
 double HydratingConcreteMatStatus :: giveDoHActual(void)
@@ -419,7 +440,7 @@ HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
     HydratingConcreteMat *mat = ( HydratingConcreteMat * ) this->gp->giveMaterial();
     TransportMaterialStatus :: printOutputAt(file, atTime);
     fprintf(file, "   status {");
-    fprintf( file, "IntrinsicTime %e  DoH %f  conductivity %f  capacity %f  density %f", atTime->giveIntrinsicTime(), giveDoHActual(), mat->giveConcreteConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
+    fprintf( file, "IntrinsicTime %e  DoH %f HeatPower %f [W/m3 of concrete] conductivity %f  capacity %f  density %f", atTime->giveIntrinsicTime(), this->giveDoHActual(), this->power, mat->giveConcreteConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
     fprintf(file, "}\n");
 }
 

@@ -56,6 +56,7 @@ public:
 protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     double computeRadiusAt(GaussPoint *gp);
+    int giveApproxOrder(int unknownIndx) { return 2; }
 };
 } // end namespace oofem
 #endif // quadaxisym1_ht_h

@@ -51,6 +51,7 @@
 \newcommand{\dvs}{\delta\vs}
 \newcommand{\dvsig}{\delta\vsig}
 \newcommand{\dO}{\,\mbox{d}\Omega}
+\newcommand{\ud}{\mathrm{d}}
 \newcommand{\sym}{_{\mbox{\small sym}}}
 \newcommand{\vxi}{\mbf{\xi}}% vector xi
 \newcommand{\quarter}{\mbox{$\frac{1}{4}$}}
@@ -2793,7 +2794,7 @@ Supported modes& \_2dHeat\\
 %\end{center}
 \end{table}
 
-\subsection{Material for cement hydration}
+\subsection{Material for cement hydration - CemhydMat}
 \label{Cemhyd}
 CemhydMat represents a hydrating material based on CEMHYD3D model version 3.0,
 developed at NIST \cite{NISTIR7232}. The model represents a digital hydrating
@@ -2816,7 +2817,7 @@ examples was published \cite{Smilauer:09}. Table~\ref{Cemhydmat_table} summarize
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & Cemhyd hydrating material\\
+Description & Cemhyd - hydrating material\\
 \hline
 Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{ia}] [\elemparam{nowarnings}{ia}] [\elemparam{scaling}{ra}] [\elemparam{reinforcementDegree}{rn}]\\
 Parameters &- \param{num} material model number\\
@@ -2853,6 +2854,54 @@ The linear solver (specified as NonStationaryProblem) performs well when the
 time integration step is small enough (order of minutes) and heat capacity,
 conductivity and density remain constant. If not so, use of nonlinear solver is
 strongly suggested (specified as NlTransientTransportProblem).
+
+\clearpage
+
+\subsection{Material for cement hydration - HydratingConcreteMat}
+\label{Affinity1}
+Simple hydration models based on chemical affinity are implemented. The material models calculate degree of hydration of cement, it can be scaled to the level of concrete when providing cement amount in concrete. The underlying affinity models are phenomenological and depend on several parameters capturing hydration kinetics. The models can capture blended cements as well with supplementary cementitious materials. The degree of hydration under isothemal conditions is approximated by several models. Incremental solution is carried out in a time step.
+
+For $\textrm{hydrationmodeltype = 1}$ \cite{Schindler:2005}
+\begin{eqnarray}
+\alpha(t) &=& \alpha_\infty \exp\left(-\left[\frac{\tau}{t} \right]^\beta \right)\\
+\frac{\ud \alpha(t)}{\ud t} &=& \frac{b\alpha_\infty}{t} \left( \frac{\tau}{t} \right)^\beta \exp\left(-\left[\frac{\tau}{t} \right]^\beta \right)
+\end{eqnarray}
+with parameters $\tau$ and $\beta$. Some meaningful parameters are provided \cite{Schindler:2005}, e.g. $\tau=13\cdot3600=48600$~s, $\beta=0.9$ and $\alpha_\infty=0.7$
+
+
+
+
+
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & HydratingConcreteMat\\
+\hline
+Record Format & \descitem{HydratingConcreteMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{hydrationmodeltype}{in} \elemparam{Qpot}{rn} \elemparam{masscement}{rn} [\elemparam{activationenergy}{rn}] [\elemparam{minModelTimeStepIntegrations}{in}] [\elemparam{castingTime}{rn}]\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{k} Conductivity\\
+&- \param{c} Specific heat capacity\\
+&- \param{file} XML input file for cement microstructure and concrete composition\\
+&- \param{eachGP} 0 (default) no separate microstructures in each GP, 1 assign separate microstructures to each GP\\
+&- \param{densityType} 0 (default) get density from OOFEM input file, 1 get it from XML input file\\
+&- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\textrm{DoH})$ \cite{Ruiz:01}\\
+&- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
+&- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
+&- \param{nowarnings} supresses warnings when material data are out of standard ranges. The array of size 4 represent entries for density, conductivity, capacity, temperature. Nonzero values mean supression.\\
+&- \param{scaling} components in the array scale density, conductivity, capacity in this order. \param{nowarnings} are checked before scaling.\\
+&- \param{reinforcementDegree} specifies the area fraction of reinforcement. Typical values is 0.015. Steel reinforcement slightly increases concrete conductivity and slightly decreases its capacity. Thermal properties of steel are considered 20~W/m/K and 500~J/kg/K.\\
+Supported modes& \_2dHeat, \_3dHeat\\
+\hline
+\end{tabular}
+\caption{HydratingConcreteMat - summary of affinity hydration models.}
+\label{Affinity1_table}
+%\end{center}
+\end{table}
+
+
 
 \subsection{Coupled heat and mass transfer material model}
 Coupled heat and mass transfer material model.
@@ -3494,8 +3543,6 @@ There are two options how to initialize the solution vector at time $t + \Delta 
 \end{eqnarray}
 
 Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf{F}(\mbf{r})$ depend on the solution vector $\mbf{r}$. For this reason, the matrices are updated in each iteration step (Newton method) or only after several steps (modified Newton method). The residuum $\mbf{R}_\tau^{i}$ and the vector $\mbf{F}(\mbf{r})$ are updated in each iteration, using the most recent capacity and conductivity matrices.
-\end{document}
-
 
 %\subsection{Other Elements}
 \begin{thebibliography}{99}
@@ -3512,10 +3559,12 @@ P.~Grassl and M.~Jir\'{a}sek.
 \bibitem{oofem} B. Patz\'ak: OOFEM home page, http://www.oofem.org, 2003.
 \bibitem{SimoHughes} J.C. Simo, T.J.R. Hughes: Computational Inelasticity, Springer, 1998.
 \bibitem{Ruiz:01} J. Ruiz, A. Schindler, R. Rasmussen, P. Kim, G. Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001.
-\bibitem{simo}  J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
+\bibitem{simo} J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
+\bibitem{Schindler:2005} A. K. Schindler and K. J. Folliard: Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 102, 24 - 33, 2005.
 \bibitem{SimoPister} J.C. Simo, K.S. Pister: Remarks on rate constitutive equations for finite deformation problems: computational implications, Comp Methods in Applied Mech and Engng, 46, 201-215, 1984.
 \bibitem{Smilauer:09} V. \v{S}milauer and T. Krej\v{c}\'i, Multiscale Model for Temperature Distribution in Hydrating Concrete, International Journal for Multiscale Computational Engineering, 7 (2), 135-151, 2009.
 \end{thebibliography}
+
 \end{document}
 
 

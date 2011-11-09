@@ -141,6 +141,11 @@ gpDoH_re = re.compile (r"""
         ([\s+-e\d]+)
         """,re.X)
 
+gpHeatPower_re = re.compile (r"""
+        HeatPower\s*
+        ([\s+-e\d]+)
+        """,re.X)
+
 beamrec_re  = re.compile (r"""
         displacements|forces
         """, re.X)
@@ -444,6 +449,11 @@ def match_gpsubrec (context, aline):
     if ppmatch:
         check_element_rec (context, 'DoH', aline)
         if debug: print "     DoH rec"
+        return 1
+    ppmatch = gpHeatPower_re.search(aline)
+    if ppmatch:
+        check_element_rec (context, 'HeatPower', aline)
+        if debug: print "     HeatPower rec"
         return 1
     return 0
     

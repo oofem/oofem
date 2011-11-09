@@ -875,6 +875,7 @@ enum InputFieldType {
     IFT_HydrationModelInterface_hydration,
     IFT_HydrationModelInterface_castAt,
     
+    IFT_HydratingConcreteMat_referenceTemperature,
     IFT_HydratingConcreteMat_castAt,
     IFT_HydratingConcreteMat_hydrationModelType,
     IFT_maxModelIntegrationTime,
@@ -885,6 +886,8 @@ enum InputFieldType {
     IFT_HydratingConcreteMat_activationEnergy,
     IFT_HydratingConcreteMat_massCement,
     IFT_HydratingConcreteMat_reinforcementDegree,
+    IFT_HydratingConcreteMat_tau,
+    IFT_HydratingConcreteMat_beta,
     IFT_HydratingConcreteMat_B1,
     IFT_HydratingConcreteMat_B2,
     IFT_HydratingConcreteMat_eta,

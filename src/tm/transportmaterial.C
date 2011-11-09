@@ -54,36 +54,31 @@ TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
 {
-    int i;
+    int i, j, numberOfIntegrationRules;
+    IntegrationRule *iRule;
     FloatArray flowVec;
     TransportElement *transpElem = ( TransportElement * ) gp->giveElement();
 
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  state");
-    //((StructuralCrossSection*)
-    // gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
-    //n = helpVec.giveSize() ;
-    //for (i=1 ; i<=n ; i++)
-    //  fprintf (File," % .4e",helpVec.at(i)) ;
+
     for ( i = 1; i <= stateVector.giveSize(); i++ ) {
         fprintf( File, " % .4e", stateVector.at(i) );
     }
 
     transpElem->computeFlow(flowVec, gp, tNow);
+
     fprintf(File, "   flow");
     for ( i = 1; i <= flowVec.giveSize(); i++ ) {
         fprintf( File, " % .4e", flowVec.at(i) );
     }
-
     fprintf(File, "\n");
 }
 
 void TransportMaterialStatus :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
-    //     Material *mat = gp->giveMaterial();
-    //     gp->giveMaterial ()
     MaterialStatus :: updateYourself(tStep);
     stateVector = tempStateVector;
 }

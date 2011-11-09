@@ -113,7 +113,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this), 0.0);
-    return result*gp->giveWeight()* radius;
+    return result*gp->giveWeight()*radius;
 }
 
 double
