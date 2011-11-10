@@ -141,7 +141,7 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 	answer.at(++k) = vec.at(j);
       }
     }
-    
+
 
 
     if ( size != k ) {
@@ -237,9 +237,6 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
     if ( this->locationArray ) {
         return this->locationArray->giveSize();
     } else {
-        //IntArray loc;
-        //this->giveLocationArray(loc, ut);
-        //return loc.giveSize();
         int i, answer = 0;
         IntArray nodeDofIDMask, dofMask;
 
@@ -249,12 +246,11 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
             answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
         }
 
-	for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-	  this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-	  this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-	  answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+            this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
+            this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+            answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
         }
-
         return answer;
     }
 }
@@ -295,8 +291,6 @@ void Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const 
             // delete nodeDofIDMask;
         }
     }
-
-    return;
 }
 
 void
@@ -415,7 +409,7 @@ Element :: setIntegrationRules(AList< IntegrationRule > *irlist)
 
 
 void
-Element ::  giveCharacteristicMatrix(FloatMatrix &answer,
+Element :: giveCharacteristicMatrix(FloatMatrix &answer,
                                      CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
@@ -428,7 +422,7 @@ Element ::  giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 void
-Element ::  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep)
+Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to mtrx
 //
@@ -439,7 +433,7 @@ Element ::  giveCharacteristicVector(FloatArray &answer, CharType type, ValueMod
 
 
 
-double Element ::  giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
+double Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics value of receiver according to CharType
 //

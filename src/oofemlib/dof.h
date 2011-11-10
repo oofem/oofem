@@ -384,7 +384,11 @@ public:
     /**
      * @return Array of master DofManagers to which the receiver is linked.
      */
-    virtual void giveMasterDofManArray(IntArray &answer) { answer.resize(0); }
+    virtual void giveMasterDofManArray(IntArray &answer)
+    {
+        answer.resize(1);
+        answer.at(1) = this->giveDofManNumber();
+    }
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
      * renumber the entities. The various FEM components (such as nodes or elements) typically contain
