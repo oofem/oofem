@@ -1,0 +1,74 @@
+test302.out
+test of Brick elements with nlgeo 1(strain is the Green-Lagrangian strain) rotated as a rigid body
+NonLinearStatic  nmsteps 1 nsteps 1 contextOutputStep 1
+nsteps 5 rtolv 1.e-6 stiffMode 1 controllmode 1 maxiter 100
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 3 2 2 2
+node 2 coords 3  1.0   0.0   0.0  bc 3 2 2 2
+node 3 coords 3  1.0   1.0   0.0  bc 3 2 2 2
+node 4 coords 3  0.0   1.0   0.0  bc 3 2 2 2
+node 5 coords 3  0.0   0.0   1.0  bc 3 2 2 2
+node 6 coords 3  1.0   0.0   1.0  bc 3 2 2 2
+node 7 coords 3  1.0   1.0   1.0  bc 3 2 2 2
+node 8 coords 3  0.0   1.0   1.0  bc 3 2 2 2
+lspace  1 nodes 8 1 2 3 4 5 6 7 8  mat 1 crossSect 1 nlgeo 1
+SimpleCS 1
+IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0  
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.5
+PiecewiseLinFunction 1 npoints 2 t 2 0. 1000. f(t) 2 0. 1000.
+#%BEGIN_CHECK% tolerance 1.e-12
+## check Green-Lagrange strain tensor
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 5 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 5 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 5 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 5 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 5 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 5 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 8 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 8 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 8 keyword "strains" component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 8 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 8 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 8 keyword "strains" component 6  value 0.0
+#%END_CHECK%
+
+
