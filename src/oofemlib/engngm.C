@@ -1654,6 +1654,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     int i, serNum, closeFlag = 0;
     Element *element;
     Domain *domain;
+    GeneralBoundaryCondition* bc;
     ErrorEstimator *ee;
     FILE *file;
 
@@ -1733,6 +1734,16 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
             }
         }
 
+	// store boundary conditions data
+	int nbc = domain->giveNumberOfBoundaryConditions();
+        for ( i = 1; i <= nbc; i++ ) {
+            bc = domain->giveBc(i);
+            if ( ( iores = bc->saveContext(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+        }
+	
+
         // store error estimator data
         ee = this->giveDomainErrorEstimator(idomain);
         if ( ee ) {
@@ -1790,6 +1801,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     bool domainUpdated = false;
     Element *element;
     Domain *domain;
+    GeneralBoundaryCondition* bc;
     ErrorEstimator *ee;
     FILE *file;
 
@@ -1904,6 +1916,15 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
 #endif
             if ( ( iores = element->restoreContext(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+        }
+
+	// restore boundary conditions data
+	int nbc = domain->giveNumberOfBoundaryConditions();
+        for ( i = 1; i <= nbc; i++ ) {
+            bc = domain->giveBc(i);
+            if ( ( iores = bc->restoreContext(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
