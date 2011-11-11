@@ -83,7 +83,9 @@ public:
     { answer.resize(0); }
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
-    int computeNumberOfDofs(EquationID ut);
+    int computeNumberOfDofs(EquationID ut) {return 2;}
+    int computeGlobalNumberOfDofs(EquationID ut);
+
     void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     void updateInternalState(TimeStep *tStep) {}

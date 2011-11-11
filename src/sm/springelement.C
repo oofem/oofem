@@ -158,7 +158,7 @@ SpringElement :: computeSpringInternalForce (TimeStep *stepN)
 }
 
 int
-SpringElement :: computeNumberOfDofs(EquationID ut)
+SpringElement :: computeGlobalNumberOfDofs(EquationID ut)
 {
     if ((this->mode == SE_1D_SPRING) || (this->mode == SE_2D_TORSIONALSPRING_XZ))  {
         return 2;
