@@ -51,6 +51,7 @@
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
+#include "dofmantransftype.h"
 
 namespace oofem {
 class TimeStep;
@@ -329,6 +330,21 @@ public:
      * @return Number of DOFs.
      */
     virtual int computeNumberOfL2GDofs(EquationID ut) { return this->computeNumberOfDofs(ut); }
+    /**
+     * Returns transformation matrix for DOFs from global coordinate system
+     * to local coordinate system in nodes if mode == _toNodalCS.
+     * If mode == _toGlobalCS, the transformation from local nodal cs to
+     * global cs in node is returned.
+     * Also includes transformations to slave DOFs.
+     * If no transformation is necessary sets answer to empty matrix and returns false.
+     * Local stiffness matrix of element should be rotated with answer before assembly.
+     * @note Function does most likely NOT need to be overridden.
+     * @param answer Computed rotation matrix.
+     * @param mode Determines type of rotation matrix.
+     * @param eid Equation ID.
+     * @return True if transformation is necessary, false otherwise.
+     */
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, DofManTransfType mode, EquationID eid);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -735,7 +751,7 @@ public:
      * and return zero value.
      * @return nonzero if answer computed, zero value if answer is empty, i.e. no transformation is necessary.
      */
-    virtual int  giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     // mid-plane normal at gaussPoint - for materials with orthotrophy
     // valid only for plane elements in space (3d)  (shells, plates, ....)

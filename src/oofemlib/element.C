@@ -104,7 +104,6 @@ Element :: ~Element()
             delete integrationRulesArray [ i ];
         }
 
-        //      delete [numberOfGaussPoints] gaussPointArray ;}
         delete[] integrationRulesArray;
     }
 }
@@ -120,10 +119,9 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
     int i, j, k, nDofs, size;
     IntArray elementNodeMask;
     FloatArray vec;
-    //answer = new FloatArray(size = this->computeNumberOfDofs()) ;
     answer.resize( size = this->computeGlobalNumberOfDofs(type) );
 
-    k      = 0;
+    k = 0;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, type, elementNodeMask);
         this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
@@ -134,21 +132,19 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
     }
 
     for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-      this->giveInternalDofManDofIDMask(i, type, elementNodeMask);
-      this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
-      nDofs = vec.giveSize();
-      for ( j = 1; j <= nDofs; j++ ) {
-	answer.at(++k) = vec.at(j);
-      }
+        this->giveInternalDofManDofIDMask(i, type, elementNodeMask);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+        nDofs = vec.giveSize();
+        for ( j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
     }
-
 
 
     if ( size != k ) {
         _error("computeVectorOf: Unknown vector and location array size mismatch");
     }
 
-    return;
 }
 
 void
@@ -163,7 +159,7 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
     FloatArray vec;
     answer.resize( size = this->computeGlobalNumberOfDofs( field.giveEquationID() ) );
 
-    k      = 0;
+    k = 0;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
         this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
@@ -174,19 +170,17 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
     }
 
     for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-      this->giveInternalDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
-      this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
-      nDofs = vec.giveSize();
-      for ( j = 1; j <= nDofs; j++ ) {
-	answer.at(++k) = vec.at(j);
-      }
+        this->giveInternalDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
+        nDofs = vec.giveSize();
+        for ( j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
     }
 
     if ( size != k ) {
         _error("computeVectorOf: Unknown vector and location array size mismatch");
     }
-
-    return;
 }
 
 void
@@ -196,15 +190,13 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
 // (e.g., the prescribed displacement) of the dofs of the receiver's
 // nodes. Puts 0 at each free dof.
 {
-    // FloatArray *answer ;
     int i, j, k, size, nDofs;
     IntArray elementNodeMask, dofMask;
     FloatArray vec;
 
-    // answer = new FloatArray(this->computeNumberOfDofs()) ;
     answer.resize( size = this->computeGlobalNumberOfDofs(ut) );
 
-    k      = 0;
+    k = 0;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, ut, elementNodeMask);
         this->giveDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
@@ -215,19 +207,18 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
     }
 
     for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-      this->giveInternalDofManDofIDMask(i, ut, elementNodeMask);
-      this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
-      nDofs = vec.giveSize();
-      for ( j = 1; j <= nDofs; j++ ) {
-	answer.at(++k) = vec.at(j);
-      }
+        this->giveInternalDofManDofIDMask(i, ut, elementNodeMask);
+        this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
+        nDofs = vec.giveSize();
+        for ( j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
     }
 
     if ( size != k ) {
         _error("computeVectorOf: Unknown vector and location array size mismatch");
     }
 
-    return;
 }
 
 
@@ -254,6 +245,58 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
         return answer;
     }
 }
+
+
+bool Element :: computeDofTransformationMatrix(FloatMatrix &answer, DofManTransfType mode, EquationID eid)
+{
+    bool flag = false;
+    int numberOfDofMans = this->giveNumberOfDofManagers();
+
+    // test if transformation is necessary
+    for (int i = 1; i <= numberOfDofMans; i++ ) {
+        flag = flag || this->giveDofManager(i)->requiresTransformation();
+    }
+
+    if ( !flag ) {
+        answer.beEmptyMtrx();
+        return false;
+    }
+
+    // initialize answer
+    int gsize = this->computeGlobalNumberOfDofs(eid);
+    if ( mode == _toGlobalCS ) {
+        answer.resize(this->computeNumberOfL2GDofs(eid), gsize);
+    } else if ( mode == _toNodalCS ) {
+        answer.resize( gsize, this->computeNumberOfL2GDofs(eid) );
+    } else {
+        OOFEM_ERROR("StructuralElementEvaluator::computeGNDofRotationMatrix:\n unsupported DofManTrasfType value");
+    }
+
+    answer.zero();
+
+    FloatMatrix dofManT;
+    IntArray dofIDmask;
+    int nr, nc, lastRowPos = 0, lastColPos = 0;
+    // loop over nodes
+    for (int i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, eid, dofIDmask);
+        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
+        nc = dofManT.giveNumberOfColumns();
+        nr = dofManT.giveNumberOfRows();
+        for (int j = 1; j <= nr; j++ ) {
+            for (int k = 1; k <= nc; k++ ) {
+                // localize node contributions
+                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+            }
+        }
+
+        lastRowPos += nr;
+        lastColPos += nc;
+    }
+
+    return true;
+}
+
 
 IntArray *Element :: giveBodyLoadArray()
 // Returns the array which contains the number of every body load that act
@@ -288,7 +331,6 @@ void Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const 
             this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
             this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
             locationArray.followedBy(nodalArray);
-            // delete nodeDofIDMask;
         }
     }
 }
@@ -1291,9 +1333,9 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
     } else {
         if ( mode == ISM_recovered ) {
             const FloatArray *nodval;
-	    NodalRecoveryModel* smoother = this->giveDomain()->giveSmoother();
+            NodalRecoveryModel* smoother = this->giveDomain()->giveSmoother();
             int result = smoother->giveNodalVector( nodval, this->giveNode(node)->giveNumber(),
-						    smoother->giveElementVirtualRegionNumber(this->number) );
+                                    smoother->giveElementVirtualRegionNumber(this->number) );
             if ( nodval ) {
                 answer = * nodval;
             } else {

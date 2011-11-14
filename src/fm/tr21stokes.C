@@ -259,7 +259,7 @@ void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeS
     GaussPoint *gp;
     FloatArray N, gVector, *lcoords, temparray(15);
     double dA, detJ, rho;
-    
+
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
@@ -268,7 +268,6 @@ void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeS
             lcoords = gp->giveCoordinates();
 
             rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            //detJ = this->interpolation_quad.giveTransformationJacobian(this->domain, this->dofManArray, *lcoords, 0.0);
             detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
             dA = detJ * gp->giveWeight();
 
@@ -311,7 +310,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             this->interpolation_quad.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
             double dS = gp->giveWeight() * this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this), 0.0);
 
-            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {         // Edge load in xi-eta system
+            if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else   { // Edge load in x-y system
                 FloatArray gcoords;
@@ -389,6 +388,12 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(15, 15);
     answer.zero();
     answer.assemble(temp, this->ordering);
+
+    // This is general and should be moved outside this function.. probably.
+    FloatMatrix transf;
+    if (this->computeDofTransformationMatrix(transf, _toGlobalCS, EID_MomentumBalance_ConservationEquation) ) {
+        answer.rotatedWith(transf);
+    }
 }
 
 double Tr21Stokes :: computeArea() const
