@@ -44,7 +44,6 @@
 #include "matstatus.h"
 
 namespace oofem {
-class GaussPoint;
 
 #define BINGHAM_DEFAULT_STRESS_GROWTH_RATE 400.0
 
@@ -108,8 +107,8 @@ protected:
     double mu_inf;
     // Stress growth rate - parameter controlling the shape of regularized model.
     double stressGrowthRate;
-public:
 
+public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
