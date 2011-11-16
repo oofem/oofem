@@ -43,7 +43,7 @@ namespace oofem {
 /**
  * This class implements various phenomenological and affinity hydration models. No coupling with relative humidity
  * is considered. Heat capacity and thermal conductivity can be set constant or concrete may be treated as a 5-component
- * evolving material.  
+ * evolving material.
  */
 class HydratingConcreteMat : public IsotropicHeatTransferMaterial
 {
@@ -52,7 +52,7 @@ public:
     ~HydratingConcreteMat();
 
     /// Return true if hydration heat source is present.
-    virtual int hasInternalSource() {return 1;};
+    virtual int hasInternalSource() { return 1; };
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
 
@@ -90,23 +90,23 @@ public:
     double activationEnergy;
     ///reference temperature for hydration model
     double referenceTemperature;
-    /**Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard: 
-    * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
-    */
+    /**Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard:
+     * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
+     */
     double tau, beta;
-    
+
     /**Parameters for affinity hydration model inspired by Cervera et al.
-    * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
-    */
+     * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
+     */
     double B1, B2, eta, DoHInf;
-    
+
 protected:
     ///use different methods to evaluate material conductivity, capacity, or density
     int conductivityType, capacityType, densityType;
     ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
     int reinforcementDegree;
-    ///maximum integration time for hydration model within a given timeStep 
-    
+    ///maximum integration time for hydration model within a given timeStep
+
     ///create material status
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
@@ -119,18 +119,16 @@ class HydratingConcreteMatStatus : public TransportMaterialStatus
 public:
     HydratingConcreteMatStatus(int n, Domain *d, GaussPoint *g);
     ~HydratingConcreteMatStatus();
-    ///The last incremental heat returned from a GP
-    double lastCallTime, lastTargTime, power;
+    double power;
     double GivePower(TimeStep *atTime);
-    double degreeOfHydration, lastDegreeOfHydration;
-    /// Returns actual DogiveDoHActualH
+    /// Returns actual degree of hydration at last known equilibrium
     virtual double giveDoHActual(void);
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
-  protected:
     double lastIntrinsicTime;
+protected:
+    double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
     double scaleTemperature(void);
-    
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h

@@ -57,9 +57,10 @@
 \newcommand{\quarter}{\mbox{$\frac{1}{4}$}}
 \newcommand{\vx}{\mbf{x}}% vector x
 \newcommand{\refeq}[1]{Eq.~(\ref{#1})}
+\newcommand{\reffig}[1]{Fig.~(\ref{#1})}
 \newcommand{\refeqs}[2]{Eqs.~(\ref{#1}), (\ref{#2})}
 \newcommand{\refeqsr}[2]{\mbox{Eqs.~(\ref{#1})-(\ref{#2})}}
-
+\newcommand{\C}{$^{\circ}\mathrm{C}$}
 
 \begin{document}
 
@@ -2819,7 +2820,7 @@ examples was published \cite{Smilauer:09}. Table~\ref{Cemhydmat_table} summarize
 \hline
 Description & Cemhyd - hydrating material\\
 \hline
-Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{ia}] [\elemparam{nowarnings}{ia}] [\elemparam{scaling}{ra}] [\elemparam{reinforcementDegree}{rn}]\\
+Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{rn}] [\elemparam{nowarnings}{ia}] [\elemparam{scaling}{ra}] [\elemparam{reinforcementDegree}{rn}]\\
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{k} Conductivity\\
@@ -2827,7 +2828,7 @@ Parameters &- \param{num} material model number\\
 &- \param{file} XML input file for cement microstructure and concrete composition\\
 &- \param{eachGP} 0 (default) no separate microstructures in each GP, 1 assign separate microstructures to each GP\\
 &- \param{densityType} 0 (default) get density from OOFEM input file, 1 get it from XML input file\\
-&- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\textrm{DoH})$ \cite{Ruiz:01}\\
+&- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\alpha)$ \cite{Ruiz:01}\\
 &- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
 &- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
 &- \param{nowarnings} supresses warnings when material data are out of standard ranges. The array of size 4 represent entries for density, conductivity, capacity, temperature. Nonzero values mean supression.\\
@@ -2859,19 +2860,31 @@ strongly suggested (specified as NlTransientTransportProblem).
 
 \subsection{Material for cement hydration - HydratingConcreteMat}
 \label{Affinity1}
-Simple hydration models based on chemical affinity are implemented. The material models calculate degree of hydration of cement, it can be scaled to the level of concrete when providing cement amount in concrete. The underlying affinity models are phenomenological and depend on several parameters capturing hydration kinetics. The models can capture blended cements as well with supplementary cementitious materials. The degree of hydration under isothemal conditions is approximated by several models. Incremental solution is carried out in a time step.
-
-For $\textrm{hydrationmodeltype = 1}$ \cite{Schindler:2005}
+Simple hydration models based on chemical affinity are implemented. The models calculate degree of hydration of cement, $\alpha$, which can be scaled to the level of concrete when providing corresponding amount of cement in concrete. Blended cements can be considered as well, either by separating supplementary cementitious materials from pure Portland clinker or by providing parameters for the evolution of hydration degree and potential heat. Released heat from cement paste is obtained from
 \begin{eqnarray}
-\alpha(t) &=& \alpha_\infty \exp\left(-\left[\frac{\tau}{t} \right]^\beta \right)\\
-\frac{\ud \alpha(t)}{\ud t} &=& \frac{b\alpha_\infty}{t} \left( \frac{\tau}{t} \right)^\beta \exp\left(-\left[\frac{\tau}{t} \right]^\beta \right)
+Q(t) = \alpha Q_{pot},
 \end{eqnarray}
-with parameters $\tau$ and $\beta$. Some meaningful parameters are provided \cite{Schindler:2005}, e.g. $\tau=13\cdot3600=48600$~s, $\beta=0.9$ and $\alpha_\infty=0.7$
+where potential hydration heat, $Q_{pot}$, is expressed in kJ/kg of cement and for pure Portland cement is around 500 kJ/kg.
 
+Evolution of hydration degree under isothemal curing conditions is approximated by several models. Scaling from a reference temperature to arbitrary temperature is based on Arrhenius equation, which coincides with the maturity method approach. The equivalent time, $t_e$, is defined as time under constant reference (isothermal) temperature
+\begin{eqnarray}
+t_e(T_0)&=&t(T) k_{rate},\\
+k_{rate}&=&\exp\left[\frac{E_a}{R}\left(\frac{1}{T_0}-\frac{1}{T}\right)\right],
+\end{eqnarray}
+where $t$ is real time, $T$ is the arbitrary constant temperature of hydration, $T_0$ is a reference temperature, $R$ is the universal gas constant (8.314 Jmol$^{-1}$K$^{-1}$) and $E_a$ is the apparent activation energy. Due to varying history of temperature, incremental solution is adopted. Linear and nonlinear nonstationary solvers are supported for all \param{hydrationmodeltype}'s. Hydration models are evaluated at intrinsic time in each time step. Usually, intrinsic time is in the middle of the time step.
 
+The \param{hydrationmodeltype} = 1 is based on exponential approximation of hydration degree \cite{Schindler:2005}. Equivalent time increment is added in each time step. Thus all the thermal history is stored in the equivalent time
+\begin{eqnarray}
+\alpha(t_e) &=& \alpha_\infty \exp\left(-\left[\frac{\tau}{t_e} \right]^\beta \right)\label{eq:affinity1}
+%\frac{\ud \alpha(t)}{\ud t} &=& \frac{b\alpha_\infty}{t} \left( \frac{\tau}{t} \right)^\beta \exp\left(-\left[\frac{\tau}{t} \right]^\beta \right)
+\end{eqnarray}
+where three parameters $\tau$, $\beta$ and $\alpha_\infty$ are needed. Some meaningful parameters are provided in \cite{Schindler:2005}, e.g. $\tau=26\cdot3600=93600$~s, $\beta=0.75$ and $\alpha_\infty=0.90$.
 
-
-
+The \param{hydrationmodeltype} = 2 is inspired by Cervera et al. \cite{Cervera:99}, who proposed an analytical form of the normalized affinity which was refined in \cite{Gawin:06a}. A slightly modified formulation is proposed here. The affinity model is formulated for a reference temperature 25\C
+\begin{eqnarray}
+\frac{\ud \alpha}{\ud t} = \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) \exp\left(-\bar\eta\frac{\alpha}{\alpha_\infty}\right) k_{rate} \label{eq:affinity2}
+\end{eqnarray}
+where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar\eta$ represents microdiffusion of free water through formed hydrates. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2879,20 +2892,23 @@ with parameters $\tau$ and $\beta$. Some meaningful parameters are provided \cit
 \hline
 Description & HydratingConcreteMat\\
 \hline
-Record Format & \descitem{HydratingConcreteMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{hydrationmodeltype}{in} \elemparam{Qpot}{rn} \elemparam{masscement}{rn} [\elemparam{activationenergy}{rn}] [\elemparam{minModelTimeStepIntegrations}{in}] [\elemparam{castingTime}{rn}]\\
+Record Format & \descitem{HydratingConcreteMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{hydrationmodeltype}{in} \elemparam{Qpot}{rn} \elemparam{masscement}{rn} [\elemparam{activationenergy}{rn}] \elemparam{reinforcementdegree}{rn}] [\elemparam{densitytype}{in}] [\elemparam{conductivitytype}{in}] [\elemparam{capacityType}{in}]   [\elemparam{minModelTimeStepIntegrations}{in}]  [\elemparam{maxmodelintegrationtime}{rn}] [\elemparam{castingTime}{rn}]\\
 Parameters &- \param{num} material model number\\
-&- \param{d} material density\\
-&- \param{k} Conductivity\\
-&- \param{c} Specific heat capacity\\
-&- \param{file} XML input file for cement microstructure and concrete composition\\
-&- \param{eachGP} 0 (default) no separate microstructures in each GP, 1 assign separate microstructures to each GP\\
-&- \param{densityType} 0 (default) get density from OOFEM input file, 1 get it from XML input file\\
-&- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\textrm{DoH})$ \cite{Ruiz:01}\\
-&- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
-&- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
-&- \param{nowarnings} supresses warnings when material data are out of standard ranges. The array of size 4 represent entries for density, conductivity, capacity, temperature. Nonzero values mean supression.\\
-&- \param{scaling} components in the array scale density, conductivity, capacity in this order. \param{nowarnings} are checked before scaling.\\
+&- \param{d} material density about 2300 kg/m$^3$\\
+&- \param{k} Conductivity about 1.7 W/m/K\\
+&- \param{c} Specific heat capacity about 870 J/kg/K\\
+&- \param{hydrationmodeltype} 1 is exponential model from \refeq{eq:affinity1}, 2 is affinity model from \refeq{eq:affinity2}\\
+&- \param{Qpot} Potential heat of hydration, about 500 kJ/kg of cement\\
+&- \param{masscement} Cement mass per 1m$^3$ of concrete, about 200-450\\
+&- \param{activationenergy} Arrhenius activation energy, 38400. (default)\\
 &- \param{reinforcementDegree} specifies the area fraction of reinforcement. Typical values is 0.015. Steel reinforcement slightly increases concrete conductivity and slightly decreases its capacity. Thermal properties of steel are considered 20~W/m/K and 500~J/kg/K.\\
+&- \param{densityType} 0 (default)\\
+&- \param{conductivityType} 0 (default), 1 compute as $\lambda = \textrm{k} (1.33-0.33\alpha)$ \cite{Ruiz:01}\\
+&- \param{capacityType} 0 (default)\\
+&- \param{minModelTimeStepIntegrations} Minimum integrations per time step in affinity model 30 (default)\\
+&- \param{maxmodelintegrationtime} Maximum integration time step in affinity model 36000 s (default)\\
+&- \param{castingtime} optional casting time of concrete, from which hydration takes place, in s\\
+&- \param{scaling} components in the array scale density, conductivity, capacity in this order. \param{nowarnings} are checked before scaling.\\
 Supported modes& \_2dHeat, \_3dHeat\\
 \hline
 \end{tabular}
@@ -2901,6 +2917,22 @@ Supported modes& \_2dHeat, \_3dHeat\\
 %\end{center}
 \end{table}
 
+\reffig{hydration_comparison} shows mutual comparison of three hydration models implemented in OOFEM. Parameters for exponential model according to \refeq{eq:affinity1} are $\tau=26\cdot3600=93600$~s, $\beta=0.75$, $\alpha_\infty=0.90$. Parameters for affinity model according to \refeq{eq:affinity2} are $B_1=3.519e-4$~s$^{-1}$, $B_2=8.0e-7$, $\eta=7.4$, $\alpha_\infty=0.85$.
+
+\begin{figure}[!htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time.eps}}
+\fi
+%end{latexonly}
+  \caption{Performance of implemented hydration models: exponential model from \refeq{eq:affinity1}, affinity model from \refeq{eq:affinity2}, CEMHYD3D model from Subsection~\ref{Cemhyd}.}
+  \label{hydration_comparison}
+\end{figure}
 
 
 \subsection{Coupled heat and mass transfer material model}
@@ -3548,8 +3580,9 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
 \begin{thebibliography}{99}
 \bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size Effect in Concrete and Other Quasibrittle  Materials, CRC Press, 1998.
 \bibitem{NISTIR7232} D.P. Bentz: CEMHYD3D: A Three-Dimensional Cement Hydration and Microstructure Development Modeling Package. Version 3.0., NIST Building and Fire Research Laboratory, Gaithersburg, Maryland, Technical report, 2005.
-\bibitem{GraJir}
-P.~Grassl and M.~Jir\'{a}sek.
+\bibitem{Cervera:99} M.~Cervera, J.~Oliver, and T.~Prato: Thermo-chemo-mechanical model for concrete. I: Hydration and aging. {\em Journal of Engineering Mechanics ASCE}, 125(9):1018--1027, 1999.
+\bibitem{Gawin:06a} D.~Gawin, F.~Pesavento, and B.~A. Schrefler: Hygro-thermo-chemo-mechanical modelling of concrete at early ages and beyond. Part I: Hydration and hygro-thermal phenomena. \em {International Journal for Numerical Methods in Engineering}, 67(3):299--331, 2006.
+\bibitem{GraJir} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Damage-plastic model for concrete failure.
 \newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
 \bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of structures, John Wiley, 2001.
