@@ -1382,17 +1382,24 @@ StructuralElement :: updateRotationMatrix()
 
 #ifdef DEBUG
     if ( isT_GtoL ) {
-        if ( T_GtoL.giveNumberOfColumns() != this->computeGlobalNumberOfDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
+    	//if (T_GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(EID_MomentumBalance) ) {
+        if (T_GtoL.giveNumberOfColumns() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
+            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch in columns");
         }
+       	//if (T_GtoL.giveNumberOfColumns() != this->computeNumberOfLocalDofs(EID_MomentumBalance) ) {
         if ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
+            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch in rows");
         }
     }
 
     if ( isT_NtoG ) {
-      if (T_NtoG.giveNumberOfRows() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
+       	//if (T_NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryDofs(EID_MomentumBalance) ) {
+        if (T_NtoG.giveNumberOfColumns() != this->computeGlobalNumberOfDofs(EID_MomentumBalance) ) {
+            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch in columns");
+        }
+       	//if (T_NtoG.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(EID_MomentumBalance) ) {
+        if (T_NtoG.giveNumberOfRows() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
+            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch in rows");
         }
     }
 
