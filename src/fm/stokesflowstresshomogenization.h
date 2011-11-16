@@ -109,7 +109,7 @@ public:
 
     virtual SparseLinearSystemNM *giveLinearNumericalMethod();
 
-    const char *giveClassName() const { return "StokesFlowStressRVE"; }
+    const char *giveClassName() const { return "StokesFlowStressStressHomogenization"; }
     classType giveClassID() const { return StokesFlowStressHomogenizationClass; }
 };
 } // end namespace oofem
