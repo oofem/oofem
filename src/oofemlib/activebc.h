@@ -41,10 +41,14 @@
 #include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
+#include "error.h"
 
 namespace oofem {
 class SparseMtrx;
 class UnknownNumberingScheme;
+class ActiveDof;
+class Dof;
+class PrimaryField;
 
 /**
  * Abstract base class for all active boundary conditions.
@@ -85,7 +89,7 @@ public:
         return IRRT_OK;
     }
 
-    /**@name Methods supporting classical input files*/
+    ///  @name Methods supporting classical input files.
     //@{
     /**
      * Adds element for active boundary condition.
@@ -148,6 +152,71 @@ public:
      */
     virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
+
+
+    /// @name Functions related to boundary conditions which have to deal with special DOFs.
+    //@{
+    /**
+     * NOT ACTUALLY USED YET due to some design difficulties.
+     * Checks to see if active boundary condition requires special DOFs.
+     * @return True if ActiveDof should be created.
+     */
+    virtual bool requiresSpecialDofs() { return false; }
+    /**
+     * Checks to see if the dof is a primary DOF.
+     * @return True if ActiveDof is a primary DOF.
+     */
+    virtual bool isPrimaryDof(ActiveDof *dof) { return true; }
+    /**
+     * Allows for active boundary conditions to handle their own special DOF.
+     * @param dof Active dof belonging to receiver.
+     * @return Number of primary master DOFs.
+     */
+    virtual int giveNumberOfMasterDofs(ActiveDof *dof)
+    {
+        OOFEM_ERROR2("%s :: giveNumberOfPrimaryMasterDofs - Not supported by bc.", giveClassName());
+        return 0;
+    }
+    /**
+     * Give the pointer to master dof belonging to active DOF.
+     * @param dof Active dof belonging to receiver.
+     * @param mdof Local master dof number.
+     * @return Master dof.
+     */
+    virtual Dof *giveMasterDof(ActiveDof *dof, int mdof)
+    {
+        OOFEM_ERROR2("%s :: giveMasterDof - Not supported by bc.", giveClassName());
+        return NULL;
+    }
+    virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
+    {
+        OOFEM_ERROR2("%s :: computeDofTransformation - Not supported by bc.", giveClassName());
+    }
+    /**
+     * Computes the value of the dof.
+     * @param field Field to take value from.
+     * @param mode Mode of unknown value.
+     * @param tStep Time step.
+     * @return Value of dof.
+     */
+    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+    {
+        OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
+        return 0.0;
+    }
+    /**
+     * Computes the value of the dof.
+     * @param eid Equation ID for the unknown value.
+     * @param mode Mode of unknown value.
+     * @param tStep Time step.
+     * @return Value of dof.
+     */
+    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+    {
+        OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
+        return 0.0;
+    }
+    //@}
 
     classType giveClassID() const { return ActiveBoundaryConditionClass; }
     const char *giveClassName() const { return "ActiveBoundaryCondition"; }
