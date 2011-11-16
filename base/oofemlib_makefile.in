@@ -20,7 +20,7 @@ SYS_LIBS  =  @LIBS@ @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@
 CFLAGS      = @CXXFLAGS@ @MODULE_SYMBOLS@
 LDFLAGS     = $(CFLAGS) @LDFLAGS@
 #
-# 
+#
 LD         = @CXX@
 CC         = @CXX@
 #
@@ -33,11 +33,11 @@ VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oof
 
 ## sources
 srcs0=
-srcs1=oofeggraphiccontext.C 
+srcs1=oofeggraphiccontext.C
 srcs2=generalbc.C bodyload.C boundary.C clock.C cltypes.C column.C conTable.C constant.C crosssection.C deadwght.C dictionr.C dof.C domain.C element.C engngm.C femcmpnn.C flotarry.C flotmtrx.C freestor.C error.C logger.C emptycs.C dummymaterial.C feinterpol.C
 srcs3=gausspnt.C initial.C intarray.C isolinearelasticmaterial.C ldltfact.C linearelasticmaterial.C load.C loadtime.C rowcol.C skylineu.C imlsolver.C compcol.C iluprecond.C dyncompcol.C symcompcol.C precond.C icprecond.C dyncomprow.C ilucomprowprecond.C voidprecond.C sparselinsystemnm.C sparsegeneigenvalsystemnm.C sparsenonlinsystemnm.C inverseit.C
 srcs4=material.C mathfem.C matrix.C matstatus.C nlstructuralelement.C node.C nodload.C nummet.C simplecrosssection.C skyline.C stationaryflow.C inputrecord.C tokenizer.C strreader.C structuralcrosssection.C structuralelement.C structuralmaterial.C structengngmodel.C
-srcs5=structuralms.C timestep.C structtemperatureload.C dofmanager.C elementside.C elementinternaldofman.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C simpleslavedof.C slavedof.C nonlocalmaterialext.C structuralnonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
+srcs5=structuralms.C timestep.C structtemperatureload.C dofmanager.C elementside.C elementinternaldofman.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C simpleslavedof.C slavedof.C activedof.C nonlocalmaterialext.C structuralnonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
 srcs6=outputmanager.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dummylocalizer.C octreelocalizer.C nodalrecoverymodel.C util.C sloangraph.C sloangraphnode.C sloanlevelstruct.C metastep.C diagpre.C exportmodule.C exportmodulemanager.C initmodulemanager.C initmodule.C zznodalrecoverymodel.C nodalaveragingrecoverymodel.C sprnodalrecoverymodel.C
 srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C maskedprimaryfield.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C fei1dquad.C fei2dquadlin.C  fei2dquadquad.C fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C slavenode.C hangingnode.C pointload.C slepcsolver.C
 srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C fei2dtrquad.C fei2dtrconst.C fei2dquadconst.C fei2dlinelin.C fei2dlinequad.C localgaussianrandomgenerator.C randommaterialext.C
@@ -46,9 +46,9 @@ srcs10=peak.C piecewis.C  piecewisper.C heavisideltf.C usrdeftimefunct.C vtkexpo
 
 xfemsrc=delaunay.C xfemelementinterface.C enrichmentfunction.C patch.C xfemmanager.C enrichmentitem.C patchintegrationrule.C
 
-igasrc=iga.C feibspline.C feinurbs.C feitspline.C structuralelementevaluator.C planestresselementevaluator.C space3delementevaluator.C igaelements.C 
+igasrc=iga.C feibspline.C feinurbs.C feitspline.C structuralelementevaluator.C planestresselementevaluator.C space3delementevaluator.C igaelements.C
 
-#obsolete 
+#obsolete
 srcs99=
 #parallel
 psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadbalancer.C parmetisloadbalancer.C nonlocalmatwtp.C
@@ -70,7 +70,7 @@ oofemLib_objs2 := $(oofemLib_objs1:.cpp=.o)
 oofemLib_deps1 := $(all_src:.C=.d)
 oofemLib_deps2 := $(oofemLib_deps1:.cpp=.d)
 
-all: oofemlib.a 
+all: oofemlib.a
 	echo all target done
 
 -include $(oofemLib_deps)
@@ -89,11 +89,11 @@ all: oofemlib.a
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
 
-oofemlib.a:  $(oofemLib_objs2) 
+oofemlib.a:  $(oofemLib_objs2)
 	echo huhu
 	rm -f oofemlib.a
 	@echo $(AR) oofemlib.a
-	@$(AR) oofemlib.a $(oofemLib_objs2) 
+	@$(AR) oofemlib.a $(oofemLib_objs2)
 
 deps:   $(oofemLib_deps2)
 

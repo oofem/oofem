@@ -83,6 +83,7 @@
 #include "constantsurfaceload.h"
 #include "pointload.h"
 #include "prescribedgradient.h"
+//#include "mixedgradientpressurebc.h"
 #include "surfacetensionbc.h"
 
 // ltf in OOFEMLIB
@@ -330,6 +331,7 @@
 #include "masterdof.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
+#include "activedof.h"
 
 
 #ifdef __PARALLEL_MODE
@@ -615,6 +617,8 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *aClass
     GeneralBoundaryCondition *newBc = NULL;
     if ( !strncasecmp(aClass, "prescribedgradient", 18) ) {
         newBc = new PrescribedGradient(number, domain);
+    } else if ( !strncasecmp(aClass, "mixedgradientpressure", 21) ) {
+        //newBc = new MixedGradientPressureBC(number, domain);
     }
 
     if ( !strncasecmp(aClass, "linearedgeload", 14) ) {
@@ -1104,6 +1108,8 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
         answer = new SimpleSlaveDof(number, dman);
     } else if ( type == SlaveDofClass ) {
         answer = new SlaveDof(number, dman);
+    } else if ( type == ActiveDofClass ) {
+        answer = new ActiveDof(number, dman);
     }
 
     if ( answer == NULL ) {
