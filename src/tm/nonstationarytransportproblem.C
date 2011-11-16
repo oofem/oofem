@@ -59,7 +59,8 @@
 
 namespace oofem {
 ///Constructor
-NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master) {
+NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
+{
     UnknownsField = NULL;
     lhs = NULL;
     nMethod = NULL;
@@ -71,7 +72,8 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     changingProblemSize = false;
 }
 ///Destructor
-NonStationaryTransportProblem :: ~NonStationaryTransportProblem()  {
+NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
+{
     if ( lhs ) {
         delete lhs;
     }
@@ -383,13 +385,12 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
 void
 NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 {
-    int j, idomain, nnodes, nelem;
+    int j, idomain, nelem;
     Domain *domain;
 
     for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
 
-        nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
             UnknownsField->update( VM_Total, stepN, * ( this->UnknownsField->giveSolutionVector(stepN) ) );
@@ -746,7 +747,8 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
 
 ///needed for CemhydMat
 void
-NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep) {
+NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
+{
     Domain *domain = this->giveDomain(1);
     int ielem, i;
     int nelem = domain->giveNumberOfElements();

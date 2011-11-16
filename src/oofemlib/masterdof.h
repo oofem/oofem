@@ -109,8 +109,6 @@ protected:
     int ic;
     /// Unknowns dictionary to support changes of static system.
     Dictionary *unknowns;
-    /*      Dictionary*  unknowns ;
-     *      Dictionary*  pastUnknowns ; */
 
 public:
     /**
@@ -118,15 +116,15 @@ public:
      * physical meaning described by id.
      * @param i DOF number.
      * @param aNode DofManager which possess DOF.
-     * @param nbc number of associated boundary condition, zero if none.
-     * @param nic number of associated initial condition, zero if none.
+     * @param nbc Number of associated boundary condition, zero if none.
+     * @param nic Number of associated initial condition, zero if none.
      * @param id Physical meaning type.
-     * @see cltypes.h, DofIDItem type 
+     * @see cltypes.h, DofIDItem type
      */
     MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id);
     MasterDof(int i, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
-    ~MasterDof()   { delete unknowns; /*delete pastUnknowns ;*/ }
+    ~MasterDof()   { delete unknowns; }
 
     const char *giveClassName() const { return "MasterDof"; }
     classType giveClassID() const { return MasterDofClass; }
@@ -150,7 +148,7 @@ public:
     int giveIcId();
 
     void printYourself();
-    void updateYourself(TimeStep *);
+    void updateYourself(TimeStep *tStep);
 
     void updateUnknownsDictionary(TimeStep *tStep, EquationID type, ValueModeType mode, double dofValue);
 

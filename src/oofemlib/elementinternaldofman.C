@@ -48,10 +48,11 @@
 #endif
 
 namespace oofem {
-  ElementDofManager :: ElementDofManager(int n, Domain *aDomain, Element* elem) :
+
+ElementDofManager :: ElementDofManager(int n, Domain *aDomain, Element* elem) :
     DofManager(n, aDomain)
     // Constructor. Creates a node with number n, belonging to aDomain.
-{ 
+{
   this->element = elem;
 }
 

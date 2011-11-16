@@ -93,8 +93,7 @@ Dof *SimpleSlaveDof :: giveMasterDof() const
         }
     }
 
-    return dofManager->giveDomain()->giveDofManager(masterDofMngr)->
-           giveDof(masterDofIndx);
+    return dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveDof(masterDofIndx);
 }
 
 BoundaryCondition *SimpleSlaveDof :: giveBc()
@@ -104,7 +103,7 @@ BoundaryCondition *SimpleSlaveDof :: giveBc()
 }
 
 
-int SimpleSlaveDof :: __giveEquationNumber() const 
+int SimpleSlaveDof :: __giveEquationNumber() const
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equation number is 0 if the receiver is
 // subjected to a boundary condition, else it is n+1, where n is the

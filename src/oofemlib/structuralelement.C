@@ -104,7 +104,6 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 {
     ( ( StructuralCrossSection * ) this->giveCrossSection() )
     ->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-    return;
 }
 
 void
@@ -115,16 +114,8 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
 {
     FloatArray d, dp;
     FloatMatrix s;
-    /*
-     * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN, d) ;
-     * if ((stepN->giveLoadResponseMode()==IncrementOfLoad) && (!stepN->isTheFirstStep())) {
-     * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN->givePreviousStep(), dp);
-     * d.subtract (dp);
-     * //delete dp;
-     * }
-     */
+
     this->computeVectorOfPrescribed(EID_MomentumBalance, mode, stepN, d);
-    //this -> computeVectorOfPrescribed(DisplacementVector,umode,stepN, d) ;
 
     if ( d.containsOnlyZeroes() ) {
         answer.resize(0);
@@ -133,8 +124,6 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
         answer.beProductOf(s, d);
         answer.negated();
     }
-
-    // delete d ;
 
     // if engngmodel supports dynamic change of static system
     // we must test if element has not been removed in previous step
@@ -174,14 +163,10 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
                         answer.at(k) -= prevInternalForces.at(k);
                     }
                 }
-
-                //delete elementNodeMask;
-                // delete dofMask;
             }
         }
     }
 
-    return;
 }
 
 
@@ -226,14 +211,10 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
         return;
     }
 
-    //delete force ;
-
     // transform result from global cs to local element  cs.
     if ( this->computeGtoLRotationMatrix(T) ) {
         answer.rotatedWith(T, 'n');
     }
-
-    return;
 }
 
 void
@@ -316,23 +297,17 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
-                    //delete T;
                 }
             } else {
                 // transform from local edge to element local c.s
                 if ( this->computeLoadLEToLRotationMatrix(T, iEdge, gp) ) {
                     force.rotatedWith(T, 'n');
-                    //delete T;
                 }
             }
 
             ntf.beProductOf(nt, force);
             ntf.times(dV);
             reducedAnswer.add(ntf);
-            //delete n ;
-            //delete nt ;
-            //delete ntf ;
-            //delete force;
         }
 
 
@@ -340,9 +315,6 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
         answer.zero();
         answer.assemble(reducedAnswer, mask);
-
-        //delete mask;
-        //delete reducedAnswer;
 
         // leave result in local c.s
         /*
@@ -421,23 +393,17 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                 // transform from global to element local c.s
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     force.rotatedWith(T, 'n');
-                    // delete T;
                 }
             } else {
                 // transform from local edge to element local c.s
                 if ( this->computeLoadLSToLRotationMatrix(T, iSurf, gp) ) {
                     force.rotatedWith(T, 'n');
-                    // delete T;
                 }
             }
 
             ntf.beProductOf(nt, force);
             ntf.times(dV);
             reducedAnswer.add(ntf);
-            //delete n ;
-            //delete nt ;
-            //delete ntf ;
-            //delete force;
         }
 
         delete iRule;
@@ -445,10 +411,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
         answer.zero();
         answer.assemble(reducedAnswer, mask);
-        //  answer = reducedAnswer -> GiveSubArray (mask);
-
-        //delete mask;
-        //delete reducedAnswer;
 
         //leave result in local c.s
         /*
@@ -500,15 +462,8 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
             bde.beProductOf(bt, de);
             bde.times(dV);
             answer.add(bde);
-            //delete b ; delete bt;
-            //delete d;
-            //delete de; delete bde;
         }
-
-        //delete et;
     }
-
-    return;
 }
 
 
@@ -537,8 +492,6 @@ StructuralElement :: computePrescribedStrainLoadVectorAt(FloatArray &answer, Tim
             answer.rotatedWith(R, 'n');
         }
     }
-
-    return;
 }
 
 
@@ -673,8 +626,6 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
             exit(1);
         }
     }
-
-    return;
 }
 
 
@@ -703,8 +654,6 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
             answer.rotatedWith(T, 'n');
         }
     }
-
-    return;
 }
 
 
@@ -739,8 +688,6 @@ StructuralElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *ste
     if ( helpLoadVector.giveSize() ) {
         answer.add(helpLoadVector);
     }
-
-    return;
 }
 
 
@@ -750,9 +697,6 @@ StructuralElement :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
     double mass;
-    //   consistentMatrix = this -> ComputeConsistentMassMatrix() ;
-    //   massMatrix       = consistentMatrix -> Lumped() ;
-    //   delete consistentMatrix ;
 
     this->computeConsistentMassMatrix(answer, tStep, mass);
 
@@ -766,9 +710,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 // Returns the lumped mass matrix of the receiver.
 {
     double mass;
-    //   consistentMatrix = this -> ComputeConsistentMassMatrix() ;
-    //   massMatrix       = consistentMatrix -> Lumped() ;
-    //   delete consistentMatrix ;
 
     IntArray nodeDofIDMask, dimFlag(3);
     IntArray nodalArray;
@@ -884,7 +825,6 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     int i, n, nLoads;
     StructuralTemperatureLoad *load;
     FloatArray gCoords, temperature;
-    // FloatMatrix *R;
 
     if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
         _error("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
@@ -898,11 +838,8 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
         if ( load->giveBCValType() == TemperatureBVT ) {
             load->computeValueAt(temperature, stepN, gCoords, mode);
             answer.add(temperature);
-            //delete temperature ;
         }
     }
-
-    return;
 }
 
 void
@@ -918,7 +855,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     }
 
     answer.resize(0);
-    nLoads    = this->giveBodyLoadArray()->giveSize();
+    nLoads = this->giveBodyLoadArray()->giveSize();
     for ( i = 1; i <= nLoads; i++ ) {
         n     = bodyLoadArray.at(i);
         load  = ( StructuralEigenstrainLoad * ) domain->giveLoad(n);
@@ -927,8 +864,6 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
             answer.add(eigenstrain);
         }
     }
-
-    return;
 }
 
 
@@ -984,10 +919,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                     } else {
                         answer.plusProductUnsym(bi, dbj, dV);
                     }
-
-                    //delete bi; delete d; delete dij; delete dbj;
-                    //if (i!=j) delete bj;
-                    //delete d;
                 }
             }
         }
@@ -1006,10 +937,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
             } else {
                 answer.plusProductUnsym(bj, dbj, dV);
             }
-
-            //delete b ;
-            //delete db ;
-            //delete d ;
         }
     }
 
@@ -1023,7 +950,8 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 }
 
 void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
-                                                                      MatResponseMode rMode, TimeStep *tStep) {
+                                                                      MatResponseMode rMode, TimeStep *tStep)
+{
     int ir, j;
     FloatMatrix temp, bj, d, dbj;
     IntegrationRule *iRule;
@@ -1129,8 +1057,6 @@ StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 
     this->computeStrainVector(Epsilon, gp, stepN);
     cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
-
-    return;
 }
 
 
@@ -1201,10 +1127,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         }
 
         answer.add(bs);
-        //delete bs;
-        //delete b;
-        //delete bt;
-        //delete TotalStressVector;
     }
 
     // if inactive update state, but no contribution to global system
@@ -1212,8 +1134,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         answer.zero();
         return;
     }
-
-    return;
 }
 
 
@@ -1309,29 +1229,11 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
         answer.zero();
         return;
     }
-
-    return;
 }
 
 
-
-
-/*
- * FloatMatrix*  StructuralElement :: giveConstitutiveMatrix ()
- * // Returns the elasticity matrix {E} of the receiver.
- * {
- * if (! constitutiveMatrix)
- *    this -> computeConstitutiveMatrix() ;
- *
- * return constitutiveMatrix ;
- * }
- *
- */
-
-
-
 void
-StructuralElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
+StructuralElement :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
@@ -1354,14 +1256,12 @@ StructuralElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
     } else {
         _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
-
-    return;
 }
 
 
 
 void
-StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
+StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                                TimeStep *tStep)
 //
 // returns characteristics vector of receiver according to mtrx
@@ -1381,8 +1281,6 @@ StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx
     } else {
         _error2( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
-
-    return;
 }
 
 void
@@ -1459,8 +1357,6 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
             materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), atTime);
         }
     }
-
-    return;
 }
 
 
@@ -1539,7 +1435,8 @@ StructuralElement :: checkConsistency()
 }
 
 void
-StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what) {
+StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what)
+{
     /*
      * function for condensation of stiffness matrix and if requested of load vector and
      * initial stress or mass matrices (if mass and load arguments are nonzero (not NULL) then
@@ -1634,8 +1531,6 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     if ( mass ) {
         delete gaussCoeff;
     }
-
-    return;
 }
 
 

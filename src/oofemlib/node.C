@@ -245,6 +245,7 @@ void Node :: updateYourself(TimeStep *tStep)
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     double dt = tStep->giveTimeIncrement();
+
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( mode == AL ) { // updated Lagrange
             ic = domain->giveCorrespondingCoordinateIndex(i);
@@ -253,7 +254,7 @@ void Node :: updateYourself(TimeStep *tStep)
                 DofIDItem id = d->giveDofID();
                 if ( id == D_u || id == D_v || id == D_w ) {
                     coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Incremental, tStep);
-                } else if ( id == V_u || id == V_v || id == V_w )     {
+                } else if ( id == V_u || id == V_v || id == V_w ) {
                     coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Total, tStep) * dt;
                 }
             }

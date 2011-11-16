@@ -63,7 +63,6 @@ Dof :: Dof(int i, DofManager *aNode, DofIDItem id)
     number         = i;
     dofManager     = aNode;
     dofID          = id;
-    ;
 }
 
 int Dof :: giveEquationNumber(const UnknownNumberingScheme &s) {
@@ -90,8 +89,7 @@ void Dof :: printSingleOutputAt(FILE *File, TimeStep *stepN, char ch,
 // Prints in the data file the unknown 'u' (for example, the displacement
 // 'd') of the receiver, at stepN.
 {
-    double x;
-    x    = scale * this->giveUnknown(type, mode, stepN);
+    double x = scale * this->giveUnknown(type, mode, stepN);
     fprintf(File, "  dof %d   %c % .8e\n", number, ch, x);
 }
 
@@ -102,12 +100,11 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *stepN, char *ch,
 // Prints in the data file the unknown 'u' (for example, the displacement
 // 'd') of the receiver, at stepN.
 {
-    int i;
     double x;
 
     fprintf(File, "  dof %d", number);
-    for ( i = 1; i <= nite; i++ ) {
-        x    = this->giveUnknown(type, mode [ i - 1 ], stepN);
+    for (int i = 1; i <= nite; i++ ) {
+        x = this->giveUnknown(type, mode [ i - 1 ], stepN);
         fprintf(File, "   %c % .8e", ch [ i - 1 ], x);
     }
 
@@ -238,9 +235,4 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     return CIO_OK;
 }
 
-
-
-
-#ifdef __PARALLEL_MODE
-#endif
 } // end namespace oofem

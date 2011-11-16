@@ -530,7 +530,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
      * std::list<__DofIDSet> __ccDofGroups;
      * int nccdg; // number of Convergence Criteria Dof Groups
      */
-    int _dg, _idofman, _ielem, _idof, _eq, _neq, _ndof, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
+    int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
     double forceErr, dispErr, _val;
     DofManager *_idofmanptr;
@@ -557,7 +557,6 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
     }
 
     rhs.subtract(F);
-    _neq = rhs.giveSize();
 
     if ( _ng > 0 ) {
         forceErr = dispErr = 0.0;
@@ -1391,12 +1390,11 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
     //  LINE SEARCH
     //
 
-    int i, neq = r.giveSize();
+    int neq = r.giveSize();
     int ls_failed, dl_failed = 0;
     int _iter = 0;
     int ico;
     int ls_maxiter = 10;
-    double __rIterIncr;
 
     DeltaLambda = DeltaLambdam1 + deltaLambda;
     Lambda = ReachedLambda + DeltaLambda;

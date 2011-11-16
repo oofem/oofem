@@ -641,7 +641,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
         Vec diag;
         PetscScalar *ptr;
-        int eq, res;
+        int eq;
 
         PetscContext *parallel_context = engngModel->givePetscContext(1, ut);
         parallel_context->createVecGlobal(& diag);
@@ -649,7 +649,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         VecGetArray(diag, & ptr);
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
             eq = prescribedEqs.at(i) - 1;
-            res = MatSetValue(* ( lhs->giveMtrx() ), eq, eq, ptr [ eq ] * 1.e6, INSERT_VALUES);
+            MatSetValue(* ( lhs->giveMtrx() ), eq, eq, ptr [ eq ] * 1.e6, INSERT_VALUES);
         }
 
         MatAssemblyBegin(* lhs->giveMtrx(), MAT_FINAL_ASSEMBLY);

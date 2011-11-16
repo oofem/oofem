@@ -421,15 +421,15 @@ public:
     //@}
 
     /**
-     * Adds the given Dof into the receiver. The dofID of scheduled DOF should not be present 
-     * in receiver as multiple DOFs with same DofID are not allowed. The given DOF is appended 
+     * Adds the given Dof into the receiver. The dofID of scheduled DOF should not be present
+     * in receiver as multiple DOFs with same DofID are not allowed. The given DOF is appended
      * at the end of the dofArray.
      * @param dof
      */
-    void appendDof( Dof *dof);
+    void appendDof(Dof *dof);
 
     /**
-     * Removes Dof with given id from dofArray
+     * Removes Dof with given id from dofArray.
      * @param id
      */
     void removeDof(DofIDItem id);
@@ -443,7 +443,7 @@ public:
     bool hasDofID(int id);
 
 #ifdef __OOFEG
-    virtual void   drawYourself(oofegGraphicContext &context) { }
+    virtual void drawYourself(oofegGraphicContext &context) { }
 #endif
 
 #if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
@@ -469,7 +469,7 @@ public:
      * @param type Physical meaning of  unknown.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementation can return only values for current
+     * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
      * @return Nonzero if successful
      */
