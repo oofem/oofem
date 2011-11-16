@@ -409,7 +409,6 @@ public:
     /**
      * Returns the receiver 'a' transformed using give transformation matrix r.
      * The method performs the operation  @f$ a = r^{\mathrm{T}} \cdot a \cdot r@f$ .
-     * @warning{This works only for square matrices and  the receiver and r must have the same size.}
      * @param r Transformation matrix.
      */
     void rotatedWith(const FloatMatrix &r);

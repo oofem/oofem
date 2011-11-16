@@ -1324,15 +1324,12 @@ void FloatMatrix :: pY() const
 
 void FloatMatrix :: rotatedWith(const FloatMatrix &r)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
-// The method performs the operation  a = r(transp) * a * r .
-// Warning : this works only for square matrices (see copying to receiver)
-// when the receiver and r has the same size!
+// The method performs the operation  a = r^T . a . r .
 {
-    FloatMatrix rt, rta;
+    FloatMatrix rta;
 
-    rt.beTranspositionOf(r);         //  r(transp)
-    rta.beProductOf(rt, * this);     //  r(transp) . a
-    this->beProductOf(rta, r);       //  r(transp) . a . r
+    rta.beTProductOf(r, * this);     //  r^T . a
+    this->beProductOf(rta, r);       //  r^T . a . r
 }
 
 
