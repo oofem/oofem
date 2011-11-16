@@ -247,7 +247,7 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
 }
 
 
-bool Element :: computeDofTransformationMatrix(FloatMatrix &answer, DofManTransfType mode, EquationID eid)
+bool Element :: computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid)
 {
     bool flag = false;
     int numberOfDofMans = this->giveNumberOfDofManagers();
@@ -264,14 +264,7 @@ bool Element :: computeDofTransformationMatrix(FloatMatrix &answer, DofManTransf
 
     // initialize answer
     int gsize = this->computeGlobalNumberOfDofs(eid);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfL2GDofs(eid), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfL2GDofs(eid) );
-    } else {
-        OOFEM_ERROR("StructuralElementEvaluator::computeGNDofRotationMatrix:\n unsupported DofManTrasfType value");
-    }
-
+    answer.resize(this->computeNumberOfL2GDofs(eid), gsize);
     answer.zero();
 
     FloatMatrix dofManT;
@@ -280,7 +273,7 @@ bool Element :: computeDofTransformationMatrix(FloatMatrix &answer, DofManTransf
     // loop over nodes
     for (int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, eid, dofIDmask);
-        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
+        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, _toGlobalCS);
         nc = dofManT.giveNumberOfColumns();
         nr = dofManT.giveNumberOfRows();
         for (int j = 1; j <= nr; j++ ) {

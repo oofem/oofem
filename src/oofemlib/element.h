@@ -340,11 +340,10 @@ public:
      * Local stiffness matrix of element should be rotated with answer before assembly.
      * @note Function does most likely NOT need to be overridden.
      * @param answer Computed rotation matrix.
-     * @param mode Determines type of rotation matrix.
      * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, DofManTransfType mode, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, EquationID eid);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are

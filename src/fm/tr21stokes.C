@@ -391,7 +391,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     // This is general and should be moved outside this function.. probably.
     FloatMatrix transf;
-    if (this->computeDofTransformationMatrix(transf, _toGlobalCS, EID_MomentumBalance_ConservationEquation) ) {
+    if (this->computeDofTransformationMatrix(transf, EID_MomentumBalance_ConservationEquation) ) {
         answer.rotatedWith(transf);
     }
 }
