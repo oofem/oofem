@@ -78,6 +78,10 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlow_smtype, "smtype"); // Macro
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
+    val = ( int ) ST_Petsc;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_lstype, "lstype"); // Macro
+    this->solverType = ( LinSystSolverType ) val;
+
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_StokesFlow_deltat, "deltat"); // Macro
 
@@ -131,20 +135,20 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
     }
 
+    this->incrementOfSolution.resize(neq);
+    this->internalForces.resize(neq);
+
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromActiveBC( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
+    this->assembleVectorFromActiveBC( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-    this->incrementOfSolution.resize(neq);
-    this->internalForces.resize(neq);
 
     OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
 
-#if 0
+#if 1
     this->giveNumericalMethod(tStep);
     double loadLevel, ebenorm;
     int currentIterations;
@@ -164,11 +168,13 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 #else
-    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
+    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(this->solverType, 1, this->giveDomain(1), this);
     this->updateComponent(tStep, InternalRhs, this->giveDomain(1));
     this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
     this->internalForces.negated();
     this->internalForces.add(externalForces);
+    printf("K = \n");
+    this->stiffnessMatrix->printYourself();
     NM_Status status = linMethod->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
     delete(linMethod);
 #endif
@@ -177,7 +183,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
     }
 
-    // update element stabilization 
+    // update element stabilization
     Domain* d = this->giveDomain(1);
     int i, nelem = d->giveNumberOfElements();
     for ( i = 1; i <= nelem; ++i ) {
@@ -221,69 +227,15 @@ void StokesFlow :: updateYourself(TimeStep *tStep)
 
 int StokesFlow :: forceEquationNumbering(int id)
 {
-    // Force numbering of equations. First all velocities on domain, then pressures.
-    int i, j, k, ndofs, nnodes, nelem;
-    DofManager *inode;
-    Element* elem;
-    Domain *domain = this->giveDomain(id);
-    TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
-    Dof *jDof;
-    DofIDItem type;
+    int neq = EngngModel :: forceEquationNumbering(id);
 
-    this->domainNeqs.at(id) = 0;
-    this->domainPrescribedNeqs.at(id) = 0;
-
-    nnodes = domain->giveNumberOfDofManagers();
-    nelem = domain->giveNumberOfElements();
-
-    // number first velocities
-    for ( i = 1; i <= nnodes; i++ ) {
-        inode = domain->giveDofManager(i);
-        ndofs = inode->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof  =  inode->giveDof(j);
-            type  =  jDof->giveDofID();
-            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
+    //this->equationNumberingCompleted = false;
+    if ( this->stiffnessMatrix ) {
+        delete this->stiffnessMatrix;
+        this->stiffnessMatrix = NULL;
     }
 
-    // and then pressures
-    for ( i = 1; i <= nnodes; i++ ) {
-        inode = domain->giveDofManager(i);
-        ndofs = inode->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof  =  inode->giveDof(j);
-            type  =  jDof->giveDofID();
-            if ( type == P_f ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-    for ( i = 1; i <= nelem; ++i ) {
-        elem = domain->giveElement(i);
-        for (k=1;k<=elem->giveNumberOfInternalDofManagers(); k++) {
-            ndofs = elem->giveInternalDofManager(k)->giveNumberOfDofs(); //define for element!!! overload for contact
-            for ( j = 1; j <= ndofs; j++ ) {
-                elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-    // invalidate element local copies of location arrays
-    nelem = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->invalidateLocationArray();
-    }
-
-    // Any existing structure is rendered obsolete.
-    this->equationNumberingCompleted = false;
-    if ( this->stiffnessMatrix ) { delete this->stiffnessMatrix; this->stiffnessMatrix = NULL; }
-
-    return domainNeqs.at(id);
+    return neq;
 }
 
 

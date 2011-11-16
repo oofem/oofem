@@ -38,6 +38,7 @@
 #include "engngm.h"
 #include "sparsemtrxtype.h"
 #include "topologydescription.h"
+#include "linsystsolvertype.h"
 
 namespace oofem {
 class SparseNonLinearSystemNM;
@@ -60,6 +61,8 @@ protected:
     SparseMtrxType sparseMtrxType;
     /// Numerical method.
     SparseNonLinearSystemNM *nMethod;
+    /// Linear solver type.
+    LinSystSolverType solverType;
 
     /// Used for determining if a new mesh must be created.
     MeshQualityErrorEstimator *meshqualityee;
