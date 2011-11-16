@@ -42,7 +42,8 @@ namespace oofem {
 #define dofType_DEF \
     ENUM_ITEM_WITH_VALUE(DT_master, 0) \
     ENUM_ITEM_WITH_VALUE(DT_simpleSlave, 1) \
-    ENUM_ITEM_WITH_VALUE(DT_slave, 2)
+    ENUM_ITEM_WITH_VALUE(DT_slave, 2) \
+    ENUM_ITEM_WITH_VALUE(DT_active, 3)
 
 /// Dof Type, determines the type of DOF created.
 enum dofType {

@@ -36,6 +36,7 @@
 #include "masterdof.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
+#include "activedof.h"
 #include "timestep.h"
 #include "load.h"
 #include "flotarry.h"
@@ -61,12 +62,6 @@
  #ifdef HAVE_STRINGS_H
   #include <strings.h>
  #endif
-#endif
-
-#ifdef __PARALLEL_MODE
-//#include "remotemasterdof.h"
-//#include "sharedmasterdof.h"
-//#include "nulldof.h"
 #endif
 
 namespace oofem {
@@ -146,13 +141,9 @@ DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueMode
 
 
 Dof *DofManager :: giveDof(int i) const
-// Returns the i-th degree of freedom of the receiver. Creates the array
-// containing the dofs of the receiver, if such array does not exist yet.
+// Returns the i-th degree of freedom of the receiver.
 {
     if ( !dofArray ) {
-        //      dofArray = new Dof* [this->giveNumberOfDofs()] ;
-        //      for (j=0 ; j<numberOfDofs ; j++)
-        //  dofArray[j] = new Dof(j+1,this) ;}
         _error("giveDof: dof is not defined");
     }
 
@@ -210,7 +201,7 @@ DofManager :: appendDof(Dof *dof)
    numberOfDofs++;
 }
 
-void 
+void
 DofManager :: removeDof(DofIDItem id) {
   int position = this->findDofWithDofId(id);
   if (position) { // dof id found
@@ -293,17 +284,11 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
 
         for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             indx = dofArray.at(i);
-            if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-                this->giveDof(indx)->giveEquationNumbers(mstrEqNmbrs, s);
-                locationArray.copySubVector(mstrEqNmbrs, k);
-                k += mstrEqNmbrs.giveSize();
-            } else {   // primary DOF
-                locationArray.at(k++) = s.giveDofEquationNumber( this->giveDof(indx) );
-            }
+            this->giveDof(indx)->giveEquationNumbers(mstrEqNmbrs, s);
+            locationArray.copySubVector(mstrEqNmbrs, k);
+            k += mstrEqNmbrs.giveSize();
         }
     }
-
-    return;
 }
 
 
@@ -322,8 +307,6 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
     } else {
         giveLocationArray(* giveCompleteGlobalDofIDArray(), locationArray, s);
     }
-
-    return;
 }
 
 void
@@ -345,8 +328,6 @@ DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) const
             _error("giveDofArray : incompatible dof requested");
         }
     }
-
-    return;
 }
 
 int
@@ -408,11 +389,7 @@ DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
     int i, answer = 0;
 
     for ( i = 1; i <= dofArray.giveSize(); i++ ) {
-        if ( !this->giveDof( dofArray.at(i) )->isPrimaryDof() ) {
-            answer += ( ( SlaveDof * ) this->giveDof( dofArray.at(i) ) )->giveNumberOfPrimaryMasterDofs();
-        } else {
-            answer += 1;
-        }
+        answer += this->giveDof( dofArray.at(i) )->giveNumberOfPrimaryMasterDofs();
     }
 
     return answer;
@@ -561,6 +538,11 @@ DofManager :: initializeFrom(InputRecord *ir)
                 }
 
                 dofArray [ j ] = new MasterDof( j + 1, this, dofBc, dofIc, ( DofIDItem ) dofIDArry.at(j + 1) );
+            } else if ( dtype == DT_active ) {
+                if ( hasBc ) {
+                    dofBc = bc.at(j + 1);
+                }
+                dofArray [ j ] = new ActiveDof( j + 1, this, dofBc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
                     IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
@@ -583,116 +565,6 @@ DofManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-/*
- * IRResultType
- * DofManager :: initializeFrom (InputRecord* ir)
- * {
- * const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
- * IRResultType result;                   // Required by IR_GIVE_FIELD macro
- *
- * int j ;
- * IntArray dofIDArry;
- * IntArray bc, ic, masterMask;
- *
- * loadArray.resize(0);
- * IR_GIVE_OPTIONAL_FIELD (ir, loadArray, IFT_DofManager_load, "load"); // Macro
- *
- * if (this->resolveDofIDArray (ir, dofIDArry) != IRRT_OK) IR_IOERR (giveClassName(), __proc,  IFT_Unknown, "", ir, result);
- *
- * // numberOfDofs = domain->giveNumberOfDofs () ;
- * bc.resize(0);
- * IR_GIVE_OPTIONAL_FIELD (ir, bc, IFT_DofManager_bc, "bc"); // Macro
- *
- * ic.resize(0);
- * IR_GIVE_OPTIONAL_FIELD (ir, ic, IFT_DofManager_ic, "ic"); // Macro
- * // reads master mask - in this array are numbers of master dofManagers
- * // to which are connected dofs in receiver.
- * // if master mask index is zero then dof is created as master (i.e., having own equation number)
- * // othervise slave dof connected to master DofManager is created.
- * // by default if masterMask is not specifyed, all dofs are created as masters.
- * masterMask.resize(0);
- * IR_GIVE_OPTIONAL_FIELD (ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
- *
- * // read boundary flag
- * if (ir->hasField(IFT_DofManager_boundaryflag, "boundary")) isBoundaryFlag = true;
- *
- *
- *#ifdef __PARALLEL_MODE
- * globalNumber = 0;
- * IR_GIVE_OPTIONAL_FIELD (ir, globalNumber, IFT_DofManager_globnum, "globnum"); // Macro
- *
- * partitions.resize(0);
- * IR_GIVE_OPTIONAL_FIELD (ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro
- *
- * if (ir->hasField (IFT_DofManager_sharedflag, "shared")) parallel_mode = DofManager_shared;
- * else if (ir->hasField (IFT_DofManager_remoteflag, "remote")) parallel_mode = DofManager_remote;
- * else if (ir->hasField (IFT_DofManager_nullflag, "null")) parallel_mode = DofManager_null;
- * else parallel_mode = DofManager_local;
- *
- * // in parallel mode,  slaves are allowed, because ((Dr. Rypl promissed)
- * // masters have to be in same partition as slaves. They can be again Remote copies.
- *#endif
- *
- *
- *
- * int hasIc,hasBc,dofIc=0,dofBc=0, hasSlaveDofs=0, masterManagerIndx=0 ;
- *
- * hasIc = !(ic.giveSize() == 0);
- * hasBc = !(bc.giveSize() == 0);
- * hasSlaveDofs = !(masterMask.giveSize() == 0);
- *
- * // check sizes
- * if (hasBc) if (bc.giveSize() != this->giveNumberOfDofs()) _error ("initializeFrom: bc size mismatch");
- * if (hasIc) if (ic.giveSize() != this->giveNumberOfDofs()) _error ("initializeFrom: ic size mismatch");
- * if (hasSlaveDofs) if (masterMask.giveSize() != this->giveNumberOfDofs())
- * _error ("initializeFrom: masterMask size mismatch");
- *
- * dofArray = new Dof* [this->giveNumberOfDofs()] ;
- * for (j=0 ; j<numberOfDofs ; j++)
- *   {
- *     if(hasIc) dofIc = ic.at(j+1) ;
- *     if(hasBc) dofBc = bc.at(j+1) ;
- *
- *  if (hasSlaveDofs) {
- *   masterManagerIndx = masterMask.at(j+1);
- *   if (masterManagerIndx) {
- *    dofArray[j] = new SimpleSlaveDof (j+1,this,masterManagerIndx, (DofID) dofIDArry.at(j+1)) ;
- *   } else {
- *#ifdef __PARALLEL_MODE
- *    if (parallel_mode == DofManager_remote)
- *     dofArray[j] = new RemoteMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *    else if (parallel_mode == DofManager_shared)
- *     dofArray[j] = new SharedMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *    else if (parallel_mode == DofManager_null)
- *     // ignore applied bc
- *     dofArray[j] = new NullDof (j+1, this, dofIc, (DofID) dofIDArry.at(j+1)) ;
- *    else
- *     dofArray[j] = new MasterDof      (j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *#else
- *    dofArray[j] = new MasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *#endif
- *   }
- *  } else {
- *#ifdef __PARALLEL_MODE
- *   if (parallel_mode == DofManager_remote)
- *    dofArray[j] = new RemoteMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *   else if (parallel_mode == DofManager_shared)
- *    dofArray[j] = new SharedMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *   else if (parallel_mode == DofManager_null)
- *    // ignore applied bc
- *    dofArray[j] = new NullDof (j+1, this, dofIc, (DofID) dofIDArry.at(j+1)) ;
- *   else
- *    dofArray[j] = new MasterDof      (j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *#else
- *   dofArray[j] = new MasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
- *#endif
- *  }
- *   }
- * // this-> giveLocationArray ();
- *
- * return IRRT_OK;
- * }
- */
 
 void DofManager :: printOutputAt(FILE *stream, TimeStep *stepN)
 {
@@ -964,13 +836,9 @@ DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
 
         for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             indx = dofArray.at(i);
-            if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-                this->giveDof(indx)->giveUnknowns(mstrUnknwns, type, mode, stepN);
-                answer.copySubVector(mstrUnknwns, k);
-                k += mstrUnknwns.giveSize();
-            } else {   // primary DOF
-                answer.at(k++) = this->giveDof(indx)->giveUnknown(type, mode, stepN);
-            }
+            this->giveDof(indx)->giveUnknowns(mstrUnknwns, type, mode, stepN);
+            answer.copySubVector(mstrUnknwns, k);
+            k += mstrUnknwns.giveSize();
         }
     }
 }
@@ -1004,13 +872,9 @@ DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
 
         for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             indx = dofArray.at(i);
-            if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-                this->giveDof(indx)->giveUnknowns(mstrUnknwns, field, mode, stepN);
-                answer.copySubVector(mstrUnknwns, k);
-                k += mstrUnknwns.giveSize();
-            } else {   // primary DOF
-                answer.at(k++) = this->giveDof(indx)->giveUnknown(field, mode, stepN);
-            }
+            this->giveDof(indx)->giveUnknowns(mstrUnknwns, field, mode, stepN);
+            answer.copySubVector(mstrUnknwns, k);
+            k += mstrUnknwns.giveSize();
         }
     }
 }
@@ -1022,46 +886,26 @@ DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &do
     if ( !hasSlaveDofs ) {
         int j, size;
         IntArray dofArray;
-        Dof *dofJ;
 
         answer.resize( size = dofMask.giveSize() );
         this->giveDofArray(dofMask, dofArray);
 
         for ( j = 1; j <= size; j++ ) {
-            dofJ = this->giveDof( dofArray.at(j) );
-
-            //if (dofJ -> hasBc(stepN) && (dofJ ->giveUnknownType() == type))
-            if ( dofJ->hasBc(stepN) ) {
-                answer.at(j) = dofJ->giveBcValue(mode, stepN); //giveUnknown(u,stepN) ;
-            }
-            // answer.at(j) = dofJ->giveBcValue(type, mode,stepN) ;//giveUnknown(u,stepN) ;
-            else {
-                answer.at(j) = 0.;
-            }
+            answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
         }
     } else {
         int i, k, indx;
         IntArray dofArray;
         FloatArray mstrBcVlus;
-        Dof *dofJ;
 
         this->giveDofArray(dofMask, dofArray);
         answer.resize( giveNumberOfPrimaryMasterDofs(dofArray) );
 
         for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             indx = dofArray.at(i);
-            if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-                this->giveDof(indx)->giveBcValues(mstrBcVlus, mode, stepN);
-                answer.copySubVector(mstrBcVlus, k);
-                k += mstrBcVlus.giveSize();
-            } else {   // primary DOF
-                dofJ = this->giveDof(indx);
-                if ( dofJ->hasBc(stepN) ) {
-                    answer.at(k++) = dofJ->giveBcValue(mode, stepN);
-                } else {
-                    answer.at(k++) = 0.0;
-                }
-            }
+            this->giveDof(indx)->giveBcValues(mstrBcVlus, mode, stepN);
+            answer.copySubVector(mstrBcVlus, k);
+            k += mstrBcVlus.giveSize();
         }
     }
 }
@@ -1081,7 +925,8 @@ DofManager :: hasAnySlaveDofs()
 
 
 bool
-DofManager :: giveMasterDofMans(IntArray &masters) {
+DofManager :: giveMasterDofMans(IntArray &masters)
+{
     int i, j;
     IntArray _dof_masters;
     bool answer = false;
@@ -1106,11 +951,9 @@ DofManager :: checkConsistency()
 // Current implementation checks (when receiver has simple slave dofs) if receiver
 // has the same coordinate system as master dofManager of slave dof.
 {
-    int i;
-
     hasSlaveDofs = false;
-    for ( i = 1; i <= numberOfDofs; i++ ) {
-        if ( this->giveDof(i)->giveClassID() == SlaveDofClass ) {
+    for (int i = 1; i <= numberOfDofs; i++ ) {
+        if ( !this->giveDof(i)->isPrimaryDof() ) {
             hasSlaveDofs = true;
             continue;
         }
@@ -1192,13 +1035,9 @@ DofManager :: computeSlaveDofTransformation(FloatMatrix &answer, const IntArray 
 
     for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
         indx = dofArray.at(i);
-        if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-            this->giveDof(indx)->computeDofTransformation(mstrContrs);
-            answer.copySubVectorRow(mstrContrs, i, k);
-            k += mstrContrs.giveSize();
-        } else {   // primary DOF
-            answer.at(i, k++) = 1.0;
-        }
+        this->giveDof(indx)->computeDofTransformation(mstrContrs);
+        answer.copySubVectorRow(mstrContrs, i, k);
+        k += mstrContrs.giveSize();
     }
 }
 
