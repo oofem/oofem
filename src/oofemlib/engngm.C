@@ -228,7 +228,7 @@ EngngModel ::  ~EngngModel()
       delete currentStep;
       delete previousStep;
     }
-    
+
     if(!stepWhenIcApply){
       delete stepWhenIcApply;
     }
@@ -597,7 +597,7 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int i, j, k, ndofs, nnodes, nelem;
+    int i, j, k, ndofs, nnodes, nelem, nbc;
     DofManager *inode;
     Element *elem;
     Domain *domain = this->giveDomain(id);
@@ -610,6 +610,7 @@ EngngModel :: forceEquationNumbering(int id)
 
     nnodes = domain->giveNumberOfDofManagers();
     nelem  = domain->giveNumberOfElements();
+    nbc    = domain->giveNumberOfBoundaryConditions();
 
     if ( !this->renumberFlag ) {
         for ( i = 1; i <= nnodes; i++ ) {
@@ -617,18 +618,6 @@ EngngModel :: forceEquationNumbering(int id)
             ndofs = inode->giveNumberOfDofs();
             for ( j = 1; j <= ndofs; j++ ) {
                 inode->giveDof(j)->askNewEquationNumber(currStep);
-            }
-        }
-
-        for ( i = 1; i <= nelem; ++i ) {
-            elem = domain->giveElement(i);
-            nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
-            for (k=1; k<=nnodes;k++) {
-                inode = elem->giveInternalDofManager(k);
-                ndofs = inode->giveNumberOfDofs();
-                for ( j = 1; j <= ndofs; j++ ) {
-                    inode->giveDof(j)->askNewEquationNumber(currStep);
-                }
             }
         }
     } else {
@@ -651,15 +640,12 @@ EngngModel :: forceEquationNumbering(int id)
         //FILE* renTableFile = fopen ("rentab.dat","w");
         //graph.writeOptimalRenumberingTable (renTableFile);
         IntArray *reverseRenTable = graph.giveOptimalRenumberingTable();
-        //time_1 = this->getClock();
-        //long nsec = (time_1 - time_0) / CLOCKS_PER_SEC;
 
         oofem_timeval ut;
         getRelativeUtime(ut, tstart);
 
         OOFEM_LOG_INFO( "done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
         OOFEM_LOG_INFO("Nominal profile %d (old) %d (new)\n", initialProfile, optimalProfile);
-        //  printf ("\nUser time consumed by renumbering: %lds", nsec);
 
         // undefine all dofs equation numbers
         for ( i = 1; i <= nnodes; i++ ) {
@@ -669,16 +655,29 @@ EngngModel :: forceEquationNumbering(int id)
                 inode->giveDof(j)->askNewEquationNumber(currStep);
             }
         }
+    }
 
-        for ( i = 1; i <= nelem; ++i ) {
-            elem = domain->giveElement(i);
-            nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
-            for (k=1; k<=nnodes;k++) {
-                inode = elem->giveInternalDofManager(k);
-                ndofs = inode->giveNumberOfDofs();
-                for ( j = 1; j <= ndofs; j++ ) {
-                    inode->giveDof(j)->askNewEquationNumber(currStep);
-                }
+    for ( i = 1; i <= nelem; ++i ) {
+        elem = domain->giveElement(i);
+        nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
+        for (k=1; k<=nnodes;k++) {
+            inode = elem->giveInternalDofManager(k);
+            ndofs = inode->giveNumberOfDofs();
+            for ( j = 1; j <= ndofs; j++ ) {
+                inode->giveDof(j)->askNewEquationNumber(currStep);
+            }
+        }
+    }
+
+    // For special boundary conditions;
+    for ( i = 1; i <= nbc; ++i ) {
+        GeneralBoundaryCondition *bc = domain->giveBc(i);
+        nnodes = bc->giveNumberOfInternalDofManagers();
+        for (k=1; k<=nnodes; k++) {
+            inode = bc->giveInternalDofManager(k);
+            ndofs = inode->giveNumberOfDofs();
+            for ( j = 1; j <= ndofs; j++ ) {
+                inode->giveDof(j)->askNewEquationNumber(currStep);
             }
         }
     }
@@ -688,20 +687,6 @@ EngngModel :: forceEquationNumbering(int id)
     for ( i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->invalidateLocationArray();
     }
-
-    /*
-     * // for equation numbering according to nodes numbers uncomment this section
-     * for ( i=1; i <= nnodes ; i++) {
-     * //  domain -> giveNode (i) -> giveCompleteLocationArray (loc) ;
-     * for equation numbering according to elements numbers uncomment this section
-     * nelem = domain -> giveNumberOfElements() ;
-     * for ( i=1 ; i <= nelem ; i++ ){
-     * loc = domain -> giveElement (i) -> giveLocationArray () ;
-     * js = loc.giveSize ();
-     * for (j=1 ; j <= js ; j++ )
-     * numberOfEquations = max (  numberOfEquations , loc.at(j));
-     * }
-     */
 
     return domainNeqs.at(id);
 }
@@ -1742,7 +1727,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
                 THROW_CIOERR(iores);
             }
         }
-	
+
 
         // store error estimator data
         ee = this->giveDomainErrorEstimator(idomain);
