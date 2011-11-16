@@ -80,7 +80,7 @@ public:
     void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
     void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN);
-    void computeDofTransformation(FloatArray &masterContribs);
+    void computeDofTransformation(FloatArray &primaryMasterContribs);
     void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
 
     /**
@@ -102,7 +102,7 @@ public:
      * computes the results.
      * @see MasterDof::giveUnknown function
      */
-    double giveLocalUnknown(EquationID, ValueModeType, TimeStep *) {
+    double giveLocalUnknown(EquationID, ValueModeType, TimeStep *tStep) {
         _error("HangingDof :: giveLocalUnknown: local coordinate system doesn't exist");
         return 0.0;
     }
@@ -114,7 +114,7 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    int __giveEquationNumber(void) const {
+    int __giveEquationNumber() const {
         _error("giveEquationNumber: undefined");
         return 0;
     }
@@ -126,7 +126,7 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    int __givePrescribedEquationNumber(void) {
+    int __givePrescribedEquationNumber() {
         _error("givePrescribedEquationNumber: undefined");
         return 0;
     }
