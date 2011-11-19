@@ -154,6 +154,12 @@ void Tr21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, V
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
+
+    // This is general and should be moved outside this function.. probably.
+    FloatMatrix transf;
+    if (this->computeDofTransformationMatrix(transf, EID_MomentumBalance_ConservationEquation) ) {
+        answer.rotatedWith(transf,'t');
+    }
 }
 
 void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -199,8 +205,6 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
             dNv(k + 1) = B(1, k + 1) = B(2, k)   = dN(j, 1);
         }
 
-        //FluidDynamicMaterialStatus *ms = static_cast<FluidDynamicMaterialStatus*>(mat->giveStatus(gp));
-        //FloatArray devStress = ms->giveDeviatoricStressVector();
         epsp.beProductOf(B, a_velocity);
         mat->computeDeviatoricStressVector(devStress, gp, epsp, tStep);
         double pressure = Nh.dotProduct(a_pressure);
@@ -306,7 +310,6 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            //this->interpolation_quad.edgeEvalN (N, *(gp->giveCoordinates()), 0.0);
             this->interpolation_quad.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
             double dS = gp->giveWeight() * this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this), 0.0);
 
@@ -342,10 +345,6 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     BTCB.zero();
     G.zero();
 
-    FloatArray a, stress;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a);
-
-
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
         gp = iRule->getIntegrationPoint(i);
@@ -361,10 +360,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
             dN_V(k + 1) = B(1, k + 1) = B(2, k)   = dN(j, 1);
         }
 
-        // Just so that the stress is stored in the material status.
-        FloatArray eps;
-        eps.beProductOf(B, a);
-        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        // Computing the internal forces should have been done first.
         mat->giveDeviatoricStiffnessMatrix(C, TangentStiffness, gp, tStep);
         // Build B^T*C*B in elemental stiffness matrix
         Ia.beTProductOf(B, C);
