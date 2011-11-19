@@ -168,6 +168,15 @@ public:
      */
     virtual bool isPrimaryDof(ActiveDof *dof) { return true; }
     /**
+     * Returns the prescribed value of a dof (if any).
+     */
+    virtual double giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep) { return 0.0; }
+    /**
+     * Returns the prescribed value of a dof (if any).
+     * @return True if dof is prescribed.
+     */
+    virtual bool hasBc(ActiveDof *dof, TimeStep *tStep) { return false; }
+    /**
      * Allows for active boundary conditions to handle their own special DOF.
      * @param dof Active dof belonging to receiver.
      * @return Number of primary master DOFs.

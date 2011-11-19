@@ -49,6 +49,8 @@ class ActiveBoundaryCondition;
 class ActiveDof : public Dof
 {
 protected:
+    /// Corresponding equation number (positive value) or prescribed equation number (negative value).
+    int equationNumber;
     /// Boundary condition number.
     int bc;
     /// Active boundary condition number.
@@ -68,6 +70,7 @@ public:
 
     virtual void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
     virtual int giveNumberOfPrimaryMasterDofs();
+    virtual bool isPrimaryDof();
     int giveNumberOfMasterDofs();
     virtual void giveMasterDofManArray(IntArray &answer);
     virtual void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
@@ -87,16 +90,18 @@ public:
 
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
-    virtual int __giveEquationNumber() const { return 0; }
-    virtual int __givePrescribedEquationNumber() { return 0; }
-    virtual int askNewEquationNumber(TimeStep *tStep) { return 0; }
-    virtual bool hasBc(TimeStep *tStep) { return false; }
-    virtual bool hasIc(TimeStep *tStep) { return false; }
-    virtual bool hasIcOn(ValueModeType type) { return false; }
-    virtual int giveBcId() { return 0; }
-    virtual InitialCondition *giveIc() { return 0; }
-    virtual bool hasIc() { return false; }
-    virtual int giveIcId() { return 0; }
+    virtual int __giveEquationNumber() const;
+    virtual int __givePrescribedEquationNumber();
+    virtual int askNewEquationNumber(TimeStep *tStep);
+    virtual bool hasBc(TimeStep *tStep);
+    virtual int giveBcId();
+    virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
+
+    virtual bool hasIc(TimeStep *tStep);
+    virtual bool hasIcOn(ValueModeType type);
+    virtual InitialCondition *giveIc();
+    virtual bool hasIc();
+    virtual int giveIcId();
 
     ActiveBoundaryCondition *giveActiveBoundaryCondition();
 
