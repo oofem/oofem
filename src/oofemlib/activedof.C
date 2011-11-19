@@ -214,7 +214,7 @@ int ActiveDof :: askNewEquationNumber(TimeStep *tStep)
 
 #ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
-        s = 0;
+        equationNumber = 0;
         return 0;
     }
 #endif
