@@ -33,22 +33,18 @@
  */
 
 #include "eigenvaluedynamic.h"
-#include "nummet.h"
-#include "subspaceit.h"
-#include "inverseit.h"
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
-#include "elementside.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
 #include "flotmtrx.h"
+#include "flotarry.h"
+
+#ifndef __MAKEDEPEND
+#include <stdio.h>
+#include <math.h>
+#endif
 
 #include "verbose.h"
-#include "flotarry.h"
-#include "skyline.h"
 #include "usrdefsub.h"
 #include "datastream.h"
 #include "geneigvalsolvertype.h"
@@ -142,7 +138,7 @@ double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType 
 
 double EigenValueDynamic ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
                                                   TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, eigen value.
+// returns unknown quantity like displacement, eigenvalue.
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
@@ -187,17 +183,13 @@ TimeStep *EigenValueDynamic :: giveNextStep()
     return currentStep;
 }
 
-void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
+void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
+{
     //
     // creates system of governing eq's and solves them at given time step
     //
     // first assemble problem at current time step
-    /*  int nelem = domain -> giveNumberOfElements ();
-     * int nnode = domain -> giveNumberOfNodes();
-     * IntArray* loc ;
-     * Element* element;
-     * Node* node ;
-     */
+
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness and mass matrices\n");
 #endif
@@ -206,19 +198,10 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
         //
         // first step  assemble stiffness Matrix
         //
-        /*
-         * IntArray* mht = this -> GiveBanWidthVector ();
-         * stiffnessMatrix = new Skyline ();
-         * massMatrix = new Skyline ();
-         * stiffnessMatrix ->  checkSizeTowardsBanWidth (mht) ;
-         * massMatrix ->  checkSizeTowardsBanWidth (mht) ;
-         * delete mht;
-         */
 
         stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-        //massMatrix = stiffnessMatrix->GiveCopy();
         massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
@@ -233,30 +216,13 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
         eigVec.zero();
         eigVal.resize(numberOfRequiredEigenValues);
         eigVal.zero();
-        /* for (int i = 1; i <= nelem ; i++ ) {
-         * element = domain -> giveElement(i);
-         * loc = element -> giveLocationArray ();
-         * charMtrx = element -> GiveCharacteristicMatrix ( StiffnessMatrix, tStep );
-         * stiffnessMatrix ->  assemble (charMtrx, loc) ;
-         * delete charMtrx;
-         * charMtrx = element -> GiveCharacteristicMatrix ( MassMatrix, tStep );
-         * massMatrix ->  assemble (charMtrx, loc) ;
-         * delete charMtrx;
-         * }*/
     }
 
     //
     // set-up numerical model
     //
     this->giveNumericalMethod(tStep);
-    /*
-     * nMethod -> setSparseMtrxAsComponent ( AEigvMtrx , stiffnessMatrix) ;
-     * nMethod -> setSparseMtrxAsComponent ( BEigvMtrx , massMatrix) ;
-     * nMethod -> setDoubleAsComponent ( NumberOfEigenValues , numberOfRequiredEigenValues) ;
-     * nMethod -> setDoubleAsComponent ( PrescribedTolerancy , rtolv) ;
-     * nMethod -> setFloatMatrixAsComponent ( EigenVectors,  eigVec);
-     * nMethod -> setFloatArrayAsComponent ( EigenValues, eigVal);
-     */
+
     //
     // call numerical model to solve arised problem
     //
@@ -264,22 +230,11 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    //nMethod -> solveYourselfAt(tStep);
     nMethod->solve(stiffnessMatrix, massMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
-
-    /*
-     * // compute eigen frequencies
-     * for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-     *  eigVal.at(i) = sqrt( eigVal.at(i) );
-     * }
-     */
 
     delete stiffnessMatrix;
     delete massMatrix;
-    //delete  eigVec;
-    //delete  eigVal;
     stiffnessMatrix = massMatrix = NULL;
-    //eigVec = NULL; eigVal = NULL;
 }
 
 void EigenValueDynamic :: updateYourself(TimeStep *stepN)
@@ -297,7 +252,6 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
     fprintf(outputStream, "\nOutput for time % .3e \n\n", 1.0);
     // print eigen values on output
     fprintf(outputStream, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
-    //this->giveNumericalMethod(stepN)->giveFloatArrayComponent(EigenValues,&eigv);
 
     for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         fprintf( outputStream, "%15.8e ", eigVal.at(i) );
@@ -333,20 +287,6 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
 #  endif
-
-    /*  int nelem = domain->giveNumberOfElements ();
-     * for (j=1 ; j<=nelem ; j++) {
-     *  elem = domain -> giveElement(j) ;
-     * elem -> updateYourself(stepN) ;}
-     *
-     #  ifdef VERBOSE
-     * VERBOSE_PRINT0("Updated Elements ",nelem)
-     #  endif
-     *
-     * REMARK:
-     * I dont update elements - because it invokes updating strain and streses
-     * in GaussPoints - it not necesarry now - so I omit this part of code
-     */
 
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         // export using export manager
@@ -440,7 +380,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
             fclose(file);
             delete stream;
             stream = NULL;
-        }                                                     // ensure consistent records
+        } // ensure consistent records
 
     }
 
@@ -499,4 +439,6 @@ EigenValueDynamic :: initPetscContexts()
     }
 }
 #endif
+
+
 } // end namespace oofem
