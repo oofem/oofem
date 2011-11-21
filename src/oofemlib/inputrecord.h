@@ -448,6 +448,9 @@ enum InputFieldType {
     IFT_SimpleCrossSection_iz, // Inertia moment z
     IFT_SimpleCrossSection_ik, // Torsion moment x
     IFT_SimpleCrossSection_shearcoeff,
+    IFT_SimpleCrossSection_shearareay, // shear area y direction
+    IFT_SimpleCrossSection_shearareaz, // shear area z direction
+
 
     IFT_HeatCrossSection_thick,
     IFT_HeatCrossSection_width,

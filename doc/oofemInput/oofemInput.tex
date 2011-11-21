@@ -2103,15 +2103,21 @@ The crossSectType keyword can be one from following possibilities
 \begin{itemize}
 \item
   \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{SimpleCS}}{\optField{thick}{rn} \optField{width}{rn}}
+  \recentry{\entKeywordInst{SimpleCS}}{\optField{thick}{rn} \optField{width}{rn} \optField{area}{rn}}
+  \recentry{}{\optField{iy}{rn} \optField{iz}{rn} \optField{ik}{rn}}
+  \recentry{}{\optField{shearareay}{rn} \optField{shearareaz}{rn} \param{beamshearcoeff}{rn}}
+  
   \end{record}
 Represents integral type of cross section model. In current
 implementation, such cross section is described using cross section
 thick (\param{thickVal}) and width (\param{widthVal}). For some
-problems (for example
-3d), the corresponding volume and cross section dimensions are
+problems (for example 3d), the corresponding volume and cross section dimensions are
 determined using element geometry, and then you can omit \param{thickVal} and \param{widthVal}
-parameters.
+parameters. Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+inertia moment along y and z axis and torsion inertia moment. Parameter \param{beamshearcoeff} allows to set shear correction factor, or equivalent 
+shear areas (\param{shearareay} and \param{shearareaz} parameters) can be provided. 
+These cross section properties are assumed to be defined in local coordinate system of element.\\
+
 \item
   \begin{record}[0.9\textwidth]
     \recentry{\entKeywordInst{LayeredCS}}{\field{nLayers}{in}}

@@ -352,7 +352,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
     MaterialMode mode = gp->giveMaterialMode();
     SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
     FloatMatrix mat3d;
-    double area, Iy, shearCoeff;
+    double area, Iy, shearAreaz;
 
 
     if ( mode != _2dBeam ) {
@@ -366,7 +366,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
     this->give1dStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
     area = crossSection->give(CS_Area);
     Iy   = crossSection->give(CS_InertiaMomentY);
-    shearCoeff = crossSection->give(CS_BeamShearCoeff);
+    shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
 
     if ( form == ReducedForm ) {
         //answer = new FloatMatrix (3,3);
@@ -375,7 +375,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
 
         answer.at(1, 1) = mat3d.at(1, 1) * area;
         answer.at(2, 2) = mat3d.at(1, 1) * Iy;
-        answer.at(3, 3) = shearCoeff * area * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
+        answer.at(3, 3) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
     } else {
         //answer = new FloatMatrix (8,8);
         answer.resize(8, 8);
@@ -383,7 +383,7 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
 
         answer.at(1, 1) = mat3d.at(1, 1) * area;
         answer.at(5, 5) = mat3d.at(1, 1) * Iy;
-        answer.at(7, 7) = shearCoeff * area * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
+        answer.at(7, 7) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
     }
 
     //delete mat3d;
@@ -404,8 +404,8 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     MaterialMode mode = gp->giveMaterialMode();
     SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
     FloatMatrix mat3d;
-    double area, E, Iy, Iz, Ik, shearCoeff;
-
+    double area, E, Iy, Iz, Ik; 
+    double shearAreay, shearAreaz;
 
     if ( mode != _3dBeam ) {
         _error("give3dBeamStiffMtrx : unsupported mode");
@@ -422,15 +422,19 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     Iz   = crossSection->give(CS_InertiaMomentZ);
     Ik   = crossSection->give(CS_TorsionMomentX);
 
-    shearCoeff = crossSection->give(CS_BeamShearCoeff);
+    //shearCoeff = crossSection->give(CS_BeamShearCoeff);
+    shearAreay = crossSection->give(CS_SHEAR_AREA_Y);
+    shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
 
     //answer = new FloatMatrix (8,8);
     answer.resize(6, 6);
     answer.zero();
 
     answer.at(1, 1) = E * area;
-    answer.at(2, 2) = shearCoeff * this->give('G', gp) * area;
-    answer.at(3, 3) = shearCoeff * this->give('G', gp) * area;
+    answer.at(2, 2) = shearAreay * this->give('G',gp);
+    answer.at(3, 3) = shearAreaz * this->give('G',gp);
+    //answer.at(2, 2) = shearCoeff * this->give('G', gp) * area;
+    //answer.at(3, 3) = shearCoeff * this->give('G', gp) * area;
     answer.at(4, 4) = this->give('G', gp) * Ik;
     answer.at(5, 5) = E * Iy;
     answer.at(6, 6) = E * Iz;

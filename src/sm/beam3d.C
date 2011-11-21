@@ -386,9 +386,19 @@ Beam3d :: computeKappaCoeffs()
     double l = this->giveLength();
 
     this->computeConstitutiveMatrixAt( d, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
-    kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
-    kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
-    // delete d;
+
+    //  kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
+    //  kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
+    if (d.at(3, 3) != 0.) {
+        kappay = 6. * d.at(5, 5) / (d.at(3, 3) * l * l);
+    } else {
+        kappay = 0.;
+    }
+    if (d.at(2, 2) != 0.) {
+        kappaz = 6. * d.at(6, 6) / (d.at(2, 2) * l * l);
+    } else {
+        kappaz = 0.;
+    }
 
     return;
 }

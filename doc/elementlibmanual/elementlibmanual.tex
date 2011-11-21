@@ -225,7 +225,7 @@ assumed.\\
 \descitem{Features} Full dynamic analysis support. Linear stability
 analysis support.\\
 \descitem{CS properties} Area,
-inertia moment along y-axis and area shear correction factor should be specified.\\ 
+inertia moment along y-axis (\param{iy} parameter) and equivalent shear area (\param{shearareaz} parameter) should be specified.\\ 
 \descitem{Loads}  Constant and linear edge loads are supported, shear
 influence is taken into account. 
 Edge number should be equal to 1. Temperature load is
@@ -286,8 +286,7 @@ approximations are assumed.\\
 \descitem{Integration} Exact.\\
 \descitem{Features} Full dynamic analysis support. Linear stability
 analysis support.\\
-\descitem{CS properties} Area, inertia moment along y and z axis, torsion inertia moment and 
-cross section area shear correction factor are required. These
+\descitem{CS properties} Area, inertia moment along y and z axis (\param{iy} and \param{iz} parameters), torsion inertia moment (\param{ik} parameter) and either cross section area shear correction factor (\param{beamshearcoeff} parameter) or equivalent shear areas (\param{shearareay} and \param{shearareaz} parameters) are required. These
 cross section properties are assumed to be defined in local coordinate
 system of element.\\
 \descitem{Loads}  Constant and linear edge loads are supported.
