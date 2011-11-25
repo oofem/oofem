@@ -997,6 +997,7 @@ enum InputFieldType {
     IFT_NonlocalMaterialExtensionInterface_averagedquantity,
 
     IFT_SimpleInterfaceMaterial_kn,
+    IFT_SimpleInterfaceMaterial_knt,
     IFT_SimpleInterfaceMaterial_frictCoeff,
 
     IFT_OutputManager_name,

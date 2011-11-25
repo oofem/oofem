@@ -133,6 +133,8 @@ class SimpleInterfaceMaterial : public StructuralMaterial
 {
 protected:
 	 double kn;
+	 // residual stifness in tension regime
+	 double kn_t; 
 	 double frictCoeff;
 
 public:

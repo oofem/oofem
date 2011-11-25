@@ -186,7 +186,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             if ( normalStrain <= 0 ) {
                 answer.at(1, 1) = this->kn;
             } else                                                       {
-                answer.at(1, 1) = 0;
+                answer.at(1, 1) = this->kn_t;
             }
         } else   {
             if ( rMode == ElasticStiffness ) {
@@ -204,7 +204,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             if ( normalStrain <= 0. ) {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn;
             } else  {
-                answer.at(1, 1) = answer.at(2, 2) = 0.;
+                answer.at(1, 1) = answer.at(2, 2) = this->kn_t;
             }
         } else   {
             if ( rMode == ElasticStiffness ) {
@@ -222,7 +222,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             if ( normalStrain <= 0. ) {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
             } else  {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 0.;
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn_t;
             }
         } else   {
             if ( rMode == ElasticStiffness ) {
@@ -407,6 +407,8 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
 
     frictCoeff = 0.;
     IR_GIVE_FIELD(ir, kn, IFT_SimpleInterfaceMaterial_kn, "kn");
+    kn_t = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, kn_t, IFT_SimpleInterfaceMaterial_knt, "knt");
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "fc");
 
     return StructuralMaterial :: initializeFrom(ir);
