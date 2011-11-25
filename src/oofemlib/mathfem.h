@@ -71,8 +71,9 @@ class FloatArray;
  #define nearest(x) floor( ( x ) + 0.5 )
 #endif
 
-#ifndef HAVE_CBRT
- #define cbrt(x) __OOFEM_POW((x), (1./3.))
+#ifdef _MSC_VER
+inline double cbrt(double x)
+{ return sgn(x)*pow(fabs(x),1.0/3.0); }
 #endif
 
 /// Returns smaller value from two given decimals
