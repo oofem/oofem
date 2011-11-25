@@ -136,7 +136,7 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
 
                 phi = acos(help) / 3.0;
                 double cp = cos(phi);
-                double sp = sqrt(3)*sin(phi);
+                double sp = sqrt(3.0)*sin(phi);
                 * r1 = 2 * p * cp - a;
                 * r2 = - p * (cp + sp) - a;
                 * r3 = - p * (cp - sp) - a;

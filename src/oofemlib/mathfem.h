@@ -71,6 +71,10 @@ class FloatArray;
  #define nearest(x) floor( ( x ) + 0.5 )
 #endif
 
+#ifndef HAVE_CBRT
+ #define cbrt(x) __OOFEM_POW((x), (1./3.))
+#endif
+
 /// Returns smaller value from two given decimals
 inline int min(int i, int j)
 { return ( i <= j ? i : j ); }
