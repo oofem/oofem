@@ -27,7 +27,7 @@ b.assemble(a,ind);
 b.printYourself();
 
 
-dr=oofemlib.OOFEMTXTDataReader("/home/bp/work/patch100.in");
+dr=oofemlib.OOFEMTXTDataReader("patch100.in");
 problem=oofemlib.InstanciateProblem(dr,oofemlib.problemMode._processor,0);
 problem.checkProblemConsistency();
 problem.setRenumberFlag();

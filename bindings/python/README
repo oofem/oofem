@@ -52,7 +52,9 @@ modules.
 
 [3]   Installation
 ==============================================================================
-- configure and build oofem-debug target with dss module.
+- configure and build oofem-debug target without any external modules.
+  (if you want to inlude external modules, you have to add module library
+   manually by editing Jamroot configuration file).
 - change directory to python located in oofem top directory.
 - make a symbolic link named "boost" in this directory, pointing to your 
   Boost root directory. 
