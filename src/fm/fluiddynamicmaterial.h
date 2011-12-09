@@ -117,23 +117,58 @@ public:
     ~FluidDynamicMaterial() { }
 
     /**
+     * Computes the deviatoric stress vector and volumetric strain rate from given deviatoric strain and pressure.
+     * Defaults to incompressible function.
+     * @param stress_dev Deviatoric stress.
+     * @param epsp_vol Volumetric strain-rate.
+     * @param gp Integration point.
+     * @param eps_dev Deviatoric strain-rate.
+     * @param pressure Pressure.
+     * @param tStep Time step.
+     */
+    virtual void computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps_dev, double pressure, TimeStep *tStep);
+    /**
      * Computes the deviatoric stress vector from given strain.
      * @param answer Deviatoric stress.
      * @param gp Integration point.
-     * @param eps Stress rate.
+     * @param eps_dev Deviatoric strain-rate.
      * @param tStep Time step.
      */
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) = 0;
+    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps_dev, TimeStep *tStep) = 0;
+
 
     /**
-     * Computes the deviatoric stiffness (derivative of deviatoric stress tensor with respect to strain).
+     * Computes the deviatoric stiffness; @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial \epsilon_{\mathrm{dev}}}@f$.
      * @param answer Stiffness matrix.
      * @param mode Mode of result.
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode mode, GaussPoint * gp,
-                                               TimeStep * tStep) = 0;
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    /**
+     * Computes the tangent @f$ \frac{\partial\sigma_{\mathrm{dev}}}{\partial p}@f$.
+     * @param answer Tangent vector.
+     * @param mode Mode of result.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    /**
+     * Computes the tangent @f$ \frac{\partial\epsilon_{\mathrm{vol}}}{\partial\epsilon_{\mathrm{dev}}}@f$.
+     * @param answer Tangent vector.
+     * @param mode Mode of result.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    /**
+     * Computes the tangent @f$ \frac{\partial\epsilon_{\mathrm{vol}}}{\partial p}@f$.
+     * @param answer Tangent.
+     * @param mode Mode of result.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     /**
      * Updates internal state of material according to new state vector.

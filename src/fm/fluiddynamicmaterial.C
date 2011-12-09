@@ -49,8 +49,39 @@
 
 namespace oofem {
 void
-FluidDynamicMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *)
+FluidDynamicMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 { }
+
+
+void
+FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
+{
+    epsp_vol = 0.0;
+    this->computeDeviatoricStressVector(stress_dev, gp, eps, tStep);
+}
+
+
+void
+FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    int size = ((FluidDynamicMaterialStatus*)gp->giveMaterialStatus())->giveDeviatoricStressVector().giveSize();
+    answer.resize(size);
+}
+
+
+void
+FluidDynamicMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    int size = ((FluidDynamicMaterialStatus*)gp->giveMaterialStatus())->giveDeviatoricStressVector().giveSize();
+    answer.resize(size);
+}
+
+
+void
+FluidDynamicMaterial :: giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = 0.0;
+}
 
 
 FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(int n, Domain *d, GaussPoint *g) :
