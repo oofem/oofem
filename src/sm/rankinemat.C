@@ -193,6 +193,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     double tanG = E / ( 2. * ( 1. + nu ) );
 
     // plastic corrector - regular case
+    bool vertex_case = false;
     if ( ftrial > 0. ) {
         double f = ftrial;
         double Enu = E / ( 1. - nu * nu );
@@ -263,9 +264,17 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
         finalStress.at(2) = sig1 * n21 * n21 + sig2 * n22 * n22;
         finalStress.at(3) = sig1 * n11 * n21 + sig2 * n12 * n22;
         // add the increment of plastic strain
-        tempPlasticStrain.at(1) += ( tempKappa - kappa ) * n11 * n11;
-        tempPlasticStrain.at(2) += ( tempKappa - kappa ) * n21 * n21;
-        tempPlasticStrain.at(3) += 2. * ( tempKappa - kappa ) * n11 * n21;
+	if (!vertex_case){
+	  tempPlasticStrain.at(1) += ( tempKappa - kappa ) * n11 * n11;
+	  tempPlasticStrain.at(2) += ( tempKappa - kappa ) * n21 * n21;
+	  tempPlasticStrain.at(3) += 2. * ( tempKappa - kappa ) * n11 * n21;
+	} else {
+	  double dkap1 = status->giveDKappa(1);
+	  double dkap2 = status->giveDKappa(2);
+	  tempPlasticStrain.at(1) += dkap1 * n11 * n11 + dkap2 * n12 * n12;
+	  tempPlasticStrain.at(2) += dkap1 * n21 * n21 + dkap2 * n22 * n22;
+	  tempPlasticStrain.at(3) += 2. * (dkap1 * n11 * n21 + dkap2 * n12 * n22);
+	}
         // evaluate the tangent shear stiffness
         if ( difPrincTrialStresses != 0. ) {
             double factor = ( sig1 - sig2 ) / difPrincTrialStresses;
