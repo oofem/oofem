@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2009   Borek Patzak
  *
  *
  *
@@ -44,8 +44,9 @@
 #include "contextioerr.h"
 #include "datastream.h"
 
-namespace oofem {
+#include "rankinemat.h"
 
+namespace oofem {
 /****************************************************************************************/
 /**************     MPSMaterialStatus     ***********************************************/
 
@@ -133,16 +134,21 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    //
-    // NOTE
-    //
-    // this material model is unit-dependent!
-    // units must be in MPa, m???, MN.
-    //
-
     double fc, c, wc, ac;
 
+    /** scaling factor transforming PREDICTED stiffnesses q1, q2, q3 and q4 to desired
+     *  default value is 1.0 = no change	
+     *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
+    double stiffnessFactor;
+
     KelvinChainSolidMaterial :: initializeFrom(ir);
+
+    // checking timefactor - for MPS material must be equal to 1.
+    double tf;
+    IR_GIVE_FIELD(ir, tf, IFT_RheoChainMaterial_timefactor, "timefactor");
+    if ( tf != 1. ) {
+        _error("initializeFrom: for MPS material timefactor must be equal to 1.");
+    }
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_MPSMaterial_mode, "mode");
@@ -152,15 +158,21 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir,  c, IFT_MPSMaterial_cc, "cc"); // cement content of concrete [kg/m^3]
         IR_GIVE_FIELD(ir, wc, IFT_MPSMaterial_wc, "w/c"); // ratio (by weight) of water to cementitious material
         IR_GIVE_FIELD(ir, ac, IFT_MPSMaterial_ac, "a/c"); // ratio (by weight) of aggregate to cement
-        this->predictParametersFrom(fc, c, wc, ac);
+
+	stiffnessFactor = 1.;
+        IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, IFT_MPSMaterial_stiffnessfactor, "stiffnessfactor"); // ratio (by weight) of aggregate to cement
+
+        this->predictParametersFrom(fc, c, wc, ac, stiffnessFactor);
+
     } else { // read model parameters for creep
-        IR_GIVE_FIELD(ir, q1, IFT_MPSMaterial_q1, "q1"); // INPUT IN [1e-6/MPa]
+        IR_GIVE_FIELD(ir, q1, IFT_MPSMaterial_q1, "q1"); 
         IR_GIVE_FIELD(ir, q2, IFT_MPSMaterial_q2, "q2");
         IR_GIVE_FIELD(ir, q3, IFT_MPSMaterial_q3, "q3");
         IR_GIVE_FIELD(ir, q4, IFT_MPSMaterial_q4, "q4");
     }
 
     IR_GIVE_FIELD(ir, talpha, IFT_MPSMaterial_talpha, "talpha"); // Macro
+    IR_GIVE_FIELD(ir, lambda0, IFT_MPSMaterial_lambda0, "lambda0"); // Macro
 
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, IFT_MPSMaterial_coupledanalysistype, "coupledanalysistype");
@@ -172,11 +184,11 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 
     if ( this->CoupledAnalysis == MPS ) {
         // muS- the only parameter necessary for evaluation of the flow-term viscosity
-        // muS = c0 * c1 * q4 [1/(MPa * day)]
+        // muS = c0 * c1 * q4 [1/(Pa*s)]
         IR_GIVE_FIELD(ir, muS, IFT_MPSMaterial_mus, "mus");
         IR_GIVE_FIELD(ir, kappaT, IFT_MPSMaterial_kappat, "kappat"); //[-] replaces ln(h) in diff equation for MPS
-	this->cyclicTparam = 0.;
-	IR_GIVE_OPTIONAL_FIELD(ir, cyclicTparam, IFT_MPSMaterial_cyclictparam, "cyclictparam");
+	this->ct = 0.;
+	IR_GIVE_OPTIONAL_FIELD(ir, ct, IFT_MPSMaterial_ct, "ct");
 
         // age when drying or thermal changes begin [days] - necessary to determine initial viscosity
         IR_GIVE_FIELD(ir, t0, IFT_MPSMaterial_t0, "t0");
@@ -285,7 +297,7 @@ MPSMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac)
+MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac, double stiffnessFactor)
 {
     /*
      * Prediction of model parameters - estimation from concrete composition
@@ -308,10 +320,10 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac)
      */
 
     // Basic creep parameters
-    q1  = 126.74271 / sqrt(fc);
-    q2  = 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9); // [1/TPa]
-    q3  = 0.29 * __OOFEM_POW(wc, 4.) * q2;
-    q4  = 20.3 * __OOFEM_POW(ac, -0.7);
+    q1  = 1.e-12 * stiffnessFactor * 126.74271 / ( sqrt(fc) ); 
+    q2  = 1.e-12 * stiffnessFactor * 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9); 
+    q3  = 1.e-6 *  stiffnessFactor * 0.29 * __OOFEM_POW(wc, 4.) * q2; 
+    q4  = 1.e-12 * stiffnessFactor * 20.3 * __OOFEM_POW(ac, -0.7); 
 
     char buff [ 1024 ];
     sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf", q1, q2, q3, q4);
@@ -332,12 +344,13 @@ MPSMaterial :: computeCharTimes()
     double Tau1;
     int j;
 
+
     if ( this->begOfTimeOfInterest == -1. ) {
-        this->begOfTimeOfInterest = 0.1;
+        this->begOfTimeOfInterest = 0.01 * lambda0;
     }
 
     if ( this->endOfTimeOfInterest == -1. ) {
-        this->endOfTimeOfInterest = 10000.;
+        this->endOfTimeOfInterest = 10000. * lambda0;
     }
 
     // perhaps different values should be used for moduli computed by the least-squares method
@@ -350,11 +363,9 @@ MPSMaterial :: computeCharTimes()
     this->endOfTimeOfInterest = RheoChainMaterial :: giveEndOfTimeOfInterest();
 
     j = 1;
-    //while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
     while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow( 10.0, ( double )(j - 1) ) ) {
         j++;
     }
-
 
     this->nUnits = j;
 
@@ -373,20 +384,21 @@ MPSMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, doubl
 {
     int mu;
     double tau0, tauMu;
-    // constant "lambda0" is assumed to be equal to 1 day (typical value)
+
     // constant "n" is assumed to be equal to 0.1 (typical value)
 
     // modulus of elasticity of the first unit of Kelvin chain.
     // (aging elastic spring with retardation time = 0)
+    double lambda0ToPowN = __OOFEM_POW(lambda0, 0.1);  
     tau0 = __OOFEM_POW(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
-    EspringVal = 1.e6 / ( q2 * log(1.0 + tau0) - q2 * tau0 / ( 10.0 + 10.0 * tau0 ) );
+    EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0) );
 
     // evaluation of moduli of elasticity for the remaining units
     // (Solidifying kelvin units with retardation times tauMu)
     answer.resize(nUnits);
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
         tauMu = __OOFEM_POW(2 * this->giveCharTime(mu), 0.1);
-        answer.at(mu) = 10.e6 * __OOFEM_POW(1 + tauMu, 2) / ( log(10.0) * q2 * tauMu * ( 0.9 + tauMu ) );
+        answer.at(mu) = 10. * __OOFEM_POW(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN) );
         this->charTimes.at(mu) *= 1.35;
     }
 
@@ -425,7 +437,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
     v = computeSolidifiedVolume(gp, atTime);
 
-    dt = atTime->giveTimeIncrement() / timeFactor;
+    dt = atTime->giveTimeIncrement();
     eta = this->computeFlowTermViscosity(gp, atTime);
 
     //incremental viscous flow compliance
@@ -463,7 +475,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
         _error("giveEModulus - mode is not supported");
     }
 
-    Einc = 1 / ( q1 * 1.e-6 + 1. / ( EspringVal * v ) + sum  +  Cf );
+    Einc = 1 / ( q1 + 1. / ( EspringVal * v ) + sum  +  Cf );
 
     return Einc;
 }
@@ -473,17 +485,17 @@ double
 MPSMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
 // compute the relative volume of the solidified material at given age (in days)
 {
-    double m, lambda0, alpha;
+    double m, alpha;
     double v;     //return value
     double atAge;     // (equivalent age)
 
     // standard values of exponents - empirical constants
     m = 0.5;
-    lambda0 = 1;     //[day]
+
     alpha = q3 / q2;
 
     if ( this->CoupledAnalysis == Basic ) {
-        atAge = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+        atAge = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() );
     } else {
         atAge = computeEquivalentTime(gp, atTime, 0);
     }
@@ -502,7 +514,7 @@ MPSMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
     double tauMu;
 
 
-    deltaT = atTime->giveTimeIncrement() / timeFactor;
+    deltaT = atTime->giveTimeIncrement();
 
     if ( this->CoupledAnalysis == MPS ) {
         deltaT *=  0.5 * ( this->computePsiR(gp, atTime, 0.) + this->computePsiR(gp, atTime, 1.) );
@@ -526,7 +538,7 @@ MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
     double deltaT;
     double tauMu;
 
-    deltaT = atTime->giveTimeIncrement() / timeFactor;
+    deltaT = atTime->giveTimeIncrement();
 
     if ( this->CoupledAnalysis == MPS ) {
         deltaT *=  0.5 * ( this->computePsiR(gp, atTime, 0) + this->computePsiR(gp, atTime, 1) );
@@ -555,8 +567,8 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
     double reductFactor;
 
     if ( this->CoupledAnalysis == Basic ) {
-        tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
-        eta = 1.e6 * tHalfStep / q4;
+        tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() );
+        eta = tHalfStep / q4;
     } else if ( this->CoupledAnalysis == MPS ) {
         MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
 
@@ -573,7 +585,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
                 prevEta = status->giveFlowTermViscosity();
             }
 
-            dt = atTime->giveTimeIncrement() / timeFactor;
+            dt = atTime->giveTimeIncrement();
             // evaluate auxiliary factors A and B
             T_new = this->giveTemperature(gp, atTime, 1);
             T_old = this->giveTemperature(gp, atTime, 0);
@@ -584,18 +596,18 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
 	    // original version
 	    //A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
-
-	    if ( this->cyclicTparam == 0. ) {
+	    
+	    if ( this->ct == 0. ) {
 	      reductFactor = 1.;
 	    } else if ( ( status->giveTmax() - T_new < 0. ) || atTime->isTheFirstStep() ) {
 	      status->setTmax(T_new);
-	      reductFactor = 1.;
-	    } else {
-	      reductFactor = exp( - this->cyclicTparam * fabs (T_new - status->giveTmax() ) );
+	      reductFactor = 1.;   
+	    } else {         
+	      reductFactor = exp( - this->ct * fabs (T_new - status->giveTmax() ) );
 	    }
 
             A = sqrt( muS * ( kappaT * reductFactor * fabs(T_new - T_old) + 0.5*(T_new + T_old) * fabs(log(H_new) - log(H_old)) ) / ( dt * this->roomTemperature ) );
-            B = sqrt(PsiS * 1.e6 / this->q4);
+            B = sqrt(PsiS / this->q4);
 
             if ( ( A * B * dt ) > 1.e-6 ) {
                 e = exp(-2 * A * B * dt);
@@ -620,11 +632,11 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 double
 MPSMaterial :: giveInitViscosity(TimeStep *atTime)
 {
-    if ( ( t0 - atTime->giveTimeIncrement() / timeFactor ) < 0 ) {
+    if ( ( t0 - atTime->giveTimeIncrement() ) < 0 ) {
         _error("giveInitViscosity - length of the first time step must be bigger than t0");
     }
 
-    return 1.e6 * ( t0 - atTime->giveTimeIncrement() / timeFactor ) / q4;
+    return ( t0 - atTime->giveTimeIncrement() ) / q4;
 }
 
 
@@ -651,7 +663,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
         reducedAnswer.beProductOf(C, sigma);
 
         // flow strain increment at constant stress
-        dt = atTime->giveTimeIncrement() / timeFactor;
+        dt = atTime->giveTimeIncrement();
         eta = this->computeFlowTermViscosity(gp, atTime);
 
         if ( this->CoupledAnalysis == Basic ) {
@@ -928,9 +940,9 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
 
     if ( atTime->isTheFirstStep() ) {
         if ( option == 0 ) { // gives time in the middle of the timestep
-            return relMatAge - atTime->giveTimeIncrement() / timeFactor + PsiE * ( 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+            return relMatAge - atTime->giveTimeIncrement() + PsiE * ( 0.5 * atTime->giveTimeIncrement() );
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-            return relMatAge - atTime->giveTimeIncrement() / timeFactor + PsiE *atTime->giveTimeIncrement() / timeFactor;
+	    return relMatAge - atTime->giveTimeIncrement() + PsiE *atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }
@@ -939,9 +951,9 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
         tEquiv = status->giveEquivalentTime();
 
         if ( option == 0 ) { // gives time in the middle of the timestep
-            tEquiv = tEquiv + PsiE *  0.5 * atTime->giveTimeIncrement() / timeFactor;
+            tEquiv = tEquiv + PsiE *  0.5 * atTime->giveTimeIncrement();
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-            tEquiv = tEquiv + PsiE *atTime->giveTimeIncrement() / timeFactor;
+            tEquiv = tEquiv + PsiE *atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }

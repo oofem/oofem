@@ -1964,27 +1964,121 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 
-\subsubsection{B3 model for concrete creep with aging}
+\subsubsection{B3 and MPS models for concrete creep with aging}
 
-Model B3 is an aging viscoelastic model for concrete creep and shrinkage, 
-developed by Prof. Ba\v{z}ant
-and coworkers. In OOFEM it is 
-implemented in two different forms. Material ``B3mat'' uses an approximation
-by an aging Maxwell chain. This is an older version, kept in OOFEM for compatibility.
-A more recent implementation is referred to as ``B3solidmat'' and exploits 
-a non-aging Kelvin chain combined with the solidification theory. It is also
-extended to the so-called microprestress solidification theory (MPS), which takes
-into account the effects of variable humidity (and in the future also of variable
-temperature) on creep.
-The underlying rheological chain consists of three major components. The solidifying Kelvin chain 
-represents short-term creep; it is serially coupled with a non-aging elastic spring that reflects instantaneous deformation. 
-Long-term creep is captured by an aging dashpot with viscosity dependent on the microprestress, the evolution of which is affected by changes of temperature and humidity.
+Model B3 is an aging viscoelastic model for concrete creep and shrinkage, developed by Prof. Ba\v{z}ant and coworkers. In OOFEM it is implemented in three different ways. 
+
+The first version, ``B3mat'', is kept in OOFEM for compatibility. It is based on an aging Maxwell chain. The moduli of individual units in the chain are evaluated in each step using the least-squares method.
+
+The second, more recent version, is referred to as ``B3solidmat''. Depending on the specified input it exploits either a non-aging Kelvin chain combined with the solidification theory, or an aging Kelvin chain. It is extended to the so-called microprestress-solidification theory (MPS), which in this implementation  takes into account only the effects of variable humidity on creep; the effects of temperature on creep are not considered. 
+The underlying rheological chain consists of four serially coupled components. The solidifying Kelvin chain represents short-term creep; it is serially coupled with a non-aging elastic spring that reflects instantaneous deformation. Long-term creep is captured by an aging dashpot with viscosity dependent on the microprestress, the evolution of which is affected by changes of humidity. The last  unit describes volumetric deformations (shrinkage and thermal strains).
+Drying creep is incorporated either by the 
+``averaged cross-sectional approach'', or by the ``point approach''.
+
+%%%% MPS
+The latest version is denoted as ``MPS'' and is based on the microprestress-solidification theory. The rheological model consists of the same four components as in  ``B3solidmat'', but now the implemented exponential algorithm is designed especially for the solidifying Kelvin chain, which is a special case of an aging Kelvin chain. This model takes into account both humidity and temperature effects on creep. Drying creep is incorporated exclusively by the so-called
+``point approach''. The model can operate in two modes,
+controlled by the keyword $CoupledAnalysisType$. The first mode ($CoupledAnalysisType = 0$) solves only the basic creep and runs as a single problem, while the second mode ($CoupledAnalysisType = 1$) needs to be run as a staggered problem with humidity and temperature analysis preceding the mechanical problem.
+
+The basic creep is in the microprestress-solidification theory influenced by the same four parameters $q_1$ - $q_4$ as in the model B3. Values of these parameters can be estimated from the composition of concrete mixture and its compressive strength using the following empirical formulae: 
+\begin{eqnarray}
+  q_1 = 126.77 \bar{f_c}^{-0.5} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_2 = 185.4 c^{0.5} \bar{f_c}^{-0.9} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_3 = 0.29 \left(w/c\right)^4 q_2 \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_4 = 20.3 \left(a/c\right)^{-0.7} \hspace{5 mm} [10^{-6}/\mbox {MPa}]  
+\end{eqnarray}
+Here, $\bar{f_c}$ is the average compressive cylinder strength at age of 28 days [MPa], $a$, $w$ and $c$ is the weight  of aggregates, water and cement per unit volume of concrete [kg/m$^3$].
+
+%%%% 	SPRING %%%%
+The non-aging spring stiffness represents the asymptotic modulus of the material; it is equal to $1/q_1$.
+%%%% 	KELIVIN CHAIN %%%%
+The solidifying Kelvin chain is composed of $M$ Kelvin units with fixed retardation times $\tau_{\mu}$, $\mu = 1, 2, \dots, M$, which form a geometric progression with quotient 10. The lowest retardation time $\tau_1$ is equal to $0.3\; begoftimeofinterest$, the highest retardation time $\tau_M$ is bigger than $0.5\; endoftimeofinterest$. The chain also contains a spring with stiffness $E_0^\infty$
+(a special case of Kelvin unit with zero retardation time).
+Moduli $E_{\mu}^\infty$ of individual Kelvin units are determined such that the chain
+provides a good approximation of the non-aging micro-compliance function of the solidifying constituent, $\Phi(t-t') = q_3 \ln \left( 1 + \left( \left(t-t' \right)/\lambda_0 \right)^n \right)$, where $\lambda_0 = 1$ day and $n = 0.1$. 
+The technique based on the continuous retardation spectrum
+leads to the following formulae:
+\begin{eqnarray}
+ \frac{1}{E_0^\infty} = q_2 \ln\left(1+\tilde{\tau_0}\right) - \frac{q_2 \tilde{\tau_0} }{10 \left( 1 + \tilde{\tau_0} \right)} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau_0} = \left( \frac{2 \tau_1}{ \sqrt{10}}  \right)^{0.1} \\
+\frac{1}{E_\mu^\infty} =  (\ln 10) \frac{q_2 \tilde{\tau}_\mu \left(0.9 + \tilde{\tau}_\mu \right)}{10 \left( 1 + \tilde{\tau}_\mu \right)^2} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau}_\mu = \left(2 \tau_\mu \right)^{0.1}, \hspace{7 mm} \mu = 1,2,\dots M
+\end{eqnarray}
+Viscosities $\eta_{\mu}^\infty$ of individual Kelvin units are obtained from simple relation $\eta_{\mu}^\infty=\tau_{\mu}/E_{\mu}^\infty$. A higher accuracy is reached if all retardation times are in the end multiplied by the factor 1.35 and the last modulus $E_M$ is divided by 1.2.
+
+%%%% 	SOLIDIFICATION %%%%
+The actual viscosities $\eta_{\mu}$ and stiffnesses $E_{\mu}$ of the solidifying chain change in time according to $\eta_{\mu}(t) = v(t) \eta_{\mu}^\infty$ and $E_{\mu}(t) = v(t) E_{\mu}^\infty$, where 
+\begin{equation}
+v(t)= \frac{1}{1 + \frac{q_2}{q_3} \left( \frac{\lambda_0}{ t} \right)^m}
+\end{equation}
+is the volume growth function, and exponent $m = 0.5$. In the case of variable temperature or humidity, the actual age of concrete 
+$t$ is replaced by the equivalent time $t_e$, which is obtained by integrating
+(\ref{dtedt}).
+
+%%%% 	MICROPRESTRESS %%%%
+Evolution of viscosity of the aging dashpot is governed by the differential
+equation 
+\begin{equation}
+\label{eq:mps_viscosity}
+\dot{\eta}+\frac{1}{\mu_S T_0} \left |  T \frac{\dot{h}}{h} - \kappa_T k_T(T) \dot{T}  \right | \left( \mu_S \eta \right)^{p/\left(p-1\right)} = \frac{\psi_S}{q_4}
+\end{equation}
+where $h$ is the relative pore humidity, $T$ is the absolute temperature [K], $T_0 = 298$ K is the room temperature,  and parameter $p = 2$. 
+Function $k_T$ is given by 
+\begin{equation}
+\quad k_T(T) = \mbox{e}^{-c_T \left (T_{max}-T\right )}
+\label{eq:mps_k_T}
+\end{equation}
+where parameter $c_T$ controls the influence of cyclic temperature on creep, and $T_{max}$ stands for the maximum reached temperature in the previous history. 
+This is a modification of the opriginal MPS theory, proposed by Havl\'{a}sek and Jir\'{a}sek. 
+%Parameter $\kappa_T$ replaces $\ln h$ which in case of basic creep eliminates the sensitivity of the original model on the choice of relative pore humidity $h$ reached by self-desiccation.
+
+
+Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differengtial equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
+are replaced by $\mu_S = c_0 T_0^{p-1} k_1^{p-1} q_4 (p-1)^p$. 
+The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$, where $t_0$ is age of concrete at the onset drying or when the temperature starts changing.
+
+
+
+%%%% 	MODIFIED TIMES %%%%
+As mentioned above, under variable humidity and temperature conditions the physical time $t$ in function $v(t)$ describing evolution of the solidified volume is replaced by the equivalent time $t_e$. In a similar spirit, $t$ is replaced by the solidification time $t_s$ in the equation describing creep of the solidifying constituent, and by the reduced time $t_r$ in equation $\mbox{d} \varepsilon_f / \mbox{d} t_r = \sigma / \eta(t)$ relating the flow strain rate to the stress.
+Factors transforming the physical time $t$ into $t_e$, $t_r$ and $t_s$ are defined as follows:
+\begin{eqnarray}
+\label{dtedt}
+ \frac{dt_e}{dt} = \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
+ \frac{dt_r}{dt} = \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
+ \frac{dt_s}{dt} = \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
+\end{eqnarray}
+Functions describing the influence of temperature have the form 
+\begin{eqnarray}
+ \beta_{eT}(T) = \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+ \beta_{rT}(T) = \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+ \beta_{sT}(T) = \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
+\end{eqnarray}
+motivated by the rate process theory.
+$R$ is the universal gas constant and $Q_e$, $Q_r$, $Q_s$ are activation energies for hydration, viscous processes and microprestress relaxation, respectively.
+Only the ratios $Q_e/R$, $Q_r/R$ and $Q_s/R$ have to be specified.
+Functions describing the influence of humidity have the form 
+\begin{eqnarray}
+ \beta_{eh}(h) = \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
+ \beta_{rh}(h) = \alpha_r + \left( 1 - \alpha_r \right) h^2\\
+ \beta_{sh}(h) = \alpha_s + \left( 1 - \alpha_s \right) h^2
+\end{eqnarray}
+where $\alpha_e$, $\alpha_r$ and $\alpha_s$ are parameters. 
+
+%%%% 	HYGRO AND THERMAL STRAIN  %%%%
+The rate of thermal strain is expressed as $\dot{\varepsilon}_T = \alpha_T \dot{T}$ and the rate of shrinkage strain as $\dot{\varepsilon}_{sh} = k_{sh} \dot{h}$, where both $\alpha_T$ and $k_{sh}$ are assumed to be constant in time and independent of temperature and humidity. 
+
+
+
 
 The model description and parameters are summarized
-in table~\ref{b3_table} for ``B3mat'' and in table~\ref{b3solid_table} for ``B3solidmat''. Since some model parameters are determined from the composition
+in table~\ref{b3_table} for ``B3mat'', in table~\ref{b3solid_table} for ``B3solidmat'', and in table ~\ref{mps_table} for ``MPS''. 
+Since some model parameters are determined from the composition
 and strength using empirical formulae, it is necessary to use the
 specified units (e.g.\ compressive strength always in MPa, irrespectively
 of the units used in the simulation for stress). 
+For ``B3mat'' and ``B3solidmat'' it is strictly 
+required to use the specified units (stress always in MPa, time in days etc.). 
+The ``MPS'' model is almost unit-independent, except for 
+$\bar{f}_c$ in MPa and $c$ in kg/m$^3$, which are used in empirical formulae.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2019,6 +2113,31 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \label{b3_table}
 %\end{center}
 \end{table}
+
+For illustration, sample input records for the material considered in Example 3.1 of the creep
+book by Ba\v{z}ant and Jir\'{a}sek is presented. The concrete mix is composed
+of 170 kg/m$^3$ of water, 450 kg/m$^3$ of type-I cement and 1800 kg/m$^3$ of aggregates,
+which corresponds to ratios $w/c=0.3778$ and $a/c=4$. The compressive strength 
+is $\bar{f}_c=45.4$ MPa. The concrete slab of thickness 200 mm is cured in air
+with initial protection against drying until the age of 7 days.
+Subsequently, the slab is exposed to an environment with
+relative humidity of 70\%. The following input record can be used for the first
+version of the model (B3mat):
+
+{\tt B3mat 1 n 0.2 relMatAge 28. fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7. alpha1 1. alpha2 1.2 ks 1. hum 0.7 vs 0.1 noshrinkage 0}
+
+Parameter $\alpha_1=1$ corresponds to type-I cement, parameter $\alpha_2=1.2$
+to curing in air, parameter $k_s=1$ to an infinite slab. 
+The volume-to-surface ratio is in this case 
+equal to one half of the slab thickness
+and must be specified in meters, independently of the length units that are
+used in the finite element analysis (e.g., for nodal coordinates).
+The value of relMatAge must be specified in days.
+Parameter {\tt relMatAge 28.}  means that time 0
+of the analysis corresponds to concrete age 28 days. 
+If material B3mat is used, the finite element analysis
+must use days as the units of time (not only for relMatAge,
+but in general, e.g.\ for the time increments).
 
 
 \begin{table}[!htb]
@@ -2117,6 +2236,136 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \label{b3solid_table}
 
 \end{table}
+
+Now consider the same conditions for ``B3solidmat''.
+In all the examples below,
+the input record with the material description can start by\\
+{\tt B3solidmat 1 d 2420. n 0.2 talpha 12.e-6 begtimeofinterest 1.e-2\\
+endtimeofinterest 3.e4 timefactor 86400. relMatAge 28.}
+
+Parameters {\tt begtimeofinterest 1.e-2} and {\tt endtimeofinterest 3.e4}
+mean that
+the computed response (e.g., deflection)
+should be accurate in the range from 0.01 day to 30,000 days after load
+application. 
+Parameter {\tt timefactor 86400.}
+means that the time unit used in the finite element analysis
+is 1 second (because 1 day = 86,400 seconds). 
+Note that the values of begtimeofinterest, endtimeofinterest
+and relMatAge are always specified in days, independently of the actual
+time units in the analysis. 
+Parameter {\tt EmoduliMode} is not specified, which means that the
+moduli of the Kelvin chain will be determined using the default method,
+based on the continuous retardation spectrum. 
+
+Additional parameters
+depend on the specific type of analysis:
+\begin{enumerate}
+\item
+Computing basic creep only, shrinkage not considered,
+parameters $q_i$ estimated from composition.\\
+{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 0 shm 0} 
+\item 
+Computing  basic creep only, shrinkage not considered,
+parameters $q_i$ specified by the user.\\
+{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.692e-6\\ microprestress 0 shm 0} 
+\item 
+Computing  basic creep only, shrinkage handled using the sectional approach,
+parameters estimated from composition.\\
+{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 0 shm 1 ks 1. alpha1 1. alpha2 1.2 hum 0.7 vs 0.1}
+\item 
+Computing  basic creep only, shrinkage handled using the sectional approach,
+parameters specified by the user.\\
+{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.692e-6\\ microprestress 0 shm 1 ks 1. q5 327.e-6 kt 0.02803 EpsSinf 702.4e-6}
+\item 
+Computing  basic creep only, shrinkage handled using the point approach (B3),
+parameters specified by the user.\\
+{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.692e-6\\ microprestress 0 shm 2 es0 ... r ... rprime ... at ...}
+\item
+Computing drying creep, shrinkage handled using the point approach (MPS),
+parameters $q_i$ estimated from composition.\\
+{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 1 c0 ... c1 ... tS0 ... w\_h ... ncoeff ... a ... shm 3 kSh ...}
+\end{enumerate}
+
+\begin{table}[!htb]
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Microprestress-solidification theory material model for concrete creep\\
+\hline
+Record Format & \descitem{mps} 
+\elemparam{d}{rn} \elemparam{n}{rn} \elemparam{talpha}{rn} \elemparam{referencetemperature}{rn}
+%
+\elemparam{mode}{in} 
+\optelemparam{CoupledAnalysisType}{in}
+%for rheo chain material
+\optelemparam{begoftimeofinterest}{rn} \optelemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn} \elemparam{lambda0}{rn}
+%mode = 0 
+\elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn} \elemparam{a/c}{rn} \elemparam{stiffnessfactor}{rn} 
+%mode = 1 
+\elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn} \elemparam{q4}{rn}
+%
+% sorption isotherm description
+\elemparam{w\_h}{rn} \elemparam{ncoeff}{rn} \elemparam{a}{rn}
+%
+% MPS
+\elemparam{t0}{rn} \elemparam{ksh}{rn} \elemparam{mus}{rn} 
+\optelemparam{alphaE}{rn} \optelemparam{alphaR}{rn} \optelemparam{alphaS}{rn}
+\optelemparam{QEtoR}{rn} \optelemparam{QRtoR}{rn} \optelemparam{QStoR}{rn}
+\optelemparam{cT}{rn} \elemparam{kappaT}{rn}
+%	   	  
+\\Parameters 
+&- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{n} Poisson ratio\\
+&- \param{talpha} coefficient of thermal expansion\\
+&- \param{referencetemperature} reference temperature only to thermal expansion of material\\
+
+&- \param{mode} optional parameter; if $mode = 0$ (default),  parameters $q1-q4$ are predicted from composition of the concrete mixture (parameters fc, cc, w/c, a/c and stiffnessfactor need to be specified). Otherwise values of parameters $q1-q4$ are expected.\\
+&- \param{CoupledAnalysisType} $0=$ basic creep; $1=$ (default) drying creep shrinkage; the problem must be run as a staggered problem with preceding analysis of humidity and temperature distribution. Following parameters must be specified: \param{w\_h}, \param{ncoeff}, \param{rn}, \param{t0}, \param{mus}, \param{kappaT}\\
+%
+&- \param{lambda0} scaling factor equal to 1.0 day in time units of analysis (eg. 86400 if the analysis runs in seconds)\\
+&- \param{begoftimeofinterest} lower boundary of time interval with good approximation of the compliance function; default value = 0.01 $lambda0$\\  
+&- \param{endoftimeofinterest} upper boundary of time interval with good approximation of the compliance function; default value = 10000. $lambda0$\\  
+&- \param{timefactor} scaling factor, for mps material must be equal to 1.0\\
+&- \param{relMatAge} relative material age\\
+%
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[!htb]
+\begin{tabular}{|l|p{9cm}|}
+\hline
+%
+&- \param{fc} 28-day standard cylinder compression strength [MPa]\\
+&- \param{cc} cement content of concrete mixture  [kg m$^{-3}$] \\
+&- \param{w/c} water to cement weight ratio\\
+&- \param{a/c} aggregate to cement weight ratio\\
+&- \param{stiffnessfactor} scaling factor converting ``predicted" parameters $q_1$ - $q_4$ into proper units (eg. 1.0 if stiffness is measured in Pa, 1.e6 for MPa)\\
+&- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters of B3 model for basic creep\\
+&- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
+%
+&- \param{mus} parameter governing to the evolution of viscosity; for exponent $p=2$, $\mu_S = c_0 c_1 q_4$ [Pa$^{-1}$ s$^{-1}$] \\
+&- \param{ksh} parameter relating rate of shrinkage to rate of humidity [-], default value is 0.0, i.e. no shrinkage\\
+&- \param{t0} time of the first temperature or humidity change\\
+&- \param{alphaE} constant, default value 10.\\
+&- \param{alphaR} constant, default value 0.1\\
+&- \param{alphaS} constant, default value 0.1\\
+&- \param{QEtoR} activation energy ratio, default value 2700. K\\
+&- \param{QRtoR} activation energy ratio, default value 5000. K\\
+&- \param{QStoR} activation energy ratio, default value 3000. K\\
+%
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
+2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
+\hline
+\end{tabular}
+
+\caption{MPS theory---summary.}
+\label{mps_table}
+
+\end{table}
+
 
 
 \clearpage
