@@ -1005,31 +1005,41 @@ The following definitions of equivalent strain are currently supported:
 \begin{itemize}
 \item
 {\bf Mazars} (1984) definition based on norm of positive part of strain:
-$$
+\begin{equation}
+\label{mazars}
 \tilde\varepsilon=\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\varepsilon_I\rangle^2}
-$$
+\end{equation}
 where $\langle\varepsilon_I\rangle$ are positive parts of 
 principal values of the strain tensor $\mbf{\varepsilon}$.
 \item
-Definition derived from the {\bf Rankine} criterion of maximum principal stress:
-$$
-\tilde\varepsilon=
-{{1}\over{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar\sigma_I\rangle^2}$$
+Definitions derived from the {\bf Rankine} criterion of maximum principal stress:
+\begin{eqnarray}
+\label{rankinesmooth}
+\tilde\varepsilon&=&
+{{1}\over{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar\sigma_I\rangle^2}
+\\
+\label{rankinestandard}
+\tilde\varepsilon&=&
+{{1}\over{E}}\max_{I=1}^{3}\bar\sigma_I
+\end{eqnarray}
 where
-$\langle\bar\sigma_I\rangle$ are the positive parts of principal 
+$\bar\sigma_I$, $I=1,2,3$, are the principal 
 values of the
-effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$.
+effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$
+and $\langle\bar\sigma_I\rangle$ are their positive parts.
 \item
 {\bf Energy} norm scaled by Young's modulus to obtain
 a strain-like quantity:
-$$
+\begin{equation}
+\label{energynorm}
 \tilde\varepsilon=\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}\over{E}}
-$$
+\end{equation}
 \item
 {\bf Modified Mises} definition, proposed by de Vree et al.~(1995):
-$$
+\begin{equation}
+\label{modifiedmises}
 \tilde\varepsilon=\frac{(k-1)I_{1\varepsilon}}{2k(1-2\nu)} + \frac{1}{2k}\sqrt{\frac{(k-1)^2}{(1-2\nu)^2}I_{1\varepsilon}^2+\frac{12 k J_{2\varepsilon}}{(1+\nu)^2}} 
-$$
+\end{equation}
 where $$
 I_{1\varepsilon} = \sum_{I=1}^3\varepsilon_I
 $$
@@ -1138,6 +1148,20 @@ The expression for maximum element size, $h_{max}=w_f/\varepsilon_0$, remains
 the same as for cohesive law with exponential softening, but in terms
 of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$.
 \item
+{\bf Cohesive crack with bilinear softening} is implemented in an
+approximate fashion and gives for different mesh sizes the same
+total dissipation but different shapes of the softening diagram.
+Instead of properly transforming the crack opening into inelastic strain,
+the current implementation deals with a stress-strain diagram adjusted
+such that the areas marked in the right part of Fig.~\ref{idm_softening}
+are equal to the fracture energies $G_f$ and $G_{ft}$ divided by the
+element size. The third parameter defining the law is the strain
+$\eps_k$ at which the softening diagram changes slope. Since this
+strain is considered as fixed, the corresponding stress $\sigma_k$
+depends on the element size and for small elements gets close to the
+tensile strength (the diagram then gets close to linear softening
+with fracture energy  $G_{ft}$). 
+\item
 {\bf Linear softening stress-strain law} works directly with strain
 and does not make any adjustment for the element size. The specified
 parameters $\varepsilon_0$ and $\varepsilon_f$, denoted by keywords {\it e0}
@@ -1175,7 +1199,30 @@ with tensile strength
 $$
 f_t = E\varepsilon_0\left({\rm e}M_d\right)^{-1/M_d}
 $$
+\item
+{\bf Extended smooth stress-strain law} is a special formulation used
+by Grassl and Jir\'{a}sek (2010). The damage law has a rather complicated form:
+\begin{equation} \label{eq:damageEvol}
+\omega = \left \{ \begin{array}{ll} 
+1-\exp\left(-\displaystyle\frac{1}{m}\left(\dfrac{\eps}{\varepsilon_{\rm p}}\right)^m\right) & \mbox{if $\eps \leq \varepsilon_1$}\\[2mm]
+1- \dfrac{\varepsilon_3}{\eps} \exp \left(- \dfrac{\eps- \varepsilon_1}{\varepsilon_{\rm f} \left[1+ \left(\frac{\eps-\varepsilon_1}{\varepsilon_2}\right)^n\right]}\right) & \mbox{if $\eps > \varepsilon_1$} \end{array} \right.
+\end{equation}
+The primary model parameters are the uniaxial tensile strength $f_{\rm t}$,
+the strain at peak stress (under uniaxial tension) $\varepsilon_{\rm p}$, and additional parameters
+$\varepsilon_1$, $\varepsilon_2$ and $n$, which control the post-peak part of the stress-strain law. In the input record, they are denoted by keywords
+{\tt ft, ep, e1, e2, nd}.
+Other parameters that appear in (\ref{eq:damageEvol}) can be derived from the condition of zero
+slope of the stress-strain curve at $\kappa=\varepsilon_{\rm p}$ and from the conditions of stress and
+stiffness continuity at $\kappa=\varepsilon_1$:
+\begin{eqnarray}\label{eqparams1}
+m&=&\frac{1}{\ln(E\varepsilon_{\rm p}/f_{\rm t})}\\
+\label{eqparams2}
+\varepsilon_{\rm f}&=&\frac{\varepsilon_1}{\left(\varepsilon_1/\varepsilon_{\rm p}\right)^m -1}\\
+\varepsilon_3&=&\varepsilon_1\exp\left(-\frac{1}{m}\left(\frac{\varepsilon_1}{\varepsilon_p}\right)^m\right)
+\label{eqparams3}
+\end{eqnarray}
 \end{itemize} 
+
 Note that parameter {\it damlaw} determines which type of damage law
 should be used, but the adjustment for element size is done only if
 parameter {\it wf} is specified for {\it damlaw}=0 or {\it damlaw}=1. 
@@ -1200,7 +1247,9 @@ three modes of a softening law with corresponding variables.
  \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.eps}}
 \fi
 %end{latexonly}
-  \caption{Implemented stress-strain diagrams for isotropic damage material. Fracturing strain $\varepsilon_f$ and crack opening at zero stress $w_f$ are interrelated through effective thickness $h$ of the crack band.}
+  \caption{Implemented stress-strain diagrams for isotropic damage material. Fracturing strain $\varepsilon_f$ and crack opening at zero stress $w_f$ are interrelated through effective thickness $h$ of the crack band. Note that the
+figure is somewhat misleading because the grey area is not $G_f$ but $G_f/h$ 
+and also because for exponential softening the approach based on an exponential cohesive law is not exactly equivalent to the approach based on an exponential softening branch of the stress-strain diagram; see the detailed discussion of the damage laws.}
   \label{idm_softening}
 \end{figure}
 
@@ -1230,6 +1279,11 @@ Record Format & \descitem{idm1}
 [\elemparam{At}{rn}] 
 [\elemparam{Bt}{rn}] 
 [\elemparam{md}{rn}] 
+[\elemparam{ft}{rn}] 
+[\elemparam{ep}{rn}] 
+[\elemparam{e1}{rn}] 
+[\elemparam{e2}{rn}] 
+[\elemparam{nd}{rn}] 
 [\elemparam{maxOmega}{rn}]\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
@@ -1239,10 +1293,11 @@ Parameters &- \param{} material number\\
 &- \param{equivstraintype} allows to choose from different definitions
 of equivalent strain:
 \begin{itemize}\setlength{\itemsep}{-3pt}
-\item[0 -] Mazars (default)
-\item[1 -] Rankine 
-\item[2 -] scaled energy norm 
-\item[3 -] modified Mises
+\item[0 -] default = Mazars, eq.~(\ref{mazars})
+\item[1 -] smooth Rankine, eq.~ (\ref{rankinesmooth})
+\item[2 -] scaled energy norm,  eq.~(\ref{energynorm})
+\item[3 -] modified Mises, eq.~(\ref{modifiedmises})
+\item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
 &- \param{damlaw} allows to choose from different damage laws:
@@ -1254,6 +1309,7 @@ of equivalent strain:
 \item[4 -] Mazars damage law with parameters At and Bt
 \item[5 -] smooth stress-strain curve with parameters e0 and md
 \item[6 -] disable damage (dummy linear elastic material)
+\item[7 -] extended smooth damage law \ref{eq:damageEvol} with parameters ft, ep, e1, e2, nd
 \end{itemize}\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
@@ -1263,7 +1319,12 @@ of equivalent strain:
 &- \param{gft} total fracture energy (for damage law 2)\\
 &- \param{At} parameter of Mazars damage law, used only by law 4\\
 &- \param{Bt} parameter of Mazars damage law, used only by law 4\\
-&- \param{md} exponent, used only by damage law 5, default value 1\\
+&- \param{md} exponent used only by damage law 5, default value 1\\
+&- \param{ft} tensile strength, used only by damage law 7\\
+&- \param{ep} strain at peak stress, used only by damage law 7\\
+&- \param{e1} parameter used only by damage law 7\\
+&- \param{e2} parameter used only by damage law 7\\
+&- \param{nd} exponent used only by damage law 7\\
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
