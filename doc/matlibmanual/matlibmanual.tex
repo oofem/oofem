@@ -2250,8 +2250,6 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 %\end{center}
 \end{table}
 
-
-
 \subsubsection{B3 and MPS models for concrete creep with aging}
 
 Model B3 is an aging viscoelastic model for concrete creep and shrinkage, developed by Prof. Ba\v{z}ant and coworkers. In OOFEM it is implemented in three different ways. 
@@ -2283,7 +2281,7 @@ The non-aging spring stiffness represents the asymptotic modulus of the material
 The solidifying Kelvin chain is composed of $M$ Kelvin units with fixed retardation times $\tau_{\mu}$, $\mu = 1, 2, \dots, M$, which form a geometric progression with quotient 10. The lowest retardation time $\tau_1$ is equal to $0.3\; begoftimeofinterest$, the highest retardation time $\tau_M$ is bigger than $0.5\; endoftimeofinterest$. The chain also contains a spring with stiffness $E_0^\infty$
 (a special case of Kelvin unit with zero retardation time).
 Moduli $E_{\mu}^\infty$ of individual Kelvin units are determined such that the chain
-provides a good approximation of the non-aging micro-compliance function of the solidifying constituent, $\Phi(t-t') = q_3 \ln \left( 1 + \left( \left(t-t' \right)/\lambda_0 \right)^n \right)$, where $\lambda_0 = 1$ day and $n = 0.1$. 
+provides a good approximation of the non-aging micro-compliance function of the solidifying constituent, $\Phi(t-t') = q_2 \ln \left( 1 + \left( \left(t-t' \right)/\lambda_0 \right)^n \right)$, where $\lambda_0 = 1$ day and $n = 0.1$. 
 The technique based on the continuous retardation spectrum
 leads to the following formulae:
 \begin{eqnarray}
@@ -2295,7 +2293,7 @@ Viscosities $\eta_{\mu}^\infty$ of individual Kelvin units are obtained from sim
 %%%% 	SOLIDIFICATION %%%%
 The actual viscosities $\eta_{\mu}$ and stiffnesses $E_{\mu}$ of the solidifying chain change in time according to $\eta_{\mu}(t) = v(t) \eta_{\mu}^\infty$ and $E_{\mu}(t) = v(t) E_{\mu}^\infty$, where 
 \begin{equation}
-v(t)= \frac{1}{1 + \frac{q_2}{q_3} \left( \frac{\lambda_0}{ t} \right)^m}
+v(t)= \frac{1}{\frac{q_3}{q_2} + \left( \frac{\lambda_0}{ t} \right)^m}
 \end{equation}
 is the volume growth function, and exponent $m = 0.5$. In the case of variable temperature or humidity, the actual age of concrete 
 $t$ is replaced by the equivalent time $t_e$, which is obtained by integrating
@@ -2364,9 +2362,11 @@ and strength using empirical formulae, it is necessary to use the
 specified units (e.g.\ compressive strength always in MPa, irrespectively
 of the units used in the simulation for stress). 
 For ``B3mat'' and ``B3solidmat'' it is strictly 
-required to use the specified units (stress always in MPa, time in days etc.). 
+required to use the specified units in the material input record (stress always in MPa, time in days etc.). 
 The ``MPS'' model is almost unit-independent, except for 
 $\bar{f}_c$ in MPa and $c$ in kg/m$^3$, which are used in empirical formulae.
+
+%%%%%%%% B3 MAT %%%%%%%%%
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2374,25 +2374,76 @@ $\bar{f}_c$ in MPa and $c$ in kg/m$^3$, which are used in empirical formulae.
 \hline
 Description & B3 material model  for concrete aging\\
 \hline
-Record Format & \descitem{B3mat}  \elemparam{n}{rn}
-\elemparam{relMatAge}{rn} \elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn}
+Record Format & \descitem{B3mat}  \elemparam{d}{rn} \elemparam{n}{rn}
+\elemparam{talpha}{rn} 
+%for rheo chain material
+\optelemparam{begoftimeofinterest}{rn} \optelemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn}
+%
+\optelemparam{mode}{in} 
+% mode = 0
+\elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn}
 \elemparam{a/c}{rn} \elemparam{t0}{rn}
-\elemparam{alpha1}{rn} \elemparam{alpha2}{rn} \elemparam{ks}{rn}
-\elemparam{hum}{rn} \elemparam{vs}{rn} \elemparam{noshrinkage}{in}\\
+% mode = 1
+\elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn}
+\elemparam{q4}{rn}
+%
+\elemparam{shmode}{in}
+% shmode 1
+\elemparam{ks}{rn} \elemparam{vs}{rn} \elemparam{hum}{rn}
+%% mode 0
+\optelemparam{alpha1}{rn} \optelemparam{alpha2}{rn} 
+%% mode 1
+\elemparam{kt}{rn} \elemparam{EpsSinf}{rn} \elemparam{q5}{rn}
+% shmode 2
+\elemparam{es0}{rn} \elemparam{r}{rn} \elemparam{rprime}{rn}
+\elemparam{at}{rn}  
+\elemparam{w\_h}{rn} \elemparam{ncoeff}{rn} \elemparam{a}{rn}
+\\
 Parameters &- \param{num} material model number\\
+%
+&- \param{d} material density\\
 &- \param{n} Poisson ratio\\
-&- \param{relmatage} relative material age \\
-&- \param{fc} 28-day mean cylinder compression strength in MPa\\
-&- \param{cc} cement content of concrete  in kg/m$^{3}$ \\
-&- \param{w/c} ratio (by weight) of water to cementitious material  \\
+&- \param{talpha} coefficient of thermal expansion\\
+&- \param{begoftimeofinterest} optional parameter; lower boundary of
+time interval with good approximation of the compliance function
+[day]; default 0.1 day\\
+&- \param{endoftimeofinterest} optional parameter; upper boundary of
+time interval with good approximation of the compliance function
+[day]\\
+&- \param{timefactor} scaling factor transforming the simulation time units into days\\
+&- \param{relMatAge} relative material age [day]\\
+%
+&- \param{mode} if $mode = 0$ (default value) creep and shrinkage parameters are
+predicted from composition; for $mode = 1$ parameters must be user-specified.\\
+&- \param{fc} 28-day mean cylinder compression strength [MPa]\\
+&- \param{cc} cement content of concrete [kg/m$^{3}$]\\
+&- \param{w/c} ratio (by weight) of water to cementitious material\\
 &- \param{a/c} ratio (by weight) of aggregate to cement \\
 &- \param{t0} age when drying begins [day]\\
-&- \param{alpha1} shrinkage parameter -- influence of cement type\\
-&- \param{alpha2} shrinkage parameter -- influence of curing type\\
-&- \param{ks} cross-section shape factor \\
-&- \param{hum} relative humidity of the environment\\
+&- \param{q1-q4} parameters of B3 model for basic creep [1/TPa]\\
+%
+&- \param{shmode} shrinkage mode;
+$0=$ no shrinkage;
+$1=$ average shrinkage (the following parameters must be specified:
+\param{ks}, \param{vs}, \param{hum} and additionally  \param{alpha1} \param{alpha2} for $mode = 0$
+and \param{kt} \param{EpsSinf} \param{q5} \param{t0} for $mode = 1$;  
+$2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime},
+\param{at}, \param{w\_h}, \param{ncoeff}, \param{a})\\
+%
+&- \param{ks} cross-section shape factor [-]\\
 &- \param{vs} volume to surface ratio [m]\\
-&- \param{noshrinkage} shrinkage flag (0 = shrinkage included, 1 = shrinkage ignored)\\
+&- \param{hum} relative humidity of the environment [-]\\
+&- \param{alpha1} shrinkage parameter -- influence of cement type [-]\\
+&- \param{alpha2} shrinkage parameter -- influence of curing type [-]\\
+&- \param{kt} shrinkage parameter [day/m$^2$]\\
+&- \param{EpsSinf} shrinkage parameter [10$^{-6}$]\\
+&- \param{q5} drying creep parameter [1/TPa]\\
+%
+&- \param{es0} final shrinkage at material point\\
+&- \param{r}, \param{rprime} coefficients\\
+&- \param{at} oefficient relating stress-induced thermal strain and shrinkage\\
+&- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
+%
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer,2dBeamLayer, 3dShellLayer\\
 \hline
@@ -2412,7 +2463,7 @@ Subsequently, the slab is exposed to an environment with
 relative humidity of 70\%. The following input record can be used for the first
 version of the model (B3mat):
 
-{\tt B3mat 1 n 0.2 relMatAge 28. fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7. alpha1 1. alpha2 1.2 ks 1. hum 0.7 vs 0.1 noshrinkage 0}
+{\tt B3mat 1 n 0.2 d 0. talpha 1.2e-5 relMatAge 28. fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7. timefactor 1. alpha1 1. alpha2 1.2 ks 1. hum 0.7 vs 0.1 shmode 1}
 
 Parameter $\alpha_1=1$ corresponds to type-I cement, parameter $\alpha_2=1.2$
 to curing in air, parameter $k_s=1$ to an infinite slab. 
@@ -2427,6 +2478,13 @@ If material B3mat is used, the finite element analysis
 must use days as the units of time (not only for relMatAge,
 but in general, e.g.\ for the time increments).
 
+If only the basic creep (without shrinkage) should be computed, then
+the material input record reduces to following:
+{\tt B3mat 1 n 0.2 d 0. talpha 1.2e-5 relMatAge 28. fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7. timefactor 1. shmode 0}
+
+
+
+%%%%%%%% B3 SOLID MAT %%%%%%%%%
 
 \begin{table}[!htb]
 \begin{tabular}{|l|p{9cm}|}
@@ -2437,11 +2495,11 @@ Record Format & \descitem{B3solidmat}
 \elemparam{d}{rn} \elemparam{n}{rn} \elemparam{talpha}{rn}
 %
 \elemparam{mode}{in} 
-\elemparam{EmoduliMode}{in} 
+\optelemparam{EmoduliMode}{in} 
 \elemparam{Microprestress}{in}
 \elemparam{shm}{in} 
 %for rheo chain material
-\elemparam{begoftimeofinterest}{rn} \elemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn}
+\optelemparam{begoftimeofinterest}{rn} \optelemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn}
 \elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn} \elemparam{a/c}{rn} \elemparam{t0}{rn} % mode = 0 
 \elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn} \elemparam{q4}{rn} % mode = 1
 %
@@ -2451,7 +2509,7 @@ Record Format & \descitem{B3solidmat}
 %shm = 1 B3_AverageShrinkage
 \elemparam{ks}{rn} 
 %for shm = 1 and mode = 0			
-\elemparam{alpha1}{rn} \elemparam{alpha2}{rn} \elemparam{hum}{rn} \elemparam{vs}{rn}
+\optelemparam{alpha1}{rn} \optelemparam{alpha2}{rn} \elemparam{hum}{rn} \elemparam{vs}{rn}
 %for shm = 1 and mode = 1
 \elemparam{q5}{rn} \elemparam{kt}{rn} \elemparam{EpsSinf}{rn}
 % = 2 B3_PointShrinkage
@@ -2472,13 +2530,21 @@ Parameters
 &- \param{EmoduliMode} optional parameter; analysis of retardation spectrum ($=0$, default value) or least-squares method ($=1$) is used for evaluation of Kelvin units moduli\\
 &- \param{Microprestress} $0=$ basic creep; $1=$ drying creep (must be run as a staggered problem with preceding analysis of humidity diffusion. Parameter \param{shm} must be equal to 3. The following parameters must be specified: \param{c0}, \param{c1}, \param{tS0}, \param{w\_h}, \param{ncoeff}, \param{a})\\
 
-&- \param{shm} shrinkage mode;
+&- \param{shmode} shrinkage mode;
 $0=$ no shrinkage;
-$1=$ average shrinkage (the following parameters must be specified: \param{ks}, \param{alpha1}, \param{alpha2}, \param{hum} and \param{vs} for $mode = 0$ and \param{ks}, \param{q5}, \param{kt} and \param{EpsSinf} for $mode=1$);
-$2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime}, \param{at});
+$1=$ average shrinkage (the following parameters must be specified:
+\param{ks}, \param{vs}, \param{hum} and additionally  \param{alpha1} \param{alpha2} for $mode = 0$
+and \param{kt} \param{EpsSinf} \param{q5} for $mode = 1$;
+$2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime},
+\param{at}), \param{w\_h} \param{ncoeff} \param{a};
 $3=$ point shrinkage based on MPS theory (needed: parameter \param{kSh} or value of \param{kSh} can be approximately determined if following parameters are given: \param{inithum}, \param{finalhum}, \param{alpha1} and \param{alpha2})\\
 
-&- \param{begoftimeofinterest}, \param{endoftimeofinterest} optional parameters; lower and upper boundary of time interval with good approximation of the compliance function [day]\\
+&- \param{begoftimeofinterest} optional parameter; lower boundary of time interval with good approximation of the compliance function
+[day]; default 0.1 day\\
+&- \param{endoftimeofinterest} optional parameter; upper boundary of
+time interval with good approximation of the compliance function
+[day]\\
+
 &- \param{timefactor} scaling factor transforming the simulation time units into days\\
 &- \param{relMatAge} relative material age [day]\\
 \hline
@@ -2493,26 +2559,29 @@ $3=$ point shrinkage based on MPS theory (needed: parameter \param{kSh} or value
 &- \param{w/c} water to cement ratio (by weight)\\
 &- \param{a/c} aggregate to cement ratio (by weight)\\
 &- \param{t0} age of concrete when drying begins [day]\\
-&- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters of B3 model for basic creep\\
+&- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters
+(compliances) of B3 model for basic creep [1/TPa]\\
 
 &- \param{c0} MPS theory parameter [MPa$^{-1}$ day$^{-1}$] \\
 &- \param{c1} MPS theory parameter [MPa]\\
-&- \param{tS0} MPS theory parameter - time when drying begins \\
+&- \param{tS0} MPS theory parameter - time when drying begins [day]\\
 &- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
 
-&- \param{ks} cross section shape factor \\
+&- \param{ks} cross section shape factor [-]\\
 &- \param{alpha1} optional shrinkage parameter - influence of cement type (optional parameter, default value is 1.0)\\
 &- \param{alpha2} optional shrinkage parameter - influence of curing type (optional parameter, default value is 1.0)\\
 &- \param{hum} relative humidity of the environment [-]\\
 &- \param{vs} volume to surface ratio [m]\\
-&- \param{q5}, \param{kt}, \param{EpsSinf} parameters of B3 model for drying creep\\
+&- \param{q5} drying creep parameter [1/TPa]\\
+&- \param{kt} shrinkage parameter [day/m$^2$]\\
+&- \param{EpsSinf} shrinkage parameter [10$^{-6}$]\\
 
 &- \param{es0} final shrinkage at material point\\
 &- \param{at} coefficient relating stress-induced thermal strain and shrinkage\\
 &- \param{rprime}, \param{r} coefficients\\
 
-&- \param{kSh} influences magnitude of shrinkage in MPS theory\\
-&- \param{inithum}, \param{finalhum} if provided, approximate value of \param{kSh} can be computed\\
+&- \param{kSh} influences magnitude of shrinkage in MPS theory [-]\\
+&- \param{inithum} [-], \param{finalhum} [-] if provided, approximate value of \param{kSh} can be computed\\
 
 
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
@@ -2531,7 +2600,7 @@ the input record with the material description can start by\\
 {\tt B3solidmat 1 d 2420. n 0.2 talpha 12.e-6 begtimeofinterest 1.e-2\\
 endtimeofinterest 3.e4 timefactor 86400. relMatAge 28.}
 
-Parameters {\tt begtimeofinterest 1.e-2} and {\tt endtimeofinterest 3.e4}
+Parameters {\tt begoftimeofinterest 1.e-2} and {\tt endoftimeofinterest 3.e4}
 mean that
 the computed response (e.g., deflection)
 should be accurate in the range from 0.01 day to 30,000 days after load
@@ -2542,7 +2611,7 @@ is 1 second (because 1 day = 86,400 seconds).
 Note that the values of begtimeofinterest, endtimeofinterest
 and relMatAge are always specified in days, independently of the actual
 time units in the analysis. 
-Parameter \param{EmoduliMode} is not specified, which means that the
+Parameter {\tt EmoduliMode} is not specified, which means that the
 moduli of the Kelvin chain will be determined using the default method,
 based on the continuous retardation spectrum. 
 
@@ -2552,28 +2621,35 @@ depend on the specific type of analysis:
 \item
 Computing basic creep only, shrinkage not considered,
 parameters $q_i$ estimated from composition.\\
-{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 0 shm 0} 
+{\tt mode 0 fc 45.4 cc 450.  w/c 0.3778 a/c 4.\\ t0 7. microprestress 0 shmode 0} 
 \item 
 Computing  basic creep only, shrinkage not considered,
 parameters $q_i$ specified by the user.\\
-{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.692e-6\\ microprestress 0 shm 0} 
+{\tt mode 1 q1 18.81 q2 126.9 q3 0.7494 q4 7.692\\ microprestress 0 shmode 0} 
 \item 
 Computing  basic creep only, shrinkage handled using the sectional approach,
 parameters estimated from composition.\\
-{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 0 shm 1 ks 1. alpha1 1. alpha2 1.2 hum 0.7 vs 0.1}
+{\tt mode 0 fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7.\\ microprestress 0 shmode 1 ks 1. alpha1 1. alpha2 1.2 hum 0.7 vs 0.1}
 \item 
 Computing  basic creep only, shrinkage handled using the sectional approach,
 parameters specified by the user.\\
-{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.692e-6\\ microprestress 0 shm 1 ks 1. q5 327.e-6 kt 0.02803 EpsSinf 702.4e-6}
+{\tt mode 1 q1 18.81 q2 126.9 q3 0.7494 q4 7.692\\
+ microprestress 0 shmode 1 ks 1. q5 326.7 kt  28025 EpsSinf 702.4 t0 7. hum 0.7 vs 0.1}
 \item 
 Computing  basic creep only, shrinkage handled using the point approach (B3),
 parameters specified by the user.\\
-{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.692e-6\\ microprestress 0 shm 2 es0 ... r ... rprime ... at ...}
+{\tt mode 1 q1 18.81 q2 126.9 q3 0.7494 q4 7.692\\ 
+microprestress 0 shmode 2 es0 ... r ... rprime ... at ...}
 \item
 Computing drying creep, shrinkage handled using the point approach (MPS),
 parameters $q_i$ estimated from composition.\\
-{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 1 c0 ... c1 ... tS0 ... w\_h ... ncoeff ... a ... shm 3 kSh ...}
+{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 1 \\
+shmode 3 c0 1. c1 0.2 tS0 7. w\_h 0.0476 ncoeff 0.182 a 4.867  kSh 1.27258e-003}
 \end{enumerate}
+
+
+%%%%%%%% MPS MAT %%%%%%%%%
+
 
 \begin{table}[!htb]
 \begin{tabular}{|l|p{9cm}|}
@@ -2654,6 +2730,72 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 \end{table}
 
+
+Finally consider the same conditions for ``MPS material''.
+In all the examples below,
+the input record with the material description can start by\\
+{\tt mps 1 d 2420. n 0.2 talpha 12.e-6 referencetemperature 296.}
+
+
+Additional parameters
+depend on the specific type of analysis:
+\begin{enumerate}
+\item
+Computing basic creep only, shrinkage not considered,
+parameters $q_i$ estimated from composition and simulation time in
+days and stiffnesses in MPa.\\
+{\tt mode 0 fc 45.4 cc 450. w/c 0.3778 a/c 4. stiffnessFactor 1.e6\\
+  timefactor 1. lambda0 1. begoftimeofinterest 1.e-2 \\
+endoftimeofinterest 3.e4  relMatAge 28.  CoupledAnalysisType 0.} 
+
+\item
+Computing basic creep only, shrinkage not considered,
+parameters $q_i$ specified by user, simulation time in seconds and stiffnesses in Pa.\\
+{\tt mode 1 q1 18.81e-12 q2 126.9e-12 q3 0.7494e-12 q4 7.6926e-12 \\
+ timefactor 1. lambda0 86400. begoftimeofinterest 864.\\
+ endoftimeofinterest 2.592e9 relMatAge 2419200. CoupledAnalysisType 0.} 
+
+\item
+Computing both basic and drying creep, 
+parameters $q_i$ specified by user, simulation time in seconds and stiffnesses in MPa.\\
+{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.6926e-6\\ 
+  timefactor 1. lambda0 86400. begoftimeofinterest 864.\\ 
+endoftimeofinterest 2.592e9  relMatAge 2419200. CoupledAnalysisType
+1. \\
+ksh 0.0004921875. t0 2419200. kappaT 0.005051 mus 4.0509259e-8 \\
+a 4.8670917 w\_h 0.04761543 ncoeff 0.18166781} 
+
+
+\end{enumerate}
+
+Final recommendations:
+
+\begin {itemize}
+\item to simulate basic creep without shrinkage it is possible to use
+  all three models
+\subitem B3mat with $shmode = 0$
+\subitem B3Solidmat with $shmode = 0$ and $microprestress = 0$
+\subitem MPS with $CoupledAnalysisType = 0$
+
+\item to simulate drying creep with shrinkage using ``sectional approach'', only the
+  first material model (B3mat) is suitable can be used (with $shmode = 1$)
+
+\item to simulate drying creep without shrinkage using ``sectional approach'', only the
+  first material model (B3mat) is suitable (with $shmode = 1$, $mode = 1$
+  and $EpsSinf = 0.0$)
+
+\item to simulate drying creep with shrinkage using ``point approach''
+  according to B3 model there are two options:
+\subitem B3mat (with $shmode = 2$)
+\subitem B3Solidmat (with $shmode = 2$)
+In order to suppress shrinkage set $es0 = 0.0$
+
+\item to simulate drying creep with shrinkage using ``point approach''
+  according to MPS model there are two options:
+\subitem B3Solidmat (with $shmode = 3$)
+\subitem MPS with $CoupledAnalysisType = 1$
+In order to suppress shrinkage set $kSh = 0.0$
+\end{itemize}
 
 
 \clearpage

@@ -135,9 +135,11 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
             _error("either kSh or initHum and finalHum must be given in input record");
         }
 
-        if ( ( ( initHum < 0.2 ) || ( initHum > 0.98 ) || ( finalHum < 0.2 ) || ( finalHum > 0.98 ) ) && ( this->kSh == -1 ) ) {
-            _error("initital humidity or final humidity out of range (0.2 - 0.98)");
-        }
+        /*
+         * if ( ( ( initHum < 0.2 ) || ( initHum > 0.98 ) || ( finalHum < 0.2 ) || ( finalHum > 0.98 ) ) && ( this->kSh == -1 ) ) {
+         *  _error("initital humidity or final humidity out of range (0.2 - 0.98)");
+         * }
+         */
 
         if ( this->kSh == -1 ) {
             IR_GIVE_OPTIONAL_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1");       // influence of cement type
@@ -159,8 +161,9 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
             IR_GIVE_OPTIONAL_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1");             // influence of cement type
             IR_GIVE_OPTIONAL_FIELD(ir, alpha2, IFT_B3Material_alpha2, "alpha2");             // influence of curing type
         } else {         // read model parameters
+            IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins [days]
             IR_GIVE_FIELD(ir, kt, IFT_B3Material_kt, "kt");
-            IR_GIVE_FIELD(ir, EpsSinf, IFT_B3Material_EpsSinf, "EpsSinf");
+            IR_GIVE_FIELD(ir, EpsSinf, IFT_B3Material_EpsSinf, "epssinf");
             IR_GIVE_FIELD(ir, q5, IFT_B3Material_q5, "q5");
         }
     }
@@ -288,7 +291,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
         sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
         // the first aging elastic spring must be added
         sum += 1 / EspringVal;
-    } else   { //least-squares method used
+    } else {   //least-squares method used
         sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
     }
 
@@ -325,8 +328,8 @@ B3SolidMaterial :: computeCharTimes()
 
     j = 1;
     //while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
-    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow(10.0, (double) (j-1)) ) {
-      j++;
+    while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow( 10.0, ( double )(j - 1) ) ) {
+        j++;
     }
 
 
@@ -371,7 +374,7 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
         }
 
         answer.at(nUnits) /= 1.2;   //last unit moduli reduction
-    } else   { // moduli computed using the least-squares method
+    } else {   // moduli computed using the least-squares method
         int i, j, r, rSize;
         double taui, tauj, sum, tti, ttj, sumRhs;
         FloatArray rhs(this->nUnits);
@@ -846,9 +849,11 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
     // relative humidity
     phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
-    if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
-    }
+    /*
+     * if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
+     *  _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
+     * }
+     */
 
     return phi;
 }
