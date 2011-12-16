@@ -885,10 +885,10 @@ these nodes depending on their relative displacement. This element can
 be applied in 1D, 2D, and 3D settings (default).
 
 \elemkeyword{Interface1d}\\
-\descitem{Parameters} \elemparam{refnode}{in}\\
-The \param{refnode} determines the reference node, which is used to
+\descitem{Parameters} \optelemparam{refnode}{in} \optelemparam{normal}{ra}\\
+The optional parameter \param{refnode} determines the reference node, which is used to
 specify a reference direction (the direction vector is obtained by
-subtracting coordinates of first node from reference node).
+subtracting the coordinates of the first node from the reference node). The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.
 The magnitude of slip is then obtained as relative displacement vector
 of two element nodes projected to reference direction. As a
 consequence, this will lead to linearized geometrical equations, where

@@ -175,20 +175,20 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         case 6:
             this->softType = ST_Disable_Damage;
             break;
-	case 7:
-	  this->softType = ST_SmoothExtended;
-	  double E, ep, ft; // auxiliary input variables
-	  IR_GIVE_FIELD (ir, E,  IFT_IsotropicLinearElasticMaterial_e, "e"); 
-	  IR_GIVE_FIELD (ir, ep, IFT_IsotropicDamageMaterial1_ep, "ep"); 
-	  IR_GIVE_FIELD (ir, ft, IFT_IsotropicDamageMaterial1_ft, "ft"); 
-	  this->md = 1./log(E*ep/ft);
-	  this->e0 = ep*pow(md,1./md);
-	  IR_GIVE_FIELD (ir, e1, IFT_IsotropicDamageMaterial1_e1, "e1"); 
-	  this->s1 = e1*exp(-pow(e1/e0,md));	
-	  this->ef = -e1/(1.-md*pow(e1/e0,md));
-	  IR_GIVE_FIELD (ir, e2, IFT_IsotropicDamageMaterial1_e2, "e2"); 
-	  IR_GIVE_FIELD (ir, nd, IFT_IsotropicDamageMaterial1_nd, "nd"); 
-	  break;
+        case 7:
+            this->softType = ST_SmoothExtended;
+            double E, ep, ft; // auxiliary input variables
+            IR_GIVE_FIELD(ir, E,  IFT_IsotropicLinearElasticMaterial_e, "e");
+            IR_GIVE_FIELD(ir, ep, IFT_IsotropicDamageMaterial1_ep, "ep");
+            IR_GIVE_FIELD(ir, ft, IFT_IsotropicDamageMaterial1_ft, "ft");
+            this->md = 1. / log(E * ep / ft);
+            this->e0 = ep * pow(md, 1. / md);
+            IR_GIVE_FIELD(ir, e1, IFT_IsotropicDamageMaterial1_e1, "e1");
+            this->s1 = e1 * exp( -pow(e1 / e0, md) );
+            this->ef = -e1 / ( 1. - md * pow(e1 / e0, md) );
+            IR_GIVE_FIELD(ir, e2, IFT_IsotropicDamageMaterial1_e2, "e2");
+            IR_GIVE_FIELD(ir, nd, IFT_IsotropicDamageMaterial1_nd, "nd");
+            break;
         default:
             OOFEM_ERROR2("Softening type number %d is unknown", damageLaw);
         }
@@ -263,29 +263,29 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
         for ( i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
-	      if ( this->equivStrainType == EST_Rankine_Smooth ) {
-                sum += principalStress.at(i) * principalStress.at(i);
-	      }
-	      else if ( sum < principalStress.at(i) ) {
-		sum = principalStress.at(i);
-	      }
+                if ( this->equivStrainType == EST_Rankine_Smooth ) {
+                    sum += principalStress.at(i) * principalStress.at(i);
+                } else if ( sum < principalStress.at(i) )   {
+                    sum = principalStress.at(i);
+                }
             }
         }
-	if ( this->equivStrainType == EST_Rankine_Smooth ) {
-	  sum = sqrt(sum);
-	}
-	kappa = sum / lmat->give('E', gp);
 
-    } else if ( ( this->equivStrainType == EST_ElasticEnergy ) ){
-	// equivalent strain expression based on elastic energy
+        if ( this->equivStrainType == EST_Rankine_Smooth ) {
+            sum = sqrt(sum);
+        }
+
+        kappa = sum / lmat->give('E', gp);
+    } else if ( ( this->equivStrainType == EST_ElasticEnergy ) ) {
+        // equivalent strain expression based on elastic energy
         FloatMatrix de;
         FloatArray stress;
         double sum;
 
         lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
-	// standard elastic energy
-	stress.beProductOf(de, strain);
-	sum = dotProduct( strain, stress, strain.giveSize() );
+        // standard elastic energy
+        stress.beProductOf(de, strain);
+        sum = dotProduct( strain, stress, strain.giveSize() );
 
         kappa = sqrt( sum / lmat->give('E', gp) );
     } else if ( this->equivStrainType == EST_Mises ) {
@@ -325,7 +325,7 @@ IsotropicDamageMaterial1 :: computeStrainInvariants(const FloatArray &strainVect
 void
 IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    if ( this->softType == ST_Disable_Damage ){//dummy material with no damage
+    if ( this->softType == ST_Disable_Damage ) { //dummy material with no damage
         omega = 0.;
     } else if ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->give(gf_ID, gp) != 0. ) { // adjustment of softening law according to the element size, given crack opening or fracture energy
         computeDamageParamForCohesiveCrack(omega, kappa, gp);
@@ -464,11 +464,11 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 
     case ST_SmoothExtended:
         // a special damage law used in Grassl and Jirasek (2010)
-      if (kappa <= e1) {
-	  return 1.0 - exp(-pow(kappa/e0,md));
-      } else {
-	  return 1.0 - s1*exp(-(kappa-e1)/(ef*(1.+pow((kappa-e1)/e2,nd))))/kappa;
-      }
+        if ( kappa <= e1 ) {
+            return 1.0 - exp( -pow(kappa / e0, md) );
+        } else {
+            return 1.0 - s1 *exp( -( kappa - e1 ) / ( ef * ( 1. + pow( ( kappa - e1 ) / e2, nd ) ) ) ) / kappa;
+        }
 
     default:
         printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
@@ -501,10 +501,10 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     double wf = this->give(wf_ID, gp);
 
 
-    if (softType == ST_Disable_Damage){
+    if ( softType == ST_Disable_Damage ) {
         return;
     }
-    
+
     if ( gf != 0. ) { //cohesive crack model
         if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening
             wf = gf / E / e0; // wf is the crack opening

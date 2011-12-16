@@ -527,7 +527,7 @@ with homogeneous Neumann boundary condition
 \end{equation} In (\ref{implicitGradient}), $l$ is the length scale parameter and $\nabla$ is the Laplace operator. 
 
 \paragraph{}
-The model description and parameters are summarized in Tables~\ref{misesMatNl_table} and~\ref{misesMatGrad_table}. Note that the internal length parameter {\tt r} has the meaning of the
+The model description and parameters are summarized in Tables~\ref{misesMatNl_table} and~\ref{misesMatGrad_table}. Note that the internal length parameter \param{r} has the meaning of the
 radius of interaction $R$ for the integral version (and thus has the dimension
 of length) but for the gradient version it has the meaning of the coefficient $l^2$
 multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimension of length squared.
@@ -606,13 +606,13 @@ the area under the diagram has the prescribed value).
 \paragraph{}
 The model description and parameters are summarized in Tables~\ref{rankineMat_table}--\ref{rankineMatGrad_table}. Note that the default value of parameter $m$ is equal to 1 for the
 integral model but for the gradient model it is equal to 2. 
-Also note that the internal length parameter {\tt r} has the meaning of the
+Also note that the internal length parameter \param{r} has the meaning of the
 radius of interaction $R$ for the integral version (and thus has the dimension
 of length) but for the gradient version it has the meaning of the coefficient $l^2$
 multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimension of length squared.
 
 For the gradient model
-it is possible to specify parameter {\tt negligible\_damage}, which sets the minimum
+it is possible to specify parameter \param{negligible\_damage}, which sets the minimum
 value of damage that is considered as nonzero. 
 The approximate solution of Helmholtz equation (\ref{implicitGradient}) can lead
     to very small but nonzero nonlocal kappa at some points that
@@ -621,7 +621,7 @@ The approximate solution of Helmholtz equation (\ref{implicitGradient}) can lead
     interpreted as "loading", the tangent terms are activated,
     but damage will not actually grow at such points and the
     convergence rate is slowed down. It is better to consider
-    such points as elastic. By default, {\tt negligible\_damage} is set to 0,
+    such points as elastic. By default, \param{negligible\_damage} is set to 0,
 but it is recommended to set it e.g.\ to 1.e-6.
 
 
@@ -1437,7 +1437,7 @@ by Grassl and Jir\'{a}sek (2010). The damage law has a rather complicated form:
 The primary model parameters are the uniaxial tensile strength $f_{\rm t}$,
 the strain at peak stress (under uniaxial tension) $\varepsilon_{\rm p}$, and additional parameters
 $\varepsilon_1$, $\varepsilon_2$ and $n$, which control the post-peak part of the stress-strain law. In the input record, they are denoted by keywords
-{\tt ft, ep, e1, e2, nd}.
+\param{ft, ep, e1, e2, nd}.
 Other parameters that appear in (\ref{eq:damageEvol}) can be derived from the condition of zero
 slope of the stress-strain curve at $\kappa=\varepsilon_{\rm p}$ and from the conditions of stress and
 stiffness continuity at $\kappa=\varepsilon_1$:
@@ -2542,7 +2542,7 @@ is 1 second (because 1 day = 86,400 seconds).
 Note that the values of begtimeofinterest, endtimeofinterest
 and relMatAge are always specified in days, independently of the actual
 time units in the analysis. 
-Parameter {\tt EmoduliMode} is not specified, which means that the
+Parameter \param{EmoduliMode} is not specified, which means that the
 moduli of the Kelvin chain will be determined using the default method,
 based on the continuous retardation spectrum. 
 
@@ -3299,6 +3299,48 @@ Supported modes& 3dMat\\
 \end{tabular}
 \caption{Nonlocal formulation of anisotropic elastoplastic model with isotropic damage -- summary.}
 \label{trabboneNl_table}
+%\end{center}
+\end{table}
+
+\subsection{Simple interface material}
+
+The model provides a simple interface contact law, which can be used to describe  an interface between two materials (e.g.\ between steel reinforcement and concrete),
+or the interaction of two bodies in contact. The law is formulated in terms of the traction vector and the displacement jump vector. In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
+By setting \param{kn} to a high value, the penetration (overlap) can be reduced,
+in the spirit of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
+of the gap can be allowed. 
+The shear response is elastoplastic, with the yield limit dependent on the normal traction.
+The magnitude of the shear traction $\vsig_T$ must not exceed the yield limit computed 
+according to a Coulomb-like friction law as the product of the (negative part of)
+ normal traction $\sigma_N$ and a dimensionless coefficient of friction $fc$:
+\begin{equation}
+	||\vsig_T|| \leq \left\langle-\sigma_N\cdot fc\right\rangle
+\end{equation}
+The shear elastic stiffness is assumed to be \param{kn}. If the normal traction is tensile
+or zero, no shear traction can be transmitted by the interface.
+In the future, this law will be enriched by a cohesion-like term.
+
+If used in connection of two nodes with {\tt interface1delement}, the element-level parameter \param{normal} determines what is compression and what is tension (from the 1st node to the 2nd node in \param{normal} direction it is tension). 
+
+The model description and parameters are summarized in table~\ref{simpleinterfacemat_table}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Simple interface material\\
+\hline
+Record Format & \descitem{simpleintermat}  \elemparam{}{in}
+\elemparam{kn}{rn} \optelemparam{fc}{rn} \optelemparam{stiffcoeff}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{kn} (penalty) stiffness in compression\\
+&- \param{fc} friction coefficient\\
+&- \param{stiffcoeff} ratio (tensile stiffness / compression stiffness)\\
+Supported modes& \_1dInterface\\
+\hline
+\end{tabular}
+\caption{Simple interface material -- summary.}
+\label{simpleinterfacemat_table}
 %\end{center}
 \end{table}
 

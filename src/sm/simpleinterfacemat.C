@@ -105,7 +105,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     el->computeStrainVector(strainVector, gp, atTime);
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
-    double normalStress, maxShearStress, dp;
+    double normalStress, maxShearStress, dp, temp;
 
     //MaterialMode mMode = gp->giveElement()->giveMaterialMode(); TODO
     MaterialMode mMode = el->giveMaterialMode();
@@ -115,7 +115,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
         normalStress = this->kn * normalStrain;
         maxShearStress = fabs(normalStress) * this->frictCoeff;
     } else {
-        normalStress = 0.;
+        normalStress = this->kn * this->stiffCoeff * normalStrain;
         maxShearStress = 0.;
     }
 
@@ -174,6 +174,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //MaterialMode mMode = gp->giveMaterialMode();
     MaterialMode mMode = gp->giveElement()->giveMaterialMode();
 
+    SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
     FloatArray strainVector;
     StructuralElement *el = ( StructuralElement * ) gp->giveElement();
     el->computeStrainVector(strainVector, gp, atTime);
@@ -186,7 +187,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             if ( normalStrain <= 0 ) {
                 answer.at(1, 1) = this->kn;
             } else                                                       {
-                answer.at(1, 1) = this->kn_t;
+                answer.at(1, 1) = this->kn * this->frictCoeff;
             }
         } else   {
             if ( rMode == ElasticStiffness ) {
@@ -204,7 +205,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             if ( normalStrain <= 0. ) {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn;
             } else  {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn_t;
+                answer.at(1, 1) = answer.at(2, 2) = this->kn * this->frictCoeff;
             }
         } else   {
             if ( rMode == ElasticStiffness ) {
@@ -222,7 +223,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
             if ( normalStrain <= 0. ) {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
             } else  {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn_t;
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->frictCoeff;
             }
         } else   {
             if ( rMode == ElasticStiffness ) {
@@ -406,10 +407,10 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     frictCoeff = 0.;
+    stiffCoeff = 0.;
     IR_GIVE_FIELD(ir, kn, IFT_SimpleInterfaceMaterial_kn, "kn");
-    kn_t = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, kn_t, IFT_SimpleInterfaceMaterial_knt, "knt");
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "fc");
+    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "stiffcoeff");
 
     return StructuralMaterial :: initializeFrom(ir);
 }
@@ -424,6 +425,7 @@ SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keywor
 
     sprintf(buff, " kn %e", kn);
     sprintf(buff, " frictCoeff %e", frictCoeff);
+    sprintf(buff, " stiffCoeff %e", stiffCoeff);
     str += buff;
 
     return 1;

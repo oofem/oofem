@@ -48,7 +48,6 @@
 #endif
 
 namespace oofem {
-
 /**
  * Gradient rankine material status.
  */
