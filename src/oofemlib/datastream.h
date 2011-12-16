@@ -1,4 +1,4 @@
-/*
+ /*
  *
  *                 #####    #####   ######  ######  ###   ###
  *               ##   ##  ##   ##  ##      ##      ## ### ##
@@ -38,6 +38,8 @@
 #include "combuff.h"
 #include "processcomm.h"
 #include "statecountertype.h"
+#include <sstream>
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
@@ -94,6 +96,46 @@ public:
     //@}
 };
 
+/**
+ * Implementation of StringDataStream representing DataStream interface to stringstream i/o.
+ * This class creates a DataStream shell around c stream i/o routines. This class will
+ * not provide any methods for opening/closing stream. This is the responsibility of user.
+ * @see DataStream class.
+ */
+class StringDataStream : public DataStream
+{
+private:
+    /// FILE pointer of associated stream
+    std::stringstream *stream;
+
+public:
+    /// Constructor, takes associated stream pointer as parameter
+    StringDataStream(std::stringstream *s) { stream = s; }
+    /// Destructor (will not close stream!)
+    ~StringDataStream() { }
+
+    virtual int read(int *data, const unsigned int count)
+    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int read(unsigned long *data, const unsigned int count)
+    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int read(long *data, const unsigned int count)
+    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int read(double *data, const unsigned int count)
+    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int read(char *data, const unsigned int count)
+    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+
+    virtual int write(const int *data, const unsigned int count)
+    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int write(const unsigned long *data, const unsigned int count)
+    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int write(const long *data, const unsigned int count)
+    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int write(const double *data, const unsigned int count)
+    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int write(const char *data, const unsigned int count)
+    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+};
 
 /**
  * Implementation of FileDataStream representing DataStream interface to file i/o.
