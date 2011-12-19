@@ -534,7 +534,7 @@ IsoInterfaceDamageMaterial :: giveInputRecordString(std :: string &str, bool key
 void
 IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
-    kappa = strain.at(1);
+    kappa = macbra(strain.at(1));
 }
 
 void

@@ -2060,6 +2060,54 @@ Features & Adaptivity support\\
 \end{table}
 
 \clearpage
+\subsubsection{Isotropic damage model for interfaces}
+Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., stiffness moduli corresponding to different
+directions decrease proportionally and independently of the loading 
+direction. The damaged stiffness tensor is expressed as
+$\mbf{D}=(1-\omega)\mbf{D}_e$ where $\omega$ is a scalar damage variable
+and $\mbf{D}_e$ is the elastic stiffness tensor.
+The damage evolution law is postulated in an explicit form, relating
+the damage variable $\omega$ to the largest previously reached 
+equivalent strain level, $\kappa$.
+
+The equivalent strain, $\tilde\varepsilon$, is a scalar measure derived from the
+strain tensor. The choice of the specific expression
+for the equivalent strain affects the shape of the elastic domain
+in the strain space and plays a similar role to the choice of a yield
+condition in plasticity.
+Currently, in the present implementation, the equivalent strain, $\tilde\varepsilon$ is equal to positive part of normal diplacement difference.
+Only the exponential softening damege law is supported:
+$$
+\omega = 1.0 - ( \frac{\varepsilon_0}{\kappa} ) * \exp( -( \frac{f_t}{G_f} ) * ( \kappa - \varepsilon_0 ))
+$$
+The model parameters are summarized in Table~\ref{iid_table}. 
+\begin{table}[!htb]
+%\begin{center}
+  \small
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Isotropic damage model for concrete in tension\\
+\hline
+Record Format & \descitem{isointrfdm01} 
+\elemparam{kn}{rn} \elemparam{ks}{rn} \elemparam{ft}{rn} \elemparam{gf}{rn} \optelemparam{maxomega}{rn} \elemparam{talpha}{rn} \elemparam{d}{rn}\\
+Parameters & - \param{d} material density\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{kn} elastic stifness in normal direction\\
+&- \param{kn} elastic stifness in tangential direction\\
+&- \param{ft} tensile strength\\
+&- \param{gf} fracture energy\\
+&- \param{maxomega} maximum damage, used for convergence improvement
+(its value is between 0 and 0.999999 (default), 
+and it affects only the secant stiffness but not the stress)\\
+Supported modes& 2dInterface, 3dInterface\\
+Features & \\
+\hline
+\end{tabular}
+\caption{Isotropic damage model for interface elements -- summary.}
+\label{iid_table}
+%\end{center}
+\end{table}
+
 
 \subsection{Material models specific to concrete}
 \subsubsection{Mazars damage model for concrete}
