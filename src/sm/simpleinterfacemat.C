@@ -105,7 +105,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     el->computeStrainVector(strainVector, gp, atTime);
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
-    double normalStress, maxShearStress, dp, temp;
+    double normalStress, maxShearStress, dp;
 
     //MaterialMode mMode = gp->giveElement()->giveMaterialMode(); TODO
     MaterialMode mMode = el->giveMaterialMode();
@@ -174,7 +174,7 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //MaterialMode mMode = gp->giveMaterialMode();
     MaterialMode mMode = gp->giveElement()->giveMaterialMode();
 
-    SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
+    //SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
     FloatArray strainVector;
     StructuralElement *el = ( StructuralElement * ) gp->giveElement();
     el->computeStrainVector(strainVector, gp, atTime);
@@ -186,13 +186,13 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
             if ( normalStrain <= 0 ) {
                 answer.at(1, 1) = this->kn;
-            } else                                                       {
+            } else {
                 answer.at(1, 1) = this->kn * this->frictCoeff;
             }
-        } else   {
+        } else {
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = this->kn;
-            } else                                                              {
+            } else {
                 _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
@@ -204,13 +204,13 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
             if ( normalStrain <= 0. ) {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn;
-            } else  {
+            } else {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn * this->frictCoeff;
             }
-        } else   {
+        } else {
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn;
-            } else          {
+            } else {
                 _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
@@ -222,13 +222,13 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
             if ( normalStrain <= 0. ) {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
-            } else  {
+            } else {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->frictCoeff;
             }
-        } else   {
+        } else {
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
-            } else          {
+            } else {
                 _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
