@@ -117,7 +117,9 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
     // specify the type of formula for damage evolution law
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, IFT_IsotropicDamageMaterial1_softeningtype, "damlaw");
-    IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0");
+    if ( damageLaw != 7 ) {
+      IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0");
+    }
     //applies only in this class
     if ( giveClassID() == IsotropicDamageMaterial1 :: giveClassID() ) {
         switch ( damageLaw ) {
