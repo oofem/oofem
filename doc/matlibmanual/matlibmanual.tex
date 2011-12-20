@@ -1536,7 +1536,7 @@ of equivalent strain:
 \item[4 -] Mazars damage law with parameters At and Bt
 \item[5 -] smooth stress-strain curve with parameters e0 and md
 \item[6 -] disable damage (dummy linear elastic material)
-\item[7 -] extended smooth damage law \ref{eq:damageEvol} with parameters ft, ep, e1, e2, nd
+\item[7 -] extended smooth damage law (\ref{eq:damageEvol}) with parameters ft, ep, e1, e2, nd
 \end{itemize}\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
@@ -2061,24 +2061,24 @@ Features & Adaptivity support\\
 
 \clearpage
 \subsubsection{Isotropic damage model for interfaces}
-Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., stiffness moduli corresponding to different
-directions decrease proportionally and independently of the loading 
-direction. The damaged stiffness tensor is expressed as
-$\mbf{D}=(1-\omega)\mbf{D}_e$ where $\omega$ is a scalar damage variable
-and $\mbf{D}_e$ is the elastic stiffness tensor.
+\label{sec:idmfi}
+
+The model provides an interface law, which can be used to describe  a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+the normal direction and \param{ks} in the tangential direction.
+Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
+direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
 The damage evolution law is postulated in an explicit form, relating
 the damage variable $\omega$ to the largest previously reached 
-equivalent strain level, $\kappa$.
+equivalent ``strain'' level, $\kappa$.
 
-The equivalent strain, $\tilde\varepsilon$, is a scalar measure derived from the
-strain tensor. The choice of the specific expression
+The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from the displacement jump vector. The choice of the specific expression
 for the equivalent strain affects the shape of the elastic domain
 in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
-Currently, in the present implementation, the equivalent strain, $\tilde\varepsilon$ is equal to positive part of normal diplacement difference.
-Only the exponential softening damege law is supported:
+Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal diplacement jump (opening of the interface).
+Only the exponential softening damage law is supported:
 $$
-\omega = 1.0 - ( \frac{\varepsilon_0}{\kappa} ) * \exp( -( \frac{f_t}{G_f} ) * ( \kappa - \varepsilon_0 ))
+\omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
 $$
 The model parameters are summarized in Table~\ref{iid_table}. 
 \begin{table}[!htb]
@@ -2093,7 +2093,7 @@ Record Format & \descitem{isointrfdm01}
 Parameters & - \param{d} material density\\
 &- \param{tAlpha} thermal dilatation coefficient\\
 &- \param{kn} elastic stifness in normal direction\\
-&- \param{kn} elastic stifness in tangential direction\\
+&- \param{ks} elastic stifness in tangential direction\\
 &- \param{ft} tensile strength\\
 &- \param{gf} fracture energy\\
 &- \param{maxomega} maximum damage, used for convergence improvement
@@ -2365,7 +2365,7 @@ This is a modification of the opriginal MPS theory, proposed by Havl\'{a}sek and
 %Parameter $\kappa_T$ replaces $\ln h$ which in case of basic creep eliminates the sensitivity of the original model on the choice of relative pore humidity $h$ reached by self-desiccation.
 
 
-Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differengtial equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
+Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differential equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
 are replaced by $\mu_S = c_0 T_0^{p-1} k_1^{p-1} q_4 (p-1)^p$. 
 The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$, where $t_0$ is age of concrete at the onset drying or when the temperature starts changing.
 
@@ -3492,10 +3492,23 @@ Supported modes& 3dMat\\
 %\end{center}
 \end{table}
 
-\subsection{Simple interface material}
 
-The model provides a simple interface contact law, which can be used to describe  an interface between two materials (e.g.\ between steel reinforcement and concrete),
-or the interaction of two bodies in contact. The law is formulated in terms of the traction vector and the displacement jump vector. In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
+\subsection{Material models for interfaces}
+
+Interface elements have to be used with material models describing
+the constitutive behavior of interfaces between two materials 
+(e.g.\ between steel reinforcement and concrete),
+or between two bodies in contact.
+Such interface laws are formulated in terms of the traction vector and the displacement jump vector.
+
+\subsubsection{Isotropic damage model for interfaces}
+
+This model is described in Section~\ref{sec:idmfi}.
+
+\subsubsection{Simple interface material}
+
+This model provides a simple interface law with penalty-type contact and friction. 
+In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
 By setting \param{kn} to a high value, the penetration (overlap) can be reduced,
 in the spirit of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
 of the gap can be allowed. 
@@ -3506,7 +3519,8 @@ according to a Coulomb-like friction law as the product of the (negative part of
 \begin{equation}
 	||\vsig_T|| \leq \left\langle-\sigma_N\cdot fc\right\rangle
 \end{equation}
-The shear elastic stiffness is assumed to be \param{kn}. If the normal traction is tensile
+The shear elastic stiffness is assumed to be \param{kn} (i.e., equal to the
+normal stiffness). If the normal traction is tensile
 or zero, no shear traction can be transmitted by the interface.
 In the future, this law will be enriched by a cohesion-like term.
 
