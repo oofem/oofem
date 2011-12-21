@@ -50,7 +50,7 @@ namespace oofem {
  * Solution of this problem is base on equation in the form of: @f$ K\cdot y=w M\cdot y @f$
  * Currently eigenvalue problem is solved using subspace iteration.
  * Tasks:
- * - Assembling the governing equation in the form @f$ K\©dot y=wM\cdot y@f$.
+ * - Assembling the governing equation in the form @f$ K\cdot y=wM\cdot y@f$.
  * - Creating Numerical method for @f$ K\cdot y=wM\cdot y@f$.
  * - Interfacing Numerical method to Elements.
  */
