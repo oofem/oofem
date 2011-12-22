@@ -1,3 +1,31 @@
+2011-12-22  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* OOFEM 2.1 released
+
+	* Updated to PETSc 3.2 with additional optimizations for the PETSc-solver bindings.
+
+	* Implemented new SlipWithFriction, PenetrationWithResistance, and OutFlowBC boundary conditions for SUPG model.
+
+	* New isotropic surface tension boundary condition for stokes solver.
+
+	* Added concept of active boundary conditions, that can contribute to governing equation(s)
+
+	* New Damage-plastic Rankine model, its gradient and nonlocal version and mixed elements for gradient damage-plasticity.
+
+	* Introducing the concept of virtual regions for nodal recovery algorithms.
+
+	* Added support for IGA parallel computations with distributed patch evaluation.
+
+	* Added support for growing/decreasing transport problem - linear and nonlinear case.
+
+	* Added cell export for gauss point values in VTK.
+
+	* Added LAPACK-bindings for FloatMatrix class.
+
+	* Significant update of documentation, huge cleanup of Doxygen generated documentation.
+
+	* Many, many enhancements and bug-fixes.
+
 2010-11-20  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 2.0 released
