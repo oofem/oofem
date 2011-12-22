@@ -1136,7 +1136,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    //PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
 #endif
     //
@@ -1404,7 +1404,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
 
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
+    //PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
  #endif
     d6 = parallel_context->localDotProduct(deltaR_, F);
     d7 = parallel_context->localDotProduct(deltaRt, F);
