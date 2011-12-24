@@ -623,7 +623,7 @@ void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, doub
 
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = 1; j <= nColumns; j++ ) {
-            this->at(i, j) += a(i) * b(j) * dV;
+            this->at(i, j) += a.at(i) * b.at(j) * dV;
         }
     }
 }
