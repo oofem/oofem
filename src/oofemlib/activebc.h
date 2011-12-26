@@ -161,7 +161,7 @@ public:
      * Checks to see if active boundary condition requires special DOFs.
      * @return True if ActiveDof should be created.
      */
-    virtual bool requiresSpecialDofs() { return false; }
+    virtual bool requiresActiveDofs() { return false; }
     /**
      * Checks to see if the dof is a primary DOF.
      * @return True if ActiveDof is a primary DOF.
