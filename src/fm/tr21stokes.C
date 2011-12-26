@@ -191,11 +191,12 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     momentum.zero();
     conservation.zero();
     GaussPoint *gp;
+
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
+        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0));
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
         this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this), 0.0);
         double dA = detJ * gp->giveWeight();
@@ -311,7 +312,8 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interpolation_quad.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-            double dS = gp->giveWeight() * this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+            double detJ = fabs(this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this), 0.0));
+            double dS = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
@@ -350,7 +352,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
-        double detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
+        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0));
         double dA = detJ * gp->giveWeight();
 
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
