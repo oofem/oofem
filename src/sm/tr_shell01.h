@@ -88,6 +88,7 @@ public:
     //void drawInternalState(oofegGraphicContext &);
 #endif
 
+    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     integrationDomain giveIntegrationDomain() { return _Triangle; }
     MaterialMode giveMaterialMode() { return _Unknown; }
 
