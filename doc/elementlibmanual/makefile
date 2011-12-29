@@ -4,7 +4,7 @@ RCP = scp
 
 html: ps
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html -dir html -mkdir elementlibmanual
+	latex2html -local_icons -dir html -mkdir elementlibmanual
 
 ps:
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
@@ -25,7 +25,6 @@ ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/elementlibmanual
 	$(RCP) -r elementlibmanual.ps $(INSTALLDIR)/resources/doc/elementlibmanual
 	$(RCP) -r elementlibmanual.pdf $(INSTALLDIR)/resources/doc/elementlibmanual
-	
 else
 	echo "INSTALLDIR not defined"
 endif

@@ -405,26 +405,31 @@ hardening\\
 \end{table}
 
 
-\subsubsection{Hardening plasticity model with Mises yield condition}
 
-This model is appropriate for plastic yielding in material such as metals.
-It is based on the Mises yield condition (in terms of the second deviatoric invariant, $J_2$),
-associated flow rule and linear isotropic hardening driven by the cumulative plastic strain. The model can be used in the small-strain context, with additive split 
+
+\subsubsection{Mises plasticity model with isotropic damage}
+\label{sec:misplast}
+
+This model is appropriate for the description of plastic yielding in ductile material such as metals, and it can also cover the effects of void growth.
+The model uses the Mises yield condition (in terms of the second deviatoric invariant, $J_2$),
+associated flow rule, linear isotropic hardening driven by the cumulative plastic strain,
+and isotropic damage, also driven by the cumulative plastic strain. The model can be used in the small-strain context, with additive split 
 of the strain tensor into the elastic and plastic parts, or in the large-strain context,
 with multiplicative split of the deformation gradient and with yield condition formulated in terms of Kirchhoff stress (which is the true Cauchy stress multiplied by the Jacobian).
 
-\paragraph{Small strain formulation:}
+\paragraph{Small-strain formulation:}
+The small-strain version of hardening Mises plasticity can be combined with isotropic damage.
 The basic equations include the additive decomposition of strain into elastic and plastic parts,
 \begin{equation}\label{VMadditiveDecomposition}
 \veps = \veps_{\rm{e}} + \veps_{\rm{p}},
 \end{equation}
-the stress strain law
+the stress strain law 
 \begin{equation}\label{VMconstitutiveEquation}
-\vsig = \mbf{D} :(\veps-\veps_{\rm{p}}),
+\vsig = (1-\omega)\bar{\vsig}=(1-\omega)\mbf{D} :(\veps-\veps_{\rm{p}}),
 \end{equation}
-the yield condition
+the definition of the yield function in terms of the effective stress,
 \begin{equation}\label{VMvonMisesCondition}
-f(\vs,\kappa) = \sqrt{\frac{3}{2}\vs:\vs}-\sigma_Y(\kappa),
+f(\bar{\vs},\kappa) = \sqrt{\frac{3}{2}\bar{\vs}:\bar{\vs}}-\sigma_Y(\kappa),
 \end{equation}
 the incremental definition of cumulative plastic strain
 \begin{equation}\label{VMcumPlasStrain}
@@ -432,41 +437,50 @@ the incremental definition of cumulative plastic strain
 \end{equation}
 the linear hardening law
 \begin{equation}\label{VMlinearHardeningLaw}
-\sigma_Y(\kappa) = H\kappa,
+\sigma_Y(\kappa) = \sigma_0 + H\kappa,
 \end{equation}
 the evolution law for the plastic strain
 \begin{equation}
- \epspd = \dot{\lambda}\frac{\partial f}{\partial \vs},
+ \epspd = \dot{\lambda}\frac{\partial f}{\partial \bar{\vs}},
 \end{equation}
-and the loading-unloading conditions
+the loading-unloading conditions
 \begin{equation}\label{VMkuhnTucker}
-\dot{\lambda} > 0 \qquad f(\vs,\kappa)\leq 0 \qquad \dot{\lambda} f(\vs,\kappa) = 0.
+\dot{\lambda} > 0 \qquad f(\bar{\vs},\kappa)\leq 0 \qquad \dot{\lambda} f(\bar{\vs},\kappa) = 0.
 \end{equation}
-In the equations above, $\veps$ is the strain tensor, $\veps_{\rm{e}}$ is the elastic strain tensor, $\veps_{p}$ is the plastic strain tensor, $\mbf{D}$ is the elastic stiffness tensor, $\vs$ is the deviatoric stress tensor, $\sigma_Y$ is the magnitude of stress at yielding under uniaxial tension (or compression), $\kappa$ is the cumulated plastic strain, $H$ is the hardening modulus and $\lambda$ is the plastic multiplier.
+and the damage law 
+\begin{equation}\label{damagelawmp}
+\omega(\kappa) = \omega_c(1-\mbox{e}^{-a\kappa}),
+\end{equation}
+In the equations above, $\veps$ is the strain tensor, $\veps_{\rm{e}}$ is the elastic strain tensor, $\veps_{p}$ is the plastic strain tensor, $\mbf{D}$ is the elastic stiffness tensor, $\vsig$ is the nominal stress tensor, $\bar{\vsig}$ is the effective stress tensor, $\bar{\vs}$ is the effective deviatoric stress tensor, $\sigma_Y$ is the magnitude of stress at yielding under uniaxial tension (or compression), $\kappa$ is the cumulated plastic strain, $H$ is the hardening modulus, $\lambda$ is the plastic multiplier, $\omega$ is the damage variable, $\omega_c$ is critical damage and $a$ is a positive dimensionless parameter.
 
-\paragraph{Large strain formulation}
-is based on the introduction of an intermediate local configuration, relative to which the elastic response is characterized. This notion leads to a multiplicative decomposition of deformation gradient into elastic and plastic parts:
+
+\paragraph{Large-strain formulation}
+is based on the introduction of an intermediate local configuration, with respect to which the elastic response is characterized. This concept leads to a multiplicative decomposition of deformation gradient into elastic and plastic parts:
 \begin{equation}
 \mbf{F} = \mbf{F}^e\mbf{F}^p.
 \end{equation}
 The stress-evaluation algorithm can be based on the 
-classical radial return mapping; see \cite{SimoHughes} for more details. 
-The model description and parameters are summarized in table~\ref{misesMat_table}.
+classical radial return mapping; see \cite{SimoHughes} for more details. Damage is not yet implemented in the large-strain version of the model.
+
+%\paragraph{}
+The model description and parameters are summarized in Table~\ref{misesMat_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & Von Mises Plasticity with isotropic hardening\\
+Description & Mises plasticity with isotropic hardening\\
 \hline
 Record Format & \descitem{MisesMat}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn}\\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
-&- \param{E} Young modulus\\
-&- \param{n} Poisson ratio\\
-&- \param{sig0} initial yield stress in uniaxial tension(compression)\\
-&- \param{H} hardening modulus\\
-Supported modes& 3dMat,3dMatF\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
+&- \param{H} hardening modulus (can be negative in the case of plastic softening)\\
+&- \param{omega\_crit} critical damage in damage law (\ref{damagelawmp})\\
+&- \param{a} exponent in damage law (\ref{damagelawmp})\\
+Supported modes& 1dMat, PlaneStress, 3dMat, 3dMatF\\
 \hline
 \end{tabular}
 \caption{Mises plasticity -- summary.}
@@ -475,13 +489,226 @@ Supported modes& 3dMat,3dMatF\\
 \end{table}
 
 
+\subsubsection{Nonlocal formulation}
+The small-strain version of the model is regularized by the over-nonlocal formulation with damage driven by a combination of local and nonlocal cumulated plastic strain,
+\begin{equation}\label{overKappa1}
+\hat{\kappa} = (1-m)\kappa + m\bar{\kappa},
+\end{equation}
+where $m$ is a dimensionless material parameter (typically $m>1$) and $\bar{\kappa}$ is the nonlocal cumulated plastic strain, which is evaluated either using the integral approach,
+or using the implicit gradient approach.
+
+\paragraph{Integral nonlocal formulation}
+One possible regularization technique is based on the integral definition of nonlocal
+  cumulated plastic strain
+\begin{equation}\label{nonLocalPlStrain1}
+\bar{\kappa}(x) = \int\limits_V \alpha(x,s)\kappa(s)\,{\rm d}s
+\end{equation}
+The nonlocal weight function is usually defined as
+\begin{equation}
+\alpha(x,s) = \frac{\alpha_0(\Vert x-s\Vert )}{\int\limits_V\alpha_0(\Vert x-t\Vert )\,{\rm d}t}
+\end{equation}
+where
+\begin{equation}\label{alpha0}
+\alpha_0(r) = \begin{cases} \left(1-\frac{r^2}{R^2}\right)^2 &\text{if $r<R$}\\ 
+\\
+							0 & \text{if $r \ge R$}
+			  \end{cases}
+\end{equation}
+is a nonnegative function, for $r<R$ monotonically decreasing with increasing distance $r=\Vert x-s\Vert$, and $V$ denotes the domain occupied by the investigated material body.
+The key idea is that the damage evolution at a certain point depends not only on the cumulated plastic strain at that point, but also on points at distances smaller than the interaction radius $R$, considered as a new material parameter. 
+\paragraph{Implicit gradient formulation}
+The gradient formulation can be conceived as the differential counterpart to the integral formulation. The nonlocal cumulated plastic strain is computed from a Helmholtz-type differential equation 
+\begin{equation}\label{implicitGradient}
+\bar{\kappa} - l^2\nabla^2\bar{\kappa} = \kappa
+\end{equation}
+with homogeneous Neumann boundary condition
+\begin{equation}\label{neumannBC}
+\frac{\partial\bar{\kappa}}{\partial n} = 0.
+\end{equation} In (\ref{implicitGradient}), $l$ is the length scale parameter and $\nabla$ is the Laplace operator. 
+
+%\paragraph{}
+The model description and parameters are summarized in Tables~\ref{misesMatNl_table} and~\ref{misesMatGrad_table}. Note that the internal length parameter \param{r} has the meaning of the
+radius of interaction $R$ for the integral version (and thus has the dimension
+of length) but for the gradient version it has the meaning of the coefficient $l^2$
+multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimension of length squared.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Nonlocal Mises plasticity with isotropic hardening\\
+\hline
+Record Format & \descitem{MisesMatNl}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\elemparam{r}{rn}\elemparam{m}{rn}\\\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
+&- \param{H} hardening modulus\\
+&- \param{omega\_crit} critical damage\\
+&- \param{a} exponent in damage law\\
+&- \param{r} nonlocal interaction radius $R$  from eq.~(\ref{alpha0})\\
+&- \param{m} over-nonlocal parameter\\
+Supported modes& 1dMat, PlaneStress, 3dMat\\
+\hline
+\end{tabular}
+\caption{Nonlocal integral Mises plasticity -- summary.}
+\label{misesMatNl_table}
+%\end{center}
+\end{table}
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Gradient-enhanced Mises plasticity with isotropic damage\\
+\hline
+Record Format & \descitem{MisesMatGrad}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\elemparam{r}{rn}\elemparam{m}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
+&- \param{H} hardening modulus\\
+&- \param{omega\_crit} critical damage\\
+&- \param{a} exponent in damage law\\
+&- \param{r} internal length scale parameter $l^2$ from eq.~(\ref{implicitGradient})\\
+&- \param{m} over-nonlocal parameter\\
+Supported modes& 1dMat, PlaneStress, 3dMat\\
+\hline
+\end{tabular}
+\caption{Gradient-enhanced Mises plasticity -- summary.}
+\label{misesMatGrad_table}
+%\end{center}
+\end{table}
+
+
+
+\subsubsection{Rankine plasticity model with isotropic damage}
+\label{sec:rankplast}
+
+This model has a very similar structure to the model described in Section~\ref{sec:misplast},
+but is based on the Rankine yield condition. It is available in the small-strain version
+only, and so far exclusively for plane stress analysis. 
+The basic equations (\ref{VMadditiveDecomposition})--(\ref{VMconstitutiveEquation}) 
+and (\ref{VMcumPlasStrain})--(\ref{damagelawmp}) remain valid, 
+and the yield function (\ref{VMvonMisesCondition}) is redefined as
+\begin{equation}\label{RankineCondition}
+f(\bar{\vsig},\kappa) = \max_{I}\bar{\sigma_I}-\sigma_Y(\kappa)
+\end{equation}
+where $\bar{\sigma_I}$ are the principal values of the effective stress tensor $\bar{\vsig}$. 
+In damage law (\ref{damagelawmp}), parameter $\omega_c$ is always set to 1.
+The user can specify either the exponent $a$ from (\ref{damagelawmp}),
+or the dissipation per unit volume, $g_f$, which represents the area under the
+stress-strain diagram (and parameter $a$ is then determined automatically such that
+the area under the diagram has the prescribed value).
+
+%\paragraph{}
+The model description and parameters are summarized in Tables~\ref{rankineMat_table}--\ref{rankineMatGrad_table}. Note that the default value of parameter $m$ is equal to 1 for the
+integral model but for the gradient model it is equal to 2. 
+Also note that the internal length parameter \param{r} has the meaning of the
+radius of interaction $R$ for the integral version (and thus has the dimension
+of length) but for the gradient version it has the meaning of the coefficient $l^2$
+multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimension of length squared.
+
+For the gradient model
+it is possible to specify parameter \param{negligible\_damage}, which sets the minimum
+value of damage that is considered as nonzero. 
+The approximate solution of Helmholtz equation (\ref{implicitGradient}) can lead
+    to very small but nonzero nonlocal kappa at some points that
+    are actually elastic. If such small values are positive,
+    they lead to a very small but nonzero damage. If this is
+    interpreted as "loading", the tangent terms are activated,
+    but damage will not actually grow at such points and the
+    convergence rate is slowed down. It is better to consider
+    such points as elastic. By default, \param{negligible\_damage} is set to 0,
+but it is recommended to set it e.g.\ to 1.e-6.
+
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Rankine plasticity with isotropic hardening and damage\\
+\hline
+Record Format & \descitem{RankMat}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn}) \\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
+&- \param{H} hardening modulus (default value 0.)\\
+&- \param{gf} dissipation per unit volume\\
+&- \param{a} exponent in damage law (\ref{damagelawmp})\\
+Supported modes& PlaneStress\\
+\hline
+\end{tabular}
+\caption{Rankine plasticity -- summary.}
+\label{rankineMat_table}
+%\end{center}
+\end{table}
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Nonlocal Rankine plasticity with isotropic hardening and damage\\
+\hline
+Record Format & \descitem{RankMatNl}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn} \\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
+&- \param{H} hardening modulus (default value 0.)\\
+&- \param{gf} dissipation per unit volume\\
+&- \param{a} exponent in damage law (\ref{damagelawmp})\\
+&- \param{r} internal length scale parameter $l^2$ from eq.~(\ref{implicitGradient})\\
+&- \param{m} over-nonlocal parameter (default value 1.)\\
+Supported modes& PlaneStress\\
+\hline
+\end{tabular}
+\caption{Nonlocal Rankine plasticity -- summary.}
+\label{rankineMatNl_table}
+%\end{center}
+\end{table}
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Gradient-enhanced Rankine plasticity with isotropic hardening and damage\\
+\hline
+Record Format & \descitem{RankMatGrad}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn}\elemparam{negligible\_damage}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
+&- \param{H} hardening modulus (default value 0.)\\
+&- \param{gf} dissipation per unit volume\\
+&- \param{a} exponent in damage law (\ref{damagelawmp})\\
+&- \param{r} internal length scale parameter $l$ from eq.~(\ref{implicitGradient})\\
+&- \param{m} over-nonlocal parameter (default value 2.)\\
+&- \param{negligible\_damage} optional parameter (default value 0.)\\
+Supported modes& PlaneStress\\
+\hline
+\end{tabular}
+\caption{Gradient-enhanced Rankine plasticity -- summary.}
+\label{rankineMatGrad_table}
+%\end{center}
+\end{table}
 
 \subsubsection{Perfectly plastic material with Mises yield condition}
 
 This is an older model, kept here for compatibility with previous versions.
 It uses Mises plasticity condition with no hardening and under small strain only.
 The model description and parameters are summarized
-in table~\ref{Steel1_table}.
+in Table~\ref{Steel1_table}. All its features are included in the model
+described in Section~\ref{sec:misplast}. 
 
 \begin{table}[!htb]
 %\begin{center}
@@ -572,7 +799,7 @@ where the yield value $f_t$ is defined as
  \centerline{\includegraphics[width=0.7\textwidth]{tension.eps}}
 \fi
 %end{latexonly}
-  \caption{Tensile behavior of proposed model ($f_t=0.2\ \rm{MPa},\ G_f^I=0.018\ \rm{N/mm}$)}
+  \caption{Tensile behavior of proposed model ($f_t=0.2$ MPa, $G_f^I=0.018$ N/mm)}
   \label{tensfig}
 \end{figure}
 The $f_{t0}$ represents tensile strength of joint or interface; and $G^I_f$ is mode-I fracture energy. For the tension mode, the associated flow hypothesis is assumed.
@@ -621,21 +848,21 @@ This follows from (\ref{ft}) and (\ref{c}). However, in the corner region, when 
 \paragraph{Cap mode}
 For the cap mode, an ellipsoid interface model is used. The yield condition is assumed as
 \begin{equation}
-  f_3(\sig, \kappa_3) = C_{nn}\sigma^2+C_{ss}\tau^2 + C_n\sigma-\bar\sigma^2(\kappa_3)
+  f_3(\sig, \kappa_3) = C_{nn}\sigma^2+C_{ss}\tau^2 + C_n\sigma-\bar{\sigma}^2(\kappa_3)
 \end{equation}
-where $C_{nn},\ C_{ss}$, and $C_n$ are material model parameters and $\bar\sigma$ is yield value, originally assumed in the following form of hardening/softening law \cite{Rots}
+where $C_{nn},\ C_{ss}$, and $C_n$ are material model parameters and $\bar{\sigma}$ is yield value, originally assumed in the following form of hardening/softening law \cite{Rots}
 \begin{eqnarray}
   \nonumber
-  \bar\sigma_1(\kappa_3)&=&\bar\sigma_i+(\bar\sigma_p-\bar\sigma_i)\sqrt{\del{2\kappa_3}{\kappa_p}-\del{\kappa_3^2}{\kappa_p^2}};\;\;\kappa_3\in(0,\kappa_p)\\
+  \bar{\sigma}_1(\kappa_3)&=&\bar{\sigma}_i+(\bar{\sigma}_p-\bar{\sigma}_i)\sqrt{\del{2\kappa_3}{\kappa_p}-\del{\kappa_3^2}{\kappa_p^2}};\;\;\kappa_3\in(0,\kappa_p)\\
   \label{hs3}
-  \bar\sigma_2(\kappa_3)&=&\bar\sigma_p+(\bar\sigma_m-\bar\sigma_p)\left(\del{\kappa_3-\kappa_p}{\kappa_m-\kappa_p}\right)^2;\;\;\kappa_3\in(\kappa_p, \kappa_m)\\
+  \bar{\sigma}_2(\kappa_3)&=&\bar{\sigma}_p+(\bar{\sigma}_m-\bar{\sigma}_p)\left(\del{\kappa_3-\kappa_p}{\kappa_m-\kappa_p}\right)^2;\;\;\kappa_3\in(\kappa_p, \kappa_m)\\
   \nonumber
-  \bar\sigma_3(\kappa_3)&=&\bar\sigma_r+(\bar\sigma_m-\bar\sigma_r)\exp\left(m\del{\kappa_3-\kappa_m}{\bar\sigma_m-\bar\sigma_r}\right);\;\;\kappa_3\in(\kappa_m, \infty)
+  \bar{\sigma}_3(\kappa_3)&=&\bar{\sigma}_r+(\bar{\sigma}_m-\bar{\sigma}_r)\exp\left(m\del{\kappa_3-\kappa_m}{\bar{\sigma}_m-\bar{\sigma}_r}\right);\;\;\kappa_3\in(\kappa_m, \infty)
 \end{eqnarray}
-with $m=2(\bar\sigma_m-\bar\sigma_p)/(\kappa_m-\kappa_p)$. The hardening/softening law (\ref{hs3}) is shown in fig.(\ref{hs3fig}). Note that the curved diagram is a $C^1$ continuous $\sigma-\kappa_3$ relation. The energy under the load-displacement diagram can be related to a ``compressive fracture energy''.
+with $m=2(\bar{\sigma}_m-\bar{\sigma}_p)/(\kappa_m-\kappa_p)$. The hardening/softening law (\ref{hs3}) is shown in fig.(\ref{hs3fig}). Note that the curved diagram is a $C^1$ continuous $\sigma-\kappa_3$ relation. The energy under the load-displacement diagram can be related to a ``compressive fracture energy''.
 The original hardening law (\ref{hs3}.1) exhibits indefinite slope for $\kappa_3=0$, which can cause the problems with numerical implementation. This has been overcomed by replacing this hardening law with parabolic equation given by
 \begin{equation}
-  \bar\sigma_1(\kappa_3) = \bar\sigma_i-2*(\bar\sigma_i-\bar\sigma_p)*\del{\kappa_3}{\kappa_p}+(\bar\sigma_i-\bar\sigma_p)\del{\kappa_3}{\kappa_p}
+  \bar{\sigma}_1(\kappa_3) = \bar{\sigma}_i-2*(\bar{\sigma}_i-\bar{\sigma}_p)*\del{\kappa_3}{\kappa_p}+(\bar{\sigma}_i-\bar{\sigma}_p)\del{\kappa_3}{\kappa_p}
 \end{equation}
 An associated flow and strain hardening hypothesis are being considered. This yields
 \begin{equation}
@@ -691,7 +918,7 @@ Parameters &- \param{num} material model number\\
 &- \param{tanfi0} initial friction angle\\
 &- \param{tanfir} residual friction angle\\
 &- \param{tanpsi} dilatancy\\
-&- \param{\{si, sp, sm, sr\}} cap parameters $\{\bar\sigma_i, \bar\sigma_p, \bar\sigma_m, \bar\sigma_r\}$\\
+&- \param{\{si, sp, sm, sr\}} cap parameters $\{\bar{\sigma}_i, \bar{\sigma}_p, \bar{\sigma}_m, \bar{\sigma}_r\}$\\
 &- \param{\{kp, km,kr\}} cap parameters $\{\kappa_p, \kappa_m, \kappa_r\}$\\
 &- \param{cnn},\param{css},\param{cn} cap mode parametrs\\
 Supported modes& \_2dInterface\\
@@ -1005,31 +1232,41 @@ The following definitions of equivalent strain are currently supported:
 \begin{itemize}
 \item
 {\bf Mazars} (1984) definition based on norm of positive part of strain:
-$$
+\begin{equation}
+\label{mazars}
 \tilde\varepsilon=\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\varepsilon_I\rangle^2}
-$$
+\end{equation}
 where $\langle\varepsilon_I\rangle$ are positive parts of 
 principal values of the strain tensor $\mbf{\varepsilon}$.
 \item
-Definition derived from the {\bf Rankine} criterion of maximum principal stress:
-$$
-\tilde\varepsilon=
-{{1}\over{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar\sigma_I\rangle^2}$$
+Definitions derived from the {\bf Rankine} criterion of maximum principal stress:
+\begin{eqnarray}
+\label{rankinesmooth}
+\tilde\varepsilon&=&
+{\del{1}{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar{\sigma}_I\rangle^2}
+\\
+\label{rankinestandard}
+\tilde\varepsilon&=&
+{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
+\end{eqnarray}
 where
-$\langle\bar\sigma_I\rangle$ are the positive parts of principal 
+$\bar{\sigma}_I$, $I=1,2,3$, are the principal 
 values of the
-effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$.
+effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$
+and $\langle\bar{\sigma}_I\rangle$ are their positive parts.
 \item
 {\bf Energy} norm scaled by Young's modulus to obtain
 a strain-like quantity:
-$$
-\tilde\varepsilon=\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}\over{E}}
-$$
+\begin{equation}
+\label{energynorm}
+\tilde\varepsilon=\del{1}{E}\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}}
+\end{equation}
 \item
 {\bf Modified Mises} definition, proposed by de Vree et al.~(1995):
-$$
+\begin{equation}
+\label{modifiedmises}
 \tilde\varepsilon=\frac{(k-1)I_{1\varepsilon}}{2k(1-2\nu)} + \frac{1}{2k}\sqrt{\frac{(k-1)^2}{(1-2\nu)^2}I_{1\varepsilon}^2+\frac{12 k J_{2\varepsilon}}{(1+\nu)^2}} 
-$$
+\end{equation}
 where $$
 I_{1\varepsilon} = \sum_{I=1}^3\varepsilon_I
 $$
@@ -1138,6 +1375,20 @@ The expression for maximum element size, $h_{max}=w_f/\varepsilon_0$, remains
 the same as for cohesive law with exponential softening, but in terms
 of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$.
 \item
+{\bf Cohesive crack with bilinear softening} is implemented in an
+approximate fashion and gives for different mesh sizes the same
+total dissipation but different shapes of the softening diagram.
+Instead of properly transforming the crack opening into inelastic strain,
+the current implementation deals with a stress-strain diagram adjusted
+such that the areas marked in the right part of Fig.~\ref{idm_softening}
+are equal to the fracture energies $G_f$ and $G_{ft}$ divided by the
+element size. The third parameter defining the law is the strain
+$\eps_k$ at which the softening diagram changes slope. Since this
+strain is considered as fixed, the corresponding stress $\sigma_k$
+depends on the element size and for small elements gets close to the
+tensile strength (the diagram then gets close to linear softening
+with fracture energy  $G_{ft}$). 
+\item
 {\bf Linear softening stress-strain law} works directly with strain
 and does not make any adjustment for the element size. The specified
 parameters $\varepsilon_0$ and $\varepsilon_f$, denoted by keywords {\it e0}
@@ -1175,7 +1426,30 @@ with tensile strength
 $$
 f_t = E\varepsilon_0\left({\rm e}M_d\right)^{-1/M_d}
 $$
+\item
+{\bf Extended smooth stress-strain law} is a special formulation used
+by Grassl and Jir\'{a}sek (2010). The damage law has a rather complicated form:
+\begin{equation} \label{eq:damageEvol}
+\omega = \left \{ \begin{array}{ll} 
+1-\exp\left(-\displaystyle\frac{1}{m}\left(\dfrac{\eps}{\varepsilon_{\rm p}}\right)^m\right) & \mbox{if $\eps \leq \varepsilon_1$}\\[2mm]
+1- \dfrac{\varepsilon_3}{\eps} \exp \left(- \dfrac{\eps- \varepsilon_1}{\varepsilon_{\rm f} \left[1+ \left(\frac{\eps-\varepsilon_1}{\varepsilon_2}\right)^n\right]}\right) & \mbox{if $\eps > \varepsilon_1$} \end{array} \right.
+\end{equation}
+The primary model parameters are the uniaxial tensile strength $f_{\rm t}$,
+the strain at peak stress (under uniaxial tension) $\varepsilon_{\rm p}$, and additional parameters
+$\varepsilon_1$, $\varepsilon_2$ and $n$, which control the post-peak part of the stress-strain law. In the input record, they are denoted by keywords
+\param{ft, ep, e1, e2, nd}.
+Other parameters that appear in (\ref{eq:damageEvol}) can be derived from the condition of zero
+slope of the stress-strain curve at $\kappa=\varepsilon_{\rm p}$ and from the conditions of stress and
+stiffness continuity at $\kappa=\varepsilon_1$:
+\begin{eqnarray}\label{eqparams1}
+m&=&\frac{1}{\ln(E\varepsilon_{\rm p}/f_{\rm t})}\\
+\label{eqparams2}
+\varepsilon_{\rm f}&=&\frac{\varepsilon_1}{\left(\varepsilon_1/\varepsilon_{\rm p}\right)^m -1}\\
+\varepsilon_3&=&\varepsilon_1\exp\left(-\frac{1}{m}\left(\frac{\varepsilon_1}{\varepsilon_p}\right)^m\right)
+\label{eqparams3}
+\end{eqnarray}
 \end{itemize} 
+
 Note that parameter {\it damlaw} determines which type of damage law
 should be used, but the adjustment for element size is done only if
 parameter {\it wf} is specified for {\it damlaw}=0 or {\it damlaw}=1. 
@@ -1200,7 +1474,9 @@ three modes of a softening law with corresponding variables.
  \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.eps}}
 \fi
 %end{latexonly}
-  \caption{Implemented stress-strain diagrams for isotropic damage material. Fracturing strain $\varepsilon_f$ and crack opening at zero stress $w_f$ are interrelated through effective thickness $h$ of the crack band.}
+  \caption{Implemented stress-strain diagrams for isotropic damage material. Fracturing strain $\varepsilon_f$ and crack opening at zero stress $w_f$ are interrelated through effective thickness $h$ of the crack band. Note that the
+figure is somewhat misleading because the grey area is not $G_f$ but $G_f/h$ 
+and also because for exponential softening the approach based on an exponential cohesive law is not exactly equivalent to the approach based on an exponential softening branch of the stress-strain diagram; see the detailed discussion of the damage laws.}
   \label{idm_softening}
 \end{figure}
 
@@ -1230,6 +1506,11 @@ Record Format & \descitem{idm1}
 [\elemparam{At}{rn}] 
 [\elemparam{Bt}{rn}] 
 [\elemparam{md}{rn}] 
+[\elemparam{ft}{rn}] 
+[\elemparam{ep}{rn}] 
+[\elemparam{e1}{rn}] 
+[\elemparam{e2}{rn}] 
+[\elemparam{nd}{rn}] 
 [\elemparam{maxOmega}{rn}]\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
@@ -1239,10 +1520,11 @@ Parameters &- \param{} material number\\
 &- \param{equivstraintype} allows to choose from different definitions
 of equivalent strain:
 \begin{itemize}\setlength{\itemsep}{-3pt}
-\item[0 -] Mazars (default)
-\item[1 -] Rankine 
-\item[2 -] scaled energy norm 
-\item[3 -] modified Mises
+\item[0 -] default = Mazars, eq.~(\ref{mazars})
+\item[1 -] smooth Rankine, eq.~ (\ref{rankinesmooth})
+\item[2 -] scaled energy norm,  eq.~(\ref{energynorm})
+\item[3 -] modified Mises, eq.~(\ref{modifiedmises})
+\item[4 -] standard Rankine, eq.~(\ref{rankinestandard})
 \end{itemize}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
 &- \param{damlaw} allows to choose from different damage laws:
@@ -1254,6 +1536,7 @@ of equivalent strain:
 \item[4 -] Mazars damage law with parameters At and Bt
 \item[5 -] smooth stress-strain curve with parameters e0 and md
 \item[6 -] disable damage (dummy linear elastic material)
+\item[7 -] extended smooth damage law (\ref{eq:damageEvol}) with parameters ft, ep, e1, e2, nd
 \end{itemize}\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
@@ -1263,7 +1546,12 @@ of equivalent strain:
 &- \param{gft} total fracture energy (for damage law 2)\\
 &- \param{At} parameter of Mazars damage law, used only by law 4\\
 &- \param{Bt} parameter of Mazars damage law, used only by law 4\\
-&- \param{md} exponent, used only by damage law 5, default value 1\\
+&- \param{md} exponent used only by damage law 5, default value 1\\
+&- \param{ft} tensile strength, used only by damage law 7\\
+&- \param{ep} strain at peak stress, used only by damage law 7\\
+&- \param{e1} parameter used only by damage law 7\\
+&- \param{e2} parameter used only by damage law 7\\
+&- \param{nd} exponent used only by damage law 7\\
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
@@ -1282,14 +1570,14 @@ Nonlocal version of isotropic damage model from Section~\ref{sec:idmtf}.
 The nonlocal averaging acts as a powerful localization
 limiter. 
 In the standard version of the model, 
-damage is driven by the nonlocal equivalent strain $\bar\varepsilon$, 
+damage is driven by the nonlocal equivalent strain $\bar{\varepsilon}$, 
 defined as a weighted average of the local equivalent strain:
 $$
-\bar\varepsilon(\mbf{x}) = \int_V\alpha(\mbf{x},\mbf{\xi})\tilde\varepsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}
+\bar{\varepsilon}(\mbf{x}) = \int_V\alpha(\mbf{x},\mbf{\xi})\tilde\varepsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}
 $$
 In the ``undernonlocal'' formulation, the damage-driving variable is a 
 combination of local and nonlocal equivalent strain, 
-$m\bar\varepsilon+(1-m)\tilde\varepsilon$, where $m$ is a parameter between
+$m\bar{\varepsilon}+(1-m)\tilde\varepsilon$, where $m$ is a parameter between
 0 and 1. (If $m>1$, the formulation is called ``overnonlocal''; this case
 is useful for nonlocal plasticity but not for nonlocal damage.) 
 
@@ -1388,7 +1676,7 @@ $$
 where $\delta$ is the Dirac distribution. One can also say that the
 nonlocal variable is evaluated as
 $$
-\bar\varepsilon(\mbf{x}) = \frac{1}{V_{r\infty}}\int_V\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)\tilde\epsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}+\left(1-\frac{V_r(\mbf{x})}{V_{r\infty}}\right)\tilde\varepsilon(\mbf{x})
+\bar{\varepsilon}(\mbf{x}) = \frac{1}{V_{r\infty}}\int_V\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)\tilde\epsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}+\left(1-\frac{V_r(\mbf{x})}{V_{r\infty}}\right)\tilde\varepsilon(\mbf{x})
 $$
 The term on the right-hand side after the integral is a multiple of the local
 variable, and so it can be referred to as the local complement.  
@@ -1772,6 +2060,54 @@ Features & Adaptivity support\\
 \end{table}
 
 \clearpage
+\subsubsection{Isotropic damage model for interfaces}
+\label{sec:idmfi}
+
+The model provides an interface law, which can be used to describe  a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+the normal direction and \param{ks} in the tangential direction.
+Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
+direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
+The damage evolution law is postulated in an explicit form, relating
+the damage variable $\omega$ to the largest previously reached 
+equivalent ``strain'' level, $\kappa$.
+
+The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from the displacement jump vector. The choice of the specific expression
+for the equivalent strain affects the shape of the elastic domain
+in the strain space and plays a similar role to the choice of a yield
+condition in plasticity.
+Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the positive part of the normal diplacement jump (opening of the interface).
+Only the exponential softening damage law is supported:
+$$
+\omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
+$$
+The model parameters are summarized in Table~\ref{iid_table}. 
+\begin{table}[!htb]
+%\begin{center}
+  \small
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Isotropic damage model for concrete in tension\\
+\hline
+Record Format & \descitem{isointrfdm01} 
+\elemparam{kn}{rn} \elemparam{ks}{rn} \elemparam{ft}{rn} \elemparam{gf}{rn} \optelemparam{maxomega}{rn} \elemparam{talpha}{rn} \elemparam{d}{rn}\\
+Parameters & - \param{d} material density\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{kn} elastic stifness in normal direction\\
+&- \param{ks} elastic stifness in tangential direction\\
+&- \param{ft} tensile strength\\
+&- \param{gf} fracture energy\\
+&- \param{maxomega} maximum damage, used for convergence improvement
+(its value is between 0 and 0.999999 (default), 
+and it affects only the secant stiffness but not the stress)\\
+Supported modes& 2dInterface, 3dInterface\\
+Features & \\
+\hline
+\end{tabular}
+\caption{Isotropic damage model for interface elements -- summary.}
+\label{iid_table}
+%\end{center}
+\end{table}
+
 
 \subsection{Material models specific to concrete}
 \subsubsection{Mazars damage model for concrete}
@@ -1962,29 +2298,123 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 %\end{center}
 \end{table}
 
+\subsubsection{B3 and MPS models for concrete creep with aging}
+
+Model B3 is an aging viscoelastic model for concrete creep and shrinkage, developed by Prof. Ba\v{z}ant and coworkers. In OOFEM it is implemented in three different ways. 
+
+The first version, ``B3mat'', is kept in OOFEM for compatibility. It is based on an aging Maxwell chain. The moduli of individual units in the chain are evaluated in each step using the least-squares method.
+
+The second, more recent version, is referred to as ``B3solidmat''. Depending on the specified input it exploits either a non-aging Kelvin chain combined with the solidification theory, or an aging Kelvin chain. It is extended to the so-called microprestress-solidification theory (MPS), which in this implementation  takes into account only the effects of variable humidity on creep; the effects of temperature on creep are not considered. 
+The underlying rheological chain consists of four serially coupled components. The solidifying Kelvin chain represents short-term creep; it is serially coupled with a non-aging elastic spring that reflects instantaneous deformation. Long-term creep is captured by an aging dashpot with viscosity dependent on the microprestress, the evolution of which is affected by changes of humidity. The last  unit describes volumetric deformations (shrinkage and thermal strains).
+Drying creep is incorporated either by the 
+``averaged cross-sectional approach'', or by the ``point approach''.
+
+%%%% MPS
+The latest version is denoted as ``MPS'' and is based on the microprestress-solidification theory. The rheological model consists of the same four components as in  ``B3solidmat'', but now the implemented exponential algorithm is designed especially for the solidifying Kelvin chain, which is a special case of an aging Kelvin chain. This model takes into account both humidity and temperature effects on creep. Drying creep is incorporated exclusively by the so-called
+``point approach''. The model can operate in two modes,
+controlled by the keyword $CoupledAnalysisType$. The first mode ($CoupledAnalysisType = 0$) solves only the basic creep and runs as a single problem, while the second mode ($CoupledAnalysisType = 1$) needs to be run as a staggered problem with humidity and temperature analysis preceding the mechanical problem.
+
+The basic creep is in the microprestress-solidification theory influenced by the same four parameters $q_1$ - $q_4$ as in the model B3. Values of these parameters can be estimated from the composition of concrete mixture and its compressive strength using the following empirical formulae: 
+\begin{eqnarray}
+  q_1 &=& 126.77 \bar{f_c}^{-0.5} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_2 &=& 185.4 c^{0.5} \bar{f_c}^{-0.9} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_3 &=& 0.29 \left(w/c\right)^4 q_2 \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_4 &=& 20.3 \left(a/c\right)^{-0.7} \hspace{5 mm} [10^{-6}/\mbox {MPa}]  
+\end{eqnarray}
+Here, $\bar{f_c}$ is the average compressive cylinder strength at age of 28 days [MPa], $a$, $w$ and $c$ is the weight  of aggregates, water and cement per unit volume of concrete [kg/m$^3$].
+
+%%%% 	SPRING %%%%
+The non-aging spring stiffness represents the asymptotic modulus of the material; it is equal to $1/q_1$.
+%%%% 	KELIVIN CHAIN %%%%
+The solidifying Kelvin chain is composed of $M$ Kelvin units with fixed retardation times $\tau_{\mu}$, $\mu = 1, 2, \dots, M$, which form a geometric progression with quotient 10. The lowest retardation time $\tau_1$ is equal to $0.3\; begoftimeofinterest$, the highest retardation time $\tau_M$ is bigger than $0.5\; endoftimeofinterest$. The chain also contains a spring with stiffness $E_0^\infty$
+(a special case of Kelvin unit with zero retardation time).
+Moduli $E_{\mu}^\infty$ of individual Kelvin units are determined such that the chain
+provides a good approximation of the non-aging micro-compliance function of the solidifying constituent, $\Phi(t-t') = q_2 \ln \left( 1 + \left( \left(t-t' \right)/\lambda_0 \right)^n \right)$, where $\lambda_0 = 1$ day and $n = 0.1$. 
+The technique based on the continuous retardation spectrum
+leads to the following formulae:
+\begin{eqnarray}
+ \frac{1}{E_0^\infty} &=& q_2 \ln\left(1+\tilde{\tau_0}\right) - \frac{q_2 \tilde{\tau_0} }{10 \left( 1 + \tilde{\tau_0} \right)} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau_0} = \left( \frac{2 \tau_1}{ \sqrt{10}}  \right)^{0.1} \\
+\frac{1}{E_\mu^\infty} &=&  (\ln 10) \frac{q_2 \tilde{\tau}_\mu \left(0.9 + \tilde{\tau}_\mu \right)}{10 \left( 1 + \tilde{\tau}_\mu \right)^2} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau}_\mu = \left(2 \tau_\mu \right)^{0.1}, \hspace{7 mm} \mu = 1,2,\dots M
+\end{eqnarray}
+Viscosities $\eta_{\mu}^\infty$ of individual Kelvin units are obtained from simple relation $\eta_{\mu}^\infty=\tau_{\mu}/E_{\mu}^\infty$. A higher accuracy is reached if all retardation times are in the end multiplied by the factor 1.35 and the last modulus $E_M$ is divided by 1.2.
+
+%%%% 	SOLIDIFICATION %%%%
+The actual viscosities $\eta_{\mu}$ and stiffnesses $E_{\mu}$ of the solidifying chain change in time according to $\eta_{\mu}(t) = v(t) \eta_{\mu}^\infty$ and $E_{\mu}(t) = v(t) E_{\mu}^\infty$, where 
+\begin{equation}
+v(t)= \frac{1}{\frac{q_3}{q_2} + \left( \frac{\lambda_0}{ t} \right)^m}
+\end{equation}
+is the volume growth function, and exponent $m = 0.5$. In the case of variable temperature or humidity, the actual age of concrete 
+$t$ is replaced by the equivalent time $t_e$, which is obtained by integrating
+(\ref{dtedt}).
+
+%%%% 	MICROPRESTRESS %%%%
+Evolution of viscosity of the aging dashpot is governed by the differential
+equation 
+\begin{equation}
+\label{eq:mps_viscosity}
+\dot{\eta}+\frac{1}{\mu_S T_0} \left |  T \frac{\dot{h}}{h} - \kappa_T k_T(T) \dot{T}  \right | \left( \mu_S \eta \right)^{p/\left(p-1\right)} = \frac{\psi_S}{q_4}
+\end{equation}
+where $h$ is the relative pore humidity, $T$ is the absolute temperature [K], $T_0 = 298$ K is the room temperature,  and parameter $p = 2$. 
+Function $k_T$ is given by 
+\begin{equation}
+\quad k_T(T) = \mbox{e}^{-c_T \left (T_{max}-T\right )}
+\label{eq:mps_k_T}
+\end{equation}
+where parameter $c_T$ controls the influence of cyclic temperature on creep, and $T_{max}$ stands for the maximum reached temperature in the previous history. 
+This is a modification of the opriginal MPS theory, proposed by Havl\'{a}sek and Jir\'{a}sek. 
+%Parameter $\kappa_T$ replaces $\ln h$ which in case of basic creep eliminates the sensitivity of the original model on the choice of relative pore humidity $h$ reached by self-desicca.
 
 
-\subsubsection{B3 model for concrete creep with aging}
+Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differential equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
+are replaced by $\mu_S = c_0 T_0^{p-1} k_1^{p-1} q_4 (p-1)^p$. 
+The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$, where $t_0$ is age of concrete at the onset drying or when the temperature starts changing.
 
-Model B3 is an aging viscoelastic model for concrete creep and shrinkage, 
-developed by Prof. Ba\v{z}ant
-and coworkers. In OOFEM it is 
-implemented in two different forms. Material ``B3mat'' uses an approximation
-by an aging Maxwell chain. This is an older version, kept in OOFEM for compatibility.
-A more recent implementation is referred to as ``B3solidmat'' and exploits 
-a non-aging Kelvin chain combined with the solidification theory. It is also
-extended to the so-called microprestress solidification theory (MPS), which takes
-into account the effects of variable humidity (and in the future also of variable
-temperature) on creep.
-The underlying rheological chain consists of three major components. The solidifying Kelvin chain 
-represents short-term creep; it is serially coupled with a non-aging elastic spring that reflects instantaneous deformation. 
-Long-term creep is captured by an aging dashpot with viscosity dependent on the microprestress, the evolution of which is affected by changes of temperature and humidity.
+
+
+%%%% 	MODIFIED TIMES %%%%
+As mentioned above, under variable humidity and temperature conditions the physical time $t$ in function $v(t)$ describing evolution of the solidified volume is replaced by the equivalent time $t_e$. In a similar spirit, $t$ is replaced by the solidification time $t_s$ in the equation describing creep of the solidifying constituent, and by the reduced time $t_r$ in equation $\mbox{d} \varepsilon_f / \mbox{d} t_r = \sigma / \eta(t)$ relating the flow strain rate to the stress.
+Factors transforming the physical time $t$ into $t_e$, $t_r$ and $t_s$ are defined as follows:
+\begin{eqnarray}
+\label{dtedt}
+ \frac{dt_e}{dt} &=& \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
+ \frac{dt_r}{dt} &=& \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
+ \frac{dt_s}{dt} &=& \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
+\end{eqnarray}
+Functions describing the influence of temperature have the form 
+\begin{eqnarray}
+ \beta_{eT}(T) &=& \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+ \beta_{rT}(T) &=& \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+ \beta_{sT}(T) &=& \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
+\end{eqnarray}
+motivated by the rate process theory.
+$R$ is the universal gas constant and $Q_e$, $Q_r$, $Q_s$ are activation energies for hydration, viscous processes and microprestress relaxation, respectively.
+Only the ratios $Q_e/R$, $Q_r/R$ and $Q_s/R$ have to be specified.
+Functions describing the influence of humidity have the form 
+\begin{eqnarray}
+ \beta_{eh}(h) &=& \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
+ \beta_{rh}(h) &=& \alpha_r + \left( 1 - \alpha_r \right) h^2\\
+ \beta_{sh}(h) &=& \alpha_s + \left( 1 - \alpha_s \right) h^2
+\end{eqnarray}
+where $\alpha_e$, $\alpha_r$ and $\alpha_s$ are parameters. 
+
+%%%% 	HYGRO AND THERMAL STRAIN  %%%%
+The rate of thermal strain is expressed as $\dot{\varepsilon}_T = \alpha_T \dot{T}$ and the rate of shrinkage strain as $\dot{\varepsilon}_{sh} = k_{sh} \dot{h}$, where both $\alpha_T$ and $k_{sh}$ are assumed to be constant in time and independent of temperature and humidity. 
+
+
+
 
 The model description and parameters are summarized
-in table~\ref{b3_table} for ``B3mat'' and in table~\ref{b3solid_table} for ``B3solidmat''. Since some model parameters are determined from the composition
+in table~\ref{b3_table} for ``B3mat'', in table~\ref{b3solid_table} for ``B3solidmat'', and in table ~\ref{mps_table} for ``MPS''. 
+Since some model parameters are determined from the composition
 and strength using empirical formulae, it is necessary to use the
 specified units (e.g.\ compressive strength always in MPa, irrespectively
 of the units used in the simulation for stress). 
+For ``B3mat'' and ``B3solidmat'' it is strictly 
+required to use the specified units in the material input record (stress always in MPa, time in days etc.). 
+The ``MPS'' model is almost unit-independent, except for 
+$\bar{f}_c$ in MPa and $c$ in kg/m$^3$, which are used in empirical formulae.
+
+%%%%%%%% B3 MAT %%%%%%%%%
 
 \begin{table}[!htb]
 %\begin{center}
@@ -1992,25 +2422,76 @@ of the units used in the simulation for stress).
 \hline
 Description & B3 material model  for concrete aging\\
 \hline
-Record Format & \descitem{B3mat}  \elemparam{n}{rn}
-\elemparam{relMatAge}{rn} \elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn}
+Record Format & \descitem{B3mat}  \elemparam{d}{rn} \elemparam{n}{rn}
+\elemparam{talpha}{rn} 
+%for rheo chain material
+\optelemparam{begoftimeofinterest}{rn} \optelemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn}
+%
+\optelemparam{mode}{in} 
+% mode = 0
+\elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn}
 \elemparam{a/c}{rn} \elemparam{t0}{rn}
-\elemparam{alpha1}{rn} \elemparam{alpha2}{rn} \elemparam{ks}{rn}
-\elemparam{hum}{rn} \elemparam{vs}{rn} \elemparam{noshrinkage}{in}\\
+% mode = 1
+\elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn}
+\elemparam{q4}{rn}
+%
+\elemparam{shmode}{in}
+% shmode 1
+\elemparam{ks}{rn} \elemparam{vs}{rn} \elemparam{hum}{rn}
+%% mode 0
+\optelemparam{alpha1}{rn} \optelemparam{alpha2}{rn} 
+%% mode 1
+\elemparam{kt}{rn} \elemparam{EpsSinf}{rn} \elemparam{q5}{rn}
+% shmode 2
+\elemparam{es0}{rn} \elemparam{r}{rn} \elemparam{rprime}{rn}
+\elemparam{at}{rn}  
+\elemparam{w\_h}{rn} \elemparam{ncoeff}{rn} \elemparam{a}{rn}
+\\
 Parameters &- \param{num} material model number\\
+%
+&- \param{d} material density\\
 &- \param{n} Poisson ratio\\
-&- \param{relmatage} relative material age \\
-&- \param{fc} 28-day mean cylinder compression strength in MPa\\
-&- \param{cc} cement content of concrete  in kg/m$^{3}$ \\
-&- \param{w/c} ratio (by weight) of water to cementitious material  \\
+&- \param{talpha} coefficient of thermal expansion\\
+&- \param{begoftimeofinterest} optional parameter; lower boundary of
+time interval with good approximation of the compliance function
+[day]; default 0.1 day\\
+&- \param{endoftimeofinterest} optional parameter; upper boundary of
+time interval with good approximation of the compliance function
+[day]\\
+&- \param{timefactor} scaling factor transforming the simulation time units into days\\
+&- \param{relMatAge} relative material age [day]\\
+%
+&- \param{mode} if $mode = 0$ (default value) creep and shrinkage parameters are
+predicted from composition; for $mode = 1$ parameters must be user-specified.\\
+&- \param{fc} 28-day mean cylinder compression strength [MPa]\\
+&- \param{cc} cement content of concrete [kg/m$^{3}$]\\
+&- \param{w/c} ratio (by weight) of water to cementitious material\\
 &- \param{a/c} ratio (by weight) of aggregate to cement \\
 &- \param{t0} age when drying begins [day]\\
-&- \param{alpha1} shrinkage parameter -- influence of cement type\\
-&- \param{alpha2} shrinkage parameter -- influence of curing type\\
-&- \param{ks} cross-section shape factor \\
-&- \param{hum} relative humidity of the environment\\
+&- \param{q1-q4} parameters of B3 model for basic creep [1/TPa]\\
+%
+&- \param{shmode} shrinkage mode;
+$0=$ no shrinkage;
+$1=$ average shrinkage (the following parameters must be specified:
+\param{ks}, \param{vs}, \param{hum} and additionally  \param{alpha1} \param{alpha2} for $mode = 0$
+and \param{kt} \param{EpsSinf} \param{q5} \param{t0} for $mode = 1$;  
+$2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime},
+\param{at}, \param{w\_h}, \param{ncoeff}, \param{a})\\
+%
+&- \param{ks} cross-section shape factor [-]\\
 &- \param{vs} volume to surface ratio [m]\\
-&- \param{noshrinkage} shrinkage flag (0 = shrinkage included, 1 = shrinkage ignored)\\
+&- \param{hum} relative humidity of the environment [-]\\
+&- \param{alpha1} shrinkage parameter -- influence of cement type [-]\\
+&- \param{alpha2} shrinkage parameter -- influence of curing type [-]\\
+&- \param{kt} shrinkage parameter [day/m$^2$]\\
+&- \param{EpsSinf} shrinkage parameter [10$^{-6}$]\\
+&- \param{q5} drying creep parameter [1/TPa]\\
+%
+&- \param{es0} final shrinkage at material point\\
+&- \param{r}, \param{rprime} coefficients\\
+&- \param{at} oefficient relating stress-induced thermal strain and shrinkage\\
+&- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
+%
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 2dPlateLayer,2dBeamLayer, 3dShellLayer\\
 \hline
@@ -2020,6 +2501,38 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 %\end{center}
 \end{table}
 
+For illustration, sample input records for the material considered in Example 3.1 of the creep
+book by Ba\v{z}ant and Jir\'{a}sek is presented. The concrete mix is composed
+of 170 kg/m$^3$ of water, 450 kg/m$^3$ of type-I cement and 1800 kg/m$^3$ of aggregates,
+which corresponds to ratios $w/c=0.3778$ and $a/c=4$. The compressive strength 
+is $\bar{f}_c=45.4$ MPa. The concrete slab of thickness 200 mm is cured in air
+with initial protection against drying until the age of 7 days.
+Subsequently, the slab is exposed to an environment with
+relative humidity of 70\%. The following input record can be used for the first
+version of the model (B3mat):
+
+{\tt B3mat 1 n 0.2 d 0. talpha 1.2e-5 relMatAge 28. fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7. timefactor 1. alpha1 1. alpha2 1.2 ks 1. hum 0.7 vs 0.1 shmode 1}
+
+Parameter $\alpha_1=1$ corresponds to type-I cement, parameter $\alpha_2=1.2$
+to curing in air, parameter $k_s=1$ to an infinite slab. 
+The volume-to-surface ratio is in this case 
+equal to one half of the slab thickness
+and must be specified in meters, independently of the length units that are
+used in the finite element analysis (e.g., for nodal coordinates).
+The value of relMatAge must be specified in days.
+Parameter {\tt relMatAge 28.}  means that time 0
+of the analysis corresponds to concrete age 28 days. 
+If material B3mat is used, the finite element analysis
+must use days as the units of time (not only for relMatAge,
+but in general, e.g.\ for the time increments).
+
+If only the basic creep (without shrinkage) should be computed, then
+the material input record reduces to following:
+{\tt B3mat 1 n 0.2 d 0. talpha 1.2e-5 relMatAge 28. fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7. timefactor 1. shmode 0}
+
+
+
+%%%%%%%% B3 SOLID MAT %%%%%%%%%
 
 \begin{table}[!htb]
 \begin{tabular}{|l|p{9cm}|}
@@ -2030,11 +2543,11 @@ Record Format & \descitem{B3solidmat}
 \elemparam{d}{rn} \elemparam{n}{rn} \elemparam{talpha}{rn}
 %
 \elemparam{mode}{in} 
-\elemparam{EmoduliMode}{in} 
+\optelemparam{EmoduliMode}{in} 
 \elemparam{Microprestress}{in}
 \elemparam{shm}{in} 
 %for rheo chain material
-\elemparam{begoftimeofinterest}{rn} \elemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn}
+\optelemparam{begoftimeofinterest}{rn} \optelemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn}
 \elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn} \elemparam{a/c}{rn} \elemparam{t0}{rn} % mode = 0 
 \elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn} \elemparam{q4}{rn} % mode = 1
 %
@@ -2044,7 +2557,7 @@ Record Format & \descitem{B3solidmat}
 %shm = 1 B3_AverageShrinkage
 \elemparam{ks}{rn} 
 %for shm = 1 and mode = 0			
-\elemparam{alpha1}{rn} \elemparam{alpha2}{rn} \elemparam{hum}{rn} \elemparam{vs}{rn}
+\optelemparam{alpha1}{rn} \optelemparam{alpha2}{rn} \elemparam{hum}{rn} \elemparam{vs}{rn}
 %for shm = 1 and mode = 1
 \elemparam{q5}{rn} \elemparam{kt}{rn} \elemparam{EpsSinf}{rn}
 % = 2 B3_PointShrinkage
@@ -2065,13 +2578,21 @@ Parameters
 &- \param{EmoduliMode} optional parameter; analysis of retardation spectrum ($=0$, default value) or least-squares method ($=1$) is used for evaluation of Kelvin units moduli\\
 &- \param{Microprestress} $0=$ basic creep; $1=$ drying creep (must be run as a staggered problem with preceding analysis of humidity diffusion. Parameter \param{shm} must be equal to 3. The following parameters must be specified: \param{c0}, \param{c1}, \param{tS0}, \param{w\_h}, \param{ncoeff}, \param{a})\\
 
-&- \param{shm} shrinkage mode;
+&- \param{shmode} shrinkage mode;
 $0=$ no shrinkage;
-$1=$ average shrinkage (the following parameters must be specified: \param{ks}, \param{alpha1}, \param{alpha2}, \param{hum} and \param{vs} for $mode = 0$ and \param{ks}, \param{q5}, \param{kt} and \param{EpsSinf} for $mode=1$);
-$2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime}, \param{at});
+$1=$ average shrinkage (the following parameters must be specified:
+\param{ks}, \param{vs}, \param{hum} and additionally  \param{alpha1} \param{alpha2} for $mode = 0$
+and \param{kt} \param{EpsSinf} \param{q5} for $mode = 1$;
+$2=$ point shrinkage (needed: \param{es0}, \param{r}, \param{rprime},
+\param{at}), \param{w\_h} \param{ncoeff} \param{a};
 $3=$ point shrinkage based on MPS theory (needed: parameter \param{kSh} or value of \param{kSh} can be approximately determined if following parameters are given: \param{inithum}, \param{finalhum}, \param{alpha1} and \param{alpha2})\\
 
-&- \param{begoftimeofinterest}, \param{endoftimeofinterest} optional parameters; lower and upper boundary of time interval with good approximation of the compliance function [day]\\
+&- \param{begoftimeofinterest} optional parameter; lower boundary of time interval with good approximation of the compliance function
+[day]; default 0.1 day\\
+&- \param{endoftimeofinterest} optional parameter; upper boundary of
+time interval with good approximation of the compliance function
+[day]\\
+
 &- \param{timefactor} scaling factor transforming the simulation time units into days\\
 &- \param{relMatAge} relative material age [day]\\
 \hline
@@ -2086,26 +2607,29 @@ $3=$ point shrinkage based on MPS theory (needed: parameter \param{kSh} or value
 &- \param{w/c} water to cement ratio (by weight)\\
 &- \param{a/c} aggregate to cement ratio (by weight)\\
 &- \param{t0} age of concrete when drying begins [day]\\
-&- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters of B3 model for basic creep\\
+&- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters
+(compliances) of B3 model for basic creep [1/TPa]\\
 
 &- \param{c0} MPS theory parameter [MPa$^{-1}$ day$^{-1}$] \\
 &- \param{c1} MPS theory parameter [MPa]\\
-&- \param{tS0} MPS theory parameter - time when drying begins \\
+&- \param{tS0} MPS theory parameter - time when drying begins [day]\\
 &- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
 
-&- \param{ks} cross section shape factor \\
+&- \param{ks} cross section shape factor [-]\\
 &- \param{alpha1} optional shrinkage parameter - influence of cement type (optional parameter, default value is 1.0)\\
 &- \param{alpha2} optional shrinkage parameter - influence of curing type (optional parameter, default value is 1.0)\\
 &- \param{hum} relative humidity of the environment [-]\\
 &- \param{vs} volume to surface ratio [m]\\
-&- \param{q5}, \param{kt}, \param{EpsSinf} parameters of B3 model for drying creep\\
+&- \param{q5} drying creep parameter [1/TPa]\\
+&- \param{kt} shrinkage parameter [day/m$^2$]\\
+&- \param{EpsSinf} shrinkage parameter [10$^{-6}$]\\
 
 &- \param{es0} final shrinkage at material point\\
 &- \param{at} coefficient relating stress-induced thermal strain and shrinkage\\
 &- \param{rprime}, \param{r} coefficients\\
 
-&- \param{kSh} influences magnitude of shrinkage in MPS theory\\
-&- \param{inithum}, \param{finalhum} if provided, approximate value of \param{kSh} can be computed\\
+&- \param{kSh} influences magnitude of shrinkage in MPS theory [-]\\
+&- \param{inithum} [-], \param{finalhum} [-] if provided, approximate value of \param{kSh} can be computed\\
 
 
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
@@ -2117,6 +2641,214 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \label{b3solid_table}
 
 \end{table}
+
+Now consider the same conditions for ``B3solidmat''.
+In all the examples below,
+the input record with the material description can start by\\
+{\tt B3solidmat 1 d 2420. n 0.2 talpha 12.e-6 begtimeofinterest 1.e-2\\
+endtimeofinterest 3.e4 timefactor 86400. relMatAge 28.}
+
+Parameters {\tt begoftimeofinterest 1.e-2} and {\tt endoftimeofinterest 3.e4}
+mean that
+the computed response (e.g., deflection)
+should be accurate in the range from 0.01 day to 30,000 days after load
+application. 
+Parameter {\tt timefactor 86400.}
+means that the time unit used in the finite element analysis
+is 1 second (because 1 day = 86,400 seconds). 
+Note that the values of begtimeofinterest, endtimeofinterest
+and relMatAge are always specified in days, independently of the actual
+time units in the analysis. 
+Parameter {\tt EmoduliMode} is not specified, which means that the
+moduli of the Kelvin chain will be determined using the default method,
+based on the continuous retardation spectrum. 
+
+Additional parameters
+depend on the specific type of analysis:
+\begin{enumerate}
+\item
+Computing basic creep only, shrinkage not considered,
+parameters $q_i$ estimated from composition.\\
+{\tt mode 0 fc 45.4 cc 450.  w/c 0.3778 a/c 4.\\ t0 7. microprestress 0 shmode 0} 
+\item 
+Computing  basic creep only, shrinkage not considered,
+parameters $q_i$ specified by the user.\\
+{\tt mode 1 q1 18.81 q2 126.9 q3 0.7494 q4 7.692\\ microprestress 0 shmode 0} 
+\item 
+Computing  basic creep only, shrinkage handled using the sectional approach,
+parameters estimated from composition.\\
+{\tt mode 0 fc 45.4 cc 450. w/c 0.3778 a/c 4. t0 7.\\ microprestress 0 shmode 1 ks 1. alpha1 1. alpha2 1.2 hum 0.7 vs 0.1}
+\item 
+Computing  basic creep only, shrinkage handled using the sectional approach,
+parameters specified by the user.\\
+{\tt mode 1 q1 18.81 q2 126.9 q3 0.7494 q4 7.692\\
+ microprestress 0 shmode 1 ks 1. q5 326.7 kt  28025 EpsSinf 702.4 t0 7. hum 0.7 vs 0.1}
+\item 
+Computing  basic creep only, shrinkage handled using the point approach (B3),
+parameters specified by the user.\\
+{\tt mode 1 q1 18.81 q2 126.9 q3 0.7494 q4 7.692\\ 
+microprestress 0 shmode 2 es0 ... r ... rprime ... at ...}
+\item
+Computing drying creep, shrinkage handled using the point approach (MPS),
+parameters $q_i$ estimated from composition.\\
+{\tt mode 0 fc 45.4 w/c 0.3778 a/c 4. t0 7. microprestress 1 \\
+shmode 3 c0 1. c1 0.2 tS0 7. w\_h 0.0476 ncoeff 0.182 a 4.867  kSh 1.27258e-003}
+\end{enumerate}
+
+
+%%%%%%%% MPS MAT %%%%%%%%%
+
+
+\begin{table}[!htb]
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Microprestress-solidification theory material model for concrete creep\\
+\hline
+Record Format & \descitem{mps} 
+\elemparam{d}{rn} \elemparam{n}{rn} \elemparam{talpha}{rn} \elemparam{referencetemperature}{rn}
+%
+\elemparam{mode}{in} 
+\optelemparam{CoupledAnalysisType}{in}
+%for rheo chain material
+\optelemparam{begoftimeofinterest}{rn} \optelemparam{endoftimeofinterest}{rn} \elemparam{timefactor}{rn} \elemparam{relMatAge}{rn} \elemparam{lambda0}{rn}
+%mode = 0 
+\elemparam{fc}{rn} \elemparam{cc}{rn} \elemparam{w/c}{rn} \elemparam{a/c}{rn} \elemparam{stiffnessfactor}{rn} 
+%mode = 1 
+\elemparam{q1}{rn} \elemparam{q2}{rn} \elemparam{q3}{rn} \elemparam{q4}{rn}
+%
+% sorption isotherm description
+\elemparam{w\_h}{rn} \elemparam{ncoeff}{rn} \elemparam{a}{rn}
+%
+% MPS
+\elemparam{t0}{rn} \elemparam{ksh}{rn} \elemparam{mus}{rn} 
+\optelemparam{alphaE}{rn} \optelemparam{alphaR}{rn} \optelemparam{alphaS}{rn}
+\optelemparam{QEtoR}{rn} \optelemparam{QRtoR}{rn} \optelemparam{QStoR}{rn}
+\optelemparam{cT}{rn} \elemparam{kappaT}{rn}
+%	   	  
+\\Parameters 
+&- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{n} Poisson ratio\\
+&- \param{talpha} coefficient of thermal expansion\\
+&- \param{referencetemperature} reference temperature only to thermal expansion of material\\
+
+&- \param{mode} optional parameter; if $mode = 0$ (default),  parameters $q1-q4$ are predicted from composition of the concrete mixture (parameters fc, cc, w/c, a/c and stiffnessfactor need to be specified). Otherwise values of parameters $q1-q4$ are expected.\\
+&- \param{CoupledAnalysisType} $0=$ basic creep; $1=$ (default) drying creep shrinkage; the problem must be run as a staggered problem with preceding analysis of humidity and temperature distribution. Following parameters must be specified: \param{w\_h}, \param{ncoeff}, \param{rn}, \param{t0}, \param{mus}, \param{kappaT}\\
+%
+&- \param{lambda0} scaling factor equal to 1.0 day in time units of analysis (eg. 86400 if the analysis runs in seconds)\\
+&- \param{begoftimeofinterest} lower boundary of time interval with good approximation of the compliance function; default value = 0.01 $lambda0$\\  
+&- \param{endoftimeofinterest} upper boundary of time interval with good approximation of the compliance function; default value = 10000. $lambda0$\\  
+&- \param{timefactor} scaling factor, for mps material must be equal to 1.0\\
+&- \param{relMatAge} relative material age\\
+%
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[!htb]
+\begin{tabular}{|l|p{9cm}|}
+\hline
+%
+&- \param{fc} 28-day standard cylinder compression strength [MPa]\\
+&- \param{cc} cement content of concrete mixture  [kg m$^{-3}$] \\
+&- \param{w/c} water to cement weight ratio\\
+&- \param{a/c} aggregate to cement weight ratio\\
+&- \param{stiffnessfactor} scaling factor converting ``predicted" parameters $q_1$ - $q_4$ into proper units (eg. 1.0 if stiffness is measured in Pa, 1.e6 for MPa)\\
+&- \param{q1}, \param{q2}, \param{q3}, \param{q4} parameters of B3 model for basic creep\\
+&- \param{w\_h}, \param{ncoeff}, \param{a} sorption isotherm parameters obtained from experiments [Pedersen, 1990] \\
+%
+&- \param{mus} parameter governing to the evolution of viscosity; for exponent $p=2$, $\mu_S = c_0 c_1 q_4$ [Pa$^{-1}$ s$^{-1}$] \\
+&- \param{ksh} parameter relating rate of shrinkage to rate of humidity [-], default value is 0.0, i.e. no shrinkage\\
+&- \param{t0} time of the first temperature or humidity change\\
+&- \param{alphaE} constant, default value 10.\\
+&- \param{alphaR} constant, default value 0.1\\
+&- \param{alphaS} constant, default value 0.1\\
+&- \param{QEtoR} activation energy ratio, default value 2700. K\\
+&- \param{QRtoR} activation energy ratio, default value 5000. K\\
+&- \param{QStoR} activation energy ratio, default value 3000. K\\
+%
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
+2dPlateLayer, 2dBeamLayer, 3dShellLayer\\
+\hline
+\end{tabular}
+
+\caption{MPS theory---summary.}
+\label{mps_table}
+
+\end{table}
+
+
+Finally consider the same conditions for ``MPS material''.
+In all the examples below,
+the input record with the material description can start by\\
+{\tt mps 1 d 2420. n 0.2 talpha 12.e-6 referencetemperature 296.}
+
+
+Additional parameters
+depend on the specific type of analysis:
+\begin{enumerate}
+\item
+Computing basic creep only, shrinkage not considered,
+parameters $q_i$ estimated from composition and simulation time in
+days and stiffnesses in MPa.\\
+{\tt mode 0 fc 45.4 cc 450. w/c 0.3778 a/c 4. stiffnessFactor 1.e6\\
+  timefactor 1. lambda0 1. begoftimeofinterest 1.e-2 \\
+endoftimeofinterest 3.e4  relMatAge 28.  CoupledAnalysisType 0.} 
+
+\item
+Computing basic creep only, shrinkage not considered,
+parameters $q_i$ specified by user, simulation time in seconds and stiffnesses in Pa.\\
+{\tt mode 1 q1 18.81e-12 q2 126.9e-12 q3 0.7494e-12 q4 7.6926e-12 \\
+ timefactor 1. lambda0 86400. begoftimeofinterest 864.\\
+ endoftimeofinterest 2.592e9 relMatAge 2419200. CoupledAnalysisType 0.} 
+
+\item
+Computing both basic and drying creep, 
+parameters $q_i$ specified by user, simulation time in seconds and stiffnesses in MPa.\\
+{\tt mode 1 q1 18.81e-6 q2 126.9e-6 q3 0.7494e-6 q4 7.6926e-6\\ 
+  timefactor 1. lambda0 86400. begoftimeofinterest 864.\\ 
+endoftimeofinterest 2.592e9  relMatAge 2419200. CoupledAnalysisType
+1. \\
+ksh 0.0004921875. t0 2419200. kappaT 0.005051 mus 4.0509259e-8 \\
+a 4.8670917 w\_h 0.04761543 ncoeff 0.18166781} 
+
+
+\end{enumerate}
+
+Final recommendations:
+
+\begin {itemize}
+\item to simulate basic creep without shrinkage it is possible to use
+  all three models
+\begin {itemize}%subitem 
+\item B3mat with $shmode = 0$
+\item B3Solidmat with $shmode = 0$ and $microprestress = 0$
+\item MPS with $CoupledAnalysisType = 0$
+\end{itemize}
+\item to simulate drying creep with shrinkage using ``sectional approach'', only the
+  first material model (B3mat) is suitable can be used (with $shmode = 1$)
+
+\item to simulate drying creep without shrinkage using ``sectional approach'', only the
+  first material model (B3mat) is suitable (with $shmode = 1$, $mode = 1$
+  and $EpsSinf = 0.0$)
+
+\item to simulate drying creep with shrinkage using ``point approach''
+  according to B3 model there are two options:
+\begin {itemize} %subitem 
+\item B3mat (with $shmode = 2$)
+\item B3Solidmat (with $shmode = 2$)
+\end{itemize}
+In order to suppress shrinkage set $es0 = 0.0$
+
+\item to simulate drying creep with shrinkage using ``point approach''
+  according to MPS model there are two options:
+\begin {itemize} % subitem 
+\item B3Solidmat (with $shmode = 3$)
+\item MPS with $CoupledAnalysisType = 1$
+\end{itemize}
+In order to suppress shrinkage set $kSh = 0.0$
+\end{itemize}
 
 
 \clearpage
@@ -2190,16 +2922,16 @@ and the Lode angle $\theta$ defined by the relation
 where $J_2$ and $J_3$ are the second and third deviatoric invariants.
 The yield function
 \bea\nonumber
-f_{\rm p}(\bar\sigma_{\rm V},\bar\rho,\bar\theta;\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
 && 
  +m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
 \label{eq:yieldSurface}
 \eea
 depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable $\kappa_{\rm p}$ (which enters through a dimensionless variable $q_{\rm h}$). Parameter $\fc$ is the uniaxial compressive strength. 
 Note that, under uniaxial compression characterized by axial stress 
-$\bar\sigma<0$,  we have $\bar\sigma_{\rm V}=\bar\sigma/3$,
-$\bar\rho=-\sqrt{2/3}\,\bar\sigma$ and $\bar\theta=60^o$. The yield function
-then reduces to $f_{\rm p}=(\bar\sigma/\fc)^2-q_{\rm{h}}^2$. This means that
+$\bar{\sigma}<0$,  we have $\bar{\sigma}_{\rm V}=\bar{\sigma}/3$,
+$\bar{\rho}=-\sqrt{2/3}\,\bar{\sigma}$ and $\bar{\theta}=60^o$. The yield function
+then reduces to $f_{\rm p}=(\bar{\sigma}/\fc)^2-q_{\rm{h}}^2$. This means that
 function $q_{\rm{h}}$ describes the evolution of the uniaxial compressive
 yield stress normalized by its maximum value, $\fc$.
 
@@ -2251,7 +2983,7 @@ a) meridional section, b) deviatoric section for a constant volumetric effective
 The maximum size of the elastic domain is attained when the variable $q_{\rm h}$ is equal to one (which is its maximum value, as follows from the hardening law, to be specified in~(\ref{eq:hardeningLaw})). The yield surface is then described by the equation
 %
 \begin{equation}\label{eq:failureSurface}
-f_{\rm p}\left(\bar\sigma_{\rm V},\bar\rho,\bar\theta;1\right) \equiv \frac{3}{2} \frac{\bar{\rho}^2}{\fc^2} + m_0 \left(\frac{\bar{\rho} }{\sqrt{6}\fc}r(\bar{\theta}) + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - 1 = 0
+f_{\rm p}\left(\bar{\sigma}_{\rm V},\bar{\rho},\bar{\theta};1\right) \equiv \frac{3}{2} \frac{\bar{\rho}^2}{\fc^2} + m_0 \left(\frac{\bar{\rho} }{\sqrt{6}\fc}r(\bar{\theta}) + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - 1 = 0
 \end{equation}
 
 The {\bf flow rule} 
@@ -2262,7 +2994,7 @@ The {\bf flow rule}
 %
 is non-associated, which means that the yield function $f_{\rm p}$ and the plastic potential 
 \bea\nonumber
-g_{\rm p}(\bar\sigma_{\rm V},\bar\rho;\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right] \left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+g_{\rm p}(\bar{\sigma}_{\rm V},\bar{\rho};\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right] \left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
 &&+q_{\rm{h}}^2(\kappa_{\rm p}) \left( \frac{m_0 \bar{\rho}}{\sqrt{6}\fc} + \frac{m_{\rm g}(\bar{\sigma}_{\rm V})}{\fc} \right)
  \label{eq:plasticPotential}
 \eea
@@ -2476,9 +3208,9 @@ size in the direction of the body diagonal can be 173 mm.
 
 The model is designed for transversely isotropic elastic material defined by five elastic material constants. Typical example is a carbon fiber tow. Axis $1$ represents the material principal direction. The orthotropic material constants are defined as
 \begin{eqnarray}
-\nu_{12}=\nu_{13},~\nu_{21}=\nu_{31},~\nu_{23}=\nu_{32},~E_{22}=E_{33}\\
-G_{12}=G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
-\frac{\nu_{12}=\nu_{13}}{E_{11}} = \frac{\nu_{21}=\nu_{31}}{E_{22}},~\frac{\nu_{31}=\nu_{21}}{E_{33}} = \frac{\nu_{13}=\nu_{12}}{E_{11}}
+\nu_{12}&=&\nu_{13},~\nu_{21}=\nu_{31},~\nu_{23}=\nu_{32},~E_{22}=E_{33}\\
+G_{12}&=&G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
+\frac{\nu_{12}=\nu_{13}}{E_{11}} &=& \frac{\nu_{21}=\nu_{31}}{E_{22}},~\frac{\nu_{31}=\nu_{21}}{E_{33}} = \frac{\nu_{13}=\nu_{12}}{E_{11}}
 \end{eqnarray}
 
 Material orientation on a finite element can be specified with \param{lcs} optional parameter. If unspecified, material orientation is the same as the global coordinate system. \param{lcs} array contains six numbers,
@@ -2503,7 +3235,8 @@ The index $p,~p\in\{11,22,33,23,31,12\}$ symbolizes six components of stress or 
 
 The compliance material matrix $\mathbf{H}$, in the secant form and including damage parameters, reads
 \footnotesize
-\begin{eqnarray}
+\begin{equation}
+\mathbf{H}=
 \left[ \begin{array}{cccccc}
 \frac{1}{(1-d_{11})E_{11}} & -\frac{\nu_{21}}{E_{22}} & -\frac{\nu_{31}}{E_{33}} &0 &0 & 0\\
 -\frac{\nu_{12}}{E_{11}} & \frac{1}{(1-d_{22})E_{22}} & -\frac{\nu_{32}}{E_{33}} &0& 0&0\\
@@ -2512,24 +3245,24 @@ The compliance material matrix $\mathbf{H}$, in the secant form and including da
  0& 0& 0& 0& \frac{1}{(1-d_{31})G_{31}} & 0\\
  0& 0&0 &0& 0& \frac{1}{(1-d_{12})G_{12}}
 \end{array} \right]\label{comp_eq_H}
-\end{eqnarray}
+\end{equation}
 \normalsize
 
 Damage occurs when any out of six stress tensor components exceeds a given strength $f_{p,0}$
-\begin{eqnarray}
+\begin{equation}
 |\sigma_p| \geq |f_{p,0}|
-\end{eqnarray}
+\end{equation}
 Positive and negative ultimate strengths can be generally different but share the same damage variable.
 At the point of damage initiation, see Fig. \ref{comp_softening}, one evaluates $\varepsilon_{p,E}$ and characteristic element length $l_p$, generally different for each damage mode. Given the fracture energy $G_{F,p}$, the maximum strain at zero stress $\varepsilon_{p,0}$ is computed
 \begin{eqnarray}
-\varepsilon_{p,0} = \varepsilon_{p,E} + \frac{2G_{F,p}}{f_{p,0} l_p}
+\varepsilon_{p,0} &=& \varepsilon_{p,E} + \frac{2G_{F,p}}{f_{p,0} l_p}
 \end{eqnarray}
 
 The point of damage initiation is never reached exactly, one needs to interpolate between the previous equilibrated step and current step to achieve objectivity.
 
 The evolution of damage $d_p$ is based on the evolution of corresponding strain $\varepsilon_p$. A maximum achieved strain is stored in the variable $\kappa_p$. If $\varepsilon_p > \kappa_p$ the damage may grow so the corresponding damage variable $d_p$ may increase. Desired stress $\sigma'_p$ is evaluated from the actual strain $\varepsilon_p$
 \begin{eqnarray}
-\sigma'_p = f_{p,0} \frac{\varepsilon_{p,0} - \varepsilon_p}{\varepsilon_{p,0}-\varepsilon_{p,E}}
+\sigma'_p &=& f_{p,0} \frac{\varepsilon_{p,0} - \varepsilon_p}{\varepsilon_{p,0}-\varepsilon_{p,E}}
 \end{eqnarray}
 and the calculation of damage variables $d_p$ stems from Eq.~\ref{comp_eq_H}, for example
 \begin{eqnarray}
@@ -2766,6 +3499,62 @@ Supported modes& 3dMat\\
 \end{table}
 
 
+\subsection{Material models for interfaces}
+
+Interface elements have to be used with material models describing
+the constitutive behavior of interfaces between two materials 
+(e.g.\ between steel reinforcement and concrete),
+or between two bodies in contact.
+Such interface laws are formulated in terms of the traction vector and the displacement jump vector.
+
+\subsubsection{Isotropic damage model for interfaces}
+
+This model is described in Section~\ref{sec:idmfi}.
+
+\subsubsection{Simple interface material}
+
+This model provides a simple interface law with penalty-type contact and friction. 
+In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
+By setting \param{kn} to a high value, the penetration (overlap) can be reduced,
+in the spirit of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
+of the gap can be allowed. 
+The shear response is elastoplastic, with the yield limit dependent on the normal traction.
+The magnitude of the shear traction $\vsig_T$ must not exceed the yield limit computed 
+according to a Coulomb-like friction law as the product of the (negative part of)
+ normal traction $\sigma_N$ and a dimensionless coefficient of friction $fc$:
+\begin{equation}
+	||\vsig_T|| \leq \left\langle-\sigma_N\cdot fc\right\rangle
+\end{equation}
+The shear elastic stiffness is assumed to be \param{kn} (i.e., equal to the
+normal stiffness). If the normal traction is tensile
+or zero, no shear traction can be transmitted by the interface.
+In the future, this law will be enriched by a cohesion-like term.
+
+If used in connection of two nodes with {\tt interface1delement}, the element-level parameter \param{normal} determines what is compression and what is tension (from the 1st node to the 2nd node in \param{normal} direction it is tension). 
+
+The model description and parameters are summarized in table~\ref{simpleinterfacemat_table}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Simple interface material\\
+\hline
+Record Format & \descitem{simpleintermat}  \elemparam{}{in}
+\elemparam{kn}{rn} \optelemparam{fc}{rn} \optelemparam{stiffcoeff}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{kn} (penalty) stiffness in compression\\
+&- \param{fc} friction coefficient\\
+&- \param{stiffcoeff} ratio (tensile stiffness / compression stiffness)\\
+Supported modes& \_1dInterface\\
+\hline
+\end{tabular}
+\caption{Simple interface material -- summary.}
+\label{simpleinterfacemat_table}
+%\end{center}
+\end{table}
+
+
 
 \clearpage
 
@@ -2882,9 +3671,9 @@ where three parameters $\tau$, $\beta$ and $\alpha_\infty$ are needed. Some mean
 
 The \param{hydrationmodeltype} = 2 is inspired by Cervera et al. \cite{Cervera:99}, who proposed an analytical form of the normalized affinity which was refined in \cite{Gawin:06a}. A slightly modified formulation is proposed here. The affinity model is formulated for a reference temperature 25\C
 \begin{eqnarray}
-\frac{\ud \alpha}{\ud t} = \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) \exp\left(-\bar\eta\frac{\alpha}{\alpha_\infty}\right) k_{rate} \label{eq:affinity2}
+\frac{\ud \alpha}{\ud t} = \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) \exp\left(-\bar{\eta}\frac{\alpha}{\alpha_\infty}\right) k_{rate} \label{eq:affinity2}
 \end{eqnarray}
-where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar\eta$ represents microdiffusion of free water through formed hydrates. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
+where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar{\eta}$ represents microdiffusion of free water through formed hydrates. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
 
 \begin{table}[!htb]
 %\begin{center}

@@ -2,7 +2,7 @@
 # top oofem makefile
 #
 SHELL      = @SHELL@
-BACKUPFILES=.+\.C$$|.+\.cpp$$|.+\.h$$|.+\.in$$|.+\.in\.[0-9]*$$|.+\.tex$$|.+\.el$$|.+\.sty$$|.+\.fig$$.+\.xmgr$$|.+\.eps$$|.+\.ps$$|.+\.pdf$$|.+\.png$$|.+\.shtml$$|makefile$$|do_release|.+\.txt$$|ChangeLog|README|VERSION|.+\.pl$$|.+\.py$$|.+\.cfg$$|.+\.html$$|*.+\.shtml$$|*.+\.img$$|*.+\.id$$|*.+\.src$$|*.+\.shtml$$|intro|mainpage|do_test$$|.+\.in$$|.+\.ctrl$$|.+t3d.in$$|.+t3d.out$$|.+configure$$|.+config.guess$$|.+config.sub$$|.+install.sh$$
+BACKUPFILES=.+\.C$$|.+\.cpp$$|.+\.h$$|.+\.in$$|.+\.in\.[0-9]*$$|.+\.tex$$|.+\.el$$|.+\.sty$$|.+\.fig$$.+\.xmgr$$|.+\.eps$$|.+\.ps$$|.+\.pdf$$|.+\.png$$|.+\.tikz$$|.+\.shtml$$|makefile$$|do_release|.+\.txt$$|ChangeLog|README|VERSION|.+\.pl$$|.+\.py$$|.+\.cfg$$|.+\.html$$|*.+\.shtml$$|*.+\.img$$|*.+\.id$$|*.+\.src$$|*.+\.shtml$$|intro|mainpage|do_test$$|.+\.in$$|.+\.ctrl$$|.+t3d.in$$|.+t3d.out$$|.+configure$$|.+config.guess$$|.+config.sub$$|.+install.sh$$
 EXCLUDEFILES=/\.svn/|/iml/|/targets/
 
 all:

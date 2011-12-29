@@ -39,6 +39,9 @@
 /* Define if M_LN2 constant defined by compiler */
 #undef HAVE_M_LN2
 
+/* Define if cbrt function provided */
+#undef HAVE_CBRT
+
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
 #undef HAVE_MACRO_VA_ARGS
 

@@ -4,7 +4,7 @@ RCP = scp
 
 html: ps
 	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html -dir html -mkdir programmer
+	latex2html -local_icons -dir html -mkdir programmer
 
 ps:
 

@@ -584,6 +584,7 @@ anti-clockwise (see fig. (\ref{TrplaneStrain})).
 
 \subsection{Plate\&Shell Elements}
 \subsubsection {CCT Element}
+\label{cct}
 Implementation of constant curvature triangular element for plate
 analysis. Formulation based on Mindlin hypothesis. The structure should be defined in x,y plane. 
 The nodes should be numbered anti-clockwise (positive rotation around
@@ -604,7 +605,10 @@ Integration of all terms using one point formula.
 
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported now.
-
+\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+The generalized stress vector contains corresponding integral forces/moments:
+$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer. 
 \descitem{Status} Reliable.
 
 \subsubsection {CCT3D Element}
@@ -627,6 +631,7 @@ Integration of all terms using one point formula.
 
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported.
+\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
 
 \descitem{Status} Reliable.
 
@@ -643,6 +648,7 @@ Integration of all terms using one point formula.\\
 \descitem{Features} Layered cross section support.\\
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported now.\\
+\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
 \descitem{Status} Reliable.
 
 
@@ -666,6 +672,7 @@ Integration of all terms using one point formula.\\
 \descitem{Features} Layered cross section support.\\
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported.\\
+\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
 \descitem{Status} Reliable.
 
 
@@ -885,10 +892,10 @@ these nodes depending on their relative displacement. This element can
 be applied in 1D, 2D, and 3D settings (default).
 
 \elemkeyword{Interface1d}\\
-\descitem{Parameters} \elemparam{refnode}{in}\\
-The \param{refnode} determines the reference node, which is used to
+\descitem{Parameters} \optelemparam{refnode}{in} \optelemparam{normal}{ra}\\
+The optional parameter \param{refnode} determines the reference node, which is used to
 specify a reference direction (the direction vector is obtained by
-subtracting coordinates of first node from reference node).
+subtracting the coordinates of the first node from the reference node). The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.
 The magnitude of slip is then obtained as relative displacement vector
 of two element nodes projected to reference direction. As a
 consequence, this will lead to linearized geometrical equations, where

@@ -46,10 +46,10 @@
 #include "integrationdomain.h"
 #include "integrationrule.h"
 #include "gausspnt.h"
+#include "math.h"
 
 #include <utility>
 #include <list>
-#include <cmath>
 
 namespace oofem {
 

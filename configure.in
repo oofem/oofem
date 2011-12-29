@@ -18,6 +18,7 @@ dnl   --with-SLEPCDIR[=SLEPC_DIR]
 dnl   --enable-dss           --disble-dss
 dnl   --enable-parmetis      --disable-parmetis
 dnl   --with-PARMETISDIR[=PARMETIS_DIR]
+dnl   --enable-mpi           --disble-mpi
 dnl   --with-MPIDIR[=MPI_DIR]
 dnl   --with-CKITDIR[=CKIT_DIR]
 dnl   --with-ELIXIRDIR[=ELIXIR_DIR]
@@ -43,6 +44,7 @@ spooles_module=no
 petsc_module=no
 slepc_module=no
 dss_module=no
+mpi_module=no
 parmetis_module=no
 
 oofeg_val=no
@@ -50,7 +52,7 @@ poofem_val=no
 oofeg_di=no
 
 LOCAL_LIBS=""
-
+MPI_DIR=""
 
 
 AC_INIT(src/oofemlib/element.h)
@@ -158,6 +160,7 @@ dnl --------------------------------------------------------------------
 dnl Checks for math library functions.
 dnl --------------------------------------------------------------------
 AC_CHECK_FUNCS(nearest)
+AC_CHECK_FUNCS(cbrt)
 
 dnl --------------------------------------------------------------------
 dnl check for enum {FALSE=0, TRUE = 1};
@@ -206,7 +209,6 @@ AC_DEFINE(HAVE_M_LN2,,Define if M_LN2 is defined)
 [
 AC_MSG_RESULT(no)
 ])
-
 
 dnl --------------------------------------------------------------------
 dnl check for STL
@@ -377,6 +379,15 @@ AC_ARG_ENABLE(dss, [  --enable-dss            adds dss module support],
 dnl--------------------------------------------------------------------
 dnl Check for MPI
 dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(mpi, [  --enable-mpi        adds mpi library support],
+     [
+         mpi_module=$enableval
+     ],
+    [
+	 mpi_module=no
+    ]
+)
+
 AC_ARG_WITH(MPIDIR, [  --with-MPIDIR=dir       allows to specify MPI_DIR] , 
  [
      MPI_DIR=$withval
@@ -612,31 +623,62 @@ if test x$poofem_val = xyes; then
 fi
 
 if test x$mpi_module = xyes; then
-  dnl parmetis requires mpi
-  AC_MSG_CHECKING(MPI location)
+   AC_DEFINE(HAVE_MPI_H)
+   MODULE_SYMBOLS="$MODULE_SYMBOLS -DMPICH_IGNORE_CXX_SEEK"
 
-  if test -f ${MPI_DIR}/include/mpi.h; then
-    AC_MSG_RESULT(${MPI_DIR})
-  else
-    while test ! -f ${MPI_DIR}/include/mpi.h; do
-      echo "Directory ${MPI_DIR} does not seem to be MPI dir."
-      echo "Type in directory (use absolute path):"
-      read MPI_DIR
-    done;
-  fi
-  MPI_INCLUDES="-I${MPI_DIR}/include"
-  AC_DEFINE(HAVE_MPI_H)
-  MODULE_SYMBOLS="$MODULE_SYMBOLS -DMPICH_IGNORE_CXX_SEEK"
+   if [ ${MPI_dir} ];  then
+   
+     dnl parmetis requires mpi
+     AC_MSG_CHECKING(MPI location)
 
-dnl check for mpi Compiler batch
- AC_PATH_PROG(CXX, mpicxx, "x", ${MPI_DIR}/bin)
- if test x$CXX = xx; then
-     echo "MPI compiler not found in $dir."
-   exit
- fi
+       if test -f ${MPI_DIR}/include/mpi.h; then
+       	  AC_MSG_RESULT(${MPI_DIR})
+       else	  
+           while test ! -f ${MPI_DIR}/include/mpi.h; do
+	         echo "Directory ${MPI_DIR} does not seem to be MPI dir."
+		 echo "Type in directory (use absolute path):"
+		 read MPI_DIR
+	   done;
+       fi
+       MPI_INCLUDES="-I${MPI_DIR}/include"
+       AC_DEFINE(HAVE_MPI_H)
+       MODULE_SYMBOLS="$MODULE_SYMBOLS -DMPICH_IGNORE_CXX_SEEK"
+   fi     
+   dnl check for mpi Compiler batch
+   AC_PATH_PROG(CXX, mpicxx, "x", ${MPI_DIR}/bin)
+   if test x$CXX = xx; then
+     AC_MSG_FAILURE(MPI compiler not found)
+   fi
+
+
+   AC_MSG_CHECKING([MPI installation])
+   AC_LINK_IFELSE([
+	AC_LANG_PROGRAM([[
+	   #include <stdio.h>
+	   #include <mpi.h>
+	   int argc = 1;
+	   char *argv[1];
+	   char **p[]={argv};
+	]],
+	[[
+	   int node;
+
+	   MPI_Init(&argc,p);
+	   MPI_Comm_rank(MPI_COMM_WORLD, &node);
+     
+	   printf("Hello World from Node %d\n",node);
+            
+	   MPI_Finalize();
+	 ]])],
+	[
+	    AC_MSG_RESULT(ok)
+	    AC_DEFINE(HAVE_MPI_H)
+	],
+	[
+	    AC_MSG_RESULT(no)
+	    AC_MSG_FAILURE(MPI installation test failed)
+       ])
 fi
-
-
 
 
 dnl --------------------------------------------------------------------

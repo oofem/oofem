@@ -75,10 +75,10 @@ SimpleInterfaceMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form,
-                                                      MatResponseMode mode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *atTime)
+                                                         MatResponseForm form,
+                                                         MatResponseMode mode,
+                                                         GaussPoint *gp,
+                                                         TimeStep *atTime)
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
@@ -90,8 +90,8 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *atTime)
+                                                const FloatArray &totalStrain,
+                                                TimeStep *atTime)
 //
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -99,62 +99,65 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 //
 {
     SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
-	 this->initGpForNewStep(gp);
-	 FloatArray shearStrain(2), shearStress, strainVector;
-	 StructuralElement* el = (StructuralElement*) gp->giveElement();
-	 el->computeStrainVector(strainVector,gp,atTime);
-	 FloatArray tempShearStressShift = status->giveTempShearStressShift();
-	 const double normalStrain = strainVector.at(1);
-	 double normalStress, maxShearStress, dp, temp;
+    this->initGpForNewStep(gp);
+    FloatArray shearStrain(2), shearStress, strainVector;
+    StructuralElement *el = ( StructuralElement * ) gp->giveElement();
+    el->computeStrainVector(strainVector, gp, atTime);
+    FloatArray tempShearStressShift = status->giveTempShearStressShift();
+    const double normalStrain = strainVector.at(1);
+    double normalStress, maxShearStress, dp;
 
     //MaterialMode mMode = gp->giveElement()->giveMaterialMode(); TODO
     MaterialMode mMode = el->giveMaterialMode();
     //answer.resize(giveSizeOfReducedStressStrainVector(mMode));
-	 answer.zero();
+    answer.zero();
     if ( normalStrain <= 0. ) {
-        normalStress = this->kn*normalStrain;
-		  maxShearStress = fabs(normalStress)*this->frictCoeff;
+        normalStress = this->kn * normalStrain;
+        maxShearStress = fabs(normalStress) * this->frictCoeff;
     } else {
-        normalStress = 0.;
-		  maxShearStress = 0.;
+        normalStress = this->kn * this->stiffCoeff * normalStrain;
+        maxShearStress = 0.;
     }
 
-	 switch (mMode) {
-		 case _1dInterface:
-			answer.resize(1);
-		 	break;
-		 case _2dInterface:
-			answer.resize(2);
-			shearStrain.at(1) = strainVector.at(2);
-		 	shearStress = shearStrain*this->kn - tempShearStressShift;
-			dp = shearStress.dotProduct(shearStress,1);
-			if (dp > maxShearStress*maxShearStress) {
-				shearStress.times(maxShearStress/sqrt(dp));
-			}
-			tempShearStressShift = shearStrain*kn - shearStress;
-			answer.at(2) = shearStress.at(1);
-			break;
-		 case _3dInterface:
-			answer.resize(3);
-			shearStrain.at(1) = strainVector.at(2);
-			shearStrain.at(2) = strainVector.at(3);
-		 	shearStress = shearStrain*this->kn - tempShearStressShift;
-			dp = shearStress.dotProduct(shearStress,2);
-			if (dp > maxShearStress*maxShearStress) {
-				shearStress.times(maxShearStress/sqrt(dp));
-			}
-			tempShearStressShift = shearStrain*kn - shearStress;
-			answer.at(2) = shearStress.at(1);
-			answer.at(3) = shearStress.at(2);
-			break;
-		default:
-         _error("giveMaterialMode: Unsupported coord mode");
-		}
-		double lim = 1e50;
-	  answer.at(1) = normalStress>lim? lim : normalStress<-lim? -lim : normalStress;
+    switch ( mMode ) {
+    case _1dInterface:
+        answer.resize(1);
+        break;
+    case _2dInterface:
+        answer.resize(2);
+        shearStrain.at(1) = strainVector.at(2);
+        shearStress = shearStrain * this->kn - tempShearStressShift;
+        dp = shearStress.dotProduct(shearStress, 1);
+        if ( dp > maxShearStress * maxShearStress ) {
+            shearStress.times( maxShearStress / sqrt(dp) );
+        }
+
+        tempShearStressShift = shearStrain * kn - shearStress;
+        answer.at(2) = shearStress.at(1);
+        break;
+    case _3dInterface:
+        answer.resize(3);
+        shearStrain.at(1) = strainVector.at(2);
+        shearStrain.at(2) = strainVector.at(3);
+        shearStress = shearStrain * this->kn - tempShearStressShift;
+        dp = shearStress.dotProduct(shearStress, 2);
+        if ( dp > maxShearStress * maxShearStress ) {
+            shearStress.times( maxShearStress / sqrt(dp) );
+        }
+
+        tempShearStressShift = shearStrain * kn - shearStress;
+        answer.at(2) = shearStress.at(1);
+        answer.at(3) = shearStress.at(2);
+        break;
+    default:
+        _error("giveMaterialMode: Unsupported coord mode");
+    }
+
+    double lim = 1e50;
+    answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
 
     // update gp
-	 status->setTempShearStressShift(tempShearStressShift);
+    status->setTempShearStressShift(tempShearStressShift);
     status->letTempStrainVectorBe(strainVector);
     status->letTempStressVectorBe(answer);
     return;
@@ -162,8 +165,8 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 
 void
 SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                 MatResponseForm form, MatResponseMode rMode,
-                                                 GaussPoint *gp, TimeStep *atTime)
+                                                    MatResponseForm form, MatResponseMode rMode,
+                                                    GaussPoint *gp, TimeStep *atTime)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -171,67 +174,68 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //MaterialMode mMode = gp->giveMaterialMode();
     MaterialMode mMode = gp->giveElement()->giveMaterialMode();
 
-		 SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
-		 FloatArray strainVector;
-		 StructuralElement* el = (StructuralElement*) gp->giveElement();
-		 el->computeStrainVector(strainVector,gp,atTime);
-		 double normalStrain = strainVector.at(1);
-       answer.zero();
+    //SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
+    FloatArray strainVector;
+    StructuralElement *el = ( StructuralElement * ) gp->giveElement();
+    el->computeStrainVector(strainVector, gp, atTime);
+    double normalStrain = strainVector.at(1);
+    answer.zero();
     switch ( mMode ) {
     case _1dInterface:
-		 answer.resize(1, 1);
-		 if ( rMode==SecantStiffness || rMode==TangentStiffness) {
-			 if (normalStrain <= 0) { answer.at(1,1) = this->kn; }
-			 else { answer.at(1,1) = 0; }
-		 }
-		 else {
-			 if ( rMode==ElasticStiffness) { answer.at(1,1) = this->kn; }
-			 else {
-				  _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-			 }
-		 }
-		 return;
-	case _2dInterface:
-		 answer.resize(2, 2);
-		 if ( rMode==SecantStiffness || rMode==TangentStiffness) {
-			 if (normalStrain <= 0.) {
-				 answer.at(1,1) = answer.at(2,2) = this->kn;
-			}
-			 else {
-				 answer.at(1,1) = answer.at(2,2) = 0.;
-			 }
-			
-		 }
-		 else {
-			 if ( rMode==ElasticStiffness) {
-				 answer.at(1,1) = answer.at(2,2) = this->kn;
-				}
-			 else {
-				  _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-			 }
-		 }
-		 return;
-	case _3dInterface:
-		 answer.resize(3, 3);
-		 if ( rMode==SecantStiffness || rMode==TangentStiffness) {
-			 if (normalStrain <= 0.) {
-				 answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = this->kn;
-			}
-			 else {
-				 answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 0.;
-			 }
-			
-		 }
-		 else {
-			 if ( rMode==ElasticStiffness) {
-				 answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = this->kn;
-				}
-			 else {
-				  _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-			 }
-		 }
-		 return;
-		return;
+        answer.resize(1, 1);
+        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+            if ( normalStrain <= 0 ) {
+                answer.at(1, 1) = this->kn;
+            } else {
+                answer.at(1, 1) = this->kn * this->frictCoeff;
+            }
+        } else {
+            if ( rMode == ElasticStiffness ) {
+                answer.at(1, 1) = this->kn;
+            } else {
+                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+            }
+        }
+
+        return;
+
+    case _2dInterface:
+        answer.resize(2, 2);
+        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+            if ( normalStrain <= 0. ) {
+                answer.at(1, 1) = answer.at(2, 2) = this->kn;
+            } else {
+                answer.at(1, 1) = answer.at(2, 2) = this->kn * this->frictCoeff;
+            }
+        } else {
+            if ( rMode == ElasticStiffness ) {
+                answer.at(1, 1) = answer.at(2, 2) = this->kn;
+            } else {
+                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+            }
+        }
+
+        return;
+
+    case _3dInterface:
+        answer.resize(3, 3);
+        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
+            if ( normalStrain <= 0. ) {
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
+            } else {
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->frictCoeff;
+            }
+        } else {
+            if ( rMode == ElasticStiffness ) {
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
+            } else {
+                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+            }
+        }
+
+        return;
+
+        return;
 
     default:
         StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
@@ -248,7 +252,9 @@ SimpleInterfaceMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode
 {
     switch ( mode ) {
     case _1dInterface: return 1;
+
     case _2dInterface: return 2;
+
     case _3dInterface: return 3;
 
     default:
@@ -274,7 +280,7 @@ SimpleInterfaceMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, 
 
 void
 SimpleInterfaceMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
-                                             MaterialMode mMode) const
+                                                MaterialMode mMode) const
 //
 // this function returns mask of reduced(if form == ReducedForm)
 // or Full(if form==FullForm) stressStrain vector in full or
@@ -304,7 +310,7 @@ SimpleInterfaceMaterial :: giveStressStrainMask(IntArray &answer, MatResponseFor
 
 void
 SimpleInterfaceMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                                        const FloatArray &charVector3d)
+                                                           const FloatArray &charVector3d)
 //
 // returns reduced stressVector or strainVector from full 3d vector reduced
 // to vector required by gp->giveStressStrainMode()
@@ -323,8 +329,8 @@ SimpleInterfaceMaterial :: giveReducedCharacteristicVector(FloatArray &answer, G
 
 void
 SimpleInterfaceMaterial :: giveFullCharacteristicVector(FloatArray &answer,
-                                                     GaussPoint *gp,
-                                                     const FloatArray &strainVector)
+                                                        GaussPoint *gp,
+                                                        const FloatArray &strainVector)
 //
 // returns full 3d general strain vector from strainVector in reducedMode
 // based on StressStrainMode in gp. Included are strains which
@@ -379,7 +385,7 @@ SimpleInterfaceMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *a
 
 void
 SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                    GaussPoint *gp,  TimeStep *tStep)
+                                                       GaussPoint *gp,  TimeStep *tStep)
 //
 // returns a FloatArray(6) of initial strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
@@ -400,9 +406,11 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-	frictCoeff = 0.;
-	 IR_GIVE_FIELD(ir, kn, IFT_SimpleInterfaceMaterial_kn, "kn");
-	 IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "fc");
+    frictCoeff = 0.;
+    stiffCoeff = 0.;
+    IR_GIVE_FIELD(ir, kn, IFT_SimpleInterfaceMaterial_kn, "kn");
+    IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "fc");
+    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "stiffcoeff");
 
     return StructuralMaterial :: initializeFrom(ir);
 }
@@ -417,6 +425,7 @@ SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keywor
 
     sprintf(buff, " kn %e", kn);
     sprintf(buff, " frictCoeff %e", frictCoeff);
+    sprintf(buff, " stiffCoeff %e", stiffCoeff);
     str += buff;
 
     return 1;
@@ -428,10 +437,10 @@ SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keywor
 
 SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
-	shearStressShift.resize(2);
-	tempShearStressShift.resize(2);
-	shearStressShift.zero();
-	tempShearStressShift.zero();
+    shearStressShift.resize(2);
+    tempShearStressShift.resize(2);
+    shearStressShift.zero();
+    tempShearStressShift.zero();
 }
 
 
@@ -444,7 +453,7 @@ SimpleInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
-    fprintf(file, "shearStressShift (%f, %f)", this->shearStressShift.at(1),this->shearStressShift.at(2));
+    fprintf( file, "shearStressShift (%f, %f)", this->shearStressShift.at(1), this->shearStressShift.at(2) );
     fprintf(file, "}\n");
 }
 
@@ -453,28 +462,28 @@ void
 SimpleInterfaceMaterialStatus :: initTempStatus()
 {
     StructuralMaterialStatus :: initTempStatus();
-	 tempShearStressShift = shearStressShift;
+    tempShearStressShift = shearStressShift;
 }
 
 void
 SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *atTime)
 {
     StructuralMaterialStatus :: updateYourself(atTime);
-	 shearStressShift = tempShearStressShift;
+    shearStressShift = tempShearStressShift;
 }
 
 FloatArray
 SimpleInterfaceMaterialStatus :: giveShearStressShift()
 {
-	FloatArray answer = shearStressShift;
-	return answer;
+    FloatArray answer = shearStressShift;
+    return answer;
 }
 
 FloatArray
 SimpleInterfaceMaterialStatus :: giveTempShearStressShift()
 {
-	FloatArray answer = tempShearStressShift;
-	return answer;
+    FloatArray answer = tempShearStressShift;
+    return answer;
 }
 
 
@@ -490,7 +499,7 @@ SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
 
     // write a raw data
     //if ( !stream->write(& kappa, 1) ) {
-        //THROW_CIOERR(CIO_IOERR);
+    //THROW_CIOERR(CIO_IOERR);
     //}
 
     return CIO_OK;
@@ -508,7 +517,7 @@ SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
 
     // read raw data
     //if ( !stream->read(& kappa, 1) ) {
-        //THROW_CIOERR(CIO_IOERR);
+    //THROW_CIOERR(CIO_IOERR);
     //}
 
     return CIO_OK;

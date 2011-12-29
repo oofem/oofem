@@ -71,6 +71,7 @@ class FloatArray;
  #define nearest(x) floor( ( x ) + 0.5 )
 #endif
 
+
 /// Returns smaller value from two given decimals
 inline int min(int i, int j)
 { return ( i <= j ? i : j ); }
@@ -114,6 +115,12 @@ inline double sgn(double i)
 inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
 /// Returns the negative part of given float
 inline double negbra(double x) { return ( x <= 0 ? x : 0 ); }
+
+#ifdef HAVE_CBRT
+inline double cbrt(double x)
+{ return sgn(x)*pow(fabs(x),1.0/3.0); }
+#endif
+
 
 /**
  * Solves cubic equation for real roots.

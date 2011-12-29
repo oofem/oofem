@@ -54,8 +54,7 @@ TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
 {
-    int i, j, numberOfIntegrationRules;
-    IntegrationRule *iRule;
+    int i;
     FloatArray flowVec;
     TransportElement *transpElem = ( TransportElement * ) gp->giveElement();
 
@@ -73,6 +72,7 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     for ( i = 1; i <= flowVec.giveSize(); i++ ) {
         fprintf( File, " % .4e", flowVec.at(i) );
     }
+
     fprintf(File, "\n");
 }
 
@@ -196,7 +196,7 @@ TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType 
 int
 TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    int size=0;
+    int size = 0;
     MaterialMode mMode = aGaussPoint->giveMaterialMode();
     switch  ( mMode ) {
     case _2dHeat:

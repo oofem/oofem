@@ -72,7 +72,7 @@ class SimpleInterfaceMaterialStatus : public StructuralMaterialStatus
      */
 
 protected:
-	FloatArray shearStressShift, tempShearStressShift;
+    FloatArray shearStressShift, tempShearStressShift;
 
 public:
     /// Constructor
@@ -98,9 +98,9 @@ public:
      */
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
 
-	 FloatArray giveShearStressShift();
-	 FloatArray giveTempShearStressShift();
-	 void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; };
+    FloatArray giveShearStressShift();
+    FloatArray giveTempShearStressShift();
+    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; };
 
     // saves current context(state) into stream
     /**
@@ -132,8 +132,9 @@ public:
 class SimpleInterfaceMaterial : public StructuralMaterial
 {
 protected:
-	 double kn;
-	 double frictCoeff;
+    double kn;
+    double stiffCoeff;
+    double frictCoeff;
 
 public:
     /// Constructor
@@ -162,11 +163,11 @@ public:
      * @param atTime time step (most models are able to respond only when atTime is current time step)
      */
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm from, 
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseForm from,
                                                MatResponseMode mode,
-                                               GaussPoint * gp,
-                                               TimeStep * atTime);
+                                               GaussPoint *gp,
+                                               TimeStep *atTime);
 
     /**
      * Computes the real stress vector for given strain increment and integration point.
@@ -247,7 +248,6 @@ public:
 
     /// Creates corresponding material status
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new SimpleInterfaceMaterialStatus(1, domain, gp); }
-
 };
 } // end namespace oofem
 #endif // simpleinterfacemat_h

@@ -674,7 +674,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     // no support for reduced integration now
     elem->computeBmatrixAt(gp, b);
 
-    if ( this->equivStrainType == EST_Rankine ) {
+    if ( this->equivStrainType == EST_Rankine_Standard ) {
         FloatArray fullHelp, fullNu;
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
 

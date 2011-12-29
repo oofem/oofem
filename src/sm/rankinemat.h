@@ -116,7 +116,7 @@ public:
                               const FloatArray &reducesStrain, TimeStep *tStep);
 
 protected:
-    void givePlaneStressStiffMtrx(FloatMatrix & answer,
+    void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                   MatResponseForm form, MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);

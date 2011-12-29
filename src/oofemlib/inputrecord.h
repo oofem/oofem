@@ -134,6 +134,7 @@ enum InputFieldType {
 
     IFT_NonLinearStatic_controllmode,
     IFT_NonLinearStatic_deltat,
+    IFT_NonLinearStatic_deltatltf,
     IFT_NonLinearStatic_rtolv,
     IFT_NonLinearStatic_stiffmode,
     IFT_NonLinearStatic_refloadmode,
@@ -503,6 +504,20 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_por,
     IFT_HeMoTKMaterial_rho_gws,
 
+    IFT_HeMoZBMaterial_a_0,
+    IFT_HeMoZBMaterial_nn,
+    IFT_HeMoZBMaterial_phi_c,
+    IFT_HeMoZBMaterial_delta_wet,
+    IFT_HeMoZBMaterial_w_h,
+    IFT_HeMoZBMaterial_n,
+    IFT_HeMoZBMaterial_a,
+    IFT_HeMoZBMaterial_latent,
+    IFT_HeMoZBMaterial_c,
+    IFT_HeMoZBMaterial_rho,
+    IFT_HeMoZBMaterial_chi_eff,
+    IFT_HeMoZBMaterial_por,
+    IFT_HeMoZBMaterial_rho_gws,
+
     IFT_CemhydMatInputFileName,
     IFT_CemhydMat_conductivitytype,
     IFT_CemhydMat_capacitytype,
@@ -568,6 +583,7 @@ enum InputFieldType {
     IFT_MPSMaterial_q2,
     IFT_MPSMaterial_q3,
     IFT_MPSMaterial_q4,
+    IFT_MPSMaterial_lambda0,
     IFT_MPSMaterial_t0,
     IFT_MPSMaterial_ksh,
     IFT_MPSMaterial_wh,
@@ -581,7 +597,8 @@ enum InputFieldType {
     IFT_MPSMaterial_alphas,
     IFT_MPSMaterial_mus,
     IFT_MPSMaterial_kappat,
-    IFT_MPSMaterial_cyclictparam,
+    IFT_MPSMaterial_ct,
+    IFT_MPSMaterial_stiffnessfactor,
 
     IFT_CebFip78Material_e28,
     IFT_CebFip78Material_fibf,
@@ -684,6 +701,9 @@ enum InputFieldType {
     IFT_IsotropicDamageMaterial1_ek,
     IFT_IsotropicDamageMaterial1_gf,
     IFT_IsotropicDamageMaterial1_gft,
+    IFT_IsotropicDamageMaterial1_ep,
+    IFT_IsotropicDamageMaterial1_e2,
+    IFT_IsotropicDamageMaterial1_nd,
 
     IFT_CompoDamageMat_ex,
     IFT_CompoDamageMat_ez,
@@ -972,6 +992,8 @@ enum InputFieldType {
     IFT_ConcreteDPM_href,
     IFT_ConcreteDPM_helem,
 
+    IFT_LsMasterMat_slaveMat,
+
     IFT_ConcreteDPMnlMaterial_r,
     IFT_ConcreteDPMnlMaterial_m,
 
@@ -997,6 +1019,7 @@ enum InputFieldType {
     IFT_NonlocalMaterialExtensionInterface_averagedquantity,
 
     IFT_SimpleInterfaceMaterial_kn,
+    IFT_SimpleInterfaceMaterial_knt,
     IFT_SimpleInterfaceMaterial_frictCoeff,
 
     IFT_OutputManager_name,

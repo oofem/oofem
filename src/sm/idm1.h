@@ -133,7 +133,7 @@ protected:
     double ek;
 
     /// Type characterizing the algorithm used to compute equivalent strain measure.
-    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine, EST_ElasticEnergy, EST_Mises };
+    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises };
     /// Parameter specifying the definition of equivalent strain.
     EquivStrainType equivStrainType;
 
@@ -144,8 +144,8 @@ protected:
     int damageLaw;
 
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
-    *   with fracturing strain or crack opening.
-    */
+     *   with fracturing strain or crack opening.
+     */
     enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage };
 
     /// Parameter specifying the type of softening (damage law).
@@ -155,6 +155,9 @@ protected:
     double At, Bt;
     /// Parameter used in "smooth damage law".
     double md;
+
+    /// Parameters used if softType = 7 (extended smooth damage law)
+    double e1, e2, s1, nd;
 
 #ifdef IDM_USE_MMAClosestIPTransfer
     /// Mapper used to map internal variables in adaptivity.
