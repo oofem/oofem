@@ -441,7 +441,7 @@ the linear hardening law
 \end{equation}
 the evolution law for the plastic strain
 \begin{equation}
- \epspd = \dot{\lambda}\frac{\partial f}{\partial \bar\vs},
+ \epspd = \dot{\lambda}\frac{\partial f}{\partial \bar{\vs}},
 \end{equation}
 the loading-unloading conditions
 \begin{equation}\label{VMkuhnTucker}
@@ -594,9 +594,9 @@ The basic equations (\ref{VMadditiveDecomposition})--(\ref{VMconstitutiveEquatio
 and (\ref{VMcumPlasStrain})--(\ref{damagelawmp}) remain valid, 
 and the yield function (\ref{VMvonMisesCondition}) is redefined as
 \begin{equation}\label{RankineCondition}
-f(\bar{\vsig},\kappa) = \max_{I}\bar\sigma_I-\sigma_Y(\kappa)
+f(\bar{\vsig},\kappa) = \max_{I}\bar{\sigma_I}-\sigma_Y(\kappa)
 \end{equation}
-where $\bar\sigma_I$ are the principal values of the effective stress tensor $\bar{\vsig}$. 
+where $\bar{\sigma_I}$ are the principal values of the effective stress tensor $\bar{\vsig}$. 
 In damage law (\ref{damagelawmp}), parameter $\omega_c$ is always set to 1.
 The user can specify either the exponent $a$ from (\ref{damagelawmp}),
 or the dissipation per unit volume, $g_f$, which represents the area under the
@@ -799,7 +799,7 @@ where the yield value $f_t$ is defined as
  \centerline{\includegraphics[width=0.7\textwidth]{tension.eps}}
 \fi
 %end{latexonly}
-  \caption{Tensile behavior of proposed model ($f_t=0.2\ \rm{MPa},\ G_f^I=0.018\ \rm{N/mm}$)}
+  \caption{Tensile behavior of proposed model ($f_t=0.2$ MPa, $G_f^I=0.018$ N/mm)}
   \label{tensfig}
 \end{figure}
 The $f_{t0}$ represents tensile strength of joint or interface; and $G^I_f$ is mode-I fracture energy. For the tension mode, the associated flow hypothesis is assumed.
@@ -848,21 +848,21 @@ This follows from (\ref{ft}) and (\ref{c}). However, in the corner region, when 
 \paragraph{Cap mode}
 For the cap mode, an ellipsoid interface model is used. The yield condition is assumed as
 \begin{equation}
-  f_3(\sig, \kappa_3) = C_{nn}\sigma^2+C_{ss}\tau^2 + C_n\sigma-\bar\sigma^2(\kappa_3)
+  f_3(\sig, \kappa_3) = C_{nn}\sigma^2+C_{ss}\tau^2 + C_n\sigma-\bar{\sigma}^2(\kappa_3)
 \end{equation}
-where $C_{nn},\ C_{ss}$, and $C_n$ are material model parameters and $\bar\sigma$ is yield value, originally assumed in the following form of hardening/softening law \cite{Rots}
+where $C_{nn},\ C_{ss}$, and $C_n$ are material model parameters and $\bar{\sigma}$ is yield value, originally assumed in the following form of hardening/softening law \cite{Rots}
 \begin{eqnarray}
   \nonumber
-  \bar\sigma_1(\kappa_3)&=&\bar\sigma_i+(\bar\sigma_p-\bar\sigma_i)\sqrt{\del{2\kappa_3}{\kappa_p}-\del{\kappa_3^2}{\kappa_p^2}};\;\;\kappa_3\in(0,\kappa_p)\\
+  \bar{\sigma}_1(\kappa_3)&=&\bar{\sigma}_i+(\bar{\sigma}_p-\bar{\sigma}_i)\sqrt{\del{2\kappa_3}{\kappa_p}-\del{\kappa_3^2}{\kappa_p^2}};\;\;\kappa_3\in(0,\kappa_p)\\
   \label{hs3}
-  \bar\sigma_2(\kappa_3)&=&\bar\sigma_p+(\bar\sigma_m-\bar\sigma_p)\left(\del{\kappa_3-\kappa_p}{\kappa_m-\kappa_p}\right)^2;\;\;\kappa_3\in(\kappa_p, \kappa_m)\\
+  \bar{\sigma}_2(\kappa_3)&=&\bar{\sigma}_p+(\bar{\sigma}_m-\bar{\sigma}_p)\left(\del{\kappa_3-\kappa_p}{\kappa_m-\kappa_p}\right)^2;\;\;\kappa_3\in(\kappa_p, \kappa_m)\\
   \nonumber
-  \bar\sigma_3(\kappa_3)&=&\bar\sigma_r+(\bar\sigma_m-\bar\sigma_r)\exp\left(m\del{\kappa_3-\kappa_m}{\bar\sigma_m-\bar\sigma_r}\right);\;\;\kappa_3\in(\kappa_m, \infty)
+  \bar{\sigma}_3(\kappa_3)&=&\bar{\sigma}_r+(\bar{\sigma}_m-\bar{\sigma}_r)\exp\left(m\del{\kappa_3-\kappa_m}{\bar{\sigma}_m-\bar{\sigma}_r}\right);\;\;\kappa_3\in(\kappa_m, \infty)
 \end{eqnarray}
-with $m=2(\bar\sigma_m-\bar\sigma_p)/(\kappa_m-\kappa_p)$. The hardening/softening law (\ref{hs3}) is shown in fig.(\ref{hs3fig}). Note that the curved diagram is a $C^1$ continuous $\sigma-\kappa_3$ relation. The energy under the load-displacement diagram can be related to a ``compressive fracture energy''.
+with $m=2(\bar{\sigma}_m-\bar{\sigma}_p)/(\kappa_m-\kappa_p)$. The hardening/softening law (\ref{hs3}) is shown in fig.(\ref{hs3fig}). Note that the curved diagram is a $C^1$ continuous $\sigma-\kappa_3$ relation. The energy under the load-displacement diagram can be related to a ``compressive fracture energy''.
 The original hardening law (\ref{hs3}.1) exhibits indefinite slope for $\kappa_3=0$, which can cause the problems with numerical implementation. This has been overcomed by replacing this hardening law with parabolic equation given by
 \begin{equation}
-  \bar\sigma_1(\kappa_3) = \bar\sigma_i-2*(\bar\sigma_i-\bar\sigma_p)*\del{\kappa_3}{\kappa_p}+(\bar\sigma_i-\bar\sigma_p)\del{\kappa_3}{\kappa_p}
+  \bar{\sigma}_1(\kappa_3) = \bar{\sigma}_i-2*(\bar{\sigma}_i-\bar{\sigma}_p)*\del{\kappa_3}{\kappa_p}+(\bar{\sigma}_i-\bar{\sigma}_p)\del{\kappa_3}{\kappa_p}
 \end{equation}
 An associated flow and strain hardening hypothesis are being considered. This yields
 \begin{equation}
@@ -918,7 +918,7 @@ Parameters &- \param{num} material model number\\
 &- \param{tanfi0} initial friction angle\\
 &- \param{tanfir} residual friction angle\\
 &- \param{tanpsi} dilatancy\\
-&- \param{\{si, sp, sm, sr\}} cap parameters $\{\bar\sigma_i, \bar\sigma_p, \bar\sigma_m, \bar\sigma_r\}$\\
+&- \param{\{si, sp, sm, sr\}} cap parameters $\{\bar{\sigma}_i, \bar{\sigma}_p, \bar{\sigma}_m, \bar{\sigma}_r\}$\\
 &- \param{\{kp, km,kr\}} cap parameters $\{\kappa_p, \kappa_m, \kappa_r\}$\\
 &- \param{cnn},\param{css},\param{cn} cap mode parametrs\\
 Supported modes& \_2dInterface\\
@@ -1243,23 +1243,23 @@ Definitions derived from the {\bf Rankine} criterion of maximum principal stress
 \begin{eqnarray}
 \label{rankinesmooth}
 \tilde\varepsilon&=&
-{{1}\over{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar\sigma_I\rangle^2}
+{\del{1}{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar{\sigma}_I\rangle^2}
 \\
 \label{rankinestandard}
 \tilde\varepsilon&=&
-{{1}\over{E}}\max_{I=1}^{3}\bar\sigma_I
+{\del{1}{E}}\max_{I=1}^{3}\bar{\sigma}_I
 \end{eqnarray}
 where
-$\bar\sigma_I$, $I=1,2,3$, are the principal 
+$\bar{\sigma}_I$, $I=1,2,3$, are the principal 
 values of the
 effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$
-and $\langle\bar\sigma_I\rangle$ are their positive parts.
+and $\langle\bar{\sigma}_I\rangle$ are their positive parts.
 \item
 {\bf Energy} norm scaled by Young's modulus to obtain
 a strain-like quantity:
 \begin{equation}
 \label{energynorm}
-\tilde\varepsilon=\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}\over{E}}
+\tilde\varepsilon=\del{1}{E}\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}}
 \end{equation}
 \item
 {\bf Modified Mises} definition, proposed by de Vree et al.~(1995):
@@ -1570,14 +1570,14 @@ Nonlocal version of isotropic damage model from Section~\ref{sec:idmtf}.
 The nonlocal averaging acts as a powerful localization
 limiter. 
 In the standard version of the model, 
-damage is driven by the nonlocal equivalent strain $\bar\varepsilon$, 
+damage is driven by the nonlocal equivalent strain $\bar{\varepsilon}$, 
 defined as a weighted average of the local equivalent strain:
 $$
-\bar\varepsilon(\mbf{x}) = \int_V\alpha(\mbf{x},\mbf{\xi})\tilde\varepsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}
+\bar{\varepsilon}(\mbf{x}) = \int_V\alpha(\mbf{x},\mbf{\xi})\tilde\varepsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}
 $$
 In the ``undernonlocal'' formulation, the damage-driving variable is a 
 combination of local and nonlocal equivalent strain, 
-$m\bar\varepsilon+(1-m)\tilde\varepsilon$, where $m$ is a parameter between
+$m\bar{\varepsilon}+(1-m)\tilde\varepsilon$, where $m$ is a parameter between
 0 and 1. (If $m>1$, the formulation is called ``overnonlocal''; this case
 is useful for nonlocal plasticity but not for nonlocal damage.) 
 
@@ -1676,7 +1676,7 @@ $$
 where $\delta$ is the Dirac distribution. One can also say that the
 nonlocal variable is evaluated as
 $$
-\bar\varepsilon(\mbf{x}) = \frac{1}{V_{r\infty}}\int_V\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)\tilde\epsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}+\left(1-\frac{V_r(\mbf{x})}{V_{r\infty}}\right)\tilde\varepsilon(\mbf{x})
+\bar{\varepsilon}(\mbf{x}) = \frac{1}{V_{r\infty}}\int_V\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)\tilde\epsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}+\left(1-\frac{V_r(\mbf{x})}{V_{r\infty}}\right)\tilde\varepsilon(\mbf{x})
 $$
 The term on the right-hand side after the integral is a multiple of the local
 variable, and so it can be referred to as the local complement.  
@@ -2316,10 +2316,10 @@ controlled by the keyword $CoupledAnalysisType$. The first mode ($CoupledAnalysi
 
 The basic creep is in the microprestress-solidification theory influenced by the same four parameters $q_1$ - $q_4$ as in the model B3. Values of these parameters can be estimated from the composition of concrete mixture and its compressive strength using the following empirical formulae: 
 \begin{eqnarray}
-  q_1 = 126.77 \bar{f_c}^{-0.5} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
-  q_2 = 185.4 c^{0.5} \bar{f_c}^{-0.9} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
-  q_3 = 0.29 \left(w/c\right)^4 q_2 \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
-  q_4 = 20.3 \left(a/c\right)^{-0.7} \hspace{5 mm} [10^{-6}/\mbox {MPa}]  
+  q_1 &=& 126.77 \bar{f_c}^{-0.5} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_2 &=& 185.4 c^{0.5} \bar{f_c}^{-0.9} \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_3 &=& 0.29 \left(w/c\right)^4 q_2 \hspace{5 mm} [10^{-6}/\mbox {MPa}]\\
+  q_4 &=& 20.3 \left(a/c\right)^{-0.7} \hspace{5 mm} [10^{-6}/\mbox {MPa}]  
 \end{eqnarray}
 Here, $\bar{f_c}$ is the average compressive cylinder strength at age of 28 days [MPa], $a$, $w$ and $c$ is the weight  of aggregates, water and cement per unit volume of concrete [kg/m$^3$].
 
@@ -2333,8 +2333,8 @@ provides a good approximation of the non-aging micro-compliance function of the 
 The technique based on the continuous retardation spectrum
 leads to the following formulae:
 \begin{eqnarray}
- \frac{1}{E_0^\infty} = q_2 \ln\left(1+\tilde{\tau_0}\right) - \frac{q_2 \tilde{\tau_0} }{10 \left( 1 + \tilde{\tau_0} \right)} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau_0} = \left( \frac{2 \tau_1}{ \sqrt{10}}  \right)^{0.1} \\
-\frac{1}{E_\mu^\infty} =  (\ln 10) \frac{q_2 \tilde{\tau}_\mu \left(0.9 + \tilde{\tau}_\mu \right)}{10 \left( 1 + \tilde{\tau}_\mu \right)^2} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau}_\mu = \left(2 \tau_\mu \right)^{0.1}, \hspace{7 mm} \mu = 1,2,\dots M
+ \frac{1}{E_0^\infty} &=& q_2 \ln\left(1+\tilde{\tau_0}\right) - \frac{q_2 \tilde{\tau_0} }{10 \left( 1 + \tilde{\tau_0} \right)} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau_0} = \left( \frac{2 \tau_1}{ \sqrt{10}}  \right)^{0.1} \\
+\frac{1}{E_\mu^\infty} &=&  (\ln 10) \frac{q_2 \tilde{\tau}_\mu \left(0.9 + \tilde{\tau}_\mu \right)}{10 \left( 1 + \tilde{\tau}_\mu \right)^2} \hspace{5 mm} \mbox{ where} \hspace{5 mm} \tilde{\tau}_\mu = \left(2 \tau_\mu \right)^{0.1}, \hspace{7 mm} \mu = 1,2,\dots M
 \end{eqnarray}
 Viscosities $\eta_{\mu}^\infty$ of individual Kelvin units are obtained from simple relation $\eta_{\mu}^\infty=\tau_{\mu}/E_{\mu}^\infty$. A higher accuracy is reached if all retardation times are in the end multiplied by the factor 1.35 and the last modulus $E_M$ is divided by 1.2.
 
@@ -2362,7 +2362,7 @@ Function $k_T$ is given by
 \end{equation}
 where parameter $c_T$ controls the influence of cyclic temperature on creep, and $T_{max}$ stands for the maximum reached temperature in the previous history. 
 This is a modification of the opriginal MPS theory, proposed by Havl\'{a}sek and Jir\'{a}sek. 
-%Parameter $\kappa_T$ replaces $\ln h$ which in case of basic creep eliminates the sensitivity of the original model on the choice of relative pore humidity $h$ reached by self-desiccation.
+%Parameter $\kappa_T$ replaces $\ln h$ which in case of basic creep eliminates the sensitivity of the original model on the choice of relative pore humidity $h$ reached by self-desicca.
 
 
 Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differential equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
@@ -2376,24 +2376,24 @@ As mentioned above, under variable humidity and temperature conditions the physi
 Factors transforming the physical time $t$ into $t_e$, $t_r$ and $t_s$ are defined as follows:
 \begin{eqnarray}
 \label{dtedt}
- \frac{dt_e}{dt} = \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
- \frac{dt_r}{dt} = \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
- \frac{dt_s}{dt} = \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
+ \frac{dt_e}{dt} &=& \psi_e(t) = \beta_{eT}(T(t))\, \beta_{eh}(h(t))\\
+ \frac{dt_r}{dt} &=& \psi_r(t) = \beta_{rT}(T(t))\, \beta_{rh}(h(t))\\
+ \frac{dt_s}{dt} &=& \psi_s(t) = \beta_{sT}(T(t))\, \beta_{sh}(h(t))
 \end{eqnarray}
 Functions describing the influence of temperature have the form 
 \begin{eqnarray}
- \beta_{eT}(T) = \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
- \beta_{rT}(T) = \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
- \beta_{sT}(T) = \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
+ \beta_{eT}(T) &=& \exp \left[ \frac{Q_e}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+ \beta_{rT}(T) &=& \exp \left[ \frac{Q_r}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]\\
+ \beta_{sT}(T) &=& \exp \left[ \frac{Q_s}{R}\left( \frac{1}{T_0} - \frac{1}{T} \right) \right]
 \end{eqnarray}
 motivated by the rate process theory.
 $R$ is the universal gas constant and $Q_e$, $Q_r$, $Q_s$ are activation energies for hydration, viscous processes and microprestress relaxation, respectively.
 Only the ratios $Q_e/R$, $Q_r/R$ and $Q_s/R$ have to be specified.
 Functions describing the influence of humidity have the form 
 \begin{eqnarray}
- \beta_{eh}(h) = \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
- \beta_{rh}(h) = \alpha_r + \left( 1 - \alpha_r \right) h^2\\
- \beta_{sh}(h) = \alpha_s + \left( 1 - \alpha_s \right) h^2
+ \beta_{eh}(h) &=& \frac{1}{1+\left[\alpha_e \left( 1-h\right) \right]^4}\\
+ \beta_{rh}(h) &=& \alpha_r + \left( 1 - \alpha_r \right) h^2\\
+ \beta_{sh}(h) &=& \alpha_s + \left( 1 - \alpha_s \right) h^2
 \end{eqnarray}
 where $\alpha_e$, $\alpha_r$ and $\alpha_s$ are parameters. 
 
@@ -2821,10 +2821,11 @@ Final recommendations:
 \begin {itemize}
 \item to simulate basic creep without shrinkage it is possible to use
   all three models
-\subitem B3mat with $shmode = 0$
-\subitem B3Solidmat with $shmode = 0$ and $microprestress = 0$
-\subitem MPS with $CoupledAnalysisType = 0$
-
+\begin {itemize}%subitem 
+\item B3mat with $shmode = 0$
+\item B3Solidmat with $shmode = 0$ and $microprestress = 0$
+\item MPS with $CoupledAnalysisType = 0$
+\end{itemize}
 \item to simulate drying creep with shrinkage using ``sectional approach'', only the
   first material model (B3mat) is suitable can be used (with $shmode = 1$)
 
@@ -2834,14 +2835,18 @@ Final recommendations:
 
 \item to simulate drying creep with shrinkage using ``point approach''
   according to B3 model there are two options:
-\subitem B3mat (with $shmode = 2$)
-\subitem B3Solidmat (with $shmode = 2$)
+\begin {itemize} %subitem 
+\item B3mat (with $shmode = 2$)
+\item B3Solidmat (with $shmode = 2$)
+\end{itemize}
 In order to suppress shrinkage set $es0 = 0.0$
 
 \item to simulate drying creep with shrinkage using ``point approach''
   according to MPS model there are two options:
-\subitem B3Solidmat (with $shmode = 3$)
-\subitem MPS with $CoupledAnalysisType = 1$
+\begin {itemize} % subitem 
+\item B3Solidmat (with $shmode = 3$)
+\item MPS with $CoupledAnalysisType = 1$
+\end{itemize}
 In order to suppress shrinkage set $kSh = 0.0$
 \end{itemize}
 
@@ -2917,16 +2922,16 @@ and the Lode angle $\theta$ defined by the relation
 where $J_2$ and $J_3$ are the second and third deviatoric invariants.
 The yield function
 \bea\nonumber
-f_{\rm p}(\bar\sigma_{\rm V},\bar\rho,\bar\theta;\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+f_{\rm p}(\bar\sigma_{\rm V},\bar{\rho},\bar{\theta};\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
 && 
  +m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
 \label{eq:yieldSurface}
 \eea
 depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable $\kappa_{\rm p}$ (which enters through a dimensionless variable $q_{\rm h}$). Parameter $\fc$ is the uniaxial compressive strength. 
 Note that, under uniaxial compression characterized by axial stress 
-$\bar\sigma<0$,  we have $\bar\sigma_{\rm V}=\bar\sigma/3$,
-$\bar\rho=-\sqrt{2/3}\,\bar\sigma$ and $\bar\theta=60^o$. The yield function
-then reduces to $f_{\rm p}=(\bar\sigma/\fc)^2-q_{\rm{h}}^2$. This means that
+$\bar{\sigma}<0$,  we have $\bar{\sigma}_{\rm V}=\bar{\sigma}/3$,
+$\bar{\rho}=-\sqrt{2/3}\,\bar{\sigma}$ and $\bar{\theta}=60^o$. The yield function
+then reduces to $f_{\rm p}=(\bar{\sigma}/\fc)^2-q_{\rm{h}}^2$. This means that
 function $q_{\rm{h}}$ describes the evolution of the uniaxial compressive
 yield stress normalized by its maximum value, $\fc$.
 
@@ -2978,7 +2983,7 @@ a) meridional section, b) deviatoric section for a constant volumetric effective
 The maximum size of the elastic domain is attained when the variable $q_{\rm h}$ is equal to one (which is its maximum value, as follows from the hardening law, to be specified in~(\ref{eq:hardeningLaw})). The yield surface is then described by the equation
 %
 \begin{equation}\label{eq:failureSurface}
-f_{\rm p}\left(\bar\sigma_{\rm V},\bar\rho,\bar\theta;1\right) \equiv \frac{3}{2} \frac{\bar{\rho}^2}{\fc^2} + m_0 \left(\frac{\bar{\rho} }{\sqrt{6}\fc}r(\bar{\theta}) + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - 1 = 0
+f_{\rm p}\left(\bar{\sigma}_{\rm V},\bar{\rho},\bar{\theta};1\right) \equiv \frac{3}{2} \frac{\bar{\rho}^2}{\fc^2} + m_0 \left(\frac{\bar{\rho} }{\sqrt{6}\fc}r(\bar{\theta}) + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - 1 = 0
 \end{equation}
 
 The {\bf flow rule} 
@@ -2989,7 +2994,7 @@ The {\bf flow rule}
 %
 is non-associated, which means that the yield function $f_{\rm p}$ and the plastic potential 
 \bea\nonumber
-g_{\rm p}(\bar\sigma_{\rm V},\bar\rho;\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right] \left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+g_{\rm p}(\bar{\sigma}_{\rm V},\bar{\rho};\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right] \left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
 &&+q_{\rm{h}}^2(\kappa_{\rm p}) \left( \frac{m_0 \bar{\rho}}{\sqrt{6}\fc} + \frac{m_{\rm g}(\bar{\sigma}_{\rm V})}{\fc} \right)
  \label{eq:plasticPotential}
 \eea
@@ -3203,9 +3208,9 @@ size in the direction of the body diagonal can be 173 mm.
 
 The model is designed for transversely isotropic elastic material defined by five elastic material constants. Typical example is a carbon fiber tow. Axis $1$ represents the material principal direction. The orthotropic material constants are defined as
 \begin{eqnarray}
-\nu_{12}=\nu_{13},~\nu_{21}=\nu_{31},~\nu_{23}=\nu_{32},~E_{22}=E_{33}\\
-G_{12}=G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
-\frac{\nu_{12}=\nu_{13}}{E_{11}} = \frac{\nu_{21}=\nu_{31}}{E_{22}},~\frac{\nu_{31}=\nu_{21}}{E_{33}} = \frac{\nu_{13}=\nu_{12}}{E_{11}}
+\nu_{12}&=&\nu_{13},~\nu_{21}=\nu_{31},~\nu_{23}=\nu_{32},~E_{22}=E_{33}\\
+G_{12}&=&G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
+\frac{\nu_{12}=\nu_{13}}{E_{11}} &=& \frac{\nu_{21}=\nu_{31}}{E_{22}},~\frac{\nu_{31}=\nu_{21}}{E_{33}} = \frac{\nu_{13}=\nu_{12}}{E_{11}}
 \end{eqnarray}
 
 Material orientation on a finite element can be specified with \param{lcs} optional parameter. If unspecified, material orientation is the same as the global coordinate system. \param{lcs} array contains six numbers,
@@ -3230,7 +3235,8 @@ The index $p,~p\in\{11,22,33,23,31,12\}$ symbolizes six components of stress or 
 
 The compliance material matrix $\mathbf{H}$, in the secant form and including damage parameters, reads
 \footnotesize
-\begin{eqnarray}
+\begin{equation}
+\mathbf{H}=
 \left[ \begin{array}{cccccc}
 \frac{1}{(1-d_{11})E_{11}} & -\frac{\nu_{21}}{E_{22}} & -\frac{\nu_{31}}{E_{33}} &0 &0 & 0\\
 -\frac{\nu_{12}}{E_{11}} & \frac{1}{(1-d_{22})E_{22}} & -\frac{\nu_{32}}{E_{33}} &0& 0&0\\
@@ -3239,24 +3245,24 @@ The compliance material matrix $\mathbf{H}$, in the secant form and including da
  0& 0& 0& 0& \frac{1}{(1-d_{31})G_{31}} & 0\\
  0& 0&0 &0& 0& \frac{1}{(1-d_{12})G_{12}}
 \end{array} \right]\label{comp_eq_H}
-\end{eqnarray}
+\end{equation}
 \normalsize
 
 Damage occurs when any out of six stress tensor components exceeds a given strength $f_{p,0}$
-\begin{eqnarray}
+\begin{equation}
 |\sigma_p| \geq |f_{p,0}|
-\end{eqnarray}
+\end{equation}
 Positive and negative ultimate strengths can be generally different but share the same damage variable.
 At the point of damage initiation, see Fig. \ref{comp_softening}, one evaluates $\varepsilon_{p,E}$ and characteristic element length $l_p$, generally different for each damage mode. Given the fracture energy $G_{F,p}$, the maximum strain at zero stress $\varepsilon_{p,0}$ is computed
 \begin{eqnarray}
-\varepsilon_{p,0} = \varepsilon_{p,E} + \frac{2G_{F,p}}{f_{p,0} l_p}
+\varepsilon_{p,0} &=& \varepsilon_{p,E} + \frac{2G_{F,p}}{f_{p,0} l_p}
 \end{eqnarray}
 
 The point of damage initiation is never reached exactly, one needs to interpolate between the previous equilibrated step and current step to achieve objectivity.
 
 The evolution of damage $d_p$ is based on the evolution of corresponding strain $\varepsilon_p$. A maximum achieved strain is stored in the variable $\kappa_p$. If $\varepsilon_p > \kappa_p$ the damage may grow so the corresponding damage variable $d_p$ may increase. Desired stress $\sigma'_p$ is evaluated from the actual strain $\varepsilon_p$
 \begin{eqnarray}
-\sigma'_p = f_{p,0} \frac{\varepsilon_{p,0} - \varepsilon_p}{\varepsilon_{p,0}-\varepsilon_{p,E}}
+\sigma'_p &=& f_{p,0} \frac{\varepsilon_{p,0} - \varepsilon_p}{\varepsilon_{p,0}-\varepsilon_{p,E}}
 \end{eqnarray}
 and the calculation of damage variables $d_p$ stems from Eq.~\ref{comp_eq_H}, for example
 \begin{eqnarray}
@@ -3665,9 +3671,9 @@ where three parameters $\tau$, $\beta$ and $\alpha_\infty$ are needed. Some mean
 
 The \param{hydrationmodeltype} = 2 is inspired by Cervera et al. \cite{Cervera:99}, who proposed an analytical form of the normalized affinity which was refined in \cite{Gawin:06a}. A slightly modified formulation is proposed here. The affinity model is formulated for a reference temperature 25\C
 \begin{eqnarray}
-\frac{\ud \alpha}{\ud t} = \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) \exp\left(-\bar\eta\frac{\alpha}{\alpha_\infty}\right) k_{rate} \label{eq:affinity2}
+\frac{\ud \alpha}{\ud t} = \tilde{A}_{25}(\alpha) k_{rate}= B_1 \left( \frac{B_2}{\alpha_\infty} + \alpha \right ) \left( \alpha_\infty - \alpha \right) \exp\left(-\bar{\eta}\frac{\alpha}{\alpha_\infty}\right) k_{rate} \label{eq:affinity2}
 \end{eqnarray}
-where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar\eta$ represents microdiffusion of free water through formed hydrates. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
+where $B_1, B_2$ are coefficients to be calibrated, $\alpha_\infty$ is the ultimate hydration degree and $\bar{\eta}$ represents microdiffusion of free water through formed hydrates. The solution proceeds incrementally, where $\alpha$ is the unknown. During one macroscopic time step, \refeq{eq:affinity2} needs to be integrated in finer inner steps. This is controlled with two optional variables; \param{maxmodelintegrationtime} specifies maximum integration time in the loop while \param{minmodeltimestepintegrations} specifies minimum number of integration steps.
 
 \begin{table}[!htb]
 %\begin{center}
