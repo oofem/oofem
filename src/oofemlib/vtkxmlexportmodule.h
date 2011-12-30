@@ -45,6 +45,11 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+#ifdef __VTK_MODULE
+ #include <vtkUnstructuredGrid.h>
+ #include <vtkSmartPointer.h>
+#endif
+
 
 namespace oofem {
 /**
@@ -92,6 +97,9 @@ protected:
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
 
+    /// Returns the filename for the given time step.
+    std::string giveOutputFileName(TimeStep *tStep);
+
     /// Returns the output stream for given solution step.
     FILE *giveOutputStream(TimeStep *tStep);
     /**
@@ -111,50 +119,82 @@ protected:
      * Returns the element cell geometry.
      */
     void giveElementCell(IntArray &answer, Element *elem, int cell);
+#ifndef __VTK_MODULE
     /**
      * Prints point data header.
      */
     void exportPointDataHeader(FILE *stream, TimeStep *tStep);
-    /**
-     * Prints point data footer.
-     */
-    void exportPointDataFooter(FILE *stream, TimeStep *tStep);
+#endif
     /**
      * Export internal variables by smoothing.
      */
-    void exportIntVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
-                       int regionDofMans, int ireg, TimeStep *tStep);
+    void exportIntVars(
+#ifdef __VTK_MODULE
+        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+        FILE *stream,
+#endif
+        IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg, TimeStep *tStep);
     /**
      * Export primary variables.
      */
-    void exportPrimaryVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
-                           int regionDofMans, int region, TimeStep *tStep);
+    void exportPrimaryVars(
+#ifdef __VTK_MODULE
+        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+        FILE *stream,
+#endif
+        IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep);
     /**
      * Exports single internal variable by smoothing.
      */
     void exportIntVarAs(InternalStateType valID, InternalStateValueType type, IntArray &mapG2L, IntArray &mapL2G,
-                        int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
+                        int regionDofMans, int ireg,
+#ifdef __VTK_MODULE
+                        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+                        FILE *stream,
+#endif
+                        TimeStep *tStep);
     /**
      * Exports single primary variable.
      */
     void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
-                         int regionDofMans, int region, FILE *stream, TimeStep *tStep);
+                         int regionDofMans, int region,
+#ifdef __VTK_MODULE
+                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+                         FILE *stream,
+#endif
+                         TimeStep *tStep);
 
     /**
      * Exports cell variables (typically internal variables).
      */
-    void exportCellVars(FILE *stream, int region, TimeStep *tStep);
+    void exportCellVars(
+#ifdef __VTK_MODULE
+        vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+        FILE *stream,
+#endif
+        int region, TimeStep *tStep);
     /**
      * Exports a single cell variable (typically an internal variable).
      */
-    void exportCellVarAs(InternalStateType type, int region, FILE *stream, TimeStep *tStep);
+    void exportCellVarAs(InternalStateType type, int region,
+#ifdef __VTK_MODULE
+                         vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+                         FILE *stream,
+#endif
+                         TimeStep *tStep);
 
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
      * The region are numbered starting from offset+1.
-     * if mode == 0 then regionNodalNumbers is array with mapping from global numbering to local region numbering.
+     * If mode == 0 then regionNodalNumbers is array with mapping from global numbering to local region numbering.
      * The i-th value contains the corresponding local region number (or zero, if global number is not in region).
-     * if mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
+     * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
      * The i-th value contains the corresponding global node number.
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,

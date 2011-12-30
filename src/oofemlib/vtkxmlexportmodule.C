@@ -49,6 +49,17 @@
  #include <string>
 #endif
 
+#ifdef __VTK_MODULE
+ #include <vtkPoints.h>
+ #include <vtkPointData.h>
+ #include <vtkDoubleArray.h>
+ #include <vtkCellArray.h>
+ #include <vtkCellData.h>
+ #include <vtkXMLUnstructuredGridWriter.h>
+ #include <vtkUnstructuredGrid.h>
+ #include <vtkSmartPointer.h>
+#endif
+
 namespace oofem {
 VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
@@ -93,16 +104,195 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
+VTKXMLExportModule :: initialize()
+{
+    if ( this->smoother ) {
+        delete this->smoother;
+        this->smoother = NULL;
+    }
+}
+
+
+void
+VTKXMLExportModule :: terminate()
+{ }
+
+
+std::string
+VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
+{
+    char baseFileName [ MAX_FILENAME_LENGTH ];
+    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
+    return std::string(baseFileName) + ".vtu";
+}
+
+
+FILE *
+VTKXMLExportModule :: giveOutputStream(TimeStep *tStep)
+{
+    FILE *answer;
+    std::string fileName = giveOutputFileName(tStep);
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2("VTKXMLExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
+    }
+
+    return answer;
+}
+
+int
+VTKXMLExportModule :: giveCellType(Element *elem)
+{
+    Element_Geometry_Type elemGT = elem->giveGeometryType();
+    int vtkCellType = 0;
+
+    if ( elemGT == EGT_point ) {
+        vtkCellType = 1;
+    } else if ( elemGT == EGT_line_1 ) {
+        vtkCellType = 3;
+    } else if ( elemGT == EGT_line_2 ) {
+        vtkCellType = 21;
+    } else if ( elemGT == EGT_triangle_1 ) {
+        vtkCellType = 5;
+    } else if ( elemGT == EGT_triangle_2 ) {
+        vtkCellType = 22;
+    } else if ( elemGT == EGT_tetra_1 ) {
+        vtkCellType = 10;
+    } else if ( elemGT == EGT_tetra_2 ) {
+        vtkCellType = 24;
+    } else if ( elemGT == EGT_quad_1 ) {
+        vtkCellType = 9;
+    } else if ( elemGT == EGT_quad_2 ) {
+        vtkCellType = 23;
+    } else if ( elemGT == EGT_hexa_1 ) {
+        vtkCellType = 12;
+    } else if ( elemGT == EGT_hexa_2 ) {
+        vtkCellType = 25;
+    } else {
+        OOFEM_ERROR2( "VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
+    }
+
+    return vtkCellType;
+}
+
+int
+VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
+{
+    switch ( cellType ) {
+        case 1:
+            return 1;
+
+        case 3:
+            return 2;
+
+        case 5:
+        case 21:
+            return 3;
+
+        case 9:
+        case 10:
+            return 4;
+
+        case 14:
+            return 5;
+
+        case 13:
+        case 22:
+            return 6;
+
+        case 12:
+        case 23:
+            return 8;
+
+        case 24:
+            return 10;
+
+        case 25:
+            return 20;
+
+        default:
+            OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
+    }
+
+    return 0; // to make compiler happy
+}
+
+
+void
+VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
+{
+    Element_Geometry_Type elemGT = elem->giveGeometryType();
+    int i, nelemNodes;
+
+    if ( ( elemGT == EGT_point ) ||
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) ) {
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(i)->giveNumber() ;
+        }
+    } else if ( elemGT == EGT_hexa_2 ) {
+        int HexaQuadNodeMapping [] = {
+            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
+        };
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
+        }
+    } else {
+        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
+    }
+}
+
+
+bool
+VTKXMLExportModule :: isElementComposite(Element *elem)
+{
+    //return false;
+    return ( elem->giveGeometryType() == EGT_Composite );
+}
+
+
+int
+VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
+{
+    Element_Geometry_Type elemGT = elem->giveGeometryType();
+
+    if ( ( elemGT == EGT_point ) ||
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
+        return 1;
+    } else {
+        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
+    }
+
+    return 0;
+}
+
+
+
+void
 VTKXMLExportModule :: doOutput(TimeStep *tStep)
 {
     if ( !testTimeStepOutput(tStep) ) {
         return;
     }
-
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkUnstructuredGrid> stream = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    vtkSmartPointer<vtkPoints> nodes = vtkSmartPointer<vtkPoints>::New();
+    vtkSmartPointer<vtkIdList> elemNodeArray = vtkSmartPointer<vtkIdList>::New();
+#else
     FILE *stream = this->giveOutputStream(tStep);
-
     fprintf(stream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
     fprintf(stream, "<UnstructuredGrid>\n");
+#endif
 
 
     Domain *d  = emodel->giveDomain(1);
@@ -124,7 +314,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             continue;
         }
 
-        // asemble local->global and gloabal->local region map
+        // assemble local->global and global->local region map
         // and get number of single cells to process
         // the composite cells exported individually
         this->initRegionNodeNumbering(mapG2L, mapL2G, regionDofMans, totalcells, d, ireg);
@@ -138,8 +328,16 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 #else
         if ( 1 ) {
 #endif
-            fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells);
 
+#ifdef __VTK_MODULE
+            for ( inode = 1; inode <= regionDofMans; inode++ ) {
+                coords = d->giveNode(mapL2G.at(inode))->giveCoordinates();
+                int dims = coords->giveSize();
+                nodes->InsertNextPoint(coords->at(1), dims >= 2 ? coords->at(2) : 0.0, dims >= 3 ? coords->at(2) : 0.0);
+            }
+            stream->SetPoints(nodes);
+#else
+            fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells);
             // export nodes in region as vtk vertices
             fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
             for ( inode = 1; inode <= regionDofMans; inode++ ) {
@@ -152,15 +350,20 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     fprintf(stream, "%e ", 0.0);
                 }
             }
-
             fprintf(stream, "</DataArray>\n</Points>\n");
+#endif
+
 
             // output all cells of the piece
-            int vtkCellType, nelemNodes;
-	    IntArray cellNodes;
+            int nelemNodes;
+            IntArray cellNodes;
+#ifdef __VTK_MODULE
+            stream->Allocate(nelem);
+#else
             fprintf(stream, "<Cells>\n");
             // output the connectivity data
             fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+#endif
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
                 if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
@@ -175,17 +378,31 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
                 }
-
 #endif
-                nelemNodes = elem->giveNumberOfNodes();
-		this->giveElementCell(cellNodes, elem, 0);
-                for ( i = 1; i <= nelemNodes; i++ ) {
-		    fprintf(stream, "%d ", mapG2L.at( cellNodes.at(i) ) - 1);
-                }
 
+
+                nelemNodes = elem->giveNumberOfNodes();
+                this->giveElementCell(cellNodes, elem, 0);
+#ifdef __VTK_MODULE
+                elemNodeArray->Reset();
+                elemNodeArray->SetNumberOfIds(nelemNodes);
+#endif
+                for ( i = 1; i <= nelemNodes; i++ ) {
+#ifdef __VTK_MODULE
+                    elemNodeArray->SetId(i-1, mapG2L.at( cellNodes.at(i) ) - 1);
+#else
+                    fprintf(stream, "%d ", mapG2L.at( cellNodes.at(i) ) - 1);
+#endif
+                }
+#ifdef __VTK_MODULE
+                stream->InsertNextCell(this->giveCellType(elem), elemNodeArray);
+#else
                 fprintf(stream, " ");
+#endif
             }
 
+#ifndef __VTK_MODULE
+            int vtkCellType;
             fprintf(stream, "</DataArray>\n");
             // output the offsets (index of individual element data in connectivity array)
             fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
@@ -232,19 +449,25 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
             fprintf(stream, "</DataArray>\n");
             fprintf(stream, "</Cells>\n");
+#endif
 
-
-            // export primary and internal varialbles
+            // export primary and internal variables
+#ifndef __VTK_MODULE
             this->exportPointDataHeader(stream, tStep);
+#endif
             this->exportPrimaryVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
             this->exportIntVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
-            this->exportPointDataFooter(stream, tStep);
+#ifndef __VTK_MODULE
+            fprintf(stream, "</PointData>\n");
+#endif
 
             //export cell data
             this->exportCellVars(stream, ireg, tStep);
 
+#ifndef __VTK_MODULE
             // end of piece record
             fprintf(stream, "</Piece>\n");
+#endif
         } // end of default piece for simple geometry elements
 
 #if 1
@@ -262,7 +485,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             }
 
  #endif
+
             if ( this->isElementComposite(elem) ) {
+#ifndef __VTK_MODULE // TODO; Not sure how to deal with this.
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
                 VTKXMLExportModuleElementInterface *interface =
@@ -271,193 +496,34 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     // passing this to access general piece related methods like exportPointDataHeader, etc.
                     interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);
                 }
+#endif
             }
         } // end loop over multi-cell elements
-
 #endif
     } // end loop over regions
 
+#ifdef __VTK_MODULE
+    // Write the file
+    vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+    writer->SetFileName(giveOutputFileName(tStep).c_str());
+    writer->SetInput(stream);
+    // Optional - set the mode. The default is binary.
+    //writer->SetDataModeToBinary();
+    //writer->SetDataModeToAscii();
+    writer->Write();
+#else
     // finish unstructured grid data and vtk file
     fprintf(stream, "</UnstructuredGrid>\n</VTKFile>");
     fclose(stream);
+#endif
 }
 
-void
-VTKXMLExportModule :: initialize()
-{
-    if ( this->smoother ) {
-        delete this->smoother;
-        this->smoother = NULL;
-    }
-}
-
-
-void
-VTKXMLExportModule :: terminate()
-{ }
-
-
-FILE *
-VTKXMLExportModule :: giveOutputStream(TimeStep *tStep)
-{
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    char fileName [ MAX_FILENAME_LENGTH ];
-    FILE *answer;
-
-    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
-    sprintf( fileName, "%s.vtu", baseFileName );
-    if ( ( answer = fopen(fileName, "w") ) == NULL ) {
-        OOFEM_ERROR2("VTKXMLExportModule::giveOutputStream: failed to open file %s", fileName);
-    }
-
-    return answer;
-}
-
-int
-VTKXMLExportModule :: giveCellType(Element *elem)
-{
-    Element_Geometry_Type elemGT = elem->giveGeometryType();
-    int vtkCellType = 0;
-
-    if ( elemGT == EGT_point ) {
-        vtkCellType = 1;
-    } else if ( elemGT == EGT_line_1 ) {
-        vtkCellType = 3;
-    } else if ( elemGT == EGT_line_2 ) {
-        vtkCellType = 21;
-    } else if ( elemGT == EGT_triangle_1 ) {
-        vtkCellType = 5;
-    } else if ( elemGT == EGT_triangle_2 ) {
-        vtkCellType = 22;
-    } else if ( elemGT == EGT_tetra_1 ) {
-        vtkCellType = 10;
-    } else if ( elemGT == EGT_tetra_2 ) {
-        vtkCellType = 24;
-    } else if ( elemGT == EGT_quad_1 ) {
-        vtkCellType = 9;
-    } else if ( elemGT == EGT_quad_2 ) {
-        vtkCellType = 23;
-    } else if ( elemGT == EGT_hexa_1 ) {
-        vtkCellType = 12;
-    } else if ( elemGT == EGT_hexa_2 ) {
-        vtkCellType = 25;
-    } else {
-        OOFEM_ERROR2( "VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
-    }
-
-    return vtkCellType;
-}
-
-int
-VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
-{
-    switch ( cellType ) {
-    case 1:
-        return 1;
-
-    case 3:
-        return 2;
-
-    case 5:
-    case 21:
-        return 3;
-
-    case 9:
-    case 10:
-        return 4;
-
-    case 14:
-        return 5;
-
-    case 13:
-    case 22:
-        return 6;
-
-    case 12:
-    case 23:
-        return 8;
-
-    case 24:
-        return 10;
-
-    case 25:
-        return 20;
-
-    default:
-        OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
-    }
-
-    return 0; // to make compiler happy
-}
-
-
-void
-VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
-{
-    Element_Geometry_Type elemGT = elem->giveGeometryType();
-    int i, nelemNodes;
-
-    if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) ) {
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(i)->giveNumber() ;
-        }
-    } else if ( elemGT == EGT_hexa_2 ) {
-        int HexaQuadNodeMapping [] = {
-            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
-        };
-        nelemNodes = elem->giveNumberOfNodes();
-        answer.resize(nelemNodes);
-        for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
-        }
-    } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
-    }
-
-    return;
-}
-
-
-bool
-VTKXMLExportModule :: isElementComposite(Element *elem)
-{
-    //return false;
-    return ( elem->giveGeometryType() == EGT_Composite );
-}
-
-
-int
-VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
-{
-    Element_Geometry_Type elemGT = elem->giveGeometryType();
-
-    if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
-        return 1;
-    } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
-    }
-
-    return 0;
-}
-
+#ifndef __VTK_MODULE
 void
 VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
 {
     int i, n;
     std :: string scalars, vectors, tensors;
-
 
     n = primaryVarsToExport.giveSize();
 
@@ -508,17 +574,18 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
     fprintf( stream, "<PointData Scalars=\"%s\" Vectors=\"%s\" Tensors=\"%s\" >\n",
             scalars.c_str(), vectors.c_str(), tensors.c_str() );
 }
+#endif
 
-void
-VTKXMLExportModule :: exportPointDataFooter(FILE *stream, TimeStep *tStep)
-{
-    fprintf(stream, "</PointData>\n");
-}
 
 //keyword "vars" in OOFEM input file
 void
-VTKXMLExportModule :: exportIntVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
-                                    int regionDofMans, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportIntVars(
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+    FILE *stream,
+#endif
+    IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
 {
     int i, n = internalVarsToExport.giveSize();
     InternalStateType isttype;
@@ -581,7 +648,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
         for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
             node = element->giveNode(elementNode)->giveNumber();
             if ( regionG2LNodalNumbers.at(node) == 0 ) { // assign new number
-                /* mark for assignement. This is done later, as it allows to preserve
+                /* mark for assignment. This is done later, as it allows to preserve
                  * natural node numbering.
                  */
                 regionG2LNodalNumbers.at(node) = 1;
@@ -607,8 +674,13 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 //keyword "vars" in OOFEM input file
 void
 VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueType type,
-                                     IntArray &mapG2L, IntArray &mapL2G,
-                                     int regionDofMans, int ireg, FILE *stream, TimeStep *tStep)
+                                     IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int ireg,
+#ifdef __VTK_MODULE
+                                     vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+                                     FILE *stream,
+#endif
+                                     TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int inode;
@@ -620,20 +692,44 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
     this->giveSmoother();
 
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkDoubleArray> intVarArray = vtkSmartPointer<vtkDoubleArray>::New();
+    intVarArray->SetName(__InternalStateTypeToString(valID));
+#endif
+
     if ( type == ISVT_SCALAR ) {
+#ifdef __VTK_MODULE
+        intVarArray->SetNumberOfComponents(1);
+#else
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(valID) );
+#endif
     } else if ( type == ISVT_VECTOR ) {
+#ifdef __VTK_MODULE
+        intVarArray->SetNumberOfComponents(3);
+#else
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
+#endif
     } else if ( ( type == ISVT_TENSOR_S3 ) || ( type == ISVT_TENSOR_S3E ) ) {
+#ifdef __VTK_MODULE
+        intVarArray->SetNumberOfComponents(9);
+#else
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
+#endif
     } else if ( type == ISVT_TENSOR_G ) {
+#ifdef __VTK_MODULE
+        intVarArray->SetNumberOfComponents(9);
+#else
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
+#endif
     } else {
         fprintf( stderr, "VTKXMLExportModule::exportIntVarAs: unsupported variable type %s\n", __InternalStateTypeToString(valID) );
     }
+#ifdef __VTK_MODULE
+    intVarArray->SetNumberOfTuples(regionDofMans);
+#endif
 
 
     if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
@@ -659,37 +755,47 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
         } else {
             this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
             if ( val == NULL ) {
-	      iVal.resize( regionVarMap.giveSize() );
-	      iVal.zero();
-	      val = & iVal;
-	      //OOFEM_ERROR2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
+                iVal.resize( regionVarMap.giveSize() );
+                iVal.zero();
+                val = & iVal;
+                //OOFEM_ERROR2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
             }
         }
 
-	valSize = val->giveSize();
+        valSize = val->giveSize();
         if ( type == ISVT_SCALAR ) {
-            if ( valSize ) {
-                fprintf( stream, "%e ", val->at(1) );
-            } else {
-                fprintf(stream, "%e ", 0.0);
-            }
+#ifdef __VTK_MODULE
+            intVarArray->SetTuple1(inode-1, valSize ? val->at(1) : 0.0);
+#else
+            fprintf( stream, "%e ", valSize ? val->at(1) : 0.0 );
+#endif
         } else if ( type == ISVT_VECTOR ) {
             jsize = min( 3, valSize );
             for ( j = 1; j <= jsize; j++ ) {
+#ifdef __VTK_MODULE
+                intVarArray->SetComponent(inode-1, j-1, val->at(j));
+#else
                 fprintf( stream, "%e ", val->at(j) );
+#endif
             }
 
             for ( j = jsize + 1; j <= 3; j++ ) {
+#ifdef __VTK_MODULE
+                intVarArray->SetComponent(inode-1, j-1, 0.0);
+#else
                 fprintf(stream, "0.0 ");
+#endif
             }
-
+#ifndef __VTK_MODULE
             fprintf(stream, " ");
+#endif
+
         } else if ( type == ISVT_TENSOR_S3 ) {
             int ii, jj, iii;
             t.zero();
             for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
-	        iii = regionVarMap.at(ii) ;
-		iii *= (valSize >= iii); // set iii to zero if val array size mismatch
+                iii = regionVarMap.at(ii);
+                iii *= (valSize >= iii); // set iii to zero if val array size mismatch
 
                 if ( ( ii == 1 ) && iii ) {
                     t.at(1, 1) = val->at(iii);
@@ -711,26 +817,43 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
             for ( ii = 1; ii <= 3; ii++ ) {
                 for ( jj = 1; jj <= 3; jj++ ) {
+#ifdef __VTK_MODULE
+                    intVarArray->SetComponent(inode-1, (ii-1)*3+jj-1, t.at(ii,jj));
+#else
                     fprintf( stream, "%e ", t.at(ii, jj) );
+#endif
                 }
             }
-
+#ifndef __VTK_MODULE
             fprintf(stream, " ");
+#endif
         } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
             jsize = min( 9, val->giveSize() );
             for ( j = 1; j <= jsize; j++ ) {
+#ifdef __VTK_MODULE
+                intVarArray->SetComponent(inode-1, j-1, val->at(j));
+#else
                 fprintf( stream, "%e ", val->at(j) );
+#endif
+
             }
 
             for ( j = jsize + 1; j <= 9; j++ ) {
+#ifdef __VTK_MODULE
+                intVarArray->SetComponent(inode-1, j-1, 0.0);
+#else
                 fprintf(stream, "0.0 ");
+#endif
             }
-
+#ifndef __VTK_MODULE
             fprintf(stream, " ");
+#endif
         }
     } // end loop over dofmans
 
+#ifndef __VTK_MODULE
     fprintf(stream, "</DataArray>\n");
+#endif
 }
 
 
@@ -749,8 +872,13 @@ VTKXMLExportModule :: giveSmoother()
 
 //keyword "primvars" in OOFEM input file
 void
-VTKXMLExportModule :: exportPrimaryVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
-                                        int regionDofMans, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportPrimaryVars(
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+    FILE *stream,
+#endif
+    IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
 {
     // should be performed over regions
 
@@ -776,16 +904,21 @@ VTKXMLExportModule :: exportPrimaryVars(FILE *stream, IntArray &mapG2L, IntArray
 //keyword "primvars" in OOFEM input file
 void
 VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
-                                      int regionDofMans, int ireg, FILE *stream, TimeStep *tStep)
+                                      int regionDofMans, int ireg,
+#ifdef __VTK_MODULE
+                                      vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+                                      FILE *stream,
+#endif
+                                      TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int inode;
-    int j, jsize;
+    int j;
     FloatArray iVal;
     FloatMatrix t(3, 3);
     IntArray regionVarMap;
     InternalStateValueType type = ISVT_UNDEFINED;
-    int nScalarComp = 1;
 
     if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
         type = ISVT_VECTOR;
@@ -796,7 +929,19 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
         OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
     }
 
-    // print header
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkDoubleArray> primVarArray = vtkSmartPointer<vtkDoubleArray>::New();
+    primVarArray->SetName(__UnknownTypeToString(valID));
+
+    if ( type == ISVT_SCALAR ) {
+        primVarArray->SetNumberOfComponents(1);
+    } else if ( type == ISVT_VECTOR ) {
+        primVarArray->SetNumberOfComponents(3);
+    } else {
+        fprintf( stderr, "VTKXMLExportModule::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
+    }
+    primVarArray->SetNumberOfTuples(regionDofMans);
+#else
     if ( type == ISVT_SCALAR ) {
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
     } else if ( type == ISVT_VECTOR ) {
@@ -804,6 +949,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     } else {
         fprintf( stderr, "VTKXMLExportModule::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
     }
+#endif
 
     DofManager *dman;
     DofIDItem id;
@@ -817,20 +963,6 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 
 
         if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
-            /*
-             * iVal.resize(3);
-             * iVal.zero();
-             *
-             * for ( j = 1; j <= numberOfDofs; j++ ) {
-             *    id = dman->giveDof(j)->giveDofID();
-             *    if ( ( id == V_u ) || ( id == D_u ) ) {
-             *        iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-             *    } else if ( ( id == V_v ) || ( id == D_v ) ) {
-             *        iVal.at(2) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-             *    } else if ( ( id == V_w ) || ( id == D_w ) ) {
-             *        iVal.at(3) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-             *    }
-             */
             iVal.resize(3);
             iVal.zero();
             mask.resize(0);
@@ -841,7 +973,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
                     mask.followedBy(id);
                 }
             }
-
+            // This needs to be handled differently. / Micket
             if ( dman->requiresTransformation() || dman->hasAnySlaveDofs() ) {
                 // handle local coordinate system, slave dofs, etc in node
                 dman->giveUnknownVector(dl, mask, EID_MomentumBalance, VM_Total, tStep);
@@ -894,35 +1026,38 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
         }
 
         if ( type == ISVT_SCALAR ) {
-            if ( iVal.giveSize() ) {
-                for ( j = 1; j <= nScalarComp; j++ ) {
-                    fprintf( stream, "%e ", iVal.at(j) );
-                }
-
-                fprintf(stream, " ");
-            } else {
-                fprintf(stream, "%e ", 0.0);
-                fprintf(stream, " ");
-            }
+#ifdef __VTK_MODULE
+            primVarArray->SetTuple1(inode-1, iVal.at(1));
+#else
+            fprintf(stream, "%e ", iVal.at(1) );
+#endif
         } else if ( type == ISVT_VECTOR ) {
-            jsize = min( 3, iVal.giveSize() );
-            for ( j = 1; j <= jsize; j++ ) {
-                fprintf( stream, "%e ", iVal.at(j) );
-            }
-
-            for ( j = jsize + 1; j <= 3; j++ ) {
-                fprintf(stream, "0.0 ");
-            }
-
-            fprintf(stream, " ");
+#ifdef __VTK_MODULE
+            primVarArray->SetTuple3(inode-1, iVal.at(1), iVal.at(2), iVal.at(3));
+#else
+            fprintf( stream, "%e %e %e ", iVal.at(1), iVal.at(2), iVal.at(3) );
+#endif
         }
     } // end loop over nodes
-
+#ifdef __VTK_MODULE
+    if ( type == ISVT_SCALAR ) {
+        stream->GetPointData()->SetScalars(primVarArray);
+    } else if ( type == ISVT_VECTOR ) {
+        stream->GetPointData()->SetVectors(primVarArray);
+    }
+#else
     fprintf(stream, "</DataArray>\n");
+#endif
 }
 
 
-void VTKXMLExportModule :: exportCellVars(FILE *stream, int region, TimeStep *tStep)
+void VTKXMLExportModule :: exportCellVars(
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+    FILE *stream,
+#endif
+    int region, TimeStep *tStep)
 {
     int i, n = cellVarsToExport.giveSize();
     InternalStateType type;
@@ -931,22 +1066,32 @@ void VTKXMLExportModule :: exportCellVars(FILE *stream, int region, TimeStep *tS
         return;
     }
 
+#ifndef __VTK_MODULE
     //print header
     fprintf(stream, "<CellData Scalars=\"\" Vectors=\"\" Tensors=\"\">\n");  // should contain a list of InternalStateType
+#endif
 
     for ( i = 1; i <= n; i++ ) {
         type = ( InternalStateType ) cellVarsToExport.at(i);
         this->exportCellVarAs(type, region, stream, tStep);
     }
 
+#ifndef __VTK_MODULE
     //print footer
     fprintf(stream, "</CellData>\n");
+#endif
 }
 
 
 //keyword "cellvars" in OOFEM input file
 void
-VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *stream, TimeStep *tStep)
+VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkUnstructuredGrid> &stream,
+#else
+    FILE *stream,
+#endif
+    TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int ielem, nelem = d->giveNumberOfElements();
@@ -957,13 +1102,24 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
     GaussPoint *gp;
     FloatArray answer, temp;
     double gptot;
+    int ncomponents = 1;
+
+#ifdef __VTK_MODULE
+    vtkSmartPointer<vtkDoubleArray> cellVarsArray = vtkSmartPointer<vtkDoubleArray>::New();
+    cellVarsArray->SetName(__InternalStateTypeToString(type));
+#endif
 
     switch ( type ) {
     case IST_MaterialNumber:
     case IST_ElementNumber:
     case IST_Pressure:
         // if it wasn't for IST_Pressure,
+#ifdef __VTK_MODULE
+        cellVarsArray->SetNumberOfComponents(1);
+        cellVarsArray->SetNumberOfTuples(nelem);
+#else
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+#endif
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
 
@@ -979,23 +1135,44 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
 
 #endif
             if ( type == IST_MaterialNumber ) {
+#ifdef __VTK_MODULE
+                cellVarsArray->SetTuple1(ielem-1, elem->giveMaterial()->giveNumber() ); // Should be integer..
+#else
                 fprintf( stream, "%d ", elem->giveMaterial()->giveNumber() );
+#endif
             } else if ( type == IST_ElementNumber ) {
+#ifdef __VTK_MODULE
+                cellVarsArray->SetTuple1(ielem-1,  elem->giveNumber() ); // Should be integer..
+#else
                 fprintf( stream, "%d ", elem->giveNumber() );
+#endif
             } else if (type == IST_Pressure) { // TODO: Why this special treatment for pressure? / Mikael
                 if (elem->giveNumberOfInternalDofManagers() == 1) {
                     IntArray pmask(1); pmask.at(1) = P_f;
                     elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
+#ifdef __VTK_MODULE
+                    cellVarsArray->SetTuple1(ielem-1,  answer.at(1) ); // Should be integer..
+#else
                     fprintf( stream, "%f ", answer.at(1) );
+#endif
                 }
             }
         }
+#ifdef __VTK_MODULE
+        stream->GetCellData()->SetScalars(cellVarsArray);
+#endif
         break;
 
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
+#ifdef __VTK_MODULE
+        cellVarsArray->SetNumberOfComponents(3);
+        cellVarsArray->SetNumberOfTuples(nelem);
+        ncomponents = 3;
+#else
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+#endif
         if ( type == IST_MaterialOrientation_x ) {
             pos = 1;
         }
@@ -1014,10 +1191,16 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
                 mtrx.resize(3, 3);
                 mtrx.zero();
             }
-
+#ifdef __VTK_MODULE
+            cellVarsArray->SetTuple3(ielem-1,  mtrx.at(1, pos), mtrx.at(2,pos), mtrx.at(3,pos) );
+#else
             fprintf( stream, "%f %f %f  ", mtrx.at(1, pos), mtrx.at(2, pos), mtrx.at(3, pos) );
+#endif
         }
 
+#ifdef __VTK_MODULE
+        stream->GetCellData()->SetVectors(cellVarsArray);
+#endif
         break;
 
     default:
@@ -1028,12 +1211,19 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
         case ISVT_VECTOR:
         case ISVT_SCALAR:
             if (vt == ISVT_SCALAR) {
-                fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+                ncomponents = 1;
             } else if (vt == ISVT_TENSOR_G) {
-                fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+                ncomponents = 9;
             } else {
-                fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\">\n", __InternalStateTypeToString(type) );
+                ncomponents = 3;
             }
+#ifdef __VTK_MODULE
+            cellVarsArray->SetNumberOfComponents(ncomponents);
+            cellVarsArray->SetNumberOfTuples(nelem);
+#else
+            fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", __InternalStateTypeToString(type), ncomponents );
+#endif
+
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
                 if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
@@ -1058,16 +1248,32 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
                     answer.times(1/gptot);
                 }
                 for (int i = 1; i <= answer.giveSize(); ++i) {
+#ifdef __VTK_MODULE
+                    cellVarsArray->SetComponent(ielem-1, i-1, answer.at(i));
+#else
                     fprintf( stream, "%e ", answer.at(i) );
+#endif
                 }
+#ifndef __VTK_MODULE
                 fprintf( stream, "\n" );
+#endif
             }
+#ifdef __VTK_MODULE
+            if (ncomponents == 1) {
+                stream->GetCellData()->SetScalars(cellVarsArray);
+            } else if (ncomponents == 3) {
+                stream->GetCellData()->SetVectors(cellVarsArray);
+            } else {
+                stream->GetCellData()->SetTensors(cellVarsArray);
+            }
+#endif
             break;
         default:
             OOFEM_ERROR2("Quantity %s not handled yet.", __InternalStateTypeToString(type) );
         }
     }
-
+#ifndef __VTK_MODULE
     fprintf(stream, "</DataArray>\n");
+#endif
 }
 } // end namespace oofem
