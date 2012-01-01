@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sloangraphnode.C,v 1.5 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,7 +35,6 @@
 /* Modified and optimized by: Borek Patzak */
 /* Author: Milan Jirasek */
 
-
 #include "sloangraphnode.h"
 #include "sloangraph.h"
 #include "mathfem.h"
@@ -47,16 +45,14 @@ SloanGraphNode :: SloanGraphNode(SloanGraph *graph, int numOld) : neighborList()
     this->graph = graph;
     NumberOld  = numOld;
     NumberNew  = 0;
-    nodeStatus    = Inactive;
+    nodeStatus = Inactive;
     Degree    = 0;
     Distance  = -1;
     Priority  = -1;
-    //Neighbor  = new ListClass();
 }
 
 SloanGraphNode :: ~SloanGraphNode()
 {
-    // delete Neighbor;
 }
 
 void SloanGraphNode :: addNeighbor(int neighbor)

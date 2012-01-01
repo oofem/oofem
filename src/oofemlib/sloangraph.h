@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sloangraph.h,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,14 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************************
-//   *** CLASS SLOAN PROFILE OPTIMIZER GRAPH NODE ***
-//   ************************************************
-
-
-/* Modified and optimized by: Borek Patzak */
-/* Author: Milan Jirasek */
-
 #ifndef sloangraph_h
 #define sloangraph_h
 
@@ -52,9 +43,10 @@
 
 namespace oofem {
 #define SLOAN_TIME_CHUNK 60
-/** If defined, the support for Multiple subDomains is turned on.
- *  Then the algorithm properly handles the isolated nodes as well as
- *  the case of multiple subdomains that are not connected
+/**
+ * If defined, the support for Multiple subdomains is turned on.
+ * Then the algorithm properly handles the isolated nodes as well as
+ * the case of multiple subdomains that are not connected
  */
 #define MDC
 
@@ -62,19 +54,21 @@ class Domain;
 
 /**
  * Graph representing the undirected graph used for Sloan algorithm for symmetric matrix profile
- * reduction. The sloan algorithm is described by following papers:
+ * reduction. The Sloan algorithm is described by following papers:
  * Sloan, S., W: An algorithm for profile and wavefront reduction of sparse matrices, IJNME, vol. 23, 239-251, 1986
- * Sloan, S., W: A fortran program for profile and wavefront reduction, IJNME, vol. 28, 2651-2679, 1989.
+ * Sloan, S., W: A Fortran program for profile and wavefront reduction, IJNME, vol. 28, 2651-2679, 1989.
  * The current implementation undergoes the description of algorithm given in second paper.
  *
- * The rigigArmNoodes and slave dofs are supported. A fictious element (graph edge)  conecting corresponding slave and
+ * The rigid arm nodes and slave dofs are supported. A fictitious element (graph edge) connecting corresponding slave and
  * master nodes is added to reflect the connection.
  *
- * The current implementation allows to select quality. The recomended value for quality is Good,
- * causing sloan pseudo-peripheral node selection algorithm is used.
+ * The current implementation allows to select quality.
+ * The recommended value for quality is Good, causing Sloan pseudo-peripheral node selection algorithm is used.
  * The Best causes the level structure to be generated for all nodes and selecting the best one.
- * Hovewer, this is extremely time consuming.
+ * However, this is extremely time consuming.
  *
+ * @author Milan Jirasek
+ * @author Borek Patzak
  */
 class SloanGraph
 {
@@ -85,26 +79,26 @@ private:
     /// Domain asoociated to graph
     Domain *domain;
 
-    // List of graph nodes
+    /// List of graph nodes.
     AList< SloanGraphNode >nodes;
-    /// Start peripheral node
+    /// Start peripheral node.
     int startNode;
-    /// End pripheral node
+    /// End peripheral node.
     int endNode;
-    /// priority queue of active or preactive nodes
+    /// Priority queue of active or preactive nodes.
     dynaList< int >queue;
-    /// integer distance weight
+    /// Integer distance weight.
     int WeightDistance;
-    /// integer degree weight
+    /// Integer degree weight.
     int WeightDegree;
     SpineQualityType SpineQuality;
-    /// Minimal profile size obtained
+    /// Minimal profile size obtained.
     int MinimalProfileSize;
-    /// Optimal degree weight
+    /// Optimal degree weight.
     int OptimalWeightDegree;
-    /// Optimal distance weight
+    /// Optimal distance weight.
     int OptimalWeightDistance;
-    /// Flag indicating that node distances from endNode were already computed
+    /// Flag indicating that node distances from endNode were already computed.
     int nodeDistancesFlag;
 
     /**
@@ -125,79 +119,79 @@ public:
     /// Initialize graph from domain description
     void  initialize();
     /// Resets the receiver state. Clears the startNode, endNode and nodeDistancesFlag values.
-    void  resetAll() { startNode = endNode = nodeDistancesFlag = 0; }
+    void resetAll() { startNode = endNode = nodeDistancesFlag = 0; }
 
     /// Return graph node
     SloanGraphNode *giveNode(int num);
 
     /// Finds the peripheral nodes (rooted in optimal start node) according to receiver quality and current weights.
-    void  findPeripheralNodes();
+    void findPeripheralNodes();
 
-    int   computeTrueDiameter();
-    int     findBestRoot();
-    int    giveFullProfileSize();
-    /// Returns the optimal profile found
-    int     giveOptimalProfileSize() { return MinimalProfileSize; }
-    /// Returns the optimal density of mesh
-    double  giveOptimalProfileDensity();
+    int computeTrueDiameter();
+    int findBestRoot();
+    int giveFullProfileSize();
+    /// Returns the optimal profile found.
+    int giveOptimalProfileSize() { return MinimalProfileSize; }
+    /// Returns the optimal density of mesh.
+    double giveOptimalProfileDensity();
 
     /**
      * Assigns the New numbers by node labeling algorithm
      * (old numbers are used when both weights are zero)
      * and returns the profile size.
      */
-    int    computeProfileSize();
+    int computeProfileSize();
     /// Returns the optimal reverse renumbering table
     IntArray *giveOptimalRenumberingTable() { return & OptimalRenumberingTable; }
-    void   writeRenumberingTable(FILE *file);
-    int   writeOptimalRenumberingTable(FILE *);
+    void writeRenumberingTable(FILE *file);
+    int writeOptimalRenumberingTable(FILE *file);
 
-    /// Sets WeightDistance to given value
-    void  setWeightDistance(int w) { if ( w >= 0 ) { WeightDistance = w; } }
-    /// Sets WeightDegree to given value
-    void  setWeightDegree(int w) { if ( w >= 0 ) { WeightDegree = w; } }
-    /// Select spine quality generation
+    /// Sets weight distance to given value.
+    void setWeightDistance(int w) { if ( w >= 0 ) { WeightDistance = w; } }
+    /// Sets weight degree to given value.
+    void setWeightDegree(int w) { if ( w >= 0 ) { WeightDegree = w; } }
+    /// Select spine quality generation.
     void  setSpineQuality(SpineQualityType q) {
         SpineQuality = q;
         resetAll();
     }
 
     /// Prints actual parameters
-    void  printParameters();
+    void printParameters();
     /// Sets weight degee and weight dist to given values
-    void  setParameters(int wdeg, int wdis);
+    void setParameters(int wdeg, int wdis);
     /**
      * Generates the new nodal numbering based on given parameters.
      * Can be used multiple times, the best result is stored in OptimalRenumberingTable,
      * MinimalProfileSize, OptimalWeightDegree and OptimalWeightDistance attributes.
      */
-    void  tryParameters(int wdeg, int wdis);
+    void tryParameters(int wdeg, int wdis);
 
 private:
-    /// Returns graph node number with minimal degree
-    int     giveNodeWithMinDegree();
+    /// Returns graph node number with minimal degree.
+    int giveNodeWithMinDegree();
     /**
      * Extract candidates from given level structure.
      * The list of candidates contains only one node of each degree
      * of last level of active spine.
      */
-    void    extractCandidates(dynaList< int > &candidates, SloanLevelStructure *Spine);
+    void extractCandidates(dynaList< int > &candidates, SloanLevelStructure *Spine);
     /// Initializes statuses and priority of nodes of receiver
-    void   initStatusAndPriority();
+    void initStatusAndPriority();
     /// Evaluates the nodal distances from backSpine. The backSpine is generated if not available.
-    void   evaluateNodeDistances();
+    void evaluateNodeDistances();
     /// Assigns old node numbers as new ones. Used to compute the profile of existing old numbering.
-    void   assignOldNumbers();
+    void assignOldNumbers();
     /// Implementation of node labeling algorithm.
-    void   assignNewNumbers();
+    void assignNewNumbers();
     /// Inserts inactive neighbours of given node as preactive ones.
-    void   insertNeigborsOf(int);
-    /// Modifies the pririty around node with max priority.
-    void   modifyPriorityAround(int);
-    /// Fids node with highest priority in queue, removes its entry and returns its number
-    int     findTopPriorityInQueue();
+    void insertNeigborsOf(int);
+    /// Modifies the priority around node with max priority.
+    void modifyPriorityAround(int);
+    /// Finds node with highest priority in queue, removes its entry and returns its number.
+    int findTopPriorityInQueue();
 #ifdef MDC
-    /// numbers isoalted nodes (those with degree equal to 0)
+    /// Numbers isolated nodes (those with degree equal to 0).
     void numberIsolatedNodes(int &NextNumber, int &labeledNodes);
 #endif
 };

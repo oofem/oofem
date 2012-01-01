@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sloangraph.C,v 1.8.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -57,9 +56,9 @@ SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTabl
     domain  = d;
     //  Spine  = NULL;
     //  BackSpine = NULL;
-    WeightDistance = 1; /*        */
-    WeightDegree = 2; /* default values    */
-    SpineQuality  = Good; /*        */
+    WeightDistance = 1;
+    WeightDegree = 2;
+    SpineQuality  = Good;
     MinimalProfileSize    = 0;
     OptimalWeightDegree   = 0;
     OptimalWeightDistance = 0;
@@ -105,7 +104,7 @@ void SloanGraph :: initialize()
 
     // loop over dof managers and test if there are some "slave" or rigidArm connection
     // if yes, such dependency is reflected in the graph by introducing additional
-    // graph edges betwenn slaves and corresponding masters
+    // graph edges between slaves and corresponding masters
     /*
      * DofManager* iDofMan;
      * for (i=1; i <= nnodes; i++){
@@ -133,10 +132,6 @@ void SloanGraph :: initialize()
      * }
      * }
      * } // end dof man loop */
-
-    // loop over dof managers and test if there are some "slave" or rigidArm connection
-    // if yes, such dependency is reflected in the graph by introducing additional
-    // graph edges betwenn slaves and corresponding masters
 
     std :: set< int, std :: less< int > >masters;
     std :: set< int, std :: less< int > > :: iterator it;
@@ -332,7 +327,7 @@ SloanGraph :: findBestRoot()
 
 
 double
-SloanGraph ::  giveOptimalProfileDensity()
+SloanGraph :: giveOptimalProfileDensity()
 {
     int nnodes = domain->giveNumberOfDofManagers();
     double d = 0;
@@ -608,7 +603,7 @@ SloanGraph :: writeRenumberingTable(FILE *file)
 }
 
 int
-SloanGraph ::  writeOptimalRenumberingTable(FILE *OutputFile)
+SloanGraph :: writeOptimalRenumberingTable(FILE *OutputFile)
 {
     if ( OptimalRenumberingTable.isEmpty() ) {
         return 0;

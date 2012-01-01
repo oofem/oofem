@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sloangraphnode.h,v 1.5 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,14 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************************
-//   *** CLASS SLOAN PROFILE OPTIMIZER GRAPH NODE ***
-//   ************************************************
-
-
-/* Modified and optimized by: Borek Patzak */
-/* Author: Milan Jirasek */
-
 #ifndef sloangraphnode_h
 #define sloangraphnode_h
 
@@ -51,39 +42,39 @@ class SloanGraph;
 
 /**
  * Class representing node in undirected graph, used by Sloan profile optimizer.
- * Node kepps its old and new number, status, degree, distance and corresponding priority.
- * The list of neigbouring nodes is also kept.
+ * Node keeps its old and new number, status, degree, distance and corresponding priority.
+ * The list of neighbouring nodes is also kept.
+ * @author Milan Jirasek
+ * @author Borek Patzak
  */
 class SloanGraphNode
 {
 public:
-    /// Status type definition
+    /// Status type definition.
     enum SloanGraphNode_StatusType { Inactive, Preactive, Active, Postactive };
 
 private:
-
-    /// Associated graph structure, to which node belongs
+    /// Associated graph structure, to which node belongs.
     SloanGraph *graph;
-    /// Old (original) number
+    /// Old (original) number.
     int NumberOld;
-    /// New (Optimized) number
+    /// New (optimized) number.
     int NumberNew;
-    /// Status of node
+    /// Status of node.
     SloanGraphNode_StatusType nodeStatus;
-    /// Node degree (number of adjacent edges)
+    /// Node degree (number of adjacent edges).
     int Degree;
-    /// Node distance
+    /// Node distance.
     int Distance;
-    /// Node priority
+    /// Node priority.
     int Priority;
-    /// List of neighbouring nodes (represent graph edges)
+    /// List of neighbouring nodes (represent graph edges).
     dynaList< int >neighborList;
 
 public:
-
-    /// Constructor. Creates node belonging to given graph with given old number.
+    /// Creates node belonging to given graph with given old number.
     SloanGraphNode(SloanGraph *graph, int numOld);
-    /// Destructor
+    /// Destructor.
     ~SloanGraphNode();
 
     /**
@@ -93,38 +84,38 @@ public:
      */
     void  addNeighbor(int neighbor);
 
-    /// Returns new number of receiver
-    int   giveNewNumber() { return NumberNew; }
-    /// Returns old number of receiver
-    int   giveOldNumber() { return NumberOld; }
-    /// Returns receiver status
+    /// Returns new number of receiver.
+    int giveNewNumber() { return NumberNew; }
+    /// Returns old number of receiver.
+    int giveOldNumber() { return NumberOld; }
+    /// Returns receiver status.
     SloanGraphNode_StatusType giveStatus() { return nodeStatus; }
-    /// Return the receiver's degree
-    int  giveDegree() { return Degree; }
-    /// Returns distance of receiver
-    int  giveDistance() { return Distance; }
-    /// Returns priority of receiver
-    int  givePriority() { return Priority; }
-    /// Returns the neighbor list of receiver
+    /// Return the receiver's degree.
+    int giveDegree() { return Degree; }
+    /// Returns distance of receiver.
+    int giveDistance() { return Distance; }
+    /// Returns priority of receiver.
+    int givePriority() { return Priority; }
+    /// Returns the neighbor list of receiver.
     dynaList< int > *giveNeighborList()  { return & neighborList; }
-    /// sets new number equal to old one
+    /// sets new number equal to old one.
     void assignOldNumber() { NumberNew = NumberOld; }
 
-    /// Sets the receiver distance to given number
-    void  setDistance(int d) { Distance = d; }
-    /// Sets the receiver priority to given value
-    void  setPriority(int p) { Priority = p; }
-    /// Sets the status of receiver to given value
-    void  setStatus(SloanGraphNode_StatusType s) { nodeStatus = s; }
-    /// Sets the new number of receiver
-    void  setNewNumber(int n) { NumberNew = n; }
-    /// Increases the priority of receiver by given value
-    void  increasePriorityBy(int p) { Priority += p; }
+    /// Sets the receiver distance to given number.
+    void setDistance(int d) { Distance = d; }
+    /// Sets the receiver priority to given value.
+    void setPriority(int p) { Priority = p; }
+    /// Sets the status of receiver to given value.
+    void setStatus(SloanGraphNode_StatusType s) { nodeStatus = s; }
+    /// Sets the new number of receiver.
+    void setNewNumber(int n) { NumberNew = n; }
+    /// Increases the priority of receiver by given value.
+    void increasePriorityBy(int p) { Priority += p; }
     /**
      * Computes the profile height corresponding to receiver from
      * current new and old numbers.
      */
-    int   computeProfileHeight();
+    int computeProfileHeight();
 };
 } // end namespace oofem
 #endif // sloangraphnode_h

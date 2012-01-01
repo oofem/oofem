@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sloanlevelstruct.h,v 1.5 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,15 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *****************************************************
-//   *** CLASS SLOAN PROFILE OPTIMIZER LEVEL STRUCTURE ***
-//   *****************************************************
-
-
-/* Modified and optimized by: Borek Patzak */
-/* Author: Milan Jirasek */
-
-
 #ifndef sloanlevelstruct_h
 #define sloanlevelstruct_h
 
@@ -52,9 +42,11 @@ namespace oofem {
 class SloanGraph;
 
 /**
- * Class representing level structure.
+ * Class representing level structure for Sloan profile optimizer.
  * This is partitioning of the nodes such that each node is assigned
  * to one of the levels in accordance with its distance from a specified root node.
+ * @author Milan Jirasek
+ * @author Borek Patzak
  */
 class SloanLevelStructure
 {
@@ -73,7 +65,7 @@ private:
     int Width;
 
 public:
-    /// Constructor. Creates new level structure assignet to graph, with root being the root node.
+    /// Creates new level structure assignment to graph, with root being the root node.
     SloanLevelStructure(SloanGraph *graph, int root) : Structure(0)
     {
         Graph = graph;
@@ -85,42 +77,42 @@ public:
     ~SloanLevelStructure();
 
     /// Destroys all levels
-    void  destroyLevels();
+    void destroyLevels();
     /**
      * Builds the level structure. The limitWidth parameter allows receiver build-up phase
-     * to be aborted during the assembly, when with of sone level is greater than given value.
+     * to be aborted during the assembly, when width of some level is greater than given value.
      * Default value for limitWidth is -1 meaning no width limit.
      * If assembly aborted, the destroyLevels() method is called.
-     * @return zero if assembly aborted due to width limit, positive value otherwise.
+     * @return Zero if assembly aborted due to width limit, positive value otherwise.
      */
-    int   formYourself(int limitWidth = -1);
+    int formYourself(int limitWidth = -1);
 
-    /// Returns the depth of receiver
+    /// Returns the depth of receiver.
     int  giveDepth() {
         if ( !Depth ) { computeDepth(); }
 
         return Depth;
     }
-    /// Returns the width of receiver
+    /// Returns the width of receiver.
     int  giveWidth() {
         if ( !Width ) { computeWidth(); }
 
         return Width;
     }
-    /// Returns the i-th level of receiver
+    /// Returns the i-th level of receiver.
     IntArray *giveLevel(int num);
-    /// Sets the end node of receiver
-    void  setEnd(int end) { End = end; }
-    /// Returns the end node of receiver
-    int     giveEnd() { return End; }
-    /// Return root node of receiver
-    int     giveRoot() { return Root; }
+    /// Sets the end node of receiver.
+    void setEnd(int end) { End = end; }
+    /// Returns the end node of receiver.
+    int giveEnd() { return End; }
+    /// Return root node of receiver.
+    int giveRoot() { return Root; }
 
 private:
-    /// Computes depth of receiver
-    void  computeDepth();
-    /// Computes the Width of receiver
-    void  computeWidth();
+    /// Computes depth of receiver.
+    void computeDepth();
+    /// Computes the Width of receiver.
+    void computeWidth();
 };
 } // end namespace oofem
 #endif // sloanlevelstruct_h
