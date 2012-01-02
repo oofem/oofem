@@ -32,6 +32,13 @@ using namespace std;
 #include "datastream.h"
 #include "dofmanvalfield.h"
 #include "fieldmanager.h"
+#include "generalbc.h"
+#include "boundary.h"
+#include "integrationrule.h"
+#include "gausspnt.h"
+#include "internalstatetype.h"
+#include "matresponsemode.h"
+#include "matresponseform.h"
 
  
 namespace oofem {
@@ -43,12 +50,53 @@ Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag) {
   return InstanciateProblem (dr, mode, contextFlag, 0);
 }
- 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
 
+/*****************************************************
+* FloatArray
+*****************************************************/
+class PyFloatArray : public FloatArray , public wrapper<FloatArray>
+{
+public:
+   PyFloatArray () : FloatArray () {}
+   PyFloatArray (int i) : FloatArray(i) {}
+   void __setitem__(int i, double val) { this->operator()(i) = val; }
+   double __getitem__(int i) { return this->operator()(i); }
+};
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
 void (FloatArray::*add_1)(const FloatArray &src) = &FloatArray::add;
 void (FloatArray::*subtract_1)(const FloatArray &src) = &FloatArray::subtract;
 
+void pyclass_FloatArray()
+{
+  class_<PyFloatArray, boost::noncopyable>("FloatArray")
+    .def(init< optional<int> >())
+    //.def("set", at2, return_internal_reference<>())
+    .def("__len__", &FloatArray::giveSize)
+    .def("__getitem__", &PyFloatArray::__getitem__) 
+    .def("__setitem__", &PyFloatArray::__setitem__)
+    .def("resize", &FloatArray::resize, flotarry_overloads_resize())
+    .def("giveSize", &FloatArray::giveSize)
+    .def("isNotEmpty", &FloatArray::isNotEmpty)
+    .def("isEmpty", &FloatArray::isEmpty)  
+    //.def("negated", &FloatArray::negated)
+    .def("printYourself", &FloatArray::printYourself)
+    .def("zero", &FloatArray::zero)
+    .def("add", add_1)
+    .def("subtract", subtract_1)
+    //.def("times", &FloatArray::times)
+    //.def("normalize", &FloatArray::normalize)
+    .def("computeNorm", &FloatArray::computeNorm)
+    .def("beProductOf", &FloatArray::beProductOf)
+    .def("beTProductOf", &FloatArray::beTProductOf)
+    //.def("beCopyOf", &FloatArray::beCopyOf)
+    .def("assemble", &FloatArray::assemble)
+    ;
+}
+
+
+/*****************************************************
+* FloatMatrix
+*****************************************************/
 class PyFloatMatrix : public FloatMatrix, public wrapper<FloatMatrix>
  {
 public:
@@ -57,7 +105,7 @@ public:
    // 0-index access
    void __setitem__ (object t, double val) {
      this->operator()(extract<int>(t[0]), extract<int>(t[1]) ) = val;}
-   double __getitem__ (object t, double val) {
+   double __getitem__ (object t) {
      return this->operator()(extract<int>(t[0]), extract<int>(t[1]) );}
 };
 
@@ -68,13 +116,68 @@ void (PyFloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bo
 void (PyFloatMatrix::*assemble_1)(const FloatMatrix &src, const IntArray &loc) = &PyFloatMatrix::assemble;
 void (PyFloatMatrix::*assemble_2)(const FloatMatrix &src, const IntArray &row, const IntArray&col) = &PyFloatMatrix::assemble;
 
+void pyclass_FloatMatrix()
+{
+  class_<PyFloatMatrix, boost::noncopyable>("FloatMatrix")
+    .def(init<int, int>())
+    .def("zero", &PyFloatMatrix::zero)
+    .def("beUnitMatrix", &PyFloatMatrix::beUnitMatrix)
+    .def("printYourself", &PyFloatMatrix::printYourself)
+    .def("__setitem__", &PyFloatMatrix::__setitem__)
+    .def("__getitem__", &PyFloatMatrix::__getitem__)
+    .def("giveDeterminant", &PyFloatMatrix::giveDeterminant)
+    .def("beTranspositionOf", &PyFloatMatrix::beTranspositionOf)
+    .def("beProductOf", &PyFloatMatrix::beProductOf)
+    .def("beTProductOf", &PyFloatMatrix::beTProductOf)
+    .def("beProductTOf", &PyFloatMatrix::beProductTOf)
+    .def("beInverseOf", &PyFloatMatrix::beInverseOf)
+    .def("solveForRhs", solveForRhs_1)
+    .def("plusProductSymmUpper", &PyFloatMatrix::plusProductSymmUpper)
+    .def("plusProductUnsym", &PyFloatMatrix::plusProductUnsym)
+    .def("add", &PyFloatMatrix::add)
+    .def("symmetrized", &PyFloatMatrix::symmetrized)
+    .def("rotatedWith", &PyFloatMatrix::rotatedWith)
+    .def("resize", &PyFloatMatrix::resize, floatmatrix_overloads_resize())
+    .def("assemble", assemble_1)
+    .def("assembleu", assemble_2)
+    ;
+}
 
+
+/*****************************************************
+* IntArray
+*****************************************************/
+class PyIntArray : public IntArray , public wrapper<IntArray>
+{
+public:
+   PyIntArray () : IntArray () {}
+   PyIntArray (int i) : IntArray(i) {}
+   void __setitem__(int i, double val) { this->operator()(i) = val; }
+   int __getitem__(int i) { return this->operator()(i); }
+};
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(intarray_overloads_resize, resize, 1, 2)
+void pyclass_IntArray()
+{
+  class_<PyIntArray, boost::noncopyable>("IntArray")
+    .def(init< optional<int> >())
+    .def("__len__", &IntArray::giveSize)
+    .def("__getitem__", &PyIntArray::__getitem__) 
+    .def("__setitem__", &PyIntArray::__setitem__)
+    .def("resize", &IntArray::resize, intarray_overloads_resize())
+    .def("isEmpty", &IntArray::isEmpty)
+    .def("containsOnlyZeroes", &IntArray::containsOnlyZeroes)
+    .def("contains", &IntArray::contains)
+    .def("printYourself", &IntArray::printYourself)
+    .def("zero", &IntArray::printYourself)
+    ;
+}
 
 
+/*****************************************************
+* SparseMtrx
+*****************************************************/
 struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
 {
-
   PySparseMtrx() : SparseMtrx() {}
   PySparseMtrx(int n, int m): SparseMtrx(n,m) {}
 
@@ -145,7 +248,6 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
   }
 };
 
-
 void (PySparseMtrx::*sm_times_1)(const FloatArray &x, FloatArray &ans) const  = &PySparseMtrx::times;
 void (PySparseMtrx::*sm_times_2)(double x) = &PySparseMtrx::times;
 int (PySparseMtrx::*sm_assemble_1)(const IntArray &loc, const FloatMatrix &mat) = &PySparseMtrx::assemble;
@@ -154,7 +256,50 @@ int (PySparseMtrx::*sm_assemble_2)(const IntArray &r, const IntArray& c, const F
 int (PySparseMtrx::*sm_buildInternalStructure_1)(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s) = &PySparseMtrx::buildInternalStructure;
 int (PySparseMtrx::*sm_buildInternalStructure_2)(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) = &PySparseMtrx::buildInternalStructure;
 
+void pyclass_SparseMtrx()
+{
+  class_<PySparseMtrx, boost::noncopyable>("SparseMtrx")
+    //.def(init<>())
+    .def("times", pure_virtual(sm_times_1))
+    .def("timesd", pure_virtual(sm_times_2))
+    .def("assemble", sm_assemble_1)
+    .def("assembleu", sm_assemble_2)
+    .def("buildInternalStructure", pure_virtual(sm_buildInternalStructure_1))
+    .def("buildInternalStructure2", sm_buildInternalStructure_2)
+    
+    //.def("zero", zero)
+    ;
+}
 
+
+/*****************************************************
+* SpatialLocalizer
+*****************************************************/
+void pyclass_SpatialLocalizer()
+{
+  class_<SpatialLocalizer, boost::noncopyable>("SpatialLocalizer", no_init)
+    .def("giveElementContainingPoint", &SpatialLocalizer::giveElementContainingPoint, return_internal_reference<>())
+    .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
+    .def("init", &SpatialLocalizer::init)
+    .def("giveClassName", &SpatialLocalizer::giveClassName)
+    ;
+}
+
+
+/*****************************************************
+* EngngModelContext
+*****************************************************/
+void pyclass_EngngModelContext()
+{
+  class_<EngngModelContext, boost::noncopyable>("EngngModelContext", no_init)
+    .def("giveFieldManager", &EngngModelContext::giveFieldManager, return_internal_reference<>())
+    ;
+}
+
+
+/*****************************************************
+* EngngModel
+*****************************************************/
 class PyEngngModel : public EngngModel, public wrapper<EngngModel>
 {
 public:
@@ -183,7 +328,6 @@ public:
     if (override f = this->get_override("updateYourself")) {f(t); return;}
     EngngModel::updateYourself(t);
   }
-
     
   void default_solveYourself() {return this->EngngModel::solveYourself();}
   void default_solveYourselfAt(TimeStep*t) {return this->EngngModel::solveYourselfAt(t);}
@@ -191,8 +335,71 @@ public:
   void default_updateYourself(TimeStep* t) {return this->EngngModel::updateYourself(t);}
 };
 
+void pyclass_EngngModel()
+{
+  class_<PyEngngModel, boost::noncopyable>("EngngModel", no_init)
+    //.def(init<int, optional<EngngModel*> > ())
+    //.def(init<int, char*, optional<EngngModel*> >())
+    .def("giveDomain", &PyEngngModel::giveDomain, return_internal_reference<>())
+    .def("giveNumberOfDomains", &PyEngngModel::giveNumberOfDomains)
+    .def("giveDomainErrorEstimator", &PyEngngModel::giveDomainErrorEstimator, return_internal_reference<>())
+    .def("terminateAnalysis", &PyEngngModel::terminateAnalysis)
+    .def("solveYourself", &EngngModel::solveYourself, &PyEngngModel::default_solveYourself)
+    .def("solveYourselfAt", &EngngModel::solveYourselfAt, &PyEngngModel::default_solveYourselfAt)
+    .def("terminate", &EngngModel::terminate, &PyEngngModel::default_terminate)
+    .def("updateYourself", &EngngModel::updateYourself, &PyEngngModel::default_updateYourself)
+    .def("initializeYourself", &PyEngngModel::initializeYourself)
+    .def("printDofOutputAt", pure_virtual(&EngngModel::printDofOutputAt))
+    .def("checkProblemConsistency", &PyEngngModel::checkProblemConsistency)
+    .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
+    .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
+    .def("giveContext", &EngngModel::giveContext, return_internal_reference<>())
+    .def("giveNextStep",&EngngModel::giveNextStep, return_internal_reference<>())
+    ;
+}
 
 
+/*****************************************************
+* Domain
+*****************************************************/
+void pyclass_Domain()
+{
+  class_<Domain>("Domain", init<int, int, EngngModel* >())
+  .def("giveNumber", &Domain::giveNumber)
+  .def("giveElement", &Domain::giveElement, return_internal_reference<>())
+  .def("giveEngngModel", &Domain::giveEngngModel, return_internal_reference<>())
+  .def("giveLoad", &Domain::giveLoad, return_internal_reference<>())
+  .def("giveBc", &Domain::giveBc, return_internal_reference<>())
+  .def("giveIc", &Domain::giveIc, return_internal_reference<>())
+  .def("giveLoadTimeFunction", &Domain::giveLoadTimeFunction, return_internal_reference<>())
+  .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
+  .def("giveCrossSection", &Domain::giveCrossSection, return_internal_reference<>())
+  .def("giveNode", &Domain::giveNode, return_internal_reference<>())
+  .def("giveDofManager", &Domain::giveDofManager, return_internal_reference<>())
+  .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
+  
+  .def("giveNumberOfDofManagers", &Domain::giveNumberOfDofManagers)
+  .def("giveNumberOfElements", &Domain::giveNumberOfElements)
+  .def("giveNumberOfMaterialModels", &Domain::giveNumberOfMaterialModels)
+  .def("giveNumberOfCrossSectionModels", &Domain::giveNumberOfCrossSectionModels)
+  .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
+  .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
+  .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
+  
+  .def("checkConsistency", &Domain::checkConsistency)
+  .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
+  .def("giveSpatialLocalizer", &Domain::giveSpatialLocalizer, return_internal_reference<>())
+  .def("giveErrorEstimator", &Domain::giveErrorEstimator, return_internal_reference<>())
+  .def("giveSmoother", &Domain::giveSmoother, return_internal_reference<>())
+
+  .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
+  ;
+}
+
+
+/*****************************************************
+* DataReader
+*****************************************************/
 struct PyDataReader : DataReader, wrapper<DataReader>
 {
   InputRecord *giveInputRecord(InputRecordType irType, int recordId)
@@ -209,7 +416,26 @@ struct PyDataReader : DataReader, wrapper<DataReader>
   }
 };
 
+void pyclass_DataReader()
+{
+  class_<PyDataReader, boost::noncopyable>("DataReader")
+    ;
+}
 
+
+/*****************************************************
+* OOFEMTXTDataReader
+*****************************************************/
+void pyclass_OOFEMTXTDataReader()
+{
+  class_<OOFEMTXTDataReader, bases<DataReader> >("OOFEMTXTDataReader", init<char* >())
+    ;
+}
+
+
+/*****************************************************
+* Element
+*****************************************************/
 class PyElement : public Element, public wrapper<Element>
 {
 public:
@@ -233,7 +459,28 @@ public:
     
 };
 
+void pyclass_Element()
+{
+  class_<PyElement, boost::noncopyable>("Element", init<int, Domain* >())
+    .def("giveLabel", &Element::giveLabel)
+    .def("giveNumber", &Element::giveNumber)
+    .def("giveLocationArray", &PyElement::giveLocationArray)
+    .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
+    .def("giveCharacteristicMatrix", &PyElement::giveCharacteristicMatrix)
+    .def("giveCharacteristicVector", &PyElement::giveCharacteristicVector)
+    .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
+    .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
+    .def("giveGeometryType", &PyElement::giveGeometryType)
+    .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
+    .def("giveNumberOfIntegrationRules", &Element::giveNumberOfIntegrationRules)
+    .def("giveDefaultIntegrationRulePtr", &Element::giveDefaultIntegrationRulePtr, return_internal_reference<>())
+    ;
+}
 
+
+/*****************************************************
+* DofManager
+*****************************************************/
 class PyDofManager : public DofManager, public wrapper<DofManager>
 {
 public:
@@ -260,7 +507,47 @@ public:
 void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
 					EquationID type, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
 
+void pyclass_DofManager()
+{
+  class_<DofManager, boost::noncopyable>("DofManager", init<int, Domain* >())
+    .def("hasCoordinates", &DofManager::hasCoordinates)
+    .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
+    .def("giveCoordinate", &DofManager::giveCoordinate)
+    .def("giveLabel", &DofManager::giveLabel)
+    .def("giveUnknownVector", giveUnknownVector_1)
+    .def("computeDofTransformation", &DofManager::computeDofTransformation)
+    ;
+}
 
+
+/*****************************************************
+* TimeStep
+*****************************************************/
+void pyclass_TimeStep()
+{
+  class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
+    .def("giveTargetTime", &TimeStep::giveTargetTime)
+    .def("giveIntrinsicTime", &TimeStep::giveIntrinsicTime)
+    .def("setTargetTime", &TimeStep::setTargetTime)
+    .def("setIntrinsicTime", &TimeStep::setIntrinsicTime)
+    .def("setTimeIncrement", &TimeStep::setTimeIncrement)
+    ;
+}
+
+
+/*****************************************************
+* DataStream
+*****************************************************/
+void pyclass_DataStream()
+{
+  class_<DataStream, boost::noncopyable>("DataStream", no_init)
+    ;
+}
+
+
+/*****************************************************
+* Field
+*****************************************************/
 class PyField : public Field, public wrapper<Field>
 {
 public:
@@ -286,8 +573,22 @@ int (PyField::*evaluateAtDman)(FloatArray &answer, DofManager* dman, ValueModeTy
 
 std::auto_ptr<Field> DofManValueField_create (FieldType t, Domain* d) { return std::auto_ptr<Field> ( new DofManValueField(t, d) ); }
 
+void pyclass_Field()
+{
+  //this class is held by auto_ptr:  to allow for taking ownership of a raw pointer
+  //see http://www.boost.org/doc/libs/1_47_0/libs/python/doc/v2/faq.html#ownership for detail
+  // also see http://stackoverflow.com/questions/4112561/boost-python-ownership-of-pointer-variables
+  class_<Field, PyField, boost::noncopyable>("Field", no_init)
+    .def("evaluateAtPos", evaluateAtPos)
+    .def("evaluateAtDman", evaluateAtDman)
+    .def("giveType", &PyField::giveType)
+    ;
+}
 
 
+/*****************************************************
+* FieldManager
+*****************************************************/
 class PyFieldManager;
 //void FieldManager_registerField (FieldManager* fm, std::auto_ptr<Field>& a, FieldType key, bool managedFlag)
 /*
@@ -306,7 +607,6 @@ void FieldManager_registerField (FieldManager* fm, std::auto_ptr<Field>& a, Fiel
   printf("Registering field\n");
 };
 
-
 class PyFieldManager : public FieldManager, public wrapper<FieldManager>
 {
 public:
@@ -321,218 +621,105 @@ public:
 
 };
 
-
-
-
-
-BOOST_PYTHON_MODULE (oofemlib)
+void pyclass_FieldManager()
 {
-
-  class_<FloatArray, boost::noncopyable>("FloatArray")
-    .def(init< optional<int> >())
-    //.def("set", at2, return_internal_reference<>())
-    .def("__len__", &FloatArray::giveSize)
-    .def("__getitem__", &FloatArray::__getItem__) 
-    .def("__setitem__", &FloatArray::__setItem__)
-    .def("resize", &FloatArray::resize, flotarry_overloads_resize())
-    .def("giveSize", &FloatArray::giveSize)
-    .def("isNotEmpty", &FloatArray::isNotEmpty)
-    .def("isEmpty", &FloatArray::isEmpty)  
-    //.def("negated", &FloatArray::negated)
-    .def("printYourself", &FloatArray::printYourself)
-    .def("zero", &FloatArray::zero)
-    .def("add", add_1)
-    .def("subtract", subtract_1)
-    //.def("times", &FloatArray::times)
-    //.def("normalize", &FloatArray::normalize)
-    .def("computeNorm", &FloatArray::computeNorm)
-    .def("beProductOf", &FloatArray::beProductOf)
-    .def("beTProductOf", &FloatArray::beTProductOf)
-    //.def("beCopyOf", &FloatArray::beCopyOf)
-    .def("assemble", &FloatArray::assemble)
-    ;
-
-
-  class_<PyFloatMatrix, boost::noncopyable>("FloatMatrix")
-    .def(init<int, int>())
-    .def("zero", &PyFloatMatrix::zero)
-    .def("beUnitMatrix", &PyFloatMatrix::beUnitMatrix)
-    .def("printYourself", &PyFloatMatrix::printYourself)
-    .def("__setitem__", &PyFloatMatrix::__setitem__)
-    .def("__getitem__", &PyFloatMatrix::__getitem__)
-    .def("giveDeterminant", &PyFloatMatrix::giveDeterminant)
-    .def("beTranspositionOf", &PyFloatMatrix::beTranspositionOf)
-    .def("beProductOf", &PyFloatMatrix::beProductOf)
-    .def("beTProductOf", &PyFloatMatrix::beTProductOf)
-    .def("beProductTOf", &PyFloatMatrix::beProductTOf)
-    .def("beInverseOf", &PyFloatMatrix::beInverseOf)
-    .def("solveForRhs", solveForRhs_1)
-    .def("plusProductSymmUpper", &PyFloatMatrix::plusProductSymmUpper)
-    .def("plusProductUnsym", &PyFloatMatrix::plusProductUnsym)
-    .def("add", &PyFloatMatrix::add)
-    .def("symmetrized", &PyFloatMatrix::symmetrized)
-    .def("rotatedWith", &PyFloatMatrix::rotatedWith)
-    .def("resize", &PyFloatMatrix::resize, floatmatrix_overloads_resize())
-    .def("assemble", assemble_1)
-    .def("assembleu", assemble_2)
-    ;
-
-  class_<IntArray, boost::noncopyable>("IntArray")
-    .def(init< optional<int> >())
-    .def("__len__", &IntArray::giveSize)
-    .def("__getitem__", &IntArray::__getItem__) 
-    .def("__setitem__", &IntArray::__setItem__)
-    .def("resize", &IntArray::resize, intarray_overloads_resize())
-    .def("isEmpty", &IntArray::isEmpty)
-    .def("containsOnlyZeroes", &IntArray::containsOnlyZeroes)
-    .def("contains", &IntArray::contains)
-    .def("printYourself", &IntArray::printYourself)
-    .def("zero", &IntArray::printYourself)
-    ;
-
-  class_<PySparseMtrx, boost::noncopyable>("SparseMtrx")
-    //.def(init<>())
-    .def("times", pure_virtual(sm_times_1))
-    .def("timesd", pure_virtual(sm_times_2))
-    .def("assemble", sm_assemble_1)
-    .def("assembleu", sm_assemble_2)
-    .def("buildInternalStructure", pure_virtual(sm_buildInternalStructure_1))
-    .def("buildInternalStructure2", sm_buildInternalStructure_2)
-    
-    //.def("zero", zero)
-    ;
-
-  class_<SpatialLocalizer, boost::noncopyable>("SpatialLocalizer", no_init)
-    .def("giveElementContainingPoint", &SpatialLocalizer::giveElementContainingPoint, return_internal_reference<>())
-    .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
-    .def("init", &SpatialLocalizer::init)
-    .def("giveClassName", &SpatialLocalizer::giveClassName)
-    ;
-
-  class_<EngngModelContext, boost::noncopyable>("EngngModelContext", no_init)
-    .def("giveFieldManager", &EngngModelContext::giveFieldManager, return_internal_reference<>())
-    ;
-  
-  class_<PyEngngModel, boost::noncopyable>("EngngModel", no_init)
-    //.def(init<int, optional<EngngModel*> > ())
-    //.def(init<int, char*, optional<EngngModel*> >())
-    .def("giveDomain", &PyEngngModel::giveDomain, return_internal_reference<>())
-    .def("giveNumberOfDomains", &PyEngngModel::giveNumberOfDomains)
-    .def("giveDomainErrorEstimator", &PyEngngModel::giveDomainErrorEstimator, return_internal_reference<>())
-    .def("terminateAnalysis", &PyEngngModel::terminateAnalysis)
-    .def("solveYourself", &EngngModel::solveYourself, &PyEngngModel::default_solveYourself)
-    .def("solveYourselfAt", &EngngModel::solveYourselfAt, &PyEngngModel::default_solveYourselfAt)
-    .def("terminate", &EngngModel::terminate, &PyEngngModel::default_terminate)
-    .def("updateYourself", &EngngModel::updateYourself, &PyEngngModel::default_updateYourself)
-    .def("initializeYourself", &PyEngngModel::initializeYourself)
-    .def("printDofOutputAt", pure_virtual(&EngngModel::printDofOutputAt))
-    .def("checkProblemConsistency", &PyEngngModel::checkProblemConsistency)
-    .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
-    .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
-    .def("giveContext", &EngngModel::giveContext, return_internal_reference<>())
-    ;
-
-  class_<Domain>("Domain", init<int, int, EngngModel* >())
-  .def("giveNumber", &Domain::giveNumber)
-  .def("giveElement", &Domain::giveElement, return_internal_reference<>())
-  .def("giveEngngModel", &Domain::giveEngngModel, return_internal_reference<>())
-  .def("giveLoad", &Domain::giveLoad, return_internal_reference<>())
-  .def("giveBc", &Domain::giveBc, return_internal_reference<>())
-  .def("giveIc", &Domain::giveIc, return_internal_reference<>())
-  .def("giveLoadTimeFunction", &Domain::giveLoadTimeFunction, return_internal_reference<>())
-  .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
-  .def("giveCrossSection", &Domain::giveCrossSection, return_internal_reference<>())
-  .def("giveNode", &Domain::giveNode, return_internal_reference<>())
-  .def("giveDofManager", &Domain::giveDofManager, return_internal_reference<>())
-  
-  .def("giveNumberOfDofManagers", &Domain::giveNumberOfDofManagers)
-  .def("giveNumberOfElements", &Domain::giveNumberOfElements)
-  .def("giveNumberOfMaterialModels", &Domain::giveNumberOfMaterialModels)
-  .def("giveNumberOfCrossSectionModels", &Domain::giveNumberOfCrossSectionModels)
-  .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
-  .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
-  .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
-  
-  .def("checkConsistency", &Domain::checkConsistency)
-  .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
-  .def("giveSpatialLocalizer", &Domain::giveSpatialLocalizer, return_internal_reference<>())
-  .def("giveErrorEstimator", &Domain::giveErrorEstimator, return_internal_reference<>())
-  .def("giveSmoother", &Domain::giveSmoother, return_internal_reference<>())
-
-  .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
-  ;
-  
-  
-  class_<PyDataReader, boost::noncopyable>("DataReader")
-    ;
-  class_<OOFEMTXTDataReader, bases<DataReader> >("OOFEMTXTDataReader", init<char* >())
-    ;
-  enum_<problemMode>("problemMode")
-    .value("_processor", _processor)
-    .value("_postProcessor", _postProcessor)
-    ;
-
-  def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
-  //def("make_foo", make_foo, return_value_policy<manage_new_object>())
-    
-  class_<PyElement, boost::noncopyable>("Element", init<int, Domain* >())
-    .def("giveLabel", &Element::giveLabel)
-    .def("giveNumber", &Element::giveNumber)
-    .def("giveLocationArray", &PyElement::giveLocationArray)
-    .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
-    .def("giveCharacteristicMatrix", &PyElement::giveCharacteristicMatrix)
-    .def("giveCharacteristicVector", &PyElement::giveCharacteristicVector)
-    .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
-    .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
-    .def("giveGeometryType", &PyElement::giveGeometryType)
-    .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
-    ;
-
-  class_<DofManager, boost::noncopyable>("DofManager", init<int, Domain* >())
-    .def("hasCoordinates", &DofManager::hasCoordinates)
-    .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
-    .def("giveCoordinate", &DofManager::giveCoordinate)
-    .def("giveLabel", &DofManager::giveLabel)
-    .def("giveUnknownVector", giveUnknownVector_1)
-    .def("computeDofTransformation", &DofManager::computeDofTransformation)
-    ;
-
-  class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
-    .def("giveTargetTime", &TimeStep::giveTargetTime)
-    .def("giveIntrinsicTime", &TimeStep::giveIntrinsicTime)
-    ;
-
-  class_<DataStream, boost::noncopyable>("DataStream", no_init)
-    ;
-
-  //this class is held by auto_ptr:  to allow for taking ownership of a raw pointer
-  //see http://www.boost.org/doc/libs/1_47_0/libs/python/doc/v2/faq.html#ownership for detail
-  // also see http://stackoverflow.com/questions/4112561/boost-python-ownership-of-pointer-variables
-  class_<Field, PyField, boost::noncopyable>("Field", no_init)
-    .def("evaluateAtPos", evaluateAtPos)
-    .def("evaluateAtDman", evaluateAtDman)
-    .def("giveType", &PyField::giveType)
-    ;
-
   class_<FieldManager, PyFieldManager, boost::noncopyable>("FieldManager", no_init)
     .def("registerField", &PyFieldManager::myRegisterField)
     .def("isFieldRegistered", &FieldManager::isFieldRegistered)
     .def("giveField", &FieldManager::giveField, return_internal_reference<>())
     .def("unregisterField", &FieldManager::unregisterField)
     ;
+}
 
-  def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
-  def("FieldManager_registerField", &FieldManager_registerField);
 
+/*****************************************************
+* DofManValueField
+*****************************************************/
+void pyclass_DofManValueField()
+{
   class_<DofManValueField, bases<Field>, boost::noncopyable >("DofManValueField", no_init)
     .def("evaluateAt", evaluateAtPos)
     .def("setDofManValue",&DofManValueField::setDofManValue)
-
     ;
-  implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >(); 
-  register_ptr_to_python< std::auto_ptr<Field> >();
+}
 
 
+/*****************************************************
+* GeneralBoundaryCondition
+*****************************************************/
+void pyclass_GeneralBoundaryCondition()
+{
+  class_<GeneralBoundaryCondition, boost::noncopyable >("GeneralBoundaryCondition", init<int, Domain*>())
+    ;
+}
+
+
+/*****************************************************
+* BoundaryCondition
+*****************************************************/
+void pyclass_BoundaryCondition()
+{
+  class_<BoundaryCondition, bases<GeneralBoundaryCondition>, boost::noncopyable >("BoundaryCondition", init<int, Domain*>())
+    .def("setPrescribedValue", &BoundaryCondition::setPrescribedValue)
+    ;
+}
+
+
+/*****************************************************
+* IntegrationRule
+*****************************************************/
+void pyclass_IntegrationRule()
+{
+  class_<IntegrationRule, boost::noncopyable >("IntegrationRule", init<int, Element*>())
+    .def("getIntegrationPoint", &IntegrationRule::getIntegrationPoint, return_internal_reference<>())
+    .def("getNumberOfIntegrationPoints", &IntegrationRule::getNumberOfIntegrationPoints)
+    ;
+}
+
+
+/*****************************************************
+* GaussPoint
+*****************************************************/
+void pyclass_GaussPoint()
+{
+  class_<GaussPoint, boost::noncopyable >("GaussPoint", no_init)
+    ;
+}
+
+
+/*****************************************************
+* Material
+*****************************************************/
+void pyclass_Material()
+{
+  class_<Material, boost::noncopyable >("Material", init<int, Domain*>())
+    .def("giveIPValue", &Material::giveIPValue)
+    .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
+    ;
+}
+
+
+
+
+
+
+/*****************************************************
+* problemMode
+*****************************************************/
+void pyenum_problemMode()
+{
+  enum_<problemMode>("problemMode")
+    .value("_processor", _processor)
+    .value("_postProcessor", _postProcessor)
+    ;
+}
+
+
+/*****************************************************
+* Element_Geometry_Type
+*****************************************************/
+void pyenum_Element_Geometry_Type()
+{
   enum_<Element_Geometry_Type>("Element_Geometry_Type")
     .value("EGT_line_1", EGT_line_1)
     .value("EGT_line_2", EGT_line_2) /* line element with three nodes 1---2---3 */	\
@@ -546,14 +733,28 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("EGT_Composite", EGT_Composite)/* Composite" geometry, vtk export supported by individual elements */ \
     .value("EGT_unknown", EGT_unknown)  /* unknown" element geometry type */
     ;
+}
 
+
+/*****************************************************
+* EquationID
+*****************************************************/
+void pyenum_EquationID()
+{
   enum_<EquationID>("EquationID")
     .value("EID_MomentumBalance", EID_MomentumBalance)
     .value("EID_AuxMomentumBalance", EID_AuxMomentumBalance)
     .value("EID_ConservationEquation", EID_ConservationEquation)
     .value("EID_MomentumBalance_ConservationEquation", EID_MomentumBalance_ConservationEquation)
     ;
+}
 
+
+/*****************************************************
+* ValueModeType
+*****************************************************/
+void pyenum_ValueModeType()
+{
   enum_<ValueModeType>("ValueModeType")
     .value("VM_Unknown", VM_Unknown)
     .value("VM_Total", VM_Total)
@@ -561,12 +762,26 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("VM_Acceleration", VM_Acceleration)
     .value("VM_Incremental", VM_Incremental)
     ;
+}
 
+
+/*****************************************************
+* DofManTransfType
+*****************************************************/
+void pyenum_DofManTransfType()
+{
   enum_<DofManTransfType>("DofManTransfType")
     .value("_toGlobalCS", _toGlobalCS)
     .value("_toNodalCS", _toNodalCS)
     ;
+}
 
+
+/*****************************************************
+* DofIDItem
+*****************************************************/
+void pyenum_DofIDItem()
+{
   enum_<DofIDItem>("DofIDItem")
     .value("Undef", Undef)
     .value("D_u", D_u)
@@ -581,7 +796,14 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("T_f", T_f)
     .value("P_f", P_f)
     ;
+}
 
+
+/*****************************************************
+* FieldType
+*****************************************************/
+void pyenum_FieldType()
+{
   enum_<FieldType>("FieldType")
     .value("FT_Unknown", FT_Unknown)
     .value("FT_Velocity", FT_Velocity)
@@ -592,6 +814,89 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("FT_HumidityConcentration", FT_HumidityConcentration)
     .value("FT_TransportProblemUnknowns", FT_TransportProblemUnknowns)
     ;
+}
 
+
+/*****************************************************
+* InternalStateType
+*****************************************************/
+void pyenum_InternalStateType()
+{
+  enum_<InternalStateType>("InternalStateType")
+    .value("IST_StressTensor", IST_StressTensor)
+    ;
+}
+
+
+/*****************************************************
+* MatResponseMode
+*****************************************************/
+void pyenum_MatResponseMode()
+{
+  enum_<MatResponseMode>("MatResponseMode")
+    .value("TangentStiffness", TangentStiffness)
+    .value("SecantStiffness", SecantStiffness)
+    .value("ElasticStiffness", ElasticStiffness)
+    ;
+}
+
+
+/*****************************************************
+* MatResponseFrom
+*****************************************************/
+void pyenum_MatResponseForm()
+{
+  enum_<MatResponseForm>("MatResponseForm")
+    .value("ReducedForm", ReducedForm)
+    .value("FullForm", FullForm)
+    ;
+}
+
+
+
+
+BOOST_PYTHON_MODULE (oofemlib)
+{
+  pyclass_FloatArray();
+  pyclass_FloatMatrix();
+  pyclass_IntArray();
+  pyclass_SparseMtrx();
+  pyclass_SpatialLocalizer();
+  pyclass_EngngModelContext();
+  pyclass_EngngModel();
+  pyclass_Domain();
+  pyclass_DataReader();
+  pyclass_OOFEMTXTDataReader();
+  pyclass_Element();
+  pyclass_DofManager();
+  pyclass_TimeStep();
+  pyclass_DataStream();
+  pyclass_Field();
+  pyclass_FieldManager();
+  pyclass_DofManValueField();
+  pyclass_GeneralBoundaryCondition();
+  pyclass_BoundaryCondition();
+  pyclass_IntegrationRule();
+  pyclass_GaussPoint();
+  pyclass_Material();
+
+  pyenum_problemMode();
+  pyenum_Element_Geometry_Type();
+  pyenum_EquationID();
+  pyenum_ValueModeType();
+  pyenum_DofManTransfType();
+  pyenum_DofIDItem();
+  pyenum_FieldType();
+  pyenum_InternalStateType();
+  pyenum_MatResponseMode();
+  pyenum_MatResponseForm();
+
+  def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
+  //def("make_foo", make_foo, return_value_policy<manage_new_object>())
+  def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
+  def("FieldManager_registerField", &FieldManager_registerField);
+
+  implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >(); 
+  register_ptr_to_python< std::auto_ptr<Field> >();
 }
 } // end namespace oofem
