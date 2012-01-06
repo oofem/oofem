@@ -265,7 +265,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     d.at(2, 3) = 0.0;
     d.at(3, 1) = 0.0;
     d.at(3, 2) = 0.0;
-    d.at(3, 3) = 0.0;
+    d.at(3, 3) = k;
 }
 
 
