@@ -46,7 +46,7 @@
 #include "integrationdomain.h"
 #include "integrationrule.h"
 #include "gausspnt.h"
-#include "math.h"
+#include "mathfem.h"
 
 #include <utility>
 #include <list>
