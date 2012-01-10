@@ -159,6 +159,9 @@ protected:
     /// Parameters used if softType = 7 (extended smooth damage law)
     double e1, e2, s1, nd;
 
+    /// Method used for evaluation of characteristic element size
+    ElementCharSizeMethod ecsMethod;
+
 #ifdef IDM_USE_MMAClosestIPTransfer
     /// Mapper used to map internal variables in adaptivity.
     static MMAClosestIPTransfer mapper;
