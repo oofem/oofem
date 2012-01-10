@@ -69,6 +69,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     Interface *giveInterface(InterfaceType it);

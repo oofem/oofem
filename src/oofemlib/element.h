@@ -213,7 +213,7 @@ public:
     /**
      * @return Number of internal DOF managers of element.
      */
-    virtual int giveNumberOfInternalDofManagers() {return 0;}
+    virtual int giveNumberOfInternalDofManagers() { return 0; }
     /**
      * Returns i-th internal element dof manager of the receiver
      * @param i Internal number of DOF.
@@ -358,7 +358,7 @@ public:
      * @param answer Mask for node.
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
-   /**
+    /**
      * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
      * ordered according to node order and dofs belonging to particular node are ordered
@@ -507,7 +507,8 @@ public:
      */
     virtual integrationDomain giveIntegrationDomain() {
         IntegrationRule *ir = giveDefaultIntegrationRulePtr();
-        return ir ? ir->giveIntegrationDomain() : _Unknown_integrationDomain; }
+        return ir ? ir->giveIntegrationDomain() : _Unknown_integrationDomain;
+    }
     /**
      * Returns material mode for receiver integration points. Should be specialized.
      * @return Material mode of element.
@@ -638,10 +639,11 @@ public:
      * @see giveDefaultIntegrationRule
      */
     IntegrationRule *giveDefaultIntegrationRulePtr() {
-        if (this->giveNumberOfIntegrationRules() == 0)
+        if ( this->giveNumberOfIntegrationRules() == 0 ) {
             return NULL;
-        else
+        } else {
             return this->integrationRulesArray [ giveDefaultIntegrationRule() ];
+        }
     }
     /// @return Number of integration rules for element.
     int giveNumberOfIntegrationRules() { return this->numberOfIntegrationRules; }
@@ -707,6 +709,17 @@ public:
      * @return Characteristic length of element in given integration point and direction.
      */
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
+    /**
+     * Returns characteristic element size for a given integration point and
+     * given direction. Required by material models relying on crack-band approach to achieve
+     * objectivity with respect to mesh size.
+     * Various techniques can be selected by changing the last parameter.
+     * @param gp Integration point.
+     * @param normalToCrackPlane Normal to assumed crack plane (some methods use it, some methods recompute it and return the new value).
+     * @param method Selection of the specific method to be used.
+     * @return Characteristic length of element in given integration point and direction.
+     */
+    virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) { return 0.; }
     /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,
@@ -829,7 +842,7 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                          int node, TimeStep *atTime);
+                                        int node, TimeStep *atTime);
     /**
      * Returns internal state variable (like stress,strain) at side of element in Reduced form
      * If side is possessing DOFs, otherwise recover techniques will not work
@@ -842,7 +855,7 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtSide(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                          int side, TimeStep *atTime)
+                                        int side, TimeStep *atTime)
     {
         answer.resize(0);
         return 0;
@@ -878,13 +891,13 @@ public:
     elementParallelMode giveParallelMode() const { return parallel_mode; }
     /// Sets parallel mode of element
     void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     /*
      * Returns the parallel mode for particular knot span of the receiver.
      * The knot span identifies the sub-region of the finite element.
      */
-    virtual elementParallelMode giveKnotSpanParallelMode(int) const {return parallel_mode;}
-#endif
+    virtual elementParallelMode giveKnotSpanParallelMode(int) const { return parallel_mode; }
+ #endif
 
     /**
      * Pack all necessary data of element (according to its parallel_mode) integration points

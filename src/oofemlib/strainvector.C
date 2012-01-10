@@ -211,15 +211,33 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
 }
 
 void
+StrainVector :: computeMaxPrincipalDir(FloatArray &answer) const
+//
+// This function computes the principal direction of the receiver
+// associated with the maximum principal value.
+//
+{
+    FloatArray princval;
+    FloatMatrix princdir;
+    this->computePrincipalValDir(princval, princdir);
+    int n = princval.giveSize();
+    answer.resize(n);
+    int i;
+    for ( i = 1; i <= n; i++ ) {
+        answer.at(i) = princdir.at(i, 1);
+    }
+}
+
+void
 StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const
 {
     //
-    // This function cumputes Principal values & directions corresponding to receiver.
+    // This function computes principal values & directions of the receiver.
     //
     // Return Values:
     //
-    // matrix dir -> principal directions of strains or stresses
-    // array sp -> principal strains or stresses
+    // answer -> principal strains (ordered from largest to smallest)
+    // dir -> principal strain directions
     //
 
     FloatMatrix ss;
@@ -231,6 +249,7 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
     MaterialMode myMode = this->giveStressStrainMode();
 
     if ( myMode == _1dMat ) {
+        // 1D problem
         answer = * this;
         dir.resize(1, 1);
         dir.at(1, 1) = 1.0;
@@ -289,7 +308,7 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
 #else
     ss.jaco_(answer, dir, 10);
 #endif
-    // sort results
+    // sort results (from the largest to the smallest eigenvalue)
     nval = 3;
     if ( myMode == _PlaneStress ) {
         nval = 2;
@@ -298,7 +317,7 @@ StrainVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
     for ( ii = 1; ii < nval; ii++ ) {
         for ( jj = 1; jj < nval; jj++ ) {
             if ( answer.at(jj + 1) > answer.at(jj) ) {
-                // swap eigen values and eigen vectors
+                // swap eigenvalues and eigenvectors
                 swap = answer.at(jj + 1);
                 answer.at(jj + 1) = answer.at(jj);
                 answer.at(jj) = swap;
@@ -463,7 +482,7 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
         stress(1) = 2. * GModulus * values [ 1 ];
         stress(2) = 2. * GModulus * values [ 2 ];
         stress(3) = GModulus * values [ 3 ];
-	stress(4) = values[4];
+        stress(4) = values [ 4 ];
     } else if ( myMode == _3dRotContinuum ) {
         if ( stress.giveStressStrainMode() != _3dRotContinuum ) {
             stress.letStressStrainModeBe(_3dRotContinuum);

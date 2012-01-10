@@ -48,7 +48,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 /**
  * This class implements an triangular three-node plane-stress
  * elasticity finite element. Each node has 2 degrees of freedom.
@@ -75,6 +74,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);

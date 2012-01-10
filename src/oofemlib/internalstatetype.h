@@ -128,7 +128,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CharacteristicLength, 78)  \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStrainMeasure, 79) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStressMeasure, 80) \
-      
+
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
@@ -136,6 +136,16 @@ namespace oofem {
  */
 enum InternalStateType {
     InternalStateType_DEF
+};
+
+enum ElementCharSizeMethod {
+    ECSM_Unknown,
+    ECSM_SquareRootOfArea,
+    ECSM_Projection,
+    ECSM_ProjectionCentered,
+    ECSM_Oliver1,
+    ECSM_Oliver1modified,
+    ECSM_Oliver2
 };
 
 #undef ENUM_ITEM

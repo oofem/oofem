@@ -52,8 +52,24 @@ public:
     /// Destructor
     ~StrainVector() { }
 
+    /**
+     * Computes the principal values of the receiver.
+     * @param answer Principal values.
+     */
     void computePrincipalValues(FloatArray &answer) const;
+    /**
+     * Computes the principal values and principal directions of the receiver.
+     * The principal values are ordered from the largest to the smallest.
+     * @param answer Principal values.
+     * @param dir Principal directions (first index refers to component, second index to eigenvalue number).
+     */
     void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const;
+    /**
+     * Computes the principal direction of the receiver
+     * associated with the maximum principal value.
+     * @param answer Principal direction.
+     */
+    void computeMaxPrincipalDir(FloatArray &answer) const;
     /**
      * Computes split of receiver into deviatoric and volumetric part.
      * @param answer Deviatoric strain.

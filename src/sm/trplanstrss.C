@@ -664,13 +664,94 @@ TrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &no
 // for crack formed in plane with normal normalToCrackPlane.
 //
 {
-    if ( normalToCrackPlane.at(3) < 0.999999 ){//ensure that characteristic length is in the plane of element
+    if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane);
-    } else {//otherwise compute out-of-plane characteristic length from element area
-        return sqrt ( this->computeVolumeAreaOrLength() );
+    } else { //otherwise compute out-of-plane characteristic length from element area
+        return sqrt( this->giveArea() );
     }
 }
 
+double
+TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method)
+//
+// returns receiver's characteristic size at gp (for some material models)
+// for crack formed in plane with normal normalToCrackPlane
+// using the selected method
+//
+{
+    if ( method == ECSM_SquareRootOfArea ) {
+        // square root of element area
+        return sqrt( this->giveArea() );
+    }
+
+    if ( ( method == ECSM_Projection ) || ( method == ECSM_ProjectionCentered ) ) {
+        // projection method (standard or modified - no difference for constant-strain element)
+        return this->giveCharacteristicLenght(gp, normalToCrackPlane);
+    }
+
+    if ( ( method == ECSM_Oliver1 ) || ( method == ECSM_Oliver1modified ) || ( method == ECSM_Oliver2 ) ) {
+        // method based on derivative of auxiliary function phi
+        // in the maximum principal strain direction
+        // (standard or modified - no difference for constant-strain element)
+
+        // nodal coordinates and coordinates of the element center
+        int i;
+        FloatArray x(3), y(3);
+        double cx = 0., cy = 0.;
+        for ( i = 1; i <= 3; i++ ) {
+            x.at(i) = giveNode(i)->giveCoordinate(1);
+            y.at(i) = giveNode(i)->giveCoordinate(2);
+            cx += x.at(i);
+            cy += y.at(i);
+        }
+
+        cx /= 3.;
+        cy /= 3.;
+
+        // nodal values of function phi (0 or 1)
+        FloatArray phi(3);
+        for ( i = 1; i <= 3; i++ ) {
+            if ( ( ( x.at(i) - cx ) * normalToCrackPlane.at(1) + ( y.at(i) - cy ) * normalToCrackPlane.at(2) ) > 0. ) {
+                phi.at(i) = 1.;
+            } else {
+                phi.at(i) = 0.;
+            }
+        }
+
+        // derivatives of shape functions wrt global coordinates
+        FloatMatrix dnx(3, 2);
+        dnx.at(1, 1) = y.at(2) - y.at(3);
+        dnx.at(2, 1) = y.at(3) - y.at(1);
+        dnx.at(3, 1) = y.at(1) - y.at(2);
+        dnx.at(1, 2) = x.at(3) - x.at(2);
+        dnx.at(2, 2) = x.at(1) - x.at(3);
+        dnx.at(3, 2) = x.at(2) - x.at(1);
+        dnx.times( 1. / ( 2. * giveArea() ) );
+
+        // gradient of function phi
+        FloatArray gradPhi(2);
+        gradPhi.zero();
+        for ( i = 1; i <= 3; i++ ) {
+            gradPhi.at(1) += phi.at(i) * dnx.at(i, 1);
+            gradPhi.at(2) += phi.at(i) * dnx.at(i, 2);
+        }
+
+        // scalar product of the gradient with crack normal
+        double dPhidN = 0.;
+        for ( i = 1; i <= 2; i++ ) {
+            dPhidN += gradPhi.at(i) * normalToCrackPlane.at(i);
+        }
+
+        if ( dPhidN == 0. ) {
+            _error("Zero value of dPhidN in TrPlaneStress2d :: giveCharacteristicSize\n");
+        }
+
+        return 1. / fabs(dPhidN);
+    }
+
+    _error("TrPlaneStress2d :: giveCharacteristicSize: invalid method");
+    return 0.;
+}
 
 void
 TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const

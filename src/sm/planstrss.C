@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "structuralms.h"
+#include "strainvector.h"
 #ifndef __MAKEDEPEND
  #include <math.h>
  #include <stdio.h>
@@ -65,7 +66,7 @@ PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
-// Constructor.
+    // Constructor.
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -176,7 +177,7 @@ PlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
         answer.at(8, 4) = b4 * b2;
         answer.at(8, 6) = b4 * b3;
         answer.at(8, 8) = b4 * b4;
-    } else if ( i == 2 )       {
+    } else if ( i == 2 ) {
         answer.at(1, 1) = c1 * c1;
         answer.at(1, 3) = c1 * c2;
         answer.at(1, 5) = c1 * c3;
@@ -209,7 +210,7 @@ PlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
         answer.at(8, 4) = c4 * c2;
         answer.at(8, 6) = c4 * c3;
         answer.at(8, 8) = c4 * c4;
-    } else if ( i == 3 )       {
+    } else if ( i == 3 ) {
         answer.at(1, 1) = b1 * c1 + b1 * c1;
         answer.at(1, 3) = b1 * c2 + b2 * c1;
         answer.at(1, 5) = b1 * c3 + b3 * c1;
@@ -442,11 +443,107 @@ PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 //
 {
     // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt (this->numberOfGaussPoints);
-    if ( normalToCrackPlane.at(3) < 0.999999 ){//ensure that characteristic length is in the plane of element
+    if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane);
-    } else {//otherwise compute out-of-plane characteristic length from element area
-        return sqrt ( this->computeVolumeAreaOrLength() );
+    } else { //otherwise compute out-of-plane characteristic length from element area
+        return DirectErrorIndicatorRCI_giveCharacteristicSize();
     }
+}
+
+double
+PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method)
+//
+// returns receiver's characteristic size at gp (for some material models)
+// for crack formed in plane with normal normalToCrackPlane
+// using the selected method
+//
+{
+    if ( method == ECSM_SquareRootOfArea ) {
+        // square root of element area
+        return DirectErrorIndicatorRCI_giveCharacteristicSize();
+    }
+
+    if ( method == ECSM_Projection ) {
+        // standard projection method
+        return this->giveCharacteristicLenght(gp, normalToCrackPlane);
+    }
+
+    // evaluate average strain and its maximum principal direction
+    int i;
+    FloatArray sumstrain, averageNormal;
+    IntegrationRule *iRule = giveDefaultIntegrationRulePtr();
+    int nGP = iRule->getNumberOfIntegrationPoints();
+    for ( i = 0; i < nGP; i++ ) {
+        GaussPoint *gpi = iRule->getIntegrationPoint(i);
+        StructuralMaterialStatus *matstatus = ( StructuralMaterialStatus * ) gpi->giveMaterialStatus();
+        sumstrain.add( matstatus->giveTempStrainVector() );
+    }
+
+    StrainVector sumstrainvec(sumstrain, _PlaneStress);
+    sumstrainvec.computeMaxPrincipalDir(averageNormal);
+
+    if ( method == ECSM_ProjectionCentered ) {
+        // projection method based on principal direction of average strain
+        normalToCrackPlane = averageNormal;
+        return this->giveLenghtInDir(normalToCrackPlane);
+    }
+
+    if ( method == ECSM_Oliver1 || method == ECSM_Oliver1modified ) {
+        // method based on derivative of auxiliary function phi at each Gauss point
+        // in the maximum principal strain direction determined at
+        // ECSM_Oliver1 ... at each Gauss point
+        // ECSM_Oliver1modified ... at element center (from average strain)
+
+        // coordinates of the element center
+        FloatArray center(2);
+        double cx = 0., cy = 0.;
+        for ( i = 1; i <= 4; i++ ) {
+            cx += giveNode(i)->giveCoordinate(1);
+            cy += giveNode(i)->giveCoordinate(2);
+        }
+
+        cx /= 4.;
+        cy /= 4.;
+
+        // nodal values of function phi (0 or 1)
+        FloatArray phi(4);
+        for ( i = 1; i <= 4; i++ ) {
+            if ( ( ( giveNode(i)->giveCoordinate(1) - cx ) * averageNormal.at(1) + ( giveNode(i)->giveCoordinate(2) - cy ) * averageNormal.at(2) ) > 0. ) {
+                phi.at(i) = 1.;
+            } else {
+                phi.at(i) = 0.;
+            }
+        }
+
+        // gradient of function phi at the current GP
+        FloatMatrix dnx;
+        this->interpolation.evaldNdx(dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+        FloatArray gradPhi(2);
+        gradPhi.zero();
+        for ( i = 1; i <= 4; i++ ) {
+            gradPhi.at(1) += phi.at(i) * dnx.at(i, 1);
+            gradPhi.at(2) += phi.at(i) * dnx.at(i, 2);
+        }
+
+        // scalar product of the gradient with crack normal (at GP)
+        double dPhidN = 0.;
+        if ( method == ECSM_Oliver1modified ) {
+            normalToCrackPlane = averageNormal;
+        }
+
+        for ( i = 1; i <= 2; i++ ) {
+            dPhidN += gradPhi.at(i) * normalToCrackPlane.at(i);
+        }
+
+        if ( dPhidN == 0. ) {
+            _error("Zero value of dPhidN in PlaneStress2d :: giveCharacteristicSize\n");
+        }
+
+        return 1. / fabs(dPhidN);
+    }
+
+    _error("PlaneStress2d :: giveCharacteristicSize: invalid method");
+    return 0.;
 }
 
 void
