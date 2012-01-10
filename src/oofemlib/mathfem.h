@@ -116,7 +116,7 @@ inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
 /// Returns the negative part of given float
 inline double negbra(double x) { return ( x <= 0 ? x : 0 ); }
 
-#ifdef HAVE_CBRT
+#ifndef HAVE_CBRT
 inline double cbrt(double x)
 { return sgn(x)*pow(fabs(x),1.0/3.0); }
 #endif
