@@ -87,7 +87,6 @@ public:
     StokesFlow(int i, EngngModel *_master = NULL);
     virtual ~StokesFlow();
 
-    /// @see EngngModel::solveYourselfAt
     void solveYourselfAt(TimeStep *tStep);
 
     /**

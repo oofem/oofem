@@ -89,7 +89,7 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 
     this->ts = TS_OK;
 
-    this->maxdef = 20; // TODO
+    this->maxdef = 25; // TODO
 
     return EngngModel :: initializeFrom(ir);
 }
@@ -110,7 +110,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Mesh deformation at %e\n",meshdeformation);
         if (this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef) {
             this->giveDomain(1)->giveTopology()->replaceFEMesh();
-            OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created.\n");
+            OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
             meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
             this->giveExportModuleManager()->initialize();
         }
@@ -148,7 +148,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
 
-#if 1
+#if 0
     this->giveNumericalMethod(tStep);
     double loadLevel, ebenorm;
     int currentIterations;
@@ -173,8 +173,6 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
     this->internalForces.negated();
     this->internalForces.add(externalForces);
-    printf("K = \n");
-    this->stiffnessMatrix->printYourself();
     NM_Status status = linMethod->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
     delete(linMethod);
 #endif
@@ -183,11 +181,12 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
     }
 
+
     // update element stabilization
     Domain* d = this->giveDomain(1);
     int i, nelem = d->giveNumberOfElements();
     for ( i = 1; i <= nelem; ++i ) {
-      ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
     }
 }
 
@@ -229,7 +228,7 @@ int StokesFlow :: forceEquationNumbering(int id)
 {
     int neq = EngngModel :: forceEquationNumbering(id);
 
-    //this->equationNumberingCompleted = false;
+    this->equationNumberingCompleted = false;
     if ( this->stiffnessMatrix ) {
         delete this->stiffnessMatrix;
         this->stiffnessMatrix = NULL;
