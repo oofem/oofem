@@ -184,21 +184,6 @@ public:
      */
     virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
     /**
-     * Returns array with values of boundary condition of dof if it is prescribed.
-     * For primary dof it has only one value, for slave dof the value of corresponding
-     * masters dofs boundary condition is assembled and returned.
-     * Use hasBc service to determine, if boundary condition is active.
-     * The physical meaning of BC is determined by corresponding DOF.
-     * @param masterBcValues Values of master dof.
-     * @param mode Value mode.
-     * @param stepN Time step.
-     */
-    virtual void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN)
-    {
-        masterBcValues.resize(1);
-        masterBcValues.at(1) = this->giveBcValue(mode, stepN);
-    }
-    /**
      * Returns equation number of receiver for given equation numbering scheme.
      * @param s Numbering scheme used to obtain equation number.
      * @return Equation number for DOF.

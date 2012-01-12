@@ -150,12 +150,6 @@ void ActiveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, 
     }
 }
 
-// This shouldn't be needed at all.
-void ActiveDof :: giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *tStep)
-{
-    OOFEM_ERROR("ActiveDof :: giveBcValues - Function should be removed completely.");
-}
-
 void ActiveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 {
     if (this->isPrimaryDof()) {

@@ -75,13 +75,12 @@ public:
     ~SlaveDof(void) { }
 
     void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
-    int giveNumberOfPrimaryMasterDofs(void);
-    void giveMasterDofManArray(IntArray &answer);
-    void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
-    void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
-    void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN);
-    void computeDofTransformation(FloatArray &primaryMasterContribs);
-    void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
+    virtual int giveNumberOfPrimaryMasterDofs();
+    virtual void giveMasterDofManArray(IntArray &answer);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+    virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
+    virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
 
     /**
      * Returns the value of the unknown associated with the receiver at given time step.
@@ -94,18 +93,8 @@ public:
      * standard method for unknown query returns the corresponding master DOF value.
      * @see MasterDof::giveUnknown
      */
-    double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN);
-    double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
-    /**
-     * Returns the value of the unknown associated with the receiver
-     * at given time step. Slave simply asks necessary master dofs and
-     * computes the results.
-     * @see MasterDof::giveUnknown function
-     */
-    double giveLocalUnknown(EquationID, ValueModeType, TimeStep *tStep) {
-        _error("HangingDof :: giveLocalUnknown: local coordinate system doesn't exist");
-        return 0.0;
-    }
+    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
 
     /**
      * Returns equation number corresponding to receiver.
@@ -114,7 +103,7 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    int __giveEquationNumber() const {
+    virtual int __giveEquationNumber() const {
         _error("giveEquationNumber: undefined");
         return 0;
     }
@@ -126,37 +115,37 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    int __givePrescribedEquationNumber() {
+    virtual int __givePrescribedEquationNumber() {
         _error("givePrescribedEquationNumber: undefined");
         return 0;
     }
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */
-    int askNewEquationNumber(TimeStep *tStep) { return 1; }
+    virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
 
     /**
      * Returns boundary condition of dof if it is prescribed.
      * HangingDof can not be subjected to BC, it is only mapping to master
      * @return NULL if no BC applied, otherwise pointer to corresponding BC.
      */
-    bool hasBc(TimeStep *tStep) { return false; }
+    virtual bool hasBc(TimeStep *tStep) { return false; }
 
     /**
      * Returns initial condition of dof if it is prescribed.
      * HangingDof can not be subjected to IC, it is only mapping to master
      * @see MasterDof::hasIc
      */
-    bool hasIc() { return false; }
+    virtual bool hasIc() { return false; }
 
     /**
      * RigidArmSlaveDof can not be subjected to IC - it is only mapping to master.
      * @see MasterDof::hasIc
      */
-    bool hasIcOn(ValueModeType) { return false; }
+    virtual bool hasIcOn(ValueModeType) { return false; }
 
-    int giveBcId() { return 0; }
-    int giveIcId() { return 0; }
+    virtual int giveBcId() { return 0; }
+    virtual int giveIcId() { return 0; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

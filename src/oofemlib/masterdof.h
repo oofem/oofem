@@ -133,35 +133,35 @@ public:
 
     virtual int __givePrescribedEquationNumber();
 
-    int askNewEquationNumber(TimeStep *tStep);
+    virtual int askNewEquationNumber(TimeStep *tStep);
 
-    double giveUnknown(EquationID eid, ValueModeType mode, TimeStep *stepN);
-    double giveUnknown(PrimaryField & field, ValueModeType, TimeStep *stepN);
+    virtual double giveUnknown(EquationID eid, ValueModeType mode, TimeStep *stepN);
+    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep *stepN);
 
-    bool hasBc(TimeStep *tStep);
-    bool hasIc();
-    bool hasIcOn(ValueModeType);
+    virtual bool hasBc(TimeStep *tStep);
+    virtual bool hasIc();
+    virtual bool hasIcOn(ValueModeType);
 
-    bool isPrimaryDof() { return true; }
+    virtual bool isPrimaryDof() { return true; }
 
-    int giveBcId();
-    int giveIcId();
+    virtual int giveBcId();
+    virtual int giveIcId();
 
-    void printYourself();
-    void updateYourself(TimeStep *tStep);
+    virtual void printYourself();
+    virtual void updateYourself(TimeStep *tStep);
 
-    void updateUnknownsDictionary(TimeStep *tStep, EquationID type, ValueModeType mode, double dofValue);
+    virtual void updateUnknownsDictionary(TimeStep *tStep, EquationID type, ValueModeType mode, double dofValue);
 
     virtual void giveUnknownsDictionaryValue(TimeStep *tStep, EquationID type, ValueModeType mode, double &dofValue);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void setBcId(int bcId) { this->bc = bcId; }
-    void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
-    void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
-    Dictionary *giveUnknowns() { return this->unknowns; }
-    int giveEqn() { return equationNumber; }
+    virtual void setBcId(int bcId) { this->bc = bcId; }
+    virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
+    virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
+    virtual Dictionary *giveUnknowns() { return this->unknowns; }
+    virtual int giveEqn() { return equationNumber; }
 
 #ifdef __PARALLEL_MODE
     virtual int packUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);

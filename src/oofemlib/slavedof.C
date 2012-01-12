@@ -137,20 +137,6 @@ SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueM
 }
 
 void
-SlaveDof :: giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN)
-{
-    FloatArray mstrBcVlus;
-
-    masterBcValues.resize( this->giveNumberOfPrimaryMasterDofs() );
-
-    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        this->giveMasterDof(i)->giveBcValues(mstrBcVlus, mode, stepN);
-        masterBcValues.copySubVector(mstrBcVlus, k);
-        k += mstrBcVlus.giveSize();
-    }
-}
-
-void
 SlaveDof :: computeDofTransformation(FloatArray &primaryMasterContribs)
 {
     FloatArray subPrimaryMasterContribs;

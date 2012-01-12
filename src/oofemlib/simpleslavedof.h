@@ -104,60 +104,25 @@ public:
      * Slave simply forwards this message to master.
      * @return Equation number, if active BC exists, returns zero
      */
-    int __giveEquationNumber() const;
+    virtual int __giveEquationNumber() const;
     /**
      * Returns prescribed equation number corresponding to receiver.
      * Slave simply forwards this message to master.
      * @return Prescribed equation number, if active BC exists, returns zero
      */
-    int  __givePrescribedEquationNumber();
+    virtual int  __givePrescribedEquationNumber();
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */
-    int askNewEquationNumber(TimeStep *tStep) { return 1; }
-    /**
-     * Returns the value of the unknown associated with the receiver
-     * at given time step. Slave simply forwards this message to master dof.
-     * @see MasterDof::giveUnknown
-     */
-    double giveUnknown(EquationID, ValueModeType, TimeStep *);
-    /**
-     * Returns the value of the unknown associated to given field of the receiver
-     * at given time step. Slave simply forwards this message to master dof.
-     * @see MasterDof::giveUnknown
-     */
-    double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
-    /**
-     * Returns boundary condition of dof if it is prescribed.
-     * Slave simply forwards this message to master.
-     * @see MasterDof::hasBc
-     */
-    bool hasBc(TimeStep *tStep);
-    /**
-     * Slave simply forwards this message to master.
-     * @see MasterDof::hasIc
-     */
-    bool hasIc();
-    /**
-     * Slave simply forwards this message to master.
-     * @see MasterDof::hasIc
-     */
-    bool hasIcOn(ValueModeType);
-    /**
-     * Slave simply forwards this message to master.
-     * @see MasterDof::hasBcId
-     */
-    int giveBcId();
-    /**
-     * Slave simply forwards this message to master.
-     * @see MasterDof::giveIcId
-     */
-    int giveIcId();
-    /**
-     * Slave simply forwards this message to master.
-     * @see MasterDof::giveBcValue
-     */
-    virtual double  giveBcValue(ValueModeType mode, TimeStep *tStep);
+    virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
+    virtual double giveUnknown(EquationID, ValueModeType, TimeStep *);
+    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
+    virtual bool hasBc(TimeStep *tStep);
+    virtual bool hasIc();
+    virtual bool hasIcOn(ValueModeType);
+    virtual int giveBcId();
+    virtual int giveIcId();
+    virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
