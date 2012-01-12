@@ -54,7 +54,6 @@
 
 namespace oofem {
 LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), LayeredCrossSectionInterface()
-    // Constructor.
 {
     numberOfDofMans     = 2;
     length              = 0.;
@@ -70,8 +69,6 @@ LIBeam2dNL :: giveInterface(InterfaceType interface)
 
     return NULL;
 }
-
-
 
 
 void
@@ -104,9 +101,8 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     answer.at(3, 3) =  n1 - n3x * l / 8.0;
     answer.at(3, 5) =  n2x;
     answer.at(3, 6) =  n2 + n3x * l / 8.0;
-
-    return;
 }
+
 
 void
 LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
@@ -255,10 +251,7 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, i
      * answer.at(6,4)=n2*n2x;
      * }
      */
-
-    return;
 }
-
 
 
 void
@@ -292,10 +285,6 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
                 }
             }
         }
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -332,10 +321,6 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(2, 2) = halfMass;
     answer.at(4, 4) = halfMass;
     answer.at(5, 5) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -346,7 +331,6 @@ LIBeam2dNL :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     double ksi, n1, n2, n3;
     double l = this->giveLength();
-    // FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
@@ -367,18 +351,16 @@ LIBeam2dNL :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     // fi_y
     answer.at(3, 3) = n1;
     answer.at(3, 6) = n2;
-
-    return;
 }
 
 
-int
-LIBeam2dNL :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+bool
+LIBeam2dNL :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     double sine, cosine;
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine = cos(pitch);
 
     answer.resize(6, 6);
     answer.zero();
@@ -394,7 +376,7 @@ LIBeam2dNL :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatr
     answer.at(5, 5) =  cosine;
     answer.at(6, 6) =  1.;
 
-    return 1;
+    return true;
 }
 
 
@@ -429,8 +411,6 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterG
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(2) * layerZCoord;
     answer.at(5) = masterGpStrain.at(3);
-
-    return;
 }
 
 
@@ -446,8 +426,6 @@ LIBeam2dNL ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) con
     answer.at(1) = D_u;
     answer.at(2) = D_w;
     answer.at(3) = R_v;
-
-    return;
 }
 
 
@@ -570,7 +548,6 @@ LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -594,8 +571,6 @@ LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     answer.at(4) = 4;
     answer.at(5) = 5;
     answer.at(6) = 6;
-
-    return;
 }
 
 double

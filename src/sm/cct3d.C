@@ -104,7 +104,6 @@ CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
-// IntArray* answer = new IntArray (6);
 {
     answer.resize(6);
 
@@ -114,8 +113,6 @@ CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
 
 
@@ -180,13 +177,13 @@ CCTPlate3d :: computeGtoLRotationMatrix()
 }
 
 
-int
+bool
 CCTPlate3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [9,18]
 // r(local) = T * r(global)
 // for one node (r written transposed): {w,r1,r2} = T * {u,v,w,r1,r2,r3}
 {
-    // test if pereviously computed
+    // test if previously computed
     if ( GtoLRotationMatrix == NULL ) {
         this->computeGtoLRotationMatrix();
     }
@@ -373,8 +370,6 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     } else {
         answer.resize(0);          // nil resultant
     }
-
-    return;
 }
 
 

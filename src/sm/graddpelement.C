@@ -155,18 +155,9 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
         return;
 	}*/
 
-
     elem->computeBmatrixAt(gp, b);
     this->computeDisplacementDegreesOfFreedom(u, gp,stepN);
-
-
-
-    /*if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-	}*/
-
     answer.beProductOf(b, u);
-    return;
 }
 void
 GradDpElement :: computeNonlocalCumPlasticStrain(double &answer, GaussPoint *gp, TimeStep *stepN)
@@ -312,8 +303,8 @@ void
 GradDpElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 {
     //set displacement and nonlocal location array
-    this-> setDisplacementLocationArray(locU,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this-> setNonlocalLocationArray(locK,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    this->setDisplacementLocationArray(locU,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
+    this->setNonlocalLocationArray(locK,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
 
 
 
@@ -343,18 +334,7 @@ GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, 
     StructuralElement* elem = this->giveStructuralElement();
     elem->computeLocalForceLoadVector(answer, stepN, mode);
 
-    // transform result from global cs to nodal cs. if necessary
-    if ( answer.isNotEmpty() ) {
-        if ( elem->computeGtoLRotationMatrix(T) ) {
-            // first back to global cs from element local
-            answer.rotatedWith(T, 't');
-        }
-
-        if ( elem->computeGNLoadRotationMatrix(T, _toNodalCS) ) {
-            answer.rotatedWith(T, 'n');
-        }
-    }
-    else {
+    if ( answer.isEmpty() ) {
         answer.resize(locSize);
         answer.zero();
     }

@@ -56,14 +56,12 @@ enum CharTensor {
 
 /**
  * This class represent CCT plate element that can be arbitrary
- * oriented in space, in contrast to base CCT element (@see CCTPlate) that is
+ * oriented in space, in contrast to base CCT element that is
  * defined in xy plane.
+ * @see CCTPlate
  *
  * This class implements a triangular three-node plate CCT finite element.
  * Each node has 3 degrees of freedom.
- *
- * Tasks:
- * - calculating its B,D,N matrices and dV.
  *
  * @author L. Svoboda
  * @date 2010-5-25
@@ -103,11 +101,11 @@ public:
     classType giveClassID() const { return CCTPlate3dClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
-    virtual int computeNumberOfL2GDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfGlobalDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     const FloatMatrix *computeGtoLRotationMatrix();
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 

@@ -85,7 +85,7 @@ protected:
 
     int giveApproxOrder() { return 1; }
 
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     void computeLCS(FloatMatrix &answer);
 };
 } // end namespace oofem

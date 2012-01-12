@@ -238,11 +238,6 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
-
-
     u.beProductOf(n, un);
 
     answer.resize(2, 8);
@@ -314,10 +309,6 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
-
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     for ( i = 1; i <= 4; i++ ) {
         dnx.at(i) = dn.at(i, 1);
@@ -341,7 +332,6 @@ Quad10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
     pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.beTranspositionOf(dn);
-    return;
 }
 
 
@@ -382,10 +372,6 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     norm_un = sqrt( dotProduct(u, u, 8) );
 
@@ -694,8 +680,6 @@ Quad10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 
@@ -708,18 +692,13 @@ Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
     this->giveIPValue(answer, gp, type, tStep);
 }
 
+
 void
 Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                          InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
-
-
-
-
-
-
 
 
 #define POINT_TOL 1.e-3

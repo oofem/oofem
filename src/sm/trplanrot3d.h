@@ -98,11 +98,11 @@ public:
     classType giveClassID() const { return TrPlaneStrRot3dClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
-    virtual int computeNumberOfL2GDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfGlobalDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     const FloatMatrix *computeGtoLRotationMatrix();
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     void printOutputAt(FILE *file, TimeStep *tStep);
 };

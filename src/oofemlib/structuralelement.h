@@ -100,10 +100,6 @@ class IDNLMaterial;
 class StructuralElement : public Element
 {
 protected:
-    /// Cached transformation matrix of receiver.
-    FloatMatrix rotationMatrix;
-    /// Flag indicating if transformation matrix has been already computed.
-    bool rotationMatrixDefined;
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityLtf;
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
@@ -619,53 +615,6 @@ protected:
      * @param answer Interpolation matrix evaluated at gp.
      */
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)  = 0;
-
-    /**
-     * Updates rotation matrix @f$ r(l)=T r(g*) @f$ between local and global coordinate system
-     * taking into account also possible local - coordinate system in some elements
-     * nodes.
-     * Default implementation uses computeGtoLRotationMatrix and
-     * computeGNDofRotationMatrix services to compute result.
-     * Default implementation uses cached rotation matrix in
-     * rotationMatrix attribute, so rotation matrix is computed only once.
-     * @return Nonzero if transformation is necessary.
-     */
-    virtual int updateRotationMatrix();
-
-    /**
-     * Returns transformation matrix from global coord. system to local element
-     * coordinate system ( i.e. r(l)=T r(g)). If no transformation is necessary
-     * then answer is empty matrix and zero value is returned.
-     * @param answer Computed rotation matrix.
-     * @return Nonzero if transformation is necessary, zero otherwise.
-     */
-    virtual int computeGtoLRotationMatrix(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    /**
-     * Returns transformation matrix for DOFs from global coordinate system
-     * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
-     * If mode == _toGlobalCS, the transformation from local nodal cs to
-     * global cs in node is returned. If no transformation is
-     * necessary sets answer to empty matrix and returns zero value.
-     * @param answer Computed rotation matrix.
-     * @param mode Determines type of rotation matrix.
-     * @return Nonzero if transformation is necessary, zero otherwise.
-     */
-    virtual int computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
-    /**
-     * Returns transformation matrix for loading from global coordinate system
-     * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
-     * If mode == _toGlobalCS, the transformation from local nodal cs to
-     * global cs in node is returned. If no transformation is
-     * necessary sets answer to empty matrix and returns zero value.
-     * @param answer Computed rotation matrix.
-     * @param mode Determines type of rotation matrix.
-     * @return Nonzero if transformation is necessary, zero otherwise.
-     */
-    virtual int computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
 
     /**
      * Returns maximum approximation order used by receiver.

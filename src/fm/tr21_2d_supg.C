@@ -221,11 +221,6 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
-
-
     u.beProductOf(n, un);
 
     answer.resize(2, 12);
@@ -293,10 +288,6 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
     FloatArray u;
     FloatMatrix dn, um(2, 6);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     for ( int i = 1; i <= 6; i++ ) {
@@ -370,10 +361,6 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     norm_un = u.computeNorm();
 
@@ -542,9 +529,6 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     GaussPoint *gp;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     for ( i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );

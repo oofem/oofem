@@ -73,7 +73,7 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
 // element geometrical NON LINEARITY IS SUPPORTED ONLY IF BMAtrix is non-linear!!!!
 // this version assumes Total Lagrange approach.
 {
-    int n, i, rot;
+    int n, i;
     FloatMatrix b, A;
     FloatArray u, help;
 
@@ -83,7 +83,6 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
         return;
     }
 
-    rot     = this->updateRotationMatrix();
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     // === total Lagrangian formulation ===
@@ -93,11 +92,6 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
         // subtract the initial displacements, if defined
         if ( initialDisplacements ) {
             u.subtract(*initialDisplacements);
-        }
-
-        // rotate the coordinate system, if required
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
         }
 
         if ( nlGeometry < 2 ) {
@@ -135,8 +129,6 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
     else if ( mode == AL ) { // updated Lagrangian formulation
         OOFEM_ERROR("computeStrainVector : AL mode not supported now");
     }
-
-    return;
 }
 
 
@@ -192,7 +184,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
     FloatMatrix b, bt, A, *ut = NULL, b2;
     FloatArray bs, TotalStressVector, u;
-    int i, j, k, rot;
+    int i, j, k;
     double dV;
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
@@ -200,18 +192,10 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
-    rot = this->updateRotationMatrix();
-
     if ( nlGeometry ) {
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         if ( u.giveSize() ) {
             ut = new FloatMatrix( &u, 1);
-            //delete u;
         } else {
             ut = NULL;
         }
@@ -259,15 +243,8 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         dV  = this->computeVolumeAround(gp);
         bs.beProductOf(bt, TotalStressVector);
         bs.times(dV);
-        if ( rot ) {
-            bs.rotatedWith(this->rotationMatrix, 't');
-        }
 
         answer.add(bs);
-        //delete bs;
-        //delete b;
-        //delete bt;
-        //delete TotalStressVector;
     }
 
     if ( nlGeometry ) {
@@ -279,8 +256,6 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         answer.zero();
         return;
     }
-
-    return;
 }
 
 
@@ -303,7 +278,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
     FloatMatrix b, bt, A, *ut = NULL, b2;
     FloatArray temp, bs, TotalStressVector, u;
     IntArray irlocnum;
-    int ir, i, j, k, rot;
+    int ir, i, j, k;
     double dV;
 
     // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
@@ -311,18 +286,10 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
 
-    rot = this->updateRotationMatrix();
-
     if ( nlGeometry ) {
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         if ( u.giveSize() ) {
             ut = new FloatMatrix( &u, 1);
-            //delete u;
         } else {
             ut = NULL;
         }
@@ -379,9 +346,6 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             dV  = this->computeVolumeAround(gp);
             bs.beProductOf(bt, TotalStressVector);
             bs.times(dV);
-            if ( rot ) {
-                bs.rotatedWith(this->rotationMatrix, 't');
-            }
 
             m->add(bs);
 
@@ -402,8 +366,6 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
         answer.zero();
         return;
     }
-
-    return;
 }
 
 
@@ -417,7 +379,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
 // taking into account possible effects of nonlinear geometry
 //
 {
-    int i, j, k, l, m, n, iStartIndx, iEndIndx, jStartIndx, jEndIndx, rot;
+    int i, j, k, l, m, n, iStartIndx, iEndIndx, jStartIndx, jEndIndx;
     double dV;
     FloatMatrix d, A, *ut = NULL, b2;
     FloatMatrix bi, bj, dbj, dij;
@@ -433,18 +395,11 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     }
 
     Material *mat = this->giveMaterial();
-    rot = this->updateRotationMatrix();
 
     if ( nlGeometry ) {
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         if ( u.giveSize() ) {
             ut = new FloatMatrix( &u, 1);
-            // delete u;
         } else {
             ut = NULL;
         }
@@ -485,8 +440,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                     // add nonlinear contribution to each component
                                     bi.at(l + 1, m) += b2.at(1, m); //mj
                                 }
-
-                                // delete b2;
                             }
                         }
                     }
@@ -502,8 +455,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                     // add nonlinear contribution to each component
                                     bj.at(l + 1, m) += b2.at(1, m); //mj
                                 }
-
-                                // delete b2;
                             }
                         }
                     } // end nlGeometry
@@ -517,10 +468,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     } else {
                         answer.plusProductUnsym(bi, dbj, dV);
                     }
-
-                    // delete bi; delete d; delete dij; delete dbj;
-                    // delete d;
-                    // if (i!=j) delete bj;
                 }
             }
         }
@@ -555,10 +502,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
             } else {
                 answer.plusProductUnsym(bj, dbj, dV);
             }
-
-            // delete bj ;
-            // delete dbj ;
-            // delete d ;
         }
     }
 
@@ -583,8 +526,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                         A.times(stress.at(j) * dV);
                         answer.add(A);
                     }
-
-                    //delete A;
                 }
             }
         }
@@ -592,10 +533,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
 
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
-    }
-
-    if ( rot ) {
-        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -607,7 +544,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 // taking into account possible effects of nonlinear geometry
 //
 {
-    int i, j, k, l, n, ir, rot;
+    int i, j, k, l, n, ir;
     double dV;
     FloatMatrix temp, d, A, *ut = NULL, b2;
     FloatMatrix bi, bj, dbj, dij;
@@ -623,18 +560,12 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     }
 
     Material *mat = this->giveMaterial();
-    rot = this->updateRotationMatrix();
 
     if ( nlGeometry ) {
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         if ( u.giveSize() ) {
             ut = new FloatMatrix( &u, 1);
-            // delete u;
         } else {
             ut = NULL;
         }
@@ -657,13 +588,10 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                     this->computeNLBMatrixAt(A, gp, l);
                     if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                         b2.beProductOf(* ut, A);
-                        //delete A;
                         for ( k = 1; k <= bj.giveNumberOfColumns(); k++ ) {
                             // add nonlinear contribution to each component
                             bj.at(l, k) += b2.at(1, k); //mj
                         }
-
-                        //delete b2;
                     }
                 }
             } // end nlGeometry
@@ -706,8 +634,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                             A.times(stress.at(j) * dV);
                             m->add(A);
                         }
-
-                        //delete A;
                     }
                 }
             }
@@ -721,9 +647,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     } // ens nlGeometry
 
     answer.symmetrized();
-    if ( rot ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 

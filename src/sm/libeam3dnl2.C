@@ -127,10 +127,6 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
         // ask element's displacement increments
         this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
 
-        if ( this->updateRotationMatrix() ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         // interpolate spin at the centre
         centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
         centreSpin.at(2) = 0.5 * ( u.at(5) + u.at(11) );
@@ -290,12 +286,10 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    ;
     FloatArray nm(6), TotalStressVector(6);
     FloatMatrix x, tempTc, GNT;
     double s1, s2;
 
-    GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
     // update temp triad
     this->updateTempQuaternion(tStep);
     this->computeRotMtrxFromQuaternion(tempTc, this->tempQ);
@@ -320,12 +314,6 @@ LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int
 
     this->computeXMtrx(x, tStep);
     answer.beProductOf(x, nm);
-
-    if ( GNTflag ) {
-        answer.rotatedWith(GNT, 'n');
-    }
-
-    return;
 }
 
 
@@ -337,11 +325,6 @@ LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep)
     answer.resize(3);
     // ask element's displacements
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
-
 
     answer.at(1) = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
                    ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -438,10 +421,6 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
             answer.at(i + 9, j + 9)   += y.at(i, j);
         }
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -524,10 +503,6 @@ LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -564,8 +539,6 @@ LIBeam3dNL2 :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     // fi_z
     answer.at(6, 6)  = n1;
     answer.at(6, 12) = n2;
-
-    return;
 }
 
 double
@@ -594,8 +567,6 @@ LIBeam3dNL2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) co
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
 
 int
@@ -659,7 +630,6 @@ LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -680,8 +650,6 @@ LIBeam3dNL2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     for ( i = 1; i <= 12; i++ ) {
         answer.at(i) = i;
     }
-
-    return;
 }
 
 double
@@ -788,8 +756,6 @@ LIBeam3dNL2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     }
 
     return 1;
-
-    ;
 }
 
 int
@@ -899,10 +865,6 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     int i, j;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
-
-    if ( this->updateRotationMatrix() ) {
-        ui.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     ac.at(1) = 0.5 * ( ui.at(10) - ui.at(4) );
     ac.at(2) = 0.5 * ( ui.at(11) - ui.at(5) );

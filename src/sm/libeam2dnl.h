@@ -56,7 +56,7 @@ public:
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

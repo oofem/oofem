@@ -49,7 +49,8 @@
 
 namespace oofem {
 
-IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
+IRResultType IGAElement :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
@@ -181,19 +182,19 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
 
 
 #ifdef __PARALLEL_MODE
-elementParallelMode 
+elementParallelMode
 IGAElement::giveKnotSpanParallelMode(int knotSpanIndex) const
 {
-  elementParallelMode emode = this->giveParallelMode();
-  if (emode == Element_remote) {
-    return Element_remote;
-  } else if (emode == Element_local) {
-    return (elementParallelMode) this->knotSpanParallelMode.at(knotSpanIndex+1);
-  } else {
-    _error("Cannot determine elementParallelMode");
-  }  
-  
-  return Element_local;//to make compiler happy
+    elementParallelMode emode = this->giveParallelMode();
+    if (emode == Element_remote) {
+        return Element_remote;
+    } else if (emode == Element_local) {
+        return (elementParallelMode) this->knotSpanParallelMode.at(knotSpanIndex+1);
+    } else {
+        _error("Cannot determine elementParallelMode");
+    }
+
+    return Element_local;//to make compiler happy
 }
 
 #endif // __PARALLEL_MODE
@@ -201,7 +202,8 @@ IGAElement::giveKnotSpanParallelMode(int knotSpanIndex) const
 
 // integration elements are setup in the same way as for IGAElement for now HUHU
 
-IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir) {
+IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     TSplineInterpolation *interpol = ( TSplineInterpolation * ) this->giveInterpolation();
@@ -283,7 +285,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir) {
 // because integration elements (does not matter whether single span or multi span)
 // are generaly finer than T-mesh;
 
-void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
+void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
+{
     WCRec p [ 8 ];
     GraphicObj *go;
     FEInterpolation *interp = this->giveInterpolation();
@@ -571,7 +574,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
 																go =  CreateLine3D(pp);
@@ -611,7 +614,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
 																go =  CreateLine3D(pp);
@@ -651,7 +654,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
 																go =  CreateLine3D(pp);
@@ -691,7 +694,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															go =  CreateLine3D(pp);
 															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -729,7 +732,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(yy < 1.5 || zz < 2.0001){
 																go =  CreateLine3D(pp);
@@ -769,7 +772,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															go =  CreateLine3D(pp);
 															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -807,7 +810,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(yy < 1.5 || zz < 2.0001){
 																go =  CreateLine3D(pp);
@@ -847,7 +850,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															go =  CreateLine3D(pp);
 															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -885,7 +888,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															go =  CreateLine3D(pp);
 															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -923,7 +926,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(yy < 0.0001){
 																go =  CreateLine3D(pp);
@@ -963,7 +966,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 														zz /= 2.0;
 														rr = xx * xx + yy * yy;
 														r = rr + zz * zz;
-														
+
 														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
 															if(yy < 2.0001){
 																go =  CreateLine3D(pp);
@@ -998,7 +1001,8 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 }
 
 
-void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType) {
+void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType)
+{
     WCRec p [ 8 ];
     GraphicObj *go;
     int i, j, k, m, n, nseg;
@@ -1037,10 +1041,6 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     int ir, nsd = interp->giveNsd();
 
     se->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-
-    if ( se->updateRotationMatrix() ) {
-        u.rotatedWith(se->rotationMatrix, 'n');
-    }
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];

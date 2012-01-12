@@ -206,11 +206,8 @@ public:
      */
     int findDofWithDofId(DofIDItem dofID) const;
     /**
-     * Assembles the vector of unknowns in nodal c.s for given dofs of receiver.
-     * This vector may have size different from number of dofs requested,
-     * because some dofs may depend on other dofs. Default implementation uses
-     * Dof::giveUnknown service.
-     * @param answer Result (in nodal cs.)
+     * Assembles the vector of unknowns in global c.s for given dofs of receiver.
+     * @param answer Result (in global c.s.)
      * @param dofMask Array containing DOF mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
      * required values. If dof with requested physical meaning does not exist in receiver,
@@ -218,17 +215,14 @@ public:
      * @param type Physical meaning of  unknown.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementation can return only values for current
+     * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveUnknown
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    EquationID type, ValueModeType mode, TimeStep *stepN);
     /**
-     * Assembles the vector of unknowns of given filed in nodal c.s for given dofs of receiver.
-     * This vector may have size different from number of dofs requested,
-     * because some dofs may depend on other dofs. Default implementation uses
-     * Dof::giveUnknown service.
+     * Assembles the vector of unknowns of given filed in global c.s for given dofs of receiver.
      * @param answer Result (in nodal cs.)
      * @param dofMask Array containing DOF mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
@@ -243,6 +237,8 @@ public:
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+
+    // TODO: Remove
     /**
      * Assembles the vector of prescribed unknowns in nodal c.s for given dofs of receiver.
      * This vector may have size different from number of dofs requested,
@@ -262,23 +258,20 @@ public:
      */
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                              ValueModeType mode, TimeStep *stepN);
-    //virtual void givePrescribedUnknownVector (FloatArray& answer, IntArray& dofMask,
-    //                       UnknownType type, ValueModeType mode, TimeStep* stepN);
     //@}
 
     /**@name Transformation functions
      * The governing equations can be assembled not only in global coordinate system, but
-     * also in user-defined local coordinate system of each dof manager. Methods in this section
-     * introduce necessary transformation methods, allowing receiver dofs to be expressed in
-     * their own local c.s. or to be dependent on other dofs on other dofManager (to implement
+     * also in user-defined local coordinate system of each DOF manager. Methods in this section
+     * introduce necessary transformation methods, allowing receiver DOFs to be expressed in
+     * their own local c.s. or to be dependent on other DOFs on other DOF manager (to implement
      * slave or rigid arm nodes etc.). The method for computing global c.s to receiver c.s
      * transformation matrix is provided.
      */
     //@{
     /**
      * Computes receiver transformation matrix from global CS to dofManager specific
-     * coordinate system. In which governing equations are assembled, for example the
-     * local coordinate system in node.
+     * coordinate system; @f$ u_g = R\cdot u_m @f$.
      * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
      * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
      * This is because this transformation should generally include not only transformation to
@@ -288,32 +281,30 @@ public:
      * @param dofIDArry Array containing DofIDItem-type values (this is enumeration
      * identifying physical meaning of particular DOF, see cltypes.h) for which transformation matrix is
      * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
-     * @param mode Mode of transformation.
+     * @return True if transformation is needed, false otherwise.
      */
-    virtual void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
+    bool computeM2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
     /**
-     * Computes receiver load transformation matrix from global CS to dofManager specific
-     * coordinate system. If mode == _toNodalCS, otherwise reverse transformation is computed
-     * (In the dofManager specific cs the governing equations are assembled, for example the
-     * local coordinate system in node). This transformation may not be orthogonal.
-     * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
-     * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
-     * This is because this transformation should generally include not only transformation to
-     * dof manager local coordinate system, but receiver dofs can be expressed using
-     * dofs of another dofManager (In this case, answer is produced only if all
-     * dof transformation is required).
-     * @param dofIDArry Array containing DofIDItem-type values (this is enumeration
-     * identifying physical meaning of particular DOF, see cltypes.h) for which transformation matrix is
-     * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
-     * @param mode Mode of transformation.
+     * Computes transformation matrix from global c.s. to DOF-manager specific c.s; @f$ u_g = Q\cdot u_l @f$.
+     * @param answer Computed transformation matrix.
+     * @param dofIDArry Array containing DofIDItem-type values for which transformation matrix is
+     * assembled. If dofIDArry is NULL, then all receiver DOFs are assumed.
+     * @return True is transformation is needed, false otherwise.
      */
-    virtual void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
+    virtual bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
     /**
-     * Indicates, whether dofManager requires the transformation from global CS to
-     * dof manager specific coordinate system.
+     * Computes transformation matrix from local DOFs to master DOFs; @f$ u_l = M\cdot u_m @f$.
+     * @param answer Computed transformation matrix.
+     * @param dofIDArry Array containing DofIDItem-type values for which transformation matrix is
+     * assembled. If dofIDArry is NULL, then all receiver DOFs are assumed.
+     * @return True is transformation is needed, false otherwise.
+     */
+    virtual bool computeM2LTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
+    /**
+     * Indicates, whether dofManager requires the transformation.
      * @return Nonzero if transformation is necessary, even for single dof.
      */
-    virtual int requiresTransformation() { return 0; }
+    virtual bool requiresTransformation();
     //@}
 
     /**@name Load related functions */
@@ -440,7 +431,7 @@ public:
      * @return True if receiver has dof with given id.
      * @see DofIDItem
      */
-    bool hasDofID(int id);
+    bool hasDofID(DofIDItem id);
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &context) { }
@@ -490,7 +481,7 @@ public:
     /**
      * Returns number of partitions sharing given receiver (=number of shared partitions + local one).
      */
-    const int givePartitionsConnectivitySize();
+    int givePartitionsConnectivitySize();
     /// Returns true if receiver is locally maintained.
     bool isLocal();
     /// Returns true if receiver is shared.
@@ -499,15 +490,11 @@ public:
 
 protected:
     virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
-    void computeSlaveLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
-    void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
-    IntArray *giveCompleteGlobalDofIDArray(void) const;
+
+    /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
+    void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
+    IntArray *giveCompleteGlobalDofIDArray() const;
 };
 } // end namespace oofem
 #endif // dofmanager_h
-
-
-
-
-
 

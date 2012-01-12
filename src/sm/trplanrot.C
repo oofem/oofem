@@ -166,28 +166,24 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     }
 
     if ( ( li <= 4 ) && ( ui >= 4 ) ) {
-        FloatArray *shapeFunct;
-        shapeFunct = new FloatArray(3);
+        FloatArray shapeFunct(3);
 
         nx = this->GiveDerivativeVX(aGaussPoint);
         ny = this->GiveDerivativeUY(aGaussPoint);
 
-        shapeFunct->at(1) = aGaussPoint->giveCoordinate(1);
-        shapeFunct->at(2) = aGaussPoint->giveCoordinate(2);
-        shapeFunct->at(3) = 1.0 - shapeFunct->at(1) - shapeFunct->at(2);
+        shapeFunct.at(1) = aGaussPoint->giveCoordinate(1);
+        shapeFunct.at(2) = aGaussPoint->giveCoordinate(2);
+        shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
         for ( i = 1; i <= 3; i++ ) {
             answer.at(ind, 3 * i - 2) = -1. * c.at(i) * 1.0 / 4.0 / area;
             answer.at(ind, 3 * i - 1) = b.at(i) * 1.0 / 4.0 / area;
-            answer.at(ind, 3 * i - 0) = ( -4. * area * shapeFunct->at(i) + nx->at(i) - ny->at(i) ) * 1.0 / 4.0 / area;
+            answer.at(ind, 3 * i - 0) = ( -4. * area * shapeFunct.at(i) + nx->at(i) - ny->at(i) ) * 1.0 / 4.0 / area;
         }
 
-        delete shapeFunct;
         delete nx;
         delete ny;
     }
-
-    return;
 }
 
 
@@ -255,8 +251,6 @@ TrPlaneStrRot :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 9) = l3;
 
     delete angles;
-
-    return;
 }
 
 
@@ -581,9 +575,6 @@ TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
     FloatArray u, Epsilon;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     answer.resize(4);
     answer.zero();
@@ -610,8 +601,6 @@ TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
 
     Epsilon.beProductOf(b, u);
     answer.at(4) = Epsilon.at(1);
-
-    return;
 }
 
 
@@ -621,15 +610,12 @@ TrPlaneStrRot :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) co
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
-// IntArray* answer = new IntArray (3);
 {
     answer.resize(3);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = R_w;
-
-    return;
 }
 
 
@@ -679,7 +665,5 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
     } else {
         answer.resize(0);          // nil resultant
     }
-
-    return;
 }
 } // end namespace oofem

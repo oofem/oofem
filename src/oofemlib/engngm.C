@@ -966,34 +966,6 @@ void EngngModel :: printYourself()
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
-/*
- * void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, CharType type)
- * //
- * // assembles matrix answer by  calling
- * // element(i) -> giveCharacteristicMatrix ( type, tStep );
- * // for each element in domain
- * // and assembling every contribution to answer
- * //
- * //
- * {
- * Element* element;
- * IntArray* loc ;
- *
- * if (answer == NULL)  _error("assemble: NULL pointer encountered.");
- *
- * int nelem = domain -> giveNumberOfElements ();
- * FloatMatrix* charMtrx;
- * for (int i = 1; i <= nelem ; i++ ) {
- *  element = domain -> giveElement(i);
- *  loc = element -> giveLocationArray ();
- *  charMtrx = element -> GiveCharacteristicMatrix ( type, tStep );
- *  if (charMtrx) answer ->  assemble (charMtrx, loc) ;
- * delete charMtrx;
- * }
- * }
- */
-
-
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
@@ -1006,7 +978,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 {
     int ielem;
     IntArray loc;
-    FloatMatrix mat;
+    FloatMatrix mat, R;
     Element *element;
 
     if ( answer == NULL ) {
@@ -1026,10 +998,13 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
         }
 
 #endif
-        element->giveLocationArray(loc, ut, s);
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
+            element->giveLocationArray(loc, ut, s);
+            if (element->giveRotationMatrix(R, ut)) {
+                mat.rotatedWith(R);
+            }
             if ( answer->assemble(loc, mat) == 0 ) {
                 _error("assemble: sparse matrix assemble error");
             }
@@ -1055,7 +1030,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
 {
     int ielem;
     IntArray r_loc, c_loc;
-    FloatMatrix mat;
+    FloatMatrix mat, Rr, Rc;
     Element *element;
 
     if ( answer == NULL ) {
@@ -1075,12 +1050,22 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
         }
 
 #endif
-        element->giveLocationArray(r_loc, r_id, ns);
-        element->giveLocationArray(c_loc, c_id, ns);
-
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
+            element->giveLocationArray(r_loc, r_id, ns);
+            element->giveLocationArray(c_loc, c_id, ns);
+            // Rotate it
+            if (element->giveRotationMatrix(Rr, r_id)) {
+                FloatMatrix tmpMat;
+                tmpMat.beTProductOf(Rr, mat); // TODO: Check transpose here
+                mat = tmpMat;
+            }
+            if (element->giveRotationMatrix(Rc, c_id)) {
+                FloatMatrix tmpMat;
+                tmpMat.beProductOf(mat, Rc); // TODO: Check transpose here
+                mat = tmpMat;
+            }
             if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
                 _error("assemble: sparse matrix assemble error");
             }
@@ -1100,7 +1085,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 {
     int ielem;
     IntArray r_loc, c_loc;
-    FloatMatrix mat;
+    FloatMatrix mat, R;
     Element *element;
     if ( answer == NULL ) OOFEM_ERROR("EngngModel :: assemble: NULL pointer encountered.");
 
@@ -1115,6 +1100,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
         if ( mat.isNotEmpty() ) {
             element->giveLocationArray(r_loc, ut, rs);
             element->giveLocationArray(c_loc, ut, cs);
+            // Rotate it
+            if (element->giveRotationMatrix(R, ut)) {
+                mat.rotatedWith(R);
+            }
             if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
                 OOFEM_ERROR("EngngModel :: assemble: sparse matrix assemble error");
             }
@@ -1127,102 +1116,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
     answer->assembleEnd();
 }
 
-/*
- * void EngngModel :: assemble (FloatArray& answer, TimeStep* tStep, CharType type, Domain* domain)
- * //
- * // assembles matrix answer by  calling
- * // element(i) -> giveCharacteristicMatrix ( type, tStep );
- * // or node(i) -> computeLoadVectorAt (tStep);
- * // for each element in domain
- * // and assembling every contribution to answer
- * //
- * //
- * {
- * int i ;
- * IntArray loc ;
- * FloatArray charVec ;
- * ValueModeType mode;
- * Element *element ;
- * DofManager *node ;
- *
- * int nnode = domain -> giveNumberOfDofManagers();
- * int nelem = domain -> giveNumberOfElements ();
- *
- * switch (type) {
- * case NodalLoadVector_Total:
- * case NodalLoadVector_Incremental:
- *
- * if (type == NodalLoadVector_Total) mode = TotalMode; else mode = IncrementalMode;
- *  for (i = 1; i <= nnode ; i++ ) {
- *    node = domain -> giveDofManager(i);
- *    node -> giveCompleteLocationArray (loc);
- *    node -> computeLoadVectorAt (charVec, tStep, mode);
- *    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
- *  }
- *
- *  break ;
- *
- * case ElementForceLoadVector_Total:
- * case ElementForceLoadVector_Incremental:
- * case ElementNonForceLoadVector_Total:
- * case ElementNonForceLoadVector_Incremental:
- * case NodalInternalForcesVector_Total:
- * case NodalInternalForcesVector_Incremental:
- * case ElementHEMOLoadVector_Total:
- *
- *  for (i = 1; i <= nelem ; i++ ) {
- *    element = domain -> giveElement(i);
- **#ifdef __PARALLEL_MODE
- * // skip remote elements (these are used as mirrors of remote elements on other domains
- * // when nonlocal constitutive models are used. They introduction is necessary to
- * // allow local averaging on domains without fine grain communication between domains).
- * if (element->giveParallelMode () == Element_remote) continue;
- **#endif
- *    element -> giveLocationArray (loc);
- *    this -> giveElementCharacteristicVector (charVec, i, type, tStep, domain);
- *    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
- *  }
- *  break ;
- *
- * case ElementForceLoadVectorOfPrescribed_Total:
- * case ElementForceLoadVectorOfPrescribed_Incremental:
- *
- * CharType mtype;
- * if (type == ElementForceLoadVectorOfPrescribed_Total) mtype = ElementForceLoadVector_Total;
- * else mtype = ElementForceLoadVector_Incremental;
- *
- * for (i=1; i<= nelem; i++) {
- *    element = domain -> giveElement(i);
- **#ifdef __PARALLEL_MODE
- * // skip remote elements (these are used as mirrors of remote elements on other domains
- * // when nonlocal constitutive models are used. They introduction is necessary to
- * // allow local averaging on domains without fine grain communication between domains).
- * if (element->giveParallelMode () == Element_remote) continue;
- **#endif
- *    element -> givePrescribedLocationArray (loc);
- *    this -> giveElementCharacteristicVector (charVec, i, mtype, tStep, domain);
- *    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
- * }
- * break ;
- *
- * case NodalLoadVectorOfPrescribed_Total:
- * case NodalLoadVectorOfPrescribed_Incremental:
- *
- * if (type == NodalLoadVector_Total) mode = TotalMode; else mode = IncrementalMode;
- *  for (i = 1; i <= nnode ; i++ ) {
- *    node = domain -> giveDofManager(i);
- *    node -> giveCompletePrescribedLocationArray (loc);
- *    node -> computeLoadVectorAt (charVec, tStep, mode);
- *    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
- *  }
- *
- *  break ;
- *
- * default:
- *   _error("assemble: Unknown Type of characteristic mtrx.");
- * }
- * }
- */
 
 void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                  CharType type, ValueModeType mode,
@@ -1238,6 +1131,8 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     int i;
     IntArray loc;
     FloatArray charVec;
+    FloatMatrix R;
+    IntArray dofIDarry(0);
     DofManager *node;
 #ifdef __PARALLEL_MODE
     double scale;
@@ -1255,8 +1150,11 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
         }
 
 #endif
-        if ( charVec.giveSize() ) {
+        if ( charVec.isNotEmpty() ) {
             node->giveCompleteLocationArray(loc, s);
+            if (node->computeM2LTransformation(R, dofIDarry)) {
+                charVec.rotatedWith(R, 't');
+            }
             answer.assemble(charVec, loc);
         }
     }
@@ -1294,6 +1192,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 {
     int i;
     IntArray loc;
+    FloatMatrix R;
     FloatArray charVec;
     Element *element;
 
@@ -1313,7 +1212,10 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 #endif
         element->giveLocationArray(loc, ut, s);
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
-        if ( charVec.giveSize() ) {
+        if ( charVec.isNotEmpty() ) {
+            if ( element->giveRotationMatrix(R, ut) ) {
+                charVec.rotatedWith(R, 't');
+            }
             answer.assemble(charVec, loc);
         }
     }
@@ -1333,6 +1235,7 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
 {
     int i;
     IntArray loc;
+    FloatMatrix R;
     FloatArray charVec;
     Element *element;
     EModelDefaultPrescribedEquationNumbering dpn;
@@ -1357,7 +1260,10 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
         }
 
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
-        if ( charVec.giveSize() ) {
+        if ( charVec.isNotEmpty() ) {
+            if ( element->giveRotationMatrix(R, ut) ) {
+                charVec.rotatedWith(R, 't');
+            }
             answer.assemble(charVec, loc);
         }
     }
@@ -1365,205 +1271,6 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
 
-
-
-
-#ifdef __PETSC_MODULE
-void
-EngngModel :: petsc_assembleVectorFromDofManagers(Vec answer, TimeStep *tStep, EquationID ut,
-                                                  CharType type, ValueModeType mode, Domain *domain)
-//
-// assembles matrix answer by  calling
-// node(i) -> computeLoadVectorAt (tStep);
-// for each element in domain
-// and assembling every contribution to answer
-//
-//
-{
-    int i, ni;
-    IntArray loc;
- #ifdef __PARALLEL_MODE
-    IntArray gloc;
-    double scale;
- #endif
-    FloatArray charVec;
-    DofManager *node;
-    EModelDefaultEquationNumbering dn;
-
-    int nnode = domain->giveNumberOfDofManagers();
-
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-    for ( i = 1; i <= nnode; i++ ) {
-        node = domain->giveDofManager(i);
-        node->computeLoadVectorAt(charVec, tStep, mode);
-        if ( ( ni = charVec.giveSize() ) ) {
-            node->giveCompleteLocationArray(loc, dn);
- #ifdef __PARALLEL_MODE
-            if ( node->giveParallelMode() == DofManager_shared ) {
-                scale = 1. / ( node->givePartitionsConnectivitySize() );
-                charVec.times(scale);
-            }
-
-            this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0);
-            VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #else
-            loc.add(-1);
-            VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #endif
-        }
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-}
-
-void
-EngngModel :: petsc_assemblePrescribedVectorFromDofManagers(Vec answer, TimeStep *tStep, EquationID ut,
-                                                            CharType type, ValueModeType mode, Domain *domain)
-//
-// assembles matrix answer by  calling
-// node(i) -> computeLoadVectorAt (tStep);
-// for each element in domain
-// and assembling every contribution to answer
-//
-//
-{
-    int i, ni;
-    IntArray loc;
- #ifdef __PARALLEL_MODE
-    IntArray gloc;
-    double scale;
- #endif
-    FloatArray charVec;
-    DofManager *node;
-    EModelDefaultPrescribedEquationNumbering dpn;
-
-    int nnode = domain->giveNumberOfDofManagers();
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    for ( i = 1; i <= nnode; i++ ) {
-        node = domain->giveDofManager(i);
-        node->computeLoadVectorAt(charVec, tStep, mode);
-        if ( ( ni = charVec.giveSize() ) ) {
-            node->giveCompleteLocationArray(loc, dpn);
- #ifdef __PARALLEL_MODE
-            if ( node->giveParallelMode() == DofManager_shared ) {
-                scale = 1. / ( node->givePartitionsConnectivitySize() );
-                charVec.times(scale);
-            }
-
-            this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0); // ????
-            VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #else
-            loc.add(-1);
-            VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #endif
-        }
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-}
-
-void
-EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, EquationID ut,
-                                               CharType type, ValueModeType mode, Domain *domain)
-//
-// assembles matrix answer by  calling
-// element(i) -> giveCharacteristicMatrix ( type, tStep );
-// for each element in domain
-// and assembling every contribution to answer
-//
-//
-{
-    int i, ni;
-    IntArray loc;
- #ifdef __PARALLEL_MODE
-    IntArray gloc;
- #endif
-    FloatArray charVec;
-    Element *element;
-    EModelDefaultEquationNumbering dn;
-
-    int nelem = domain->giveNumberOfElements();
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    for ( i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
- #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
- #endif
-        this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
-        if ( ( ni = charVec.giveSize() ) ) {
-            element->giveLocationArray(loc, ut, dn);
- #ifdef __PARALLEL_MODE
-            this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0);
-            VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #else
-            loc.add(-1);
-            VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #endif
-        }
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-}
-
-void
-EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *tStep, EquationID ut,
-                                                         CharType type, ValueModeType mode, Domain *domain)
-//
-// assembles matrix answer by  calling
-// element(i) -> giveCharacteristicMatrix ( type, tStep );
-// for each element in domain
-// and assembling every contribution to answer
-//
-//
-{
-    int i, ni;
-    IntArray loc;
- #ifdef __PARALLEL_MODE
-    IntArray gloc;
- #endif
-    FloatArray charVec;
-    Element *element;
-    EModelDefaultPrescribedEquationNumbering dpn;
-
-    int nelem = domain->giveNumberOfElements();
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    for ( i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
- #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
- #endif
-        this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
-        if ( ( ni = charVec.giveSize() ) ) {
-            element->giveLocationArray(loc, ut, dpn);
- #ifdef __PARALLEL_MODE
-            this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0); // ??
-            VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #else
-            loc.add(-1);
-            VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
- #endif
-        }
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-}
-
-#endif
 
 void
 EngngModel ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
@@ -1608,12 +1315,7 @@ EngngModel :: initStepIncrements()
             elem->initForNewStep();
         }
     }
-
-    return;
 }
-
-
-
 
 
 contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mode, void *obj)

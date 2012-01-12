@@ -139,8 +139,6 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
 
 
@@ -214,8 +212,6 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
 
 

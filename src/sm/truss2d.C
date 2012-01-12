@@ -50,13 +50,9 @@
 #endif
 
 namespace oofem {
-//
-// upravit teplota u geom. nelinearity
-//
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans     = 2;
     length              = 0.;
@@ -134,7 +130,6 @@ void Truss2d :: computeGaussPoints()
 }
 
 
-
 void
 Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is
@@ -156,10 +151,6 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
     answer.at(4, 4) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -182,6 +173,7 @@ Truss2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(2, 4) = n2;
 }
 
+
 int
 Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
@@ -201,48 +193,6 @@ Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
 
     return 1;
 }
-
-
-/*
- * FloatArray*  Truss2d :: ComputeResultingBodyForceAt (TimeStep* stepN)
- * {
- *
- * FloatArray   *f ;
- * double area;
- * f   = this -> StructuralElement::ComputeResultingBodyForceAt(stepN) ;
- * if (f) {
- *    area = this->giveCrossSection()->give('A') ;
- *    return f->times(area) ;}
- * else
- *    return NULL ;
- * }
- */
-/*
- * FloatMatrix*  Truss2d :: computeStiffnessMatrix ()
- * // Returns the stiffness matrix of the receiver, expressed in the global
- * // axes.
- * {
- * Material* mat ;
- * FloatMatrix *d;
- * double    E,coeff ;
- *
- * mat   = this -> giveMaterial() ;
- * d     = this -> ComputeConstitutiveMatrixAt(gaussPointArray[0]);
- * E     = d->at(1,1);
- * coeff = E * this->giveCrossSection()->give('A') / this->giveLength() ;
- * stiffnessMatrix = new FloatMatrix(4,4) ;
- * stiffnessMatrix->at(1,1) =  coeff ;
- * stiffnessMatrix->at(1,3) = -coeff ;
- * stiffnessMatrix->at(3,1) = -coeff ;
- * stiffnessMatrix->at(3,3) =  coeff ;
- * delete d;
- *
- * this -> giveRotationMatrix() ;
- * stiffnessMatrix -> rotatedWith(rotationMatrix) ;
- *  stiffnessMatrix -> printYourself() ;
- * return stiffnessMatrix ;
- * }
- */
 
 
 double Truss2d :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -322,68 +272,6 @@ Truss2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
     return 1;
 }
-
-/*
- * FloatMatrix*
- * Truss2d ::  GiveGtoLRotationMatrix () // giveRotationMatrix ()
- * // Returns the rotation matrix of the receiver.
- * // r(local) = T * r(global)
- * {
- * double sine,cosine ;
- * FloatMatrix *rotationMatrix;
- *
- * // if (! rotationMatrix) {
- * sine           = sin (this->givePitch()) ;
- * cosine         = cos (pitch) ;
- * rotationMatrix = new FloatMatrix(4,4) ;
- * rotationMatrix -> at(1,1) =  cosine ;
- * rotationMatrix -> at(1,2) =  sine   ;
- * rotationMatrix -> at(2,1) = -sine   ;
- * rotationMatrix -> at(2,2) =  cosine ;
- * rotationMatrix -> at(3,3) =  cosine ;
- * rotationMatrix -> at(3,4) =  sine   ;
- * rotationMatrix -> at(4,3) = -sine   ;
- * rotationMatrix -> at(4,4) =  cosine ;
- *
- * return rotationMatrix ;
- * }
- */
-
-/*
- * int
- * Truss2d :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0;}
- *
- * answer.resize (4,4); answer.zero();
- *
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*2+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * }
- * }
- * return 1 ;
- * }
- */
 
 
 void

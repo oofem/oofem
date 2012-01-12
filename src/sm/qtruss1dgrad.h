@@ -49,7 +49,6 @@ namespace oofem {
  * A truss bar element is characterized by its 'length' and its 'pitch'. The
  * pitch is the angle in radians between the X-axis and the axis of the
  * element (oriented node1 to node2).
- * The 'rotationMatrix' R is such that u{loc}=R*u{glob}.
  * Note: element is formulated in global c.s.
  * Tasks:
  * - calculating its Gauss points ;

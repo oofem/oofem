@@ -41,13 +41,13 @@
 namespace oofem {
 /**
  * This class implements a 2-dimensional beam element
- * with cubic lateral displace,ent interpolation (rotations are quadratic)
+ * with cubic lateral displacement interpolation (rotations are quadratic)
  * and longitudial displacements are linear.
  * This is an exact displacement approximation for beam with no
  * nonnodal loading.
  *
  * This class is not derived from liBeam3d or truss element, because it does not support
- * any material nonlinearities (if shoul, stiffness must be integrated)
+ * any material nonlinearities (if should, stiffness must be integrated)
  */
 class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
@@ -109,8 +109,7 @@ protected:
     //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    int computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
-    //int computeGtoNRotationMatrix (FloatMatrix&);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     double giveKappayCoeff();

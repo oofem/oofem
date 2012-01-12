@@ -74,7 +74,6 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, n1x, n4x, n3xx, n6xx, n2xxx, n3xxx, n5xxx, n6xxx;
-    // FloatMatrix* answer ;
 
     l    = this->giveLength();
     ksi  = aGaussPoint->giveCoordinate(1);
@@ -87,7 +86,6 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     n5xxx =  1.0 / l;
     n6xxx =  0.5 * ( 1. + ksi );
 
-    // answer = new FloatMatrix(3,6) ;
     answer.resize(3, 6);
     answer.zero();
 
@@ -99,12 +97,11 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     answer.at(3, 3) =  n3xxx;
     answer.at(3, 5) =  n5xxx;
     answer.at(3, 6) =  n6xxx;
-
-    return;
 }
 
 
-void LIBeam2d :: computeGaussPoints()
+void
+LIBeam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -150,10 +147,6 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(2, 2) = halfMass;
     answer.at(4, 4) = halfMass;
     answer.at(5, 5) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -163,7 +156,6 @@ LIBeam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
-    // FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
@@ -178,8 +170,6 @@ LIBeam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(2, 5) = n2;
     answer.at(3, 3) = n1;
     answer.at(3, 6) = n2;
-
-    return;
 }
 
 
@@ -192,13 +182,13 @@ LIBeam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
 }
 
 
-int
-LIBeam2d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+bool
+LIBeam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     double sine, cosine;
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine = cos(pitch);
 
     answer.resize(6, 6);
     answer.zero();
@@ -214,11 +204,12 @@ LIBeam2d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix
     answer.at(5, 5) =  cosine;
     answer.at(6, 6) =  1.;
 
-    return 1;
+    return true;
 }
 
 
-double LIBeam2d :: computeVolumeAround(GaussPoint *aGaussPoint)
+double
+LIBeam2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -249,13 +240,11 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(2) * layerZCoord;
     answer.at(5) = masterGpStrain.at(3);
-
-    return;
 }
 
 
 void
-LIBeam2d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+LIBeam2d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
@@ -267,12 +256,11 @@ LIBeam2d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
     answer.at(1) = D_u;
     answer.at(2) = D_w;
     answer.at(3) = R_v;
-
-    return;
 }
 
 
-double LIBeam2d :: giveLength()
+double
+LIBeam2d :: giveLength()
 // Returns the length of the receiver.
 {
     double dx, dy;
@@ -290,7 +278,8 @@ double LIBeam2d :: giveLength()
 }
 
 
-double LIBeam2d :: givePitch()
+double
+LIBeam2d :: givePitch()
 // Returns the pitch of the receiver.
 {
     double xA, xB, yA, yB;
@@ -337,7 +326,6 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -353,7 +341,6 @@ LIBeam2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         _error("giveEdgeDofMapping: wrong edge number");
     }
 
-
     answer.resize(6);
     answer.at(1) = 1;
     answer.at(2) = 2;
@@ -361,13 +348,11 @@ LIBeam2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     answer.at(4) = 4;
     answer.at(5) = 5;
     answer.at(6) = 6;
-
-    return;
 }
 
 
 double
-LIBeam2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
@@ -378,7 +363,7 @@ LIBeam2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 }
 
 
-void 
+void
 LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);

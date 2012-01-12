@@ -106,37 +106,7 @@ protected:
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
 
-    /**
-     * Updates rotation matrix r(l)=T r(g*) between  local and global coordinate system
-     * taking into account also possible local - coordinate system in some elements
-     * nodes.
-     * Default implementation uses computeGtoLRotationMatrix and
-     * computeGNDofRotationMatrix  services to compute result.
-     * Default implementation uses cached rotation matrix in
-     * rotationMatrix attribute, so rotation matrix is computed only once.
-     * @return Nonzero if transformation is necessary.
-     */
-    virtual int updateRotationMatrix();
-    /**
-     * Returns  transformation matrix from global coord. system to local element
-     * coordinate system ( i.e. r(l)=T r(g)). If no transformation is necessary
-     * then answer is empty matrix and zero value is returned.
-     * @return Nonzero if transformation is necessary, zero otherwise.
-     */
-    virtual int computeGtoLRotationMatrix(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-    /**
-     * Returns transformation matrix for DOFs from global coordinate system
-     * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
-     * If mode == _toGlobalCS, the transformation from local nodal c.s. to
-     * global c.s. in node is returned. If no transformation is
-     * necessary sets answer to empty matrix and returns zero value.
-     * @return nonzero if transformation is necessary, zero otherwise.
-     */
-    virtual int computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
-    /**
+    /*
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
      * by collecting the code numbers of nodes corresponding to these

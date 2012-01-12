@@ -77,8 +77,6 @@ StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    rotationMatrix.beEmptyMtrx();
-    rotationMatrixDefined = 0;
     activityLtf = 0;
     initialDisplacements = NULL;
 }
@@ -166,7 +164,6 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
             }
         }
     }
-
 }
 
 
@@ -209,11 +206,6 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
         }
     } else {
         return;
-    }
-
-    // transform result from global cs to local element  cs.
-    if ( this->computeGtoLRotationMatrix(T) ) {
-        answer.rotatedWith(T, 'n');
     }
 }
 
@@ -316,16 +308,6 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         answer.zero();
         answer.assemble(reducedAnswer, mask);
 
-        // leave result in local c.s
-        /*
-         * // transform result from global cs to nodal cs. if necessary
-         * if (this -> computeGtoLRotationMatrix(T)) {
-         * // first back to global cs from element local
-         * answer.rotatedWith(T,'T');
-         * }
-         * if (this -> computeGtoNLoadRotationMatrix(T)) { answer.rotatedWith(T,'n');}
-         */
-
         return;
     } else {
         _error("computeEdgeLoadVectorAt: incompatible load");
@@ -412,15 +394,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         answer.zero();
         answer.assemble(reducedAnswer, mask);
 
-        //leave result in local c.s
-        /*
-         * // transform result from global cs to nodal cs. if necessary
-         * if (this -> computeGtoLRotationMatrix(T)) {
-         * // first back to global cs from element local
-         * answer.rotatedWith(T,'T');
-         * }
-         * if (this -> computeGtoNLoadRotationMatrix(T)) { answer.rotatedWith(T,'n'); }
-         */
         return;
     } else {
         _error("computeSurfaceLoadVectorAt: incompatible load");
@@ -467,7 +440,6 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
 }
 
 
-
 void
 StructuralElement :: computePrescribedStrainLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 //
@@ -476,25 +448,8 @@ StructuralElement :: computePrescribedStrainLoadVectorAt(FloatArray &answer, Tim
 // whole element
 //
 {
-    FloatMatrix R;
-
     this->computePrescribedStrainLocalLoadVectorAt(answer, tStep, mode);
-
-    if ( answer.isNotEmpty() ) {
-        // FIRST TRANSFORM RESULT TO GLOBAL C.S
-        if ( this->computeGtoLRotationMatrix(R) ) {
-            // first back to global cs from element local
-            answer.rotatedWith(R, 't');
-        }
-
-        // TRANSFORM TO NODAL C.S
-        if ( this->computeGNLoadRotationMatrix(R, _toNodalCS) ) {
-            answer.rotatedWith(R, 'n');
-        }
-    }
 }
-
-
 
 
 void
@@ -557,8 +512,6 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     }
 
     answer.symmetrized();
-    //this -> giveRotationMatrix () ;
-    //if (rotationMatrix) answer.rotatedWith(rotationMatrix) ;
 }
 
 
@@ -629,7 +582,6 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
 }
 
 
-
 void
 StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // computes the part of load vector, which is imposed by force loads acting
@@ -639,24 +591,8 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
 // in this vector a real forces are stored (temperature part is subtracted).
 // so we need further sobstract part corresponding to non-nodeal loading.
 {
-    FloatMatrix T;
-
     this->computeLocalForceLoadVector(answer, stepN, mode);
-
-    // transform result from global cs to nodal cs. if necessary
-    if ( answer.isNotEmpty() ) {
-        if ( this->computeGtoLRotationMatrix(T) ) {
-            // first back to global cs from element local
-            answer.rotatedWith(T, 't');
-        }
-
-        if ( this->computeGNLoadRotationMatrix(T, _toNodalCS) ) {
-            answer.rotatedWith(T, 'n');
-        }
-    }
 }
-
-
 
 
 void
@@ -664,7 +600,6 @@ StructuralElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *ste
 // Computes the load vector of the receiver, at stepN.
 {
     FloatArray helpLoadVector;
-
     answer.resize(0);
     // test for deactivation of receiver
     if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
@@ -699,10 +634,6 @@ StructuralElement :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double mass;
 
     this->computeConsistentMassMatrix(answer, tStep, mass);
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -720,11 +651,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
         int ndofs = computeNumberOfDofs(EID_MomentumBalance);
         answer.resize(ndofs, ndofs);
         answer.zero();
-
-        if ( this->updateRotationMatrix() ) {
-            answer.rotatedWith(this->rotationMatrix);
-        }
-
         return;
     }
 
@@ -767,10 +693,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     }
 
     answer.times(dim * mass / summ);
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -943,10 +865,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
@@ -997,10 +915,6 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -1025,10 +939,6 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(*initialDisplacements);
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
     }
     answer.beProductOf(b, u);
 }
@@ -1077,7 +987,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     FloatMatrix b, bt, R, GNT;
-    int Rflag, GNTflag;
     FloatArray bs, TotalStressVector;
     double dV;
 
@@ -1085,9 +994,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
-
-    Rflag = this->computeGtoLRotationMatrix(R);
-    GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
@@ -1117,15 +1023,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         dV  = this->computeVolumeAround(gp);
         bs.beProductOf(bt, TotalStressVector);
         bs.times(dV);
-
-        if ( Rflag ) {
-            bs.rotatedWith(R, 't');
-        }
-
-        if ( GNTflag ) {
-            bs.rotatedWith(GNT, 'n');
-        }
-
         answer.add(bs);
     }
 
@@ -1155,7 +1052,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     IntegrationRule *iRule;
 
     FloatMatrix b, bt, R, GNT;
-    int ir, Rflag, GNTflag;
+    int ir;
     FloatArray temp, bs, TotalStressVector;
     IntArray irlocnum;
     double dV;
@@ -1164,9 +1061,6 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     // as this is valid only if receiver has no nodes with slaves
     // zero answer will resize accordingly when adding first contribution
     answer.resize(0);
-
-    Rflag = this->computeGtoLRotationMatrix(R);
-    GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
 
     FloatArray *m = & answer;
     if ( this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation() ) {
@@ -1205,14 +1099,6 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             dV  = this->computeVolumeAround(gp);
             bs.beProductOf(bt, TotalStressVector);
             bs.times(dV);
-
-            if ( Rflag ) {
-                bs.rotatedWith(R, 't');
-            }
-
-            if ( GNTflag ) {
-                bs.rotatedWith(GNT, 'n');
-            }
 
             m->add(bs);
 
@@ -1360,65 +1246,6 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
 }
 
 
-
-int
-StructuralElement :: updateRotationMatrix()
-{
-    /* returns a transformation matrix between local coordinate system
-     * and global coordinate system, taking into account possible local
-     * coordinate system in nodes.
-     * if no transformation necessary - returns NULL
-     */
-    int isT_GtoL, isT_NtoG;
-    FloatMatrix T_GtoL, T_NtoG;
-
-    if ( rotationMatrixDefined ) {
-        return rotationMatrix.isNotEmpty();
-    }
-
-    rotationMatrixDefined = 1;
-    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-
-#ifdef DEBUG
-    if ( isT_GtoL ) {
-    	//if (T_GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(EID_MomentumBalance) ) {
-        if (T_GtoL.giveNumberOfColumns() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch in columns");
-        }
-       	//if (T_GtoL.giveNumberOfColumns() != this->computeNumberOfLocalDofs(EID_MomentumBalance) ) {
-        if ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch in rows");
-        }
-    }
-
-    if ( isT_NtoG ) {
-       	//if (T_NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryDofs(EID_MomentumBalance) ) {
-        if (T_NtoG.giveNumberOfColumns() != this->computeGlobalNumberOfDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch in columns");
-        }
-       	//if (T_NtoG.giveNumberOfColumns() != this->computeNumberOfGlobalDofs(EID_MomentumBalance) ) {
-        if (T_NtoG.giveNumberOfRows() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch in rows");
-        }
-    }
-
-#endif
-
-    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
-    } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL;
-    } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG;
-    } else {
-        rotationMatrix.beEmptyMtrx();
-        return false;
-    }
-    return true;
-}
-
-
 int
 StructuralElement :: checkConsistency()
 //
@@ -1538,110 +1365,6 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     if ( mass ) {
         delete gaussCoeff;
     }
-}
-
-
-
-int
-StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += this->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfL2GDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfL2GDofs(EID_MomentumBalance) );
-    } else {
-        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
-}
-
-
-
-int
-StructuralElement :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += this->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfL2GDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfL2GDofs(EID_MomentumBalance) );
-    } else {
-        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        this->giveDofManager(i)->computeLoadTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
 }
 
 

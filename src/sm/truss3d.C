@@ -60,11 +60,11 @@ namespace oofem {
 
 Truss3d :: Truss3d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans     = 2;
     length              = 0.;
 }
+
 
 Interface *
 Truss3d :: giveInterface(InterfaceType interface)
@@ -81,6 +81,7 @@ Truss3d :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
+
 //all tensor values appear as the first tensor component
 int
 Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
@@ -88,6 +89,7 @@ Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
+
 
 void
 Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
@@ -109,9 +111,8 @@ Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answ
     for ( i = 1; i <= 2; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
-
-    return;
 }
+
 
 void
 Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
@@ -122,14 +123,12 @@ Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
     _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
+
 void
 Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
-
-
-
 
 
 void
@@ -140,7 +139,6 @@ Truss3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 //
 {
     double coeff, l, x1, x2, y1, y2, z1, z2;
-    // FloatMatrix* answer;
 
     x1 = this->giveNode(1)->giveCoordinate(1);
     y1 = this->giveNode(1)->giveCoordinate(2);
@@ -160,8 +158,6 @@ Truss3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     l = this->giveLength();
     coeff = 1.0 / l / l;
     answer.times(coeff);
-
-    return;
 }
 
 void
@@ -191,13 +187,11 @@ Truss3d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int 
     answer.at(5, 5) = coeff;
     answer.at(6, 3) = coeff * ( -1 );
     answer.at(6, 6) = coeff;
-
-    return;
 }
 
 
-
-void Truss3d :: computeGaussPoints()
+void
+Truss3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -207,7 +201,6 @@ void Truss3d :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
     }
 }
-
 
 
 void
@@ -233,10 +226,6 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(4, 4) = halfMass;
     answer.at(5, 5) = halfMass;
     answer.at(6, 6) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -259,9 +248,8 @@ Truss3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(2, 5) = n2;
     answer.at(3, 3) = n1;
     answer.at(3, 6) = n2;
-
-    return;
 }
+
 
 int
 Truss3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
@@ -281,7 +269,8 @@ Truss3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
 }
 
 
-double Truss3d :: computeVolumeAround(GaussPoint *aGaussPoint)
+double
+Truss3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
@@ -290,7 +279,8 @@ double Truss3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 
-double Truss3d :: giveLength()
+double
+Truss3d :: giveLength()
 // Returns the length of the receiver.
 {
     Node *nodeA, *nodeB;
@@ -352,6 +342,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 1;
 }
 
+
 IRResultType
 Truss3d :: initializeFrom(InputRecord *ir)
 {
@@ -374,7 +365,6 @@ Truss3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.at(2) = D_v;
     answer.at(3) = D_w;
 }
-
 
 
 void
@@ -420,6 +410,7 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     answer.at(6) = 6;
 }
 
+
 double
 Truss3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
@@ -430,6 +421,7 @@ Truss3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     double weight  = aGaussPoint->giveWeight();
     return 0.5 * this->giveLength() * weight;
 }
+
 
 int
 Truss3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)

@@ -71,10 +71,7 @@ public:
     void computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * @returns Nonzero if successful.
-     */
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
@@ -108,8 +105,7 @@ protected:
     //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    int computeGtoLRotationMatrix(FloatMatrix &);
-    //int computeGtoNRotationMatrix (FloatMatrix&);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 

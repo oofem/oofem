@@ -60,16 +60,14 @@ FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans  = 4;
-
-    numberOfGaussPoints          = 4;
+    numberOfGaussPoints = 4;
     numberOfFiAndShGaussPoints = 1;
 }
 
+
 L4Axisymm :: ~L4Axisymm()
-// destructor
 { }
 
 
@@ -88,7 +86,6 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 }
 
 
-
 void
 L4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
@@ -105,8 +102,6 @@ L4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -136,7 +131,6 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         _error("ComputeBmatrixAt size mismatch");
     }
 
-    //gm = new FloatMatrix(size,8);
     answer.resize(size, 8);
     answer.zero();
 
@@ -188,8 +182,6 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
             answer.at(ind, 2 * i - 0) = dnx.at(i, 1);
         }
     }
-
-    return;
 }
 
 
@@ -266,27 +258,21 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
 {
-    int i, rot;
+    int i;
     FloatMatrix b, A;
     FloatArray u, Epsilon, help;
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     answer.resize(6);
     answer.zero();
-    rot     = this->updateRotationMatrix();
     if ( mode == TL ) { // Total Lagrange formulation
         this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         // linear part of strain tensor (in vector form)
 
         this->computeBmatrixAt(gp, b, 1, 2);
         Epsilon.beProductOf(b, u);
         answer.at(1) = Epsilon.at(1);
         answer.at(2) = Epsilon.at(2);
-        // delete Epsilon;  delete b;
 
         if ( numberOfFiAndShGaussPoints == 1 ) {
             //
@@ -306,8 +292,6 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
 
-        // delete Epsilon;  delete b;
-
         if ( nlGeometry ) {
             for ( i = 1; i <= 6; i++ ) {
                 // nonlin part of strain vector
@@ -315,19 +299,12 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
                 if ( A.isNotEmpty() ) {
                     help.beProductOf(A, u);
                     answer.at(i) += 0.5 * dotProduct( u, help, u.giveSize() );
-                    // delete help;
-                    //delete A;
                 }
             }
         }
-
-        // delete u;
-        //
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("computeStrainVector : unsupported mode");
     }
-
-    return;
 }
 
 
@@ -432,11 +409,13 @@ L4Axisymm :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, G
     this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
 }
 
+
 SPRPatchType
 L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
 }
+
 
 int
 L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
@@ -458,6 +437,7 @@ L4Axisymm :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
+
 
 void
 L4Axisymm :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
@@ -481,8 +461,6 @@ L4Axisymm :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &an
     answer.at(1, 2) = n.at(2);
     answer.at(1, 3) = n.at(3);
     answer.at(1, 4) = n.at(4);
-
-    return;
 }
 
 
@@ -548,9 +526,8 @@ L4Axisymm :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
+
 
 double
 L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
@@ -563,6 +540,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 
     return c.at(1) * result * aGaussPoint->giveWeight();
 }
+
 
 void
 L4Axisymm :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
@@ -605,8 +583,6 @@ L4Axisymm :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 
     return 1;
 }
-
-
 
 
 #ifdef __OOFEG
@@ -853,8 +829,6 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }
-
-    return;
 }
 
 

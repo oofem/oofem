@@ -51,7 +51,6 @@
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
-#include "dofmantransftype.h"
 
 namespace oofem {
 class TimeStep;
@@ -156,7 +155,6 @@ protected:
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
 
-
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
@@ -184,7 +182,6 @@ public:
     /// Virtual destructor.
     virtual ~Element();
 
-    // assembly
     /**@name Methods referring to code numbers */
     //@{
     /**
@@ -305,36 +302,48 @@ public:
      * zero value is placed on position of free dof.
      */
     void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer);
-    //void computeVectorOfPrescribed(UnknownType ut, ValueModeType type, TimeStep* stepN, FloatArray& answer);
 
     /**
-     * Computes or simply returns total number of element's local dofs.
+     * Computes or simply returns total number of element's local DOFs.
      * Must be defined by particular element.
-     * @param ut Id of equation that dofs belong to.
-     * @return Number of dofs belonging to ut.
+     * @param eid Id of equation that DOFs belong to.
+     * @return Number of DOFs belonging to ut.
      */
-    virtual int computeNumberOfDofs(EquationID ut) { return 0; }
+    virtual int computeNumberOfDofs(EquationID eid) { return 0; }
     /**
-     * Computes the total number of element's global dofs. This should be the size of global element contribution,
-     * including the transformation from global coordinate system to nodal one.
-     * The transition from global cs to nodal one can change the value, as rigid arm and other transformations could
-     * be included.
-     * @param ut Id of equation that DOFs belong to.
+     * Computes the total number of element's global dofs.
+     * The transitions from global c.s. to nodal c.s. should NOT be included.
+     * @param eid Id of equation that DOFs belong to.
      * @return Total number of DOFs belonging to ut.
      */
-    virtual int computeGlobalNumberOfDofs(EquationID ut);
+    virtual int computeNumberOfGlobalDofs(EquationID eid);
     /**
-     * Returns number of DOFs after transformation from local to global coordinate system, before the
-     * transformation to final nodal coordinate system happens.
-     * @param ut Equation that dofs belong to.
-     * @return Number of DOFs.
+     * Computes the total number of element's primary master DOFs.
+     * @param eid ID of equation that DOFs belong to.
+     * @return Total number of DOFs belonging to eid.
      */
-    virtual int computeNumberOfL2GDofs(EquationID ut) { return this->computeNumberOfDofs(ut); }
+    int computeNumberOfPrimaryMasterDofs(EquationID eid);
+    /**
+     * Returns transformation matrix from global c.s. to local element
+     * c.s., i.e. @f$ r_l =T r_g @f$.
+     * If no transformation is necessary then answer is empty matrix and zero value is returned.
+     * @param answer Computed rotation matrix.
+     * @return Nonzero if transformation is necessary, zero otherwise.
+     */
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer) {
+        answer.beEmptyMtrx();
+        return false;
+    }
+    /**
+     * Transformation matrices updates rotation matrix between element-local and primary DOFs,
+     * taking into account nodal c.s. and master DOF weights.
+     * @param eid Equation ID to compute rotation matrix for.
+     * @return True if there is a rotation required, false otherwise.
+     */
+    virtual bool giveRotationMatrix(FloatMatrix &answer, EquationID eid);
     /**
      * Returns transformation matrix for DOFs from global coordinate system
-     * to local coordinate system in nodes if mode == _toNodalCS.
-     * If mode == _toGlobalCS, the transformation from local nodal cs to
-     * global cs in node is returned.
+     * to local coordinate system in nodes.
      * Also includes transformations to slave DOFs.
      * If no transformation is necessary sets answer to empty matrix and returns false.
      * Local stiffness matrix of element should be rotated with answer before assembly.

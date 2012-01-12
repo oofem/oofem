@@ -67,6 +67,7 @@ Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), Layere
     dofsToCondense = NULL;
 }
 
+
 Beam2d :: ~Beam2d()
 {
     delete dofsToCondense;
@@ -84,7 +85,6 @@ Beam2d :: giveInterface(InterfaceType interface)
 }
 
 
-
 void
 Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
@@ -96,7 +96,6 @@ Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     ksi   = 0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
     kappa = this->giveKappaCoeff();
 
-    //answer = new FloatMatrix(3,6) ;
     answer.resize(3, 6);
     answer.zero();
 
@@ -110,11 +109,11 @@ Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     answer.at(3, 3) =   kappa / ( l * ( 1. + 2. * kappa ) );
     answer.at(3, 5) =   2. * kappa / ( l * ( 1. + 2. * kappa ) );
     answer.at(3, 6) =   kappa / ( l * ( 1. + 2. * kappa ) );
-
-    return;
 }
 
-void Beam2d :: computeGaussPoints()
+
+void
+Beam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -138,7 +137,6 @@ Beam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
 {
     double l, ksi, ksi2, ksi3, kappa, c1;
-    // FloatMatrix* answer ;
 
     l     = this->giveLength();
     ksi =   0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
@@ -147,7 +145,6 @@ Beam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     ksi2 = ksi * ksi;
     ksi3 = ksi2 * ksi;
 
-    //answer = new FloatMatrix(3,6) ;
     answer.resize(3, 6);
     answer.zero();
 
@@ -161,9 +158,8 @@ Beam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 3) = ( ( 1. + 2. * kappa ) - 2. * ( 2. + kappa ) * ksi + 3. * ksi2 ) / c1;
     answer.at(3, 5) = ( -6. * ksi + 6. * ksi2 ) / ( l * c1 );
     answer.at(3, 6) = ( -2. * ( 1. - kappa ) * ksi + 3. * ksi2 ) / c1;
-
-    return;
 }
+
 
 void
 Beam2d :: computeLocalStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -177,9 +173,6 @@ Beam2d :: computeLocalStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     if ( dofsToCondense ) {
         this->condense(& answer, NULL, NULL, dofsToCondense);
     }
-
-    // return result
-    return;
 }
 
 
@@ -191,13 +184,6 @@ Beam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, Tim
 {
     // compute clamped stifness
     this->computeLocalStiffnessMatrix(answer, rMode, tStep);
-    // rotate answer to global coordinate system
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
-
-    // return result
-    return;
 }
 
 
@@ -237,20 +223,11 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     answer.at(6, 6) =  ei * 2. * ( 2. + kappa ) / ( l * c1 );
 
     answer.symmetrized();  // symmetrize answer
-
-    // rotate answer to global coordinate system
-    //  this -> giveRotationMatrix () ;
-    //  if (rotationMatrix) answer.rotatedWith(*rotationMatrix) ;
-
-    // delete d;
-    // return result
-    return;
 }
 
 
-
-int
-Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+bool
+Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     double sine, cosine;
@@ -258,8 +235,8 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix (
     answer.resize(6, 6);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine  = cos(pitch);
     answer.at(1, 1) =  cosine;
     answer.at(1, 2) =  sine;
     answer.at(2, 1) = -sine;
@@ -271,7 +248,7 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix (
     answer.at(5, 5) =  cosine;
     answer.at(6, 6) =  1.;
 
-    return 1;
+    return true;
 }
 
 
@@ -305,9 +282,6 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(2) * layerZCoord;
     answer.at(5) = masterGpStrain.at(3);
-
-    //delete masterGpStrain;
-    return;
 }
 
 
@@ -318,18 +292,16 @@ Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(3);
 
     answer.at(1) = D_u;
     answer.at(2) = D_w;
     answer.at(3) = R_v;
-
-    return;
 }
 
 
-double Beam2d :: giveLength()
+double
+Beam2d :: giveLength()
 // Returns the length of the receiver.
 {
     double dx, dy;
@@ -347,7 +319,8 @@ double Beam2d :: giveLength()
 }
 
 
-double Beam2d :: givePitch()
+double
+Beam2d :: givePitch()
 // Returns the pitch of the receiver.
 {
     double xA, xB, yA, yB;
@@ -365,6 +338,7 @@ double Beam2d :: givePitch()
 
     return pitch;
 }
+
 
 double
 Beam2d :: giveKappaCoeff()
@@ -397,8 +371,8 @@ Beam2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine = cos(pitch);
 
     answer.at(1, 1) = cosine;
     answer.at(1, 2) = sine;
@@ -408,6 +382,7 @@ Beam2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
     return 1;
 }
+
 
 IRResultType
 Beam2d :: initializeFrom(InputRecord *ir)
@@ -434,7 +409,6 @@ Beam2d :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
@@ -447,60 +421,40 @@ Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     answer.beProductOf(stiffness, u);
-    // delete u;
 
-    /* Subtracted in PrintReaction Forces
-     * if (loadEndForces = this-> ComputeLoadDependentPartOfLoadVector (tStep)) {
-     * loadEndForces -> times(-1.0);
-     * answer->add(loadEndForces);
-     * }
-     */
     this->computePrescribedStrainLoadVectorAt(prescStrainEndForces, tStep, VM_Total);
     if ( prescStrainEndForces.giveSize() ) {
         prescStrainEndForces.times(-1.0);
         answer.add(prescStrainEndForces);
     }
-
-    return;
 }
+
 
 void
 Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     // stress equivalent vector in nodes (vector of internal forces)
     FloatArray u, load;
-    FloatMatrix stiffness, T_GtoL, T_NtoG;
-
-    this->computeGtoLRotationMatrix(T_GtoL);
-    this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
+    FloatMatrix stiffness;
 
     // compute stifness matrix in global cs
     this->computeLocalStiffnessMatrix(stiffness, SecantStiffness, tStep);
-    stiffness.rotatedWith(T_GtoL);
 
     // compute vector of unknowns in global cs
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    if ( T_NtoG.isNotEmpty() ) {
-        u.rotatedWith(T_NtoG, 'n');
-    }
-
     answer.beProductOf(stiffness, u);
 
     // subtract prescribed strain load
     this->computePrescribedStrainLocalLoadVectorAt(load, tStep, VM_Total);
     if ( load.isNotEmpty() ) {
-        load.rotatedWith(T_GtoL, 't');
         answer.subtract(load);
     }
 
     // subtract exact end forces due to nonnodal loading
     this->computeLocalForceLoadVector(load, tStep, VM_Total);
     if ( load.isNotEmpty() ) {
-        load.rotatedWith(T_GtoL, 't');
         answer.subtract(load);
     }
-
-    return;
 }
 
 
@@ -529,8 +483,8 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         //  edgeLoad->computeComponentArrayAt(components, tStep, mode);
 
         // prepare transformation coeffs
-        sine           = sin( this->givePitch() );
-        cosine         = cos(pitch);
+        sine = sin( this->givePitch() );
+        cosine = cos(pitch);
 
         switch ( edgeLoad->giveClassID() ) {
         case ConstantEdgeLoadClass:
@@ -623,15 +577,11 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         default:
             _error("computeEdgeLoadVectorAt: unsupported load type");
         }
-
-        //delete components;
     }
-
-    return;
 }
 
 
-void 
+void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
@@ -639,36 +589,22 @@ Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 }
 
 
-void Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
+void
+Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     // Performs end-of-step operations.
 
     int i, n;
-    FloatArray rg, rl, Fg, Fl;
+    FloatArray rl, Fl;
     FloatMatrix T;
 
     fprintf(File, "beam element %d :\n", number);
 
-    //   for (i=0 ; i < numberOfIntegrationRules ; i++)
-    //   integrationRulesArray[i]->printOutputAt(file,stepN);
-
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rg);
-    if ( this->updateRotationMatrix() ) {
-        rl.beProductOf(this->rotationMatrix, rg);
-        // delete rg;
-    } else {
-        rl = rg;
-    }
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rl);
 
     // ask for global element end forces vector
-    this->giveEndForcesVector(Fg, stepN);
-    // if (computeGNLoadRotationMatrix (T, _toGlobalCS)) Fg.rotatedWith (T, 'n');
-    if ( computeGtoLRotationMatrix(T) ) {
-        Fg.rotatedWith(T, 'n');
-    }
-
-    Fl = Fg;
+    this->giveEndForcesVector(Fl, stepN);
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
@@ -703,8 +639,6 @@ Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
-
-    return;
 }
 
 
@@ -725,8 +659,6 @@ Beam2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-
-
 void
 Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the load vector of the receiver, at stepN.
@@ -741,10 +673,7 @@ Beam2d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep 
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
-
-    return;
 }
-
 
 
 void
@@ -794,8 +723,6 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     }
 
     mass = l * area * density;
-
-    return;
 }
 
 
@@ -837,44 +764,6 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
  */
 
 /*
- * int
- * Beam2d :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0 ;}
- *
- * answer.resize(6,6); answer.zero();
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*3+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * }
- * // rotation in plane
- * answer.at(ii+2,ii+2)     = 1.0;
- * }
- *
- * return 1;
- * }
- */
-
-/*
  * void
  * Beam2d :: giveMassMtrxIntegrationgMask (IntArray& answer)
  * {
@@ -891,7 +780,7 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // computes initial stress matrix of receiver (or geometric stiffness matrix)
 
-    FloatMatrix stiff, T;
+    FloatMatrix stiff;
     FloatArray endForces;
 
     double l = this->giveLength();
@@ -902,8 +791,6 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(6, 6);
     answer.zero();
 
-    //answer.at (1,1) = 0.;
-    //answer.at (1,4) = 0.;
     answer.at(2, 2) = 4. * kappa2 + 4. * kappa + 6. / 5.;
     answer.at(2, 3) = -l / 10.;
     answer.at(2, 5) = -4. * kappa2 - 4. * kappa - 6. / 5.;
@@ -912,7 +799,6 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(3, 5) = l / 10.;
     answer.at(3, 6) = -l * l * ( kappa2 / 3. + kappa / 3. + 1. / 30. );
 
-    //answer.at (4,4) = 0.;
     answer.at(5, 5) = 4. * kappa2 + 4. * kappa + 6. / 5.;
     answer.at(5, 6) = l / 10.;
     answer.at(6, 6) = l * l * ( kappa2 / 3. + kappa / 3. + 2. / 15. );
@@ -924,17 +810,7 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.symmetrized();
     // ask end forces in g.c.s
     this->giveEndForcesVector(endForces, tStep);
-    //if (computeGNLoadRotationMatrix (T, _toGlobalCS)) endForces.rotatedWith (T, 'n');
-    if ( computeGtoLRotationMatrix(T) ) {
-        endForces.rotatedWith(T, 'n');
-    }
 
-    /*
-     * this -> giveRotationMatrix () ;
-     * if (rotationMatrix) {
-     * endForces.rotatedWith (rotationMatrix, 'n');
-     * }
-     */
     N = ( -endForces.at(1) + endForces.at(4) ) / 2.;
     answer.times( N / ( l * ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) ) );
 
@@ -945,13 +821,8 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     }
 
     //answer.beLumpedOf (mass);
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
-
-    return;
 }
+
 
 #ifdef __OOFEG
 void Beam2d :: drawRawGeometry(oofegGraphicContext &gc)

@@ -83,8 +83,8 @@ public:
     { answer.resize(0); }
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
-    int computeNumberOfDofs(EquationID ut) {return 2;}
-    int computeGlobalNumberOfDofs(EquationID ut);
+    int computeNumberOfDofs(EquationID ut) { return 2; }
+    int computeNumberOfGlobalDofs(EquationID ut);
 
     void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
@@ -110,7 +110,7 @@ protected:
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS)
     {}
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {}
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     double computeSpringInternalForce(TimeStep *tStep);
 };
 } // end namespace oofem

@@ -53,7 +53,7 @@
 
 namespace oofem {
 /**
- * Represents VTK (Visualization Toolkit) export module. It uses vtk (.vtu) file format, Unstructured grid dataset.
+ * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.
  * The export of data is done on Region By Region basis, possibly taking care about possible nonsmooth character of
  * some internal variables at region boundaries.
  * Each region is usually exported as a single piece. When region contains composite cells, these are assumed to be
@@ -62,7 +62,6 @@ namespace oofem {
 class VTKXMLExportModule : public ExportModule
 {
 protected:
-
     /// List of InternalStateType values, identifying the selected vars for export.
     IntArray internalVarsToExport;
     /// List of primary unknowns to export.
@@ -74,6 +73,8 @@ protected:
     NodalRecoveryModel::NodalRecoveryModelType stype;
     /// Smoother.
     NodalRecoveryModel *smoother;
+    /// Smoother for primary variables.
+    NodalRecoveryModel *primVarSmoother;
     /// List of regions to skip.
     IntArray regionsToSkip;
     /// Number of virtual regions.
@@ -96,6 +97,8 @@ public:
 protected:
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
+    /// Returns the smoother for primary variables (nodal averaging).
+    NodalRecoveryModel *givePrimVarSmoother();
 
     /// Returns the filename for the given time step.
     std::string giveOutputFileName(TimeStep *tStep);
@@ -145,6 +148,11 @@ protected:
         FILE *stream,
 #endif
         IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep);
+    /**
+     * Tries to find the value of a primary field on the given DofManager.
+     * Some elements have different interpolation of some fields, and requires some additional code to compute node values (if available).
+     */
+    void getPrimaryVariable(FloatArray &answer, DofManager *dman, TimeStep *tStep, UnknownType type, int ireg);
     /**
      * Exports single internal variable by smoothing.
      */

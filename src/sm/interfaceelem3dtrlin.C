@@ -64,7 +64,7 @@ FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 InterfaceElement3dTrLin :: InterfaceElement3dTrLin(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
-    numberOfDofMans       = 6;
+    numberOfDofMans = 6;
 }
 
 
@@ -89,9 +89,8 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 
     answer.at(1, 16) = answer.at(2, 17) = answer.at(3, 18) = n.at(3);
     answer.at(1, 7)  = answer.at(2, 8)  = answer.at(3, 9)  = -n.at(3);
-
-    return;
 }
+
 
 void
 InterfaceElement3dTrLin :: computeGaussPoints()
@@ -106,7 +105,6 @@ InterfaceElement3dTrLin :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 4, _3dInterface);
     }
 }
-
 
 
 int
@@ -131,14 +129,12 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 }
 
 
-
 int
 InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     _error("Not implemented");
     return 0;
 }
-
 
 
 double
@@ -171,7 +167,6 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 
-
 IRResultType
 InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
 {
@@ -182,7 +177,8 @@ InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
 
 
 void
-InterfaceElement3dTrLin ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+InterfaceElement3dTrLin ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -192,7 +188,6 @@ InterfaceElement3dTrLin ::   giveDofManDofIDMask(int inode, EquationID, IntArray
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-    return;
 }
 
 
@@ -231,7 +226,8 @@ InterfaceElement3dTrLin :: computeLCS(FloatMatrix &answer)
     }
 }
 
-int
+
+bool
 InterfaceElement3dTrLin :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     // planar geonetry is assumed

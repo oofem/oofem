@@ -92,7 +92,7 @@ public:
      * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
      */
     virtual void computeTransformation(FloatMatrix &answer, const IntArray *dofIDArry);
-    virtual int requiresTransformation() { return 0; }
+    virtual bool requiresTransformation() { return false; }
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
 };
 } // end namespace oofem

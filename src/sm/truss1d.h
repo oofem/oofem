@@ -55,7 +55,6 @@ namespace oofem {
  * A truss bar element is characterized by its 'length' and its 'pitch'. The
  * pitch is the angle in radians between the X-axis and the axis of the
  * element (oriented node1 to node2).
- * The 'rotationMatrix' R is such that @f$ u_{\mathrm{loc}}=R\cdot u_{\mathrm{glob}} @f$.
  * Note: element is formulated in global c.s.
  * Tasks:
  * - Calculating its Gauss points.
@@ -64,7 +63,6 @@ namespace oofem {
  *   Matrix' of class Element are here overloaded in order to account for
  *   rotational effects.
  */
-
 class Truss1d : public StructuralElement,
     public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
     public DirectErrorIndicatorRCInterface,

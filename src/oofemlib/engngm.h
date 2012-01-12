@@ -871,12 +871,6 @@ protected:
     void assemblePrescribedVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
                 CharType type, ValueModeType mode, Domain *domain);
 
-#ifdef __PETSC_MODULE
-    void petsc_assembleVectorFromDofManagers(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
-    void petsc_assemblePrescribedVectorFromDofManagers(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
-    void petsc_assembleVectorFromElements(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
-    void petsc_assemblePrescribedVectorFromElements(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
-#endif
 #ifdef __PARALLEL_MODE
     /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.

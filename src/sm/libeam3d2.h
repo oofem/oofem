@@ -74,7 +74,7 @@ public:
     void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     virtual int testElementExtension(ElementExtension ext);
 
@@ -133,7 +133,6 @@ protected:
     double giveCurrentLength(TimeStep *tStep);
     void updateYourself(TimeStep *tStep);
     void initForNewStep();
-    int updateRotationMatrix();
 };
 } // end namespace oofem
 #endif // libeam3d2_h

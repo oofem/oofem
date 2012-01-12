@@ -80,10 +80,6 @@ protected:
      */
     int mat [ 2 ];
 
-    /// Cached transformation matrix of receiver.
-    FloatMatrix rotationMatrix;
-    /// Flag indicating if transformation matrix has been already computed.
-    int rotationMatrixDefined;
 public:
     TR1_2D_SUPG2(int n, Domain *d);
     ~TR1_2D_SUPG2();
@@ -190,14 +186,6 @@ public:
 #endif
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    virtual int updateRotationMatrix();
-    virtual int computeGtoLRotationMatrix(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-    virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
-    virtual int computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
 
 protected:
     void computeGaussPoints();

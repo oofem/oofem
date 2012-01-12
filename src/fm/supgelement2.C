@@ -63,8 +63,6 @@ SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    rotationMatrix.beEmptyMtrx();
-    rotationMatrixDefined = 0;
 }
 
 
@@ -425,10 +423,6 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
         /* supg stabilization */
         answer.plusProductUnsym(b, n, rho * t_supg * dV);
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -445,11 +439,6 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.zero();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -481,10 +470,6 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
             answer.at(i) += coeff * sum;
         }
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -524,10 +509,6 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
         answer.plusProductUnsym(bn, b, t_supg * rho * dV);
         answer.plusProductUnsym(bn, grad_uN, t_supg * rho * dV);
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -545,10 +526,6 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
     nsd = this->giveNumberOfSpatialDimensions();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     int rule = this->giveTermIntergationRuleIndex(DiffusionTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -577,10 +554,6 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
             answer.at(i) += coeff * sum;
         }
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -615,11 +588,6 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
         /* SUPG term */
 
         answer.plusProductUnsym( un_gu, dDB, t_supg * dV * ( -1.0 ) * ( 1. / Re ) );
-    }
-
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -665,11 +633,6 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
         // supg term
         answer.plusProductUnsym(b, np, t_supg * dV);
     }
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beTProductOf(rotationMatrix, tmp);
-    }
 }
 void
 SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
@@ -694,10 +657,6 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     }
 
     answer.symmetrized();
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -723,13 +682,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
 
         /* standard term */
 
-
         answer.plusProductUnsym(np, gu, dV);
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beProductOf(tmp, this->rotationMatrix);
     }
 }
 
@@ -750,10 +703,6 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MC);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     /* pspg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
@@ -797,11 +746,6 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
         dV  = this->computeVolumeAround(gp);
         coeff = dV * t_pspg;
         answer.plusProductUnsym(g, b, coeff);
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beProductOf(tmp, this->rotationMatrix);
     }
 }
 
@@ -909,11 +853,6 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
         coeff = dV * t_pspg;
         answer.plusProductUnsym(g, n, coeff);
     }
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beProductOf(tmp, this->rotationMatrix);
-    }
 }
 
 void
@@ -1011,10 +950,6 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
         } else {
             _error("computeForceLoadVector : unsupported load type class");
         }
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -1115,10 +1050,6 @@ SUPGElement2 :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, Time
     FloatMatrix b;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
-
     this->computeBMatrix(b, gp);
     answer.beProductOf(b, u);
 }
@@ -1134,157 +1065,4 @@ SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
-
-int
-SUPGElement2 :: updateRotationMatrix()
-{
-    /* returns a tranformation matrix between local coordinate system
-     * and global coordinate system, taking into account possible local
-     * coordinate system in nodes.
-     * if no transformation necessary - returns NULL
-     */
-    int isT_GtoL, isT_NtoG;
-    FloatMatrix T_GtoL, T_NtoG;
-
-    if ( rotationMatrixDefined ) {
-        return rotationMatrix.isNotEmpty();
-    }
-
-    rotationMatrixDefined = 1;
-    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-
-#ifdef DEBUG
-    if ( isT_GtoL ) {
-        if ( ( !T_GtoL.isSquare() ) ||
-            ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
-        }
-    }
-
-    if ( isT_NtoG ) {
-        if ( ( !T_NtoG.isSquare() ) ||
-            ( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
-        }
-    }
-
-#endif
-
-    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
-    } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL;
-    } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG;
-    } else {
-        rotationMatrix.beEmptyMtrx();
-        return false;
-    }
-
-    return true;
-}
-
-
-
-int
-SUPGElement2 :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += this->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
-    } else {
-        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
-}
-
-
-int
-SUPGElement2 :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += this->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
-    } else {
-        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        this->giveDofManager(i)->computeLoadTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
-}
 } // end namespace oofem

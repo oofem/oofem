@@ -154,12 +154,6 @@ void Tr21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, V
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
-
-    // This is general and should be moved outside this function.. probably.
-    FloatMatrix transf;
-    if (this->computeDofTransformationMatrix(transf, EID_MomentumBalance_ConservationEquation) ) {
-        answer.rotatedWith(transf,'t');
-    }
 }
 
 void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -386,12 +380,6 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(15, 15);
     answer.zero();
     answer.assemble(temp, this->ordering);
-
-    // This is general and should be moved outside this function.. probably.
-    FloatMatrix transf;
-    if (this->computeDofTransformationMatrix(transf, EID_MomentumBalance_ConservationEquation) ) {
-        answer.rotatedWith(transf);
-    }
 }
 
 double Tr21Stokes :: computeArea() const

@@ -125,8 +125,6 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     } else {
         answer.resize(0);          // nil resultant
     }
-
-    return;
 }
 
 
@@ -196,7 +194,6 @@ CCTPlate :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     answer.at(5, 9) = ( -c3 * c2 * l1 + c3 * c1 * l2 ) * 0.5;
 
     answer.times( 1. / ( 2. * area ) );
-    return;
 }
 
 
@@ -245,8 +242,6 @@ CCTPlate :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 3) = l1;
     answer.at(3, 6) = l2;
     answer.at(3, 9) = l3;
-
-    return;
 }
 
 
@@ -404,8 +399,6 @@ CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.at(1) = D_w;
     answer.at(2) = R_u;
     answer.at(3) = R_v;
-
-    return;
 }
 
 
@@ -470,12 +463,6 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
     answer.at(7, 7) = mss1;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
-
-    return;
 }
 
 
@@ -613,6 +600,7 @@ CCTPlate :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return 0;
 }
 
+
 void
 CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 // evaluates N matrix (interpolation estimated stress matrix)
@@ -636,8 +624,6 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 
@@ -656,6 +642,7 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
         answer.resize(0);
     }
 }
+
 
 void
 CCTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
@@ -677,6 +664,7 @@ CCTPlate :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
     pap.at(3) = this->giveNode(3)->giveNumber();
 }
 
+
 void
 CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
@@ -690,6 +678,7 @@ CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     }
 }
 
+
 void
 CCTPlate :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
 {
@@ -699,6 +688,7 @@ CCTPlate :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, Ga
         _error("SPRNodalRecoveryMI_computeIPGlobalCoordinates: unsupported ip num");
     }
 }
+
 
 SPRPatchType
 CCTPlate :: SPRNodalRecoveryMI_givePatchType()
@@ -733,8 +723,6 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     answer.at(6) = masterGpStrain.at(3) * layerZCoord;
     answer.at(4) = masterGpStrain.at(5);
     answer.at(5) = masterGpStrain.at(4);
-
-    return;
 }
 
 
@@ -777,6 +765,7 @@ CCTPlate  :: drawRawGeometry(oofegGraphicContext &gc)
     }
 }
 
+
 void
 CCTPlate  :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 {
@@ -811,6 +800,7 @@ CCTPlate  :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         EMAddGraphicsToModel(ESIModel(), go);
     }
 }
+
 
 void
 CCTPlate  :: drawScalar(oofegGraphicContext &context)

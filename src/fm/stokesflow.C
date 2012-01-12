@@ -148,7 +148,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
 
-#if 0
+#if 1
     this->giveNumericalMethod(tStep);
     double loadLevel, ebenorm;
     int currentIterations;

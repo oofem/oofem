@@ -55,7 +55,6 @@
 
 namespace oofem {
 LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3) //, kappa (3)
-    // Constructor.
 {
     numberOfDofMans    = 2;
     l0                 = 0.;
@@ -67,7 +66,8 @@ LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
 
 
 void
-LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec) {
+LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
+{
     if ( vec.giveSize() != 3 ) {
         _error("computeSMtrx: vec param size mismatch");
     }
@@ -83,8 +83,10 @@ LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec) {
     answer.at(3, 2) =  vec.at(1);
 }
 
+
 void
-LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
+LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+{
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
 
@@ -111,8 +113,10 @@ LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
     answer.add(SS);
 }
 
+
 void
-LIBeam3dNL ::     updateTempTriad(TimeStep *tStep) {
+LIBeam3dNL ::     updateTempTriad(TimeStep *tStep)
+{
     // test if not previously done
     if ( tStep->giveSolutionStateCounter() == tempTcCounter ) {
         return;
@@ -123,9 +127,6 @@ LIBeam3dNL ::     updateTempTriad(TimeStep *tStep) {
 
     // ask element's displacement increments
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     // interpolate spin at the centre
     centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -142,7 +143,8 @@ LIBeam3dNL ::     updateTempTriad(TimeStep *tStep) {
 }
 
 void
-LIBeam3dNL :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) {
+LIBeam3dNL :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
     FloatArray xd(3), eps(3), curv(3);
 
     // update temp triad
@@ -192,18 +194,16 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep) {
 }
 
 void
-LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer,
-                                       TimeStep *tStep, int useUpdatedGpRecord) {
+LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
     int i, j, GNTflag;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    ;
     FloatArray nm(6), TotalStressVector(6);
     FloatMatrix x, GNT;
     double s1, s2;
 
-    GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
     // update temp triad
     this->updateTempTriad(tStep);
 
@@ -227,25 +227,17 @@ LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer,
 
     this->computeXMtrx(x, tStep);
     answer.beProductOf(x, nm);
-
-    if ( GNTflag ) {
-        answer.rotatedWith(GNT, 'n');
-    }
-
-    return;
 }
 
 
 void
-LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep) {
+LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep)
+{
     FloatArray u(3);
 
     answer.resize(3);
     // ask element's displacements
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     answer.at(1) = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
                    ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -253,13 +245,12 @@ LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep) {
                    ( this->giveNode(1)->giveCoordinate(2) + u.at(2) );
     answer.at(3) = ( this->giveNode(2)->giveCoordinate(3) + u.at(9) ) -
                    ( this->giveNode(1)->giveCoordinate(3) + u.at(3) );
-
-    return;
 }
 
+
 void
-LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode rMode, TimeStep *tStep) {
+LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
     int i, j, k;
     double s1, s2;
     FloatMatrix d, x, xt(12, 6), dxt, xtt, sn, sm, sxd, y;
@@ -343,11 +334,8 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer,
             answer.at(i + 9, j + 9)   += y.at(i, j);
         }
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
+
 
 void
 LIBeam3dNL :: computeGaussPoints()
@@ -360,6 +348,7 @@ LIBeam3dNL :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
     }
 }
+
 
 IRResultType
 LIBeam3dNL :: initializeFrom(InputRecord *ir)
@@ -395,6 +384,7 @@ LIBeam3dNL :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 double
 LIBeam3dNL :: giveLength()
 // Returns the original length (l0) of the receiver.
@@ -413,6 +403,7 @@ LIBeam3dNL :: giveLength()
 
     return l0;
 }
+
 
 void
 LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -438,10 +429,6 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(4, 4) = answer.at(10, 10) = Ik * halfMass;
     answer.at(5, 5) = answer.at(11, 11) = Iy * halfMass;
     answer.at(6, 6) = answer.at(12, 12) = Iz * halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -451,7 +438,6 @@ LIBeam3dNL :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
-    // FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
@@ -482,6 +468,7 @@ LIBeam3dNL :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     return;
 }
 
+
 double
 LIBeam3dNL :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the length of the receiver. This method is valid only if 1
@@ -507,10 +494,7 @@ LIBeam3dNL ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) con
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
-
 
 
 int
@@ -570,7 +554,6 @@ LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -591,12 +574,11 @@ LIBeam3dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     for ( i = 1; i <= 12; i++ ) {
         answer.at(i) = i;
     }
-
-    return;
 }
 
+
 double
-LIBeam3dNL ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
@@ -647,7 +629,7 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 /*
  * int
- * LIBeam3dNL :: computeGtoLRotationMatrix (FloatMatrix& answer) // giveRotationMatrix ()
+ * LIBeam3dNL :: computeGtoLRotationMatrix (FloatMatrix& answer)
  * // Returns the rotation matrix of the receiver.
  * // rotation matrix is computed for original configuration only
  * {
@@ -667,7 +649,6 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
  * answer.at(i+9, j+9) = lcs.at(i,j);
  * }
  *
- * //delete lcs;
  * return 1 ;
  * }
  */
@@ -699,9 +680,8 @@ LIBeam3dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     }
 
     return 1;
-
-    ;
 }
+
 
 int
 LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
@@ -716,6 +696,7 @@ LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     answer.beEmptyMtrx();
     return 0;
 }
+
 
 void
 LIBeam3dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
@@ -771,10 +752,6 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     // first, compute Tmid
     // ask increments
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
-
-    if ( this->updateRotationMatrix() ) {
-        ui.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     ac.at(1) = 0.5 * ( ui.at(10) - ui.at(4) );
     ac.at(2) = 0.5 * ( ui.at(11) - ui.at(5) );

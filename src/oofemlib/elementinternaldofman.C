@@ -51,25 +51,18 @@ namespace oofem {
 
 ElementDofManager :: ElementDofManager(int n, Domain *aDomain, Element* elem) :
     DofManager(n, aDomain)
-    // Constructor. Creates a node with number n, belonging to aDomain.
 {
   this->element = elem;
 }
 
 
-
-
 ElementDofManager :: ~ElementDofManager()
-// Destructor.
 { }
 
-IRResultType
-ElementDofManager :: initializeFrom(InputRecord *ir)
+
+IRResultType ElementDofManager :: initializeFrom(InputRecord *ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    // int j, size ;
-    // IntArray *dofIDArry;
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
@@ -78,12 +71,10 @@ ElementDofManager :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void ElementDofManager :: printYourself()
 // Prints the receiver on screen.
 {
     int i;
-    // double x,y ;
 
     printf("InternalElementDofManager %d \n", number);
     for ( i = 0; i < numberOfDofs; i++ ) {
@@ -98,32 +89,4 @@ void ElementDofManager :: printYourself()
     printf("\n");
 }
 
-void
-ElementDofManager :: computeTransformation(FloatMatrix &answer, const IntArray *map)
-{
-    //
-    // computes transformation of receiver from global cs to nodal (user-defined) cs.
-    // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
-    // file. Do not change their order and do not insert any values between these values.
-    //
-    //
-
-    int i, size;
-
-    if ( map == NULL ) {
-        size = numberOfDofs;
-    } else {
-        size = map->giveSize();
-    }
-
-
-    // response for all local dofs is computed
-
-    answer.resize(size, size);
-    answer.zero();
-
-    for ( i = 1; i <= size; i++ ) {
-        answer.at(i, i) = 1.0;
-    }
-}
 } // end namespace oofem

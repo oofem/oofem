@@ -857,7 +857,6 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 }
 
 
-
 NodalRecoveryModel *
 VTKXMLExportModule :: giveSmoother()
 {
@@ -865,10 +864,25 @@ VTKXMLExportModule :: giveSmoother()
 
     if ( this->smoother == NULL ) {
       this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
-      this->smoother-> setRecoveryMode (nvr, vrmap);
+      this->smoother->setRecoveryMode (nvr, vrmap);
     }
     return this->smoother;
 }
+
+
+NodalRecoveryModel *
+VTKXMLExportModule :: givePrimVarSmoother()
+{
+    Domain *d = emodel->giveDomain(1);
+
+    if ( this->primVarSmoother == NULL ) {
+        this->primVarSmoother = CreateUsrDefNodalRecoveryModel(NodalRecoveryModel::NRM_NodalAveraging, d);
+        this->primVarSmoother->setRecoveryMode (nvr, vrmap);
+    }
+    return this->primVarSmoother;
+}
+
+
 
 //keyword "primvars" in OOFEM input file
 void
@@ -959,29 +973,23 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
         dman = d->giveNode( mapL2G.at(inode) );
+
+#if 0  // This should, eventually, replace all below.
+        getPrimaryVariable(iVal, dman, tStep, valID, ireg);
+#else
         numberOfDofs = dman->giveNumberOfDofs();
-
-
         if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
             iVal.resize(3);
             iVal.zero();
             mask.resize(0);
-
             for ( j = 1; j <= numberOfDofs; j++ ) {
                 id = dman->giveDof(j)->giveDofID();
                 if ( ( id == V_u ) || ( id == D_u ) || ( id == V_v ) || ( id == D_v ) || ( id == V_w ) || ( id == D_w ) ) {
                     mask.followedBy(id);
                 }
             }
-            // This needs to be handled differently. / Micket
-            if ( dman->requiresTransformation() || dman->hasAnySlaveDofs() ) {
-                // handle local coordinate system, slave dofs, etc in node
-                dman->giveUnknownVector(dl, mask, EID_MomentumBalance, VM_Total, tStep);
-                dman->computeDofTransformation(t, & mask, _toGlobalCS);
-                dg.beProductOf(t, dl);
-            } else {
-                dman->giveUnknownVector(dg, mask, EID_MomentumBalance, VM_Total, tStep);
-            }
+
+            dman->giveUnknownVector(dg, mask, EID_MomentumBalance, VM_Total, tStep);
 
             for ( j = 1; j <= mask.giveSize(); j++ ) {
                 id = dman->giveDof(j)->giveDofID();
@@ -1024,6 +1032,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
             OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(valID) );
             //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
         }
+#endif
 
         if ( type == ISVT_SCALAR ) {
 #ifdef __VTK_MODULE
@@ -1048,6 +1057,72 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 #else
     fprintf(stream, "</DataArray>\n");
 #endif
+}
+
+
+void
+VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, TimeStep *tStep, UnknownType type, int ireg)
+{
+    IntArray dofIDMask(3);
+    int indx, size;
+    DofIDItem id;
+    const FloatArray *recoveredVal;
+
+    // This code is not perfect. It should be rewritten to handle all cases more gracefully.
+
+    EquationID eid = EID_MomentumBalance; // Shouldn't be necessary
+    InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
+
+    dofIDMask.resize(0);
+    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
+        for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( ( id == V_u ) || ( id == D_u ) || ( id == V_v ) || ( id == D_v ) || ( id == V_w ) || ( id == D_w ) ) {
+                dofIDMask.followedBy(id);
+            }
+        }
+    } else if ( type == FluxVector ) {
+        dofIDMask.followedBy(C_1);
+        eid = EID_ConservationEquation;
+        iState = IST_MassConcentration_1;
+    } else if ( type == TemperatureVector ) {
+        dofIDMask.followedBy(T_f);
+        eid = EID_ConservationEquation;
+        iState = IST_Temperature;
+    } else if ( type == PressureVector ) {
+        dofIDMask.followedBy(P_f);
+        eid = EID_ConservationEquation;
+        iState = IST_Pressure;
+    } else {
+        OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(type) );
+    }
+
+    size = dofIDMask.giveSize();
+    answer.resize(size);
+    answer.zero();
+
+    for (int j = 1; j <= size; j++ ) {
+        if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
+            // primary variable available directly in DOF-manager
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
+        } else if ( iState != IST_Undefined ) {
+            // primary variable not directly available
+            // but equivalent InternalStateType provided
+            // in this case use smoother to recover nodal value
+
+            // This can't deal with ValueModeType, and would recover over and over for some vectorial quantities like velocity.
+            this->givePrimVarSmoother()->recoverValues(iState, tStep); // recover values if not done before
+            this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), ireg);
+            // here we have a lack of information about how to convert recovered values to response
+            // if the size is compatible we accept it, otherwise give a warning and zero value.
+            if ( size == recoveredVal->giveSize() ) {
+                answer.at(j) = recoveredVal->at(j);
+            } else {
+                OOFEM_WARNING2("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
+                answer.at(j) = 0.0;
+            }
+        }
+    }
 }
 
 

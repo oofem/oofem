@@ -70,28 +70,12 @@ public:
     /// Destructor.
     ~ElementDofManager();
 
-    // miscellaneous
-    const char *giveClassName() const { return "ElementDofManager"; }
-    classType giveClassID() const { return ElementDofManagerClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    //virtual IntArray* ResolveDofIDArray (char* initString);
     void printYourself();
 
-    /**
-     * Computes receiver transformation matrix from global cs. to dofManager specific
-     * coordinate system (in which governing equations are assembled, for example the
-     * local coordinate system in node).
-     * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
-     * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
-     * This is because this transformation should generally include not only transformation to
-     * dof manager local coordinate system, but receiver dofs can be expressed using
-     * dofs of another dofManager (In this case, square answer is produced only if all
-     * dof transformation is required).
-     * @param dofIDArry Array containing DofIDItem values for which transformation matrix is
-     * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
-     */
-    virtual void computeTransformation(FloatMatrix &answer, const IntArray *dofIDArry);
-    virtual int requiresTransformation() { return 0; }
+    const char *giveClassName() const { return "ElementDofManager"; }
+    classType giveClassID() const { return ElementDofManagerClass; }
+
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
 };
 } // end namespace oofem

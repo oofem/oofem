@@ -71,9 +71,6 @@ TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans  = 3;
-
-    rotationMatrix.beEmptyMtrx();
-    rotationMatrixDefined = 0;
 }
 
 TR1_2D_SUPG :: ~TR1_2D_SUPG()
@@ -193,9 +190,6 @@ TR1_2D_SUPG :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
     /* SUPG stabilization term */
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     usum = un.at(1) + un.at(3) + un.at(5);
     vsum = un.at(2) + un.at(4) + un.at(6);
@@ -224,10 +218,6 @@ TR1_2D_SUPG :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.at(6, 2) += coeff * ( b [ 2 ] * ( usum + un.at(1) ) + c [ 2 ] * ( vsum + un.at(2) ) );
     answer.at(6, 4) += coeff * ( b [ 2 ] * ( usum + un.at(3) ) + c [ 2 ] * ( vsum + un.at(4) ) );
     answer.at(6, 6) += coeff * ( b [ 2 ] * ( usum + un.at(5) ) + c [ 2 ] * ( vsum + un.at(6) ) );
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -242,11 +232,6 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     double dudx, dudy, dvdx, dvdy, usum, vsum, coeff;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -277,10 +262,6 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.at(2) += coeff * ( b [ 0 ] * ( dvdx * u1u1 + dvdy * u1u2 ) + c [ 0 ] * ( dvdx * u1u2 + dvdy * u2u2 ) );
     answer.at(4) += coeff * ( b [ 1 ] * ( dvdx * u1u1 + dvdy * u1u2 ) + c [ 1 ] * ( dvdx * u1u2 + dvdy * u2u2 ) );
     answer.at(6) += coeff * ( b [ 2 ] * ( dvdx * u1u1 + dvdy * u1u2 ) + c [ 2 ] * ( dvdx * u1u2 + dvdy * u2u2 ) );
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 't');
-    }
 }
 
 
@@ -294,11 +275,6 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
     double coeff, ar12 = area / 12.;
@@ -360,10 +336,6 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
             }
         }
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -377,10 +349,6 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -396,10 +364,6 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         //rh1p(2,lok) = -geome(7,ia)*( sigxy(ia)*geome(lok,ia) + sigyy(ia)*geome(lok1,ia) )*0.5d+00;
         answer.at( ( i ) * 2 + 1 ) = area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
         answer.at( ( i + 1 ) * 2 ) = area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
-    }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -438,10 +402,6 @@ TR1_2D_SUPG :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespons
     answer.plusProductUnsym(_b, _db, area); //answer.plusProduct (_b,_db,area);
     //answer.symmetrized() ;
     answer.times(1. / Re);
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -466,10 +426,6 @@ TR1_2D_SUPG :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
     // stabilization term (G_\delta mtrx)
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
-
     usum = un.at(1) + un.at(3) + un.at(5);
     vsum = un.at(2) + un.at(4) + un.at(6);
     coeff = ar3 * t_supg;
@@ -497,11 +453,6 @@ TR1_2D_SUPG :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.at(6, 1) += coeff * ( usum * b [ 2 ] * c [ 0 ] + vsum * c [ 2 ] * c [ 0 ] );
     answer.at(6, 2) += coeff * ( usum * b [ 2 ] * c [ 1 ] + vsum * c [ 2 ] * c [ 1 ] );
     answer.at(6, 3) += coeff * ( usum * b [ 2 ] * c [ 2 ] + vsum * c [ 2 ] * c [ 2 ] );
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beTProductOf(rotationMatrix, tmp);
-    }
 }
 
 
@@ -522,10 +473,6 @@ TR1_2D_SUPG :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *at
             answer.at(i, j) = coeff * n [ i - 1 ] * n [ j - 1 ];
         }
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -544,11 +491,6 @@ TR1_2D_SUPG :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTi
     answer.at(1, 2) = answer.at(2, 2) = answer.at(3, 2) = c [ 0 ] * ar3;
     answer.at(1, 4) = answer.at(2, 4) = answer.at(3, 4) = c [ 1 ] * ar3;
     answer.at(1, 6) = answer.at(2, 6) = answer.at(3, 6) = c [ 2 ] * ar3;
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beProductOf(tmp, this->rotationMatrix);
-    }
 }
 
 void
@@ -561,11 +503,6 @@ TR1_2D_SUPG :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -595,11 +532,6 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
 
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
-
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
     double coeff;
 
@@ -628,11 +560,6 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *
             }
         }
     }
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beProductOf(tmp, this->rotationMatrix);
-    }
 }
 
 void
@@ -649,11 +576,6 @@ TR1_2D_SUPG :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime)
     answer.at(2, 2) = answer.at(2, 4) = answer.at(2, 6) = coeff * c [ 1 ];
     answer.at(3, 1) = answer.at(3, 3) = answer.at(3, 5) = coeff * b [ 2 ];
     answer.at(3, 2) = answer.at(3, 4) = answer.at(3, 6) = coeff * c [ 2 ];
-
-    if ( this->updateRotationMatrix() ) {
-        FloatMatrix tmp = answer;
-        answer.beProductOf(tmp, this->rotationMatrix);
-    }
 }
 
 void
@@ -908,7 +830,7 @@ TR1_2D_SUPG :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *
     answer.at(6, 2) += ( l / 6 ) * d3 * d2 * n2;
     answer.at(6, 3) += ( l / 3 ) * d3 * d3 * n2;
 
-    answer.times(-1.0);
+    answer.negated();
 }
 
 
@@ -927,9 +849,6 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 
     // add body load (gravity) termms
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
     usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
@@ -997,10 +916,6 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             }
         }
     }
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 't');
-    }
 }
 
 void
@@ -1057,11 +972,6 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     //this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime->givePreviousStep(),un) ;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
     this->computeVectorOf(EID_MomentumBalance, VM_Acceleration, atTime->givePreviousStep(), a);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-        a.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     un = u;
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
@@ -1281,10 +1191,6 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
-
     u.times(uscale);
     double nu;
 
@@ -1542,9 +1448,6 @@ TR1_2D_SUPG :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeS
 
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     answer.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     answer.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -1883,10 +1786,6 @@ TR1_2D_SUPG :: computeCriticalLEPlicTimeStep(TimeStep *tStep)
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
-
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
     double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
     double vn3 = sqrt( u.at(5) * u.at(5) + u.at(6) * u.at(6) );
@@ -2071,8 +1970,6 @@ TR1_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 void
@@ -2197,10 +2094,6 @@ TR1_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     FloatArray fi(3), un(6);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
-
-    if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     for ( i = 1; i <= 3; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
@@ -2418,159 +2311,6 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
     }
 }
 
-
-int
-TR1_2D_SUPG :: updateRotationMatrix()
-{
-    /* returns a tranformation matrix between local coordinate system
-     * and global coordinate system, taking into account possible local
-     * coordinate system in nodes.
-     * if no transformation necessary - returns NULL
-     */
-    int isT_GtoL, isT_NtoG;
-    FloatMatrix T_GtoL, T_NtoG;
-
-    if ( rotationMatrixDefined ) {
-        return rotationMatrix.isNotEmpty();
-    }
-
-    rotationMatrixDefined = 1;
-    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-
-#ifdef DEBUG
-    if ( isT_GtoL ) {
-        if ( ( !T_GtoL.isSquare() ) ||
-            ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
-        }
-    }
-
-    if ( isT_NtoG ) {
-        if ( ( !T_NtoG.isSquare() ) ||
-            ( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
-        }
-    }
-
-#endif
-
-    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
-    } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL;
-    } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG;
-    } else {
-        rotationMatrix.beEmptyMtrx();
-        return false;
-    }
-
-    return true;
-}
-
-
-
-int
-TR1_2D_SUPG :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += this->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
-    } else {
-        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
-}
-
-
-int
-TR1_2D_SUPG :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += this->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
-    } else {
-        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        this->giveDofManager(i)->computeLoadTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
-}
 
 void
 TR1_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)

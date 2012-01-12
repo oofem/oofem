@@ -49,22 +49,16 @@
 namespace oofem {
 ElementSide :: ElementSide(int n, Domain *aDomain) :
     DofManager(n, aDomain)
-    // Constructor. Creates a node with number n, belonging to aDomain.
 { }
 
 
 ElementSide :: ~ElementSide()
-// Destructor.
 { }
 
 
-IRResultType
-ElementSide :: initializeFrom(InputRecord *ir)
+IRResultType ElementSide :: initializeFrom(InputRecord *ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    // int j, size ;
-    // IntArray *dofIDArry;
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
@@ -77,7 +71,6 @@ void ElementSide :: printYourself()
 // Prints the receiver on screen.
 {
     int i;
-    // double x,y ;
 
     printf("Side %d \n", number);
     for ( i = 0; i < numberOfDofs; i++ ) {
@@ -93,8 +86,7 @@ void ElementSide :: printYourself()
 }
 
 
-void
-ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *map)
+void ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *map)
 {
     //
     // computes transformation of receiver from global cs to nodal (user-defined) cs.
@@ -110,7 +102,6 @@ ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *map)
     } else {
         size = map->giveSize();
     }
-
 
     // response for all local dofs is computed
 

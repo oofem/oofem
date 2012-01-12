@@ -47,9 +47,6 @@ public:
     PlaneStressStructuralElementEvaluator() : StructuralElementEvaluator() { }
 
 protected:
-    /// Cached transformation matrix of receiver. @todo{To be moved from structural element}
-    FloatMatrix *rotationMatrix;
-
     /**
      * Assemble interpolation matrix at given IP.
      * In case of IGAElements, N is assumed to contain only nonzero interpolation functions.

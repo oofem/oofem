@@ -79,7 +79,8 @@ Node :: ~Node()
 }
 
 
-double Node :: giveCoordinate(int i)
+double
+Node :: giveCoordinate(int i)
 // Returns the i-th coordinate of the receiver.
 {
     if ( i > coordinates.giveSize() ) {
@@ -90,8 +91,7 @@ double Node :: giveCoordinate(int i)
 }
 
 
-IRResultType
-Node :: initializeFrom(InputRecord *ir)
+IRResultType Node :: initializeFrom(InputRecord *ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
@@ -169,6 +169,8 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
     int i, n, nLoads;
     NodalLoad *loadN;
     FloatArray contribution;
+    IntArray dofIDarry(0);
+    FloatMatrix L2G, M2L;
 
     if ( this->giveLoadArray()->isEmpty() ) {
         answer.resize(0);
@@ -177,8 +179,8 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
         answer.resize(0);
         nLoads = loadArray.giveSize();       // the node may be subjected
         for ( i = 1; i <= nLoads; i++ ) {     // to more than one load
-            n            = loadArray.at(i);
-            loadN        = dynamic_cast< NodalLoad * >( domain->giveLoad(n) );
+            n     = loadArray.at(i);
+            loadN = dynamic_cast< NodalLoad * >( domain->giveLoad(n) );
             if ( !loadN ) {
                 _error("computeLoadVectorAt: incompatible load");
             }
@@ -187,35 +189,20 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
                 _error("computeLoadVectorAt: incompatible load type applied");
             }
 
-            //loadN -> computeComponentArrayAt(contribution, stepN, mode) ;      // can be NULL
-            if ( requiresTransformation() && loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
-                FloatArray __gcontrib;
-                FloatMatrix _t;
-                loadN->computeComponentArrayAt(__gcontrib, stepN, mode); // can be NULL
-                this->computeLoadTransformation(_t, NULL, _toNodalCS);
-                contribution.beProductOf(_t, __gcontrib);
-            } else {
-                loadN->computeComponentArrayAt(contribution, stepN, mode); // can be NULL
+            loadN->computeComponentArrayAt(contribution, stepN, mode); // can be NULL
+            // Transform from Global to Local c.s.
+            if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
+                if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
+                    contribution.rotatedWith(L2G, 'n');
+                }
             }
-
             answer.add(contribution);
-            //delete contribution ;
         }
     }
-
-    // transform "local dofs" to master dofs
-    if ( hasSlaveDofs && answer.isNotEmpty() ) {
-        FloatMatrix masterTransf;
-
-        // assemble transformation contributions from local dofs
-        computeLoadTransformation(masterTransf, NULL, _toNodalCS);
-        answer.rotatedWith(masterTransf, 'n');
-    }
-
-    return;
 }
 
-void Node :: printYourself()
+void
+Node :: printYourself()
 // Prints the receiver on screen.
 {
     int i;
@@ -237,7 +224,8 @@ void Node :: printYourself()
 }
 
 
-void Node :: updateYourself(TimeStep *tStep)
+void
+Node :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     int i, ic;
@@ -263,7 +251,8 @@ void Node :: updateYourself(TimeStep *tStep)
 }
 
 
-double Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double scale)
+double
+Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double scale)
 //
 // returns coordinate + scale * displacement
 // displacement is of updMode (UpdateMode) type
@@ -423,124 +412,23 @@ Node :: hasSameLCS(Node *remote)
 }
 
 
-void
-Node :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode)
-{
-    // computes trasformation matrix of receiver.
-    // transformation should include trasformation from global cs to nodal cs,
-    // as well as further necessary transformations (for example in case
-    // rigid arms this must include transformation to master dofs).
-
-    if ( !hasSlaveDofs && !hasLocalCS() ) {
-        int _size = ( dofIDArry == NULL ) ? numberOfDofs : dofIDArry->giveSize();
-        answer.resize(_size, _size);
-        answer.beUnitMatrix();
-        return;
-    }
-
-    if ( hasSlaveDofs ) {
-        this->computeSlaveDofTransformation(answer, dofIDArry, mode);
-    }
-
-    if ( hasLocalCS() ) {
-        FloatMatrix GNTransf;
-        this->computeGNDofTransformation(GNTransf, dofIDArry);
-
-        if ( mode == _toGlobalCS ) {
-            if ( hasSlaveDofs ) {
-                answer.beTProductOf( GNTransf, answer );
-            } else {
-                answer.beTranspositionOf(GNTransf);
-            }
-        } else
-        if ( hasSlaveDofs ) {
-            answer.beProductOf(answer, GNTransf);
-        } else {
-            answer = GNTransf;
-        }
-    }
-}
-
-void
-Node :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode)
-{
-    // computes trasformation matrix of receiver.
-    // transformation should include trasformation from global cs to nodal cs,
-    // as well as further necessary transformations (for example in case
-    // rigid arms this must include transformation to master dofs).
-
-    FloatMatrix t;
-
-    if ( mode == _toNodalCS ) {
-        computeDofTransformation(t, dofMask, _toGlobalCS);
-        answer.beTranspositionOf(t);
-    } else if ( mode == _toGlobalCS ) {
-        computeDofTransformation(answer, dofMask, _toGlobalCS);
-    } else {
-        _error("computeLoadTransformation: unsupported mode");
-    }
-
-
-
-    /*
-     * if (!hasSlaveDofs && !hasLocalCS()) {
-     *  int _size = (dofMask == NULL) ? numberOfDofs : dofMask->giveSize();
-     *  answer.resize(_size,_size);
-     *  answer.beUnitMatrix();
-     *  return;
-     * }
-     *
-     * if (hasSlaveDofs) {
-     *  if (mode != _toNodalCS) _error ("computeSlaveLoadTransformation: unsupported mode");
-     *  FloatMatrix t;
-     *  computeSlaveDofTransformation (t, dofMask, _toGlobalCS);
-     *  answer.beTranspositionOf (t);
-     * }
-     *
-     * if (hasLocalCS()) {
-     *  FloatMatrix GNTransf;
-     *  this->computeGNDofTransformation (GNTransf, dofMask);
-     *
-     *  if (mode == _toGlobalCS)
-     *    if (hasSlaveDofs) answer.beTProductOf (GNTransf, *answer.GiveCopy());
-     *    else             answer.beTranspositionOf (GNTransf);
-     *  else
-     *    if (hasSlaveDofs) answer.beProductOf (*answer.GiveCopy(), GNTransf);
-     *    else             answer = GNTransf;
-     * }
-     */
-}
-
-
-void
-Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry)
+bool
+Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
 {
     //
-    // computes transfromation of receiver from global cs to nodal (user-defined) cs.
+    // computes transformation of receiver from global cs to nodal (user-defined) cs.
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.
-    //
     //
 
     int i, j;
     DofIDItem id, id2;
 
     if ( localCoordinateSystem == NULL ) {
-        // localCoordinateSystem same as global c.s.
-        int size;
-        if ( dofIDArry == NULL ) {
-            size = numberOfDofs;
-        } else {
-            size = dofIDArry->giveSize();
-        }
-
-        answer.resize(size, size);
-        answer.zero();
-        for ( i = 1; i <= size; i++ ) {
-            answer.at(i, i) = 1.0;
-        }
+        answer.beEmptyMtrx();
+        return false;
     } else {
-        if ( dofIDArry == NULL ) {
+        if ( dofIDArry.isEmpty() ) {
             // response for all local dofs is computed
 
             answer.resize(numberOfDofs, numberOfDofs);
@@ -555,7 +443,7 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
-                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
+                            answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
                         }
                     }
@@ -568,7 +456,7 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
-                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
+                            answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
                     }
@@ -581,7 +469,7 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id2 = giveDof(j)->giveDofID();
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
-                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
+                            answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
                         }
                     }
@@ -598,22 +486,22 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                     _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id) );
                 }
             }
-        } else { // end if (dofIDArry == NULL)
+        } else { // end if (dofIDArry.isEmpty())
             // map is provided -> assemble for requested dofs
-            int size = dofIDArry->giveSize();
+            int size = dofIDArry.giveSize();
             answer.resize(size, size);
             answer.zero();
 
             for ( i = 1; i <= size; i++ ) {
                 // test for vector quantities
-                switch ( id = ( DofIDItem ) dofIDArry->at(i) ) {
+                switch ( id = ( DofIDItem ) dofIDArry.at(i) ) {
                 case D_u:
                 case D_v:
                 case D_w:
                     for ( j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry->at(j);
+                        id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
-                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
+                            answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
                         }
                     }
 
@@ -623,9 +511,9 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                 case V_v:
                 case V_w:
                     for ( j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry->at(j);
+                        id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
-                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
+                            answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
                     }
 
@@ -635,9 +523,9 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                 case R_v:
                 case R_w:
                     for ( j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry->at(j);
+                        id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
-                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1, ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
+                            answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1, ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
                         }
                     }
 
@@ -656,7 +544,7 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
         } // end map is provided -> assemble for requested dofs
 
     } // end localCoordinateSystem defined
-
+    return true;
 }
 
 
@@ -785,7 +673,7 @@ void Node :: drawYourself(oofegGraphicContext &gc)
  #endif
 
         bool ordinary = true;
-        ;
+
         int idof;
         for ( idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
             if ( this->giveDof(1)->giveClassID() == SimpleSlaveDofClass ) {

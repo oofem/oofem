@@ -57,20 +57,17 @@
 
 namespace oofem {
 Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-    // Constructor.
 {
-    numberOfDofMans       = 2;
-    referenceNode       = 0;
+    numberOfDofMans = 2;
+    referenceNode = 0;
 
-    length              = 0.;
-    kappay = kappaz      = -1.0;
+    length = 0.;
+    kappay = kappaz = -1.0;
     dofsToCondense = NULL;
 }
 
 Beam3d :: ~Beam3d()
 {
-    // destructor
-
     delete dofsToCondense;
 }
 
@@ -81,7 +78,6 @@ Beam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
     double l, ksi, kappay, kappaz;
-    // FloatMatrix* answer ;
 
     l     = this->giveLength();
     ksi   = 0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
@@ -113,8 +109,6 @@ Beam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     answer.at(6, 6) =   ( -2. * ( 2. + kappaz ) + 6. * ksi ) / ( l * ( 1. + 2. * kappaz ) );
     answer.at(6, 8) =   ( -6. + 12. * ksi ) / ( l * l * ( 1. + 2. * kappaz ) );
     answer.at(6, 12) =   ( -2. * ( 1. - kappaz ) + 6. * ksi ) / ( l * ( 1. + 2. * kappaz ) );
-
-    return;
 }
 
 void Beam3d :: computeGaussPoints()
@@ -140,7 +134,6 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // r = {u1,v1,w1,fi_x1,fi_y1,fi_z1,u2,v2,w2,fi_x2,fi_y2,fi_21}^T
 {
     double l, ksi, ksi2, ksi3, kappay, kappaz, c1y, c1z;
-    // FloatMatrix* answer ;
 
     l     = this->giveLength();
     ksi =   0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
@@ -151,7 +144,6 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     ksi2 = ksi * ksi;
     ksi3 = ksi2 * ksi;
 
-    //answer = new FloatMatrix(3,6) ;
     answer.resize(6, 12);
     answer.zero();
 
@@ -177,8 +169,6 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(6, 6) = ( ( 1. + 2. * kappaz ) - 2. * ( 2. + kappaz ) * ksi + 3. * ksi2 ) / c1z;
     answer.at(6, 8) = ( 6. * ksi + 6. * ksi2 ) / ( l * c1z );
     answer.at(6, 12) = ( -2. * ( 1. - kappaz ) * ksi + 3. * ksi2 ) / c1z;
-
-    return;
 }
 
 void
@@ -194,8 +184,6 @@ Beam3d :: computeLocalStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     if ( dofsToCondense ) {
         this->condense(& answer, NULL, NULL, dofsToCondense);
     }
-
-    return;
 }
 
 
@@ -205,17 +193,8 @@ Beam3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, Tim
 // axes. No integration over volume done, beam with constant material and crosssection
 // parameters assumed.
 {
-    // compute clamped stifness
+    // compute clamped stiffness
     this->computeLocalStiffnessMatrix(answer, rMode, tStep);
-
-    // rotate answer to global coordinate system
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
-
-
-    // return result
-    return;
 }
 
 
@@ -272,13 +251,9 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     answer.at(11, 11) = eiy * 2. * ( 2. + kappay ) / ( l * c1y );
     answer.at(12, 12) = eiz * 2. * ( 2. + kappaz ) / ( l * c1z );
 
-
     answer.symmetrized();  // symmetrize answer
-
-    // delete d;
-    // return result
-    return;
 }
+
 
 int
 Beam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
@@ -296,15 +271,12 @@ Beam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
     }
-
-    //delete lcs;
     return 1;
-
-    ;
 }
 
-int
-Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+
+bool
+Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver.
 {
     FloatMatrix lcs;
@@ -322,8 +294,6 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix (
             answer.at(i + 9, j + 9) = lcs.at(i, j);
         }
     }
-
-    //delete lcs;
     return 1;
 }
 
@@ -337,12 +307,12 @@ Beam3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-Beam3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Beam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(6);
 
     answer.at(1) = D_u;
@@ -351,13 +321,11 @@ Beam3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
 
 
-
-double Beam3d :: giveLength()
+double
+Beam3d :: giveLength()
 // Returns the length of the receiver.
 {
     double dx, dy, dz;
@@ -399,12 +367,12 @@ Beam3d :: computeKappaCoeffs()
     } else {
         kappaz = 0.;
     }
-
-    return;
 }
 
+
 double
-Beam3d :: giveKappayCoeff() {
+Beam3d :: giveKappayCoeff()
+{
     if ( kappay < 0.0 ) {
         this->computeKappaCoeffs();
     }
@@ -412,8 +380,10 @@ Beam3d :: giveKappayCoeff() {
     return kappay;
 }
 
+
 double
-Beam3d :: giveKappazCoeff() {
+Beam3d :: giveKappazCoeff()
+{
     if ( kappaz < 0.0 ) {
         this->computeKappaCoeffs();
     }
@@ -459,6 +429,7 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 1;
 }
 
+
 IRResultType
 Beam3d :: initializeFrom(InputRecord *ir)
 {
@@ -490,7 +461,6 @@ Beam3d :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
@@ -501,32 +471,21 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
 
     this->computeStiffnessMatrix(stiffness, SecantStiffness, tStep);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
     answer.beProductOf(stiffness, u);
-    // delete u;
 
-    /* Subtracted in PrintReaction Forces
-     * if (loadEndForces = this-> ComputeLoadDependentPartOfLoadVector (tStep)) {
-     * loadEndForces -> times(-1.0);
-     * answer->add(loadEndForces);
-     * }
-     */
     this->computePrescribedStrainLoadVectorAt(prescStrainEndForces, tStep, VM_Total);
     if ( prescStrainEndForces.giveSize() ) {
         prescStrainEndForces.times(-1.0);
         answer.add(prescStrainEndForces);
     }
-
-    return;
 }
+
 
 void
 Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     // computes exact global end-forces vector
     FloatArray loadEndForces;
-    FloatMatrix T_NtoG;
-    int isT_NtoG;
 
     this->giveInternalForcesVector(answer, tStep);
 
@@ -536,14 +495,6 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
         loadEndForces.times(-1.0);
         answer.add(loadEndForces);
     }
-
-    // transform result in nodal cs to global cs
-    isT_NtoG = this->computeGNLoadRotationMatrix(T_NtoG, _toGlobalCS);
-    if ( isT_NtoG ) {
-        answer.rotatedWith(T_NtoG, 'n');
-    }
-
-    return;
 }
 
 
@@ -588,7 +539,6 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
                 if ( this->computeLoadGToLRotationMtrx(T) ) {
                     components.rotatedWith(T, 'n');
-                    //delete T;
                 }
             }
 
@@ -662,11 +612,10 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             if ( edgeLoad->giveCoordSystMode() == BoundaryLoad :: BL_GlobalMode ) {
                 if ( T.isNotEmpty() ) {
                     endComponents.rotatedWith(T, 'n');
-                    //delete T; // delete T allocated before
                 }
             }
 
-            // compute diferences
+            // compute differences
             endComponents.subtract(components);
 
             dfx = endComponents.at(1);
@@ -702,63 +651,31 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         default:
             _error("computeEdgeLoadVectorAt: unsupported load type");
         }
-
-        //delete components;
     }
-
-    /*
-     * if (answer.giveSize() != 0) {
-     * R = this -> giveRotationMatrix() ;
-     * if (R) answer.rotatedWith(R,'t');
-     * }
-     */
-    return;
 }
 
 
-void Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
+void
+Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     // Performs end-of-step operations.
 
     int i, n;
-    FloatArray rg, rl, Fg, Fl;
+    FloatArray rl, Fl;
     FloatMatrix T;
 
     fprintf(File, "beam element %d :\n", number);
 
-    //   for (i=0 ; i < numberOfIntegrationRules ; i++)
-    //   integrationRulesArray[i]->printOutputAt(file,stepN);
-
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rg);
-    if ( this->updateRotationMatrix() ) {
-        rl.beProductOf(this->rotationMatrix, rg);
-        // delete rg;
-    } else {
-        rl = rg;
-    }
-
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rl);
     // ask for global element end forces vector
-    this->giveEndForcesVector(Fg, stepN);
-    //if (computeGNLoadRotationMatrix (T, _toGlobalCS)) Fg.rotatedWith (T, 'n');
-    if ( computeGtoLRotationMatrix(T) ) {
-        Fg.rotatedWith(T, 'n');
-    }
-
-    /*
-     * if (rotationMatrix) {
-     * Fl.beProductOf (*rotationMatrix, Fg);
-     * }
-     */
-    Fl = Fg;
+    this->giveEndForcesVector(Fl, stepN);
 
     fprintf(File, "  local displacements ");
     n = rl.giveSize();
     for ( i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", rl.at(i) );
     }
-
-    // delete rl;
 
     fprintf(File, "\n  local end forces    ");
     n = Fl.giveSize();
@@ -779,33 +696,21 @@ Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
     StructuralElement :: computeLocalForceLoadVector(answer, stepN, mode); // in global c.s
 
     if ( answer.giveSize() && dofsToCondense ) {
-        /*
-         * // transform back to local c.s.
-         * T = this -> giveRotationMatrix() ;
-         * if (T) answer.rotatedWith(T,'n');
-         */
         // condense requested dofs
         if ( answer.giveSize() != 0 ) {
             this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
-
-        /*
-         * // transform back to global c.s.
-         * if (T) answer.rotatedWith(T,'t');
-         */
     }
-
-    return;
 }
 
-void 
+
+void
 Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-  answer.times(this->giveCrossSection()->give(CS_Area));
+    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times(this->giveCrossSection()->give(CS_Area));
 }
-
 
 
 /*
@@ -818,23 +723,16 @@ Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
  * StructuralElement::computeForceLoadVector(answer, stepN, mode); // in global c.s
  *
  * if (answer.giveSize() && dofsToCondense) {
- * // transform back to local c.s.
- * T = this -> giveRotationMatrix() ;
- * if (T) answer.rotatedWith(T,'n');
- *
  * // condense requested dofs
  * if (answer.giveSize() != 0) {
  * this->computeClampedStiffnessMatrix (stiff, TangentStiffness, stepN) ;
  * this->condense (&stiff, NULL, &answer, dofsToCondense);
  * }
  *
- * // transform back to global c.s.
- * if (T) answer.rotatedWith(T,'t');
  * }
- *
- * return ;
  * }
  */
+
 
 void
 Beam3d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
@@ -844,26 +742,13 @@ Beam3d :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep 
     FloatMatrix stiff;
 
     if ( answer.giveSize() && dofsToCondense ) {
-        /*
-         * // transform back to local c.s.
-         * T = this -> giveRotationMatrix() ;
-         * if (T) answer.rotatedWith(T,'n');
-         */
         // condense requested dofs
         if ( answer.giveSize() != 0 ) {
             this->computeClampedStiffnessMatrix(stiff, TangentStiffness, stepN);
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
-
-        /*
-         * // transform back to global c.s.
-         * if (T) answer.rotatedWith(T,'t');
-         */
     }
-
-    return;
 }
-
 
 
 void
@@ -927,9 +812,8 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     }
 
     mass = area * l * density;
-
-    return;
 }
+
 
 int
 Beam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
@@ -981,70 +865,8 @@ Beam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
  *  answer.at(6) = e0.at(1) * et.at(3)/ width;   // kappa_z
  * }
  * }
- * //delete et;
- * //delete e0;
- *
- * return ;
  * }
  */
-
-/*
- * int
- * Beam3d :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0;}
- *
- * answer.resize(12,12); answer.zero();
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*6+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * // node displacements
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii,ii+2)   = triplet->at(1,3);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * answer.at(ii+1,ii+2) = triplet->at(2,3);
- * answer.at(ii+2,ii)   = triplet->at(3,1);
- * answer.at(ii+2,ii+1) = triplet->at(3,2);
- * answer.at(ii+2,ii+2) = triplet->at(3,3);
- * // node rotations
- * answer.at(ii+3,ii+3) = triplet->at(1,1);
- * answer.at(ii+3,ii+4) = triplet->at(1,2);
- * answer.at(ii+3,ii+5) = triplet->at(1,3);
- * answer.at(ii+4,ii+3) = triplet->at(2,1);
- * answer.at(ii+4,ii+4) = triplet->at(2,2);
- * answer.at(ii+4,ii+5) = triplet->at(2,3);
- * answer.at(ii+5,ii+3) = triplet->at(3,1);
- * answer.at(ii+5,ii+4) = triplet->at(3,2);
- * answer.at(ii+5,ii+5) = triplet->at(3,3);
- *
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * answer.at(ii+2,ii+2) = 1.0;
- * answer.at(ii+3,ii+3) = 1.0;
- * answer.at(ii+4,ii+4) = 1.0;
- * answer.at(ii+5,ii+5) = 1.0;
- * }
- * }
- *
- * return 1;
- * }
- */
-
 
 void
 Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -1066,8 +888,6 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(12, 12);
     answer.zero();
 
-    //answer.at (1,1) = 0.;
-    //answer.at (1,4) = 0.;
     answer.at(2, 2) = ( 4. * kappaz2 + 4. * kappaz + 6. / 5. ) / denomz;
     answer.at(2, 6) = ( l / 10. ) / denomz;
     answer.at(2, 8) = ( -4. * kappaz2 - 4. * kappaz - 6. / 5. ) / denomz;
@@ -1086,7 +906,6 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(6, 8) = ( -l / 10. ) / denomz;
     answer.at(6, 12) = -l * l * ( kappaz2 / 3. + kappaz / 3. + 1. / 30. ) / denomz;
 
-    //answer.at (4,4) = 0.;
     answer.at(8, 8) = ( 4. * kappaz2 + 4. * kappaz + 6. / 5. ) / denomz;
     answer.at(8, 12) = ( -l / 10. ) / denomz;
 
@@ -1113,17 +932,7 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.symmetrized();
     // ask end forces in g.c.s
     this->giveEndForcesVector(endForces, tStep);
-    //if (computeGNLoadRotationMatrix (T, _toGlobalCS)) endForces.rotatedWith (T, 'n');
-    if ( computeGtoLRotationMatrix(T) ) {
-        endForces.rotatedWith(T, 'n');
-    }
 
-    /*
-     * this -> giveRotationMatrix () ;
-     * if (rotationMatrix) {
-     * endForces.rotatedWith (rotationMatrix, 'n');
-     * }
-     */
     N = ( -endForces.at(1) + endForces.at(7) ) / 2.;
     answer.times(N / l);
 
@@ -1134,15 +943,7 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     }
 
     //answer.beLumpedOf (mass);
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
-
-    //answer.printYourself();
-
-    return;
 }
-
 
 
 void
@@ -1162,10 +963,8 @@ Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &an
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
     answer.at(5) = masterGpStrain.at(2);
     answer.at(6) = masterGpStrain.at(3);
-
-
-    return;
 }
+
 
 Interface *
 Beam3d :: giveInterface(InterfaceType interface)

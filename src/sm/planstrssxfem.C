@@ -1,3 +1,37 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 #include "planstrssxfem.h"
 #include "engngm.h"
 #include "dof.h"
@@ -14,7 +48,8 @@
 
 namespace oofem {
 Interface *
-PlaneStress2dXfem :: giveInterface(InterfaceType interface) {
+PlaneStress2dXfem :: giveInterface(InterfaceType interface)
+{
     if ( interface != XfemElementInterfaceType ) {
         return PlaneStress2d :: giveInterface(interface);
     } else if ( interface == XfemElementInterfaceType ) {
@@ -25,8 +60,8 @@ PlaneStress2dXfem :: giveInterface(InterfaceType interface) {
 }
 
 
-void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                                           int li, int ui) {
+void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+{
     int i;
     // evaluation of N,dNdx
     FloatMatrix dNdx;
@@ -112,7 +147,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     }
 }
 
-void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const {
+void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const
+{
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >(this) );
@@ -125,7 +161,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
             if ( er->isDofManEnriched( dofManArray.at(i) ) ) {
                 IntArray *dofIdAr = er->getDofIdArray();
                 for ( int k = 1; k <= dofIdAr->giveSize(); k++ ) {
-                    if ( dm->hasDofID( dofIdAr->at(k) ) == false ) {
+                    if ( dm->hasDofID( (DofIDItem)dofIdAr->at(k) ) == false ) {
                         int sz = dm->giveNumberOfDofs();
                         Dof *df = new MasterDof( sz + 1, dm, 0, 0, (DofIDItem)dofIdAr->at(k) );
                         int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
@@ -156,7 +192,8 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
 }
 
 
-int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut) {
+int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
+{
     int ret = 0;
     for ( int i = 1; i <= giveNumberOfDofManagers(); i++ ) {
         DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );
@@ -170,7 +207,8 @@ int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut) {
 
 
 void
-PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     PlaneStress2d :: giveDofManDofIDMask(inode, EID_MomentumBalance, answer);
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
@@ -186,7 +224,8 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
     return;
 }
 
-void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) {
+void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     if ( xf->isInteracted(this) ) {
         PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
@@ -201,16 +240,13 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
 void
 PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
-// Total value) of the dofs of the receiver's nodes (in nodal cs).
-// Dofs cointaining expected unknowns (of expected type) are determined
-// using this->GiveNodeDofIDMask function
+// Total value) of the dofs in the element local c.s.
 {
-    // FloatArray *answer ;
     int i, j, k, nDofs, size;
     IntArray elementNodeMask;
     FloatArray vec;
-    answer.resize( size = this->computeGlobalNumberOfDofs(type) );
-    k      = 0;
+    answer.resize( size = this->computeNumberOfGlobalDofs(type) );
+    k = 0;
     int m = 0;
     FloatArray p1(size - 8);
 
@@ -230,8 +266,7 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
     for ( int i = 1; i <= m; i++ ) {
         answer.at(k + i) = p1.at(i);
     }
-
-    return;
+    // Rotate it as well? but this element doesn't support local coordinate systems anyway.
 }
 
 
@@ -251,7 +286,8 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     }
 }
 
-void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) {
+void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
     this->computeStiffnessMatrix_withIRulesAsSubcells(answer, rMode, tStep);
 }
 
@@ -262,7 +298,8 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
 }
 
 
-double PlaneStress2dXfem :: computeArea() const {
+double PlaneStress2dXfem :: computeArea() const
+{
     FloatArray *node1 = this->giveDofManager(1)->giveCoordinates();
     FloatArray *node2 = this->giveDofManager(2)->giveCoordinates();
     FloatArray *node3 = this->giveDofManager(3)->giveCoordinates();

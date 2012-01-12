@@ -111,7 +111,8 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 /*Stiffness matrix is taken from the microproblem. No GPs are presented here on macroscale.
  * Stiffness matrix (24,24) goes in order node 1 (u,v,w) to node 2 (u,v,w) ... 8 (u,v,w). Displacements are in global coordinates.
  */
-void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) {
+void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
     //MatResponseMode rMode specifies tangent, secant, or initial matrix
     if ( !this->isActivated(tStep) ) {
         return;
@@ -163,7 +164,8 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
 
 //assign values to DOF on the boundary according to definition on macrolspace and actual displacement stage
-void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
+void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
+{
     //Domain *microDomain = problemMicro->giveDomain(1);
     //EngngModel *microEngngModel = microDomain->giveEngngModel();
     //Domain *domain = this->giveDomain();
@@ -187,14 +189,6 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
         displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
     }
-
-    if ( this->updateRotationMatrix() ) {
-        this->rotationMatrix.printYourself();
-        OOFEM_ERROR("Not implemented\n");
-    }
-
-
-    //displ_x.printYourself();
 
     //overrides the first load-time function to be a constant
     if ( !microDomain->giveNumberOfLoadTimeFunctions() ) {
@@ -246,7 +240,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
 //obtain nodal forces from underlying microScale
 //node numbering on element is in the same order as in the input file
 //useUpdatedGpRecord=1 is used for printing of reactions
-void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) {
+void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
     int i, j, k;
     //StructuralEngngModel *microStructuralEngngModel;
     FloatArray reactions, localCoords, n(8);
@@ -302,7 +297,8 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     //OOFEM_ERROR("STOP");
 }
 
-void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords) {
+void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords)
+{
     FloatArray localCoords;
 
     //this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries

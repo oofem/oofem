@@ -185,7 +185,7 @@ InterfaceElem2dQuad ::   giveDofManDofIDMask(int inode, EquationID, IntArray &an
 }
 
 
-int
+bool
 InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     int i;

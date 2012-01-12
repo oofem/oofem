@@ -67,26 +67,20 @@ SpringElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
     answer.resize(2,2);
     answer.at(1,1)=answer.at(2,2)= this->springConstant;
     answer.at(1,2)=answer.at(2,1)=-this->springConstant;
-    /* transformation from local c.s. to global c.s. involves DOF expansion */
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
 void
 SpringElement :: giveInternalForcesVector(FloatArray &answer, TimeStep * atTime, int useUpdatedGpRecord)
 {
-    FloatMatrix k;
-    FloatArray u;
-    this->computeStiffnessMatrix(k, SecantStiffness, atTime);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-
-    answer.beProductOf(k,u);
+    double f = this->computeSpringInternalForce(atTime);
+    answer.resize(2);
+    answer.at(1) = -f;
+    answer.at(2) = f;
 }
 
 
-int
+bool
 SpringElement :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     /*
@@ -116,7 +110,7 @@ SpringElement :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 void
-SpringElement ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+SpringElement :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
@@ -147,18 +141,16 @@ SpringElement ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 }
 
 double
-SpringElement :: computeSpringInternalForce (TimeStep *stepN)
+SpringElement :: computeSpringInternalForce(TimeStep *stepN)
 {
     FloatArray u;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
     return (this->springConstant * (u.at(2)-u.at(1)));
 }
 
+
 int
-SpringElement :: computeGlobalNumberOfDofs(EquationID ut)
+SpringElement :: computeNumberOfGlobalDofs(EquationID eid)
 {
     if ((this->mode == SE_1D_SPRING) || (this->mode == SE_2D_TORSIONALSPRING_XZ))  {
         return 2;
@@ -169,7 +161,6 @@ SpringElement :: computeGlobalNumberOfDofs(EquationID ut)
     }
     return 0;
 }
-
 
 
 IRResultType

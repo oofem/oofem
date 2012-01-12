@@ -161,7 +161,7 @@ TrPlaneStrRot3d :: computeGtoLRotationMatrix()
 }
 
 
-int
+bool
 TrPlaneStrRot3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [9,18]
 // r(local) = T * r(global)

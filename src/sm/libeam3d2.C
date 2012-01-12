@@ -62,7 +62,6 @@
 
 namespace oofem {
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
-    // Constructor.
 {
     numberOfDofMans     = 2;
     referenceNode       = 0;
@@ -78,7 +77,6 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
     double l, ksi, n1, n2, n1x, n2x;
-    // FloatMatrix* answer ;
 
     if ( this->nlGeometry ) {
         l     = this->giveCurrentLength( domain->giveEngngModel()->giveCurrentStep() );
@@ -117,8 +115,6 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     answer.at(6, 6)  = n1x;
     answer.at(6, 12) = n2x;
-
-    return;
 }
 
 void
@@ -150,10 +146,6 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -185,8 +177,6 @@ LIBeam3d2 :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(5, 11) = n2;
     answer.at(6, 6) = n1;
     answer.at(6, 12) = n2;
-
-    return;
 }
 
 void
@@ -199,7 +189,7 @@ LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 
 
 
-int
+bool
 LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
 {
     int i, j;
@@ -261,8 +251,6 @@ LIBeam3d2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
 
 
@@ -403,7 +391,6 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -425,8 +412,6 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     for ( i = 1; i <= 12; i++ ) {
         answer.at(i) = i;
     }
-
-    return;
 }
 
 double
@@ -465,11 +450,7 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
     }
-
-    //delete lcs;
     return 1;
-
-    ;
 }
 
 void
@@ -533,7 +514,8 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-LIBeam3d2 ::     updateTempTriad(TimeStep *tStep) {
+LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
+{
     int isT_NtoG;
     FloatMatrix T_NtoG;
     // test if not previously done
@@ -546,11 +528,6 @@ LIBeam3d2 ::     updateTempTriad(TimeStep *tStep) {
 
     // ask element's displacement increments
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-    //rot     = this -> giveRotationMatrix () ;
-    if ( isT_NtoG ) {
-        u.rotatedWith(T_NtoG, 'n');
-    }
 
     // interpolate spin at the centre
     centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -564,61 +541,6 @@ LIBeam3d2 ::     updateTempTriad(TimeStep *tStep) {
     tempTc.beProductOf(dR, tc);
     // remember timestamp
     tempTcCounter = tStep->giveSolutionStateCounter();
-}
-
-
-int
-LIBeam3d2 :: updateRotationMatrix()
-{
-    /* returns a tranformation matrix between local coordinate system
-     * and global coordinate system, taking into account possible local
-     * coordinate system in nodes.
-     * if no transformation necessary - returns NULL
-     */
-    int isT_GtoL, isT_NtoG;
-    FloatMatrix T_GtoL, T_NtoG;
-
-    //rotationMatrixDefined flag ignored to account for corotational frame
-    //if (rotationMatrixDefined) return rotationMatrix;
-    //rotationMatrixDefined = 1;
-
-    // if nlGeometry use default cached rotation matrix assembly
-    if ( this->nlGeometry == 0 ) {
-        return NLStructuralElement :: updateRotationMatrix();
-    }
-
-    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-
-#ifdef DEBUG
-    if ( isT_GtoL ) {
-        if ( ( !T_GtoL.isSquare() ) ||
-            ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            _error("Libeam3d2 :: giveRotationMatrix - T_GtoL transformation matrix size mismatch");
-        }
-    }
-
-    if ( isT_NtoG ) {
-        if ( ( !T_NtoG.isSquare() ) ||
-            ( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            _error("Libeam3d2 :: giveRotationMatrix - T_NtoG transformation matrix size mismatch");
-        }
-    }
-
-#endif
-
-    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
-    } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL;
-    } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG;
-    } else {
-        int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
-        rotationMatrix.resize(ndofs, ndofs);
-        rotationMatrix.beUnitMatrix();
-    }
-    return true;
 }
 
 
@@ -677,12 +599,9 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     FloatMatrix b;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
-    if ( this->updateRotationMatrix() ) {
-        ui.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     this->computeBmatrixAt(gp, b);
-    // incerement of strains
+    // increment of strains
     answer.beProductOf(b, ui);
 
     if ( this->nlGeometry ) {
@@ -692,8 +611,6 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
             answer.add(PrevEpsilon);
         }
     }
-
-    return;
 }
 
 double
@@ -801,9 +718,6 @@ LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
     answer.at(5) = masterGpStrain.at(2);
     answer.at(6) = masterGpStrain.at(3);
-
-
-    return;
 }
 
 Interface *

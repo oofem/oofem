@@ -140,19 +140,10 @@ public:
     /** Returns true, if the local coordinate systems of receiver and given node are the same */
     bool hasSameLCS(Node *remote);
 
-    void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
-    void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
-    int requiresTransformation() { return ( this->hasLocalCS() || hasSlaveDofs ); }
+    virtual bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
+    virtual bool requiresTransformation() { return ( this->hasLocalCS() || hasSlaveDofs ); }
     virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    /**
-     * Computes transformation matrix for given dofs from global c.s to
-     * rotated coordinate system (given by localCoordinateSystem member value).
-     * @param answer Result of [map.giveSize(), map.giveSize()] size.
-     * @param map Array containing DofIDItem-type values (this is enumeration
-     * identifying physical meaning of particular DOF, see cltypes.h) for which transformation matrix is
-     * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
-     */
-    void computeGNDofTransformation(FloatMatrix &answer, const IntArray *map);
+
     /**
      * Updates receiver at end of time step (i.e. after equilibrium has been reached).
      * If EngngModel formulation ( see giveFormulation() member function) returns actualized

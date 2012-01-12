@@ -146,8 +146,7 @@ void LineSurfaceTension :: giveCharacteristicVector(FloatArray &answer, CharType
     if( mtrx == LoadVector )  {
         this->computeLoadVector(answer, mode, tStep);
     } else if ( mtrx == NodalInternalForcesVector ){
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance));
-        answer.zero();
+        answer.resize(0);
     } else {
         OOFEM_ERROR2("giveCharacteristicVector: Unknown CharType (%s).",__CharTypeToString(mtrx));
     }

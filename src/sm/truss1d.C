@@ -53,11 +53,10 @@ namespace oofem {
 Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SpatialLocalizerInterface()
-    , DirectErrorIndicatorRCInterface(),
+    SpatialLocalizerInterface(),
+    DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
-    // Constructor.
 {
     numberOfDofMans     = 2;
     length              = 0.;
@@ -83,6 +82,7 @@ Truss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
     answer.at(1, 2) = ( x2 - x1 ) / l / l;
 }
 
+
 void Truss1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
@@ -93,7 +93,6 @@ void Truss1d :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
     }
 }
-
 
 
 void
@@ -130,6 +129,7 @@ Truss1d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(1, 1) = n1;
     answer.at(1, 2) = n2;
 }
+
 
 int
 Truss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
@@ -197,8 +197,6 @@ Truss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 }
 
 
-
-
 void
 Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                             IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
@@ -240,8 +238,6 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Truss1d");
 }
-
-
 
 
 #ifdef __OOFEG
@@ -442,6 +438,7 @@ Truss1d :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
+
 int
 Truss1d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
@@ -475,9 +472,8 @@ Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answ
 
     answer.at(1, 1) = n1;
     answer.at(1, 2) = n2;
-
-    return;
 }
+
 
 void
 Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -487,6 +483,7 @@ Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
 }
+
 
 void
 Truss1d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
@@ -525,12 +522,14 @@ Truss1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords
     return 1;
 }
 
+
 int
 Truss1d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lc;
     return this->computeLocalCoordinates(lc, coords);
 }
+
 
 double
 Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -559,12 +558,12 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
 }
 
 
-
 double
 Truss1d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
     return this->giveLength();
 }
+
 
 int
 Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
@@ -588,6 +587,7 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
 
     return result;
 }
+
 
 void
 Truss1d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

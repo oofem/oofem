@@ -132,10 +132,6 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 
@@ -167,8 +163,6 @@ LIBeam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(5, 11) = n2;
     answer.at(6, 6) = n1;
     answer.at(6, 12) = n2;
-
-    return;
 }
 
 void
@@ -181,8 +175,8 @@ LIBeam3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
 
 
 
-int
-LIBeam3d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+bool
+LIBeam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     FloatMatrix lcs;
     int i, j;
@@ -199,9 +193,7 @@ LIBeam3d :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix
             answer.at(i + 9, j + 9) = lcs.at(i, j);
         }
     }
-
-    //delete lcs;
-    return 1;
+    return true;
 }
 
 
@@ -230,8 +222,6 @@ LIBeam3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
 
 
@@ -366,7 +356,6 @@ LIBeam3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     this->computeNmatrixAt(aGaussPoint, answer);
-    return;
 }
 
 
@@ -388,8 +377,6 @@ LIBeam3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     for ( i = 1; i <= 12; i++ ) {
         answer.at(i) = i;
     }
-
-    return;
 }
 
 double
@@ -428,11 +415,7 @@ LIBeam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
     }
-
-    //delete lcs;
     return 1;
-
-    ;
 }
 
 
@@ -511,9 +494,6 @@ LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(5) * layerZCoord - masterGpStrain.at(6) * layerYCoord;
     answer.at(5) = masterGpStrain.at(2);
     answer.at(6) = masterGpStrain.at(3);
-
-
-    return;
 }
 
 Interface *

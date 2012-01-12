@@ -308,10 +308,6 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
 
     if ( mode == TL ) {  // Total Lagrange formulation
         this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-        if ( this->updateRotationMatrix() ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
-
         // linear part of strain tensor (in vector form)
 
         this->computeBmatrixAt(gp, b, 1, 2);
@@ -338,8 +334,6 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
 
-        // delete Epsilon; // delete b;
-
         if ( nlGeometry ) {
             for ( i = 1; i <= 6; i++ ) {
                 // nonlin part of strain vector
@@ -352,14 +346,9 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
                 }
             }
         }
-
-        // delete u;
-        //
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("computeStrainVector : unsupported mode");
     }
-
-    return;
 }
 
 
@@ -397,8 +386,10 @@ Axisymm3d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
     }
 }
 
+
 void
-Axisymm3d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+Axisymm3d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -408,8 +399,6 @@ Axisymm3d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) c
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 
@@ -449,15 +438,13 @@ Axisymm3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &an
         return;
     }
 
-
     answer.zero();
 
     answer.at(1, 1) = n.at(1);
     answer.at(1, 2) = n.at(2);
     answer.at(1, 3) = n.at(3);
-
-    return;
 }
+
 
 void
 Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -504,9 +491,12 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
     }
 }
 
+
 int
 Axisymm3d :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
+{
+    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+}
 
 
 void
@@ -514,6 +504,7 @@ Axisymm3d :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, G
 {
     this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
 }
+
 
 SPRPatchType
 Axisymm3d :: SPRNodalRecoveryMI_givePatchType()
@@ -549,9 +540,8 @@ Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
     answer.at(1, 3) = n.at(2);
     answer.at(2, 2) = n.at(1);
     answer.at(2, 4) = n.at(2);
-
-    return;
 }
+
 
 void
 Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
@@ -580,9 +570,8 @@ Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
+
 
 double
 Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
@@ -651,10 +640,12 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 
 
 int
-Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
-  FloatArray lcoords;
-  return this->interpolation.global2local(lcoords, coords, FEIElementGeometryWrapper(this), 0.0);
+Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
+    FloatArray lcoords;
+    return this->interpolation.global2local(lcoords, coords, FEIElementGeometryWrapper(this), 0.0);
 }
+
 
 double
 Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

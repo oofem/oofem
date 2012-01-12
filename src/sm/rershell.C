@@ -179,8 +179,6 @@ void RerShell :: computeGaussPoints()
 }
 
 
-
-
 void
 RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
@@ -253,8 +251,6 @@ RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(5, 5) = l1;
     answer.at(5, 11) = l2;
     answer.at(5, 17) = l3;
-
-    return;
 }
 
 
@@ -285,8 +281,6 @@ RerShell :: giveArea()
 }
 
 
-
-
 IRResultType
 RerShell :: initializeFrom(InputRecord *ir)
 {
@@ -305,21 +299,16 @@ RerShell :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    FloatArray *coord1;
     GaussPoint *gp;
     double dV, mss1;
 
     answer.resize(18, 18);
     answer.zero();
-    coord1             = new FloatArray(2);
-    coord1->at(1)    = 0;
-    coord1->at(2)    = 0;
-    gp                 =  integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
     mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d', gp) / 3.;
@@ -335,10 +324,6 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(13, 13) = mss1;
     answer.at(14, 14) = mss1;
     answer.at(15, 15) = mss1;
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
 }
 
 void
@@ -524,9 +509,8 @@ int RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &co
 }
 
 
-
-int
-RerShell ::  computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+bool
+RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [18,18]
 // r(local) = T * r(global)
 //
@@ -713,8 +697,6 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     answer.at(6) = masterGpStrain.at(3) + masterGpStrain.at(6) * layerZCoord;
     answer.at(4) = masterGpStrain.at(8);
     answer.at(5) = masterGpStrain.at(7);
-
-    return;
 }
 
 
@@ -725,7 +707,6 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
     int i;
     GaussPoint *gp;
     FloatMatrix globTensorMembrane, globTensorPlate;
-    // int j;
 
     fprintf(file, "element %d :\n", number);
 
@@ -763,14 +744,13 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 }
 
 
-
 void
-RerShell ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+RerShell ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (6);
     answer.resize(6);
 
     answer.at(1) = D_u;
@@ -779,10 +759,7 @@ RerShell ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.at(4) = R_u;
     answer.at(5) = R_v;
     answer.at(6) = R_w;
-
-    return;
 }
-
 
 
 /*
@@ -858,9 +835,8 @@ RerShell :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
+
 
 void
 RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -868,6 +844,7 @@ RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 {
     this->giveIPValue(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), type, tStep);
 }
+
 
 void
 RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,

@@ -296,6 +296,10 @@ enum InputFieldType {
     IFT_ActiveBoundaryCondition_elementSides,
     IFT_ActiveBoundaryCondition_dofManagers,
 
+    IFT_MixedGradientPressureBC_devGradient,
+    IFT_MixedGradientPressureBC_pressure,
+    IFT_MixedGradientPressureBC_centerCoords,
+
     IFT_StressTensorLoad_stressTensor,
 
     IFT_PrescribedTensor_centercoords,
@@ -897,7 +901,7 @@ enum InputFieldType {
 
     IFT_HydrationModelInterface_hydration,
     IFT_HydrationModelInterface_castAt,
-    
+
     IFT_HydratingConcreteMat_referenceTemperature,
     IFT_HydratingConcreteMat_castAt,
     IFT_HydratingConcreteMat_hydrationModelType,
@@ -1319,7 +1323,7 @@ public:
     virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the FloatMatrix field value.
     virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString) = 0;
-    // Reads the array of strings.
+    /// Reads the array of strings.
     virtual IRResultType giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;

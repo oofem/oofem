@@ -194,12 +194,6 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 #if 1
         /* Original version */
         dman->giveUnknownVector( v_t, velocityMask, EID_MomentumBalance, VM_Total, atTime->givePreviousStep() );
-	if (dman->requiresTransformation()) {
-	  /// transform element unknown vertor to global cs.
-	  dman->computeDofTransformation(t, &velocityMask, _toGlobalCS);
-	  v_t.rotatedWith(t, 'n');
-	}
-
         /* Modified version */
         //dman->giveUnknownVector(v_t, velocityMask, EID_MomentumBalance, VM_Total, atTime);
 
@@ -232,12 +226,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 #else
         // pure explicit version
         dman->giveUnknownVector(v_t, velocityMask, EID_MomentumBalance, VM_Total, atTime);
-	if (dman->requiresTransformation()) {
-	  /// transform element unknown vertor to global cs.
-	  dman->computeDofTransformation(t, &velocityMask, _toGlobalCS);
-	  v_t.rotatedWith(t, 'n');
-	}
-	
+
         for ( ci = 1; ci <= nsd; ci++ ) {
             x2.at(ci) = x.at(ci) + dt *v_t.at(ci);
         }

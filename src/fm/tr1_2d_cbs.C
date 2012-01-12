@@ -82,10 +82,10 @@ TR1_2D_CBS :: ~TR1_2D_CBS()
 int
 TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
 {
-    if ( ut == EID_MomentumBalance ) {
-        return 2;
+    if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance ) {
+        return 6;
     } else if ( ut == EID_ConservationEquation ) {
-        return 1;
+        return 3;
     } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
@@ -94,7 +94,7 @@ TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
 }
 
 void
-TR1_2D_CBS ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
@@ -113,7 +113,7 @@ TR1_2D_CBS ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
 }
 
 void
-TR1_2D_CBS ::   giveElementDofIDMask(EquationID ut, IntArray &answer) const
+TR1_2D_CBS :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 {
     this->giveDofManDofIDMask(1, ut, answer);
 }

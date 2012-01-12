@@ -59,7 +59,7 @@ public:
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) { computeLumpedMassMatrix(answer, tStep); }
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    int computeGtoLRotationMatrix(FloatMatrix &);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     // layered cross section support functions
     void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,

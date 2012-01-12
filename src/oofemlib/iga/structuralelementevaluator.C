@@ -221,9 +221,6 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
      * // subtract initial displacements, if defined
      * if (initialDisplacements) u.subtract(initialDisplacements);
      */
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     this->computeStrainVector(answer, gp, stepN, u);
 }
@@ -255,8 +252,6 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     }
 
     answer.beProductOf(b, ur);
-
-    return;
 }
 
 
@@ -272,8 +267,6 @@ void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, Gauss
 
     this->computeStrainVector(Epsilon, gp, stepN);
     cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
-
-    return;
 }
 
 
@@ -289,8 +282,6 @@ void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, Gauss
 
     this->computeStrainVector(Epsilon, gp, stepN, u);
     cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
-
-    return;
 }
 
 void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
@@ -305,9 +296,6 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
      * // subtract initial displacements, if defined
      * if (initialDisplacements) u.subtract(initialDisplacements);
      */
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     int i, j;
     IntegrationRule *iRule;
@@ -375,12 +363,11 @@ void StructuralElementEvaluator :: computeNonForceLoadVector(FloatArray &answer,
     if ( helpLoadVector.giveSize() ) {
         answer.add(helpLoadVector);
     }
-
-    return;
 }
 
 
-void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) {
+void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
     int ir, j, numberOfIntegrationRules;
     FloatMatrix temp, bj, d, dbj;
     IntegrationRule *iRule;
@@ -435,143 +422,6 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
             answer.assemble(* m, irlocnum);
         }
     } // end loop over irules
-
-    if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix);
-    }
-
-    return;
 }
-
-
-#if 0  // HUHU
-int
-StructuralElementEvaluator :: updateRotationMatrix()
-{
-    /* returns a transformation matrix between local coordinate system
-     * and global coordinate system, taking into account possible local
-     * coordinate system in nodes.
-     * if no transformation necessary - returns NULL
-     */
-    int isT_NtoG;
-    FloatMatrix T_NtoG;
-
-    if ( rotationMatrixDefined ) {
-        return rotationMatrix.isNotEmpty();
-    }
-
-    rotationMatrixDefined = 1;
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-    if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG;
-    } else {
-        rotationMatrix.beEmptyMtrx();
-        return false;
-    }
-    returnt true;
-}
-#endif
-
-int
-StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
-{
-    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
-    Element *elem = this->giveElement();
-    int numberOfDofMans = elem->giveNumberOfDofManagers();
-
-    // test if transformation is necessary
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        flag += elem->giveDofManager(i)->requiresTransformation();
-    }
-
-    if ( flag == 0 ) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
-
-    // initialize answer
-    int gsize = elem->computeGlobalNumberOfDofs(EID_MomentumBalance);
-    if ( mode == _toGlobalCS ) {
-        answer.resize(elem->computeNumberOfL2GDofs(EID_MomentumBalance), gsize);
-    } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, elem->computeNumberOfL2GDofs(EID_MomentumBalance) );
-    } else {
-        OOFEM_ERROR("StructuralElementEvaluator::computeGNDofRotationMatrix:\n unsupported DofManTrasfType value");
-    }
-
-    answer.zero();
-
-    FloatMatrix dofManT;
-    IntArray dofIDmask;
-    int nr, nc;
-    // loop over nodes
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        elem->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
-        elem->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
-        nc = dofManT.giveNumberOfColumns();
-        nr = dofManT.giveNumberOfRows();
-        for ( j = 1; j <= nr; j++ ) {
-            for ( k = 1; k <= nc; k++ ) {
-                // localize node contributions
-                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
-            }
-        }
-
-        lastRowPos += nr;
-        lastColPos += nc;
-    }
-
-    return 1;
-}
-
-int
-StructuralElementEvaluator :: updateRotationMatrix()
-{
-    /* returns a transformation matrix between local coordinate system
-     * and global coordinate system, taking into account possible local
-     * coordinate system in nodes.
-     * if no transformation necessary - returns NULL
-     */
-    int isT_GtoL, isT_NtoG;
-    FloatMatrix T_GtoL, T_NtoG;
-
-    if ( rotationMatrixDefined ) {
-        return rotationMatrix.isNotEmpty();
-    }
-
-    rotationMatrixDefined = 1;
-    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-
-#ifdef DEBUG
-    if ( isT_GtoL ) {
-        if ( ( !T_GtoL.isSquare() ) ||
-						 ( T_GtoL.giveNumberOfRows() != this->giveElement()->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            OOFEM_ERROR("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
-        }
-    }
-
-    if ( isT_NtoG ) {
-      if ( T_NtoG.giveNumberOfRows() != this->giveElement()->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
-            OOFEM_ERROR("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
-        }
-    }
-
-#endif
-
-    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
-    } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL;
-    } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG;
-    } else {
-        rotationMatrix.beEmptyMtrx();
-        return false;
-    }
-    return true;
-}
-
-
 
 } // end namespace oofem

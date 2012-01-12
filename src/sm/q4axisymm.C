@@ -52,16 +52,16 @@
 namespace oofem {
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 8;
     numberOfGaussPoints          = 4;
     numberOfFiAndShGaussPoints   = 1;
 }
 
+
 Q4Axisymm :: ~Q4Axisymm()
-// Destructor
 { }
+
 
 FloatArray *
 Q4Axisymm :: GiveDerivativeKsi(double ksi, double eta)
@@ -82,6 +82,7 @@ Q4Axisymm :: GiveDerivativeKsi(double ksi, double eta)
     return n;
 }
 
+
 FloatArray *
 Q4Axisymm :: GiveDerivativeEta(double ksi, double eta)
 {
@@ -100,6 +101,7 @@ Q4Axisymm :: GiveDerivativeEta(double ksi, double eta)
 
     return n;
 }
+
 
 void
 Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
@@ -209,13 +211,10 @@ Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     int i;
     double ksi, eta;
-    // FloatArray   *n;
-    // FloatMatrix  *answer;
 
     ksi = aGaussPoint->giveCoordinate(1);
     eta = aGaussPoint->giveCoordinate(2);
 
-    //n = new FloatArray (8);
     FloatArray n(8);
 
     n.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
@@ -227,7 +226,6 @@ Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     n.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
     n.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
 
-    //answer = new FloatMatrix(2,16);
     answer.resize(2, 16);
     answer.zero();
 
@@ -235,8 +233,6 @@ Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -306,7 +302,6 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 Q4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -368,19 +363,14 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
 {
-    int rot;
     FloatMatrix b, A;
     FloatArray u, Epsilon, help;
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     answer.resize(6);
     answer.zero();
-    rot     = this->updateRotationMatrix();
     if ( mode == TL ) { // Total Lagrange formulation
         this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
 
         // linear part of strain tensor (in vector form)
 
@@ -397,7 +387,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
             // instead of evaluating in given gp
             //
             GaussPoint *helpGaussPoint;
-            helpGaussPoint     = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
+            helpGaussPoint = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
 
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
@@ -408,8 +398,6 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
-
-        // delete Epsilon;  delete b;
 
         /*
          * if (nlGeometry) {
@@ -428,12 +416,11 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
     } else if ( mode == AL ) { // actualized Lagrange formulation
         _error("ComputeStrainVector : unsupported mode");
     }
-
-    return;
 }
 
 void
-Q4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Q4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -443,8 +430,6 @@ Q4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 

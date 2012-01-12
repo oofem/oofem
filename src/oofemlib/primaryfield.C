@@ -86,7 +86,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &ans
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 {
-  int eq = dof->giveEquationNumber(emodel->giveUnknownNumberingScheme(this->ut));
+    int eq = dof->giveEquationNumber(emodel->giveUnknownNumberingScheme(this->ut));
     if ( eq == 0 ) {
         _error("giveUnknownValue: invalid equation number");
     }
@@ -108,21 +108,21 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager* dman,
 			     ValueModeType mode, TimeStep *atTime,
 			     IntArray *dofId)
 {
-  if (dman->giveDomain() == this->emodel->giveDomain(domainIndx)) {
-    if (dofId) {
-      dman->giveUnknownVector(answer, *dofId, *this, mode, atTime);
-      return 0; // ok
-    } else { // all dofs requested
-      int i, size = dman->giveNumberOfDofs();      
-      for (i=1; i<=size; i++) {
-	answer.at(i)=dman->giveDof(i)->giveUnknown(*this, mode, atTime);
-      }
-      return 0; // ok
-    }
-  } else {
-    return this->__evaluateAt(answer, *dman->giveCoordinates(),
+    if (dman->giveDomain() == this->emodel->giveDomain(domainIndx)) {
+        if (dofId) {
+            dman->giveUnknownVector(answer, *dofId, *this, mode, atTime);
+            return 0; // ok
+        } else { // all dofs requested
+            int i, size = dman->giveNumberOfDofs();
+            for (i=1; i<=size; i++) {
+                answer.at(i)=dman->giveDof(i)->giveUnknown(*this, mode, atTime);
+            }
+            return 0; // ok
+        }
+    } else {
+        return this->__evaluateAt(answer, *dman->giveCoordinates(),
 			      mode, atTime, dofId);
-  }
+    }
 }
 
 
@@ -131,42 +131,42 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
 			     ValueModeType mode, TimeStep *atTime,
 			     IntArray *dofId)
 {
-   Element *bgelem;
-   Domain *domain = emodel->giveDomain(domainIndx);
-   SpatialLocalizer *sl = domain->giveSpatialLocalizer();
-   // locate background element
-   if ( ( bgelem = sl->giveElementContainingPoint(coords) ) == NULL ) {
-     //_error ("PrimaryField::evaluateAt: point not found in domain\n");
-     return 1;
-   }
-   
-   EIPrimaryFieldInterface *interface = ( EIPrimaryFieldInterface * ) ( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
-   if ( interface ) {
-     if (dofId) {
-       return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, *dofId, mode, atTime);
-     } else { // use element default dof id mask
-       IntArray elemDofId;
-       bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
-       return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, atTime);
-     }
-   } else {
-     _error("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
-     return 1; // failed
-   } 
+    Element *bgelem;
+    Domain *domain = emodel->giveDomain(domainIndx);
+    SpatialLocalizer *sl = domain->giveSpatialLocalizer();
+    // locate background element
+    if ( ( bgelem = sl->giveElementContainingPoint(coords) ) == NULL ) {
+        //_error ("PrimaryField::evaluateAt: point not found in domain\n");
+        return 1;
+    }
+
+    EIPrimaryFieldInterface *interface = ( EIPrimaryFieldInterface * ) ( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
+    if ( interface ) {
+        if (dofId) {
+            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, *dofId, mode, atTime);
+        } else { // use element default dof id mask
+            IntArray elemDofId;
+            bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
+            return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, atTime);
+        }
+    } else {
+        _error("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
+        return 1; // failed
+    }
 }
 
 int PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
 			       ValueModeType mode, TimeStep *atTime)
 {
-  return this->__evaluateAt(answer, coords, mode, atTime, NULL);
+    return this->__evaluateAt(answer, coords, mode, atTime, NULL);
 }
 
 
-int 
+int
 PrimaryField::evaluateAt(FloatArray &answer, DofManager* dman,
-			 ValueModeType mode, TimeStep *atTime) 
+			 ValueModeType mode, TimeStep *atTime)
 {
-  return this->__evaluateAt(answer, dman, mode, atTime, NULL);
+    return this->__evaluateAt(answer, dman, mode, atTime, NULL);
 }
 
 

@@ -85,7 +85,7 @@ protected:
     void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }
-    int computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 };
 } // end namespace oofem
 #endif // interfaceelem2dquad_h

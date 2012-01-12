@@ -95,7 +95,6 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     reactions.resize(numRestrDofs);
     // compute reaction forces
     this->computeReactions(reactions, tStep, di);
-
     //
     // loop over reactions and print them
     //

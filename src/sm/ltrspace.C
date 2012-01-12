@@ -243,52 +243,6 @@ void LTRSpace :: computeGaussPoints()
 }
 
 
-/*
- * FloatArray*  LTRSpace :: ComputeBodyLoadVectorAt (Load* forLoad, TimeStep* stepN)
- * // Computes numerically the load vector of the receiver due to the body
- * // loads, at stepN.
- * {
- * double      dV, load;
- * GaussPoint* gp = NULL;
- * FloatArray  *answer,*f,*coord1 ;
- *
- *
- * f = forLoad -> ComputeValueAt(stepN)->times(this->giveMaterial() -> give('d'));
- *
- * if (!f) {
- * return NULL;                              // nil resultant
- * } else {
- * coord1             = new FloatArray(3) ;
- * coord1 -> at(1)    = 0 ;
- * coord1 -> at(2)    = 0 ;
- * coord1 -> at(3)    = 0 ;
- * gp                 = integrationRulesArray[0]->getIntegrationPoint(0);
- *
- * dV = this->computeVolumeAround(gp);             // 6.0*Volume /6.
- * answer = new FloatArray(6) ;
- *
- * load=f->at(1) * dV / 4.0;
- * answer->at(1)=load ;
- * answer->at(4)=load ;
- * answer->at(7)=load ;
- *
- * load=f->at(2) * dV / 4.0;
- * answer->at(2)=load ;
- * answer->at(5)=load ;
- * answer->at(8)=load ;
- *
- * load=f->at(3) * dV / 4.0;
- * answer->at(3)=load ;
- * answer->at(6)=load ;
- * answer->at(9)=load ;
- *
- * delete f ;
- * delete gp;
- * return answer ;
- * }
- * }
- */
-
 void
 LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
@@ -311,13 +265,7 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     for ( int i = 1; i <= 12; i++ ) {
         answer.at(i, i) = mss1;
     }
-
-    //  this -> giveRotationMatrix () ;
-    //  if (rotationMatrix) answer.rotatedWith(rotationMatrix) ;
 }
-
-
-
 
 
 void
@@ -898,8 +846,6 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
     for ( i = 1; i <= n; i++ ) {
         answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i) + l4 *list.at(4)->at(i);
     }
-
-    return;
 }
 
 
@@ -932,8 +878,6 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
     answer.at(2, 5) = n.at(2);
     answer.at(3, 3) = n.at(1);
     answer.at(3, 6) = n.at(2);
-
-    return;
 }
 
 void
@@ -990,8 +934,6 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
 
 double
