@@ -36,16 +36,13 @@
 #define fluiddynamicmaterial_h
 
 #include "material.h"
-#include "dictionr.h"
+#include "matstatus.h"
+
 #include "flotarry.h"
 #include "flotmtrx.h"
 
-#include "matconst.h"
-#include "structuralelement.h"
-#include "matstatus.h"
 
 namespace oofem {
-class GaussPoint;
 
 /**
  * This class implements a transport material status information. It is an attribute of

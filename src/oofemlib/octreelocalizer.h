@@ -36,7 +36,9 @@
 #define octreelocalizer_h
 
 #include "spatiallocalizer.h"
-#include "compiler.h"
+#include "flotarry.h"
+#include "alist.h"
+#include "intarray.h"
 
 #ifndef __MAKEDEPEND
  #include <set>

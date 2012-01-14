@@ -85,18 +85,17 @@ namespace oofem {
  #undef PRINTF
 CemhydMat :: CemhydMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
 {
-    /// Constructor
     MasterCemhydMatStatus = NULL;
 }
 
 CemhydMat :: ~CemhydMat()
 {
-    /// destructor
 }
 
-///returns hydration power [W/m3 of concrete]
+//returns hydration power [W/m3 of concrete]
 void
-CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode) {
+CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+{
     double averageTemperature;
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     val.resize(1);
@@ -125,13 +124,15 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
 }
 
 void
-CemhydMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime) {
+CemhydMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     ms->letTempStateVectorBe(vec);
 }
 
 
-int CemhydMat :: giveCycleNumber(GaussPoint *gp) {
+int CemhydMat :: giveCycleNumber(GaussPoint *gp)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -140,7 +141,8 @@ int CemhydMat :: giveCycleNumber(GaussPoint *gp) {
     return ms->GiveCycNum();
 }
 
-double CemhydMat :: giveTimeOfCycle(GaussPoint *gp) {
+double CemhydMat :: giveTimeOfCycle(GaussPoint *gp)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -151,7 +153,8 @@ double CemhydMat :: giveTimeOfCycle(GaussPoint *gp) {
 
 
 
-double CemhydMat :: giveDoHActual(GaussPoint *gp) {
+double CemhydMat :: giveDoHActual(GaussPoint *gp)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -161,7 +164,8 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp) {
 }
 
 //standard units are [Wm-1K-1]
-double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
+double CemhydMat :: giveConcreteConductivity(GaussPoint *gp)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double conduct;
 
@@ -191,7 +195,8 @@ double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
 }
 
 //normally it returns J/kg/K of concrete
-double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
+double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double capacityConcrete;
 
@@ -221,7 +226,8 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
     return capacityConcrete;
 }
 
-double CemhydMat :: giveConcreteDensity(GaussPoint *gp) {
+double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
+{
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double concreteBulkDensity;
     if ( MasterCemhydMatStatus ) {
@@ -423,7 +429,8 @@ int CemhydMat :: initMaterial(Element *element) {
     return 1;
 }
 
-void CemhydMat :: clearWeightTemperatureProductVolume(Element *element) {
+void CemhydMat :: clearWeightTemperatureProductVolume(Element *element)
+{
     IntegrationRule *iRule;
     GaussPoint *gp;
     CemhydMatStatus *ms;
@@ -437,7 +444,8 @@ void CemhydMat :: clearWeightTemperatureProductVolume(Element *element) {
     }
 }
 
-void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep *tStep) {
+void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep *tStep)
+{
     IntegrationRule *iRule;
     GaussPoint *gp;
     CemhydMatStatus *ms;
@@ -500,7 +508,7 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_CemhydMat_reinforcementDegree, "reinforcementdegree"); // Macro
-    IR_GIVE_FIELD2(ir, XMLfileName, IFT_CemhydMat_inputFileName, "file", MAX_FILENAME_LENGTH);
+    IR_GIVE_FIELD(ir, XMLfileName, IFT_CemhydMat_inputFileName, "file");
 
     return IRRT_OK;
 }
@@ -515,7 +523,7 @@ CemhydMat :: CreateStatus(GaussPoint *gp) const
 }
 
 
-///constructor allowing to copy a microstructure from another CemhydMatStatus
+//constructor allowing to copy a microstructure from another CemhydMatStatus
 //particular instance of CemhydMat in an integration point
 CemhydMatStatus :: CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatStatus *CemStat, CemhydMat *cemhydmat, bool withMicrostructure) : TransportMaterialStatus(n, d, gp)
 {
@@ -543,9 +551,9 @@ CemhydMatStatus :: CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatSt
     if ( withMicrostructure ) {
         this->initializeMicrostructure();
         if ( !CemStat ) {
-            this->readInputFileAndInitialize(cemhydmat->XMLfileName, 1);
+            this->readInputFileAndInitialize(cemhydmat->XMLfileName.c_str(), 1);
         } else { //copy 3D microstructure
-            this->readInputFileAndInitialize(cemhydmat->XMLfileName, 0); //read input but do not reconstruct 3D microstructure
+            this->readInputFileAndInitialize(cemhydmat->XMLfileName.c_str(), 0); //read input but do not reconstruct 3D microstructure
             for ( k = 0; k < SYSIZE; k++ ) {
                 for ( j = 0; j < SYSIZE; j++ ) {
                     for ( i = 0; i < SYSIZE; i++ ) {
@@ -561,7 +569,8 @@ CemhydMatStatus :: CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatSt
 #endif //__TM_MODULE
 
 
-void CemhydMatStatus :: initializeMicrostructure() {
+void CemhydMatStatus :: initializeMicrostructure()
+{
     icyc = 1; //set the cycle counter
     time_cur = 0.; //hydration time [h]
     heat_new = 0.;
@@ -7380,7 +7389,7 @@ double CemhydMatStatus :: GivePower(double GiveTemp, double TargTime) {
     double castingTime = 0.;
 #endif
 
-    //do not calculate anything before casting time 
+    //do not calculate anything before casting time
     if ( TargTime - castingTime <= 0 ) {
         PartHeat = 0.;
         LastCallTime = castingTime;

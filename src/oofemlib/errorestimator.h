@@ -47,6 +47,7 @@
 #include "remeshingcrit.h"
 #include "classtype.h"
 #include "errorestimatortype.h"
+#include "intarray.h"
 
 namespace oofem {
 class Domain;

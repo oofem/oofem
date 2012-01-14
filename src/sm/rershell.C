@@ -60,7 +60,6 @@
 namespace oofem {
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans  = 3;
     GtoLRotationMatrix = NULL;
@@ -93,7 +92,6 @@ RerShell :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 // evaluated at aGaussPoint.
 {
     int i, j, k, ii, ki;
-    // FloatMatrix *answer ;
     FloatArray b(3), c(3), nodeCoords;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -120,7 +118,6 @@ RerShell :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
     area = this->giveArea();
 
-    //answer = new FloatMatrix(8,18);
     answer.resize(8, 18);
     answer.zero();
 
@@ -163,11 +160,11 @@ RerShell :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     }
 
     answer.times( 1. / ( 2. * area ) );
-    return;
 }
 
 
-void RerShell :: computeGaussPoints()
+void
+RerShell :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( !integrationRulesArray ) {
@@ -186,7 +183,6 @@ RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     double x1, x2, x3, y1, y2, y3, l1, l2, l3, b1, b2, b3, c1, c2, c3;
     FloatArray nodeCoords;
-    //FloatMatrix* answer;
 
     l1 = aGaussPoint->giveCoordinate(1);
     l2 = aGaussPoint->giveCoordinate(2);
@@ -326,6 +322,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(15, 15) = mss1;
 }
 
+
 void
 RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
 // Computes numerically the load vector of the receiver due to the body
@@ -388,7 +385,6 @@ RerShell :: computeGtoLRotationMatrix()
 // e3'    : e1' x help
 // e2'    : e3' x e1'
 {
-    // double n,val;
     int i;
 
     if ( GtoLRotationMatrix == NULL ) {
@@ -441,7 +437,8 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //converts global coordinates to local planar area coordinates, does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
 #define POINT_TOL 1.e-3
-int RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
+int
+RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
     //set size of return value to 3 area coordinates
     answer.resize(3);

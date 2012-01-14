@@ -107,7 +107,7 @@ public:
      * @return Newly allocated boundary condition with required type.
      * @see CreateUsrDefLoadOfType
      */
-    GeneralBoundaryCondition *ofType(char *aClass);
+    GeneralBoundaryCondition *ofType(const char *aClass);
 
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to

@@ -32,12 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "buffereddatareader.h"
+#include "error.h"
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <ctype.h>
 #endif
-#include "buffereddatareader.h"
-#include "dynalist.h"
 
 namespace oofem {
 BufferedDataReader :: BufferedDataReader()

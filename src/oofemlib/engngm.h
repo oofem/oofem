@@ -492,7 +492,7 @@ public:
      * Prints header, opens the outFileName, instanciate itself the receiver using
      * using virtual initializeFrom service and instanciates all problem domains.
      */
-    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, char *outFileName, char *desc);
+    virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
     /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database

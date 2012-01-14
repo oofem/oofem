@@ -36,11 +36,14 @@
 #define leplic_h
 
 #include "materialinterface.h"
-#include <cmath>
+#include "flotarry.h"
+#include "mathfem.h"
+#include "interface.h"
 
 namespace oofem {
 class LEPlic;
 class Polygon;
+class Element;
 
 /**
  * Element interface for LEPlic class representing Lagrangian-Eulerian (moving) material interface.

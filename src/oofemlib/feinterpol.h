@@ -37,6 +37,7 @@
 
 #include "error.h"
 #include "inputrecord.h"
+#include "intarray.h"
 
 namespace oofem {
 class Element;
@@ -62,7 +63,7 @@ public:
 
 
 /**
- * Void cell geometry wrapper. 
+ * Void cell geometry wrapper.
  * Allows to use some interpolation services not needing the reference to cell geometry.
  */
 class FEIVoidCellGeometry : public FEICellGeometry
@@ -162,7 +163,7 @@ public:
      */
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
-     * Evaluates local coordinates from given global ones. 
+     * Evaluates local coordinates from given global ones.
      * @param answer Contains evaluated local coordinates.
      * @param gcoords Array containing global coordinates.
      * @param cellgeo Underlying cell geometry.
@@ -191,7 +192,7 @@ public:
      * basis functions are generally nonzero.
      */
     virtual int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) { return 0; }
-    /** 
+    /**
      * Returns the number of nonzero basis functions at individual knot span,
      * @return Zero in case of all basis functions generally nonzero, answer otherwise.
      */

@@ -36,7 +36,6 @@
 #define cbselement_h
 
 #include "fmelement.h"
-#include "flotmtrx.h"
 
 namespace oofem {
 class TimeStep;

@@ -602,7 +602,7 @@ Element :: postInitialize()
 
 
 Element *
-Element :: ofType(char *aClass)
+Element :: ofType(const char *aClass)
 // Returns a new element, which has the same number than the receiver,
 // but belongs to aClass (PlaneStrain, or Truss2D,..).
 {

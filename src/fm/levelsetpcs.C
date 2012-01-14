@@ -69,6 +69,7 @@ LevelSetPCS :: initialize()
     levelSetVersion++;
 }
 
+
 IRResultType
 LevelSetPCS :: initializeFrom(InputRecord *ir)
 {
@@ -553,6 +554,7 @@ LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime)
     return 0.0;
 }
 
+
 double
 LevelSetPCS :: evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime)
 {
@@ -566,6 +568,7 @@ LevelSetPCS :: evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime)
 
     return 0.0;
 }
+
 
 void
 LevelSetPCS :: FMMReinitialization(FloatArray &dmanValues)
@@ -626,8 +629,6 @@ LevelSetPCS :: FMMReinitialization(FloatArray &dmanValues)
 }
 
 
-
-
 contextIOResultType
 LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -643,6 +644,7 @@ LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     return CIO_OK;
 }
+
 
 contextIOResultType
 LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)

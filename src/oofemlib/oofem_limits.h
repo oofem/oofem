@@ -44,8 +44,6 @@ namespace oofem {
 #define MAX_NAME_LENGTH 40
 /// Maximum file name path string length.
 #define MAX_FILENAME_LENGTH 120
-/// Maximum class name string length.
-#define MAX_CLASSNAME_LENGTH 50
 /// Maximum number of tokens.
 #define OOFEM_MAX_TOKENS 8000
 /// Maximum length of error message.

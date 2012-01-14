@@ -37,6 +37,7 @@
 
 #include "materialinterface.h"
 #include "geotoolbox.h"
+#include "interface.h"
 
 #ifndef __MAKEDEPEND
  #include <vector>

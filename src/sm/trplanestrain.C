@@ -39,17 +39,12 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-// #include "polynoxy.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
 #include "verbose.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 #include "mathfem.h"
 
 #ifdef __OOFEG
@@ -61,8 +56,8 @@
 namespace oofem {
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
-    , DirectErrorIndicatorRCInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
+    DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
     // Constructor.
@@ -187,7 +182,6 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
 // Returns the [4x6] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    // FloatMatrix *answer ;
     Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -206,7 +200,6 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
 
-    // answer = new FloatMatrix(3,6) ;
     answer.resize(4, 6);
 
     answer.at(1, 1) = y2 - y3;
@@ -226,7 +219,6 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     answer.at(4, 6) = y1 - y2;
 
     answer.times( 1. / ( 2. * area ) );
-    return;
 }
 
 
@@ -248,13 +240,11 @@ TrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double l1, l2, l3;
-    // FloatMatrix* answer ;
 
     l1 = aGaussPoint->giveCoordinate(1);
     l2 = aGaussPoint->giveCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
-    //answer = new FloatMatrix(2,6) ;
     answer.resize(2, 6);
     answer.zero();
 
@@ -265,10 +255,7 @@ TrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(2, 2) = l1;
     answer.at(2, 4) = l2;
     answer.at(2, 6) = l3;
-
-    return;
 }
-
 
 
 void
@@ -301,9 +288,8 @@ TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoi
     answer.at(1, 3) = n2;
     answer.at(2, 2) = n1;
     answer.at(2, 4) = n2;
-
-    return;
 }
+
 
 void
 TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
@@ -332,9 +318,8 @@ TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
+
 
 double
 TrPlaneStrain ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
@@ -364,6 +349,7 @@ TrPlaneStrain ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     length = sqrt(dx * dx + dy * dy);
     return 0.5 *length *aGaussPoint->giveWeight();
 }
+
 
 void
 TrPlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
@@ -443,26 +429,9 @@ TrPlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, 
 }
 
 
-
-
 double TrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    /*   FloatMatrix* jacob ;
-     * FloatArray*  coord ;
-     * double       determinant,weight,thickness,volume ;
-     *
-     * coord       = aGaussPoint -> giveCoordinates() ;
-     * jacob       = this -> giveJacobianMatrixAt(coord) ;
-     * determinant = fabs (jacob->giveDeterminant()) ;
-     * weight      = aGaussPoint -> giveWeight() ;
-     * thickness   = this -> giveMaterial() -> give('t') ;
-     *
-     * volume      = determinant * weight * thickness ;
-     *
-     *
-     * return volume ; */
-
     double area, weight;
 
     weight  = aGaussPoint->giveWeight();
@@ -596,19 +565,17 @@ TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 
 
 void
-TrPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+TrPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
 
-    // IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 
@@ -703,9 +670,8 @@ TrPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
+
 
 void
 TrPlaneStrain :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -716,12 +682,14 @@ TrPlaneStrain :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, 
     this->giveIPValue(answer, gp, type, tStep);
 }
 
+
 void
 TrPlaneStrain :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                            InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
 }
+
 
 void
 TrPlaneStrain :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -731,6 +699,7 @@ TrPlaneStrain :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
     pap.at(2) = this->giveNode(2)->giveNumber();
     pap.at(3) = this->giveNode(3)->giveNumber();
 }
+
 
 void
 TrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
@@ -745,9 +714,12 @@ TrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
     }
 }
 
+
 int
 TrPlaneStrain :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return 1; }
+{
+    return 1;
+}
 
 
 void
@@ -810,10 +782,12 @@ TrPlaneStrain :: computeLocalCoordinates(FloatArray &answer, const FloatArray &c
 
 
 int
-TrPlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+TrPlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
+
 
 double
 TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -843,7 +817,8 @@ TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
 
 
 double
-TrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+TrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     return sqrt(this->giveArea() * 2.0);
 }
 
@@ -876,11 +851,13 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
     return result;
 }
 
+
 void
 TrPlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
+
 
 void
 TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
@@ -905,10 +882,7 @@ TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray
     for ( i = 1; i <= n; i++ ) {
         answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i);
     }
-
-    return;
 }
-
 
 
 void

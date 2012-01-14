@@ -81,7 +81,7 @@ LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 
 
 
-LoadTimeFunction *LoadTimeFunction :: ofType(char *aClass)
+LoadTimeFunction *LoadTimeFunction :: ofType(const char *aClass)
 // Returns a new function, which has the same number than the receiver,
 // but which also is typed (ConstantFunction, PeakFunction,...).
 {

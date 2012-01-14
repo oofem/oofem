@@ -36,13 +36,8 @@
 #define oofemtxtinputrecord_h
 
 #include "inputrecord.h"
-#include "intarray.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "dictionr.h"
-#include "dynalist.h"
-#include "range.h"
 #include "tokenizer.h"
+#include "dynalist.h"
 
 namespace oofem {
 #define IR_MAX_ERROR_LENGTH 100
@@ -61,7 +56,7 @@ protected:
     Tokenizer tokenizer;
     bool readFlag [ OOFEM_MAX_TOKENS ];
 
-    // Record representation.
+    /// Record representation.
     char record [ OOFEM_MAX_LINE_LENGTH ];
 
 public:
@@ -87,11 +82,10 @@ public:
     void finish(bool wrn = true);
 
 public:
-    virtual IRResultType giveRecordKeywordField(char *answer, int &value, int maxchar);
-    virtual IRResultType giveRecordKeywordField(char *answer, int maxchar);
+    virtual IRResultType giveRecordKeywordField(std::string &answer, int &value);
+    virtual IRResultType giveRecordKeywordField(std::string &answer);
     virtual IRResultType giveField(int &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(char *answer, int maxchar, const InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(std::string &answer, const InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString);
@@ -100,17 +94,6 @@ public:
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
 
-    virtual IRResultType giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
-
     virtual bool hasField(const InputFieldType fieldID, const char *idString);
 
 protected:
@@ -118,7 +101,6 @@ protected:
     int scanInteger(const char *source, int &value);
     int scanDouble(const char *source, double &value);
     void setReadFlag(int itok) { readFlag [ itok - 1 ] = true; }
-
 
     const char *__getPosAfter(const char *, const char *);
     const char *__scanInteger(const char *source, int *value);

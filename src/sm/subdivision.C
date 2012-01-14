@@ -3553,7 +3553,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     GeneralBoundaryCondition *bc;
     InitialCondition *ic;
     LoadTimeFunction *ltf;
-    char name [ MAX_NAME_LENGTH ];
+    std::string name;
     const char *__proc = "createMesh"; // Required by IR_GIVE_FIELD macro
 
     // create new mesh (missing param for new mesh!)
@@ -3840,10 +3840,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     for ( i = 1; i <= ncrosssect; i++ ) {
         domain->giveCrossSection(i)->giveInputRecordString(irString);
         irPtr->setRecordString( irString.c_str() );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ( crossSection  = ( CrossSection * )
-                          ( CrossSection(i, * dNew).ofType(name) ) )->initializeFrom(irPtr);
+                          ( CrossSection(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
         ( * dNew )->setCrossSection(i, crossSection);
     }
 
@@ -3853,10 +3853,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     for ( i = 1; i <= nmat; i++ ) {
         domain->giveMaterial(i)->giveInputRecordString(irString);
         irPtr->setRecordString( irString.c_str() );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ( mat  = ( Material * )
-                 ( Material(i, * dNew).ofType(name) ) )->initializeFrom(irPtr);
+            ( Material(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
         ( * dNew )->setMaterial(i, mat);
     }
 
@@ -3866,9 +3866,9 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     for ( i = 1; i <= nbarriers; i++ ) {
         domain->giveNonlocalBarrier(i)->giveInputRecordString(irString);
         irPtr->setRecordString( irString.c_str() );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        barrier = CreateUsrDefNonlocalBarrierOfType(name, i, * dNew);
+        barrier = CreateUsrDefNonlocalBarrierOfType(name.c_str(), i, * dNew);
         barrier->initializeFrom(irPtr);
         ( * dNew )->setNonlocalBarrier(i, barrier);
     }
@@ -3879,10 +3879,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     for ( i = 1; i <= nbc; i++ ) {
         domain->giveBc(i)->giveInputRecordString(irString);
         irPtr->setRecordString( irString.c_str() );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ( bc = ( GeneralBoundaryCondition * )
-               ( GeneralBoundaryCondition(i, * dNew).ofType(name) ) )->initializeFrom(irPtr);
+            ( GeneralBoundaryCondition(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
         ( * dNew )->setBoundaryCondition(i, bc);
     }
 
@@ -3892,7 +3892,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     for ( i = 1; i <= nic; i++ ) {
         domain->giveIc(i)->giveInputRecordString(irString);
         irPtr->setRecordString( irString.c_str() );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ic = new InitialCondition(i, *dNew);
         ic->initializeFrom(irPtr);
@@ -3905,10 +3905,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     for ( i = 1; i <= nltf; i++ ) {
         domain->giveLoadTimeFunction(i)->giveInputRecordString(irString);
         irPtr->setRecordString( irString.c_str() );
-        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ( ltf  = ( LoadTimeFunction * )
-                 ( LoadTimeFunction(i, * dNew).ofType(name) ) )->initializeFrom(irPtr);
+            ( LoadTimeFunction(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
         ( * dNew )->setLoadTimeFunction(i, ltf);
     }
 

@@ -32,11 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "oofemtxtdatareader.h"
+#include "error.h"
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <ctype.h>
 #endif
-#include "oofemtxtdatareader.h"
 
 namespace oofem {
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(), ir()

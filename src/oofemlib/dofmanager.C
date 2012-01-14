@@ -754,7 +754,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-DofManager *DofManager :: ofType(char *aClass)
+DofManager *DofManager :: ofType(const char *aClass)
 // Returns a new DofManager, which has the same number than the receiver,
 // but belongs to aClass (Node, ElementSide,..).
 {

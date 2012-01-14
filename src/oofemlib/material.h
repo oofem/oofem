@@ -36,29 +36,23 @@
 #define material_h
 
 #include "femcmpnn.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
 
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
-#include "nonlocalmaterialext.h"
 #include "timestep.h"
-#include "classtype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "matresponseform.h"
 #include "matresponsemode.h"
 #include "materialextension.h"
-#include "contextioresulttype.h"
-#include "contextmode.h"
 
 namespace oofem {
 #define STRAIN_STEPS 10.0
 
 class GaussPoint;
-
+class Dictionary;
+class FloatArray;
+class FloatMatrix;
 
 /**
  * Abstract base class for all material models. Declares the basic common interface
@@ -109,8 +103,8 @@ protected:
      * material model
      */
     double castingTime;
-public:
 
+public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
@@ -278,7 +272,7 @@ public:
      * @return Newly allocated material model with required type.
      * @see CreateUsrDefMaterialOfType
      */
-    Material *ofType(char *aClass);
+    Material *ofType(const char *aClass);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

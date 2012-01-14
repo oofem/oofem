@@ -55,6 +55,7 @@ LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 
+
 void
 LinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                   MatResponseForm form, MatResponseMode rMode,
@@ -78,8 +79,6 @@ LinearElasticMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     default:
         StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -112,7 +111,6 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
     thickness3 = thickness * thickness * thickness;
 
     if ( form == ReducedForm ) {
-        //answer = new FloatMatrix (5,5);
         answer.resize(5, 5);
         answer.zero();
 
@@ -128,7 +126,6 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
 
         answer.at(5, 5) = answer.at(4, 4);
     } else {
-        //answer = new FloatMatrix (8,8);
         answer.resize(8, 8);
         answer.zero();
 
@@ -142,10 +139,8 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
         answer.at(7, 7) = mat3d.at(6, 6) * thickness * ( 5. / 6. );
         answer.at(8, 8) = answer.at(7, 7);
     }
-
-    //delete mat3d;
-    return;
 }
+
 
 void
 LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
@@ -168,7 +163,6 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
     this->givePlaneStressStiffMtrx(mat, ReducedForm, rMode, gp, tStep);
 
     if ( form == ReducedForm ) {
-        //answer = new FloatMatrix (4,4);
         answer.resize(4, 4);
         answer.zero();
 
@@ -180,7 +174,6 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
 
         answer.at(4, 4) = mat.at(3, 3);
     } else {
-        //answer = new FloatMatrix (7,7);
         answer.resize(7, 7);
         answer.zero();
 
@@ -194,9 +187,6 @@ LinearElasticMaterial :: give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
         answer.at(2, 6) = answer.at(6, 2) = mat.at(2, 3);
         answer.at(6, 6) = answer.at(7, 7) = mat.at(3, 3);
     }
-
-    //delete mat;
-    return;
 }
 
 
@@ -228,7 +218,6 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
     thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
-    //answer = new FloatMatrix (8,8);
     answer.resize(8, 8);
     answer.zero();
 
@@ -249,9 +238,6 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
 
     answer.at(7, 7) = mat3d.at(6, 6) * thickness * ( 5. / 6. );
     answer.at(8, 8) = answer.at(7, 7);
-
-    //delete mat3d;
-    return;
 }
 
 
@@ -261,7 +247,6 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
                                               const FloatArray &reducedStrain,
                                               TimeStep *atTime)
 {
-    //  FloatMatrix* Material :: (*dfunc) (GaussPoint*, FloatArray* = NULL);
     FloatArray stressIncrement, stressVector, strainVector;
     FloatMatrix d;
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
@@ -275,7 +260,7 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
                                                 atTime, VM_Total);
 
     if ( status->giveStressVector().giveSize() ) {
-        stressVector      = status->giveStressVector();
+        stressVector = status->giveStressVector();
     } else {
         stressVector.resize( strainVector.giveSize() );
     }
@@ -286,7 +271,6 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
     // update gp
     status->letTempStrainVectorBe(reducedStrain);
     status->letTempStressVectorBe(stressVector);
-    //delete strainIncrement;
 
     if ( form == FullForm ) {
         crossSection->giveFullCharacteristicVector(answer, gp, stressVector);
@@ -294,7 +278,6 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
     }
 
     answer = stressVector;
-    return;
 }
 
 
@@ -348,7 +331,6 @@ LinearElasticMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Ma
 }
 
 
-
 void
 LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                               MaterialMode mmode) const
@@ -363,14 +345,9 @@ LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm 
 // stressStrain resides.
 //
 {
-    // int i;
-    //IntArray *indx;
-    //MaterialMode mode  = gp -> giveMaterialMode ();
-
     if ( form == ReducedForm ) {
         switch ( mmode ) {
         case _PlaneStressRot:
-            //indx = new IntArray (4);
             answer.resize(4);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -384,7 +361,6 @@ LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm 
     } else if ( form == FullForm ) {
         switch ( mmode ) {
         case _PlaneStressRot:
-            //indx = new IntArray (7);
             answer.resize(7);
             answer.zero();
             answer.at(1) = 1;
@@ -399,7 +375,6 @@ LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm 
     } else {
         _error("giveStressStrainMask : unknown form mode");
     }
-
-    return;
 }
+
 } // end namespace oofem

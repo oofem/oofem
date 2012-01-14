@@ -92,7 +92,7 @@ public:
     /// Destructor
     ~MicroMaterial();
 
-    char inputFileNameMicro [ MAX_FILENAME_LENGTH ];
+    std::string inputFileNameMicro;
 
     IRResultType initializeFrom(InputRecord *ir);
 

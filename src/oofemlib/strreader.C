@@ -38,7 +38,7 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
- #include <ctype.h>
+ #include <cctype>
 #endif
 
 namespace oofem {

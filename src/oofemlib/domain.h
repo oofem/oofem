@@ -39,6 +39,7 @@
 #include "datareader.h"
 #include "domaintype.h"
 #include "statecountertype.h"
+#include "intarray.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -516,7 +517,7 @@ public:
     void setNonlocalUpdateStateCounter(StateCounterType val) { this->nonlocalUpdateStateCounter = val; }
 
 private:
-    void resolveDomainDofsDefaults(char *);
+    void resolveDomainDofsDefaults(const char *);
 
     void error(const char *file, int line, const char *format, ...);
     void warning(const char *file, int line, const char *format, ...);

@@ -33,6 +33,8 @@
  */
 
 #include "inputrecord.h"
+#include "error.h"
+
 #ifndef __MAKEDEPEND
  #include <ctype.h>
 #endif
@@ -71,4 +73,105 @@ InputRecord :: report_error(const char *_class, const char *proc, const InputFie
 {
     __OOFEM_ERROR6(file, line, "Input error: \"%s\", field keyword \"%s\" (fieldID=%d)\n%s::%s", strerror(result), kwd, fieldID, _class, proc);
 }
+
+
+IRResultType
+InputRecord :: giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
 } // end namespace oofem

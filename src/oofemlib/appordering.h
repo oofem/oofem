@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -50,8 +50,7 @@ class ApplicationOrdering
 public:
     // TODO: Document this
     enum EquationType { et_standard, et_prescribed };
-protected:
-public:
+
     ApplicationOrdering() { }
     virtual ~ApplicationOrdering() { }
 

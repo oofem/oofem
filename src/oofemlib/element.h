@@ -615,7 +615,7 @@ public:
      * @return newly allocated element with required type.
      * @see CreateUsrDefElementOfType
      */
-    Element *ofType(char *aClass);
+    Element *ofType(const char *aClass);
     /**
      * Returns the element geometry type.
      * This information is assumed to be of general interest, but

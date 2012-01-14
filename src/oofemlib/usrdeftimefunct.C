@@ -33,6 +33,7 @@
  */
 
 #include "usrdeftimefunct.h"
+#include <sstream>
 #include <math.h>
 
 namespace oofem {
@@ -44,9 +45,9 @@ double UserDefinedLoadTimeFunction :: __at(double time)
     int err;
     double result;
 
-    char buff [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH + 20 ];
-    sprintf(buff, "t=%e;%s", time, ftExpression);
-    result = myParser.eval(buff, err);
+    std::ostringstream buff;
+    buff << "t=" << time << ";" << ftExpression;
+    result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
         _error("at: parser syntax error");
     }
@@ -67,9 +68,9 @@ double UserDefinedLoadTimeFunction :: __derAt(double time)
         return 0.;
     }
 
-    char buff [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH + 20 ];
-    sprintf(buff, "t=%e;%s", time, dfdtExpression);
-    result = myParser.eval(buff, err);
+    std::ostringstream buff;
+    buff << "t=" << time << ";" << dfdtExpression;
+    result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
         _error("derAt: parser syntax error");
     }
@@ -91,9 +92,9 @@ double UserDefinedLoadTimeFunction :: __accelAt(double time)
         return 0.;
     }
 
-    char buff [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH + 20 ];
-    sprintf(buff, "t=%e;%s", time, d2fdt2Expression);
-    result = myParser.eval(buff, err);
+    std::ostringstream buff;
+    buff << "t=" << time << ";" << d2fdt2Expression;
+    result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
         _error("accelAt: parser syntax error");
     }
@@ -110,13 +111,13 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
 
     LoadTimeFunction :: initializeFrom(ir);
 
-    result = ir->giveField(ftExpression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
+    result = ir->giveField(ftExpression, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
     if ( result != IRRT_OK ) {
         IR_IOERR(giveClassName(), __proc, IFT_UserDefinedLoadTimeFunction_ft, "f(t)", ir, result);
     }
 
-    result = ir->giveOptionalField(dfdtExpression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH, IFT_UserDefinedLoadTimeFunction_ft, "dfdt(t)");
-    result = ir->giveOptionalField(d2fdt2Expression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH, IFT_UserDefinedLoadTimeFunction_ft, "d2fdt2(t)");
+    result = ir->giveOptionalField(dfdtExpression, IFT_UserDefinedLoadTimeFunction_ft, "dfdt(t)");
+    result = ir->giveOptionalField(d2fdt2Expression, IFT_UserDefinedLoadTimeFunction_ft, "d2fdt2(t)");
 
     //this->readQuotedString (initString, "f(t)", ftExpression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH);
 

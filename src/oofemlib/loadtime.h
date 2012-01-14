@@ -97,7 +97,7 @@ public:
      * @return Newly allocated load time function of required type.
      * @see CreateUsrDefLoadTimeFunctionOfType
      */
-    LoadTimeFunction *ofType(char *aClass);
+    LoadTimeFunction *ofType(const char *aClass);
 
     /**
      * Returns the value of load time function at given time.

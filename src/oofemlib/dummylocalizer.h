@@ -37,11 +37,13 @@
 
 #include "spatiallocalizer.h"
 #include "compiler.h"
+#include "alist.h"
 
 namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
+class IntArray;
 
 /**
  * The dummy implementation of spatial localizer based on traversing the whole domain.

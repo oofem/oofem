@@ -40,7 +40,6 @@
 #include "parser.h"
 
 namespace oofem {
-#define UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH 200
 
 /**
  * Class representing user defined load time function. User input is function expression.
@@ -54,11 +53,11 @@ private:
     /// Parser used to evaluate expressions.
     Parser myParser;
     /// Expression for the function value.
-    char ftExpression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ];
+    std::string ftExpression;
     /// Expression for first time derivative.
-    char dfdtExpression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ];
+    std::string dfdtExpression;
     /// Expression for second time derivative.
-    char d2fdt2Expression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ];
+    std::string d2fdt2Expression;
 
 public:
     /**

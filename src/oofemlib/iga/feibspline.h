@@ -35,11 +35,15 @@
 #ifndef feibspline_h
 #define feibspline_h
 
-#include "flotarry.h"
-#include "flotmtrx.h"
 #include "feinterpol.h"
+#include "flotarry.h"
 
 namespace oofem {
+
+class FloatMatrix;
+class FloatArray;
+class IntArray;
+
 /**
  * Interpolation for B-splines.
  */

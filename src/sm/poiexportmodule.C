@@ -76,15 +76,15 @@ POIExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_POIExportModule_mtype, "mtype"); // Macro
     mtype = ( POIEM_MapperType ) val;
 
-    char poiFileName [ MAX_FILENAME_LENGTH ];
-    IR_GIVE_OPTIONAL_FIELD2(ir, poiFileName, IFT_POIExportModule_poifilename, "poifilename", MAX_FILENAME_LENGTH); // Macro
-    this->readPOIFile(poiFileName); // parse poi file
+    std::string poiFileName;
+    IR_GIVE_OPTIONAL_FIELD(ir, poiFileName, IFT_POIExportModule_poifilename, "poifilename"); // Macro
+    this->readPOIFile(poiFileName.c_str()); // parse poi file
 
     return IRRT_OK;
 }
 
 void
-POIExportModule :: readPOIFile(char *poiFileName)
+POIExportModule :: readPOIFile(const char *poiFileName)
 {
     char line [ OOFEM_MAX_LINE_LENGTH ];
     int i, nPOI;

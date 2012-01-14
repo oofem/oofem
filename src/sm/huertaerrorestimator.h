@@ -40,6 +40,8 @@
 #include "refinedelement.h"
 #include "refinedmesh.h"
 #include "alist.h"
+#include "flotarry.h"
+#include "statecountertype.h"
 
 namespace oofem {
 class Element;

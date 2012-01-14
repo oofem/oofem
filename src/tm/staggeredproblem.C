@@ -63,33 +63,23 @@
 
 namespace oofem {
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
-    // constructor
 {
     ndomains = 1; // to store time step ltf
     nModels  = 2;
     emodelList = new AList< EngngModel >(nModels);
-    inputStreamNames = new char * [ nModels ];
-    for ( int j = 0; j < nModels; j++ ) {
-        inputStreamNames [ j ] = new char [ MAX_FILENAME_LENGTH ];
-    }
+    inputStreamNames = new std::string [ nModels ];
 
     dtTimeFunction = 0;
     stepMultiplier = 1.;
 }
 
 StaggeredProblem ::  ~StaggeredProblem()
-// destructor
 {
     delete emodelList;
-    for ( int i = 0; i < nModels; i++ ) {
-        delete inputStreamNames [ i ];
-    }
-
     delete inputStreamNames;
 }
 
 ///////////
-
 int
 StaggeredProblem :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dataOutputFileName, char *desc)
 {
@@ -109,7 +99,7 @@ StaggeredProblem :: instanciateSlaveProblems()
     EngngModel *slaveProb;
 
     for ( i = 1; i <= nModels; i++ ) {
-        OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ]);
+        OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ].c_str());
         slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
         emodelList->put(i, slaveProb);
     }
@@ -123,8 +113,6 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    char problem_inputStream [ MAX_FILENAME_LENGTH ];
 
     EngngModel :: initializeFrom(ir);
 
@@ -140,25 +128,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         _error("stepMultiplier must be > 0")
     }
 
-    IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
-    strncpy(inputStreamNames [ 0 ], problem_inputStream, MAX_FILENAME_LENGTH);
-    IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob2, "prob2", MAX_FILENAME_LENGTH); // Macro
-    strncpy(inputStreamNames [ 1 ], problem_inputStream, MAX_FILENAME_LENGTH);
+    IR_GIVE_FIELD(ir, inputStreamNames[0], IFT_StaggeredProblem_prob1, "prob1"); // Macro
+    IR_GIVE_FIELD(ir, inputStreamNames[1], IFT_StaggeredProblem_prob2, "prob2"); // Macro
 
-    /*
-     * // initialize slave problems here
-     * if (giveContextOutputMode() == ALWAYS) contextFlag = 1;
-     * EngngModel* problem;
-     * emodelList -> growTo(nModels) ;
-     * for (int i=1; i<=nModels; i++) {
-     * if ((inputStream = fopen(problem_inputStream[i-1],"r")) == NULL)
-     * _error2 ("Can't open input stream",problem_inputStream[i-1]) ;
-     *
-     * problem = :: InstanciateProblem (inputStream, _processor, contextFlag, this);
-     * //problem->setSlaveMode (this);
-     * emodelList->put(i,problem);
-     * }
-     */
     return IRRT_OK;
 }
 

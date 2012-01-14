@@ -35,10 +35,10 @@
 #ifndef directerrorindicatorrc_h
 #define directerrorindicatorrc_h
 
-#include "compiler.h"
-
 #include "interface.h"
 #include "remeshingcrit.h"
+#include "flotarry.h"
+#include "statecountertype.h"
 
 namespace oofem {
 class Domain;

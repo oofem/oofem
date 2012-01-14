@@ -36,12 +36,12 @@
 #define buffereddatareader_h
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <string>
 #endif
 
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
+#include "dynalist.h"
 
 namespace oofem {
 /**
@@ -56,7 +56,7 @@ class BufferedDataReader : public DataReader
 {
 protected:
     OOFEMTXTInputRecord ir;
-    dynaList< std :: string >buffer;
+    dynaList< std :: string > buffer;
     dynaList< std :: string > :: iterator pos;
 
 public:

@@ -105,7 +105,6 @@ public:
      */
     int readRange(const char **helpSource, int &li, int &hi);
 
-    //
 private:
     //
     // I don't expect, that You will use following functions

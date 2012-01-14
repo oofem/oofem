@@ -67,13 +67,13 @@ public:
     virtual ~ModuleManager() {
         delete moduleList;
     }
-    /** 
+    /**
      * Creates new instance of module.
      * @param name Name of module.
      * @param n Number associated with module.
      * @param emodel Engineering model which receiver belongs to.
      */
-    virtual M *CreateModuleOfType(char *name, int n, EngngModel *emodel) = 0;
+    virtual M *CreateModuleOfType(const char *name, int n, EngngModel *emodel) = 0;
     /**
 
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
@@ -92,7 +92,7 @@ public:
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
         int i;
-        char name [ MAX_NAME_LENGTH ];
+        std::string name;
         M *module;
         InputRecord *mir;
 
@@ -100,15 +100,15 @@ public:
         moduleList->growTo(numberOfModules);
         for ( i = 0; i < numberOfModules; i++ ) {
             mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
-            result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
+            result = mir->giveRecordKeywordField(name);
             if ( result != IRRT_OK ) {
                 IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
             }
 
             // read type of module
-            module = this->CreateModuleOfType(name, i, emodel);
+            module = this->CreateModuleOfType(name.c_str(), i, emodel);
             if ( module == NULL ) {
-                OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name);
+                OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str());
             }
 
             module->initializeFrom(mir);

@@ -60,21 +60,21 @@
 namespace oofem {
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
-    SpatialLocalizerInterface()
-    , DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
+    SpatialLocalizerInterface(),
+    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
-    // Constructor.
 {
     numberOfDofMans  = 4;
     jacobianMatrix = NULL;
     numberOfGaussPoints = 4;
 }
 
+
 Quad1PlaneStrain :: ~Quad1PlaneStrain()
-// Destructor
 {
     delete jacobianMatrix;
 }
+
 
 void
 Quad1PlaneStrain :: giveDerivativeKsi(FloatArray &answer, double eta)
@@ -87,6 +87,7 @@ Quad1PlaneStrain :: giveDerivativeKsi(FloatArray &answer, double eta)
     answer.at(4) =  0.25 * ( 1. - eta );
 }
 
+
 void
 Quad1PlaneStrain :: giveDerivativeEta(FloatArray &answer, double ksi)
 {
@@ -97,6 +98,7 @@ Quad1PlaneStrain :: giveDerivativeEta(FloatArray &answer, double ksi)
     answer.at(3) = -0.25 * ( 1. - ksi );
     answer.at(4) = -0.25 * ( 1. + ksi );
 }
+
 
 void
 Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
@@ -158,9 +160,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
 #ifdef Quad1PlaneStrain_reducedShearIntegration
     delete helpGaussPoint;
 #endif
-    return;
 }
-
 
 
 void
@@ -175,6 +175,7 @@ Quad1PlaneStrain :: computeGaussPoints()
     }
 }
 
+
 void
 Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
@@ -182,8 +183,6 @@ Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
 {
     int i;
     double ksi, eta;
-    // FloatArray*  n;
-    // FloatMatrix* answer;
 
     ksi = aGaussPoint->giveCoordinate(1);
     eta = aGaussPoint->giveCoordinate(2);
@@ -202,10 +201,7 @@ Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
-
 
 
 void
@@ -237,8 +233,6 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGauss
     answer.at(1, 3) = n2;
     answer.at(2, 2) = n1;
     answer.at(2, 4) = n2;
-
-    return;
 }
 
 
@@ -274,9 +268,8 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
+
 
 double
 Quad1PlaneStrain ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
@@ -309,6 +302,7 @@ Quad1PlaneStrain ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge
     length = sqrt(dx * dx + dy * dy);
     return 0.5 *length *aGaussPoint->giveWeight();
 }
+
 
 void
 Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
@@ -410,6 +404,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
     return volume;
 }
 
+
 void
 Quad1PlaneStrain :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
@@ -438,6 +433,7 @@ Quad1PlaneStrain :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGa
         answer.at(2, 2) += ny.at(i) * y;
     }
 }
+
 
 IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
@@ -472,57 +468,18 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 }
 
 void
-Quad1PlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Quad1PlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
-
-/*
- * int
- * Quad1PlaneStrain :: computeGtoNRotationMatrix (FloatMatrix &answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0 ;}
- *
- * answer.resize (this->computeNumberOfDofs(),this->computeNumberOfDofs());
- * answer.zero();
- *
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*2+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * }
- * }
- *
- * return 1;
- * }
- */
 
 int
 Quad1PlaneStrain :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
@@ -581,6 +538,7 @@ Quad1PlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType typ
     return this->giveIPValueSize(type, gp);
 }
 
+
 void
 Quad1PlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
@@ -610,9 +568,8 @@ Quad1PlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMat
     answer.at(1, 2) = n2;
     answer.at(1, 3) = n3;
     answer.at(1, 4) = n4;
-
-    return;
 }
+
 
 void
 Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
@@ -669,7 +626,6 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Quad1PlaneStrain");
 }
-
 
 
 #ifdef __OOFEG
@@ -924,11 +880,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }
-
-    return;
 }
-
-
 
 
 void
@@ -1041,6 +993,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 
 #endif
 
+
 void
 Quad1PlaneStrain :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -1049,6 +1002,7 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
+
 
 void
 Quad1PlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
@@ -1069,9 +1023,12 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
     }
 }
 
+
 int
 Quad1PlaneStrain :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
+{
+    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+}
 
 
 void
@@ -1079,6 +1036,7 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &co
 {
     this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
 }
+
 
 SPRPatchType
 Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
@@ -1218,6 +1176,7 @@ Quad1PlaneStrain :: computeLocalCoordinates(FloatArray &answer, const FloatArray
     return 1;
 }
 
+
 int
 Quad1PlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
     int result;
@@ -1226,6 +1185,7 @@ Quad1PlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
 
     return result;
 }
+
 
 double
 Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

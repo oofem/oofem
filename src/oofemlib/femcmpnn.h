@@ -46,9 +46,7 @@
  #include <string>
 #endif
 
-#include "domain.h"
 #include "error.h"
-#include "interface.h"
 #include "interfacetype.h"
 #include "inputrecord.h"
 #include "classtype.h"
@@ -61,7 +59,12 @@
 #endif
 
 namespace oofem {
+
 class DataStream;
+class Domain;
+class Interface;
+class TimeStep;
+
 /**
  * The top abstract class of all classes constituting the finite element mesh.
  * Defines the attributes and methods common to all components of mesh:

@@ -61,7 +61,6 @@ TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
-    // Constructor.
 {
     numberOfDofMans  = 3;
     area = -1;

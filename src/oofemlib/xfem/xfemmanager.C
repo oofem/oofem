@@ -228,7 +228,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int i;
-    char name [ MAX_NAME_LENGTH ];
+    std::string name;
     EnrichmentItem *ei;
     EnrichmentFunction *ef;
     BasicGeometry *ge;
@@ -237,15 +237,15 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     enrichmentFunctionList->growTo(numberOfEnrichmentFunctions);
     for ( i = 0; i < numberOfEnrichmentFunctions; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, i + 1);
-        result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
+        result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ef = CreateUsrDefEnrichmentFunction( name, i + 1, emodel->giveDomain(1) );
+        ef = CreateUsrDefEnrichmentFunction( name.c_str(), i + 1, emodel->giveDomain(1) );
         if ( ef == NULL ) {
-            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment function (%s)", name);
+            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment function (%s)", name.c_str());
         }
 
         enrichmentFunctionList->put(i + 1, ef);
@@ -255,15 +255,15 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     geometryList->growTo(numberOfGeometryItems);
     for ( i = 0; i < numberOfGeometryItems; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_geoRec, i + 1);
-        result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
+        result = mir->giveRecordKeywordField(name);
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ge = CreateUsrDefGeometry(name);
+        ge = CreateUsrDefGeometry(name.c_str());
 
         if ( ge == NULL ) {
-            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown geometry (%s)", name);
+            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown geometry (%s)", name.c_str());
         }
 
         geometryList->put(i + 1, ge);
@@ -273,16 +273,16 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     enrichmentItemList->growTo(numberOfEnrichmentItems);
     for ( i = 0; i < numberOfEnrichmentItems; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i + 1);
-        result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
+        result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ei = CreateUsrDefEnrichmentItem( name, i + 1, this, emodel->giveDomain(1) );
+        ei = CreateUsrDefEnrichmentItem( name.c_str(), i + 1, this, emodel->giveDomain(1) );
 
         if ( ei == NULL ) {
-            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment item (%s)", name);
+            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str());
         }
 
 

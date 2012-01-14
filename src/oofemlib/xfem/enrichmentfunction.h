@@ -36,6 +36,7 @@
 #define enrichmentfunction_h
 
 #include "femcmpnn.h"
+#include "intarray.h"
 
 namespace oofem {
 class EnrichmentItem;

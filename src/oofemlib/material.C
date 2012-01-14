@@ -198,7 +198,7 @@ Material :: printYourself()
 
 
 Material *
-Material :: ofType(char *aClass)
+Material :: ofType(const char *aClass)
 // Returns a new material, which has the same number than the receiver,
 // but belongs to aClass (Hook, Microplane, ...).
 {

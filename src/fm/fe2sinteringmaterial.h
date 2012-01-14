@@ -68,7 +68,7 @@ public:
      * @param inputfile The input file describing the micro problem.
      * @param porosity Initial porosity.
      */
-	FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const char* inputfile);
+    FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile);
     /// Destructor
     ~FE2SinteringMaterialStatus() { delete this->rve; }
 
@@ -77,7 +77,7 @@ public:
     double giveVOFFraction() { return this->voffraction; }
 
     /// Creates/Initiates the RVE problem.
-    bool createRVE(int n, GaussPoint *gp, const char *inputfile);
+    bool createRVE(int n, GaussPoint *gp, const std::string &inputfile);
 
     /// Copies time step data to RVE.
     void setTimeStep(TimeStep *tStep);
@@ -102,7 +102,7 @@ public:
 class FE2SinteringMaterial : public StructuralMaterial
 {
 private:
-    char inputfile[OOFEM_MAX_LINE_LENGTH];
+    std::string inputfile;
 
 public:
     /**

@@ -179,14 +179,12 @@ IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &ans
 // forceElasticResponse ignored - always elastic
 //
 {
-    //FloatMatrix* constitutiveMatrix ;
     double e, nu, ee;
 
     e  = this->E;
     nu = this->nu;
 
     ee = e / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
-    //constitutiveMatrix = new FloatMatrix(6,6) ;
     answer.resize(6, 6);
     answer.zero();
 
@@ -205,9 +203,7 @@ IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &ans
     answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
 
     answer.times(ee);
-    return;
 }
-
 
 
 void
@@ -216,10 +212,7 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
-//
-//
 {
-    //FloatMatrix* constitutiveMatrix ;
     double e, nu, ee, shear;
 
     e     = this->E;
@@ -228,7 +221,6 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     shear = this->G;
 
     if ( form == FullForm ) {
-        //constitutiveMatrix = new FloatMatrix(6,6);
         answer.resize(6, 6);
         answer.zero();
 
@@ -238,7 +230,6 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
         answer.at(2, 2) = ee;
         answer.at(6, 6) = shear;
     } else {
-        //constitutiveMatrix = new FloatMatrix(3,3);
         answer.resize(3, 3);
         answer.zero();
 
@@ -248,10 +239,7 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
         answer.at(2, 2) = ee;
         answer.at(3, 3) = shear;
     }
-
-    return;
 }
-
 
 
 void
@@ -260,10 +248,7 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                                            MatResponseMode mode,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
-//
-//
 {
-    //FloatMatrix* constitutiveMatrix;
     double e, nu, ee, shear;
 
     e     = this->E;
@@ -272,7 +257,6 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     shear = this->G;
 
     if ( form == FullForm ) {
-        //constitutiveMatrix = new FloatMatrix(6,6);
         answer.resize(6, 6);
         answer.zero();
 
@@ -287,7 +271,6 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
         answer.at(3, 3) = ee * ( 1.0 - nu );
         answer.at(6, 6) = shear;
     } else {
-        //constitutiveMatrix = new FloatMatrix(3,3);
         answer.resize(4, 4);
         answer.zero();
 
@@ -302,8 +285,6 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
         answer.at(3, 3) = ee * ( 1.0 - nu );
         answer.at(4, 4) = shear;
     }
-
-    return;
 }
 
 
@@ -313,29 +294,22 @@ IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                                         MatResponseMode mode,
                                                         GaussPoint *gp,
                                                         TimeStep *atTime)
-//
-//
 {
-    //FloatMatrix* constitutiveMatrix ;
     double e;
 
     e     = this->E;
 
     if ( form == FullForm ) {
-        //constitutiveMatrix = new FloatMatrix(6,6);
         answer.resize(6, 6);
         answer.zero();
 
         answer.at(1, 1) = e;
     } else {
-        //constitutiveMatrix = new FloatMatrix(1,1);
         answer.resize(1, 1);
         answer.zero();
 
         answer.at(1, 1) = e;
     }
-
-    return;
 }
 
 
@@ -369,7 +343,6 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
     shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
 
     if ( form == ReducedForm ) {
-        //answer = new FloatMatrix (3,3);
         answer.resize(3, 3);
         answer.zero();
 
@@ -377,7 +350,6 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
         answer.at(2, 2) = mat3d.at(1, 1) * Iy;
         answer.at(3, 3) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
     } else {
-        //answer = new FloatMatrix (8,8);
         answer.resize(8, 8);
         answer.zero();
 
@@ -385,9 +357,6 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
         answer.at(5, 5) = mat3d.at(1, 1) * Iy;
         answer.at(7, 7) = shearAreaz * mat3d.at(1, 1) / ( 2. * ( 1 + nu ) );
     }
-
-    //delete mat3d;
-    return;
 }
 
 
@@ -404,7 +373,7 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     MaterialMode mode = gp->giveMaterialMode();
     SimpleCrossSection *crossSection =  dynamic_cast< SimpleCrossSection * >( gp->giveCrossSection() );
     FloatMatrix mat3d;
-    double area, E, Iy, Iz, Ik; 
+    double area, E, Iy, Iz, Ik;
     double shearAreay, shearAreaz;
 
     if ( mode != _3dBeam ) {
@@ -426,7 +395,6 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     shearAreay = crossSection->give(CS_SHEAR_AREA_Y);
     shearAreaz = crossSection->give(CS_SHEAR_AREA_Z);
 
-    //answer = new FloatMatrix (8,8);
     answer.resize(6, 6);
     answer.zero();
 
@@ -438,9 +406,6 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     answer.at(4, 4) = this->give('G', gp) * Ik;
     answer.at(5, 5) = E * Iy;
     answer.at(6, 6) = E * Iz;
-
-    //delete mat3d;
-    return;
 }
 
 
@@ -454,22 +419,16 @@ IsotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer
 // gp (element) local axes
 //
 {
-    //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
     answer.at(1) = this->give(tAlpha, gp);
     answer.at(2) = this->give(tAlpha, gp);
     answer.at(3) = this->give(tAlpha, gp);
-
-    return;
 }
 
 
 MaterialStatus *
 IsotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
     return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }

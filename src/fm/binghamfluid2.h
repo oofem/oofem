@@ -40,7 +40,6 @@
 #include "flotmtrx.h"
 
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
 
 namespace oofem {

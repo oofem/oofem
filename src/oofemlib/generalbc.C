@@ -68,7 +68,7 @@ LoadTimeFunction *GeneralBoundaryCondition :: giveLoadTimeFunction()
 }
 
 
-GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(char *aClass)
+GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(const char *aClass)
 // Returns a new load, which has the same number than the receiver,
 // but belongs to aClass (NodalLoad, DeadWeight,..).
 {

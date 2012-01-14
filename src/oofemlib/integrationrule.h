@@ -46,6 +46,7 @@ namespace oofem {
 class TimeStep;
 class GaussPoint;
 class Element;
+class DataStream;
 
 /**
  * Abstract base class representing integration rule. The integration rule is
@@ -102,7 +103,7 @@ protected:
      */
     int firstLocalStrainIndx, lastLocalStrainIndx;
 
-    /** 
+    /**
      * Flag indicating that rule is dynamic, ie, its gauss points (their number, coordinates, weights) can change during
      * computation. Then some more data should be stored/restored from context file to reflect such dynamic feature.
      */

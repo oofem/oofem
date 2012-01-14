@@ -111,7 +111,7 @@ public:
      * Update equilibrium history variables according to temp-variables.
      * Invoked, after new equilibrium state has been reached.
      */
-    virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) { }
     /**
      * Returns the value of material model property stored in receiving status.
      * This is typically used when random variation of some material property is considered,

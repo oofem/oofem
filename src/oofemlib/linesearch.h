@@ -38,6 +38,7 @@
 
 #include "nummet.h"
 #include "nmstatus.h"
+#include "flotarry.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

@@ -35,20 +35,21 @@
 #ifndef inputrecord_h
 #define inputrecord_h
 
-#include "intarray.h"
-#include "flotarry.h"
-#include "dictionr.h"
 #include "dynalist.h"
-#include "range.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
  #include <vector>
  #include <string>
 #endif
 
 namespace oofem {
+
+class IntArray;
+class FloatArray;
+class FloatMatrix;
+class Dictionary;
+class Range;
+
 /**
  * Type defining the return values of InputRecord reading operations.
  * IRRT_OK the corresponding value to given keyword was successfully read.
@@ -1218,29 +1219,11 @@ enum InputFieldType {
 
 /**
  * Macro facilitating the use of input record reading methods.
- * uses the given input record (__ir parameter) and reads the compulsory
- * field identified by __kwd and stores the  result into __value parameter.
- * Includes also the error reporting.
- */
-#define IR_GIVE_FIELD2(__ir, __value, __id, __kwd, __opt) result = __ir->giveField(__value, __opt, __id, __kwd); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
-
-/**
- * Macro facilitating the use of input record reading methods.
- * uses the given input record (__ir parameter) and reads the optional
- * field identified by __kwd and stores the  result into __value parameter.
- * Includes also the error reporting.
- */
-#define IR_GIVE_OPTIONAL_FIELD2(__ir, __value, __id, __kwd, __opt) \
-    result = __ir->giveOptionalField(__value, __opt, __id, __kwd); \
-    if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
-/**
- * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the compulsory record keyword (__kwd)
  * and its number (__value param). Includes also the error reporting.
  */
-#define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value, __opt) \
-    result = __ir->giveRecordKeywordField(__name, __value, __opt); \
+#define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
+    result = __ir->giveRecordKeywordField(__name, __value); \
     if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "RecordIDField", __ir, result); }
 
 
@@ -1251,7 +1234,7 @@ enum InputFieldType {
  * Input record can represent database records or text file records, allowing the transparent
  * input operations.
  * The input record after init phase should "contain" all relevant data, so the input record should
- * resolve all dependencies. THis allows to create a copy of input record instance for later use
+ * resolve all dependencies. This allows to create a copy of input record instance for later use
  * without the need to re-open input files (used for metasteps).
  */
 class InputRecord
@@ -1277,15 +1260,13 @@ public:
      */
     //@{
     /// Reads the record id field  (type of record) and its corresponding number.
-    virtual IRResultType giveRecordKeywordField(char *answer, int &value, int maxchar) = 0;
+    virtual IRResultType giveRecordKeywordField(std::string &answer, int &value) = 0;
     /// Reads the record id field  (type of record).
-    virtual IRResultType giveRecordKeywordField(char *answer, int maxchar) = 0;
+    virtual IRResultType giveRecordKeywordField(std::string &answer) = 0;
     /// Reads the integer field value.
     virtual IRResultType giveField(int &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the double field value.
     virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the char* field value.
-    virtual IRResultType giveField(char *answer, int maxchar, const InputFieldType fieldI, const char *idString) = 0;
     /// Reads the string field value.
     virtual IRResultType giveField(std::string &answer, const InputFieldType fieldI, const char *idString) = 0;
     /// Reads the FloatArray field value.
@@ -1294,7 +1275,7 @@ public:
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the FloatMatrix field value.
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString) = 0;
-    // Reads the array of strings.
+    /// Reads the vector of strings.
     virtual IRResultType giveField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
@@ -1310,25 +1291,23 @@ public:
      */
     //@{
     /// Reads the integer field value.
-    virtual IRResultType giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the double field value.
-    virtual IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the char* field value.
-    virtual IRResultType giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the string field value.
-    virtual IRResultType giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the FloatArray field value.
-    virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the IntArray field value.
-    virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the FloatMatrix field value.
-    virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the array of strings.
-    virtual IRResultType giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString);
+    /// Reads the vector of strings.
+    IRResultType giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the Dictionary field value.
-    virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
     /// Reads the dynaList<Range> field value.
-    virtual IRResultType giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString) = 0;
+    IRResultType giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.

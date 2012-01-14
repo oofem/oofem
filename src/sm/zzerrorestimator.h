@@ -38,6 +38,8 @@
 #include "errorestimator.h"
 #include "interface.h"
 #include "internalstatetype.h"
+#include "flotarry.h"
+#include "statecountertype.h"
 
 namespace oofem {
 #define ZZErrorEstimator_ElementResultCashed

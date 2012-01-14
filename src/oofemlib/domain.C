@@ -417,7 +417,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     int i, num;
-    char name [ MAX_NAME_LENGTH ], topologytype[ MAX_NAME_LENGTH ];
+    std::string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
     DofManager *node;
     Element *elem;
@@ -440,7 +440,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
     __keyword = "domain";
-    result = ir->giveField(name, MAX_NAME_LENGTH, IFT_Domain_type, __keyword);
+    result = ir->giveField(name, IFT_Domain_type, __keyword);
     if ( result != IRRT_OK ) {
         IR_IOERR(giveClassName(), __proc, IFT_Domain_type, __keyword, ir, result);
     }
@@ -451,9 +451,9 @@ int Domain :: instanciateYourself(DataReader *dr)
     VERBOSE_PRINT0("Instanciating domain ", this->number);
 #  endif
 
-    resolveDomainDofsDefaults(name);
+    resolveDomainDofsDefaults(name.c_str());
     fprintf( outputStream, "Domain type: %s, default ndofs per node is %d, per side is %d\n\n\n",
-            name, giveNumberOfDefaultNodeDofs(), giveNumberOfDefaultSideDofs() );
+            name.c_str(), giveNumberOfDefaultNodeDofs(), giveNumberOfDefaultSideDofs() );
 
     // read output manager record
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
@@ -470,7 +470,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
     IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
     topologytype[0] = 0;
-    IR_GIVE_OPTIONAL_FIELD2(ir, topologytype, IFT_Domain_topology, "topology", MAX_NAME_LENGTH); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
@@ -487,14 +487,13 @@ int Domain :: instanciateYourself(DataReader *dr)
     for ( i = 0; i < nnode; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i + 1);
         // read type of dofManager
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
 #ifdef __ENABLE_COMPONENT_LABELS
         // assign component number according to record order
         // component number (as given in input record) becomes label
         ( node = ( DofManager * )
-                 ( DofManager(i + 1, this).ofType(name) ) )->initializeFrom(ir);
+            ( DofManager(i + 1, this).ofType(name.c_str()) ) )->initializeFrom(ir);
         if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
             // label does not exist yet
             dofManLabelMap [ num ] = i + 1;
@@ -507,7 +506,7 @@ int Domain :: instanciateYourself(DataReader *dr)
 #else
         // component numbers as given in input record
         ( node = ( DofManager * )
-                 ( DofManager(num, this).ofType(name) ) )->initializeFrom(ir);
+            ( DofManager(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nnode ) ) {
@@ -535,11 +534,10 @@ int Domain :: instanciateYourself(DataReader *dr)
     for ( i = 0; i < nelem; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_elemRec, i + 1);
         // read type of element
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
 #ifdef __ENABLE_COMPONENT_LABELS
-        elem = Element(i + 1, this).ofType(name);
+        elem = Element(i + 1, this).ofType(name.c_str());
         elem->initializeFrom(ir);
 
         if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
@@ -553,7 +551,7 @@ int Domain :: instanciateYourself(DataReader *dr)
         elementList->put(i + 1, elem);
 #else
         ( elem = ( Element * )
-                 ( Element(num, this).ofType(name) ) )->initializeFrom(ir);
+            ( Element(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nelem ) ) {
@@ -579,11 +577,10 @@ int Domain :: instanciateYourself(DataReader *dr)
     crossSectionList->growTo(ncrossSections);
     for ( i = 0; i < ncrossSections; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( crossSection  = ( CrossSection * )
-                          ( CrossSection(num, this).ofType(name) ) )->initializeFrom(ir);
+            ( CrossSection(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > ncrossSections ) ) {
@@ -609,11 +606,10 @@ int Domain :: instanciateYourself(DataReader *dr)
     for ( i = 0; i < nmat; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_matRec, i + 1);
         // read type of material
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( mat  = ( Material * )
-                 ( Material(num, this).ofType(name) ) )->initializeFrom(ir);
+            ( Material(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nmat ) ) {
@@ -640,10 +636,9 @@ int Domain :: instanciateYourself(DataReader *dr)
         for ( i = 0; i < nbarrier; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i + 1);
             // read type of load
-            //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-            barrier = CreateUsrDefNonlocalBarrierOfType(name, num, this);
+            barrier = CreateUsrDefNonlocalBarrierOfType(name.c_str(), num, this);
             barrier->initializeFrom(ir);
 
             // check number
@@ -672,10 +667,9 @@ int Domain :: instanciateYourself(DataReader *dr)
         for ( i = 0; i < nrfg; i++ ) {
             ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i + 1);
             // read type of load
-            //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-            rfg = CreateUsrDefRandomFieldGenerator(name, num, this);
+            rfg = CreateUsrDefRandomFieldGenerator(name.c_str(), num, this);
             rfg->initializeFrom(ir);
 
             // check number
@@ -704,11 +698,10 @@ int Domain :: instanciateYourself(DataReader *dr)
     for ( i = 0; i < nload; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_bcRec, i + 1);
         // read type of load
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( load = ( GeneralBoundaryCondition * )
-                 ( GeneralBoundaryCondition(num, this).ofType(name) ) )->initializeFrom(ir);
+            ( GeneralBoundaryCondition(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nload ) ) {
@@ -734,8 +727,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     for ( i = 0; i < nic; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_icRec, i + 1);
         // read type of load
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ic = new InitialCondition(num, this);
         if ( ic ) {
@@ -768,11 +760,10 @@ int Domain :: instanciateYourself(DataReader *dr)
     for ( i = 0; i < nloadtimefunc; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
         // read type of ltf
-        //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( ltf  = ( LoadTimeFunction * )
-                 ( LoadTimeFunction(num, this).ofType(name) ) )->initializeFrom(ir);
+                 ( LoadTimeFunction(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {
@@ -807,10 +798,10 @@ int Domain :: instanciateYourself(DataReader *dr)
 
 #endif
     this->topology = NULL;
-    if (strlen(topologytype) > 0) {
-        this->topology = CreateUsrDefTopologyOfType(topologytype, this);
+    if (topologytype.length() > 0) {
+        this->topology = CreateUsrDefTopologyOfType(topologytype.c_str(), this);
         if (!this->topology) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype);
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype.c_str());
         }
         return this->topology->instanciateYourself(dr);
     }
@@ -1047,7 +1038,7 @@ int Domain ::  giveNumberOfDefaultSideDofs()
 
 
 
-void Domain ::  resolveDomainDofsDefaults(char *typeName)
+void Domain :: resolveDomainDofsDefaults(const char *typeName)
 //
 // resolves default number of dofs per node according to domain type name.
 // and also resolves default dof mask according to domain type.

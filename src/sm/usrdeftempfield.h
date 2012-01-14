@@ -40,7 +40,6 @@
 #include "parser.h"
 
 namespace oofem {
-#define UserDefinedTemperatureField_MAX_EXPR_LENGTH 200
 
 /**
  * Class representing user defined temperature field. User input is function expression,
@@ -58,7 +57,7 @@ class UserDefinedTemperatureField : public StructuralTemperatureLoad
 private:
     Parser myParser;
     int size;
-    char ftExpression [ 3 ] [ UserDefinedTemperatureField_MAX_EXPR_LENGTH ];
+    std::string ftExpression [ 3 ];
 
 public:
     /**
@@ -68,7 +67,7 @@ public:
      */
     UserDefinedTemperatureField(int n, Domain *d) : StructuralTemperatureLoad(n, d), myParser() { }
     /// Destructor
-    virtual ~UserDefinedTemperatureField()  { }
+    virtual ~UserDefinedTemperatureField() { }
 
     /**
      * Computes components values of temperature field at given point (coordinates given in Global c.s.).

@@ -53,7 +53,6 @@
 
 #include "materialinterface.h"
 #ifndef __MAKEDEPEND
- #include <math.h>
  #include <stdio.h>
 #endif
 #include "contextioerr.h"
@@ -70,13 +69,11 @@ FEI2dQuadConst Quad10_2D_SUPG :: pressureInterpolation(1, 2);
 
 Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain), pressureNode(1, aDomain, this)
-    // Constructor.
 {
     numberOfDofMans  = 4;
 }
 
 Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
-// Destructor
 { }
 
 
@@ -86,7 +83,6 @@ Quad10_2D_SUPG :: giveInternalDofManager(int i) const
     //_error2("No such DOF available on Element %d", number);
     return ( DofManager * ) & pressureNode;
 }
-
 
 
 void Quad10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme &s) const
@@ -113,7 +109,6 @@ void Quad10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut,
 }
 
 
-
 int
 Quad10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {
@@ -135,6 +130,7 @@ Quad10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
     return 0;
 }
 
+
 int
 Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
@@ -150,6 +146,8 @@ Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 
     return 0;
 }
+
+
 void
 Quad10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
@@ -167,6 +165,7 @@ Quad10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
+
 
 void
 Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
@@ -190,6 +189,7 @@ Quad10_2D_SUPG :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 void
 Quad10_2D_SUPG :: computeGaussPoints()
@@ -224,9 +224,8 @@ Quad10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
         answer.at(1, 2 * i - 1)  = n.at(i);
         answer.at(2, 2 * i - 0)  = n.at(i);
     }
-
-    return;
 }
+
 
 void
 Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)

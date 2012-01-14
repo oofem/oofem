@@ -118,7 +118,7 @@ CrossSection :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 CrossSection *
-CrossSection :: ofType(char *aClass)
+CrossSection :: ofType(const char *aClass)
 // Returns a new cross section, which has the same number than the receiver,
 // but belongs to aClass (simpleCrossSection, LayeredCrossSection, FibredCS, ...).
 {

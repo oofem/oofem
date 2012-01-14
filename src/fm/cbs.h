@@ -42,9 +42,6 @@
 //<RESTRICTED_SECTION>
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 /**

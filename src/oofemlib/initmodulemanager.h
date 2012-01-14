@@ -58,7 +58,7 @@ public:
     InitModuleManager(EngngModel *emodel);
     ~InitModuleManager();
 
-    InitModule *CreateModuleOfType(char *name, int n, EngngModel *emodel);
+    InitModule *CreateModuleOfType(const char *name, int n, EngngModel *emodel);
 
     /**
      * Performs the initialization of individual modules.

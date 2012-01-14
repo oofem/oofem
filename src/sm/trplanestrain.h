@@ -173,7 +173,6 @@ protected:
     //void computeNLBMatrixAt(FloatMatrix& answer, GaussPoint*, int);
 
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
-    //int computeGtoNRotationMatrix(FloatMatrix &);
     void computeGaussPoints();
 
     virtual double giveArea();

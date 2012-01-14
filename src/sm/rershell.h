@@ -64,19 +64,13 @@ protected:
     double Rx, Ry, Rxy;
     FloatMatrix *GtoLRotationMatrix;
 
-    // Transformation Matrix form GtoL(3,3) is stored
-    // at the element level for computation
-    // efficiency
-
 public:
     RerShell(int n, Domain *d);
     ~RerShell() { delete GtoLRotationMatrix; }
 
-    // FloatMatrix* ComputeConstitutiveMatrixAt (GaussPoint *) ;
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    //void printOutputAt (TimeStep*) ;
     FloatMatrix *computeGtoLRotationMatrix();
     int giveLocalCoordinateSystem(FloatMatrix &answer);
     void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);

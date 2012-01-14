@@ -52,7 +52,7 @@ public:
     ~ExportModuleManager();
 
     IRResultType initializeFrom(InputRecord *ir);
-    ExportModule *CreateModuleOfType(char *name, int num, EngngModel *emodel);
+    ExportModule *CreateModuleOfType(const char *name, int num, EngngModel *emodel);
 
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.

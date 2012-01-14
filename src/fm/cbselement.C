@@ -49,7 +49,6 @@
 #include "elementside.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
- #include <stdlib.h>
  #include <stdio.h>
 #endif
 
@@ -61,12 +60,10 @@
 namespace oofem {
 CBSElement :: CBSElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 { }
 
 
 CBSElement :: ~CBSElement()
-// Destructor.
 { }
 
 IRResultType
@@ -85,7 +82,6 @@ CBSElement :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
                                         CharType mtrx, TimeStep *tStep)
@@ -100,9 +96,8 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
+
 
 void
 CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
@@ -135,9 +130,8 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
     else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
+
 
 double
 CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
@@ -150,7 +144,6 @@ CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 
     return 0.0;
 }
-
 
 
 void
@@ -177,6 +170,7 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
  * }
  */
 
+
 int
 CBSElement :: checkConsistency()
 //
@@ -195,6 +189,7 @@ CBSElement :: checkConsistency()
     return result;
 }
 
+
 void
 CBSElement :: updateInternalState(TimeStep *stepN)
 {
@@ -210,6 +205,7 @@ CBSElement :: updateInternalState(TimeStep *stepN)
         }
     }
 }
+
 
 void
 CBSElement :: printOutputAt(FILE *file, TimeStep *stepN)

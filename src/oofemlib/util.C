@@ -109,12 +109,11 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     const char *__keyword, *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                                 // Required by IR_GIVE_FIELD macro
     EngngModel *problem;
-    char desc [ OOFEM_MAX_LINE_LENGTH + 1 ], problemName [ MAX_NAME_LENGTH ];
-    char dataOutputFileName [ MAX_FILENAME_LENGTH ];
+    std::string problemName, dataOutputFileName, desc;
 
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_outFileRec, 1);
     __keyword = NULL;
-    result = ir->giveField(dataOutputFileName, MAX_FILENAME_LENGTH, IFT_EngngModel_outfile, __keyword);
+    result = ir->giveField(dataOutputFileName, IFT_EngngModel_outfile, __keyword);
     if ( result != IRRT_OK ) {
         IR_IOERR("", __proc, IFT_EngngModel_outfile, "Output file record", ir, result);
     }
@@ -123,27 +122,27 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 
     ir = dr->giveInputRecord(DataReader :: IR_jobRec, 1);
     __keyword = NULL;
-    result = ir->giveField(desc, OOFEM_MAX_LINE_LENGTH, IFT_EngngModel_probdescription, __keyword);
+    result = ir->giveField(desc, IFT_EngngModel_probdescription, __keyword);
 
     /* here we need copy of input record. The pointer returned by dr->giveInputRecord can (and will)
      * be updated as reading e-model components (nodes, etc). But we need this record being available
      * through the whole e-model instanciation
      */
     InputRecord *emodelir = dr->giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
-    result = emodelir->giveRecordKeywordField(problemName, MAX_NAME_LENGTH);
-    //result = IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+    result = emodelir->giveRecordKeywordField(problemName);
+    //result = IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
     if ( result != IRRT_OK ) {
         IR_IOERR("", __proc, IFT_EngngModel_probname, "", emodelir, result);
     }
 
-    problem = CreateUsrDefEngngModelOfType(problemName, 1, _master);
+    problem = CreateUsrDefEngngModelOfType(problemName.c_str(), 1, _master);
     problem->setProblemMode(mode);
 
     if ( contextFlag ) {
         problem->setContextOutputMode(COM_Always);
     }
 
-    problem->instanciateYourself(dr, emodelir, dataOutputFileName, desc);
+    problem->instanciateYourself(dr, emodelir, dataOutputFileName.c_str(), desc.c_str());
     //emodelir.finish();
     delete(emodelir);
 

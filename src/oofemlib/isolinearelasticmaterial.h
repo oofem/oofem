@@ -66,7 +66,7 @@ protected:
     double E;
     /// Poisson's ratio.
     double nu;
-    // Shear modulus.
+    /// Shear modulus.
     double G;
 
 public:

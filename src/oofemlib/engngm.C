@@ -278,10 +278,9 @@ EngngModel ::  ~EngngModel()
 }
 
 
-int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dataOutputFileName, char *desc)
+int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
-    //char line [OOFEM_MAX_LINE_LENGTH+1];
     Domain *domain;
     int i;
     bool inputReaderFinish = true;
@@ -290,14 +289,12 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
 
     if ( this->giveProblemMode() ==   _postProcessor ) {
         // modify output file name to prevent output to be lost
-        strcat(dataOutputFileName, ".oofeg");
+        strcat(this->dataOutputFileName, ".oofeg");
     }
 
-    if ( ( outputStream = fopen(dataOutputFileName, "w") ) == NULL ) {
-        _error2("instanciateYourself: Can't open output file %s", dataOutputFileName);
+    if ( ( outputStream = fopen(this->dataOutputFileName, "w") ) == NULL ) {
+        _error2("instanciateYourself: Can't open output file %s", this->dataOutputFileName);
     }
-
-    ;
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = getTime();
@@ -324,13 +321,6 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
 
 #ifdef __PETSC_MODULE
     this->initPetscContexts();
-    /*
-     * petscContextList -> growTo(ndomains) ;
-     * for (i=0; i < this->ndomains ; i++) {
-     * petscContext =  new PetscContext (this);
-     * petscContextList->put(i+1,petscContext) ;
-     * }
-     */
 #endif
 
     // instanciate receiver

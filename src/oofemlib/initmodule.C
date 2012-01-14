@@ -34,6 +34,7 @@
 
 #include "initmodule.h"
 #include "oofem_limits.h"
+#include "error.h"
 
 #ifndef __MAKEDEPEND
  #include <stdarg.h>
@@ -57,10 +58,10 @@ InitModule :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    char initFileName [ MAX_FILENAME_LENGTH ];
-    IR_GIVE_FIELD2(ir, initFileName, IFT_InitModule_initfilename, "initfile", MAX_FILENAME_LENGTH);
-    if ( ( initStream = fopen(initFileName, "r") ) == NULL ) {
-        OOFEM_ERROR2("InitModule::initializeFrom: failed to open file %s", initFileName);
+    std::string initFileName;
+    IR_GIVE_FIELD(ir, initFileName, IFT_InitModule_initfilename, "initfile");
+    if ( ( initStream = fopen(initFileName.c_str(), "r") ) == NULL ) {
+        OOFEM_ERROR2("InitModule::initializeFrom: failed to open file %s", initFileName.c_str());
     }
 
     return IRRT_OK;

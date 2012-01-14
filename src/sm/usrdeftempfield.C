@@ -34,6 +34,7 @@
 
 #include "usrdeftempfield.h"
 #include "timestep.h"
+#include <sstream>
 
 namespace oofem {
 void
@@ -42,21 +43,17 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
 {
     int i, err;
     double result;
-    FloatArray c(3);
 
     if ( ( mode != VM_Incremental ) && ( mode != VM_Total ) ) {
         _error2( "computeComponentArrayAt: unknown mode (%s)", __ValueModeTypeToString(mode) );
     }
 
-    for ( i = 1; i <= coords.giveSize(); i++ ) {
-        c.at(i) = coords.at(i);
-    }
-
     answer.resize(this->size);
-    char buff [ UserDefinedTemperatureField_MAX_EXPR_LENGTH + 80 ];
+    std::ostringstream buff;
     for ( i = 1; i <= size; i++ ) {
-        sprintf(buff, "x=%e;y=%e;z=%e;t=%e;%s", c.at(1), c.at(2), c.at(3), stepN->giveTargetTime(), ftExpression [ i - 1 ]);
-        result = myParser.eval(buff, err);
+        buff << "x=" << coords.at(1) << ";y=" << coords.at(2) << ";z=" << coords.at(3) <<
+            ";t=" << stepN->giveTargetTime() << ";" <<ftExpression[i-1];
+        result = myParser.eval(buff.str().c_str(), err);
         if ( err ) {
             _error("computeValueAt: parser syntax error");
         }
@@ -64,10 +61,9 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
         answer.at(i) = result;
 
         if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-            sprintf(buff, "x=%e;y=%e;z=%e;t=%e;%s", c.at(1), c.at(2), c.at(3),
-                    stepN->giveTargetTime() - stepN->giveTimeIncrement(), ftExpression [ i - 1 ]);
-
-            result = myParser.eval(buff, err);
+            buff << "x=" << coords.at(1) << ";y=" << coords.at(2) << ";z=" << coords.at(3) <<
+                ";t=" << (stepN->giveTargetTime() - stepN->giveTimeIncrement()) << ";" << ftExpression[i-1];
+            result = myParser.eval(buff.str().c_str(), err);
             if ( err ) {
                 _error("computeValueAt: parser syntax error");
             }
@@ -75,15 +71,12 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
             answer.at(i) -= result;
         }
     }
-
-    return;
 }
 
 IRResultType
 UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    // const char *__keyword;
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, size, IFT_UserDefinedTemperatureField_size, "size"); // Macro
@@ -92,27 +85,15 @@ UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
     }
 
     if ( size > 0 ) {
-        IR_GIVE_FIELD2(ir, ftExpression [ 0 ], IFT_UserDefinedTemperatureField_t1, "t1(txyz)", UserDefinedTemperatureField_MAX_EXPR_LENGTH);
-        /*
-         * result = ir->giveField(ftExpression[0], UserDefinedTemperatureField_MAX_EXPR_LENGTH, IFT_UserDefinedTemperatureField_t1, "t1(txyz)");
-         * if (result != IRRT_OK) IR_IOERR (giveClassName(), __proc, IFT_UserDefinedTemperatureField_t1, __keyword, ir, result);
-         */
+        IR_GIVE_FIELD(ir, ftExpression [ 0 ], IFT_UserDefinedTemperatureField_t1, "t1(txyz)");
     }
 
     if ( size > 1 ) {
-        IR_GIVE_FIELD2(ir, ftExpression [ 1 ], IFT_UserDefinedTemperatureField_t1, "t2(txyz)", UserDefinedTemperatureField_MAX_EXPR_LENGTH);
-        /*
-         * result = ir->giveField(ftExpression[1], UserDefinedTemperatureField_MAX_EXPR_LENGTH, IFT_UserDefinedTemperatureField_t2, "t2(txyz)");
-         * if (result != IRRT_OK) IR_IOERR (giveClassName(), __proc, IFT_UserDefinedTemperatureField_t2, __keyword, ir, result);
-         */
+        IR_GIVE_FIELD(ir, ftExpression [ 1 ], IFT_UserDefinedTemperatureField_t1, "t2(txyz)");
     }
 
     if ( size > 2 ) {
-        IR_GIVE_FIELD2(ir, ftExpression [ 2 ], IFT_UserDefinedTemperatureField_t1, "t3(txyz)", UserDefinedTemperatureField_MAX_EXPR_LENGTH);
-        /*
-         * result = ir->giveField(ftExpression[2], UserDefinedTemperatureField_MAX_EXPR_LENGTH, IFT_UserDefinedTemperatureField_t3, "t3(txyz)");
-         * if (result != IRRT_OK) IR_IOERR (giveClassName(), __proc, IFT_UserDefinedTemperatureField_t3, __keyword, ir, result);
-         */
+        IR_GIVE_FIELD(ir, ftExpression [ 2 ], IFT_UserDefinedTemperatureField_t1, "t3(txyz)");
     }
 
     return IRRT_OK;

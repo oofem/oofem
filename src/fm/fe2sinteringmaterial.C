@@ -143,7 +143,7 @@ IRResultType FE2SinteringMaterial::initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
-    IR_GIVE_FIELD2(ir, this->inputfile, IFT_MicroMaterialFileName, "inputfile", OOFEM_MAX_LINE_LENGTH);
+    IR_GIVE_FIELD(ir, this->inputfile, IFT_MicroMaterialFileName, "inputfile");
     return this->StructuralMaterial::initializeFrom(ir);
 }
 
@@ -174,7 +174,7 @@ int FE2SinteringMaterial::checkConsistency()
     return true;
 }
 
-FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const char* inputfile) :
+FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile) :
             StructuralMaterialStatus(n, d, gp)
 {
     MaterialMode mmode = gp->giveMaterialMode();
@@ -197,9 +197,9 @@ FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPo
 }
 
 // Uses an input file for now, should eventually create the RVE itself.
-bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp, const char* inputfile)
+bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp, const std::string &inputfile)
 {
-    OOFEMTXTDataReader dr(inputfile);
+    OOFEMTXTDataReader dr(inputfile.c_str());
     EngngModel *em = InstanciateProblem(&dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
     em->initMetaStepAttributes(em->giveNextStep());

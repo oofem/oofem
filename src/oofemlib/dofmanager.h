@@ -371,7 +371,7 @@ public:
      * @param aClass String with DofManager name.
      * @return Newly allocated DofManager with required type.
      */
-    DofManager *ofType(char *aClass);
+    DofManager *ofType(const char *aClass);
 
     const char *giveClassName() const { return "DofManager"; }
     classType giveClassID() const { return DofManagerClass; }

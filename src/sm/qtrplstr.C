@@ -61,11 +61,11 @@ FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
-    // Constructor.
 {
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
 }
+
 
 Interface *
 QTrPlaneStress2d :: giveInterface(InterfaceType interface)
@@ -90,8 +90,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
 
     return NULL;
 }
-
-
 
 
 /*
@@ -179,17 +177,15 @@ QTrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
 double
 QTrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    if ( normalToCrackPlane.at(3) < 0.999999 ){//ensure that characteristic length is in the plane of element
+    if ( normalToCrackPlane.at(3) < 0.999999 ){ //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    } else {//otherwise compute out-of-plane characteristic length from element area
+    } else  {//otherwise compute out-of-plane characteristic length from element area
         return sqrt ( this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints);
     }
 }
@@ -219,7 +215,6 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
@@ -240,9 +235,8 @@ QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
         answer.at(3, 2 * i - 1) = dnx.at(i, 2);
         answer.at(3, 2 * i - 0) = dnx.at(i, 1);
     }
-
-    return;
 }
+
 
 double
 QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -267,8 +261,6 @@ QTrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
 }
 
 
-#define POINT_TOL 1.e-3
-
 int
 QTrPlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
@@ -287,28 +279,21 @@ void QTrPlaneStress2d :: computeGaussPoints()
 }
 
 void
-QTrPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-
-    // IntArray* answer = new IntArray (2);
+QTrPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     answer.resize(2);
-
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
-
 
 
 int
-QTrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+QTrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
+
 
 double
 QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -602,11 +587,9 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 void
 QTrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 {
-    return;
 }
 
 #endif
-
 
 
 int
@@ -621,7 +604,6 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType ty
 }
 
 
-
 void
 QTrPlaneStress2d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -630,6 +612,7 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
     pap.at(2) = this->giveNode(2)->giveNumber();
     pap.at(3) = this->giveNode(3)->giveNumber();
 }
+
 
 void
 QTrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
@@ -652,9 +635,12 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
     }
 }
 
+
 int
 QTrPlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return numberOfGaussPoints; }
+{
+    return numberOfGaussPoints;
+}
 
 
 void
@@ -665,6 +651,7 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &co
     }
 }
 
+
 SPRPatchType
 QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {
@@ -672,9 +659,9 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-
 double
-QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp;
     double volume = 0.0;
@@ -686,6 +673,7 @@ QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
 
     return sqrt( volume * 2.0 / this->giveCrossSection()->give(CS_Thickness) );
 }
+
 
 int
 QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
@@ -711,9 +699,11 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
     return result;
 }
 
+
 void
 QTrPlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
+
 } // end namespace oofem

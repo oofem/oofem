@@ -142,7 +142,7 @@ public:
      * @return newly Allocated cross section model with required type.
      * @see CreateUsrDefCrossSectionOfType
      */
-    CrossSection *ofType(char *aClass);
+    CrossSection *ofType(const char *aClass);
 
     /**
      * Returns nonzero, if receiver implements required extension.

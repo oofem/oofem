@@ -78,7 +78,7 @@ protected:
     /// List of engineering models to solve sequentially.
     AList< EngngModel > *emodelList;
     double deltaT;
-    char **inputStreamNames;
+    std::string *inputStreamNames;
     /// Associated time function for time step increment
     int dtTimeFunction;
     /**

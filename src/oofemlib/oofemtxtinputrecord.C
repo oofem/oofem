@@ -33,19 +33,28 @@
  */
 
 #include "oofemtxtinputrecord.h"
+#include "intarray.h"
+#include "flotarry.h"
+#include "flotmtrx.h"
+#include "dictionr.h"
+#include "dynalist.h"
+#include "range.h"
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <string.h>
  #include <ctype.h>
-#include <iostream>
+ #include <iostream>
 #endif
 
 namespace oofem {
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer() {
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer()
+{
     record [ 0 ] = '\0';
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer() {
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer()
+{
     strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH - 1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
@@ -93,11 +102,10 @@ OOFEMTXTInputRecord :: setRecordString(const char *newRec)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int &value, int maxchar)
+OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer, int &value)
 {
-    if ( tokenizer.giveNumberOfTokens() ) {
-        strncpy(answer, tokenizer.giveToken(1), maxchar - 1);
-        answer [ maxchar - 1 ] = '\0';
+    if ( tokenizer.giveNumberOfTokens() > 0 ) {
+        answer = std::string(tokenizer.giveToken(1));
         setReadFlag(1);
         if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
             return IRRT_BAD_FORMAT;
@@ -112,11 +120,10 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int &value, int maxc
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int maxchar)
+OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer)
 {
-    if ( tokenizer.giveNumberOfTokens() ) {
-        strncpy(answer, tokenizer.giveToken(1), maxchar - 1);
-        answer [ maxchar - 1 ] = '\0';
+    if ( tokenizer.giveNumberOfTokens() > 0 ) {
+        answer = std::string(tokenizer.giveToken(1));
         setReadFlag(1);
 
         return IRRT_OK;
@@ -155,33 +162,6 @@ OOFEMTXTInputRecord :: giveField(double &answer, const InputFieldType fieldID, c
         setReadFlag(indx + 1);
         return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
-    }
-}
-
-IRResultType
-OOFEMTXTInputRecord :: giveField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString)
-{
-    int indx = 0;
-    if ( idString ) {
-        if ( ( indx = this->giveKeywordIndx(idString) ) == 0 ) {
-            return IRRT_NOTFOUND;
-        }
-
-        setReadFlag(indx);
-        indx++;
-    } else {
-        indx = 1;
-    }
-
-    const char *_token = tokenizer.giveToken(indx);
-    if ( _token ) {
-        strncpy(answer, tokenizer.giveToken(indx), maxchar - 1);
-        answer [ maxchar - 1 ] = '\0';
-        setReadFlag(indx);
-        return IRRT_OK;
-    } else {
-        answer [ 0 ] = '\0';
         return IRRT_NOTFOUND;
     }
 }
@@ -517,14 +497,13 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     }
 }
 
-
-
-char *OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain)
+char *
+OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain)
 // reads Simple string from source according to following rules:
-// at begining skips whitespace (blank, tab)
+// at beginning skips whitespace (blank, tab)
 // read string terminated by whitespace or end-of-line
 // remain is unread remain of source string.
-// maximum of maxchar (including terminating '\0') is copyied into simpleString.
+// maximum of maxchar (including terminating '\0') is copied into simpleString.
 {
     const char *curr = source;
     char *ss = simpleString;
@@ -552,8 +531,8 @@ char *OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simple
     return simpleString;
 }
 
-
-const char *OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain)
+const char *
+OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain)
 //
 //
 //
@@ -562,7 +541,6 @@ const char *OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key
     * remain = __scanInteger(* remain, val);
     return * remain;
 }
-
 
 const char *
 OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain)
@@ -575,7 +553,8 @@ OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *va
     return * remain;
 }
 
-const char *OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *idString)
+const char *
+OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *idString)
 //
 // returns possition of substring idString in source
 // return value pointer at the end of occurence idString in source
@@ -605,7 +584,8 @@ const char *OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char 
     return str1 + len;
 }
 
-const char *OOFEMTXTInputRecord :: __skipNextWord(const char *src)
+const char *
+OOFEMTXTInputRecord :: __skipNextWord(const char *src)
 //
 // skips next word in src ; returns pointer after it
 //
@@ -623,8 +603,8 @@ const char *OOFEMTXTInputRecord :: __skipNextWord(const char *src)
     return src;
 }
 
-
-const char *OOFEMTXTInputRecord :: __scanInteger(const char *source, int *value)
+const char *
+OOFEMTXTInputRecord :: __scanInteger(const char *source, int *value)
 {
     //
     // reads integer value from source, returns pointer to char after this number
@@ -642,8 +622,8 @@ const char *OOFEMTXTInputRecord :: __scanInteger(const char *source, int *value)
     return endptr;
 }
 
-
-const char *OOFEMTXTInputRecord :: __scanDouble(const char *source, double *value)
+const char *
+OOFEMTXTInputRecord :: __scanDouble(const char *source, double *value)
 {
     //
     // reads integer value from source, returns pointer to char after this number
@@ -661,124 +641,6 @@ const char *OOFEMTXTInputRecord :: __scanDouble(const char *source, double *valu
     //return __skipNextWord(source);
     return endptr;
 }
-
-
-
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, maxchar, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(std::string &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
-IRResultType
-OOFEMTXTInputRecord :: giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString)
-{
-    IRResultType r = this->giveField(answer, fieldID, idString);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
-    }
-}
-
 
 int
 OOFEMTXTInputRecord :: readRange(const char **helpSource, int &li, int &hi)

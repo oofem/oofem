@@ -41,7 +41,6 @@
 #ifndef gausspnt_h
 #define gausspnt_h
 
-#include "flotarry.h"
 #include "integrationrule.h"
 #include "matstatus.h"
 #include "tdictionary.h"
