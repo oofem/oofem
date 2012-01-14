@@ -110,7 +110,6 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer, int &value)
         if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
             return IRRT_BAD_FORMAT;
         }
-        setReadFlag(1);
         setReadFlag(2);
 
         return IRRT_OK;
@@ -184,6 +183,7 @@ OOFEMTXTInputRecord :: giveField(std::string &answer, const InputFieldType field
     const char *_token = tokenizer.giveToken(indx);
     if ( _token ) {
         answer = std::string(tokenizer.giveToken(indx));
+        setReadFlag(indx);
         return IRRT_OK;
     } else {
         answer = "";
