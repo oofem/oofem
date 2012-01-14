@@ -128,14 +128,14 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int val;
-    char msgFileName [ MAX_FILENAME_LENGTH ] = "";
+    std::string msgFileName;
 
     val = -3;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SpoolesSolver_msglvl, "msglvl"); // Macro
     msglvl = val;
-    IR_GIVE_OPTIONAL_FIELD2(ir, msgFileName, IFT_SpoolesSolver_msgfile, "msgfile", MAX_FILENAME_LENGTH); // Macro
-    if ( ( ( int ) strlen(msgFileName) ) ) {
-        msgFile = fopen(msgFileName, "w");
+    IR_GIVE_OPTIONAL_FIELD(ir, msgFileName, IFT_SpoolesSolver_msgfile, "msgfile"); // Macro
+    if ( !msgFileName.empty() ) {
+        msgFile = fopen(msgFileName.c_str(), "w");
         msgFileCloseFlag = 1;
     } else {
         msgFile = stdout;
