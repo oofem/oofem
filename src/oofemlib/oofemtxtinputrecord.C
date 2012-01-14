@@ -110,7 +110,7 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer, int &value)
         if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
             return IRRT_BAD_FORMAT;
         }
-
+        setReadFlag(1);
         setReadFlag(2);
 
         return IRRT_OK;
