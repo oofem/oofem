@@ -82,6 +82,9 @@ protected:
     /// Real->virtual region map.
     IntArray vrmap;
 
+    /// Buffer for earlier time steps exported to *.pvd file.
+    dynaList< std::string > pvdBuffer;
+
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     VTKXMLExportModule(int n, EngngModel *e);
@@ -211,6 +214,11 @@ protected:
 
     /// Returns true if element geometry type is composite (not a single cell).
     bool isElementComposite(Element *elem);
+
+    /**
+     * Writes a VTK collection file where time step data is stored.
+     */
+    void writeVTKCollection();
 };
 
 /**

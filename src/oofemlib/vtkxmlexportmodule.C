@@ -47,6 +47,8 @@
 #ifndef __MAKEDEPEND
  #include <vector>
  #include <string>
+ #include <sstream>
+ #include <fstream>
 #endif
 
 #ifdef __VTK_MODULE
@@ -500,10 +502,13 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 #endif
     } // end loop over regions
 
+    std::string fname = giveOutputFileName(tStep);
+
 #ifdef __VTK_MODULE
     // Write the file
     vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
-    writer->SetFileName(giveOutputFileName(tStep).c_str());
+    //vtkSmartPointer<vtkXMLPUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+    writer->SetFileName(fname.c_str());
     writer->SetInput(stream);
     // Optional - set the mode. The default is binary.
     //writer->SetDataModeToBinary();
@@ -514,6 +519,19 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     fprintf(stream, "</UnstructuredGrid>\n</VTKFile>");
     fclose(stream);
 #endif
+
+    // Writing the *.pvd-file. Only time step information for now. It's named "timestep" but is actually the total time.
+    // First we check to see that there are more than 1 time steps, otherwise it is redundant;
+    if ( emodel->giveNumberOfSteps() > 1 ) {
+#ifdef __PARALLEL_MODE
+        // TODO: Should use PVTU-files. Until then, no PVD files either.
+#else
+        std::ostringstream pvdEntry;
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        this->pvdBuffer.pushBack(pvdEntry.str());
+        this->writeVTKCollection();
+#endif
+    }
 }
 
 #ifndef __VTK_MODULE
@@ -1349,4 +1367,21 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
     fprintf(stream, "</DataArray>\n");
 #endif
 }
+
+void VTKXMLExportModule::writeVTKCollection()
+{
+    std::string fname = this->emodel->giveOutputBaseFileName() + ".pvd";
+
+    ofstream outfile(fname.c_str());
+
+    outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
+    for (dynaList< std::string >::iterator it = this->pvdBuffer.begin(); it != this->pvdBuffer.end(); ++it) {
+        outfile << *it << "\n";
+    }
+    outfile << "</Collection>\n</VTKFile>";
+
+    outfile.close();
+}
+
+
 } // end namespace oofem
