@@ -43,7 +43,8 @@
 #include "contextioerr.h"
 #include "util.h"
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <sstream>
 
 namespace oofem {
 
@@ -208,11 +209,9 @@ bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp, const std::str
     if (!this->rve) {
         return false;
     }
-    char tempstring[1024];
-    char newName[1024];
-    this->rve->giveOutputBaseFileName(tempstring, 1024);
-    sprintf(newName, "%s-%d", tempstring, n);
-    this->rve->letOutputBaseFileNameBe(newName);
+    std::ostringstream name;
+    name << this->rve->giveOutputBaseFileName() << "-gp" << n;
+    this->rve->letOutputBaseFileNameBe(name.str());
     return true;
 }
 

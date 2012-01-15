@@ -46,9 +46,7 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
     if ( ( inputStream = fopen(inputfilename, "r") ) == NULL ) {
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
-
-    strncpy(dataSourceName, inputfilename, MAX_FILENAME_LENGTH - 1);
-    dataSourceName [ MAX_FILENAME_LENGTH - 1 ] = '\0';
+    dataSourceName = std::string(inputfilename);
 }
 
 OOFEMTXTDataReader :: ~OOFEMTXTDataReader()

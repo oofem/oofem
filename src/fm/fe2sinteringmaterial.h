@@ -52,9 +52,6 @@ class GaussPoint;
 class FE2SinteringMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    /// Input file
-    char file[OOFEM_MAX_LINE_LENGTH];
-
     StokesFlowStressHomogenization *rve;
 
 	double voffraction;

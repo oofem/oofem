@@ -104,14 +104,11 @@ DofManExportModule :: doOutput(TimeStep *tStep)
 FILE *
 DofManExportModule :: giveOutputStream(TimeStep *tStep)
 {
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    char fileName [ MAX_FILENAME_LENGTH ];
     FILE *answer;
 
-    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
-    sprintf( fileName, "%s.dm", baseFileName );
-    if ( ( answer = fopen(fileName, "w") ) == NULL ) {
-        OOFEM_ERROR2("DofManExportModule::giveOutputStream: failed to open file %s", fileName);
+    std::string fileName = this->giveOutputBaseFileName(tStep) + ".dm";
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2("DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
     }
 
     return answer;

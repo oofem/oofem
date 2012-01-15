@@ -187,14 +187,11 @@ GPExportModule :: terminate()
 FILE *
 GPExportModule :: giveOutputStream(TimeStep *tStep)
 {
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    char fileName [ MAX_FILENAME_LENGTH ];
     FILE *answer;
 
-    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
-    sprintf( fileName, "%s.gp", baseFileName );
-    if ( ( answer = fopen(fileName, "w") ) == NULL ) {
-        OOFEM_ERROR2("GPExportModule::giveOutputStream: failed to open file %s", fileName);
+    std::string fileName = this->giveOutputBaseFileName(tStep) + ".gp";
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2("GPExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
     }
 
     return answer;

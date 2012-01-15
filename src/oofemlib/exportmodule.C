@@ -79,16 +79,16 @@ ExportModule :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void
-ExportModule :: giveOutputBaseFileName(char *name, int num, TimeStep *tStep)
+std::string
+ExportModule :: giveOutputBaseFileName(TimeStep *tStep)
 {
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    this->emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
+    char fext[100];
 #ifdef __PARALLEL_MODE
-    sprintf( name, "%s_%03d.m%d.%d", baseFileName, emodel->giveRank(), this->number, tStep->giveNumber() );
+    sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
 #else
-    sprintf( name, "%s.m%d.%d", baseFileName, this->number, tStep->giveNumber() );
+    sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
 #endif
+    return this->emodel->giveOutputBaseFileName() + fext;
 }
 
 bool

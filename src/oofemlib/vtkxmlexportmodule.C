@@ -121,9 +121,7 @@ VTKXMLExportModule :: terminate()
 std::string
 VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
 {
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
-    return std::string(baseFileName) + ".vtu";
+    return this->giveOutputBaseFileName(tStep) + ".vtu";
 }
 
 

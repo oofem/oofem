@@ -228,15 +228,12 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 void
 HOMExportModule :: initialize()
 {
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    char fileName [ MAX_FILENAME_LENGTH ];
     Domain *d  = emodel->giveDomain(1);
     domainType domType = d->giveDomainType();
 
-    emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
-    sprintf(fileName, "%s.hom", baseFileName);
-    if ( ( this->stream = fopen(fileName, "w") ) == NULL ) {
-        OOFEM_ERROR2("HOMExportModule::giveOutputStream: failed to open file %s", fileName);
+    std::string fileName = emodel->giveOutputBaseFileName() + ".hom";
+    if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2("HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {

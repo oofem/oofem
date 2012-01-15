@@ -101,10 +101,9 @@
 
 namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
-    // constructor
+// constructor
 {
     number = i;
-    //nMethod = NULL;
     currentStep = NULL;
     previousStep = NULL;
     stepWhenIcApply = NULL;
@@ -118,9 +117,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     nxfemman = 0;
     nonLinFormulation = UNKNOWN;
 
-    //dataInputFileName     = NULL ;
-    dataOutputFileName    = new char [ MAX_FILENAME_LENGTH ];
-    //inputStream           = NULL ;
     outputStream          = NULL;
 
     domainList            = new AList< Domain >(0);
@@ -159,10 +155,9 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 }
 
 EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
-    // constructor
+// constructor
 {
     number = i;
-    //nMethod = NULL;
     currentStep = NULL;
     previousStep = NULL;
     stepWhenIcApply = NULL;
@@ -175,11 +170,6 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     nMetaSteps = 0;
     nxfemman = 0;
 
-    //dataInputFileName = new char[strlen(s)+1] ;
-    //strcpy (dataInputFileName,s) ;
-    dataOutputFileName = new char [ MAX_FILENAME_LENGTH ];
-
-    //inputStream           = NULL ;
     outputStream          = NULL;
 
     domainList            = new AList< Domain >(0);
@@ -197,16 +187,10 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     }
 
 #ifndef __PARALLEL_MODE
-    //dataInputFileName = new char[strlen(s)+1] ;
-    //strcpy (dataInputFileName,s) ;
-    dataOutputFileName = new char [ MAX_FILENAME_LENGTH ];
     parallelFlag = 0;
 #else
     parallelFlag = 1;
     initParallel();
-    //dataInputFileName = new char[strlen(s)+10] ;
-    //sprintf (dataInputFileName, "%s.%d", s, rank);
-    dataOutputFileName = new char [ MAX_FILENAME_LENGTH ];
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;
     lb = NULL;
@@ -233,10 +217,6 @@ EngngModel ::  ~EngngModel()
       delete stepWhenIcApply;
     }
 
-    //delete nMethod;
-
-    //delete dataInputFileName ;
-    delete[] dataOutputFileName;
     delete domainList;
     delete metaStepList;
     delete xfemManagerList;
@@ -285,15 +265,15 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     int i;
     bool inputReaderFinish = true;
 
-    strcpy(this->dataOutputFileName, dataOutputFileName);
+    this->dataOutputFileName = std::string(dataOutputFileName);
 
     if ( this->giveProblemMode() ==   _postProcessor ) {
         // modify output file name to prevent output to be lost
-        strcat(this->dataOutputFileName, ".oofeg");
+        this->dataOutputFileName.append(".oofeg");
     }
 
-    if ( ( outputStream = fopen(this->dataOutputFileName, "w") ) == NULL ) {
-        _error2("instanciateYourself: Can't open output file %s", this->dataOutputFileName);
+    if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+        _error2("instanciateYourself: Can't open output file %s", this->dataOutputFileName.c_str());
     }
 
     fprintf(outputStream, "%s", PRG_HEADER);
@@ -1676,21 +1656,23 @@ EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersio
 // returns nonzero on success
 //
 {
-    char fname [ MAX_FILENAME_LENGTH ];
-    sprintf(fname, "%s.%d.%d.osf", this->dataOutputFileName, stepNumber, stepVersion);
+    std::string fname = this->dataOutputFileName;
+    char fext[100];
+    sprintf(fext, ".%d.%d.osf", stepNumber, stepVersion);
+    fname += fext;
 
     if ( cmode ==  contextMode_read ) {
-        * contextFile = fopen(fname, "rb"); // open for reading
+        * contextFile = fopen(fname.c_str(), "rb"); // open for reading
     } else {
-        * contextFile = fopen(fname, "wb"); // open for writting,
+        * contextFile = fopen(fname.c_str(), "wb"); // open for writing,
     }
 
     //  rewind (*contextFile); // seek the beginning
     // // overwrite if exist
-    // else *contextFile = fopen(fname,"r+"); // open for reading and writting
+    // else *contextFile = fopen(fname,"r+"); // open for reading and writing
 
     if ( ( * contextFile == NULL ) && errLevel > 0 ) {
-        _error2("giveContextFile : can't open %s", fname);
+        _error2("giveContextFile : can't open %s", fname.c_str());
     }
 
     return 1;
@@ -1699,17 +1681,20 @@ EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersio
 bool
 EngngModel :: testContextFile(int stepNumber, int stepVersion)
 {
-    char fname [ MAX_FILENAME_LENGTH ];
-    sprintf(fname, "%s.%d.%d.osf", this->dataOutputFileName, stepNumber, stepVersion);
+    std::string fname = this->dataOutputFileName;
+    char fext[100];
+    sprintf(fext, ".%d.%d.osf", stepNumber, stepVersion);
+    fname.append(fext);
+
 #ifdef HAVE_ACCESS
-    if ( access(fname, R_OK) == 0 ) {
+    if ( access(fname.c_str(), R_OK) == 0 ) {
         return true;
     } else {
         return false;
     }
 
 #elif _MSC_VER
-    if ( _access(fname, 4) == 0 ) {
+    if ( _access(fname.c_str(), 4) == 0 ) {
         return true;
     } else {
         return false;
@@ -1729,11 +1714,14 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 // returns nonzero on success
 //
 {
-    char fname [ MAX_FILENAME_LENGTH ];
-    sprintf(fname, "%s.domain.%d.%d.din", this->dataOutputFileName, domainNum, domainSerNum);
+    std::string fname = this->dataOutputFileName;
+    char fext [ 100 ];
+    sprintf(fext, ".domain.%d.%d.din", domainNum, domainSerNum);
+    fname += fext;
+
     DataReader *dr;
 
-    if ( ( dr = new OOFEMTXTDataReader(fname) ) == NULL ) {
+    if ( ( dr = new OOFEMTXTDataReader(fname.c_str()) ) == NULL ) {
         _error("Creation of DataReader failed");
     }
 

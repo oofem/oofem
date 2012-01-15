@@ -57,7 +57,7 @@ class OOFEMTXTDataReader : public DataReader
 protected:
     OOFEMTXTInputRecord ir;
     FILE *inputStream;
-    char dataSourceName [ MAX_FILENAME_LENGTH ];
+    std::string dataSourceName;
 
 public:
     /// Constructor.
@@ -66,7 +66,7 @@ public:
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual void finish();
-    virtual const char *giveDataSourceName() const { return dataSourceName; }
+    virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
 
 protected:
     void giveRawLineFromInput(char *line);

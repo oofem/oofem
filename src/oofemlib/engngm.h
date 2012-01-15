@@ -67,6 +67,7 @@
 #include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
+ #include <string>
  #include <stdio.h>
 
  #ifdef __PARALLEL_MODE
@@ -214,7 +215,7 @@ protected:
     EModelDefaultPrescribedEquationNumbering defaultPrescribedNumberingScheme;
 
     /// Path to output stream.
-    char *dataOutputFileName;
+    std::string dataOutputFileName;
     /// Output stream.
     FILE *outputStream;
     /// Domain context output mode.
@@ -313,24 +314,22 @@ public:
         domainNeqs.at(id) = neq;
     }
     // input / output
-    /// Returns input file path.
-    //char* giveInputDataFileName () ;
     /// Returns file descriptor of output file.
     FILE *giveOutputStream();
     /**
      * Returns base output file name
-     * to which extensions, like .out .vtk .osf should be added.
+     * to which extensions, like .out .vtu .osf should be added.
      * In current implementation, output file name is simply returned.
      * @param dest Path and base file name will be copied into the array pointed to by dest.
      * @param n Not more than n bytes of src are copied
      */
-    char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n - 1); }
+    std::string giveOutputBaseFileName() { return dataOutputFileName; }
     /**
      * Sets the base output file name.
      * @see giveOutputBaseFileName
-     * @param src Output file name.
+     * @param src New output file name.
      */
-    void letOutputBaseFileNameBe(char *src) { strncpy(dataOutputFileName, src, MAX_FILENAME_LENGTH-1); }
+    void letOutputBaseFileNameBe(const std::string &src) { dataOutputFileName = src; }
     /**
      * Returns domain context output mode.
      */

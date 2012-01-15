@@ -368,14 +368,11 @@ VTKExportModule :: terminate()
 FILE *
 VTKExportModule :: giveOutputStream(TimeStep *tStep)
 {
-    char baseFileName [ MAX_FILENAME_LENGTH ];
-    char fileName [ MAX_FILENAME_LENGTH ];
+    std::string fileName;
     FILE *answer;
-
-    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
-    sprintf( fileName, "%s.vtk", baseFileName );
-    if ( ( answer = fopen(fileName, "w") ) == NULL ) {
-        OOFEM_ERROR2("VTKExportModule::giveOutputStream: failed to open file %s", fileName);
+    fileName = this->giveOutputBaseFileName(tStep) + ".vtk";
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2("VTKExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
     }
     return answer;
 }
