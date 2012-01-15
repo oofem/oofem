@@ -38,6 +38,7 @@
 #include "matstatus.h"
 #include "dynalist.h"
 #include "interface.h"
+#include "intarray.h"
 
 namespace oofem {
 //
