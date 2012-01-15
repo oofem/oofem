@@ -39,8 +39,8 @@
 #include "timer.h"
 #include "mathfem.h"
 #include "timestep.h"
+#include "flotarry.h"
 #include "usrdefsub.h"
-
 
 #include "parallel.h"
 #include "processcomm.h"

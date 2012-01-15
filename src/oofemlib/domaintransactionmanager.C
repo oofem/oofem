@@ -36,6 +36,7 @@
 #include "domaintransactionmanager.h"
 #include "error.h"
 #include "femcmpnn.h"
+#include "domain.h"
 
 namespace oofem {
 DomainTransactionManager :: DomainTransactionManager(Domain *d)

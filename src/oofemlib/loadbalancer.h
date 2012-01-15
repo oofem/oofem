@@ -39,14 +39,16 @@
  #include "interface.h"
  #include "clock.h"
  #include "alist.h"
+ #include "flotarry.h"
+ #include "intarray.h"
 
+#define __LB_DEBUG
  #ifdef __LB_DEBUG
   #include "dynalist.h"
   #include "range.h"
  #endif
 
 namespace oofem {
- #define __LB_DEBUG
 
 class Domain;
 class EngngModel;
