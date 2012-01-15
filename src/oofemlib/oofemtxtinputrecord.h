@@ -39,6 +39,8 @@
 #include "tokenizer.h"
 #include "dynalist.h"
 
+#include <vector>
+
 namespace oofem {
 #define IR_MAX_ERROR_LENGTH 100
 
@@ -54,7 +56,7 @@ protected:
      * unread fields can be detected
      */
     Tokenizer tokenizer;
-    bool readFlag [ OOFEM_MAX_TOKENS ];
+    std::vector< bool > readFlag;
 
     /// Record representation.
     char record [ OOFEM_MAX_LINE_LENGTH ];
@@ -63,7 +65,7 @@ public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
     /// Constructor. Creates the input record corresponding to given string.
-    OOFEMTXTInputRecord(char *source);
+    OOFEMTXTInputRecord(const char *source);
     /// Copy constructor.
     OOFEMTXTInputRecord(const OOFEMTXTInputRecord &);
     /// Destructor.
@@ -84,17 +86,17 @@ public:
 public:
     virtual IRResultType giveRecordKeywordField(std::string &answer, int &value);
     virtual IRResultType giveRecordKeywordField(std::string &answer);
-    virtual IRResultType giveField(int &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(std::string &answer, const InputFieldType fieldI, const char *idString);
-    virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString);
-    virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString);
-    virtual IRResultType giveField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(std::string &answer, InputFieldType fieldI, const char *idString);
+    virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldI, const char *idString);
+    virtual IRResultType giveField(IntArray &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldI, const char *idString);
+    virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
 
-    virtual bool hasField(const InputFieldType fieldID, const char *idString);
+    virtual bool hasField(InputFieldType fieldID, const char *idString);
 
 protected:
     int giveKeywordIndx(const char *kwd);

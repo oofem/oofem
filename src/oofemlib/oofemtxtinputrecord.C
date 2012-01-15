@@ -59,17 +59,19 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
+    readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
         readFlag [ i ] = src.readFlag [ i ];
     }
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(char *source) : InputRecord(), tokenizer()
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer()
 {
     strncpy(this->record, source, OOFEM_MAX_LINE_LENGTH - 1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
+    readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
         readFlag [ i ] = false;
     }
@@ -82,6 +84,7 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
+    readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
         readFlag [ i ] = src.readFlag [ i ];
     }
@@ -96,6 +99,7 @@ OOFEMTXTInputRecord :: setRecordString(const char *newRec)
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
+    readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
         readFlag [ i ] = false;
     }
@@ -132,7 +136,7 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std::string &answer)
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(int &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType fieldID, const char *idString)
 {
     int indx = this->giveKeywordIndx(idString);
     if ( indx ) {
@@ -149,7 +153,7 @@ OOFEMTXTInputRecord :: giveField(int &answer, const InputFieldType fieldID, cons
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(double &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType fieldID, const char *idString)
 {
     int indx = this->giveKeywordIndx(idString);
     if ( indx ) {
@@ -166,7 +170,7 @@ OOFEMTXTInputRecord :: giveField(double &answer, const InputFieldType fieldID, c
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::string &answer, const InputFieldType fieldI, const char *idString)
+OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType fieldI, const char *idString)
 {
     int indx = 0;
     if ( idString ) {
@@ -192,7 +196,7 @@ OOFEMTXTInputRecord :: giveField(std::string &answer, const InputFieldType field
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(IntArray &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType fieldID, const char *idString)
 {
     int value, size;
     int indx = this->giveKeywordIndx(idString);
@@ -222,7 +226,7 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, const InputFieldType fieldID,
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(FloatArray &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType fieldID, const char *idString)
 {
     double value;
     int size;
@@ -253,7 +257,7 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, const InputFieldType fieldI
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType fieldID, const char *idString)
 {
     int nrows, ncols;
     int indx = this->giveKeywordIndx(idString);
@@ -284,7 +288,7 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, const InputFieldType field
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString)
 {
     int size;
     int indx = this->giveKeywordIndx(idString);
@@ -308,7 +312,7 @@ OOFEMTXTInputRecord :: giveField(std::vector< std::string > &answer, const Input
 
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType fieldID, const char *idString)
 {
     double value;
     int size;
@@ -341,7 +345,7 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, const InputFieldType fieldI
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, InputFieldType fieldID, const char *idString)
 {
     int li, hi;
     const char *rec;
@@ -382,7 +386,7 @@ OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, const InputFieldType f
 }
 
 bool
-OOFEMTXTInputRecord :: hasField(const InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: hasField(InputFieldType fieldID, const char *idString)
 {
     //returns nonzero if idString is present in source
     int indx = this->giveKeywordIndx(idString);
