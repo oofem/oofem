@@ -1,6 +1,7 @@
-4test.oofem.out.2
+4test.oofem.out
 1D PETSc test
-linearstatic nsteps 1 lstype 3 smtype 7
+linearstatic nsteps 1 lstype 3 smtype 7 nmodules 0
+#vtkxml tstep_all domain_all primvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
@@ -14,7 +15,7 @@ Planestress2D 4 nodes 4 11 3 6 15 boundaryLoads 2 2 2 crossSect 1 mat 1
 Planestress2D 6 nodes 4 15 6 9 12 boundaryLoads 2 2 2 crossSect 1 mat 1
 SimpleCS 1 thick 1.0
 IsoLE  1 d 1.0 E 300.e3 n 0.2 talpha 0.0
-BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3
 ConstantFunction 1 f(t) 1.0
 

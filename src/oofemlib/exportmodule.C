@@ -84,10 +84,11 @@ ExportModule :: giveOutputBaseFileName(TimeStep *tStep)
 {
     char fext[100];
 #ifdef __PARALLEL_MODE
-    sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-#else
-    sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
+    if (this->emodel->giveNumberOfProcesses() > 1)
+        sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
+    else
 #endif
+    sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
     return this->emodel->giveOutputBaseFileName() + fext;
 }
 

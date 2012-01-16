@@ -58,6 +58,7 @@
  #include <vtkCellArray.h>
  #include <vtkCellData.h>
  #include <vtkXMLUnstructuredGridWriter.h>
+ #include <vtkXMLPUnstructuredGridWriter.h>
  #include <vtkUnstructuredGrid.h>
  #include <vtkSmartPointer.h>
 #endif
@@ -505,9 +506,18 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     std::string fname = giveOutputFileName(tStep);
 
 #ifdef __VTK_MODULE
-    // Write the file
+#if 0
+    // Doesn't as well as I would want it to, interface to VTK is to limited to control this.
+    // * The PVTU-file is written by every process (seems to be impossible to avoid).
+    // * Part files are renamed and time step and everything else is cut off => name collisions
+    vtkSmartPointer<vtkXMLPUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLPUnstructuredGridWriter>::New();
+    writer->SetTimeStep(tStep->giveNumber()-1);
+    writer->SetNumberOfPieces( this->emodel->giveNumberOfProcesses() );
+    writer->SetStartPiece( this->emodel->giveRank() );
+    writer->SetEndPiece( this->emodel->giveRank() );
+#else
     vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
-    //vtkSmartPointer<vtkXMLPUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+#endif
     writer->SetFileName(fname.c_str());
     writer->SetInput(stream);
     // Optional - set the mode. The default is binary.
@@ -522,10 +532,25 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
     // Writing the *.pvd-file. Only time step information for now. It's named "timestep" but is actually the total time.
     // First we check to see that there are more than 1 time steps, otherwise it is redundant;
-    if ( emodel->giveNumberOfSteps() > 1 ) {
 #ifdef __PARALLEL_MODE
-        // TODO: Should use PVTU-files. Until then, no PVD files either.
+    if ( (emodel->giveNumberOfSteps() > 1 || emodel->giveNumberOfProcesses() > 1 ) && emodel->giveRank() == 0 ) {
+        // TODO: Should use probably use PVTU-files instead. It is starting to get messy.
+        // For this to work, all processes must have an identical output file name.
+        for (int i = 0; i < this->emodel->giveNumberOfProcesses(); ++i) {
+            std::ostringstream pvdEntry;
+            char fext[100];
+            if (this->emodel->giveNumberOfProcesses() > 1) {
+                sprintf( fext, "_%03d.m%d.%d", i, this->number, tStep->giveNumber() );
+            } else {
+                sprintf( fext, "m%d.%d", this->number, tStep->giveNumber() );
+            }
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"" << i << "\" file=\""
+                    << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
+            this->pvdBuffer.pushBack(pvdEntry.str());
+        }
+        this->writeVTKCollection();
 #else
+   if ( emodel->giveNumberOfSteps() > 1 ) {
         std::ostringstream pvdEntry;
         pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.pushBack(pvdEntry.str());
@@ -1372,7 +1397,7 @@ void VTKXMLExportModule::writeVTKCollection()
 {
     std::string fname = this->emodel->giveOutputBaseFileName() + ".pvd";
 
-    ofstream outfile(fname.c_str());
+    std::ofstream outfile(fname.c_str());
 
     outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
     for (dynaList< std::string >::iterator it = this->pvdBuffer.begin(); it != this->pvdBuffer.end(); ++it) {
