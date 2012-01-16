@@ -237,7 +237,7 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
 #endif
 
-    primaryUnknownError.resize( this->refinedMesh.nodes * d->giveNumberOfDefaultNodeDofs() );
+    primaryUnknownError.resize( this->refinedMesh.nodes * d->giveDefaultNodeDofIDArry().giveSize() );
     primaryUnknownError.zero();
 
     // uNormArray.resize(nelems);
@@ -1126,7 +1126,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         endNode = nodes;
     }
 
-    dofs = element->giveDomain()->giveNumberOfDefaultNodeDofs();
+    dofs = element->giveDomain()->giveDefaultNodeDofIDArry().giveSize();
 
     if ( mode == HuertaErrorEstimatorInterface :: CountMode ) {
         for ( inode = startNode; inode <= endNode; inode++ ) {
@@ -1569,7 +1569,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
         endNode = nodes;
     }
 
-    dofs = element->giveDomain()->giveNumberOfDefaultNodeDofs();
+    dofs = element->giveDomain()->giveDefaultNodeDofIDArry().giveSize();
 
     if ( mode == HuertaErrorEstimatorInterface :: CountMode ) {
         for ( inode = startNode; inode <= endNode; inode++ ) {
@@ -2170,7 +2170,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
         endNode = nodes;
     }
 
-    dofs = element->giveDomain()->giveNumberOfDefaultNodeDofs();
+    dofs = element->giveDomain()->giveDefaultNodeDofIDArry().giveSize();
 
     if ( mode == HuertaErrorEstimatorInterface :: CountMode ) {
 #ifdef DEBUG
@@ -3064,7 +3064,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     :: getRelativeUtime(et_setup, st_setup);
 #endif
 
-    dofs = domain->giveNumberOfDefaultNodeDofs();
+    dofs = domain->giveDefaultNodeDofIDArry().giveSize();
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
 #ifdef USE_INPUT_FILE
@@ -3648,7 +3648,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     :: getRelativeUtime(et_setup, st_setup);
 #endif
 
-    dofs = domain->giveNumberOfDefaultNodeDofs();
+    dofs = domain->giveDefaultNodeDofIDArry().giveSize();
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
 #ifdef USE_INPUT_FILE
@@ -3876,7 +3876,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     :: getRelativeUtime(et_setup, st_setup);
  #endif
 
-    dofs = domain->giveNumberOfDefaultNodeDofs();
+    dofs = domain->giveDefaultNodeDofIDArry().giveSize();
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
  #ifdef USE_INPUT_FILE

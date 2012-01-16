@@ -385,8 +385,8 @@ IRResultType DofManager ::  resolveDofIDArray(InputRecord *ir, IntArray &dofIDAr
 
     // returns nonzero if succes
     if ( numberOfDofs == -1 ) {
-        numberOfDofs = domain->giveNumberOfDefaultNodeDofs();
         dofIDArry = domain->giveDefaultNodeDofIDArry();
+        numberOfDofs = dofIDArry.giveSize();
     } else {
         // if ndofs is prescribed, read the physical meaning of particular dofs
         // for detailed values of DofMask array see cltypes.h file

@@ -979,7 +979,6 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
         type = ISVT_VECTOR;
     } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == TemperatureVector ) ) {
         type = ISVT_SCALAR;
-        //nScalarComp = d->giveNumberOfDefaultNodeDofs();
     } else {
         OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
     }

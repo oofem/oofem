@@ -119,13 +119,8 @@ private:
     /// List of Random generators.
     AList< RandomFieldGenerator > *randomFieldGeneratorList;
 
-    // numberOfDefaultDofsPerNode specifies default number of dofs per node
-    // for current domain type. The defaultDofMask describes the physical meaning of these
-    // dofs.
-    int numberOfDefaultDofsPerNode;
-    int numberOfDefaultDofsPerSide;
+    /// Default dofs for a node (depends on the domain type).
     IntArray defaultNodeDofIDArry;
-    IntArray defaultSideDofIDArry;
 
     /**
      * Domain type. Determined by input data. It determines the problem type (like plane stress or plane strain mode).
@@ -389,25 +384,10 @@ public:
      * of nodal dofs. Default values are determined using current domain type.
      */
     const IntArray &giveDefaultNodeDofIDArry();
-    /**
-     * Returns default DofID array which defines physical meaning of particular DOFs.
-     * of element side dofs. Default values are determined using current domain type.
-     */
-    const IntArray &giveDefaultSideDofIDArry();
-    /**
-     * Returns default number of dofs per node. Determined using current domain type.
-     */
-    int giveNumberOfDefaultNodeDofs();
-    /**
-     * Returns default number of dofs per side. Determined using current domain type.
-     */
-    int giveNumberOfDefaultSideDofs();
-
     /// Returns domain type.
     domainType giveDomainType() { return dType; }
     /// Sets domain type
     void setDomainType(domainType _dType) { this->dType = _dType; }
-    // consistency check
     /**
      * Checks internal consistency of domain and all domain components.
      * The checkConsistency of all domain components is invoked.
@@ -483,8 +463,15 @@ public:
      */
     int commitTransactions(DomainTransactionManager *tm);
 
+    /**
+     * Initializes global dof man map according to domain dofman list.
+     */
     void initGlobalDofManMap(bool forceinit = false);
     void initGlobalElementMap(bool forceinit = false);
+    /**
+     * Assigns new local number (stored as dofmanager number, so it can be requested)
+     * to all dofManagers available in domanMap.
+     */
     void renumberDofManagers();
     void renumberDofManData(DomainTransactionManager *tm);
     void renumberElements();

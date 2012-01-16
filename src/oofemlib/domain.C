@@ -39,7 +39,6 @@
 #include "elementside.h"
 #include "material.h"
 #include "crosssection.h"
-//#include "yieldcriteria.h"
 #include "load.h"
 #include "initial.h"
 #include "loadtime.h"
@@ -47,9 +46,6 @@
 #include "oofem_limits.h"
 #include "entityrenumberingscheme.h"
 
-#ifndef __MAKEDEPEND
-//#include <clock.h>
-#endif
 #include "clock.h"
 #include "verbose.h"
 #include "strreader.h"
@@ -85,11 +81,11 @@
 #endif
 
 namespace oofem {
-Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(), defaultSideDofIDArry()
-    // Constructor. Creates a new domain.
+Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
+// Constructor. Creates a new domain.
 {
     this->engineeringModel = e;
-    this->number   = n;
+    this->number = n;
     this->serialNumber = serNum;
 
     elementList           = new AList< Element >(0);
@@ -101,11 +97,8 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(), def
     crossSectionList      = new AList< CrossSection >(0);
     nonlocalBarierList    = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
-    // yieldCriteriaList     = new AList(0) ;
     xfemManager           = NULL;
 
-    numberOfDefaultDofsPerNode = -1;
-    numberOfDefaultDofsPerSide = -1;
     dType                 = _unknownMode;
 
     connectivityTable     = NULL;
@@ -122,6 +115,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(), def
 #endif
 }
 
+
 Domain :: ~Domain()
 // Destructor.
 {
@@ -135,7 +129,6 @@ Domain :: ~Domain()
     delete nonlocalBarierList;
     delete randomFieldGeneratorList;
     delete xfemManager;
-
     delete connectivityTable;
     delete spatialLocalizer;
     delete outputManager;
@@ -155,44 +148,22 @@ Domain :: ~Domain()
 }
 
 
-Element *Domain :: giveElement(int n)
+Element *
+Domain :: giveElement(int n)
 // Returns the n-th element. Generates error if it is not defined yet.
 {
     if ( elementList->includes(n) ) {
         return elementList->at(n);
     } else {
         _error2("giveElement: undefined element (%d)", n);
-        // elem = (Element*) Element(n,this).typed() ;
-        // elementList -> put(n,elem) ;}
     }
 
     return NULL;
 }
 
-/*
- * FILE*  Domain :: giveInputStream ()
- * // Returns an input stream on the data file of the receiver.
- * {
- * if (inputStream)
- *    return inputStream ;
- * else {
- * fprintf (stderr,"\nDomain->giveInputStream: Internal error\a\n") ;
- * exit (1);}
- *
- * return inputStream ;
- * }
- *
- * FILE*  Domain :: giveOutputStream ()
- * // Returns an output stream on the data file of the receiver.
- * {
- * if (! outputStream) {
- * fprintf (stderr,"\nDomain->giveOutputStream: Internal error\a\n") ;
- * exit (1);
- * }
- * return outputStream ;
- * }
- */
-Load *Domain :: giveLoad(int n)
+
+Load *
+Domain :: giveLoad(int n)
 // Returns the n-th load. Generates the error if not defined.
 {
     Load *answer;
@@ -206,14 +177,14 @@ Load *Domain :: giveLoad(int n)
         }
     } else {
         _error2("giveLoad: undefined load (%d)", n);
-        //      load = (Load*) Load(n,this).typed() ;
-        //      loadList -> put(n,load) ;}
     }
 
     return NULL;
 }
 
-GeneralBoundaryCondition *Domain :: giveBc(int n)
+
+GeneralBoundaryCondition *
+Domain :: giveBc(int n)
 // Returns the n-th bc. Generates the error if not defined.
 {
     if ( bcList->includes(n) ) {
@@ -225,7 +196,9 @@ GeneralBoundaryCondition *Domain :: giveBc(int n)
     return NULL;
 }
 
-InitialCondition *Domain :: giveIc(int n)
+
+InitialCondition *
+Domain :: giveIc(int n)
 // Returns the n-th ic. Generates the error if not defined.
 {
     if ( icList->includes(n) ) {
@@ -238,7 +211,8 @@ InitialCondition *Domain :: giveIc(int n)
 }
 
 
-LoadTimeFunction *Domain :: giveLoadTimeFunction(int n)
+LoadTimeFunction *
+Domain :: giveLoadTimeFunction(int n)
 // Returns the n-th load-time function. Creates this fuction if it does
 // not exist yet.
 {
@@ -254,7 +228,8 @@ LoadTimeFunction *Domain :: giveLoadTimeFunction(int n)
 }
 
 
-Material *Domain :: giveMaterial(int n)
+Material *
+Domain :: giveMaterial(int n)
 // Returns the n-th material. Creates this material if it does not exist
 // yet.
 {
@@ -270,7 +245,8 @@ Material *Domain :: giveMaterial(int n)
 }
 
 
-Node *Domain :: giveNode(int n)
+Node *
+Domain :: giveNode(int n)
 // Returns the n-th node if it exists.
 {
     Node *node = NULL;
@@ -288,7 +264,9 @@ Node *Domain :: giveNode(int n)
     return node;
 }
 
-ElementSide *Domain :: giveSide(int n)
+
+ElementSide *
+Domain :: giveSide(int n)
 // Returns the n-th element side.
 {
     DofManager *side = NULL;
@@ -305,7 +283,9 @@ ElementSide *Domain :: giveSide(int n)
     return ( ElementSide * ) side;
 }
 
-DofManager *Domain :: giveDofManager(int n)
+
+DofManager *
+Domain :: giveDofManager(int n)
 // Returns the n-th node. Creates this node if it does not exist yet.
 {
     if ( dofManagerList->includes(n) ) {
@@ -320,8 +300,8 @@ DofManager *Domain :: giveDofManager(int n)
 }
 
 
-
-CrossSection *Domain :: giveCrossSection(int n)
+CrossSection *
+Domain :: giveCrossSection(int n)
 // Returns the n-th cross section.
 // yet.
 {
@@ -335,7 +315,8 @@ CrossSection *Domain :: giveCrossSection(int n)
 }
 
 
-NonlocalBarrier *Domain :: giveNonlocalBarrier(int n)
+NonlocalBarrier *
+Domain :: giveNonlocalBarrier(int n)
 // Returns the n-th NonlocalBarrier.
 {
     if ( nonlocalBarierList->includes(n) ) {
@@ -348,7 +329,8 @@ NonlocalBarrier *Domain :: giveNonlocalBarrier(int n)
 }
 
 
-RandomFieldGenerator *Domain :: giveRandomFieldGenerator(int n)
+RandomFieldGenerator *
+Domain :: giveRandomFieldGenerator(int n)
 // Returns the n-th RandomFieldGenerator.
 {
     if ( randomFieldGeneratorList->includes(n) ) {
@@ -360,23 +342,9 @@ RandomFieldGenerator *Domain :: giveRandomFieldGenerator(int n)
     return NULL;
 }
 
-/*
- * YieldCriteria*  Domain :: giveYieldCriteria (int n)
- * // Returns the n-th yieldCriteria
- * // yet.
- * {
- * YieldCriteria* yieldCriteria ;
- *
- * if (yieldCriteriaList -> includes(n))
- *    yieldCriteria = (YieldCriteria*) yieldCriteriaList -> at(n) ;
- * else {
- *   _errori ("giveYieldCriteria: No such cross section defined: ",n);
- * }
- * return yieldCriteria ;
- * }
- */
 
-EngngModel *Domain :: giveEngngModel()
+EngngModel *
+Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
 // exist yet.
 {
@@ -409,9 +377,9 @@ void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunct
 
 void Domain :: clearBoundaryConditions() { bcList->clear(true); };
 
-int Domain :: instanciateYourself(DataReader *dr)
+int
+Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
-
 {
     const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
@@ -452,8 +420,8 @@ int Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     resolveDomainDofsDefaults(name.c_str());
-    fprintf( outputStream, "Domain type: %s, default ndofs per node is %d, per side is %d\n\n\n",
-            name.c_str(), giveNumberOfDefaultNodeDofs(), giveNumberOfDefaultSideDofs() );
+    fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
+             name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
@@ -809,7 +777,8 @@ int Domain :: instanciateYourself(DataReader *dr)
 }
 
 
-void Domain :: error(const char *file, int line, const char *format, ...)
+void
+Domain :: error(const char *file, int line, const char *format, ...)
 {
     char buffer [ MAX_ERROR_MSG_LENGTH ];
     va_list args;
@@ -822,7 +791,8 @@ void Domain :: error(const char *file, int line, const char *format, ...)
 }
 
 
-void Domain :: warning(const char *file, int line, const char *format, ...)
+void
+Domain :: warning(const char *file, int line, const char *format, ...)
 {
     char buffer [ MAX_ERROR_MSG_LENGTH ];
     va_list args;
@@ -919,7 +889,8 @@ Domain :: giveDefaultNodeDofIDArry()
 }
 
 
-int Domain :: giveNumberOfSpatialDimensions()
+int
+Domain :: giveNumberOfSpatialDimensions()
 {
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
     // Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
@@ -937,157 +908,42 @@ int Domain :: giveNumberOfSpatialDimensions()
 }
 
 
-int Domain ::  giveNumberOfDefaultNodeDofs()
-//
-// returns default number of dofs for one node
-// this number depend on type of problem (2dplane-stress, 3d truss, 3d, 2d beam etc.)
-// returns member data  numberOfDefaultDofsPerNode.
-// numberOfDefaultDofsPerNode is initialized in initiazeFrom subroutine.
-//
-{
-    if ( numberOfDefaultDofsPerNode == -1 ) {
-        OOFEM_LOG_WARNING("Domain ::  giveNumberOfDefaultNodeDofs : Number of Default Dofs per Node is not specified, using default 6 instead\a\n");
-        return ( numberOfDefaultDofsPerNode = 6 );
-    } else {
-        return numberOfDefaultDofsPerNode;
-    }
-}
-
-
-const IntArray &
-Domain :: giveDefaultSideDofIDArry()
-{
-    // returns default DofID array, defining physical meaning of partucular DOFs
-    // in side Dof collection
-
-    // IntArray* answer;
-
-    /*
-     * if(dType == _2dPlaneStressRotMode) {
-     * answer = new IntArray (3);
-     *  answer->at(1)=D_u; answer->at(2)=D_v;answer->at(3)=R_w;
-     * }
-     * else if(dType == _2dPlaneStressMode) {
-     * answer = new IntArray (2);
-     *  answer->at(1)=D_u; answer->at(2)=D_v;
-     * }
-     * else if  (dType == _3dMode) {
-     * answer = new IntArray (3);
-     *  answer->at(1)=D_u; answer->at(2)=D_v; answer->at(3)=D_w;
-     * }
-     * else if (dType == _3dAxisymmMode) {
-     * answer = new IntArray (3);
-     *  answer->at(1)=D_u; answer->at(2)=D_v; answer->at(3)=R_w;
-     * }
-     * else if  (dType == _2dMindlinPlateMode) {
-     * answer = new IntArray (3);
-     *  answer->at(1)=D_w; answer->at(2)=R_u; answer->at(3)=R_v;
-     * }
-     * else if ( dType == _3dShellMode) {
-     * answer = new IntArray (5);
-     *  answer->at(1)=D_u; answer->at(2)=D_v; answer->at(3)=D_w;
-     * answer->at(4)=R_u; answer->at(5)=R_v;
-     * }
-     * else if  (dType == _2dTrussMode) {
-     * answer = new IntArray (2);
-     *  answer->at(1)=D_u; answer->at(2)=D_w;
-     * }
-     * else if  (dType == _1dTrussMode) {
-     * answer = new IntArray (1);
-     *  answer->at(1)=D_u;
-     * }
-     * else if  (dType == _2dBeamMode) {
-     * answer = new IntArray (3);
-     *  answer->at(1)=D_u; answer->at(2)=D_w; answer->at(3)=R_v;
-     * }
-     * else if  (dType == _2dHeatMode) {
-     * answer = new IntArray (1);
-     *  answer->at(1)=T_f;
-     * }
-     * else {
-     *  _error("Domain : Domain type name of unknown type\a\n");
-     *  return NULL;
-     * }
-     * return answer;
-     */
-
-    _error2( "giveDefaultSideDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
-    defaultSideDofIDArry.resize(0);
-    return defaultSideDofIDArry;
-}
-
-
-
-int Domain ::  giveNumberOfDefaultSideDofs()
-//
-// returns default number of dofs for one side
-// this number depend on type of problem (2dplane-stress, 3d truss, 3d, 2d beam etc.)
-// returns member data  numberOfDefaultDofsPerNode.
-// numberOfDefaultDofsPerNode is initialized in initializeFrom subroutine.
-//
-{
-    if ( numberOfDefaultDofsPerSide == -1 ) {
-        _warning("giveNumberOfDefaultSideDofs: Number of Default Dofs per Side is not specified, using default 0 instead");
-        return ( numberOfDefaultDofsPerSide = 0 );
-    } else {
-        return numberOfDefaultDofsPerSide;
-    }
-}
-
-
-
-
-
-void Domain :: resolveDomainDofsDefaults(const char *typeName)
+void
+Domain :: resolveDomainDofsDefaults(const char *typeName)
 //
 // resolves default number of dofs per node according to domain type name.
 // and also resolves default dof mask according to domain type.
 //
 {
-    numberOfDefaultDofsPerSide = 0;
 
     if ( !strncasecmp(typeName, "2dplanestressrot", 16) ) {
         dType = _2dPlaneStressRotMode;
-        numberOfDefaultDofsPerNode = 3;
     } else if ( !strncasecmp(typeName, "2dplanestress", 12) ) {
         dType = _2dPlaneStressMode;
-        numberOfDefaultDofsPerNode = 2;
     } else if ( !strncasecmp(typeName, "planestrain", 11) ) {
         dType = _PlaneStrainMode;
-        numberOfDefaultDofsPerNode = 2;
     } else if ( !strncasecmp(typeName, "3daxisymm", 9) ) {
         dType = _3dAxisymmMode;
-        numberOfDefaultDofsPerNode = 3;
     } else if  ( !strncasecmp(typeName, "2dmindlinplate", 14) ) {
         dType = _2dMindlinPlateMode;
-        numberOfDefaultDofsPerNode = 3;
     } else if ( !strncasecmp(typeName, "3dshell", 7) ) {
         dType = _3dShellMode;
-        numberOfDefaultDofsPerNode = 6;
     } else if  ( !strncasecmp(typeName, "2dtruss", 7) ) {
         dType = _2dTrussMode;
-        numberOfDefaultDofsPerNode = 2;
     } else if  ( !strncasecmp(typeName, "1dtruss", 7) ) {
         dType = _1dTrussMode;
-        numberOfDefaultDofsPerNode = 1;
     } else if  ( !strncasecmp(typeName, "2dbeam", 6) ) {
         dType = _2dBeamMode;
-        numberOfDefaultDofsPerNode = 3;
     } else if  ( !strncasecmp(typeName, "heattransfer", 11) ) {
         dType = _HeatTransferMode;
-        numberOfDefaultDofsPerNode = 1;
     } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
-        numberOfDefaultDofsPerNode = 2;
     } else if ( !strncasecmp(typeName, "2dincompflow", 12) ) {
         dType = _2dIncompressibleFlow;
-        numberOfDefaultDofsPerNode = 3;
     } else if ( !strncasecmp(typeName, "3dincompflow", 12) ) {
         dType = _3dIncompressibleFlow;
-        numberOfDefaultDofsPerNode = 4;
     } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
-        numberOfDefaultDofsPerNode = 3;
     } else {
         _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
         return;
@@ -1097,7 +953,8 @@ void Domain :: resolveDomainDofsDefaults(const char *typeName)
 
 #ifdef __OOFEG
 
-void Domain :: drawYourself(oofegGraphicContext &context)
+void
+Domain :: drawYourself(oofegGraphicContext &context)
 //
 // shows graphics representation of domain, respecting mode
 //
@@ -1111,7 +968,10 @@ void Domain :: drawYourself(oofegGraphicContext &context)
     }
 }
 
-void Domain :: drawElements(oofegGraphicContext &context) {
+
+void
+Domain :: drawElements(oofegGraphicContext &context)
+{
     //
     // steps through element array and calls element(i)->show(mode,this);
     //
@@ -1120,7 +980,10 @@ void Domain :: drawElements(oofegGraphicContext &context) {
     }
 }
 
-void Domain :: drawNodes(oofegGraphicContext &context) {
+
+void
+Domain :: drawNodes(oofegGraphicContext &context)
+{
     //
     // steps through element array and calls element(i)->show(mode,this);
     //
@@ -1138,6 +1001,7 @@ Domain :: giveSmoother()
 {
     return this->smoother;
 }
+
 
 void
 Domain :: setSmoother(NodalRecoveryModel *smoother, bool destroyOld)
@@ -1159,7 +1023,8 @@ Domain :: setTopology(TopologyDescription *topo, bool destroyOld)
 }
 
 
-ConnectivityTable *Domain :: giveConnectivityTable()
+ConnectivityTable *
+Domain :: giveConnectivityTable()
 //
 // return connectivity Table - if no defined - creates new one
 //
@@ -1172,7 +1037,8 @@ ConnectivityTable *Domain :: giveConnectivityTable()
 }
 
 
-SpatialLocalizer *Domain :: giveSpatialLocalizer()
+SpatialLocalizer *
+Domain :: giveSpatialLocalizer()
 //
 // return connectivity Table - if no defined - creates new one
 //
@@ -1186,9 +1052,8 @@ SpatialLocalizer *Domain :: giveSpatialLocalizer()
 }
 
 
-
-
-int Domain ::  giveCorrespondingCoordinateIndex(int idof)
+int
+Domain ::  giveCorrespondingCoordinateIndex(int idof)
 //
 // find corresponding coordinate axis to idof
 // if no - coordinate axis corespond to idof returns 0;
@@ -1307,59 +1172,9 @@ int Domain ::  giveCorrespondingCoordinateIndex(int idof)
     return 0;
 }
 
-/*
- * Domain :: giveCorrespondingDofID (int idof)
- * {
- * // returns corresponding DofId to idof-th dof in node
- * // respecting current domain mode.
- * // if no corresponding dofID exists returns (Err_dof = 0)
- * //
- *
- * switch (dType) {
- * case _2dBeamMode:
- * if     (idof == 1) return D_u;
- * else if(idof == 2) return D_w;
- * else if(idof == 3) return R_v;
- * break ;
- * case _2dPlaneStressMode:
- * if     (idof == 1) return D_u;
- * else if(idof == 2) return D_v;
- * break;
- * case _2dTrussMode:
- * if     (idof == 1) return D_u;
- * else if(idof == 2) return D_v;
- * break;
- * case _1dTrussMode:
- * if     (idof == 1) return D_u;
- * break;
- * case _2dMindlinPlateMode:
- * if     (idof == 1) return D_w;
- * else if(idof == 2) return R_u;
- * else if(idof == 3) return R_v;
- * break;
- * case _3dMode:
- * if     (idof == 1) return D_u;
- * else if(idof == 2) return D_v;
- * else if(idof == 3) return D_w;
- * break;
- * case _2dHeatMode:
- * if     (idof == 1) return T_f;
- * break;
- * default:
- * _error ("giveCorrespondingDofID : udefined iDof for selected domainType");
- * }
- * return Err_dof;
- *
- * }
- */
 
 int
 Domain :: checkConsistency()
-//
-// checks internal consistency
-//
-// many parameters are checked at run-time during computation
-//
 // this function transverse tree of all objects and invokes
 // checkConsistency on this objects
 // currently this function checks noly consistency
@@ -1426,8 +1241,6 @@ Domain :: giveTransactionManager()
 
     return transactionManager;
 }
-
-
 
 
 int Domain :: commitTransactions(DomainTransactionManager *tm)
@@ -1545,8 +1358,6 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
         dofManagerList_new->put(++_i, dmit->second);
     }
 
-
-
     this->renumberElements();
     this->renumberElementData(tm);
     // initialize new element list
@@ -1578,17 +1389,16 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
 }
 
 
-/* renumber here the master node number for rigid and hanging dofs, etc;
- * existing local nodes need mapping from old_local to new numbering,
- * but received nodes need mapping from global to new numbering
- *
- * -> we need to keep the list of received nodes! (now they are only introduced into globally indexed dmanMap!);
- */
 void
 Domain :: initGlobalDofManMap(bool forceinit)
 {
-    // initializes global dof man map according to domain dofman list
-
+    /*
+     * Renumber here the master node number for rigid and hanging dofs, etc;
+     * existing local nodes need mapping from old_local to new numbering,
+     * but received nodes need mapping from global to new numbering
+     *
+     * -> we need to keep the list of received nodes! (now they are only introduced into globally indexed dmanMap!);
+     */
     if ( forceinit || !dmanMapInitialized ) {
         int key, idofman, ndofman = this->giveNumberOfDofManagers();
         DofManager *dofman;
@@ -1603,17 +1413,9 @@ Domain :: initGlobalDofManMap(bool forceinit)
 }
 
 
-/* renumber here the master node number for rigid and hanging dofs, etc;
- * existing local nodes need mapping from old_local to new numbering,
- * but received nodes need mapping from global to new numbering
- *
- * -> we need to keep the list of received nodes! (now they are only introduced into globally indexed dmanMap!);
- */
 void
 Domain :: initGlobalElementMap(bool forceinit)
 {
-    // initializes global dof man map according to domain dofman list
-
     if ( forceinit || !elementMapInitialized ) {
         int key, ielem, nelem = this->giveNumberOfElements();
         Element *elem;
@@ -1628,17 +1430,16 @@ Domain :: initGlobalElementMap(bool forceinit)
 }
 
 
-
 void
-Domain :: renumberDofManData(DomainTransactionManager *tm) {
-    int _i;
+Domain :: renumberDofManData(DomainTransactionManager *tm)
+{
     std :: map< int, DofManager * > :: iterator it;
 
     SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
-    for ( _i = 0, it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
+    for ( it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
         if ( tm->dofmanTransactions.find(it->first) != tm->dofmanTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
             it->second->updateLocalNumbering(domainGToLFunctor); // g_to_l
@@ -1649,16 +1450,17 @@ Domain :: renumberDofManData(DomainTransactionManager *tm) {
     }
 }
 
+
 void
-Domain :: renumberElementData(DomainTransactionManager *tm) {
-    int _i;
+Domain :: renumberElementData(DomainTransactionManager *tm)
+{
     std :: map< int, Element * > :: iterator it;
 
     SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
-    for ( _i = 0, it = elementMap.begin(); it != elementMap.end(); it++ ) {
+    for ( it = elementMap.begin(); it != elementMap.end(); it++ ) {
         if ( tm->elementTransactions.find(it->first) != tm->elementTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
             it->second->updateLocalNumbering(domainGToLFunctor); // g_to_l
@@ -1669,10 +1471,7 @@ Domain :: renumberElementData(DomainTransactionManager *tm) {
     }
 }
 
-/*
- * Assigns new local number (stored as dofmanager number, so it can be requested)
- * Assigns new local number to all dofManagers available in domanMap.
- */
+
 void
 Domain :: renumberDofManagers()
 {
@@ -1686,7 +1485,8 @@ Domain :: renumberDofManagers()
 
 
 void
-Domain :: renumberElements() {
+Domain :: renumberElements()
+{
     int _locnum;
     std :: map< int, Element * > :: iterator it;
 
@@ -1694,6 +1494,7 @@ Domain :: renumberElements() {
         it->second->setNumber(_locnum++);
     }
 }
+
 
 int
 Domain :: LB_giveUpdatedLocalNumber(int num, EntityRenumberingScheme scheme)
@@ -1711,6 +1512,7 @@ Domain :: LB_giveUpdatedLocalNumber(int num, EntityRenumberingScheme scheme)
 
     return 0;
 }
+
 
 int
 Domain :: LB_giveUpdatedGlobalNumber(int num, EntityRenumberingScheme scheme)
@@ -1742,6 +1544,7 @@ Domain :: dofmanGlobal2Local(int _globnum)
     }
 }
 
+
 int
 Domain :: elementGlobal2Local(int _globnum)
 {
@@ -1752,6 +1555,7 @@ Domain :: elementGlobal2Local(int _globnum)
         return 0;
     }
 }
+
 
 void
 Domain :: setXfemManager(XfemManager *xfemManager)
