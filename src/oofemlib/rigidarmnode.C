@@ -51,7 +51,7 @@ RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 
 
 void
-RigidArmNode :: allocAuxArrays(void)
+RigidArmNode :: allocAuxArrays()
 {
     masterMask = new IntArray( this->giveNumberOfDofs() );
     countOfMasterDofs = new IntArray(numberOfDofs);
@@ -71,7 +71,7 @@ RigidArmNode :: allocAuxArrays(void)
 }
 
 void
-RigidArmNode :: deallocAuxArrays(void)
+RigidArmNode :: deallocAuxArrays()
 {
     delete masterMask;
     delete countOfMasterDofs;
@@ -83,9 +83,6 @@ RigidArmNode :: deallocAuxArrays(void)
 
     delete[] masterDofID;
     delete[] masterContribution;
-
-    // only delete
-    delete[] masterNode;
 }
 
 
@@ -157,9 +154,8 @@ RigidArmNode :: checkConsistency()
     }
 
     IntArray masterNodes(ndofs);
-    masterNode = new Node * [ ndofs ];
+    masterNode = master;
     for ( i = 1; i <= ndofs; i++ ) {
-        masterNode [ i - 1 ] = master;
         masterNodes.at(i) = master->giveNumber();
     }
 
@@ -206,11 +202,11 @@ RigidArmNode :: computeMasterContribution()
     uvw.at(3) = this->findDofWithDofId(R_w);
 
     for ( i = 1; i <= 3; i++ ) {
-        xyz.at(i) = this->giveCoordinate(i) - ( * masterNode )->giveCoordinate(i);
+        xyz.at(i) = this->giveCoordinate(i) - masterNode->giveCoordinate(i);
     }
 
     if ( hasLocalCS() ) {
-        xyz.rotatedWith(* localCoordinateSystem, 'n');
+        xyz.rotatedWith(* this->localCoordinateSystem, 'n');
     }
 
     for ( i = 1; i <= numberOfDofs; i++ ) {

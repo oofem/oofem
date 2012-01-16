@@ -74,15 +74,15 @@ protected:
     /// Number of master DofManager (Node)
     int masterDofMngr;
     /// Pointer to master Node
-    Node **masterNode;
+    Node *masterNode;
     ///
     IntArray **masterDofID;
     /// Array of vectors of master contribution coefficients
     FloatArray **masterContribution;
 
 private:
-    void allocAuxArrays(void);
-    void deallocAuxArrays(void);
+    void allocAuxArrays();
+    void deallocAuxArrays();
 
 public:
     /**
@@ -104,9 +104,6 @@ public:
     const char *giveClassName() const { return "RigidArmNode"; }
     classType giveClassID() const { return RigidArmNodeClass; }
     bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
-
-    /// Returns reference to master dof. Public because RigidArmSlaveDof need to access.
-    Node *giveMasterDofMngr() const { return * masterNode; }
 };
 } // end namespace oofem
 #endif // rigidarmnode_h
