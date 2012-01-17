@@ -244,7 +244,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
             PlasticStrainVector3d.add(* loadingStressGrad);
             // strainVector3d -> add (mStrainIncrement3d);
 
-            // update yieldCriteria and loading criteria records to newly reache state
+            // update yieldCriteria and loading criteria records to newly reached state
             // in loadingStressGrad is stored current plastic vector increment
             this->updateTempYC(gp, & stressVector3d, & PlasticStrainVector3d);
             this->updateTempLC(gp, & stressVector3d, & PlasticStrainVector3d);

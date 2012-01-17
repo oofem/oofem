@@ -128,6 +128,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CharacteristicLength, 78)  \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStrainMeasure, 79) \
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStressMeasure, 80) \
+    ENUM_ITEM_WITH_VALUE(IST_vonMisesStress, 81)
 
 
 /**

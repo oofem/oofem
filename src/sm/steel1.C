@@ -104,7 +104,7 @@ Steel1 :: GiveYCStressGradient(GaussPoint *gp,
 //
 // - returning vector of derivatives of yield surface with respect to stresses.
 //
-// ig gp->status are posibly stored hardenining variables
+// ig gp->status are posibly stored hardening variables
 {
     double f, sigx, sigy, sigz, sx, sy, sz;
     FloatArray *answer = new FloatArray(6);

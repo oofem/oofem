@@ -685,6 +685,13 @@ protected:
      */
     void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
                                  const FloatArray &stressVector, bool transpose = false) const;
+    
+    /**
+     * Computes equivalent of von Mises stress. Returns 0 if six stress components do not exist on the material.
+     * @param currentStress Stress vector given by 6 components.
+     */
+    double computeVonMisesStress(const FloatArray *currentStress);
+
     /**
      * Computes 3d strain vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for strain vector.

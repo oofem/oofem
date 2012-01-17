@@ -170,6 +170,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_YoungModulusConcrete:
     case IST_PoissonRatioConcrete:
     case IST_Viscosity:
+    case IST_vonMisesStress:
         return ISVT_SCALAR;
 
     default:

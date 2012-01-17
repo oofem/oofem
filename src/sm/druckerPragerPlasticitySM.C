@@ -50,6 +50,8 @@
  #include <math.h>
 #endif
 
+#define PRINTFDP //if defined, printf debug info simultaneously on screen
+
 namespace oofem {
 DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
@@ -477,8 +479,10 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
         //printf("newtonError = %e\n", newtonError) ;
     }
 
-    //printf("iterationCount in regular return = %d\n", iterationCount) ;
-
+#ifdef PRINTFDP
+    printf("iterationCount in regular return = %d\n", iterationCount) ;
+#endif
+    
     if ( deltaLambda < 0. ) {
         _error("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
     }
@@ -534,10 +538,12 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         tempKappa = kappa + deltaKappa;
         yieldValue = computeYieldValue(volumetricStress, 0., tempKappa, eM);
         newtonError = fabs(yieldValue / eM);
-        //printf("newtonError = %e\n", newtonError) ;
+#ifdef PRINTFDP
+        printf("newtonError in iteration %d in vertex return = %e\n", iterationCount, newtonError) ;
+#endif
     }
 
-    //printf("iterationCount in vertex return = %d\n", iterationCount) ;
+    printf("Done iteration in vertex return, after %d\n", iterationCount) ;
 
     if ( deltaKappa < 0. ) {
         _error("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.\n");
@@ -590,7 +596,7 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(const double kappa, const d
     case 1:             // linear hardening/softening.
         // if the limit value for kappa is exceeded in the softening case, the derivative is zero
         if ( ( hardeningModulus < 0. ) && ( kappa >= -initialYieldStress / hardeningModulus / eM ) ) {
-            return 0.;
+            return 0.0;
         } else {
             return eM * hardeningModulus;
         }
@@ -689,8 +695,13 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     const double tempKappa = status->giveTempKappa();
     const double deltaKappa = tempKappa - kappa;
     const double deltaLambdaStar = sqrt(2.) * gM * deltaKappa / kFactor / normOfStress;
-    const double hStar = kFactor * computeYieldStressPrime(tempKappa, eM);
+    double hStar = kFactor * computeYieldStressPrime(tempKappa, eM);
 
+    //exclude division by zero
+    if(hStar == 0.){
+        OOFEM_ERROR("DruckerPragerPlasticitySM :: computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
+    }
+    
     const double a_const = 1. + deltaLambdaStar;
     const double b_const = 3. * alpha * alphaPsi * kM / hStar - deltaLambdaStar / 3.;
     const double c_const = 3. * sqrt(2.) * alphaPsi * kM / 2. / hStar;
@@ -793,6 +804,9 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     const double a_const =
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );
 
+    if ( ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa ) == 0.){
+        OOFEM_ERROR2("DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix of tangent type is singular, material ID %d\n", this->giveNumber());
+    }
     // compute the algorithmic tangent stiffness
 
     answer.resize(6, 6);
@@ -961,3 +975,5 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
 
 #endif
 } // end namespace oofem
+
+#undef PRINTFDP

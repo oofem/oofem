@@ -2210,9 +2210,24 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 }
 
 
+double
+StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress) {
+    double J2;
+    double v1, v2, v3;
 
+    if ( currentStress == NULL || currentStress->giveSize() != 6) {
+        return 0.0;
+    }
 
+    v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
+    v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
+    v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
+    J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
+             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+
+    return sqrt(3*J2);
+}
 
 
 void
@@ -2541,6 +2556,10 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     if ( type == IST_StressTensor ) {
         answer = status->giveStressVector();
         return 1;
+    } else if ( type == IST_vonMisesStress ) {
+        answer.resize(1);
+        answer.at(1) = this->computeVonMisesStress(&status->giveStressVector());
+        return 1;
     } else if ( type == IST_StrainTensor ) {
         answer = status->giveStrainVector();
         return 1;
@@ -2651,10 +2670,10 @@ StructuralMaterial :: giveIPValueType(InternalStateType type)
         ( type == IST_CylindricalStressTensor ) ) {
         return ISVT_TENSOR_S3;
     }
-    // strains components packed in enginnering notation
+    // strains components packed in engineering notation
     else if ( ( type == IST_StrainTensor ) || ( type == IST_StrainTensorTemp ) || ( type == IST_CylindricalStrainTensor ) ) {
         return ISVT_TENSOR_S3E;
-    } else if ( type == IST_Temperature ) {
+    } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
@@ -2699,7 +2718,7 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
         return 3;
-    } else if ( type == IST_Temperature ) {
+    } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
         return 1;
     } else {
         return Material :: giveIPValueSize(type, aGaussPoint);

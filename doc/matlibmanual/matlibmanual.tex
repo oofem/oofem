@@ -99,7 +99,7 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \newpage
 \section{Material Models for Structural Analysis}
 \subsection{Elastic materials}
-\subsubsection{Isotropic linear elastic material}
+\subsubsection{Isotropic linear elastic material - IsoLE}
 \label{IsoLE}
 Linear isotropic material model. The model parameters are summarized
 in table~\ref{IsoLE_table}.
@@ -131,7 +131,7 @@ Features & Adaptivity support\\
 
 
 
-\subsubsection{Orthotropic linear elastic material}
+\subsubsection{Orthotropic linear elastic material - OrthoLE}
 \label{OrthoLE}
 Linear orthotropic, linear elastic  material model. The model parameters are summarized
 in table~\ref{OrthoLE_table}.
@@ -231,7 +231,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \end{table}
 
 
-\subsubsection{Hyperelastic material}
+\subsubsection{Hyperelastic material - HyperMat}
 This material model can describe elastic behavior at large strains.
 A hyperelastic model postulates the existence of free energy potential. Existence of the potential implies reversibility of deformations and no energy dissipation during loading process. Here we use the free energy function introduced in \cite{SimoHughes}
 \begin{equation}\label{freeEnergy}
@@ -267,7 +267,7 @@ Supported modes& 3dMat\\
 
 \subsection{Plasticity-based material models}
 
-\subsubsection{Drucker-Prager model}
+\subsubsection{Drucker-Prager model - DruckerPrager}
 The Drucker-Prager plasticity model\footnote{Contributed by Simon Rolshoven, LSC, FENAC, EPFL.} is an isotropic elasto-plastic model based
 on a yield function
 \be
@@ -284,7 +284,13 @@ deviatoric invariant of the stress tensor.
 The friction coefficient $\alpha$ is a positive parameter that
 controls the influence of the pressure on the yield limit, important for
 cohesive-frictional materials such as concrete, soils or other
-geomaterials.
+geomaterials. Regarding Mohr-Coulomb plasticity, relation to cohesion, $c$, and 
+the angle of friction, $\theta$, exists for the Drucker-Prager model
+\bea
+\alpha = \frac{2\sin\theta}{(3-\sin\theta)\sqrt{3}}\\
+\tauY = \frac{6c\cos\theta}{(3-\sin\theta)\sqrt{3}}
+\eea 
+
 The flow rule is derived from the plastic potential
 \be
 g\left(\bsig\right) = \alphaPsi I_1 + \sqrt{J_2}
@@ -397,6 +403,7 @@ hardening\\
 &- \param{kc} $\kappa_c$ for the exponential softening law\\
 &- \param{yieldtol} tolerance of the error in the yield criterion, default value
 1.e-14\\
+Supported modes& 3dMat, PlaneStrain, 3dRotContinuum\\
 \hline
 \end{tabular}
 \caption{DP material - summary.}
@@ -404,10 +411,7 @@ hardening\\
 %\end{center}
 \end{table}
 
-
-
-
-\subsubsection{Mises plasticity model with isotropic damage}
+\subsubsection{Mises plasticity model with isotropic damage - MisesMat}
 \label{sec:misplast}
 
 This model is appropriate for the description of plastic yielding in ductile material such as metals, and it can also cover the effects of void growth.
@@ -702,7 +706,7 @@ Supported modes& PlaneStress\\
 %\end{center}
 \end{table}
 
-\subsubsection{Perfectly plastic material with Mises yield condition}
+\subsubsection{Perfectly plastic material with Mises yield condition - Steel1}
 
 This is an older model, kept here for compatibility with previous versions.
 It uses Mises plasticity condition with no hardening and under small strain only.
@@ -736,7 +740,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \end{table}
 
 
-\subsubsection{Composite plasticity model for masonry}
+\subsubsection{Composite plasticity model for masonry - Masonry02}
 Masonry is a composite material made of bricks and mortar. Nonlinear behavior of both components should be considered to obtain a realistic model able to describe cracking, slip, and crushing of the material. The model is based on paper by Lourenco and Rots \cite{Rots}. It is formulated on the basis of softening plasticity for tension, shear, and compression (see fig.(\ref{compyieldsurffig})). Numerical implementation is based on modern algorithmic concepts such as implicit integration of the rate equations and consistent tangent stiffness matrices.
 
 \begin{figure}[!htb]
@@ -932,7 +936,7 @@ Supported modes& \_2dInterface\\
 
 
 \subsubsection{Nonlinear elasto-plastic material model for concrete
-plates and shells}
+plates and shells - Concrete2}
 \label{Rer}
 Nonlinear elasto-plastic material model with hardening.
 Takes into account uniaxial stress + transverse shear in concrete
@@ -999,12 +1003,12 @@ Supported modes& 3dShellLayer, 2dPlateLayer\\
 
 \subsection{Material models for tensile failure}
 \subsubsection{Nonlinear elasto-plastic material model for concrete
-plates and shells}
+plates and shells - Concrete2}
 The description can be found is section~\ref{Rer}.
 
 
 
-\subsubsection{Smeared rotating crack model}
+\subsubsection{Smeared rotating crack model - Concrete3}
 \label{rcm}
 Implementation of smeared rotating crack model.
 Virgin material is modeled as isotropic linear elastic material
@@ -1050,7 +1054,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 \subsubsection{Smeared rotating crack model with transition to scalar
-damage - linear softening}
+damage - linear softening - RCSD}
 \label{rcsd}
 Implementation of smeared rotating crack model with transition to
 scalar damage with linear softening law.
@@ -1114,7 +1118,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 \subsubsection{Smeared rotating crack model with transition to scalar
-damage - exponential softening}
+damage - exponential softening - RCSDE}
 \label{rcsde}
 Implementation of smeared rotating crack model with transition to
 scalar damage with exponential softening law.
@@ -1138,7 +1142,7 @@ Record Format & \descitem{RCSDE} \elemparam{d}{rn} \elemparam{E}{rn}
 
 
 
-\subsubsection{Nonlocal smeared rotating crack model with transition to scalar damage}
+\subsubsection{Nonlocal smeared rotating crack model with transition to scalar damage - RCSDNL}
 \label{rcsdnl}
 Implementation of nonlocal version of smeared rotating crack model with transition to
 scalar damage.
@@ -1211,7 +1215,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 
-\subsubsection{Isotropic damage model for tensile failure}
+\subsubsection{Isotropic damage model for tensile failure - Idm1}
 \label{sec:idmtf}
 This isotropic damage model assumes that the stiffness degradation is
 isotropic, i.e., stiffness moduli corresponding to different
@@ -1488,7 +1492,7 @@ and also because for exponential softening the approach based on an exponential 
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
-Record Format & \descitem{idm1} 
+Record Format & \descitem{Idm1} 
 \elemparam{}{in} 
 \elemparam{d}{rn} 
 \elemparam{E}{rn}
@@ -1564,7 +1568,7 @@ Features & Adaptivity support\\
 %\end{center}
 \end{table}
 
-\subsubsection{Nonlocal isotropic damage model for tensile failure}
+\subsubsection{Nonlocal isotropic damage model for tensile failure - Idmnl1}
 \label{sec:nidm}
 Nonlocal version of isotropic damage model from Section~\ref{sec:idmtf}.
 The nonlocal averaging acts as a powerful localization
@@ -1690,7 +1694,7 @@ in Tables~\ref{idnl_table} and \ref{idnl_table_cont}.
 \hline
 Description & Nonlocal isotropic damage model for concrete in tension\\
 \hline
-Record Format & \descitem{idmnl1} 
+Record Format & \descitem{Idmnl1} 
 \elemparam{}{in} 
 \elemparam{d}{rn} 
 \elemparam{E}{rn}
@@ -1784,7 +1788,7 @@ Features & Adaptivity support\\
 \clearpage
 
 %------------------------------------------------------------------
-\subsubsection{MDM - Anisotropic damage model}
+\subsubsection{Anisotropic damage model - Mdm}
 %------------------------------------------------------------------
 
 \paragraph{Local formulation}
@@ -2009,7 +2013,7 @@ in table~\ref{mdm_table}.
 Description & MDM Anisotropic damage model\\
 \hline
 & Common parameters\\
-Record Format & \descitem{mdm} \elemparam{d}{rn} \elemparam{nmp}{ins} \elemparam{talpha}{rn}
+Record Format & \descitem{Mdm} \elemparam{d}{rn} \elemparam{nmp}{ins} \elemparam{talpha}{rn}
 \elemparam{parmd}{rn}  \elemparam{nonloc}{in}
 \elemparam{formulation}{in} \elemparam{mode}{in}\\
 Parameters & -\param{num} material model number\\
@@ -2110,7 +2114,7 @@ Features & \\
 
 
 \subsection{Material models specific to concrete}
-\subsubsection{Mazars damage model for concrete}
+\subsubsection{Mazars damage model for concrete - MazarsModel}
 This isotropic damage model assumes that the stiffness degradation is
 isotropic, i.e., stiffness moduli corresponding to different
 directions decrease proportionally and independently of direction of
@@ -2140,7 +2144,7 @@ in table~\ref{maz_table}.
 \hline
 Description & Mazars damage model for concrete\\
 \hline
-Record Format & \descitem{mazarsmodel} \elemparam{d}{rn} \elemparam{E}{rn}
+Record Format & \descitem{MazarsModel} \elemparam{d}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn}  \elemparam{e0}{rn}
 \elemparam{ac}{rn} [\elemparam{bc}{rn}] [\elemparam{beta}{rn}]
 \elemparam{at}{rn} \optelemparam{bt}{rn}
@@ -2182,7 +2186,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 \end{table}
 
 
-\subsubsection{Nonlocal Mazars damage model for concrete}
+\subsubsection{Nonlocal Mazars damage model for concrete - MazarsModelnl}
 The nonlocal variant of Mazars damage model for concrete.
 Model based on nonlocal averaging of equivalent strain.
 The nonlocal averaging acts as a powerful localization
@@ -2196,7 +2200,7 @@ in table~\ref{maznl_table}.
 \hline
 Description & Nonlocal Mazars damage model for concrete\\
 \hline
-Record Format & \descitem{mazarsmodelnl} \elemparam{r}{rn} \elemparam{E}{rn}
+Record Format & \descitem{MazarsModelnl} \elemparam{r}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn}  \elemparam{e0}{rn}
 \elemparam{ac}{rn} \elemparam{bc}{rn} \elemparam{beta}{rn}
 \elemparam{version}{in} \elemparam{at}{rn} \optelemparam{bt}{rn} \elemparam{r}{rn}
@@ -2231,7 +2235,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 \end{table}
 
 
-\subsubsection{CebFip78 model for concrete creep with aging}
+\subsubsection{CebFip78 model for concrete creep with aging - CebFip78}
 Implementation of aging viscoelastic model for concrete creep
 according to the CEB-FIP Model Code.
 The model parameters are summarized
@@ -2266,7 +2270,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 
-\subsubsection{Double-power law model for concrete creep with aging}
+\subsubsection{Double-power law model for concrete creep with aging - DoublePowerLaw}
 Implementation of aging viscoelastic model for concrete creep
 with compliance function given by the double-power law.
 The model parameters are summarized
@@ -2278,7 +2282,7 @@ in table~\ref{doublepowerlaw_table}.
 \hline
 Description & Double-power law model  for concrete creep with aging\\
 \hline
-Record Format & \descitem{doublepowerlaw}  \elemparam{n}{rn}
+Record Format & \descitem{DoublePowerLaw}  \elemparam{n}{rn}
 \elemparam{relMatAge}{rn} \elemparam{E28}{rn} \elemparam{fi1}{rn} \elemparam{m}{rn}
 \elemparam{n}{rn} \elemparam{alpha}{rn} \\
 Parameters &- \param{num} material model number\\
@@ -2854,7 +2858,7 @@ In order to suppress shrinkage set $kSh = 0.0$
 \clearpage
 
 
-\subsubsection{Microplane model M4}
+\subsubsection{Microplane model M4 - Microplane\_M4}
 Model M4 covers inelastic behavior of concrete under complex
 triaxial stress states. It is based on the microplane concept and
 can describe softening. However, 
@@ -2872,7 +2876,7 @@ in table~\ref{m4_table}.
 \hline
 Description & M4 material model\\
 \hline
-Record Format & \descitem{microplane\_m4}  \elemparam{nmp}{in}
+Record Format & \descitem{Microplane\_M4}  \elemparam{nmp}{in}
 \elemparam{c3}{rn} \elemparam{c20}{rn} \elemparam{k1}{rn}
 \elemparam{k2}{rn} \elemparam{k3}{rn} \elemparam{k4}{rn}
 \elemparam{E}{rn} \elemparam{n}{rn} \\
@@ -2897,7 +2901,7 @@ Supported modes& 3dMat\\
 \newcommand{\mD}{\mbf{D}}
 \newcommand{\qh}{q_{\rm h}}
 
-\subsubsection{Damage-plastic model for concrete}
+\subsubsection{Damage-plastic model for concrete - ConcreteDPM}
 
 This model, developed by Grassl and Jir\'{a}sek for failure of concrete
 under general triaxial stress, is described in detail in \cite{GraJir}.
@@ -3197,14 +3201,14 @@ is terminated. The maximum admissible element size
 \begin{equation}
 h_{\max} = \frac{EG_f}{f_t^2} = \frac{Ew_f}{f_t}
 \end{equation}
-happens to be equal to Hillerborg's chacteristic material length. 
+happens to be equal to Hillerborg's characteristic material length. 
 For typical concretes it is in the order of a few hundred mm. 
 If the condition $h<h_{\max}$ is violated, the mesh needs to be refined.
 Note that the effective element size $h$ is obtained by projecting the element.
 For instance, if the element is a cube of edge length 100 mm, its effective
 size in the direction of the body diagonal can be 173 mm. 
 
-\subsection{Orthotropic damage model with fixed crack orientations for composites}
+\subsection{Orthotropic damage model with fixed crack orientations for composites - CompDamMat}
 
 The model is designed for transversely isotropic elastic material defined by five elastic material constants. Typical example is a carbon fiber tow. Axis $1$ represents the material principal direction. The orthotropic material constants are defined as
 \begin{eqnarray}
@@ -3296,7 +3300,7 @@ The damage initiation is based on a trial stress. It becomes necessary for  high
 \hline
 Description & Orthotropic damage model with fixed crack orientations for composites\\
 \hline
-Record Format & \descitem{compdammat}  \elemparam{num}{in}
+Record Format & \descitem{CompDamMat}  \elemparam{num}{in}
 \elemparam{d}{rn} \elemparam{Exx}{rn} \elemparam{EyyEzz}{rn}
 \elemparam{nuxynuxz}{rn} \elemparam{nuyz}{rn} \elemparam{GxyGxz}{rn}
 \elemparam{Tension\_f0\_Gf}{ra} \elemparam{Compres\_f0\_Gf}{ra} [\elemparam{afterIter}{in}] [\elemparam{allowSnapBack}(ia)]\\
@@ -3321,7 +3325,7 @@ Supported modes& 3dMat, 1dMat\\
 
 
 
-\subsection{Orthotropic elastoplastic model with isotropic damage}
+\subsection{Orthotropic elastoplastic model with isotropic damage - TrabBone3d}
 
 This model combines orthotropic elastoplasticity with isotropic damage.
 Material orthotropy is described by the fabric tensor, i.e., a symmetric second-order
@@ -3440,7 +3444,7 @@ Supported modes& 3dMat\\
 \label{trabbone_table}
 %\end{center}
 \end{table}
-\subsubsection{Nonlocal formulation}
+\subsubsection{Nonlocal formulation - TrabBoneNL3d}
 The model is regularized by the over-nonlocal formulation with damage driven by a combination of local and nonlocal cumulated plastic strain
 \begin{equation}\label{overKappa}
 \hat{\kappa} = (1-m)\kappa + m\bar{\kappa},
@@ -3559,7 +3563,7 @@ Supported modes& \_1dInterface\\
 \clearpage
 
 \section{Material Models for Transport Problems}
-\subsection{Isotropic linear material}
+\subsection{Isotropic linear material - IsoHeat}
 \label{IsoLET}
 Linear isotropic material model for transport problems. The model parameters are summarized
 in table~\ref{Isoheat_table}.
@@ -3724,7 +3728,7 @@ Supported modes& \_2dHeat, \_3dHeat\\
 \end{figure}
 
 
-\subsection{Coupled heat and mass transfer material model}
+\subsection{Coupled heat and mass transfer material model - HeMotk}
 Coupled heat and mass transfer material model.
 Source: T. Krejci doctoral thesis; Bazant and Najjar, 1972;
 Pedersen, 1990. Assumptions: water vapor is the only driving
@@ -3773,7 +3777,7 @@ Supported modes& \_2dHeMo\\
 \clearpage
 
 \section{Material Models for Fluid Dynamic}
-\subsection{Newtonian fluid}
+\subsection{Newtonian fluid - NewtonianFluid}
 \label{NewtonianFluidMaterial}
 Constitutive model of Newtonian fluid. The model parameters are summarized
 in table~\ref{NewtonianFluidMaterial_table}.
@@ -3799,7 +3803,7 @@ Supported modes& \_2dFlow\\
 
 
 
-\subsection{Bingham fluid}
+\subsection{Bingham fluid - BinghamFluid}
 \label{BinghamFluidMaterial}
 Constitutive model of Bingham fluid. This is a constitutive model of
 non-Newtonian type. The model parameters are summarized
@@ -3871,7 +3875,7 @@ Supported modes& \_2dFlow\\
 
 
 
-\subsection{Two-fluid material}
+\subsection{Two-fluid material - TwoFluidMat}
 \label{TwoFluidMaterial}
 Material coupling the behaviour of two particulat materials based on
 rule of mixture. The weighting factor is VOF fraction.
@@ -3883,7 +3887,7 @@ The model parameters are summarized in table~\ref{TwoFluidMaterial_table}.
 \hline
 Description & Two-Fluid material\\
 \hline
-Record Format & \descitem{twofluidmat} \elemparam{num}{in}
+Record Format & \descitem{TwoFluidMat} \elemparam{num}{in}
 \elemparam{mat}{ia}\\
 Parameters &- \param{num} material model number\\
 &- \param{mat} integer array contaning two numbers representing
@@ -4302,7 +4306,7 @@ documentation of MPlasticMaterial class):
  initialization, update, and store/restore operations are overloaded, to
  handle the history parameters properly.
 
-\subsection{Nonstationary nonlinear transport model}
+\subsection{Nonstationary nonlinear transport model - NLTransientTransportProblem class}
 \label{NonNonTrans}
 
 Several differential equations of diffusion-type lead to the following nonlinear system
@@ -4370,7 +4374,7 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
 \bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size Effect in Concrete and Other Quasibrittle  Materials, CRC Press, 1998.
 \bibitem{NISTIR7232} D.P. Bentz: CEMHYD3D: A Three-Dimensional Cement Hydration and Microstructure Development Modeling Package. Version 3.0., NIST Building and Fire Research Laboratory, Gaithersburg, Maryland, Technical report, 2005.
 \bibitem{Cervera:99} M.~Cervera, J.~Oliver, and T.~Prato: Thermo-chemo-mechanical model for concrete. I: Hydration and aging. {\em Journal of Engineering Mechanics ASCE}, 125(9):1018--1027, 1999.
-\bibitem{Gawin:06a} D.~Gawin, F.~Pesavento, and B.~A. Schrefler: Hygro-thermo-chemo-mechanical modelling of concrete at early ages and beyond. Part I: Hydration and hygro-thermal phenomena. \em {International Journal for Numerical Methods in Engineering}, 67(3):299--331, 2006.
+\bibitem{Gawin:06a} D.~Gawin, F.~Pesavento, and B.~A. Schrefler: Hygro-thermo-chemo-mechanical modelling of concrete at early ages and beyond. Part I: Hydration and hygro-thermal phenomena. {\em International Journal for Numerical Methods in Engineering}, 67(3):299--331, 2006.
 \bibitem{GraJir} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Damage-plastic model for concrete failure.
 \newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
