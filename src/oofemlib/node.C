@@ -66,14 +66,12 @@
 namespace oofem {
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain), coordinates()
-    // Constructor. Creates a node with number n, belonging to aDomain.
 {
     localCoordinateSystem = NULL;
 }
 
 
 Node :: ~Node()
-// Destructor.
 {
     delete localCoordinateSystem;
 }
@@ -99,7 +97,6 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
     int j, size;
     FloatArray triplets;
-    // IntArray *dofIDArry;
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
@@ -170,7 +167,7 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
     NodalLoad *loadN;
     FloatArray contribution;
     IntArray dofIDarry(0);
-    FloatMatrix L2G, M2L;
+    FloatMatrix L2G;
 
     if ( this->giveLoadArray()->isEmpty() ) {
         answer.resize(0);
@@ -200,6 +197,7 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
         }
     }
 }
+
 
 void
 Node :: printYourself()
@@ -313,7 +311,8 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double s
 }
 
 int
-Node :: checkConsistency() {
+Node :: checkConsistency()
+{
     /*
      * Checks internal data consistency in node.
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
@@ -628,9 +627,9 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 
-
 #ifdef __OOFEG
-void Node :: drawYourself(oofegGraphicContext &gc)
+void
+Node :: drawYourself(oofegGraphicContext &gc)
 //
 // draws graphics representation of receiver
 //

@@ -516,8 +516,6 @@ LIBeam3d2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 void
 LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
 {
-    int isT_NtoG;
-    FloatMatrix T_NtoG;
     // test if not previously done
     if ( tStep->giveSolutionStateCounter() == tempTcCounter ) {
         return;

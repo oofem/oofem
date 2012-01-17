@@ -57,7 +57,6 @@
 
 namespace oofem {
 LIBeam3dNL2 :: LIBeam3dNL2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), q(4), tempQ(4) //, kappa (3)
-    // Constructor.
 {
     numberOfDofMans    = 2;
     l0                 = 0.;
@@ -69,7 +68,8 @@ LIBeam3dNL2 :: LIBeam3dNL2(int n, Domain *aDomain) : NLStructuralElement(n, aDom
 
 
 void
-LIBeam3dNL2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec) {
+LIBeam3dNL2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
+{
     if ( vec.giveSize() != 3 ) {
         _error("computeSMtrx: vec param size mismatch");
     }
@@ -84,6 +84,7 @@ LIBeam3dNL2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec) {
     answer.at(3, 1) = -vec.at(2);
     answer.at(3, 2) =  vec.at(1);
 }
+
 
 void
 LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
@@ -113,6 +114,7 @@ LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     answer.add(S);
     answer.add(SS);
 }
+
 
 void
 LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
@@ -175,6 +177,7 @@ LIBeam3dNL2 :: computeRotMtrxFromQuaternion(FloatMatrix &answer, FloatArray &q)
     answer.times(2.);
 }
 
+
 void
 LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R)
 {
@@ -223,7 +226,6 @@ LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R)
 }
 
 
-
 void
 LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -254,6 +256,7 @@ LIBeam3dNL2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep 
     answer.at(6) = curv.at(3); // kappa_3
 }
 
+
 void
 LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 {
@@ -279,15 +282,16 @@ LIBeam3dNL2 :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
     }
 }
 
+
 void
 LIBeam3dNL2 :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    int i, j, GNTflag;
+    int i, j;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     FloatArray nm(6), TotalStressVector(6);
-    FloatMatrix x, tempTc, GNT;
+    FloatMatrix x, tempTc;
     double s1, s2;
 
     // update temp triad
@@ -333,6 +337,7 @@ LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep)
     answer.at(3) = ( this->giveNode(2)->giveCoordinate(3) + u.at(9) ) -
                    ( this->giveNode(1)->giveCoordinate(3) + u.at(3) );
 }
+
 
 void
 LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
@@ -423,6 +428,7 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     }
 }
 
+
 void
 LIBeam3dNL2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
@@ -469,6 +475,7 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 double
 LIBeam3dNL2 :: giveLength()
 // Returns the original length (l0) of the receiver.
@@ -487,6 +494,7 @@ LIBeam3dNL2 :: giveLength()
 
     return l0;
 }
+
 
 void
 LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -540,6 +548,7 @@ LIBeam3dNL2 :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(6, 6)  = n1;
     answer.at(6, 12) = n2;
 }
+
 
 double
 LIBeam3dNL2 :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -652,6 +661,7 @@ LIBeam3dNL2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     }
 }
 
+
 double
 LIBeam3dNL2 ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
@@ -758,6 +768,7 @@ LIBeam3dNL2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     return 1;
 }
 
+
 int
 LIBeam3dNL2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
@@ -771,7 +782,6 @@ LIBeam3dNL2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Ga
     answer.beEmptyMtrx();
     return 0;
 }
-
 
 
 void
@@ -809,7 +819,6 @@ LIBeam3dNL2 :: initForNewStep()
     NLStructuralElement :: initForNewStep();
     tempQ = q;
 }
-
 
 
 void
@@ -921,8 +930,8 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 }
 
 
-
-contextIOResultType LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType
+LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -941,8 +950,8 @@ contextIOResultType LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode m
 }
 
 
-
-contextIOResultType LIBeam3dNL2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType
+LIBeam3dNL2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
@@ -959,8 +968,6 @@ contextIOResultType LIBeam3dNL2 :: restoreContext(DataStream *stream, ContextMod
 
     return CIO_OK;
 }
-
-
 
 
 #ifdef __OOFEG

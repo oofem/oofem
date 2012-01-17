@@ -196,12 +196,12 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep) {
 void
 LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    int i, j, GNTflag;
+    int i, j;
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     FloatArray nm(6), TotalStressVector(6);
-    FloatMatrix x, GNT;
+    FloatMatrix x;
     double s1, s2;
 
     // update temp triad
