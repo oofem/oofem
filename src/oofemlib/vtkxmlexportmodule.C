@@ -968,11 +968,6 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
                                       TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int inode;
-    int j;
-    FloatArray iVal;
-    FloatMatrix t(3, 3);
-    IntArray regionVarMap;
     InternalStateValueType type = ISVT_UNDEFINED;
 
     if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
@@ -1006,73 +1001,12 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 #endif
 
     DofManager *dman;
-    DofIDItem id;
-    int numberOfDofs;
-    IntArray mask(3);
-    FloatArray dl, dg;
+    FloatArray iVal;
 
-    for ( inode = 1; inode <= regionDofMans; inode++ ) {
+    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
         dman = d->giveNode( mapL2G.at(inode) );
 
-#if 0  // This should, eventually, replace all below.
-        getPrimaryVariable(iVal, dman, tStep, valID, ireg);
-#else
-        numberOfDofs = dman->giveNumberOfDofs();
-        if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
-            iVal.resize(3);
-            iVal.zero();
-            mask.resize(0);
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == V_u ) || ( id == D_u ) || ( id == V_v ) || ( id == D_v ) || ( id == V_w ) || ( id == D_w ) ) {
-                    mask.followedBy(id);
-                }
-            }
-
-            dman->giveUnknownVector(dg, mask, EID_MomentumBalance, VM_Total, tStep);
-
-            for ( j = 1; j <= mask.giveSize(); j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == V_u ) || ( id == D_u ) ) {
-                    iVal.at(1) = dg.at(j);
-                } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                    iVal.at(2) = dg.at(j);
-                } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                    iVal.at(3) = dg.at(j);
-                }
-            }
-        } else if ( valID == FluxVector ) {
-            iVal.resize(1);
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( id == C_1 ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                }
-            }
-        } else if ( valID == TemperatureVector ) {
-            iVal.resize(1);
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( id == T_f ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                }
-            }
-        } else if ( valID == PressureVector ) {
-            iVal.resize(1);
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == P_f ) ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                }
-            }
-        } else {
-            OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(valID) );
-            //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
-        }
-#endif
+        this->getPrimaryVariable(iVal, dman, tStep, valID, ireg);
 
         if ( type == ISVT_SCALAR ) {
 #ifdef __VTK_MODULE
@@ -1121,24 +1055,27 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
                 dofIDMask.followedBy(id);
             }
         }
+        answer.resize(3);
     } else if ( type == FluxVector ) {
         dofIDMask.followedBy(C_1);
         eid = EID_ConservationEquation;
         iState = IST_MassConcentration_1;
+        answer.resize(1);
     } else if ( type == TemperatureVector ) {
         dofIDMask.followedBy(T_f);
         eid = EID_ConservationEquation;
         iState = IST_Temperature;
+        answer.resize(1);
     } else if ( type == PressureVector ) {
         dofIDMask.followedBy(P_f);
         eid = EID_ConservationEquation;
         iState = IST_Pressure;
+        answer.resize(1);
     } else {
         OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(type) );
     }
 
     size = dofIDMask.giveSize();
-    answer.resize(size);
     answer.zero();
 
     for (int j = 1; j <= size; j++ ) {
