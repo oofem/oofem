@@ -183,7 +183,7 @@ POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 void
 POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeStep *tStep)
 {
-    int i, region, result;
+    int i, region;
     IntArray toMap(1);
     Domain *d = emodel->giveDomain(1);
     FloatArray poiCoords(3);
@@ -200,7 +200,10 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
         region = ( * PoiIter ).region;
 
         this->giveMapper()->__init(d, toMap, poiCoords, region, tStep);
-        result = this->giveMapper()->__mapVariable(val, poiCoords, valID, tStep);
+        if ( !this->giveMapper()->__mapVariable(val, poiCoords, valID, tStep) ) {
+            OOFEM_WARNING("POIExportModule :: exportIntVarAs - Failed to map variable");
+            val.resize(0);
+        }
         fprintf(stream, "%10d ", ( * PoiIter ).id);
         for ( i = 1; i <= val.giveSize(); i++ ) {
             fprintf( stream, " %15e", val.at(i) );
