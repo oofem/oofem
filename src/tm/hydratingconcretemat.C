@@ -315,10 +315,11 @@ HydratingConcreteMatStatus :: HydratingConcreteMatStatus(int n, Domain *d, Gauss
 {
     //constructor
     power = 0.;
-    lastIntrinsicTime = -1.e6; //start from begining (se to -1.e6 s)
+    lastIntrinsicTime = -1.e6; //start from begining (set to -1.e6 s)
     degreeOfHydration = 0.;
-    lastDegreeOfHydration = 0;
+    lastDegreeOfHydration = 0.;
     lastEquivalentTime = 0.;
+    equivalentTime = 0.;
 }
 
 HydratingConcreteMatStatus :: ~HydratingConcreteMatStatus()
@@ -346,9 +347,10 @@ double HydratingConcreteMatStatus :: GivePower(TimeStep *atTime)
     }
 
     if ( mat->hydrationModelType == 1 ) { //exponential affinity hydration model, need to keep equivalent time
-        equivalentTime = lastEquivalentTime + ( intrinsicTime - lastIntrinsicTime ) * scaleTemperature();
+        equivalentTime = this->lastEquivalentTime + ( intrinsicTime - lastIntrinsicTime ) * scaleTemperature();
         if ( equivalentTime != 0. ) {
             degreeOfHydration = mat->DoHInf * exp( -pow(mat->tau / equivalentTime, mat->beta) );
+            //printf("%f %f %f %f\n", equivalentTime, this->lastEquivalentTime, intrinsicTime, lastIntrinsicTime);
         }
     } else if ( mat->hydrationModelType == 2 ) { //affinity hydration model inspired by Miguel Cervera et al.
         //determine timeStep for integration
@@ -365,7 +367,7 @@ double HydratingConcreteMatStatus :: GivePower(TimeStep *atTime)
             } else {
                 time += timeStep;
             }
-
+            //printf("%f %f %f %f\n", time, affinity, scaleTemperature(), degreeOfHydration);
             affinity = mat->B1 * ( mat->B2 / mat->DoHInf + degreeOfHydration ) * ( mat->DoHInf - degreeOfHydration ) * exp(-mat->eta * degreeOfHydration / mat->DoHInf);
             //scale from 25C to arbitrary temperature
             affinity *= scaleTemperature();
@@ -395,9 +397,9 @@ double HydratingConcreteMatStatus :: giveDoHActual(void)
 
 void
 HydratingConcreteMatStatus :: updateYourself(TimeStep *atTime) {
-  lastIntrinsicTime = atTime->giveIntrinsicTime(); //where heat power was evaluated in last equilibrium  
-  lastEquivalentTime = equivalentTime;
-  lastDegreeOfHydration = degreeOfHydration;
+  this->lastIntrinsicTime = atTime->giveIntrinsicTime(); //where heat power was evaluated in last equilibrium  
+  this->lastEquivalentTime = this->equivalentTime;
+  this->lastDegreeOfHydration = this->degreeOfHydration;
   TransportMaterialStatus :: updateYourself(atTime);
 };
 

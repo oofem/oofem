@@ -105,8 +105,6 @@ protected:
     int conductivityType, capacityType, densityType;
     ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
     int reinforcementDegree;
-    ///maximum integration time for hydration model within a given timeStep
-
     ///create material status
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
