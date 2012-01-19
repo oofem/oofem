@@ -42,6 +42,7 @@
 #include "usrdefsub.h"
 #include "util.h"
 #include "inputrecord.h"
+#include "datareader.h"
 #include "oofem_limits.h"
 
 namespace oofem {

@@ -41,7 +41,7 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "verbose.h"
-
+#include "element.h"
 
 #ifdef TIME_REPORT
  #ifndef __MAKEDEPEND

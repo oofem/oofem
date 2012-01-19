@@ -42,6 +42,7 @@
 
 namespace oofem {
 class SpatialLocalizer;
+class TimeStep;
 
 /**
  * Determines the state of the evolving topology.

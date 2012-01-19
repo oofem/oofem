@@ -40,6 +40,7 @@
 #include "engngm.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
+#include "internalstatevaluetype.h"
 
 namespace oofem {
 /**

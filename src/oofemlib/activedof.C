@@ -243,7 +243,7 @@ bool ActiveDof :: hasIc(TimeStep *tStep) { return false; }
 bool ActiveDof :: hasIcOn(ValueModeType type) { return false; }
 bool ActiveDof :: hasIc() { return false; }
 int ActiveDof :: giveIcId() { return 0; }
-InitialCondition *ActiveDof :: giveIc() { return false; }
+InitialCondition *ActiveDof :: giveIc() { return NULL; }
 
 
 contextIOResultType ActiveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)

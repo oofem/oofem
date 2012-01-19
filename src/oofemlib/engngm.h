@@ -35,20 +35,11 @@
 #ifndef engngm_h
 #define engngm_h
 
-#include "alist.h"
-
 #include "inputrecord.h"
-#include "datareader.h"
 
-#include "sparsemtrx.h"
-#include "flotarry.h"
-#include "element.h"
-#include "dofmanager.h"
-#include "exportmodulemanager.h"
-#include "initmodulemanager.h"
-#include "field.h"
+#include "alist.h"
+#include "intarray.h"
 #include "fieldmanager.h"
-#include "maskedprimaryfield.h"
 #include "timer.h"
 #include "chartype.h"
 #include "classtype.h"
@@ -90,12 +81,21 @@
 namespace oofem {
 
 class Domain;
-class NumericalMethod;
 class TimeStep;
+class Dof;
+class DofManager;
+class DataReader;
+class DataStream;
 class ErrorEstimator;
 class MetaStep;
 class MaterialInterface;
+class SparseMtrx;
+class NumericalMethod;
 class XfemManager;
+class InitModuleManager;
+class ExportModuleManager;
+class FloatMatrix;
+class FloatArray;
 
 #ifdef __PARALLEL_MODE
 class ProblemCommunicator;
@@ -393,7 +393,6 @@ public:
      * function (for updating nodal and element values) should be called.
      */
     virtual void solveYourselfAt(TimeStep *) { }
-    //virtual int requiresNewLhs () {return 1;}
     /**
      * Terminates the solution of time step. Default implementation calls prinOutput() service and if specified,
      * context of whole domain is stored and output for given time step is printed.
@@ -565,9 +564,7 @@ public:
      * to update domain variables in all components belonging to receiver
      * like error estimators, solvers, etc, having domains as attributes.
      */
-    virtual void updateDomainLinks() {
-        this->giveExportModuleManager()->initialize();
-    };
+    virtual void updateDomainLinks();
     void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current time step.
     TimeStep *giveCurrentStep() { if ( master ) { return master->giveCurrentStep(); } else { return currentStep; } }
@@ -719,12 +716,8 @@ public:
       return this->defaultNumberingScheme;
     }
 
-
-    // we don't directly call element ->GiveCharacteristicMatrix() function, because some
-    // engngm classes may require special modification of base types supported on
-    // element class level
     /**
-     * Returns characteristic matrix of element. The Element::GiveCharacteristicMatrix function
+     * Returns characteristic matrix of element. The Element::giveCharacteristicMatrix function
      * should not be called directly, because EngngModel may require some special modification
      * of characteristic matrices supported on element level. But default implementation does
      * the direct call to element level.
@@ -734,10 +727,9 @@ public:
      * @param tStep Time step when response is computed.
      * @param domain Source domain.
      */
-    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
-    { domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep); }
+    virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
     /**
-     * Returns characteristic vector of element. The Element::GiveCharacteristicVector function
+     * Returns characteristic vector of element. The Element::giveCharacteristicVector function
      * should not be called directly, because EngngModel may require some special modification
      * of characteristic vectors supported on element level. But default implementation does
      * the direct call to element level.
@@ -748,8 +740,7 @@ public:
      * @param tStep Time step when response is computed.
      * @param domain Source domain.
      */
-    virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain)
-    { domain->giveElement(num)->giveCharacteristicVector(answer, type, mode, tStep); }
+    virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
 
 #ifdef __PETSC_MODULE
     /**
@@ -799,14 +790,7 @@ public:
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
             CharType type, const UnknownNumberingScheme &s, Domain *domain);
-    /**
-     * Assembles characteristic vector of required type into given vector.
-     * @param answer Assembled vector.
-     * @param tStep Time step, when answer is assembled.
-     * @param type Characteristic components of type type are requested.
-     * from dofManagers/elements and assembled.
-     */
-    //virtual void assemble (FloatArray&, TimeStep*, CharType type, Domain* domain) ;
+
 protected:
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
@@ -821,13 +805,6 @@ protected:
     virtual void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
                         CharType type, ValueModeType mode,
                         const UnknownNumberingScheme &s, Domain *domain);
-    /**
-     * Assembles prescribed characteristic vector of required type from dofManagers into given vector.
-     * @param answer Assembled vector.
-     * @param tStep Time step, when answer is assembled.
-     * @param type Characteristic components of type type are requested.
-     */
-    // void assemblePrescribedVectorFromDofManagers(FloatArray &, TimeStep *, EquationID, CharType type, ValueModeType mode, Domain * domain);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -886,9 +863,8 @@ protected:
      */
     virtual void unpackMigratingData(TimeStep *) { }
 #endif
-public:
 
-    // consistency check
+public:
     /**
      * Allows programmer to test some receiver's internal data, before computation begins.
      * @return Nonzero if receiver check is o.k.
@@ -1034,12 +1010,4 @@ public:
 
 } // end namespace oofem
 #endif // engngm_h
-
-
-
-
-
-
-
-
 

@@ -41,7 +41,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "elementside.h"
-
+#include "maskedprimaryfield.h"
 #include "verbose.h"
 #include "conTable.h"
 #include "transportelement.h"

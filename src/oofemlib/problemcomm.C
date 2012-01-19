@@ -37,6 +37,7 @@
 #include "problemcomm.h"
 #include "intarray.h"
 #include "error.h"
+#include "element.h"
 
 #ifdef __USE_MPI
  #ifndef __MAKEDEPEND

@@ -39,6 +39,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "dof.h"
+#include "intarray.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

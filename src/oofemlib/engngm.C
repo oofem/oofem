@@ -36,36 +36,36 @@
 //#include "gpinitmodule.h"
 // Milan ?????????????????
 
+#include "femcmpnn.h"
 #include "nummet.h"
+#include "sparsemtrx.h"
 #include "engngm.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
 #include "oofemdef.h"
-
 #include "mathfem.h"
 #include "clock.h"
-#include "datastream.h"
-
-#include "femcmpnn.h"
 #include "dofmanager.h"
 #include "node.h"
 #include "elementside.h"
 #include "dof.h"
 #include "activebc.h"
 #include "timestep.h"
-#include "skyline.h"
 #include "verbose.h"
-#include "outputmanager.h"
+#include "datastream.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "sloangraph.h"
 #include "logger.h"
 #include "errorestimator.h"
-#include "oofem_limits.h"
 #include "contextioerr.h"
-#include "xfemmanager.h"
 #include "material.h"
+#include "xfemmanager.h"
+#include "outputmanager.h"
+#include "exportmodulemanager.h"
+#include "initmodulemanager.h"
+
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
 #endif
@@ -1243,6 +1243,20 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
 
 
 void
+EngngModel :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
+{
+    domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep);
+}
+
+
+void
+EngngModel :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain)
+{
+    domain->giveElement(num)->giveCharacteristicVector(answer, type, mode, tStep);
+}
+
+
+void
 EngngModel ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // updates some component, which is used by numerical method
@@ -1286,6 +1300,13 @@ EngngModel :: initStepIncrements()
         }
     }
 }
+
+
+void
+EngngModel :: updateDomainLinks()
+{
+    this->giveExportModuleManager()->initialize();
+};
 
 
 contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mode, void *obj)

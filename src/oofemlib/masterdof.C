@@ -38,7 +38,7 @@
 #include "timestep.h"
 #include "boundary.h"
 #include "initial.h"
-
+#include "primaryfield.h"
 #include "flotarry.h"
 #include "dictionr.h"
 #include "datastream.h"

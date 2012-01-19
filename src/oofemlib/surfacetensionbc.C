@@ -42,6 +42,7 @@
 #include "feinterpol.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
+#include "sparsemtrx.h"
 
 #include "integrationdomain.h"
 #include "integrationrule.h"

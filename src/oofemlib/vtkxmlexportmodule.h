@@ -44,6 +44,7 @@
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
+#include "internalstatevaluetype.h"
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>

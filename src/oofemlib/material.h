@@ -39,12 +39,14 @@
 
 #include "matconst.h"
 #include "matstatus.h"
+#include "materialmode.h"
 #include "timestep.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "matresponseform.h"
 #include "matresponsemode.h"
 #include "materialextension.h"
+#include "dictionr.h"
 
 namespace oofem {
 #define STRAIN_STEPS 10.0

@@ -36,6 +36,7 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "logger.h"
+#include "element.h"
 
 namespace oofem {
 OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), element_out(), element_except()

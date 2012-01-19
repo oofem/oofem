@@ -39,6 +39,7 @@
 #include "petscordering.h"
 #include "engngm.h"
 #include "activebc.h"
+#include "element.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

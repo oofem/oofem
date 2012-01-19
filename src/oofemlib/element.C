@@ -34,34 +34,23 @@
 
 #include "element.h"
 
-#include "domain.h"
-#include "timestep.h"
-#include "node.h"
-#include "dof.h"
-#include "boundary.h"
-#include "material.h"
-#include "crosssection.h"
-#include "bodyload.h"
-#include "gausspnt.h"
 #include "integrationrule.h"
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "primaryfield.h"
 #include "verbose.h"
-
+#include "entityrenumberingscheme.h"
+#include "error.h"
 #include "usrdefsub.h"
-#include "elementside.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
- #include <math.h>
-#endif
-
-#include "errorestimator.h"
-#include "remeshingcrit.h"
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
+
+#ifndef __MAKEDEPEND
+ #include <cstdio>
+ #include <cmath>
+#endif
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :

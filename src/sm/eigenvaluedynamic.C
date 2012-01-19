@@ -38,6 +38,7 @@
 #include "node.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
+#include "exportmodulemanager.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>

@@ -40,6 +40,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "enumitem.h"
+#include <string>
 
 namespace oofem {
 
@@ -63,6 +64,9 @@ enum FieldType {
 
 FieldType __StringToFieldType(std::string _value);
 
+class TimeStep;
+class FloatArray;
+
 /**
  * Abstract class representing field. Field represent the spatial distribution of certain variable.
  * Field is able to evaluate its value at any point of interest. The field is usually associated to
@@ -74,7 +78,7 @@ protected:
     FieldType type;
 
 public:
-    /** 
+    /**
      * Constructor. Creates a field of given type associated to given domain.
      */
     Field(FieldType b) { type = b; }
@@ -106,7 +110,7 @@ public:
      */
     virtual int evaluateAt(FloatArray &answer, DofManager* dman,
                            ValueModeType mode, TimeStep *atTime) = 0;
-    
+
     /// Returns the type of receiver
     FieldType giveType() { return type; }
 

@@ -42,6 +42,7 @@
 #include "dofmanager.h"
 #include "elementside.h"
 #include "dof.h"
+#include "maskedprimaryfield.h"
 
 #ifdef __CEMHYD_MODULE
 #include "cemhydmat.h"

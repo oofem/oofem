@@ -37,18 +37,15 @@
 #define masterdof_h
 
 #include "dof.h"
-#include "compiler.h"
 #include "dictionr.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
-
-#include "error.h"
 #include "dofmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
+#endif
+
+#ifndef __MAKEDEPEND
+ #include <cstdio>
 #endif
 
 namespace oofem {

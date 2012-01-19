@@ -38,6 +38,7 @@
 #include "loadtime.h"
 #include "metastep.h"
 #include "element.h"
+#include "exportmodulemanager.h"
 
 #include "mathfem.h"
 #include "clock.h"

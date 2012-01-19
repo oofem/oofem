@@ -35,7 +35,6 @@
 #include "poiexportmodule.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "strreader.h"
 #include "node.h"
 #include "mmaclosestiptransfer.h"
 #include "mmaleastsquareprojection.h"
@@ -44,6 +43,8 @@
 #include "eleminterpmapperinterface.h"
 #include "mathfem.h"
 #include "util.h"
+#include "internalstatevaluetype.h"
+#include "element.h"
 #include "oofem_limits.h"
 
 namespace oofem {

@@ -73,6 +73,7 @@
 #include "flotarry.h"
 #include "engngm.h"
 #include "domain.h"
+#include "element.h"
 #ifndef __MAKEDEPEND
  #include <set>
 #endif

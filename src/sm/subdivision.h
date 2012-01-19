@@ -392,7 +392,7 @@ public:
     /// Constructor
     Subdivision(Domain *d) : MesherInterface(d) { mesh = 0;
                                                   smoothingFlag = false; }
-    ~Subdivision() { if ( mesh ) { delete mesh; } }
+    virtual ~Subdivision() { if ( mesh ) { delete mesh; } }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
     virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);

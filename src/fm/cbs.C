@@ -43,6 +43,7 @@
 #include "elementside.h"
 #include "dof.h"
 #include "initial.h"
+#include "maskedprimaryfield.h"
 
 #include "verbose.h"
 #include "conTable.h"

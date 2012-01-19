@@ -59,6 +59,7 @@
 #include "masterdof.h"
 #include "xfem/xfemmanager.h"
 #include "patchintegrationrule.h"
+#include "datareader.h"
 
 namespace oofem {
 XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)

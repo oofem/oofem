@@ -924,8 +924,6 @@ VTKXMLExportModule :: givePrimVarSmoother()
 }
 
 
-
-//keyword "primvars" in OOFEM input file
 void
 VTKXMLExportModule :: exportPrimaryVars(
 #ifdef __VTK_MODULE
@@ -936,27 +934,15 @@ VTKXMLExportModule :: exportPrimaryVars(
     IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
 {
     // should be performed over regions
-
-    int i, n = primaryVarsToExport.giveSize();
-    //int nnodes;
-    //Domain *d = emodel->giveDomain(1);
     UnknownType type;
 
-    if ( n == 0 ) {
-        return;
-    }
-
-    //nnodes = d->giveNumberOfDofManagers();
-    //fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-
-    for ( i = 1; i <= n; i++ ) {
+    for (int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         type = ( UnknownType ) primaryVarsToExport.at(i);
         this->exportPrimVarAs(type, mapG2L, mapL2G, regionDofMans, region, stream, tStep);
     }
 }
 
 
-//keyword "primvars" in OOFEM input file
 void
 VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
                                       int regionDofMans, int ireg,

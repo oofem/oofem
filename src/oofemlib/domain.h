@@ -36,14 +36,11 @@
 #define domain_h
 
 #include "alist.h"
-#include "datareader.h"
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <time.h>
  #include <map>
  #ifdef __PARALLEL_MODE
   #include <list>
@@ -59,7 +56,6 @@ namespace oofem {
 class Element;
 class Node;
 class Material;
-class TimeStep;
 class GeneralBoundaryCondition;
 class InitialCondition;
 class Load;
@@ -78,6 +74,7 @@ class DomainTransactionManager;
 class RandomFieldGenerator;
 class XfemManager;
 class TopologyDescription;
+class DataReader;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;

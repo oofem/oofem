@@ -43,6 +43,7 @@
 #include "elementside.h"
 #include "dof.h"
 #include "initial.h"
+#include "maskedprimaryfield.h"
 
 #include "verbose.h"
 #include "conTable.h"
@@ -399,7 +400,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     DofManager* inode;
     Dof* jDof;
     DofIDItem type;
-    
+
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();

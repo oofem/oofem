@@ -39,6 +39,7 @@
 #include "element.h"
 #include "node.h"
 #include "dof.h"
+#include "sparsemtrx.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

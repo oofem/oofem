@@ -36,9 +36,12 @@
 #define element_h
 
 #include "femcmpnn.h"
-#include "domain.h"
 #include "flotmtrx.h"
+#include "flotarry.h"
 
+#include "alist.h"
+#include "intarray.h"
+#include "error.h"
 #include "integrationrule.h"
 #include "classtype.h"
 #include "chartype.h"
@@ -52,13 +55,14 @@
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
 
+#include <cstdio>
+
 namespace oofem {
 class TimeStep;
 class Node;
 class Material;
 class GaussPoint;
 class FloatMatrix;
-class FloatArray;
 class IntArray;
 class CrossSection;
 class ElementSide;
@@ -552,7 +556,7 @@ public:
      * @param tStep Time step for newly reached state.
      * @see Material::updateYourself
      * @see IntegrationRule::updateYourself
-     * @see gaussPoint::updateYourself
+     * @see GaussPoint::updateYourself
      * @see Element::updateInternalState
      */
     virtual void updateInternalState(TimeStep *tStep) { }
@@ -566,7 +570,7 @@ public:
      * @param tStep Time step for newly reached state.
      * @see Material::updateYourself
      * @see IntegrationRule::updateYourself
-     * @see gaussPoint::updateYourself
+     * @see GaussPoint::updateYourself
      * @see Element::updateInternalState
      */
     virtual void updateYourself(TimeStep *tStep);

@@ -35,34 +35,34 @@
 #ifndef dof_h
 #define dof_h
 
-#include "compiler.h"
-#include "dictionr.h"
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
+ #include <cstdio>
 #endif
 
-#include "error.h"
-#include "primaryfield.h"
+#include "flotarry.h"
+#include "intarray.h"
 #include "classtype.h"
 #include "unknowntype.h"
 #include "equationid.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
 #include "contextioresulttype.h"
-#include "entityrenumberingscheme.h"
 
 namespace oofem {
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 #endif
 
+class DataStream;
+class Dictionary;
+class PrimaryField;
 class Domain;
 class DofManager;
 class TimeStep;
 class BoundaryCondition;
 class InitialCondition;
 class UnknownNumberingScheme;
+class EntityRenumberingFunctor;
 
 /**
  * Abstract class Dof represents Degree Of Freedom in finite element mesh.
@@ -98,41 +98,6 @@ class UnknownNumberingScheme;
  */
 class Dof
 {
-    /*
-     * This class implements an abstract class for  nodal (or whatever i.e. side)
-     * degree of freedom. A dof is usually attribute of one node.
-     * DESCRIPTION
-     * 'number' and 'node' are used for reading/writing data in the data file.
-     * 'DofID' is parameter determining physical meaning of receiver.
-     * This parameter is also used in member function giveUnknownType, which returns
-     * UnknownType type according to DofID parameter.
-     *
-     * I don't know whether to implement following feature (now  not implemented)
-     * 'unknowns' and '<<' are the dictionaries where the dof stores
-     * its unknowns (e.g., the displacement 'd', the velocity 'v' and the acceleration
-     * 'a'), at the current time step and at the previous one.
-     *
-     * TASKS
-     * - equation numbering, in method 'giveEquationNumber'and 'givePrescribedEquationNumber';
-     * - managing its b.c. and its i.c., if any (methods 'hasBc', 'giveBc', etc);
-     * - managing its unknowns. This includes retrieving the associated solution
-     *   from the Engng. System , or from receiver's dictionary
-     * (based on emodel->requiresNodeUnknowsDictionaryUpdate() function,
-     * which determines whether to use dictionary or ask unknowns values from
-     * emodel)
-     * - managing physical meaning of dof (dofID variable)
-     *
-     * REMARKS
-     * - class Dof is not a subclass of FEMComponent : a dof belongs to a single
-     *   node, not to the domain ;
-     * - class Dof is not restricted to structural analysis problems. Unknowns
-     *   may also be pressures, temperatures, etc.
-     * - method give returns unknown value quantity according to ValueModeType parameter,
-     *  UnknownType parameter is used to check whether physical meaning of
-     * unknown corresponds.
-     *
-     */
-
 protected:
     /// Dof number.
     int number;
@@ -140,8 +105,6 @@ protected:
     DofManager *dofManager;
     /// Physical meaning of DOF.
     DofIDItem dofID;
-    /*      Dictionary*  unknowns ;
-     * Dictionary*  pastUnknowns ; */
 
 public:
 

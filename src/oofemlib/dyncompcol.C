@@ -39,6 +39,7 @@
 #include "engngm.h"
 #include "domain.h"
 #include "mathfem.h"
+#include "element.h"
 
 namespace oofem {
 DynCompCol :: DynCompCol(void) : SparseMtrx(), base_(0)

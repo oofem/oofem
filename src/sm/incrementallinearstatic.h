@@ -37,6 +37,7 @@
 
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
+#include "sparsemtrxtype.h"
 
 namespace oofem {
 /**

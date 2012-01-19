@@ -44,6 +44,8 @@
 #include "meshqualityerrorestimator.h"
 #include "topologydescription.h"
 #include "petsccontext.h"
+#include "exportmodulemanager.h"
+#include "primaryfield.h"
 
 namespace oofem {
 StokesFlow :: StokesFlow(int i, EngngModel *_master) : EngngModel(i, _master)
