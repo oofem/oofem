@@ -107,7 +107,7 @@ SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, Equation
     this->mtrx = InpMtx_new();
     InpMtx_init(this->mtrx, INPMTX_BY_ROWS, type, nent, neq);
     nRows = nColumns = neq;
-    return TRUE;
+    return true;
 }
 
 int

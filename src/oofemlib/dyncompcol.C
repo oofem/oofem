@@ -370,7 +370,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * // increment version
      * this->version++;
      *
-     * return TRUE;
+     * return true;
      */
     int neq = eModel->giveNumberOfDomainEquations(di, ut);
 
@@ -453,7 +453,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     // increment version
     this->version++;
 
-    return TRUE;
+    return true;
 }
 
 

@@ -703,7 +703,7 @@ void LSpace :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
     for ( i = 0; i < 8; i++ ) {
@@ -845,7 +845,7 @@ void LSpace :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
     for ( i = 0; i < 8; i++ ) {
@@ -896,7 +896,7 @@ void LSpace :: drawScalar(oofegGraphicContext &context)
     }
 
     EASValsSetEdgeColor( context.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     if ( context.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 8; i++ ) {

@@ -292,7 +292,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      *
      * // increment version
      * this->version++;
-     * return TRUE;
+     * return true;
      */
 
     int neq = eModel->giveNumberOfDomainEquations(di, ut);
@@ -369,7 +369,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
                     ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
-    return TRUE;
+    return true;
 }
 
 

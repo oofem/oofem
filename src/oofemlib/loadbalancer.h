@@ -110,13 +110,13 @@ protected:
     /// The rebalancing done every lbstep.
     int lbstep;
  #ifdef __LB_DEBUG
-    // list of steps with perturbed balancing.
+    /// List of steps with perturbed balancing.
     dynaList< Range >perturbedSteps;
-    // perturbing factor
+    /// Perturbing factor.
     double perturbFactor;
-    // list of step at which to performed lb recovery.
+    /// list of step at which to performed lb recovery.
     IntArray recoveredSteps;
-    // processing weights for lb recovery.
+    /// processing weights for lb recovery.
     FloatArray processingWeights;
  #endif
 public:
@@ -227,7 +227,7 @@ public:
          *  This is extracted from IP nonlocal tables;
          */
         virtual void init(Domain *d) = 0;
-        /*
+        /**
          * Migrates necessary local elements to remote processors, where they
          * become remote elements needed to efficiently handle nonlocal dependencies.
          *
@@ -242,7 +242,7 @@ public:
          *   (remote elements and null dofmans)
          */
         virtual void migrate() = 0;
-        /*
+        /**
          * Called after all wtps migrated their data.
          * Intended to update local data structure.
          * Current implementations rebuilds the nonlocal integration point tables.

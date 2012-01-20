@@ -172,7 +172,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * // increment version
      * this->version++;
      *
-     * return TRUE;
+     * return true;
      */
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -241,7 +241,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     // increment version
     this->version++;
 
-    return TRUE;
+    return true;
 }
 
 

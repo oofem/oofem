@@ -63,7 +63,7 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
 
     _dss->Initialize(0, _st);
     _sm = NULL;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 
@@ -84,7 +84,7 @@ DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
 
     _dss->Initialize(0, _st);
     _sm = NULL;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 DSSMatrix :: ~DSSMatrix()
@@ -180,7 +180,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
 
     int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
-    /**
+    /*
      *  Assemble block to equation mapping information
      */
 
@@ -236,7 +236,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     // increment version
     this->version++;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -322,7 +322,7 @@ void DSSMatrix :: zero()
 
     // increment version
     this->version++;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 SparseMtrx *DSSMatrix :: factorized()
@@ -332,7 +332,7 @@ SparseMtrx *DSSMatrix :: factorized()
     }
 
     _dss->ReFactorize();
-    isFactorized = TRUE;
+    isFactorized = true;
     return this;
 }
 

@@ -161,7 +161,7 @@ TrianglePatch :: draw(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetEdgeColor( gc.getGeometryColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) vertices->at(1)->at(1);
     p [ 0 ].y = ( FPNum ) vertices->at(1)->at(2);
@@ -189,7 +189,7 @@ TrianglePatch :: drawWD(oofegGraphicContext &gc, FloatArray &vd)
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetEdgeColor( gc.getGeometryColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     p [ 0 ].x = ( FPNum ) vertices->at(1)->at(1);
     p [ 0 ].y = ( FPNum ) vertices->at(1)->at(2);
     p [ 0 ].z = 0.;

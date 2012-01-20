@@ -368,10 +368,10 @@ public:
     void setProblemScale(problemScale pscale) { pScale = pscale; }
     /// Returns scale in multiscale simulation
     problemScale giveProblemScale() { return pScale; }
-    /// Sets the renumber flag to TRUE
-    virtual void setRenumberFlag() { this->renumberFlag = 1; }
-    /// Sets the renumber flag to FALSE
-    virtual void resetRenumberFlag() { this->renumberFlag = 0; }
+    /// Sets the renumber flag to true.
+    virtual void setRenumberFlag() { this->renumberFlag = true; }
+    /// Sets the renumber flag to false.
+    virtual void resetRenumberFlag() { this->renumberFlag = false; }
 
     /**
      * Performs analysis termination after finishing analysis.

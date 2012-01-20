@@ -407,7 +407,7 @@ main(int argc, char *argv[])
 
     // this versiont supports keybort shortcuts like Ctrl+A, Ctrl+X etc.
     ESIPopup();
-    ESIEventLoop(TRUE, NULL);
+    ESIEventLoop(true, NULL);
 
 #ifdef __PETSC_MODULE
     PetscFinalize();
@@ -2330,9 +2330,9 @@ static void
 toggleTransparentContours(Widget w, XtPointer ptr, XtPointer call_data)
 {
     if ( IsContourBgTransparent() ) {
-        SetContourBgTransparent(FALSE);
+        SetContourBgTransparent();
     } else {
-        SetContourBgTransparent(TRUE);
+        SetContourBgTransparent(true);
     }
 }
 

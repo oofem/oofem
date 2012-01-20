@@ -43,39 +43,6 @@ namespace oofem {
 //#define GRAPH_DEBUG_PRINT
 #define GRAPH_LENGTH_FRAC 1.e-4
 
-// Globals which should be set before calling this function:
-//
-// int    polySides  =  how many corners the polygon has
-// float  polyX[]    =  horizontal coordinates of corners
-// float  polyY[]    =  vertical coordinates of corners
-// float  x, y       =  point to be tested
-//
-// (Globals are used in this example for purposes of speed.
-// Change as desired.)
-//
-// The function will return TRUE if the point x,y is inside the
-// polygon, or FALSE if it is not. If the point x,y is exactly on
-// the edge of the polygon, then the function may return TRUE or
-// FALSE.
-//
-// Note that division by zero is avoided because the division is
-// protected by the "if" clause which surrounds it.
-/*
- * boolean pointInPolygon() {
- *
- * int      i, j=0         ;
- * boolean  oddNODES=FALSE ;
- *
- * for (i=0; i<polySides; i++) {
- *  j++; if (j==polySides) j=0;
- *  if (polyY[i]<y && polyY[j]>=y
- ||  polyY[j]<y && polyY[i]>=y) {
- *    if (polyX[i]+(y-polyY[i])/(polyY[j]-polyY[i])*(polyX[j]-polyX[i])<x) {
- *      oddNODES=!oddNODES; }}}
- *
- * return oddNODES; }
- */
-
 int
 Polygon :: testPoint(double x, double y) const
 {

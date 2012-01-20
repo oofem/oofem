@@ -936,11 +936,7 @@ PerfectlyPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, Gaus
 
     this->giveEffectiveMaterialStiffnessMatrix(materialMatrix, TangentStiffness, gp,
                                                atTime);
-    // materialMatrix = this->giveLinearElasticMaterial()->
-    //  GiveCharacteristicMatrix (FullForm, gp, strainIncrement,TRUE);
     answer.beProductOf(materialMatrix, strainIncrement);
-    //delete materialMatrix;
-    return;
 }
 
 
@@ -1023,9 +1019,6 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
 }
 
 
-
-
-
 FloatArray *
 PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *gp,
                                                                    FloatArray *stressVector3d,
@@ -1075,9 +1068,6 @@ PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
-
-
 
 
 double

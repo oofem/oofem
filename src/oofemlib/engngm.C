@@ -110,7 +110,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     numberOfSteps = 0;
     numberOfEquations = 0;
     numberOfPrescribedEquations = 0;
-    renumberFlag      = 0;
+    renumberFlag = false;
     equationNumberingCompleted = 0;
     ndomains = 0;
     nMetaSteps = 0;
@@ -164,7 +164,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     numberOfSteps = 0;
     numberOfEquations = 0;
     numberOfPrescribedEquations = 0;
-    renumberFlag      = 0;
+    renumberFlag = false;
     equationNumberingCompleted = 0;
     ndomains = 0;
     nMetaSteps = 0;
@@ -369,7 +369,7 @@ EngngModel :: initializeFrom(InputRecord *ir)
         this->setUDContextOutputMode(contextOutputStep);
     }
 
-    renumberFlag = 0;
+    renumberFlag = false;
     IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, IFT_EngngModel_renumberflag, "renumber");                // Macro
     nMetaSteps   = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, IFT_EngngModel_nmsteps, "nmsteps");                // Macro

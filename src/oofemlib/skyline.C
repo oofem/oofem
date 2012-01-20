@@ -63,7 +63,7 @@ Skyline :: Skyline(int n) : SparseMtrx(n, n)
     nwk          = 0;
     adr          = NULL;
     mtrx         = NULL;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 
@@ -74,7 +74,7 @@ Skyline :: Skyline() : SparseMtrx()
     nwk          = 0;
     adr          = NULL;
     mtrx         = NULL;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 
@@ -398,7 +398,7 @@ int Skyline :: setInternalStructure(IntArray *a)
 
     // increment version
     this->version++;
-    return TRUE;
+    return true;
 }
 
 int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
@@ -484,7 +484,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     // increment version
     this->version++;
-    return TRUE;
+    return true;
 }
 
 
@@ -555,7 +555,7 @@ SparseMtrx *Skyline :: factorized()
         mtrx [ ack ] -= s;
     }
 
-    isFactorized = TRUE;
+    isFactorized = true;
 
 #ifdef TIME_REPORT
     //printf ("Skyline info: user time consumed by factorization: %.2lfs\n", (clock()-tstart)/(double)CLOCKS_PER_SEC);
@@ -652,7 +652,7 @@ void Skyline :: zero()
         mtrx [ j ] = 0.0;
     }
 
-    isFactorized = FALSE;
+    isFactorized = false;
 
     // increment version
     this->version++;

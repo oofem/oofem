@@ -45,7 +45,7 @@ namespace oofem {
 template< class Key, class T >class TDictionaryIterator;
 template< class Key, class T >class TDictionary;
 
-/*
+/**
  * This class implements key/value associations,
  * A pair is used as an entry in a dictionary.
 

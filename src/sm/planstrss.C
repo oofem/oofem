@@ -702,7 +702,7 @@ void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_HOLLOW);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
@@ -739,7 +739,7 @@ void PlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_HOLLOW);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);

@@ -465,7 +465,7 @@ void CohesiveSurface3d :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
     WCRec pl [ 2 ];

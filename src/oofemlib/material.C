@@ -103,14 +103,11 @@ Material :: give(int aProperty, GaussPoint *gp)
 
 bool
 Material :: hasProperty(int aProperty, GaussPoint *gp)
-// Returns TRUE if the aProperty is defined on a material
+// Returns true if the aProperty is defined on a material
 {
-    if ( propertyDictionary->includes(aProperty) ) {
-        return true;
-    }
-
-    return false;
+    return propertyDictionary->includes(aProperty);
 }
+
 
 void
 Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)

@@ -107,9 +107,6 @@ inline double clamp(double a, double lower, double upper)
 /// Returns the signum of given value (if value is < 0 returns -1, otherwise returns 1)
 inline double sgn(double i)
 { return ( i < 0. ? -1. : 1. ); }
-/// Returns the cubic root of x.
-//inline double cbrt(double x)
-//{ return sgn(x)*pow(fabs(x),1.0/3.0); }
 
 /// Returns the positive part of given float
 inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
@@ -117,6 +114,7 @@ inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
 inline double negbra(double x) { return ( x <= 0 ? x : 0 ); }
 
 #ifndef HAVE_CBRT
+/// Returns the cubic root of x.
 inline double cbrt(double x)
 { return sgn(x)*pow(fabs(x),1.0/3.0); }
 #endif
@@ -184,24 +182,23 @@ public:
 
 
 
+/**
+ * Minimize function of one variable using golden section search
+ *
+ * golden section search routine for finding the minimum of given function represented by functor f.
+ * Input parameters:
+ * ax, bx, cx -> three x-coordinates bracketing the minima (ax < bx < cx and f(bx) < f(ax) and f(bx) < f(cx))
+ * tol - tolerance
+ * Output parameters:
+ * xmin coordinate of minima
+ * return value - the minimum found
+ *
+ * Done according to Scientific Computation WS 2001/2002 by Gaston Gonnet
+ * http://linneus20.ethz.ch:8080/wsrscript.html
+ */
 template< class T >double gss(double ax, double bx, double cx, const T &f,
                               double tol, double &xmin)
 {
-    /*
-     * Minimize function of one variable using golden section search
-     *
-     * golden section serach routine for finding the minimum of given function represented by functor f.
-     * Input parameters:
-     * ax, bx, cx -> three x-coordinates bracketing the minima (ax<bx<cx and f(bx)<f(ax) and f(bx)<f(cx))
-     * tol - tolerance
-     * Output parameters:
-     * xmin coordinate of minima
-     * return value - the minimum found
-     *
-     * Done according to Scientific Computation WS 2001/2002 by Gaston Gonnet
-     * http://linneus20.ethz.ch:8080/wsrscript.html
-     */
-
     int ii = 0;
     double f1, f2, x0, x1, x2, x3;
 

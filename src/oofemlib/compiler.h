@@ -39,14 +39,6 @@
 #include "oofemcfg.h"
 
 namespace oofem {
-#ifndef HAVE_FALSETRUE
-enum { FALSE=0, TRUE = 1 };
-#endif
-
-#ifndef HAVE_BOOLTYPE
-typedef int bool;
-enum { false=0, true =1 };
-#endif
 
 #ifndef HAVE_STRNCASECMP
 int strncasecmp(const char *s1, const char *s2, int count);

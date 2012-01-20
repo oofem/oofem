@@ -3318,7 +3318,7 @@ Subdivision :: RS_Triangle :: drawGeometry()
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     //    EASValsSetShrink(0.8);
     p [ 0 ].x = ( FPNum ) mesh->giveNode( nodes.at(1) )->giveCoordinate(1);
@@ -3357,7 +3357,7 @@ Subdivision :: RS_Tetra :: drawGeometry()
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
+    EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
     //EASValsSetShrink(0.8);

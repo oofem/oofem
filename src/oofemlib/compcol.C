@@ -244,7 +244,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
      * // increment version
      * this->version++;
      *
-     * return TRUE;
+     * return true;
      */
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -313,7 +313,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     // increment version
     this->version++;
 
-    return TRUE;
+    return true;
 }
 
 

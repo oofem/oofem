@@ -66,7 +66,7 @@ SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n)
 {
     size         = n;
     rowColumns   = NULL;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 SkylineUnsym :: SkylineUnsym() : SparseMtrx()
@@ -75,7 +75,7 @@ SkylineUnsym :: SkylineUnsym() : SparseMtrx()
     // nRows = nColumns = 0;  // set by SparseMtrx constructor
     size         = 0;
     rowColumns   = NULL;
-    isFactorized = FALSE;
+    isFactorized = false;
 }
 
 SkylineUnsym :: ~SkylineUnsym()
@@ -344,7 +344,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
     // increment version
     this->version++;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -381,7 +381,7 @@ int SkylineUnsym :: setInternalStructure(IntArray *adr1)
     // increment version
     this->version++;
 
-    return TRUE;
+    return true;
 }
 
 
@@ -496,7 +496,7 @@ SkylineUnsym :: factorized()
         }
     }
 
-    isFactorized = TRUE;
+    isFactorized = true;
 
 #ifdef TIME_REPORT
     //printf ("\nSkylineU info: user time consumed by factorization: %.2gs", (clock()-tstart)/(double)CLOCKS_PER_SEC);
@@ -725,7 +725,7 @@ SkylineUnsym :: zero()
         this->giveRowColumn(j)->zero();
     }
 
-    isFactorized = FALSE;
+    isFactorized = false;
 
     // increment version
     this->version++;

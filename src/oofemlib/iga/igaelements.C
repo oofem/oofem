@@ -252,7 +252,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    EASValsSetEdgeFlag(FALSE);
+    EASValsSetEdgeFlag();
     numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double * const * knotVector = interp->giveKnotVector();
     const IntArray *span;
@@ -446,7 +446,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    EASValsSetEdgeFlag(FALSE);
+    EASValsSetEdgeFlag();
     numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double * const * knotVector = interp->giveKnotVector();
     const IntArray *span;
@@ -564,7 +564,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    EASValsSetEdgeFlag(FALSE);
+    EASValsSetEdgeFlag();
     numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double * const * knotVector = interp->giveKnotVector();
     const IntArray *span;
