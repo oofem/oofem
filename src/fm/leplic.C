@@ -42,6 +42,7 @@
 #include "spatiallocalizer.h"
 #include "contextioerr.h"
 #include "util.h"
+#include "element.h"
 
 namespace oofem {
 #define LEPLIC_ZERO_VOF  1.e-12

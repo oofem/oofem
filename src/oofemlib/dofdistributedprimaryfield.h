@@ -37,10 +37,6 @@
 
 #include "primaryfield.h"
 
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
-
 namespace oofem {
 /**
  * Class representing field of primary variables, which are typically allocated on nodes.

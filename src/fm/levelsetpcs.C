@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "timestep.h"
 #include "node.h"
+#include "element.h"
 #include "datastream.h"
 #include "conTable.h"
 #include "spatiallocalizer.h"

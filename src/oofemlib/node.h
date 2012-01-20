@@ -43,6 +43,7 @@
 
 #include "dofmanager.h"
 #include "domain.h"
+#include "flotarry.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

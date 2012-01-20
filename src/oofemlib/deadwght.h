@@ -60,15 +60,15 @@ public:
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
+    virtual void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
     { computeComponentArrayAt(answer, atTime, mode); }
 
-    bcValType giveBCValType() const { return ForceLoadBVT; }
-    bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    virtual bcValType giveBCValType() const { return ForceLoadBVT; }
+    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 
-    classType giveClassID() const { return DeadWeightClass; }
-    const char *giveClassName() const { return "DeadWeight"; }
-    const char *giveInputRecordName() const { return "DeadWeight"; }
+    virtual classType giveClassID() const { return DeadWeightClass; }
+    virtual const char *giveClassName() const { return "DeadWeight"; }
+    virtual const char *giveInputRecordName() const { return "DeadWeight"; }
 };
 } // end namespace oofem
 #endif // deadwght_h

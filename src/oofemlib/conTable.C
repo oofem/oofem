@@ -35,9 +35,9 @@
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <stdlib.h>
-//#include <malloc.h>
  #include <set>
 #endif
+
 #include "freestor.h"
 #include "domain.h"
 #include "element.h"
@@ -462,7 +462,6 @@ void ConnectivityTable :: printYourself()
      * }
      * }
      */
-    return;
 }
 
 

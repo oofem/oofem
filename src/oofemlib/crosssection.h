@@ -36,20 +36,20 @@
 #define crosssection_h
 
 #include "femcmpnn.h"
-#include "material.h"
-#include "gausspnt.h"
 #include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "gausspnt.h"
+#include "materialmode.h"
+#include "matresponsemode.h"
+#include "material.h"
 
 #include "classtype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "materialmode.h"
 #include "crosssectextension.h"
-#include "contextioresulttype.h"
 
 namespace oofem {
+
 /// List of properties possibly stored in a cross section.
 enum CrossSectionProperty {
     CS_Thickness=400,  ///< Thickness

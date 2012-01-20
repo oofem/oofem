@@ -37,13 +37,9 @@
 
 #include "combuff.h"
 #include "processcomm.h"
-#include "statecountertype.h"
+
 #include <sstream>
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
+#include <cstdio>
 
 namespace oofem {
 /**

@@ -35,11 +35,12 @@
 #ifndef contable_h
 #define contable_h
 
-#include "domain.h"
-#include "node.h"
-#include "element.h"
+#include "alist.h"
 
 namespace oofem {
+class IntArray;
+class Domain;
+
 /**
  * Class representing connectivity table. Usually attribute of domain. Provides
  * selected connectivity information services for domain.
@@ -79,26 +80,26 @@ public:
     void reset();
 
 #ifdef __OOFEG
-    /**
+    /*
      * Creates connectivity table.
      * Alocates space for dofManagersConnectivity and dofManagersValues attributes.
      * Availbale only in oofeg.
      */
     // void               allocateConnectivityTable ();
-    /**
+    /*
      * Builds the dofManagersConnectivity and dofManagersValues attributes.
      * Availbale only in oofeg.
      */
     // void               instanciateYourself(oofegGraphicContext& gc);
-    /// Resets dofManagersConnectivity and dofManagersValues attributes (Availbale only in oofeg).
+    // Resets dofManagersConnectivity and dofManagersValues attributes (Availbale only in oofeg).
 
     // void               resetYourself ();
-    /// Returns Number Of Elements sharing the given DofManager  (Availbale only in oofeg).
+    // Returns Number Of Elements sharing the given DofManager  (Availbale only in oofeg).
     // int                giveNumberOfElementsInDofMngr (int i);
 
-    /// Returns Value assigned to particular DofManager using dofManagersValues attribute (Availbale only in oofeg).
+    // Returns Value assigned to particular DofManager using dofManagersValues attribute (Availbale only in oofeg).
     // double             giveDofMngrValue (oofegGraphicContext& gc, int i);
-    /// Returns min and max values for values stored in dofManagersValues (Availbale only in oofeg).
+    // Returns min and max values for values stored in dofManagersValues (Availbale only in oofeg).
     // void               giveMinMaxVal (oofegGraphicContext& gc, double*, double*);
 #endif
 

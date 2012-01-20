@@ -36,13 +36,9 @@
 #define dummylocalizer_h
 
 #include "spatiallocalizer.h"
-#include "compiler.h"
 #include "alist.h"
 
 namespace oofem {
-class Domain;
-class Element;
-class TimeStep;
 class IntArray;
 
 /**
@@ -63,17 +59,17 @@ public:
     /// Destructor
     ~DummySpatialLocalizer() { this->region_elements.clear(true); }
 
-    int init(bool force = false);
+    virtual int init(bool force = false);
 
-    Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0);
-    GaussPoint *giveClosestIP(const FloatArray &coords, int region);
-    void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
-    void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
+    virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0);
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region);
+    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
+    virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
-    const char *giveClassName() const { return "DummySpatialLocalizer"; }
-    classType giveClassID() const { return DummySpatialLocalizerClass; }
+    virtual const char *giveClassName() const { return "DummySpatialLocalizer"; }
+    virtual classType giveClassID() const { return DummySpatialLocalizerClass; }
 };
 } // end namespace oofem
 #endif // dummylocalizer_h

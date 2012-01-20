@@ -35,6 +35,7 @@
 #include "errorestimator.h"
 #include "directerrorindicatorrc.h"
 #include "domain.h"
+#include "element.h"
 #include "conTable.h"
 #include "mathfem.h"
 #include "timestep.h"

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef cltypes2_h
-#define cltypes2_h
+#ifndef cltypes_h
+#define cltypes_h
 
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
+#include "valuemodetype.h"
 
 namespace oofem {
 /// @return Character corresponding to given ValueModeType.
@@ -48,5 +49,5 @@ bool isUnknownTypeModeIncremental(ValueModeType);
 /// @return The value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType(InternalStateType type);
 } // end namespace oofem
-#endif // cltypes2_h
+#endif // cltypes_h
 

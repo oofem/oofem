@@ -62,7 +62,8 @@ DofDistributedPrimaryField :: giveSolutionVector(TimeStep *atTime)
 }
 
 void
-DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer) {
+DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer)
+{
     int i, j, ndofs, eqNum;
     double val;
     Domain *domain = emodel->giveDomain(domainIndx);
@@ -91,7 +92,8 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, F
 
 // project solutionVector to DoF unknowns dictionary
 void
-DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore) {
+DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore)
+{
     int i, j, ndofs;
     int eqNum;
     double val;

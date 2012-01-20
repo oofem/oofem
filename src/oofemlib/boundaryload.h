@@ -36,7 +36,8 @@
 #define boundaryload_h
 
 #include "load.h"
-#include "gausspnt.h"
+#include "bctype.h"
+#include "valuemodetype.h"
 #include "dictionr.h"
 
 namespace oofem {

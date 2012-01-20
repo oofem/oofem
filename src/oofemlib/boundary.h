@@ -36,20 +36,13 @@
 #define boudary_h
 
 #include "generalbc.h"
-#include "dictionr.h"
-
-#include "dof.h"
 #include "bctype.h"
 #include "valuemodetype.h"
-
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 #include "classtype.h"
 
 namespace oofem {
 class TimeStep;
-class Dictionary;
+class Dof;
 
 /**
  * Class implementing Dirichlet boundary condition on DOF (primary boundary condition).

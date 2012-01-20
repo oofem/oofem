@@ -39,7 +39,10 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "alist.h"
+#include "element.h"
+#include "dofmanager.h"
 #include "conTable.h"
+#include "processcomm.h"
 #ifndef __MAKEDEPEND
  #include <queue>
  #include <list>

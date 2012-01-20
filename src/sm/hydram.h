@@ -79,6 +79,7 @@
 #include "timestep.h"
 #include "structuralms.h"
 #include "structuralmaterial.h"
+#include "interface.h"
 
 namespace oofem {
 #define ROOT_PRECISION_DKSI 1e-14

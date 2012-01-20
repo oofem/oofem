@@ -32,20 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ******************************
-//   *** CLASS CONSTANT EDGE LOAD ***
-//   ******************************
-
 #ifndef constantedgeload_h
 #define constantedgeload_h
 
 #include "boundaryload.h"
-#include "gausspnt.h"
 
 namespace oofem {
-class TimeStep;
 
-/*
+/**
  * This class implements a boundary load (force, moment,...) that acts
  * directly on a boundary of some finite element (on side, face, ..).
  * A boundary load is usually attribute of one or more elements.
@@ -69,17 +63,16 @@ class ConstantEdgeLoad : public BoundaryLoad
 public:
     ConstantEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
 
-    // Overloaded methods:
-    void computeValueAt(FloatArray &answer, TimeStep *, FloatArray &coords, ValueModeType mode);
-    int giveApproxOrder() { return 0; }
-    IRResultType initializeFrom(InputRecord *ir);
-    bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual int giveApproxOrder() { return 0; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
 
-    classType giveClassID() const { return ConstantEdgeLoadClass; }
-    const char *giveClassName() const { return "ConstantEdgeLoad"; }
+    virtual classType giveClassID() const { return ConstantEdgeLoadClass; }
+    virtual const char *giveClassName() const { return "ConstantEdgeLoad"; }
 
 private:
-    void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
+    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
 };
 } // end namespace oofem
 #endif // constantedgeload_h

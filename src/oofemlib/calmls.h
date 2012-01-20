@@ -40,10 +40,12 @@
  #include <set>
  #include <vector>
 #endif
+
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
-#include "sparsemtrx.h"
 #include "flotarry.h"
+#include "intarray.h"
+#include "dofiditem.h"
 
 namespace oofem {
 class Domain;

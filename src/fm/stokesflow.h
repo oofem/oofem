@@ -39,6 +39,7 @@
 #include "sparsemtrxtype.h"
 #include "topologydescription.h"
 #include "linsystsolvertype.h"
+#include "flotmtrx.h"
 
 namespace oofem {
 class SparseNonLinearSystemNM;

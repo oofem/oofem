@@ -36,7 +36,6 @@
 #define constantsurfaceload_h
 
 #include "boundaryload.h"
-#include "gausspnt.h"
 
 namespace oofem {
 
@@ -65,8 +64,8 @@ public:
     ConstantSurfaceLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
 
     // Overloaded methods:
-    void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
-    int giveApproxOrder() { return 0; }
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual int giveApproxOrder() { return 0; }
 
     /**
      * Sets a new load vector.
@@ -74,14 +73,14 @@ public:
      */
     void updateLoad(const FloatArray newValue) { componentArray = newValue; };
 
-    IRResultType initializeFrom(InputRecord *ir);
-    bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }
 
-    classType giveClassID() const { return ConstantSurfaceLoadClass; }
-    const char *giveClassName() const { return "ConstantSurfaceLoad"; }
+    virtual classType giveClassID() const { return ConstantSurfaceLoadClass; }
+    virtual const char *giveClassName() const { return "ConstantSurfaceLoad"; }
 
 private:
-    void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
+    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
 };
 } // end namespace oofem
 #endif // constantsurfaceload_h

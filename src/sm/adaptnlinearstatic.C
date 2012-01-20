@@ -43,6 +43,8 @@
 #include "node.h"
 #include "elementside.h"
 #include "util.h"
+#include "domain.h"
+#include "datareader.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif

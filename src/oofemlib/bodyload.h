@@ -41,8 +41,6 @@
 #include "bcgeomtype.h"
 
 namespace oofem {
-class Element;
-class TimeStep;
 
 /**
  * Class implementing element body load, acting over whole element volume (e.g., the dead weight).

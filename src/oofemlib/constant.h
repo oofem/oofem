@@ -38,6 +38,7 @@
 #include "loadtime.h"
 
 namespace oofem {
+
 /**
  * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
  */
@@ -60,15 +61,13 @@ public:
     /// @return Value of receiver.
     double giveValue() { return value; }
 
-    // Overloaded methods:
     virtual double __at(double t) { return this->giveValue(); }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    classType giveClassID() const { return ConstantFunctionClass; }
-    const char *giveClassName() const { return "ConstantFunction"; }
-    const char *giveInputRecordName() const { return "ConstantFunction"; }
+    virtual classType giveClassID() const { return ConstantFunctionClass; }
+    virtual const char *giveClassName() const { return "ConstantFunction"; }
 };
 } // end namespace oofem
 #endif // constant_h

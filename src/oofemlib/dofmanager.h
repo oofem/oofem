@@ -35,25 +35,29 @@
 #ifndef dofmanager_h
 #define dofmanager_h
 
+#ifndef __MAKEDEPEND
+ #include <cstdio>
+#endif
+
 #include "alist.h"
 #include "femcmpnn.h"
-#include "domain.h"
-#include "dof.h"
 #include "intarray.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-#include "classtype.h"
 #include "equationid.h"
 #include "valuemodetype.h"
 #include "doftype.h"
-#include "dofmantransftype.h"
 #include "dofiditem.h"
 #include "contextioresulttype.h"
-#include "unknownnumberingscheme.h"
 
 namespace oofem {
+
+class DataStream;
+class Dof;
+class Domain;
+class EntityRenumberingFunctor;
+class FloatMatrix;
+class PrimaryField;
+class UnknownNumberingScheme;
+
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 /// In parallel mode, this type indicates the mode of DofManager.
