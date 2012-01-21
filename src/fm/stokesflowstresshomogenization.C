@@ -36,6 +36,7 @@
 #include "prescribedgradient.h"
 #include "inputrecord.h"
 #include "usrdefsub.h"
+#include "sparsemtrx.h"
 
 #include "line2boundaryelement.h"
 

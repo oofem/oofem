@@ -37,6 +37,7 @@
 
 #ifndef __MAKEDEPEND
  #include <math.h>
+ #include <cstring>
 #endif
 
 #include "rcsdnl.h"
