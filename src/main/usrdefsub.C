@@ -102,9 +102,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
-#if 0 // Soon
-#include "particletopologydescription.h"
-#endif
+//#include "particletopologydescription.h" // Soon
 
 // end __OOFEMLIB_MODULE
 
@@ -339,497 +337,310 @@
  #include "parmetisloadbalancer.h"
 #endif
 
+#include <string>
+
+// Comparison operator for strings. Just strcasecmp here?
+struct CaseComp
+{
+    int operator() (std::string a, std::string b) const { return strncasecmp(a.c_str(), b.c_str(), b.length()) < 0; }
+};
+
 namespace oofem {
+
+// Template to wrap constructors into functions
+template < typename T > Element* elemCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, Element*(*)(int,Domain*), CaseComp > elemList;
+
 Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domain)
 {
-    Element *newElement = NULL;
+    if (elemList.size() == 0) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "planestress2dxfem", 17) ) {
-        newElement = new PlaneStress2dXfem(number, domain);
-    } else if ( !strncasecmp(aClass, "planestress2d", 13) ) {
-        newElement = new PlaneStress2d(number, domain);
-    }
-
-    if ( !strncasecmp(aClass, "quad1planestrain", 16) ) {
-        newElement = new Quad1PlaneStrain(number, domain);
-    } else if ( !strncasecmp(aClass, "qtrplanestraingrad", 18) ) {
-        newElement = new QTrPlaneStrainGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "qtrplanestrain", 14) ) {
-        newElement = new QTrPlaneStrain(number, domain);
-    } else if ( !strncasecmp(aClass, "qplanestraingrad", 16) )  {
-        newElement = new QPlaneStrainGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "qplanestrain", 12) ) {
-        newElement = new QPlaneStrain(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestress2d", 15) ) {
-        newElement = new TrPlaneStress2d(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestrrot3d", 15) ) {
-        newElement = new TrPlaneStrRot3d(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestrrot", 13) ) {
-        newElement = new TrPlaneStrRot(number, domain);
-    } else if ( !strncasecmp(aClass, "qplanestressgrad", 16) ) {
-        newElement = new QPlaneStressGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "qplanestress2d", 14) ) {
-        newElement = new QPlaneStress2d(number, domain);
-    } else if ( !strncasecmp(aClass, "qtrplstrgrad", 12) ) {
-        newElement = new QTrPlaneStressGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "qtrplstr", 8) ) {
-        newElement = new QTrPlaneStress2d(number, domain);
-    } else if ( !strncasecmp(aClass, "axisymm3d", 9) ) {
-        newElement = new Axisymm3d(number, domain);
-    } else if ( !strncasecmp(aClass, "q4axisymm", 9) ) {
-        newElement = new Q4Axisymm(number, domain);
-    } else if ( !strncasecmp(aClass, "l4axisymm", 9) ) {
-        newElement = new L4Axisymm(number, domain);
-    } else if ( !strncasecmp(aClass, "lspacebb", 8) ) {
-        newElement = new LSpaceBB(number, domain);
-    } else if ( !strncasecmp(aClass, "lspace", 6) ) {
-        newElement = new LSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "qspacegrad", 10) ) {
-        newElement = new QSpaceGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "qspace", 6) ) {
-        newElement = new QSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "cctplate3d", 10) ) {
-        newElement = new CCTPlate3d(number, domain);
-    } else if ( !strncasecmp(aClass, "cctplate", 8) ) {
-        newElement = new CCTPlate(number, domain);
-    }
-    //   else if (! strncasecmp(aClass,"ltrspaceec",10))
-    //     newElement = new LTRSpaceWithEmbeddedCrack (number,domain) ;
-    else if ( !strncasecmp(aClass, "ltrspace", 8) ) {
-        newElement = new LTRSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "truss2d", 7) ) {
-        newElement = new Truss2d(number, domain);
-    } else if ( !strncasecmp(aClass, "rershell", 8) ) {
-        newElement = new RerShell(number, domain);
-    } else if ( !strncasecmp(aClass, "tr_shell01", 10) ) {
-        newElement = new TR_SHELL01(number, domain);
-    } else if ( !strncasecmp(aClass, "beam2d", 6) ) {
-        newElement = new Beam2d(number, domain);
-    } else if ( !strncasecmp(aClass, "beam3d", 6) ) {
-        newElement = new Beam3d(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam2dNL", 10) ) {
-        newElement = new LIBeam2dNL(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam2d", 8) ) {
-        newElement = new LIBeam2d(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3dnl2", 11) ) {
-        newElement = new LIBeam3dNL2(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3dNL", 10) ) {
-        newElement = new LIBeam3dNL(number, domain);
-    } else if ( !strncasecmp(aClass, "truss3d", 7) ) {
-        newElement = new Truss3d(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestrain", 13) ) {
-        newElement = new TrPlaneStrain(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3d2", 9) ) {
-        newElement = new LIBeam3d2(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3d", 8) ) {
-        newElement = new LIBeam3d(number, domain);
-    } else if ( !strncasecmp(aClass, "qtruss1dgrad", 12) ) {
-        newElement = new QTruss1dGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "qtruss1d", 8) ) {
-        newElement = new QTruss1d(number, domain);
-    } else if ( !strncasecmp(aClass, "truss1d", 7) ) {
-        newElement = new Truss1d(number, domain);
-    } else if ( !strncasecmp(aClass, "interface2dquad", 15) ) {
-        newElement = new InterfaceElem2dQuad(number, domain);
-    } else if ( !strncasecmp(aClass, "interface3dtrlin", 16) ) {
-        newElement = new InterfaceElement3dTrLin(number, domain);
-    } else if ( !strncasecmp(aClass, "interface1d", 11) ) {
-        newElement = new InterfaceElem1d(number, domain);
-    } else if ( !strncasecmp(aClass, "macrolspace", 11) ) {
-        newElement = new MacroLSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "lumpedmass", 10) ) {
-        newElement = new LumpedMassElement(number, domain);
-    } else if ( !strncasecmp(aClass, "spring", 6) ) {
-        newElement = new SpringElement(number, domain);
-    } else if ( !strncasecmp(aClass, "cohsur3d", 8) ) {
-        newElement = new CohesiveSurface3d(number, domain);
-    } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25) ) {
-        newElement = new BsplinePlaneStressElement(number, domain);
-    } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23) ) {
-        newElement = new NURBSPlaneStressElement(number, domain);
-    } else if ( !strncasecmp(aClass, "tsplineplanestresselement", 25) ) {
-        newElement = new TSplinePlaneStressElement(number, domain);
-    } else if ( !strncasecmp(aClass, "nurbs3delement", 14) ) {
-        newElement = new NURBSSpace3dElement(number, domain);
-    }
-
-#endif //__SM_MODULE
-#ifdef __TM_MODULE
-    if ( !strncasecmp(aClass, "quad1ht", 7) ) {
-        newElement = new Quad1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1ht", 5) ) {
-        newElement = new Tr1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "quadaxisym1ht", 13) ) {
-        newElement = new QuadAxisym1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "traxisym1ht", 11) ) {
-        newElement = new TrAxisym1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "quad1hmt", 8) ) {
-        newElement = new Quad1_ht(number, domain, Quad1_ht :: HeatMass1TransferEM);
-    } else if ( !strncasecmp(aClass, "quadaxisym1hmt", 14) ) {
-        newElement = new QuadAxisym1_ht(number, domain, Quad1_ht :: HeatMass1TransferEM);
-    } else if ( !strncasecmp(aClass, "brick1ht", 8) ) {
-        newElement = new Brick1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "brick1hmt", 9) ) {
-        newElement = new Brick1_ht(number, domain, Brick1_ht :: HeatMass1TransferEM);
-    } else if ( !strncasecmp(aClass, "tetrah1ht", 9) ) {
-        newElement = new Tetrah1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "tetrah1hmt", 10) ) {
-        newElement = new Tetrah1_ht(number, domain, Tetrah1_ht :: HeatMass1TransferEM);
-    }
-
-#endif //__TM_MODULE
+        elemList["planestress2dxfem"]  = elemCreator< PlaneStress2dXfem >;
+        elemList["planestress2d"]      = elemCreator< PlaneStress2d >;
+        elemList["quad1planestrain"]   = elemCreator< Quad1PlaneStrain >;
+        elemList["qtrplanestraingrad"] = elemCreator< QTrPlaneStrainGrad >;
+        elemList["qtrplanestrain"]     = elemCreator< QTrPlaneStrain >;
+        elemList["qplanestraingrad"]   = elemCreator< QPlaneStrainGrad >;
+        elemList["qplanestrain"]       = elemCreator< QPlaneStrain >;
+        elemList["trplanestress2d"]    = elemCreator< TrPlaneStress2d >;
+        elemList["trplanestrrot3d"]    = elemCreator< TrPlaneStrRot3d >;
+        elemList["trplanestrrot"]      = elemCreator< TrPlaneStrRot >;
+        elemList["qplanestressgrad"]   = elemCreator< QPlaneStressGrad >;
+        elemList["qplanestress2d"]     = elemCreator< QPlaneStress2d >;
+        elemList["qtrplstrgrad"]       = elemCreator< QTrPlaneStressGrad >;
+        elemList["qtrplstr"]           = elemCreator< QTrPlaneStress2d >;
+        elemList["axisymm3d"]          = elemCreator< Axisymm3d >;
+        elemList["q4axisymm"]          = elemCreator< Q4Axisymm >;
+        elemList["l4axisymm"]          = elemCreator< L4Axisymm >;
+        elemList["lspacebb"]           = elemCreator< LSpaceBB >;
+        elemList["lspace"]             = elemCreator< LSpace >;
+        elemList["qspacegrad"]         = elemCreator< QSpaceGrad >;
+        elemList["qspace"]             = elemCreator< QSpace >;
+        elemList["cctplate3d"]         = elemCreator< CCTPlate3d >;
+        elemList["cctplate"]           = elemCreator< CCTPlate >;
+        //elemList["ltrspaceec"]       = elemCreator< LTRSpaceWithEmbeddedCrack >;
+        elemList["ltrspace"]           = elemCreator< LTRSpace >;
+        elemList["truss2d"]            = elemCreator< Truss2d >;
+        elemList["rershell"]           = elemCreator< RerShell >;
+        elemList["tr_shell01"]         = elemCreator< TR_SHELL01 >;
+        elemList["beam2d"]             = elemCreator< Beam2d >;
+        elemList["beam3d"]             = elemCreator< Beam3d >;
+        elemList["libeam2dNL"]         = elemCreator< LIBeam2dNL >;
+        elemList["libeam2d"]           = elemCreator< LIBeam2d >;
+        elemList["libeam3dnl2"]        = elemCreator< LIBeam3dNL2 >;
+        elemList["libeam3dNL"]         = elemCreator< LIBeam3dNL >;
+        elemList["truss3d"]            = elemCreator< Truss3d >;
+        elemList["trplanestrain"]      = elemCreator< TrPlaneStrain >;
+        elemList["libeam3d2"]          = elemCreator< LIBeam3d2 >;
+        elemList["libeam3d"]           = elemCreator< LIBeam3d >;
+        elemList["qtruss1dgrad"]       = elemCreator< QTruss1dGrad >;
+        elemList["qtruss1d"]           = elemCreator< QTruss1d >;
+        elemList["truss1d"]            = elemCreator< Truss1d >;
+        elemList["interface2dquad"]    = elemCreator< InterfaceElem2dQuad >;
+        elemList["interface3dtrlin"]   = elemCreator< InterfaceElement3dTrLin >;
+        elemList["interface1d"]        = elemCreator< InterfaceElem1d >;
+        elemList["macrolspace"]        = elemCreator< MacroLSpace >;
+        elemList["lumpedmass"]         = elemCreator< LumpedMassElement >;
+        elemList["spring"]             = elemCreator< SpringElement >;
+        elemList["cohsur3d"]           = elemCreator< CohesiveSurface3d >;
+        elemList["bsplineplanestresselement"] = elemCreator< BsplinePlaneStressElement >;
+        elemList["nurbsplanestresselement"]   = elemCreator< NURBSPlaneStressElement >;
+        elemList["tsplineplanestresselement"] = elemCreator< TSplinePlaneStressElement >;
+        elemList["nurbs3delement"]            = elemCreator< NURBSSpace3dElement >;
+#endif
 #ifdef __FM_MODULE
-    if ( !strncasecmp(aClass, "tr1cbs", 6) ) {
-        newElement = new TR1_2D_CBS(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1supgaxi", 10) ) {
-        newElement = new TR1_2D_SUPG_AXI(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1supg2axi", 11) ) {
-        newElement = new TR1_2D_SUPG2_AXI(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1supg2", 8) ) {
-        newElement = new TR1_2D_SUPG2(number, domain);
+        elemList["tr1cbs"]         = elemCreator< TR1_2D_CBS >;
+        elemList["tr1supgaxi"]     = elemCreator< TR1_2D_SUPG_AXI >;
+        elemList["tr1supg2axi"]    = elemCreator< TR1_2D_SUPG2_AXI >;
+        elemList["tr1supg2"]       = elemCreator< TR1_2D_SUPG2 >;
+        elemList["tr1supg"]        = elemCreator< TR1_2D_SUPG >;
+        elemList["tet1supg"]       = elemCreator< Tet1_3D_SUPG >;
+        elemList["tr21supg"]       = elemCreator< TR21_2D_SUPG >;
+        elemList["quad1supg"]      = elemCreator< Quad10_2D_SUPG >;
+        elemList["tr21stokes"]     = elemCreator< Tr21Stokes >;
+        elemList["line2boundary"]  = elemCreator< Line2BoundaryElement >;
+        elemList["linesurfacetension"]  = elemCreator< LineSurfaceTension >;
+        elemList["line2surfacetension"] = elemCreator< Line2SurfaceTension >;
+#endif
+#ifdef __TM_MODULE
+        elemList["quad1ht"]        = elemCreator< Quad1_ht >;
+        elemList["quad1hmt"]       = elemCreator< Quad1_hmt >;
+        elemList["quadaxisym1ht"]  = elemCreator< QuadAxisym1_ht >;
+        elemList["quadaxisym1hmt"] = elemCreator< QuadAxisym1_hmt >;
+        elemList["brick1ht"]       = elemCreator< Brick1_ht >;
+        elemList["brick1hmt"]      = elemCreator< Brick1_hmt >;
+        elemList["tetrah1ht"]      = elemCreator< Tetrah1_ht >;
+        elemList["tetrah1hmt"]     = elemCreator< Tetrah1_hmt >;
+        elemList["tr1ht"]          = elemCreator< Tr1_ht >;
+        elemList["traxisym1ht"]    = elemCreator< TrAxisym1_ht >;
+#endif
     }
-    else if ( !strncasecmp(aClass, "tr1supg", 7) ) {
-        newElement = new TR1_2D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "tet1supg", 8) ) {
-        newElement = new Tet1_3D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "tr21supg", 8) ) {
-        newElement = new TR21_2D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "quad1supg", 9) ) {
-        newElement = new Quad10_2D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "tr21stokes", 10) ) {
-        newElement = new Tr21Stokes(number, domain);
-    } else if ( !strncasecmp(aClass, "linesurfacetension", 18) ) {
-        newElement = new LineSurfaceTension(number, domain);
-    } else if ( !strncasecmp(aClass, "line2surfacetension", 19) ) {
-        newElement = new Line2SurfaceTension(number, domain);
-    } else if ( !strncasecmp(aClass, "line2boundary", 13) ) {
-        newElement = new Line2BoundaryElement(number, domain);
-    }
-
-#endif //__FM_MODULE
-    return newElement;
+    return (elemList.count(aClass) == 1) ? elemList[aClass](number, domain) : NULL;
 }
+
+
+template < typename T > DofManager* dofmanCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, DofManager*(*)(int,Domain*), CaseComp > dofmanList;
 
 DofManager *CreateUsrDefDofManagerOfType(const char *aClass, int number, Domain *domain)
 {
-    DofManager *newDofManager = NULL;
+    if ( dofmanList.size() == 0 ) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "particle", 8) ) {
-        newDofManager = new Particle(number, domain);
-    }
-
+        dofmanList["particle"] = dofmanCreator< Particle >;
 #endif //__SM_MODULE
-    return newDofManager;
+    }
+    return (dofmanList.count(aClass) == 1) ? dofmanList[aClass](number, domain) : NULL;
 }
+
+
+template < typename T > CrossSection* csCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, CrossSection*(*)(int,Domain*), CaseComp > csList;
 
 CrossSection *CreateUsrDefCrossSectionOfType(const char *aClass, int number, Domain *domain)
 {
-    CrossSection *newCS = NULL;
+    if ( dofmanList.size() == 0 ) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "layeredcs", 9) ) {
-        newCS =   new LayeredCrossSection(number, domain);
-    } else if ( !strncasecmp(aClass, "fiberedcs", 9) ) {
-        newCS =   new FiberedCrossSection(number, domain);
-    }
-
+        csList["layeredcs"] = csCreator< LayeredCrossSection >;
+        csList["fiberedcs"] = csCreator< FiberedCrossSection >;
 #endif //__SM_MODULE
-    return newCS;
+    }
+    return (csList.count(aClass) == 1) ? csList[aClass](number, domain) : NULL;
 }
+
+
+// Template to wrap constructors into functions
+template < typename T > EngngModel* engngCreator( int n, EngngModel *m ) { return ( new T(n, m) ); }
+std::map< std::string, EngngModel*(*)(int, EngngModel*), CaseComp > engngList;
 
 EngngModel *CreateUsrDefEngngModelOfType(const char *aClass, int number, EngngModel *master)
 {
-    EngngModel *newEModel = NULL;
-
+    if (engngList.size() == 0) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "linearstatic", 12) ) {
-        newEModel = new LinearStatic(number, master);
-    } else if ( !strncasecmp(aClass, "stationaryflow", 14) ) {
-        newEModel = new StationaryFlow(number, master);
-    } else if ( !strncasecmp(aClass, "eigenvaluedynamic", 17) ) {
-        newEModel = new EigenValueDynamic(number, master);
-    } else if ( !strncasecmp(aClass, "nonlinearstatic", 15) ) {
-        newEModel = new NonLinearStatic(number, master);
-    } else if ( !strncasecmp(aClass, "nldeidynamic", 12) ) {
-        newEModel = new NlDEIDynamic(number, master);
-    }
-    //#ifdef __PARALLEL_MODE
-    else if ( !strncasecmp(aClass, "pnldeidynamic", 9) ) {
-        newEModel = new PNlDEIDynamic(number, master);
-    }
-    //#endif
-    else if ( !strncasecmp(aClass, "deidynamic", 10) ) {
-        newEModel = new DEIDynamic(number, master);
-    } else if ( !strncasecmp(aClass, "diidynamic", 10) ) {
-        newEModel = new DIIDynamic(number, master);
-    } else if ( !strncasecmp(aClass, "incrlinearstatic", 16) ) {
-        newEModel = new IncrementalLinearStatic(number, master);
-    } else if ( !strncasecmp(aClass, "linearstability", 15) ) {
-        newEModel = new LinearStability(number, master);
-    } else if ( !strncasecmp(aClass, "adaptnlinearstatic", 18) ) {
-        newEModel = new AdaptiveNonLinearStatic(number, master);
-    } else if ( !strncasecmp(aClass, "adaptlinearstatic", 17) ) {
-        newEModel = new AdaptiveLinearStatic(number, master);
-    }
-
+        engngList["linearstatic"]       = engngCreator< LinearStatic >;
+        engngList["stationaryflow"]     = engngCreator< StationaryFlow >;
+        engngList["eigenvaluedynamic"]  = engngCreator< EigenValueDynamic >;
+        engngList["nonlinearstatic"]    = engngCreator< NonLinearStatic >;
+        engngList["nldeidynamic"]       = engngCreator< NlDEIDynamic >;
+        engngList["pnldeidynamic"]      = engngCreator< PNlDEIDynamic >;
+        engngList["deidynamic"]         = engngCreator< DEIDynamic >;
+        engngList["diidynamic"]         = engngCreator< DIIDynamic >;
+        engngList["incrlinearstatic"]   = engngCreator< IncrementalLinearStatic >;
+        engngList["linearstability"]    = engngCreator< LinearStability >;
+        engngList["adaptnlinearstatic"] = engngCreator< AdaptiveNonLinearStatic >;
+        engngList["adaptlinearstatic"]  = engngCreator< AdaptiveLinearStatic >;
  #ifdef __PARALLEL_MODE
-    else if ( !strncasecmp(aClass, "plinearstatic", 13) ) {
-        newEModel = new PLinearStatic(number, master);
-    }
+        engngList["plinearstatic"]      = engngCreator< PLinearStatic >;
  #endif
 #endif //__SM_MODULE
-
 #ifdef __TM_MODULE
-    if ( !strncasecmp(aClass, "stationaryproblem", 17) ) {
-        newEModel = new StationaryTransportProblem(number, master);
-    } else if ( !strncasecmp(aClass, "nonstationaryproblem", 20) ) {
-        newEModel = new NonStationaryTransportProblem(number, master);
-    } else if ( !strncasecmp(aClass, "nltransienttransportproblem", 27) ) {
-        newEModel = new NLTransientTransportProblem(number, master);
-    } else if ( !strncasecmp(aClass, "staggeredproblem", 16) ) {
-        newEModel = new StaggeredProblem(number, master);
-    }
-
+        engngList["stationaryproblem"]              = engngCreator< StationaryTransportProblem >;
+        engngList["nonstationaryproblem"]           = engngCreator< NonStationaryTransportProblem >;
+        engngList["nltransienttransportproblem"]    = engngCreator< NLTransientTransportProblem >;
+        engngList["staggeredproblem"]               = engngCreator< StaggeredProblem >;
 #endif //__TM_MODULE
-
 #ifdef __FM_MODULE
-    if ( !strncasecmp(aClass, "cbs", 3) ) {
-        newEModel = new CBS(number, master);
-    } else if ( !strncasecmp(aClass, "supg", 4) ) {
-        newEModel = new SUPG(number, master);
-    } else if ( !strncasecmp(aClass, "stokesflowstresshomogenization", 30) ) {
-        newEModel = new StokesFlowStressHomogenization(number, master);
-    } else if ( !strncasecmp(aClass, "stokesflow", 10) ) {
-        newEModel = new StokesFlow(number, master);
-    }
-
+        engngList["cbs"]        = engngCreator< CBS >;
+        engngList["supg"]       = engngCreator< SUPG >;
+        engngList["stokesflow"] = engngCreator< StokesFlow >;
+        engngList["stokesflowstresshomogenization"] = engngCreator< StokesFlowStressHomogenization >;
 #endif //__FM_MODULE
-
-    if ( newEModel == NULL ) {
-        printf("%s : unknown EngngModel type \n", aClass);
-        exit(0);
     }
-
-    return newEModel;
+    return (engngList.count(aClass) == 1) ? engngList[aClass](number, master) : NULL;
 }
+
+
+template < typename T > GeneralBoundaryCondition* bcCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, GeneralBoundaryCondition*(*)(int, Domain*), CaseComp > bcList;
 
 GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *aClass, int number, Domain *domain)
 {
-    GeneralBoundaryCondition *newBc = NULL;
-    if ( !strncasecmp(aClass, "prescribedgradient", 18) ) {
-        newBc = new PrescribedGradient(number, domain);
-    } else if ( !strncasecmp(aClass, "mixedgradientpressure", 21) ) {
-        //newBc = new MixedGradientPressureBC(number, domain);
-    }
-
-    if ( !strncasecmp(aClass, "linearedgeload", 14) ) {
-        newBc = new LinearEdgeLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "constantedgeload", 16) ) {
-        newBc = new ConstantEdgeLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "constantsurfaceload", 19) ) {
-        newBc = new ConstantSurfaceLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "pointload", 9) ) {
-        newBc = new PointLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "surfacetension", 14) ) {
-        newBc = new SurfaceTensionBoundaryCondition(number, domain);
-    }
-
+    if (bcList.size() == 0) {
+        bcList["prescribedgradient"]    = bcCreator< PrescribedGradient >;
+        //bcList["mixedgradientpressure"] = bcCreator< MixedGradientPressureBC >;
+        bcList["linearedgeload"]        = bcCreator< LinearEdgeLoad >;
+        bcList["constantedgeload"]      = bcCreator< ConstantEdgeLoad >;
+        bcList["constantsurfaceload"]   = bcCreator< ConstantSurfaceLoad >;
+        bcList["pointload"]             = bcCreator< PointLoad >;
+        bcList["surfacetension"]        = bcCreator< SurfaceTensionBoundaryCondition >;
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
-        newBc = new StructuralTemperatureLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) ) {
-        newBc = new StructuralEigenstrainLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "usrdeftempfield", 15) ) {
-        newBc = new UserDefinedTemperatureField(number, domain);
-    } else if ( !strncasecmp(aClass, "tf1", 3) ) {
-        newBc = new TF1(number, domain);
-    }
-
+        bcList["structtemperatureload"] = bcCreator< StructuralTemperatureLoad >;
+        bcList["structeigenstrainload"] = bcCreator< StructuralEigenstrainLoad >;
+        bcList["usrdeftempfield"]       = bcCreator< UserDefinedTemperatureField >;
+        bcList["tf1"]                   = bcCreator< TF1 >;
 #endif //__SM_MODULE
 #ifdef __FM_MODULE
-    if ( !strncasecmp(aClass, "prescribedtractionpressurebc", 28) ) {
-        newBc = new TractionPressureBC(number, domain);
-    }
-
+        bcList["prescribedtractionpressurebc"] = bcCreator< TractionPressureBC >;
 #endif
-    return newBc;
+    }
+    return (bcList.count(aClass) == 1) ? bcList[aClass](number, domain) : NULL;
 }
+
+
+template < typename T > LoadTimeFunction* ltfCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, LoadTimeFunction*(*)(int, Domain*), CaseComp > ltfList;
 
 LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(const char *aClass, int number, Domain *domain)
 {
-    LoadTimeFunction *newLTF = NULL;
-
-    if ( !strncasecmp(aClass, "peakfunction", 12) ) {
-        newLTF = new PeakFunction(number, domain);
-    } else if ( !strncasecmp(aClass, "piecewiselinfunction", 20) ) {
-        newLTF = new PiecewiseLinFunction(number, domain);
-    } else if ( !strncasecmp(aClass, "periodicpiecewiselinfunction", 28) ) {
-        newLTF = new PeriodicPiecewiseLinFunction(number, domain);
-    } else if ( !strncasecmp(aClass, "heavisideltf", 12) ) {
-        newLTF = new HeavisideLTF(number, domain);
-    } else if ( !strncasecmp(aClass, "usrdefltf", 9) ) {
-        newLTF = new UserDefinedLoadTimeFunction(number, domain);
+    if (ltfList.size() == 0) {
+        ltfList["peakfunction"]                 = ltfCreator< PeakFunction >;
+        ltfList["piecewiselinfunction"]         = ltfCreator< PiecewiseLinFunction >;
+        ltfList["periodicpiecewiselinfunction"] = ltfCreator< PeriodicPiecewiseLinFunction >;
+        ltfList["heavisideltf"]                 = ltfCreator< HeavisideLTF >;
+        ltfList["usrdefltf"]                    = ltfCreator< UserDefinedLoadTimeFunction >;
     }
-
-    return newLTF;
+    return (ltfList.count(aClass) == 1) ? ltfList[aClass](number, domain) : NULL;
 }
+
+
+template < typename T > Material* matCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, Material*(*)(int,Domain*), CaseComp > matList;
 
 Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *domain)
 {
-    Material *newMaterial = NULL;
-
+    if (matList.size() == 0) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "dummymat", 8) ) {
-        newMaterial = new DummyMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "orthole", 7) ) {
-        newMaterial = new OrthotropicLinearElasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "steel1", 6) ) {
-        newMaterial = new Steel1(number, domain);
-    } else if ( !strncasecmp(aClass, "concrete2", 9) ) {
-        newMaterial = new Concrete2(number, domain);
-    } else if ( !strncasecmp(aClass, "concrete3", 9) ) {
-        newMaterial = new Concrete3(number, domain);
-    } else if ( !strncasecmp(aClass, "cebfip78", 8) ) {
-        newMaterial = new CebFip78Material(number, domain);
-    } else if ( !strncasecmp(aClass, "doublepowerlaw", 14) ) {
-        newMaterial = new DoublePowerLawMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "b3mat", 5) ) {
-        newMaterial = new B3Material(number, domain);
-    } else if ( !strncasecmp(aClass, "b3solidmat", 10) ) {
-        newMaterial = new B3SolidMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "mps", 3) ) {
-        newMaterial = new MPSMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "j2mat", 5) ) {
-        newMaterial = new J2plasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rcsdnl", 6) ) {
-        newMaterial = new RCSDNLMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rcsde", 5) ) {
-        newMaterial = new RCSDEMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rcsd", 4) ) {
-        newMaterial = new RCSDMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "microplane_m4", 13) ) {
-        newMaterial = new M4Material(number, domain);
-    } else if ( !strncasecmp(aClass, "idm1", 4) ) {
-        newMaterial = new IsotropicDamageMaterial1(number, domain);
-    } else if ( !strncasecmp(aClass, "idmnl1", 6) ) {
-        newMaterial = new IDNLMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "mazarsmodelnl", 13) ) {
-        newMaterial = new MazarsNLMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "mazarsmodel", 11) ) {
-        newMaterial = new MazarsMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "druckerprager", 13) ) {
-        newMaterial = new DruckerPragerPlasticitySM(number, domain);
-    } else if ( !strncasecmp(aClass, "j2mmat", 6) ) {
-        newMaterial = new J2MPlasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rankine", 7) ) {
-        newMaterial = new RankinePlasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "masonry02", 9) ) {
-        newMaterial = new Masonry02(number, domain);
-    } else if ( !strncasecmp(aClass, "isointrfdm01", 12) ) {
-        newMaterial = new IsoInterfaceDamageMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "j22mat", 6) ) {
-        newMaterial = new J2Mat(number, domain);
-    } else if ( !strncasecmp(aClass, "cebfipslip90", 12) ) {
-        newMaterial = new CebFipSlip90Material(number, domain);
-    } else if ( !strncasecmp(aClass, "hellmat", 7) ) {
-        newMaterial = new HellmichMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "mdm", 3) ) {
-        newMaterial = new MDM(number, domain);
-    } else if ( !strncasecmp(aClass, "compdammat", 10) ) {
-        newMaterial = new CompoDamageMat(number, domain);
-    } else if ( !strncasecmp(aClass, "micromat", 8) ) {
-        newMaterial = new MicroMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "hyperelmat", 10) ) {
-        newMaterial = new HyperElasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "misesmatgrad", 12) )  {
-        newMaterial = new MisesMatGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "misesmatnl", 10) ) {
-        newMaterial = new MisesMatNl(number, domain);
-    } else if ( !strncasecmp(aClass, "misesmat", 8) ) {
-        newMaterial = new MisesMat(number, domain);
-    } else if ( !strncasecmp(aClass, "rankmatgrad", 11) ) {
-        newMaterial = new RankineMatGrad(number, domain);
-    } else if ( !strncasecmp(aClass, "rankmatnl", 9) ) {
-        newMaterial = new RankineMatNl(number, domain);
-    } else if ( !strncasecmp(aClass, "rankmat", 7) ) {
-        newMaterial = new RankineMat(number, domain);
-    } else if ( !strncasecmp(aClass, "trabbonenl3d", 12) ) {
-        newMaterial = new TrabBoneNL3D(number, domain);
-    } else if ( !strncasecmp(aClass, "trabboneembed", 13) ) {
-        newMaterial = new TrabBoneEmbed(number, domain);
-    } else if ( !strncasecmp(aClass, "trabbonenlembed", 15) ) {
-        newMaterial = new TrabBoneNLEmbed(number, domain);
-    } else if ( !strncasecmp(aClass, "trabbonenl", 10) ) {
-        newMaterial = new TrabBoneNL(number, domain);
-    } else if ( !strncasecmp(aClass, "trabbone3d", 10) ) {
-        newMaterial = new TrabBone3D(number, domain);
-    } else if ( !strncasecmp(aClass, "trabbone", 8) ) {
-        newMaterial = new TrabBoneMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "concretedpm", 11) ) {
-        newMaterial = new ConcreteDPM(number, domain);
-    } else if ( !strncasecmp(aClass, "concreteidm", 11) ) {
-        // for compatibility with old input files
-        newMaterial = new ConcreteDPM(number, domain);
-    } else if ( !strncasecmp(aClass, "cohint", 6) ) {
-        newMaterial = new CohesiveInterfaceMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "simpleintermat", 14) ) {
-        newMaterial = new SimpleInterfaceMaterial(number, domain);
-    }
-
+        matList["dummymat"]         = matCreator< DummyMaterial >;
+        matList["orthole"]          = matCreator< OrthotropicLinearElasticMaterial >;
+        matList["steel1"]           = matCreator< Steel1 >;
+        matList["concrete2"]        = matCreator< Concrete2 >;
+        matList["concrete3"]        = matCreator< Concrete3 >;
+        matList["cebfip78"]         = matCreator< CebFip78Material >;
+        matList["doublepowerlaw"]   = matCreator< DoublePowerLawMaterial >;
+        matList["b3mat"]            = matCreator< B3Material >;
+        matList["b3solidmat"]       = matCreator< B3SolidMaterial >;
+        matList["mps"]              = matCreator< MPSMaterial >;
+        matList["j2mat"]            = matCreator< J2plasticMaterial >;
+        matList["rcsdnl"]           = matCreator< RCSDNLMaterial >;
+        matList["rcsde"]            = matCreator< RCSDEMaterial >;
+        matList["rcsd"]             = matCreator< RCSDMaterial >;
+        matList["microplane_m4"]    = matCreator< M4Material >;
+        matList["idm1"]             = matCreator< IsotropicDamageMaterial1 >;
+        matList["idmnl1"]           = matCreator< IDNLMaterial >;
+        matList["mazarsmodelnl"]    = matCreator< MazarsNLMaterial >;
+        matList["mazarsmodel"]      = matCreator< MazarsMaterial >;
+        matList["druckerprager"]    = matCreator< DruckerPragerPlasticitySM >;
+        matList["j2mmat"]           = matCreator< J2MPlasticMaterial >;
+        matList["rankine"]          = matCreator< RankinePlasticMaterial >;
+        matList["masonry02"]        = matCreator< Masonry02 >;
+        matList["isointrfdm01"]     = matCreator< IsoInterfaceDamageMaterial >;
+        matList["j22mat"]           = matCreator< J2Mat >;
+        matList["cebfipslip90"]     = matCreator< CebFipSlip90Material >;
+        matList["hellmat"]          = matCreator< HellmichMaterial >;
+        matList["mdm"]              = matCreator< MDM >;
+        matList["compdammat"]       = matCreator< CompoDamageMat >;
+        matList["micromat"]         = matCreator< MicroMaterial >;
+        matList["hyperelmat"]       = matCreator< HyperElasticMaterial >;
+        matList["misesmatgrad"]     = matCreator< MisesMatGrad >;
+        matList["misesmatnl"]       = matCreator< MisesMatNl >;
+        matList["misesmat"]         = matCreator< MisesMat >;
+        matList["rankmatgrad"]      = matCreator< RankineMatGrad >;
+        matList["rankmatnl"]        = matCreator< RankineMatNl >;
+        matList["rankmat"]          = matCreator< RankineMat >;
+        matList["trabbonenl3d"]     = matCreator< TrabBoneNL3D >;
+        matList["trabboneembed"]    = matCreator< TrabBoneEmbed >;
+        matList["trabbonenlembed"]  = matCreator< TrabBoneNLEmbed >;
+        matList["trabbonenl"]       = matCreator< TrabBoneNL >;
+        matList["trabbone3d"]       = matCreator< TrabBone3D >;
+        matList["trabbone"]         = matCreator< TrabBoneMaterial >;
+        matList["concretedpm"]      = matCreator< ConcreteDPM >;
+        matList["concreteidm"]      = matCreator< ConcreteDPM >; // for compatibility with old inputfiles
+        matList["cohint"]           = matCreator< CohesiveInterfaceMaterial >;
+        matList["simpleintermat"]   = matCreator< SimpleInterfaceMaterial >;
 #endif //__SM_MODULE
-
 #ifdef __TM_MODULE
-    if ( !strncasecmp(aClass, "isoheat", 7) ) {
-        newMaterial = new IsotropicHeatTransferMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "hemotk", 6) ) {
-        newMaterial = new HeMoTKMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "hydratingconcretemat", 20) ) {
-        newMaterial = new HydratingConcreteMat(number, domain);
-    }
- #ifdef __CEMHYD_MODULE
-    else if ( !strncmp(aClass, "cemhydmat", 9) ) {
-        newMaterial = new CemhydMat(number, domain);
-    }
+        matList["isoheat"]              = matCreator< IsotropicHeatTransferMaterial >;
+        matList["hemotk"]               = matCreator< HeMoTKMaterial >;
+        matList["hydratingconcretemat"] = matCreator< HydratingConcreteMat >;
+#ifdef __CEMHYD_MODULE
+        matList["cemhydmat"]            = matCreator< CemhydMat >;
  #endif //__CEMHYD_MODULE
 #endif //__TM_MODULE
-
 #if defined( __SM_MODULE ) && defined ( __TM_MODULE )
-    if ( !strncmp(aClass, "hisoheat", 8) ) {
-        newMaterial = new HydratingIsoHeatMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "hhemotk", 7) ) {
-        newMaterial = new HydratingHeMoMaterial(number, domain);
-    }
-
+        matList["hisoheat"] = matCreator< HydratingIsoHeatMaterial >;
+        matList["hhemotk"] = matCreator< HydratingHeMoMaterial >;
 #endif //defined(__SM_MODULE) && defined (__TM_MODULE)
-
 #ifdef __FM_MODULE
-    if ( !strncasecmp(aClass, "newtonianfluid", 14) ) {
-        newMaterial = new NewtonianFluidMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "twofluidmat", 11) ) {
-        newMaterial = new TwoFluidMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "binghamfluid2", 13) ) {
-        newMaterial = new BinghamFluidMaterial2(number, domain);
-    } else if ( !strncasecmp(aClass, "binghamfluid", 12) ) {
-        newMaterial = new BinghamFluidMaterial2(number, domain);
-    } else if ( !strncasecmp(aClass, "fe2sinteringmaterial", 20) ) {
-        newMaterial = new FE2SinteringMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "surfacetension", 22) ) {
-        newMaterial = new SurfaceTensionMaterial(number, domain);
-    }
-
+        matList["newtonianfluid"]       = matCreator< NewtonianFluidMaterial >;
+        matList["twofluidmat"]          = matCreator< TwoFluidMaterial >;
+        matList["binghamfluid2"]        = matCreator< BinghamFluidMaterial2 >;
+        matList["binghamfluid"]         = matCreator< BinghamFluidMaterial2 >;
+        matList["fe2sinteringmaterial"] = matCreator< FE2SinteringMaterial >;
+        matList["surfacetension"]       = matCreator< SurfaceTensionMaterial >;
 #endif // __FM_MODULE
-
-    return newMaterial;
+    }
+    return (matList.count(aClass) == 1) ? matList[aClass](number, domain) : NULL;
 }
 
-TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *d)
+
+template < typename T > TopologyDescription* topologyCreator( Domain *d ) { return new T(d); }
+std::map< std::string, TopologyDescription*(*)(Domain*), CaseComp > topologyList;
+
+TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
-    TopologyDescription *newTopology = NULL;
-#if 0 // Soon..
-    if ( !strncasecmp(aClass, "particletopology", 16) ) {
-        newTopology = new ParticleTopologyDescription(d);
+    if (topologyList.size() == 0) {
+        //topologyList["particletopology"] = topologyCreator< ParticleTopologyDescription >; // Soon..
     }
-#endif
-    return newTopology;
+    return (topologyList.count(aClass) == 1) ? topologyList[aClass](domain) : NULL;
 }
 
 SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type)
@@ -873,8 +684,7 @@ SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type)
     }
 #endif
     else {
-        fprintf(stderr, "CreateUsrDefSparseMtrx: Unknown mtrx type\n");
-        exit(1);
+        OOFEM_ERROR("CreateUsrDefSparseMtrx: Unknown mtrx type\n");
     }
 
     return answer;
@@ -909,8 +719,7 @@ SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, D
 
 #endif
     } else {
-        fprintf(stderr, "CreateUsrDefSparseLinSolver: Unknown solver type\n");
-        exit(1);
+        OOFEM_ERROR("CreateUsrDefSparseLinSolver: Unknown solver type\n");
     }
 
     return nm;
@@ -929,8 +738,7 @@ SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigv
         nm = ( SparseGeneralEigenValueSystemNM * ) new SLEPcSolver(i, d, m);
         return nm;
     } else {
-        fprintf(stderr, "CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
-        exit(1);
+        OOFEM_ERROR("CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
     }
 
     return nm;
@@ -954,83 +762,72 @@ ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, 
 #endif //__SM_MODULE
 
     if ( answer == NULL ) {
-        fprintf(stderr, "CreateUsrDefErrorEstimator: Unknown error estimator type\n");
-        exit(1);
+        OOFEM_ERROR("CreateUsrDefErrorEstimator: Unknown error estimator type\n");
     }
 
     return answer;
 }
+
+
+template < typename T > ExportModule* exportCreator( int n, EngngModel *e ) { return ( new T(n, e) ); }
+std::map< std::string, ExportModule*(*)(int,EngngModel*), CaseComp > exportList;
 
 ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    ExportModule *answer = NULL;
-
-    if ( !strncasecmp(aClass, "vtkxml", 6) ) {
-        answer = new VTKXMLExportModule(number, emodel);
-    } else if ( !strncasecmp(aClass, "vtk", 3) ) {
-        answer = new VTKExportModule(number, emodel);
-    }
-
+    if (exportList.size() == 0) {
+        exportList["vtkxml"]    = exportCreator< VTKXMLExportModule >;
+        exportList["vtk"]       = exportCreator< VTKExportModule >;
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "poi", 3) ) {
-        answer = new POIExportModule(number, emodel);
-    } else if ( !strncasecmp(aClass, "hom", 3) ) {
-        answer = new HOMExportModule(number, emodel);
-    } else if ( !strncasecmp(aClass, "dm", 2) ) {
-        answer = new DofManExportModule(number, emodel);
-    } else if ( !strncasecmp(aClass, "gp", 2) ) {
-        answer = new GPExportModule(number, emodel);
-    }
-
+        exportList["poi"]       = exportCreator< POIExportModule >;
+        exportList["hom"]       = exportCreator< HOMExportModule >;
+        exportList["dm"]        = exportCreator< DofManExportModule >;
+        exportList["gp"]        = exportCreator< GPExportModule >;
 #endif //__SM_MODULE
-
-    return answer;
+    }
+    return (exportList.count(aClass) == 1) ? exportList[aClass](number, emodel) : NULL;
 }
 
-InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int n, EngngModel *emodel)
+
+template < typename T > InitModule* initCreator( int n, EngngModel *e ) { return ( new T(n, e) ); }
+std::map< std::string, InitModule*(*)(int,EngngModel*), CaseComp > initList;
+
+InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    InitModule *answer = NULL;
-
+    if ( initList.size() == 0 ) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "gpinitmodule", 12) ) {
-        answer = new GPInitModule(n, emodel);
-    }
-
+        initList["gpinitmodule"] = initCreator< GPInitModule >;
 #endif //__SM_MODULE
-
-    return answer;
+    }
+    return (initList.count(aClass) == 1) ? initList[aClass](number, emodel) : NULL;
 }
 
-NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int num, Domain *d)
+
+template < typename T > NonlocalBarrier* barrierCreator( int n, Domain *d ) { return ( new T(n, d) ); }
+std::map< std::string, NonlocalBarrier*(*)(int,Domain*), CaseComp > barrierList;
+
+NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int number, Domain *domain)
 {
-    NonlocalBarrier *answer = NULL;
-
+    if ( barrierList.size() == 0 ) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "polylinebarrier", 15) ) {
-        answer = new PolylineNonlocalBarrier(num, d);
-    }
-
-    if ( !strncasecmp(aClass, "symmetrybarrier", 15) ) {
-        answer = new SymmetryBarrier(num, d);
-    }
-
+        barrierList["polylinebarrier"] = barrierCreator< PolylineNonlocalBarrier >;
+        barrierList["symmetrybarrier"] = barrierCreator< SymmetryBarrier >;
 #endif //__SM_MODULE
-
-    return answer;
+    }
+    return (barrierList.count(aClass) == 1) ? barrierList[aClass](number, domain) : NULL;
 }
 
-RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int num, Domain *d)
+
+template < typename T > RandomFieldGenerator* randomFieldCreator( int n, Domain *d ) { return ( new T(n, d) ); }
+std::map< std::string, RandomFieldGenerator*(*)(int,Domain*), CaseComp > randomFieldList;
+
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int number, Domain *domain)
 {
-    RandomFieldGenerator *answer = NULL;
-
+    if ( randomFieldList.size() == 0 ) {
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "localgaussrandomgenerator", 25) ) {
-        answer = new LocalGaussianRandomGenerator(num, d);
-    }
-
+        randomFieldList["localgaussrandomgenerator"] = randomFieldCreator< LocalGaussianRandomGenerator >;
 #endif
-
-    return answer;
+    }
+    return (randomFieldList.count(aClass) == 1) ? randomFieldList[aClass](number, domain) : NULL;
 }
 
 
@@ -1162,44 +959,49 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d)
     return answer;
 }
 
-EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int num, XfemManager *xm, Domain *d) {
-    EnrichmentItem *answer = NULL;
-    if ( !strncasecmp(aClass, "cracktip", 8) ) {
-        answer = new CrackTip(num, xm, d);
-    } else if ( !strncasecmp(aClass, "crackinterior", 13) ) {
-        answer = new CrackInterior(num, xm, d);
-    } else if ( !strncasecmp(aClass, "inclusion", 9) ) {
-        answer = new Inclusion(num, xm, d);
-    }
 
-    return answer;
+template < typename T > EnrichmentItem* enrichItemCreator( int n, XfemManager *x, Domain *d ) { return new T(n, x, d); }
+std::map< std::string, EnrichmentItem*(*)(int,XfemManager*,Domain*), CaseComp > enrichItemList;
+
+EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemManager *xm, Domain *domain)
+{
+    if (enrichItemList.size() == 0) {
+        enrichItemList["cracktip"]      = enrichItemCreator< CrackTip >;
+        enrichItemList["crackinterior"] = enrichItemCreator< CrackInterior >;
+        enrichItemList["inclusion"]     = enrichItemCreator< Inclusion >;
+    }
+    return (enrichItemList.count(aClass) == 1) ? enrichItemList[aClass](number, xm, domain) : NULL;
 }
 
-EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int num, Domain *d) {
-    EnrichmentFunction *answer = NULL;
-    if ( !strncasecmp(aClass, "discontinuousfunction", 21) ) {
-        answer = new DiscontinuousFunction(num, d);
-    } else if ( !strncasecmp(aClass, "branchfunction", 14) ) {
-        answer = new BranchFunction(num, d);
-    } else if ( !strncasecmp(aClass, "rampfunction", 14) ) {
-        answer = new RampFunction(num, d);
-    }
 
-    return answer;
+template < typename T > EnrichmentFunction* enrichFuncCreator( int n, Domain *d ) { return new T(n, d); }
+std::map< std::string, EnrichmentFunction*(*)(int,Domain*), CaseComp > enrichFuncList;
+
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int number, Domain *domain)
+{
+    if (enrichFuncList.size() == 0) {
+        enrichFuncList["discontinuousfunction"] = enrichFuncCreator< DiscontinuousFunction >;
+        enrichFuncList["branchfunction"] = enrichFuncCreator< BranchFunction >;
+        enrichFuncList["rampfunction"] = enrichFuncCreator< RampFunction >;
+    }
+    return (enrichFuncList.count(aClass) == 1) ? enrichFuncList[aClass](number, domain) : NULL;
 }
 
-BasicGeometry *CreateUsrDefGeometry(const char *aClass) {
-    BasicGeometry *answer = NULL;
-    if ( !strncasecmp(aClass, "line", 4) ) {
-        answer = new Line();
-    } else if ( !strncasecmp(aClass, "circle", 6) ) {
-        answer = new Circle();
-    }
 
-    return answer;
+template < typename T > BasicGeometry* geometryCreator() { return new T(); }
+std::map< std::string, BasicGeometry*(*)(), CaseComp > geometryList;
+
+BasicGeometry *CreateUsrDefGeometry(const char *aClass)
+{
+    if (geometryList.size() == 0) {
+        geometryList["line"] = geometryCreator< Line >;
+        geometryList["circle"] = geometryCreator< Circle >;
+    }
+    return (geometryList.count(aClass) == 1) ? geometryList[aClass]() : NULL;
 }
 
-Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e) {
+Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e)
+{
     Patch *answer = NULL;
     if ( ptype == Patch :: PT_TrianglePatch ) {
         answer = new TrianglePatch(e);

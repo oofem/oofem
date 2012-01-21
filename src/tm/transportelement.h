@@ -59,7 +59,7 @@ protected:
 
 public:
     TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
-    ~TransportElement();
+    virtual ~TransportElement();
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);

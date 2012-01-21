@@ -51,31 +51,31 @@ protected:
     int numberOfGaussPoints;
 
 public:
-    Brick1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
-    ~Brick1_ht();
+    Brick1_ht(int n, Domain *d);
+    virtual ~Brick1_ht();
 
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     // definition
-    const char *giveClassName() const { return "Brick1_htElement"; }
-    classType giveClassID() const { return Brick1_htClass; }
+    virtual const char *giveClassName() const { return "Brick1_ht"; }
+    virtual classType giveClassID() const { return Brick1_htClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
 
-    Interface *giveInterface(InterfaceType t);
+    virtual Interface *giveInterface(InterfaceType t);
     virtual int testElementExtension(ElementExtension ext)
     { return ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ); }
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -110,5 +110,15 @@ protected:
 
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
+
+class Brick1_hmt : public Brick1_ht
+{
+public:
+    Brick1_hmt(int n, Domain *d);
+
+    virtual const char *giveClassName() const { return "Brick1_hmt"; }
+    virtual classType giveClassID() const { return Brick1_hmtClass; }
+};
+
 } // end namespace oofem
 #endif // brick1_ht_h

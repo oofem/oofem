@@ -60,16 +60,18 @@
 namespace oofem {
 FEI3dHexaLin Brick1_ht :: interpolation;
 
-Brick1_ht :: Brick1_ht(int n, Domain *aDomain, ElementMode em) :
-    TransportElement(n, aDomain, em)
-    // Constructor.
+Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 8;
 }
 
+Brick1_hmt :: Brick1_hmt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
+{
+    emode = HeatMass1TransferEM;
+}
+
 Brick1_ht :: ~Brick1_ht()
-// Destructor
 { }
 
 void

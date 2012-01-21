@@ -45,18 +45,31 @@ namespace oofem {
 class QuadAxisym1_ht : public Quad1_ht
 {
 public:
-    QuadAxisym1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
-    ~QuadAxisym1_ht();
+    QuadAxisym1_ht(int n, Domain *d);
+    virtual ~QuadAxisym1_ht();
 
-    double computeVolumeAround(GaussPoint *gp);
-    // definition
-    const char *giveClassName() const { return "QuadAxisym1_htElement"; }
-    classType giveClassID() const { return QuadAxisym1_htClass; }
+    virtual double computeVolumeAround(GaussPoint *gp);
+
+    virtual const char *giveClassName() const { return "QuadAxisym1_ht"; }
+    virtual classType giveClassID() const { return QuadAxisym1_htClass; }
 
 protected:
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    double computeRadiusAt(GaussPoint *gp);
-    int giveApproxOrder(int unknownIndx) { return 2; }
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual double computeRadiusAt(GaussPoint *gp);
+    virtual int giveApproxOrder(int unknownIndx) { return 2; }
 };
+
+/**
+ * Same as QuadAxisym1_ht but for heat+mass transfer.
+ */
+class QuadAxisym1_hmt : public QuadAxisym1_ht
+{
+public:
+    QuadAxisym1_hmt(int n, Domain *d);
+
+    virtual const char *giveClassName() const { return "QuadAxisym1_hmt"; }
+    virtual classType giveClassID() const { return QuadAxisym1_hmtClass; }
+};
+
 } // end namespace oofem
 #endif // quadaxisym1_ht_h

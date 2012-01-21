@@ -154,11 +154,15 @@ enum classType {
     TrPlaneStrainClass,
     LIBeam3dNLClass,
     Quad1_htClass,
+    Quad1_hmtClass,
     Tr1_htClass,
     QuadAxisym1_htClass,
+    QuadAxisym1_hmtClass,
     TrAxisym1_htClass,
     Brick1_htClass,
+    Brick1_hmtClass,
     Tetrah1_htClass,
+    Tetrah1_hmtClass,
     PlaneStress2dXfemClass,
     LumpedMassElementClass,
     SpringElementClass,
@@ -324,7 +328,7 @@ enum classType {
 
     SurfaceTensionMaterialClass,
     SurfaceTensionMaterialStatusClass,
-    
+
     SimpleInterfaceMaterialClass,
     SimpleInterfaceMaterialStatusClass,
 

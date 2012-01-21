@@ -51,30 +51,29 @@ protected:
     static FEI2dQuadLin interpolation;
 
 public:
-    Quad1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
-    ~Quad1_ht();
+    Quad1_ht(int n, Domain *d);
+    virtual ~Quad1_ht();
 
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    // definition
-    const char *giveClassName() const { return "Quad1_htElement"; }
-    classType giveClassID() const { return Quad1_htClass; }
+    virtual const char *giveClassName() const { return "Quad1_ht"; }
+    virtual classType giveClassID() const { return Quad1_htClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
 
-    Interface *giveInterface(InterfaceType t);
+    virtual Interface *giveInterface(InterfaceType t);
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -90,18 +89,30 @@ public:
 #endif
 
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
 
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
     virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
 
-    void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void giveEdgeDofMapping(IntArray &mask, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
 
-    int giveApproxOrder(int unknownIndx) { return 1; }
+    virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
+
+/**
+ * Class for heat and mass transfer.
+ */
+class Quad1_hmt: public Quad1_ht
+{
+public:
+    Quad1_hmt(int n, Domain *d);
+    virtual const char *giveClassName() const { return "Quad1_hmt"; }
+    virtual classType giveClassID() const { return Quad1_hmtClass; }
+};
+
 } // end namespace oofem
 #endif // quad1_ht_h

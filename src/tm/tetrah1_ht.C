@@ -60,16 +60,18 @@
 namespace oofem {
 FEI3dTrLin Tetrah1_ht :: interpolation;
 
-Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain, ElementMode em) :
-    TransportElement(n, aDomain, em)
-    // Constructor.
+Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 1;
 }
 
+Tetrah1_hmt :: Tetrah1_hmt(int n, Domain *aDomain) : Tetrah1_ht(n, aDomain)
+{
+    this->emode = HeatMass1TransferEM; // This could be done in a better way.
+}
+
 Tetrah1_ht :: ~Tetrah1_ht()
-// Destructor
 { }
 
 void

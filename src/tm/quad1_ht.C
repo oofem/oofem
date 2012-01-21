@@ -61,12 +61,15 @@ namespace oofem {
 
 FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
 
-Quad1_ht :: Quad1_ht(int n, Domain *aDomain, ElementMode em) :
-    TransportElement(n, aDomain, em)
-    // Constructor.
+Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
+}
+
+Quad1_hmt :: Quad1_hmt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
+{
+    emode = HeatMass1TransferEM;
 }
 
 Quad1_ht :: ~Quad1_ht()
@@ -86,8 +89,6 @@ Quad1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
     answer.at(1, 2) = n.at(2);
     answer.at(1, 3) = n.at(3);
     answer.at(1, 4) = n.at(4);
-
-    return;
 }
 
 void
@@ -147,7 +148,8 @@ Quad1_ht :: computeGaussPoints()
 }
 
 void
-Quad1_ht ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Quad1_ht ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -224,8 +226,6 @@ Quad1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 
     answer.at(1, 1) = n.at(1);
     answer.at(1, 2) = n.at(2);
-
-    return;
 }
 
 
@@ -263,8 +263,6 @@ Quad1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
 
 void
@@ -348,12 +346,7 @@ Quad1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, i)  = n.at(1, i);
     }
-
-    return;
 }
-
-
-
 
 
 int
@@ -397,83 +390,6 @@ Quad1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 {
     return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
-
-/*
- * #define _SMALLNUM 1.e-6
- * int
- * Quad1_ht::computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
- * {
- * Node    *node1,*node2,*node3,*node4;
- * double  x1,x2,x3,x4,y1,y2,y3,y4,a1,a2,a3,a4,b1,b2,b3,b4;
- * double a,b,c, r1, r2, r3, eta, denom1, denom2;
- * int nroot;
- *
- * answer.resize(2);
- *
- * node1 = this -> giveNode(1) ;
- * node2 = this -> giveNode(2) ;
- * node3 = this -> giveNode(3) ;
- * node4 = this -> giveNode(4) ;
- *
- *
- * x1 = node1 -> giveCoordinate(1) ;
- * x2 = node2 -> giveCoordinate(1) ;
- * x3 = node3 -> giveCoordinate(1) ;
- * x4 = node4 -> giveCoordinate(1) ;
- *
- * y1 = node1 -> giveCoordinate(2) ;
- * y2 = node2 -> giveCoordinate(2) ;
- * y3 = node3 -> giveCoordinate(2) ;
- * y4 = node4 -> giveCoordinate(2) ;
- *
- * a1 = x1+x2+x3+x4;
- * a2 = x1-x2-x3+x4;
- * a3 = x1+x2-x3-x4;
- * a4 = x1-x2+x3-x4;
- *
- * b1 = y1+y2+y3+y4;
- * b2 = y1-y2-y3+y4;
- * b3 = y1+y2-y3-y4;
- * b4 = y1-y2+y3-y4;
- *
- * a = a2*b4-b2*a4;
- * b = a1*b4+a2*b3-a3*b2-b1*a4-b4*4.0*coords.at(1)+a4*4.0*coords.at(2);
- * c = a1*b3-a3*b1-4.0*coords.at(1)*b3+4.0*coords.at(2)*a3;
- *
- * // solve quadratic equation for ksi
- * cubic (0.0, a, b, c, &r1, &r2, &r3, &nroot);
- * if (nroot) {
- * if ((r1>=(-1.0-_SMALLNUM))&&(r1<=(1.0+_SMALLNUM))) {
- *  denom1 = (b3+r1*b4);
- *  denom2 = (a3+r1*a4);
- *  if (fabs(denom2) > fabs(denom1))
- *   eta = (4.0*coords.at(1)-a1-r1*a2) / denom2;
- *  else eta = (4.0*coords.at(2)-b1-r1*b2) / denom1;
- *
- *  if ((eta>=(-1.0-_SMALLNUM))&&(eta<=(1.0+_SMALLNUM))) {
- *   answer.at(1) = r1;
- *   answer.at(2) = eta;
- *   return 1;
- *  }
- * }
- * }
- * if (nroot > 1) {
- * if ((r2>=(-1.0-_SMALLNUM))&&(r2<=(1.0+_SMALLNUM))) {
- *  eta = (4.0*coords.at(2)-b1-r2*b2) / (b3+r2*b4);
- *  fprintf (stderr, "%e\n", eta);
- *  if ((eta>=(-1.0-_SMALLNUM))&&(eta<=(1.0+_SMALLNUM))) {
- *   answer.at(1) = r2;
- *   answer.at(2) = eta;
- *   return 1;
- *  }
- * }
- * }
- *
- * // given point not inside receiver volume
- * return 0;
- * }
- */
-
 
 
 #ifdef __OOFEG
@@ -582,11 +498,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
     }
-
-    return;
 }
-
-
 
 #endif
 } // end namespace oofem

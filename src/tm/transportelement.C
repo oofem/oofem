@@ -62,19 +62,18 @@
 namespace oofem {
 TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
     Element(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 {
     emode = em;
 }
 
 
 TransportElement :: ~TransportElement()
-// Destructor.
 { }
 
 
 void
-TransportElement ::   giveElementDofIDMask(EquationID, IntArray &answer) const {
+TransportElement ::   giveElementDofIDMask(EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -110,8 +109,6 @@ TransportElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
     } else {
         _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
-
-    return;
 }
 
 void
@@ -129,8 +126,6 @@ TransportElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx,
         _error2( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
                 __CharTypeToString(mtrx) );
     }
-
-    return;
 }
 
 int
@@ -259,7 +254,6 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, i
     }
 
     answer.symmetrized();
-    return;
 }
 
 void
@@ -330,8 +324,6 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 
         answer.add(helpLoadVector);
     }
-
-    return;
 }
 
 
@@ -804,9 +796,7 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *st
         OOFEM_ERROR1("Unknown element mode");
     }
 
-    answer.times(-1.);
-    //         }
-    //     }
+    answer.negated();
 }
 
 

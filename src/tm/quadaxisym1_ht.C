@@ -57,10 +57,13 @@
 #endif
 
 namespace oofem {
-QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
-    Quad1_ht(n, aDomain, em)
-    // Constructor.
+QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 { }
+
+QuadAxisym1_hmt :: QuadAxisym1_hmt(int n, Domain *aDomain) : QuadAxisym1_ht(n, aDomain)
+{
+    this->emode = HeatMass1TransferEM; // This could be done in a better way.
+}
 
 QuadAxisym1_ht :: ~QuadAxisym1_ht()
 // Destructor

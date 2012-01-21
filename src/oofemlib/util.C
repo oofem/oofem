@@ -137,6 +137,9 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     }
 
     problem = CreateUsrDefEngngModelOfType(problemName.c_str(), 1, _master);
+    if (!problem) {
+        OOFEM_ERROR("EngngModel::InstanciateProblem - Failed to construct engineering model.\n");
+    }
     problem->setProblemMode(mode);
 
     if ( contextFlag ) {
