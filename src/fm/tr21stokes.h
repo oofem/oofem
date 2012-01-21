@@ -69,52 +69,14 @@ protected:
     static IntArray ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads
     static IntArray edge_ordering [ 3 ];
-
     /// Dummy variable
     static bool __initialized;
-
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        //1 2 4 5 7 8 10 11 12 13 14 15 3 6 9
-        ordering.at(1)  = 1;
-        ordering.at(2)  = 2;
-        ordering.at(3) = 4;
-        ordering.at(4)  = 5;
-        ordering.at(5)  = 7;
-        ordering.at(6) = 8;
-        ordering.at(7)  = 10;
-        ordering.at(8)  = 11;
-        ordering.at(9) = 12;
-        ordering.at(10) = 13;
-        ordering.at(11) = 14;
-        ordering.at(12) = 15;
-        ordering.at(13) = 3;
-        ordering.at(14) = 6;
-        ordering.at(15) = 9;
-
-        //1, 2, 4, 5, 10, 11
-        //4, 5, 7, 8, 12, 13
-        //7, 8, 1, 2, 14, 15
-        edge_ordering [ 0 ](0) = 1;
-        edge_ordering [ 0 ](1) = 2;
-        edge_ordering [ 0 ](2) = 4;
-        edge_ordering [ 0 ](3) = 5;
-        edge_ordering [ 0 ](4) = 10;
-        edge_ordering [ 0 ](5) = 11;
-
-        edge_ordering [ 1 ](0) = 4;
-        edge_ordering [ 1 ](1) = 5;
-        edge_ordering [ 1 ](2) = 7;
-        edge_ordering [ 1 ](3) = 8;
-        edge_ordering [ 1 ](4) = 12;
-        edge_ordering [ 1 ](5) = 13;
-
-        edge_ordering [ 2 ](0) = 7;
-        edge_ordering [ 2 ](1) = 8;
-        edge_ordering [ 2 ](2) = 1;
-        edge_ordering [ 2 ](3) = 2;
-        edge_ordering [ 2 ](4) = 14;
-        edge_ordering [ 2 ](5) = 15;
+        ordering.setValues(15,  1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 3, 6, 9);
+        edge_ordering [ 0 ].setValues(6,  1, 2, 4, 5, 10, 11);
+        edge_ordering [ 1 ].setValues(6,  4, 5, 7, 8, 12, 13);
+        edge_ordering [ 2 ].setValues(6,  7, 8, 1, 2, 14, 15);
         return true;
     }
 

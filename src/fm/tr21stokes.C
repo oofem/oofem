@@ -112,31 +112,21 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 
     if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
         if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-            answer.resize(2);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
+            answer.setValues(2, V_u, V_v);
         } else if ( ut == EID_ConservationEquation ) {
-            answer.resize(1);
-            answer.at(1) = P_f;
+            answer.setValues(1, P_f);
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.resize(3);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
-            answer.at(3) = P_f;
+            answer.setValues(3, V_u, V_v, P_f);
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
     } else if ( ( inode == 4 ) || ( inode == 5 ) || ( inode == 6 ) ) {
         if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-            answer.resize(2);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
+            answer.setValues(2, V_u, V_v);
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.resize(2);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
+            answer.setValues(2, V_u, V_v);
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
@@ -319,7 +309,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
 
             // Reshape the vector
             for ( int j = 0; j < 3; j++ ) {
-                f(2 * j)   += N(j) * t(0) * dS;
+                f(2 * j)     += N(j) * t(0) * dS;
                 f(2 * j + 1) += N(j) * t(1) * dS;
             }
         }
@@ -495,10 +485,7 @@ double Tr21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, Flo
 
 void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer.resize(3);
-    answer(0) = V_u;
-    answer(1) = V_v;
-    answer(2) = P_f;
+    answer.setValues(3, V_u, V_v, P_f);
 }
 
 double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

@@ -47,6 +47,7 @@
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
+ #include <cstdarg>
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -338,11 +339,11 @@ bool IntArray :: containsOnlyZeroes() const
 {
     for ( int i = 0; i < size; i++ ) {
         if ( values [ i ] ) {
-            return 0;
+            return false;
         }
     }
 
-    return 1;
+    return true;
 }
 
 
@@ -493,6 +494,18 @@ void IntArray :: copySubVector(const IntArray &src, int si)
     for ( i = 1; i <= n; i++ ) {
         this->at(si + i) = src.at(i);
     }
+}
+
+
+void IntArray :: setValues(int n, ...)
+{
+    va_list vl;
+    va_start(vl,n);
+    this->resize(n);
+    for (int i = 0; i < n; i++ ) {
+        this->values [ i ] = va_arg(vl, int);
+    }
+    va_end(vl);
 }
 
 

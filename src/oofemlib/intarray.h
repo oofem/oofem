@@ -283,7 +283,11 @@ public:
      * @param si Index to start copying from.
      */
     void copySubVector(const IntArray &src, int si);
-
+    /**
+     * Sets the array to be a sequence of values.
+     * @param x Number of integers in the sequence to follow.
+     */
+    void setValues(int n, ...);
     /**
      * Adds given scalar to all values of receiver
      * @param val Value to add.
