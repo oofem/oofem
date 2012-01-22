@@ -152,16 +152,8 @@ public:
      */
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
 
-    /**
-     * Request material extension.
-     * @param ext Material extension tested.
-     * @return Nonzero if implemented.
-     */
-    virtual int testMaterialExtension(MaterialExtension ext) { return ( ( ext == Material_TransportCapability ) ? 1 : 0 ); }
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "TransportMaterial"; }
-    /// Returns classType id of receiver.
-    classType giveClassID() const { return TransportMaterialClass; }
+    virtual const char *giveClassName() const { return "TransportMaterial"; }
+    virtual classType giveClassID() const { return TransportMaterialClass; }
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

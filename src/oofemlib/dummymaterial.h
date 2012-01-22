@@ -50,7 +50,6 @@ class DummyMaterial : public Material
 {
 public:
     DummyMaterial (int n, Domain* d) : Material(n,d) {};
-    virtual int testMaterialExtension(MaterialExtension ext) { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode) { return 0;}
 
     const char *giveClassName() const { return "DummyMaterial"; }

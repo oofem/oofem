@@ -137,7 +137,7 @@ TransportElement :: checkConsistency()
 //
 {
     int result = 1;
-    if ( !this->giveMaterial()->testMaterialExtension(Material_TransportCapability) ) {
+    if ( !dynamic_cast<TransportMaterial*>(giveMaterial()) ) {
         _warning("checkConsistency : material without support for transport problems");
         result = 0;
     }

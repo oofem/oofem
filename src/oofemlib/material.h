@@ -45,7 +45,6 @@
 #include "internalstatevaluetype.h"
 #include "matresponseform.h"
 #include "matresponsemode.h"
-#include "materialextension.h"
 #include "dictionr.h"
 
 namespace oofem {
@@ -200,14 +199,7 @@ public:
      * Returns nonzero if receiver is non linear
      */
     virtual int hasNonLinearBehaviour() { return 0; }
-    //virtual int hasStructuralCapability () { return 0;}
-    //virtual int hasHeatCapability       () { return 0;}
-    /**
-     * Returns nonzero, if receiver implements required extension.
-     * @param ext Required extension.
-     * @return Nonzero, if supported, zero otherwise.
-     */
-    virtual int testMaterialExtension(MaterialExtension ext) { return 0; }
+
     /**
      * Tests if material supports material mode.
      * @param mode Required material mode.

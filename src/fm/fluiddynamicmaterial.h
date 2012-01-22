@@ -175,8 +175,6 @@ public:
      */
     virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int testMaterialExtension(MaterialExtension ext) { return ( ( ext == Material_FluidDynamicsCapability ) ? 1 : 0 ); }
-
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);

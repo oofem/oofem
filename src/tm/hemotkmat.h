@@ -92,7 +92,6 @@ public:
 
     double give(int aProperty, GaussPoint *gp);
 
-    virtual int testMaterialExtension(MaterialExtension ext) { return ( ext == Material_TransportCapability ); }
     int hasMaterialModeCapability(MaterialMode mode);
 
     // identification

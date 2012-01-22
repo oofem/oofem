@@ -192,7 +192,6 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
         answer.resize(0);
-        return;
     }
     /**
      * Returns the reference temperature of receiver.
@@ -214,7 +213,6 @@ public:
     // identification and auxiliary functions
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual int testMaterialExtension(MaterialExtension ext) { return ( ( ext == Material_StructuralCapability ) ? 1 : 0 ); }
     const char *giveClassName() const { return "StructuralMaterial"; }
     classType giveClassID() const { return StructuralMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
@@ -685,7 +683,7 @@ protected:
      */
     void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
                                  const FloatArray &stressVector, bool transpose = false) const;
-    
+
     /**
      * Computes equivalent of von Mises stress. Returns 0 if six stress components do not exist on the material.
      * @param currentStress Stress vector given by 6 components.

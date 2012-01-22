@@ -1255,7 +1255,7 @@ StructuralElement :: checkConsistency()
 //
 {
     int result = 1;
-    if ( !this->giveMaterial()->testMaterialExtension(Material_StructuralCapability) ) {
+    if ( !dynamic_cast<StructuralMaterial*>(this->giveMaterial()) ) {
         _warning("checkConsistency : material without structural support");
         result = 0;
     }
