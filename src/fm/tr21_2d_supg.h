@@ -63,44 +63,44 @@ protected:
 
 public:
     TR21_2D_SUPG(int n, Domain *aDomain);
-    ~TR21_2D_SUPG();
+    virtual ~TR21_2D_SUPG();
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition
-    const char *giveClassName() const { return "TR21_2D_SUPG"; }
-    classType giveClassID() const { return SUPGElementClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
-    MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs(EquationID ut);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c).
     virtual int checkConsistency();
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
     virtual double LS_PCS_computeVolume();
-    void LS_PCS_computeVolume(double &answer,  const FloatArray **coordinates);
+    virtual void LS_PCS_computeVolume(double &answer,  const FloatArray **coordinates);
     virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
@@ -132,7 +132,7 @@ public:
 #endif
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    double computeCriticalTimeStep(TimeStep *tStep);
+    virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
     virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
@@ -140,13 +140,13 @@ public:
     virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
     virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *atTime);
 
-    Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType);
 
 protected:
     virtual void giveLocalVelocityDofMap (IntArray &map);
     virtual void giveLocalPressureDofMap (IntArray &map);
 
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
@@ -156,7 +156,7 @@ protected:
     virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual int  giveNumberOfSpatialDimensions();
-    double computeVolumeAround(GaussPoint *aGaussPoint);
+    virtual double computeVolumeAround(GaussPoint *aGaussPoint);
     virtual void initGeometry();
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);

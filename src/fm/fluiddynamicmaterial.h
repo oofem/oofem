@@ -65,14 +65,14 @@ public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and integration point g.
     FluidDynamicMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
-    ~FluidDynamicMaterialStatus() { }
+    virtual ~FluidDynamicMaterialStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Gives the deviatoric stress.
@@ -83,8 +83,8 @@ public:
      */
     void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
 
-    const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
-    classType giveClassID() const { return FluidDynamicMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
+    virtual classType giveClassID() const { return FluidDynamicMaterialStatusClass; }
 };
 
 
@@ -111,7 +111,7 @@ public:
      */
     FluidDynamicMaterial(int n, Domain *d) : Material(n, d) { }
     /// Destructor.
-    ~FluidDynamicMaterial() { }
+    virtual ~FluidDynamicMaterial() { }
 
     /**
      * Computes the deviatoric stress vector and volumetric strain rate from given deviatoric strain and pressure.
@@ -180,8 +180,8 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-    const char *giveClassName() const { return "FluidDynamicMaterial"; }
-    classType giveClassID() const { return FluidDynamicMaterialClass; }
+    virtual const char *giveClassName() const { return "FluidDynamicMaterial"; }
+    virtual classType giveClassID() const { return FluidDynamicMaterialClass; }
 };
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h

@@ -53,37 +53,37 @@ protected:
 
 public:
     Tet1_3D_SUPG(int n, Domain *d);
-    ~Tet1_3D_SUPG();
+    virtual ~Tet1_3D_SUPG();
 
     // definition
-    const char *giveClassName() const { return "Tet1_3D_SUPG"; }
-    classType giveClassID() const { return SUPGElementClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
-    MaterialMode giveMaterialMode() { return _3dFlow; }
+    virtual const char *giveClassName() const { return "Tet1_3D_SUPG"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
+    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs(EquationID ut);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    Interface *giveInterface(InterfaceType t);
+    virtual Interface *giveInterface(InterfaceType t);
 
-    double computeCriticalTimeStep(TimeStep *tStep);
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeCriticalTimeStep(TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
 
-    double LS_PCS_computeF(LevelSetPCS *, TimeStep *);
-    void LS_PCS_computedN(FloatMatrix &answer);
-    double LS_PCS_computeVolume();
+    virtual double LS_PCS_computeF(LevelSetPCS *, TimeStep *);
+    virtual void LS_PCS_computedN(FloatMatrix &answer);
+    virtual double LS_PCS_computeVolume();
     virtual double LS_PCS_computeS(LevelSetPCS *, TimeStep *);
-    void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
+    virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
 #endif
 
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);

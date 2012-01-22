@@ -69,59 +69,59 @@ protected:
 
 public:
     TR1_2D_SUPG(int n, Domain *d);
-    ~TR1_2D_SUPG();
+    virtual ~TR1_2D_SUPG();
 
-    void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
-    void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-     void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) {
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) {
         answer.resize(3, 6);
         answer.zero();
     }
-    void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) {
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) {
         answer.resize(3);
         answer.zero();
     }
-    void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
-    void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
 
-     void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
-     void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
-     void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
+    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
 
-    void updateStabilizationCoeffs(TimeStep *tStep);
-    double computeCriticalTimeStep(TimeStep *tStep);
+    virtual void updateStabilizationCoeffs(TimeStep *tStep);
+    virtual double computeCriticalTimeStep(TimeStep *tStep);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     // definition
-    const char *giveClassName() const { return "SUPGElement"; }
-    classType giveClassID() const { return SUPGElementClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-    MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual const char *giveClassName() const { return "SUPGElement"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs(EquationID ut);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c).
     virtual int checkConsistency();
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -144,32 +144,32 @@ public:
     virtual double  computeVolumeAround(GaussPoint *aGaussPoint);
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep);
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    //virtual void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
-    void LS_PCS_computedN(FloatMatrix &answer);
-    double LS_PCS_computeVolume() { return area; }
+    virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
+    virtual void LS_PCS_computedN(FloatMatrix &answer);
+    virtual double LS_PCS_computeVolume() { return area; }
     virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
-    void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
+    virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
@@ -193,7 +193,7 @@ protected:
     virtual void giveLocalPressureDofMap(IntArray &map);
 
     void computeNMtrx(FloatArray &answer, GaussPoint *gp);
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
 
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void initGeometry();

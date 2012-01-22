@@ -55,49 +55,49 @@ protected:
 
 public:
     TR1_2D_SUPG_AXI(int n, Domain *d);
-    ~TR1_2D_SUPG_AXI();
+    virtual ~TR1_2D_SUPG_AXI();
 
-    void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
-    void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
-    void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime);
-    void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
-    void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime);
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *atTime);
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime);
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
 
-    void updateStabilizationCoeffs(TimeStep *tStep);
-    void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
-    void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
-    
-    void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
-    void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
-    void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
-    void  computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    void  computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
-    
+    virtual void updateStabilizationCoeffs(TimeStep *tStep);
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime);
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime);
 
-    double computeVolumeAround(GaussPoint *gp);
-    void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
+    virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+    virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
+    virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
+    virtual void computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+    virtual void computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime);
+
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
     // definition
-    const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
-    classType giveClassID() const { return SUPGElementClass; }
-    MaterialMode giveMaterialMode() { return _2dAxiFlow; }
+    virtual const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
+
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void initGeometry();
-    double computeRadiusAt(GaussPoint *gp);
-    void computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
-    void computeNVector(FloatArray &answer, GaussPoint *gp);
+    virtual double computeRadiusAt(GaussPoint *gp);
+    virtual void computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
+    virtual void computeNVector(FloatArray &answer, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // tr1_2d_supg_axi_h

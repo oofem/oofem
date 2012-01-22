@@ -52,11 +52,11 @@ public:
      */
     TractionPressureBC(int i, Domain *d) : BoundaryCondition(i, d) { }
     /// Destructor.
-    ~TractionPressureBC() { }
+    virtual ~TractionPressureBC() { }
 
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void scale(double s) { }
 };

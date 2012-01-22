@@ -63,20 +63,20 @@ public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
     BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~BinghamFluidMaterial2Status() { }
+    virtual ~BinghamFluidMaterial2Status() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    double giveTempDevStressMagnitude() const { return temp_devStressMagnitude; }
-    double giveTempDevStrainMagnitude() const { return temp_devStrainMagnitude; }
-    double giveDevStressMagnitude() const { return devStressMagnitude; }
-    double giveDevStrainMagnitude() const { return devStrainMagnitude; }
+    virtual double giveTempDevStressMagnitude() const { return temp_devStressMagnitude; }
+    virtual double giveTempDevStrainMagnitude() const { return temp_devStrainMagnitude; }
+    virtual double giveDevStressMagnitude() const { return devStressMagnitude; }
+    virtual double giveDevStrainMagnitude() const { return devStrainMagnitude; }
 
     void letTempDevStrainMagnitudeBe(double _val) { temp_devStrainMagnitude = _val; }
     void letTempDevStressMagnitudeBe(double _val) { temp_devStressMagnitude = _val; }
@@ -85,8 +85,8 @@ public:
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
     void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
-    const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
-    classType giveClassID() const { return BinghamFluidMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
+    virtual classType giveClassID() const { return BinghamFluidMaterialStatusClass; }
 };
 
 
@@ -115,7 +115,7 @@ public:
      */
     BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d) { mu_inf = 1.e6; stressGrowthRate=BINGHAM_DEFAULT_STRESS_GROWTH_RATE;}
     /// Destructor.
-    ~BinghamFluidMaterial2() { }
+    virtual ~BinghamFluidMaterial2() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -131,11 +131,11 @@ public:
                                                TimeStep * tStep);
 
     virtual double give(int aProperty, GaussPoint *gp);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "BinghamFluidMaterial2"; }
-    classType giveClassID() const { return BinghamFluidMaterialClass; }
+    virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
+    virtual classType giveClassID() const { return BinghamFluidMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

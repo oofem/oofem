@@ -143,7 +143,7 @@ public:
     virtual void initialize();
     virtual void updatePosition(TimeStep *atTime);
     virtual void updateYourself(TimeStep *tStep) { previousLevelSetValues = levelSetValues; }
-    double computeCriticalTimeStep(TimeStep *);
+    virtual double computeCriticalTimeStep(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void reinitialization(TimeStep *atTime);
 
@@ -155,8 +155,8 @@ public:
     double giveLevelSetDofManValue(int i) { return levelSetValues.at(i); }
 
     // identification
-    const char *giveClassName() const { return "LevelSetPCS"; }
-    classType giveClassID() const { return LevelSetPCSClass; }
+    virtual const char *giveClassName() const { return "LevelSetPCS"; }
+    virtual classType giveClassID() const { return LevelSetPCSClass; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -171,7 +171,6 @@ protected:
      * @f$ d_{\tau} = S(\phi)(1-|\nabla d|) @f$ to steady state.
      */
     void redistance(TimeStep *atTime);
-
 
     /** @name Fast marching related services */
     //@{

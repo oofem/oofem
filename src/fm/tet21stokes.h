@@ -82,61 +82,58 @@ protected:
             momentum_ordering(i*3+2) = j++;
             j++;
         }
-        conservation_ordering(0) = 4;
-        conservation_ordering(1) = 8;
-        conservation_ordering(2) = 12;
-        conservation_ordering(3) = 16;
+        conservation_ordering.setValues(4, 4, 8, 12, 16);
 
-        surf_ordering [ 0 ](0)  = 1;  surf_ordering [ 0 ](1)  = 2;  surf_ordering [ 0 ](2)  = 3;  // node 1
-        surf_ordering [ 0 ](3)  = 9;  surf_ordering [ 0 ](4)  = 10; surf_ordering [ 0 ](5)  = 11; // node 3
-        surf_ordering [ 0 ](6)  = 5;  surf_ordering [ 0 ](7)  = 6;  surf_ordering [ 0 ](8)  = 7;  // node 2
-        surf_ordering [ 0 ](9)  = 23; surf_ordering [ 0 ](10) = 24; surf_ordering [ 0 ](11) = 25; // node 7
-        surf_ordering [ 0 ](12) = 20; surf_ordering [ 0 ](13) = 21; surf_ordering [ 0 ](14) = 22; // node 6
-        surf_ordering [ 0 ](15) = 17; surf_ordering [ 0 ](16) = 18; surf_ordering [ 0 ](17) = 19; // node 5
+        surf_ordering [ 0 ].setValues(18, 1,  2,  3, // node 1
+                                          9, 10, 11,  // node 3
+                                          5,  6,  7,  // node 2
+                                         23, 24, 25,  // node 7
+                                         20, 21, 22,  // node 6
+                                         17, 18, 19); // node 5
 
-        surf_ordering [ 1 ](0)  = 1;  surf_ordering [ 1 ](1)  = 2;  surf_ordering [ 1 ](2)  = 3;  // node 1
-        surf_ordering [ 1 ](3)  = 5;  surf_ordering [ 1 ](4)  = 6;  surf_ordering [ 1 ](5)  = 7;  // node 2
-        surf_ordering [ 1 ](6)  = 13; surf_ordering [ 1 ](7)  = 14; surf_ordering [ 1 ](8)  = 15; // node 4
-        surf_ordering [ 1 ](9)  = 17; surf_ordering [ 1 ](10) = 18; surf_ordering [ 1 ](11) = 19; // node 5
-        surf_ordering [ 1 ](12) = 29; surf_ordering [ 1 ](13) = 30; surf_ordering [ 1 ](14) = 31; // node 9
-        surf_ordering [ 1 ](15) = 26; surf_ordering [ 1 ](16) = 27; surf_ordering [ 1 ](17) = 28; // node 8
+        surf_ordering [ 1 ].setValues(18, 1,  2,  3,  // node 1
+                                          5,  6,  7,  // node 2
+                                         13, 14, 15,  // node 4
+                                         17, 18, 19,  // node 5
+                                         29, 30, 31,  // node 9
+                                         26, 27, 28); // node 8
 
-        surf_ordering [ 2 ](0)  = 5;  surf_ordering [ 2 ](1)  = 6;  surf_ordering [ 2 ](2)  = 7;  // node 2
-        surf_ordering [ 2 ](3)  = 9;  surf_ordering [ 2 ](4)  = 10; surf_ordering [ 2 ](5)  = 11; // node 3
-        surf_ordering [ 2 ](6)  = 13; surf_ordering [ 2 ](7)  = 14; surf_ordering [ 2 ](8)  = 15; // node 4
-        surf_ordering [ 2 ](9)  = 20; surf_ordering [ 2 ](10) = 21; surf_ordering [ 2 ](11) = 22; // node 6
-        surf_ordering [ 2 ](12) = 32; surf_ordering [ 2 ](13) = 33; surf_ordering [ 2 ](14) = 34; // node 10
-        surf_ordering [ 2 ](15) = 29; surf_ordering [ 2 ](16) = 30; surf_ordering [ 2 ](17) = 31; // node 9
+        surf_ordering [ 2 ].setValues(18, 5,  6,  7,  // node 2
+                                          9, 10, 11,  // node 3
+                                         13, 14, 15,  // node 4
+                                         20, 21, 22,  // node 6
+                                         32, 33, 34,  // node 10
+                                         29, 30, 31); // node 9
 
-        surf_ordering [ 3 ](0)  = 1;  surf_ordering [ 3 ](1)  = 2;  surf_ordering [ 3 ](2)  = 3;  // node 1
-        surf_ordering [ 3 ](3)  = 13; surf_ordering [ 3 ](4)  = 14; surf_ordering [ 3 ](5)  = 15; // node 4
-        surf_ordering [ 3 ](6)  = 9;  surf_ordering [ 3 ](7)  = 10; surf_ordering [ 3 ](8)  = 11; // node 3
-        surf_ordering [ 3 ](9)  = 26; surf_ordering [ 3 ](10) = 27; surf_ordering [ 3 ](11) = 28; // node 8
-        surf_ordering [ 3 ](12) = 32; surf_ordering [ 3 ](13) = 33; surf_ordering [ 3 ](14) = 34; // node 10
-        surf_ordering [ 3 ](15) = 23; surf_ordering [ 3 ](16) = 24; surf_ordering [ 3 ](17) = 25; // node 7
+        surf_ordering [ 2 ].setValues(18, 1,  2,  3,  // node 1
+                                         13, 14, 15,  // node 4
+                                          9, 10, 11,  // node 3
+                                         26, 27, 28,  // node 8
+                                         32, 33, 34,  // node 10
+                                         23, 24, 25); // node 7
         return true;
     }
 
 public:
     Tet21Stokes(int n, Domain *d);
-    ~Tet21Stokes();
+    virtual ~Tet21Stokes();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void computeGaussPoints();
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void computeGaussPoints();
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
-    void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeLoadVector(FloatArray &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
+    virtual void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeLoadVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
-    const char *giveClassName() const { return "Tet21Stokes"; }
-    classType giveClassID() const { return Tet21StokesElementClass; }
-    MaterialMode giveMaterialMode() { return _3dFlow; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
+    virtual const char *giveClassName() const { return "Tet21Stokes"; }
+    virtual classType giveClassID() const { return Tet21StokesElementClass; }
+    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
 
     virtual int computeNumberOfDofs(EquationID ut);
 
@@ -152,7 +149,7 @@ public:
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 

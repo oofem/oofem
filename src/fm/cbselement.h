@@ -51,14 +51,12 @@ class CBSElement : public FMElement
 {
 public:
     CBSElement(int n, Domain *aDomain);
-    ~CBSElement();
+    virtual ~CBSElement();
 
-    ///Initializes receiver according to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    // characteristic  matrix
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
 
     /** Calculates consistent mass matrix. */
@@ -89,13 +87,13 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
     // time step termination
-    void updateInternalState(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
     // definition
-    const char *giveClassName() const { return "CBSElement"; }
-    classType giveClassID() const { return CBSElementClass; }
+    virtual const char *giveClassName() const { return "CBSElement"; }
+    virtual classType giveClassID() const { return CBSElementClass; }
 
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 

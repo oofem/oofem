@@ -111,34 +111,34 @@ public:
         materialInterface = NULL;
         //</RESTRICTED_SECTION>
     }
-    ~CBS() {
+    virtual ~CBS() {
         //<RESTRICTED_SECTION>
         if ( materialInterface ) { delete materialInterface; }
         //</RESTRICTED_SECTION>
     }
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void   updateDomainLinks();
+    virtual void updateDomainLinks();
 
-    TimeStep *giveNextStep();
-    TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
+    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
     // identification
-    const char *giveClassName() const { return "CBS"; }
-    classType giveClassID() const { return CBSClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "CBS"; }
+    virtual classType giveClassID() const { return CBSClass; }
+    virtual fMode giveFormulation() { return TL; }
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
 

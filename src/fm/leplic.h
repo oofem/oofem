@@ -164,7 +164,7 @@ public:
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
     virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
     virtual double giveNodalScalarRepresentation(int);
-    double computeCriticalTimeStep(TimeStep *tStep);
+    virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     /**
      * Returns updated nodal positions.
@@ -181,8 +181,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "LEPlic"; }
-    classType giveClassID() const { return LEPlicClass; }
+    virtual const char *giveClassName() const { return "LEPlic"; }
+    virtual classType giveClassID() const { return LEPlicClass; }
 
 protected:
     void doLagrangianPhase(TimeStep *atTime);

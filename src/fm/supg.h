@@ -112,35 +112,35 @@ public:
         renumberFlag = false;
         materialInterface = NULL;
     }
-    ~SUPG() {
+    virtual ~SUPG() {
         if ( VelocityPressureField ) { delete VelocityPressureField; }
 
         if ( materialInterface ) { delete materialInterface; }
     }
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
-    TimeStep *giveNextStep();
-    TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
+    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
     // identification
-    const char *giveClassName() const { return "SUPG"; }
-    classType giveClassID() const { return SUPGClass; }
+    virtual const char *giveClassName() const { return "SUPG"; }
+    virtual classType giveClassID() const { return SUPGClass; }
 
     fMode giveFormulation() { return TL; }
 

@@ -56,10 +56,10 @@ public:
     /// Constructor
     SurfaceTensionMaterialStatus(int n, Domain *d, GaussPoint *g) : MaterialStatus(n, d, g) { }
     /// Destructor
-    ~SurfaceTensionMaterialStatus() { }
+    virtual ~SurfaceTensionMaterialStatus() { }
 
-    const char *giveClassName() const { return "SurfaceTensionMaterialStatus"; }
-    classType giveClassID() const { return SurfaceTensionMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "SurfaceTensionMaterialStatus"; }
+    virtual classType giveClassID() const { return SurfaceTensionMaterialStatusClass; }
 };
 
 /**
@@ -72,13 +72,13 @@ public:
     /// Constructor
     SurfaceTensionMaterial(int n, Domain *d) : Material(n, d) { }
     /// Destructor.
-    ~SurfaceTensionMaterial() { }
+    virtual ~SurfaceTensionMaterial() { }
 
     /**
      * Initializes the material.
      * - g Isotropic surface tension (gamma) (optional, default 0.0)
      */
-    IRResultType initializeFrom(InputRecord *ir)
+    virtual IRResultType initializeFrom(InputRecord *ir)
     {
         const char *__proc = "initializeFrom";
         IRResultType result;
@@ -88,8 +88,8 @@ public:
         return result;
     }
 
-    const char *giveClassName() const { return "SurfaceTensionMaterial"; }
-    classType giveClassID() const { return SurfaceTensionMaterialClass; }
+    virtual const char *giveClassName() const { return "SurfaceTensionMaterial"; }
+    virtual classType giveClassID() const { return SurfaceTensionMaterialClass; }
 };
 } // end namespace oofem
 #endif // surfacetensionmaterial_h

@@ -64,7 +64,7 @@ public:
      */
     TwoFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { masterMat = 0; }
     /// Destructor.
-    ~TwoFluidMaterial() { }
+    virtual ~TwoFluidMaterial() { }
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
@@ -80,11 +80,11 @@ public:
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual double give(int aProperty, GaussPoint *gp);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "TwoFluidMaterial"; }
-    classType giveClassID() const { return TwoFluidMaterialClass; }
+    virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
+    virtual classType giveClassID() const { return TwoFluidMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

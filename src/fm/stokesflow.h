@@ -88,7 +88,7 @@ public:
     StokesFlow(int i, EngngModel *_master = NULL);
     virtual ~StokesFlow();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     /**
      * Updates everything for the problem.
@@ -126,11 +126,11 @@ public:
     virtual void doStepOutput(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
-    TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
 
-    const char *giveClassName() const { return "StokesFlow"; }
-    classType giveClassID() const { return StokesFlowClass; }
+    virtual const char *giveClassName() const { return "StokesFlow"; }
+    virtual classType giveClassID() const { return StokesFlowClass; }
 };
 } // end namespace oofem
 

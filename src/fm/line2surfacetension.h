@@ -59,7 +59,7 @@ public:
      */
     Line2SurfaceTension(int n, Domain *d);
     /// Destructor.
-    ~Line2SurfaceTension();
+    virtual ~Line2SurfaceTension();
 
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
@@ -85,11 +85,11 @@ public:
                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                  FloatArray &answer);
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
 
-    const char *giveClassName() const { return "Line2SurfaceTension"; }
-    classType giveClassID() const { return Line2SurfaceTensionElementClass; }
+    virtual const char *giveClassName() const { return "Line2SurfaceTension"; }
+    virtual classType giveClassID() const { return Line2SurfaceTensionElementClass; }
 };
 }
 

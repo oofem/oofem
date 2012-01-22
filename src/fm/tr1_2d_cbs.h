@@ -62,7 +62,8 @@ class IntArray;
  * This class is the implementation of triangular CFD element with linear (and equal order) interpolation of velocity and pressure fields.
  * Should be used with CBS solution algorithm.
  */
-class TR1_2D_CBS : public CBSElement, public SpatialLocalizerInterface, public EIPrimaryFieldInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
+class TR1_2D_CBS : public CBSElement, public SpatialLocalizerInterface, public EIPrimaryFieldInterface,
+    public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
     //<RESTRICTED_SECTION>
     , public LEPlicElementInterface
     //</RESTRICTED_SECTION>
@@ -75,7 +76,7 @@ protected:
 
 public:
     TR1_2D_CBS(int n, Domain *aDomain);
-    ~TR1_2D_CBS();
+    virtual ~TR1_2D_CBS();
 
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
@@ -89,27 +90,27 @@ public:
     virtual void computeCorrectionRhs(FloatArray &answer, TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     // definition
-    const char *giveClassName() const { return "CBSElement"; }
-    classType giveClassID() const { return CBSElementClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-    MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual const char *giveClassName() const { return "CBSElement"; }
+    virtual classType giveClassID() const { return CBSElementClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs(EquationID ut);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateYourself(TimeStep *tStep);
     /// Used to check consistency and initialize some element geometry data (area,b,c)
     virtual int checkConsistency();
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -133,26 +134,26 @@ public:
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep) { return 1.e6; }
     //</RESTRICTED_SECTION>
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    //virtual void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
@@ -171,7 +172,7 @@ public:
 #endif
 
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 };
 } // end namespace oofem

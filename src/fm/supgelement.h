@@ -59,12 +59,12 @@ protected:
 
 public:
     SUPGElement(int n, Domain *aDomain);
-    ~SUPGElement();
+    virtual ~SUPGElement();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual double giveCharacteristicValue(CharType type, TimeStep *tStep);
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
@@ -149,36 +149,36 @@ public:
      */
     virtual void computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime) {
       _warning("computeSlipWithFrictionBCTerm_MB not implemented");
-      answer.resize(0,0); 
+      answer.resize(0,0);
     }
     /**
      * Computes Lhs contribution due to applied Penetration bc.
      */
     virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime){
       _warning("computePenetrationWithResistanceBCTerm_MB not implemented");
-      answer.resize(0,0); 
+      answer.resize(0,0);
     }
     /**
      * Computes Lhs contribution due to outflow BC.
      */
     virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime){
       _warning("computeOutFlowBCTerm_MB not implemented");
-      answer.resize(0,0); 
+      answer.resize(0,0);
     }
-  		
+
 
 
     /// Computes the critical time increment.
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
     // time step termination
-    void updateInternalState(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
     // definition
-    const char *giveClassName() const { return "SUPGElement"; }
-    classType giveClassID() const { return SUPGElementClass; }
+    virtual const char *giveClassName() const { return "SUPGElement"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);

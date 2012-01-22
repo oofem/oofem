@@ -65,11 +65,11 @@ public:
      * @param n Elements number.
      * @param d Pointer to the domain to which element belongs.
      */
-	LineSurfaceTension (int n, Domain *d);
+	LineSurfaceTension(int n, Domain *d);
     /// Destructor.
-	~LineSurfaceTension ();
+    virtual ~LineSurfaceTension();
 
-	IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 	virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 	virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
@@ -109,8 +109,8 @@ public:
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
-    const char *giveClassName() const { return "LineSurfaceTension"; }
-    classType giveClassID() const { return LineSurfaceTensionElementClass; }
+    virtual const char *giveClassName() const { return "LineSurfaceTension"; }
+    virtual classType giveClassID() const { return LineSurfaceTensionElementClass; }
 };
 
 } // end namespace oofem

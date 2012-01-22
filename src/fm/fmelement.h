@@ -62,7 +62,7 @@ protected:
 
 public:
     FMElement(int n, Domain *aDomain);
-    ~FMElement();
+    virtual ~FMElement();
 
     /**
      * Updates the stabilization coefficients used for CBS and SUPG algorithms.
@@ -70,9 +70,9 @@ public:
      */
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "FMElement"; }
-    classType giveClassID() const { return FMElementClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "FMElement"; }
+    virtual classType giveClassID() const { return FMElementClass; }
 };
 } // end namespace oofem
 #endif // fmelement_h

@@ -64,13 +64,13 @@ class SUPGElement2 : public SUPGElement
 {
 public:
     SUPGElement2(int n, Domain *aDomain);
-    ~SUPGElement2();
+    virtual ~SUPGElement2();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // characteristic  matrix
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *tStep);
-    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *tStep);
     virtual double giveCharacteristicValue(CharType, TimeStep *tStep);
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 
@@ -94,13 +94,13 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
     // time step termination
-    void updateInternalState(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
     // definition
-    const char *giveClassName() const { return "SUPGElement2"; }
-    classType giveClassID() const { return SUPGElementClass; }
+    virtual const char *giveClassName() const { return "SUPGElement2"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
 
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 

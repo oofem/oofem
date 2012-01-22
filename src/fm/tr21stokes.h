@@ -82,13 +82,13 @@ protected:
 
 public:
     Tr21Stokes(int n, Domain *d);
-    ~Tr21Stokes();
+    virtual ~Tr21Stokes();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void computeGaussPoints();
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void computeGaussPoints();
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
     void computeLoadVector(FloatArray &answer, TimeStep *tStep);
@@ -96,10 +96,10 @@ public:
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
-    const char *giveClassName() const { return "Tr21Stokes"; }
-    classType giveClassID() const { return Tr21StokesElementClass; }
-    MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual const char *giveClassName() const { return "Tr21Stokes"; }
+    virtual classType giveClassID() const { return Tr21StokesElementClass; }
+    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     /// @see Element::computeNumberOfDofs
     virtual int computeNumberOfDofs(EquationID ut);
@@ -116,7 +116,7 @@ public:
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 

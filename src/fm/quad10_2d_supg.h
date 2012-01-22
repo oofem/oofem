@@ -63,23 +63,23 @@ protected:
 
 public:
     Quad10_2D_SUPG(int n, Domain *d);
-    ~Quad10_2D_SUPG();
+    virtual ~Quad10_2D_SUPG();
 
     // definition
-    const char *giveClassName() const { return "Quad1_2D_SUPG"; }
-    classType giveClassID() const { return SUPGElementClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    MaterialMode giveMaterialMode() { return _2dFlow; }
+    virtual const char *giveClassName() const { return "Quad1_2D_SUPG"; }
+    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveInternalDofManDofIDMask(int i, EquationID, IntArray & answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs(EquationID ut);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void updateYourself(TimeStep *tStep);
     virtual int checkConsistency();
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);
@@ -87,14 +87,14 @@ public:
     virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
-    Interface *giveInterface(InterfaceType t);
+    virtual Interface *giveInterface(InterfaceType t);
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
@@ -134,7 +134,7 @@ public:
 #endif
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    double computeCriticalTimeStep(TimeStep *tStep);
+    virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg
     virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
@@ -154,7 +154,7 @@ protected:
     virtual void giveLocalVelocityDofMap (IntArray &map);
     virtual void giveLocalPressureDofMap (IntArray &map);
 
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
@@ -164,7 +164,7 @@ protected:
     virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual int giveNumberOfSpatialDimensions();
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
 

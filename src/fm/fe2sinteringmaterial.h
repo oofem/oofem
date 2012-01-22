@@ -67,28 +67,28 @@ public:
      */
     FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile);
     /// Destructor
-    ~FE2SinteringMaterialStatus() { delete this->rve; }
+    virtual ~FE2SinteringMaterialStatus() { delete this->rve; }
 
     StokesFlowStressHomogenization *giveRVE() { return this->rve; }
 
     double giveVOFFraction() { return this->voffraction; }
 
     /// Creates/Initiates the RVE problem.
-    bool createRVE(int n, GaussPoint *gp, const std::string &inputfile);
+    virtual bool createRVE(int n, GaussPoint *gp, const std::string &inputfile);
 
     /// Copies time step data to RVE.
-    void setTimeStep(TimeStep *tStep);
+    virtual void setTimeStep(TimeStep *tStep);
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const char *giveClassName() const { return "FE2SinteringMaterialStatus"; }
-    classType giveClassID() const { return FE2SinteringMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "FE2SinteringMaterialStatus"; }
+    virtual classType giveClassID() const { return FE2SinteringMaterialStatusClass; }
 };
 
 
@@ -115,11 +115,11 @@ public:
     virtual void givePlaneStressStiffMtrx (FloatMatrix &answer, MatResponseForm, MatResponseMode, GaussPoint *gp, TimeStep *atTime);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "FE2SinteringMaterial"; }
-    classType giveClassID() const { return FE2SinteringMaterialClass; }
+    virtual const char *giveClassName() const { return "FE2SinteringMaterial"; }
+    virtual classType giveClassID() const { return FE2SinteringMaterialClass; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

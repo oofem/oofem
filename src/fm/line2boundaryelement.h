@@ -64,9 +64,9 @@ public:
      */
     Line2BoundaryElement(int n, Domain *d);
     /// Destructor.
-    ~Line2BoundaryElement();
+    virtual ~Line2BoundaryElement();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.resize(0); }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.resize(0,0); }
@@ -94,10 +94,10 @@ public:
 
     virtual FEInterpolation *giveInterpolation();
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-    int computeNumberOfDofs(EquationID eid) { return 0; }
+    virtual int computeNumberOfDofs(EquationID eid) { return 0; }
 
-    const char *giveClassName() const { return "Line2BoundaryElement"; }
-    classType giveClassID() const { return Line2BoundaryElementClass; }
+    virtual const char *giveClassName() const { return "Line2BoundaryElement"; }
+    virtual classType giveClassID() const { return Line2BoundaryElementClass; }
 
     // Interfaces
     virtual Interface* giveInterface(InterfaceType it);
