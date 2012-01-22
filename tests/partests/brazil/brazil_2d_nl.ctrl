@@ -50,12 +50,12 @@ boundaryload 2
 
 patch 1
 elemprop mat 1 crossSect 1
-triatype TrPlaneStrain2d
+triatype TrPlaneStrain
 quadtype Quad1PlaneStrain
 
 patch 2
 elemprop mat 2 crossSect 2
-triatype TrPlaneStrain2d
+triatype TrPlaneStrain
 quadtype Quad1PlaneStrain
 
 property 0

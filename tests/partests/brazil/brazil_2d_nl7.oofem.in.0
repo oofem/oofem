@@ -203,7 +203,7 @@ node 413 coords 3 7.034905e+00 2.010884e+01 0.000000e+00 Null
 node 414 coords 3 7.339091e+00 1.876705e+01 0.000000e+00 Null
 node 415 coords 3 7.426628e+00 1.742630e+01 0.000000e+00 Null
 node 418 coords 3 5.439777e+00 2.133281e+01 0.000000e+00 Null
-TrPlaneStrain2d 2 nodes 3 387 388 412 mat 1 crossSect 1
+TrPlaneStrain 2 nodes 3 387 388 412 mat 1 crossSect 1
 Quad1PlaneStrain 41 nodes 4 44 45 123 122 Remote partitions 1 2 mat 1 crossSect 1
 Quad1PlaneStrain 42 nodes 4 45 46 124 123 Remote partitions 1 2 mat 1 crossSect 1
 Quad1PlaneStrain 43 nodes 4 46 47 125 124 Remote partitions 1 2 mat 1 crossSect 1

@@ -302,8 +302,8 @@ node 416 coords 3 7.323843e+00 1.617465e+01 0.000000e+00
 node 417 coords 3 7.081568e+00 1.523291e+01 0.000000e+00
 node 418 coords 3 5.439777e+00 2.133281e+01 0.000000e+00
 node 419 coords 3 6.502484e+00 1.101829e+01 0.000000e+00
-TrPlaneStrain2d 1 nodes 3 160 161 221 mat 1 crossSect 1
-TrPlaneStrain2d 2 nodes 3 387 388 412 Remote partitions 1 1 mat 1 crossSect 1
+TrPlaneStrain 1 nodes 3 160 161 221 mat 1 crossSect 1
+TrPlaneStrain 2 nodes 3 387 388 412 Remote partitions 1 1 mat 1 crossSect 1
 Quad1PlaneStrain 3 nodes 4 1 9 87 79 mat 1 crossSect 1
 Quad1PlaneStrain 4 nodes 4 9 10 88 87 mat 1 crossSect 1
 Quad1PlaneStrain 5 nodes 4 10 11 89 88 mat 1 crossSect 1
