@@ -488,7 +488,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
             x3 = -1.0;
             break;
         default:
-            _error("LTRSpace ::giveInternalStateAtNode: unsupported node");
+            _error("LSpace ::giveInternalStateAtNode: unsupported node");
         }
 
         for ( j = 1; j <= size; j++ ) {

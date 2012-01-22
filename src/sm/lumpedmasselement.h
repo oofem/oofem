@@ -54,28 +54,28 @@ protected:
 
 public:
     LumpedMassElement(int n, Domain *d);
-    ~LumpedMassElement() { }
+    virtual ~LumpedMassElement() { }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
     { answer.resize(0, 0); }
-    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     { answer.resize(0, 0); }
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
     { answer.resize(0); }
-    void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
+    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
     { answer.resize(0); }
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
     { answer.resize(0); }
 
-    int computeNumberOfDofs(EquationID ut);
-    void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    virtual int computeNumberOfDofs(EquationID ut);
+    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
-    void updateInternalState(TimeStep *tStep) {}
-    void updateYourself(TimeStep *tStep) {}
-    int checkConsistency();
+    virtual void updateInternalState(TimeStep *tStep) {}
+    virtual void updateYourself(TimeStep *tStep) {}
+    virtual int checkConsistency();
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -84,16 +84,16 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "LumpedMassElement"; }
-    classType giveClassID() const { return LumpedMassElementClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_point; }
+    virtual const char *giveClassName() const { return "LumpedMassElement"; }
+    virtual classType giveClassID() const { return LumpedMassElementClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS)
     {}
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {}
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) {}
 };
 } // end namespace oofem
 #endif // lumpedmasselement_h

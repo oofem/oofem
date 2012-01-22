@@ -44,7 +44,7 @@
 namespace oofem {
 
 /**
- * Class for maintaining gauss point values for CompoDamageMat model.
+ * Class for maintaining Gauss point values for CompoDamageMat model.
  *
  * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is a temporal damage array
  * @author Vit Smilauer
@@ -55,16 +55,13 @@ public:
     /// Constructor
     CompoDamageMatStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~CompoDamageMatStatus();
+    virtual ~CompoDamageMatStatus();
 
-    /// Prints the receiver state to stream
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    /// Initializes temp variables - called at the beginning of each time increment (not iteration), resets tempStressVector, tempStrainVector
-    void initTempStatus();
+    virtual void initTempStatus();
 
-    /// Update after new equilibrium state reached
-    void updateYourself(TimeStep *);
+    virtual void updateYourself(TimeStep *tStep);
 
     //tempVal are values used during iteration, Val are equilibrated values, updated after last iteration in previous time step
 
@@ -83,7 +80,7 @@ public:
     /// Highest damage ever reached in all previous equilibrated steps at IP [6 for tension and compression]
     FloatArray omega;
 
-    ///Iteration in the time step
+    /// Iteration in the time step
     int Iteration;
 
     /// Stress at which damage starts. For uniaxial loading is equal to given maximum stress in the input. The stress is linearly interpolated between increments at IP [6 tension, 6 compression]
@@ -99,11 +96,11 @@ public:
     /// Characteristic element length at IP in three perpendicular planes aligned with material orientation
     FloatArray elemCharLength;
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
 
-    const char *giveClassName() const { return "CompoDamageMatStatus"; }
-    classType giveClassID() const { return CompoDamageMatStatusClass; }
+    virtual const char *giveClassName() const { return "CompoDamageMatStatus"; }
+    virtual classType giveClassID() const { return CompoDamageMatStatusClass; }
 };
 
 
@@ -129,26 +126,26 @@ public:
     /// Constructor
     CompoDamageMat(int n, Domain *d);
     /// Destructor
-    ~CompoDamageMat();
-    const char *giveClassName() const { return "CompositeDamageMaterial"; }
-    classType giveClassID() const { return CompositeDamageMaterialClass; }
-    /// Returns input record name of the receiver.
-    const char *giveInputRecordName() const { return "compodamagemat"; }
+    virtual ~CompoDamageMat();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
+    virtual classType giveClassID() const { return CompositeDamageMaterialClass; }
+    virtual const char *giveInputRecordName() const { return "compodamagemat"; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
+
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                        MatResponseForm form, MatResponseMode mmode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm form, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep);
 
-    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);

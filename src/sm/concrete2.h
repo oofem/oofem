@@ -83,8 +83,8 @@ protected:
 
 public:
     Concrete2MaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~Concrete2MaterialStatus();
-    void   printOutputAt(FILE *file, TimeStep *tStep)
+    virtual ~Concrete2MaterialStatus();
+    virtual void printOutputAt(FILE *file, TimeStep *tStep)
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 
     void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
@@ -115,12 +115,12 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     // saves current context(state) into stream
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
-    const char *giveClassName() const { return "Concrete2MaterialStatus"; }
-    classType giveClassID() const { return Concrete2MaterialStatusClass; }
+    virtual const char *giveClassName() const { return "Concrete2MaterialStatus"; }
+    virtual classType giveClassID() const { return Concrete2MaterialStatusClass; }
 };
 
 
@@ -158,7 +158,7 @@ private:
 
 public:
     Concrete2(int n, Domain *d);
-    ~Concrete2();
+    virtual ~Concrete2();
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &, TimeStep *atTime);
@@ -168,17 +168,17 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *atTime);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    void  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    void giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                        const FloatArray &strain, TimeStep *atTime);
-    void  dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+    void dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
                double SCC, double SCT, int *ifplas);
-    void  dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+    void dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
                double SCC, double SCT, int *ifplas);
-    void  stirr(double dez, double srf);
-    void  strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
+    void stirr(double dez, double srf);
+    void strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
                   double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
 
     // two functions used to initialize and updating temporary variables in
@@ -187,13 +187,13 @@ protected:
     void updateStirrups(GaussPoint *gp, FloatArray *strainIncrement);
 
 public:
-    double give(int, GaussPoint *gp);
+    virtual double give(int, GaussPoint *gp);
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    const char *giveClassName() const { return "Concrete2"; }
-    classType giveClassID() const { return Concrete2Class; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual const char *giveClassName() const { return "Concrete2"; }
+    virtual classType giveClassID() const { return Concrete2Class; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem
 #endif // concrete2_h

@@ -62,9 +62,9 @@ public:
     /// Constructor.
     IDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
-    ~IDNLMaterialStatus();
+    virtual ~IDNLMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Returns the local  equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
@@ -72,14 +72,14 @@ public:
     void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
     // definition
-    const char *giveClassName() const { return "IDNLMaterialStatus"; }
-    classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "IDNLMaterialStatus"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Interface requesting service.
@@ -115,15 +115,14 @@ public:
     /// Constructor
     IDNLMaterial(int n, Domain *d);
     /// Destructor
-    ~IDNLMaterial();
+    virtual ~IDNLMaterial();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "IDNLMaterial"; }
-    classType giveClassID() const { return IsotropicDamageMaterial1Class; }
+    virtual const char *giveClassName() const { return "IDNLMaterial"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterial1Class; }
+    virtual const char *giveInputRecordName() const { return "idmnl1"; }
 
-    const char *giveInputRecordName() const { return "idmnl1"; }
-
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -140,10 +139,8 @@ public:
     /// Plots the sparse structure of stiffness contribution.
     virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *atTime);
 #endif
-    /**
-     * Computes the damage parameter from given equivalent strain in given integration point.
-     */
-    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *g);
+
+    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
 
     /**@name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
     //@{
@@ -196,7 +193,7 @@ public:
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 #endif
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IDNLMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IDNLMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
 
 protected:
     virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }

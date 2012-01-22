@@ -83,7 +83,7 @@ public:
      */
     FETICommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size);
     /// Destructor
-    ~FETICommunicator();
+    virtual ~FETICommunicator();
 
     int giveNumberOfEquations() { return numberOfEquations; }
 

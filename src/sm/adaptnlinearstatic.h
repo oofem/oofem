@@ -88,19 +88,19 @@ protected:
 
 public:
     AdaptiveNonLinearStatic(int i, EngngModel *_master = NULL);
-    ~AdaptiveNonLinearStatic();
+    virtual ~AdaptiveNonLinearStatic();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
-    ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
-    double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
 
     /**
      * Returns the load level corresponding to given solution step number.
      */
-    double giveTimeStepLoadLevel(int istep);
+    virtual double giveTimeStepLoadLevel(int istep);
     /**
      * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
@@ -118,12 +118,12 @@ public:
      * internal variable mapping procedures and optionally restoring new global equilibrium.
      * Given domain becomes new domain of receiver.
      */
-    int adaptiveRemap(Domain *dNew);
+    virtual int adaptiveRemap(Domain *dNew);
 
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
     virtual const char *giveClassName() const { return "AdaptiveNonLinearStatic"; }
     virtual classType giveClassID() const { return AdaptiveNonLinearStaticClass; }

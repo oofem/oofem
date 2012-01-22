@@ -111,22 +111,20 @@ public:
     ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp);
 
     /// Destructor.
-    ~ConcreteDPMStatus();
+    virtual ~ConcreteDPMStatus();
 
-    void initTempStatus();
-    void updateYourself(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void initTempStatus();
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     int setIPValue(const FloatArray value, InternalStateType type);
 
-    void restoreConsistency();
-    const char *giveClassName() const
-    { return "ConcreteDPMStatus"; }
-    classType  giveClassID() const
-    { return ConcreteDPMStatusClass; }
+    virtual void restoreConsistency();
+    virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }
+    virtual classType giveClassID() const { return ConcreteDPMStatusClass; }
 
     /**
      * Get the full plastic strain vector from the material status.
@@ -418,23 +416,24 @@ protected:
     StressVector effectiveStress;
 
 public:
-    /// constructor
+    /// Constructor
     ConcreteDPM(int n, Domain *d);
-    /// destructor
-    ~ConcreteDPM();
-    IRResultType initializeFrom(InputRecord *ir);
+    /// Destructor
+    virtual ~ConcreteDPM();
 
-    int hasMaterialModeCapability(MaterialMode mMode);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "ConcreteDPM"; }
-    classType giveClassID() const { return ConcreteDPMClass; }
+    virtual int hasMaterialModeCapability(MaterialMode mMode);
+
+    virtual const char *giveClassName() const { return "ConcreteDPM"; }
+    virtual classType giveClassID() const { return ConcreteDPMClass; }
 
     virtual ConcreteDPMStatus *giveStatus(GaussPoint *gp) const
     { return static_cast< ConcreteDPMStatus * >( this->Material :: giveStatus(gp) ); }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    void giveRealStressVector(FloatArray &answer,
+    virtual void giveRealStressVector(FloatArray &answer,
                               MatResponseForm form,
                               GaussPoint *gp,
                               const FloatArray &reducedStrain,
@@ -685,30 +684,30 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(const double theta, const double ecc) const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
                                        MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type);
 
-    int giveIPValue(FloatArray &answer,
+    virtual int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *tStep);
 
-    int giveIPValueSize(InternalStateType type,
+    virtual int giveIPValueSize(InternalStateType type,
                         GaussPoint *gp);
 
-    int giveIntVarCompFullIndx(IntArray &answer,
+    virtual int giveIntVarCompFullIndx(IntArray &answer,
                                InternalStateType type,
                                MaterialMode mmode);
 
-    InternalStateValueType giveIPValueType(InternalStateType type);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
 #endif

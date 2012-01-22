@@ -62,49 +62,49 @@ protected:
 
 public:
     Beam2d(int n, Domain *aDomain);
-    ~Beam2d();
+    virtual ~Beam2d();
 
-    void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
-    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    int giveLocalCoordinateSystem(FloatMatrix &answer);
-    void computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
-    void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual void computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    virtual void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
-    Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType);
 
     virtual FEInterpolation *giveInterpolation() { return &interp_geom; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id) { return NULL; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double computeVolumeAround(GaussPoint *gp);
-    void  printOutputAt(FILE *file, TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual void  printOutputAt(FILE *file, TimeStep *tStep);
 
-    const char *giveClassName() const { return "Beam2d"; }
-    classType giveClassID() const { return Beam2dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual const char *giveClassName() const { return "Beam2d"; }
+    virtual classType giveClassID() const { return Beam2dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                      GaussPoint *slaveGp, TimeStep *tStep);
 
 protected:
-    void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
-    void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
+    virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    //virtual void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
@@ -116,9 +116,9 @@ protected:
                                                MatResponseMode rMode, TimeStep *tStep);
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,
                                              MatResponseMode rMode, TimeStep *tStep);
-    void computeGaussPoints();
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _2dBeam; }
+    virtual void computeGaussPoints();
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _2dBeam; }
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

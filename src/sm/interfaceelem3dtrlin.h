@@ -49,7 +49,7 @@ protected:
 
 public:
     InterfaceElement3dTrLin(int n, Domain *d);
-    ~InterfaceElement3dTrLin() { }
+    virtual ~InterfaceElement3dTrLin() { }
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
@@ -57,11 +57,11 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-    Interface *giveInterface(InterfaceType) { return NULL; }
+virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -70,20 +70,20 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
-    classType giveClassID() const { return InterfaceElement3dTrLinClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
+    virtual classType giveClassID() const { return InterfaceElement3dTrLinClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode()  { return _3dInterface; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual MaterialMode giveMaterialMode()  { return _3dInterface; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
-    void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    virtual void computeGaussPoints();
 
-    int giveApproxOrder() { return 1; }
+    virtual int giveApproxOrder() { return 1; }
 
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     void computeLCS(FloatMatrix &answer);

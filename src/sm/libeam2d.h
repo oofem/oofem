@@ -41,7 +41,7 @@
 
 namespace oofem {
 /**
- * A 2-dimensional Linear Isoparametric.
+ * A 2-dimensional Linear Isoparametric
  * Mindlin theory beam element, with reduced integration.
  */
 class LIBeam2d : public StructuralElement, public LayeredCrossSectionInterface
@@ -54,48 +54,48 @@ public:
     double pitch, length;
 
     LIBeam2d(int n, Domain *aDomain);
-    ~LIBeam2d() { }
+    virtual ~LIBeam2d() { }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) { computeLumpedMassMatrix(answer, tStep); }
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) { computeLumpedMassMatrix(answer, tStep); }
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     // layered cross section support functions
-    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                     GaussPoint *slaveGp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &) const;
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual FEInterpolation *giveInterpolation() { return &interpolation; }
 
     // definition & identification
-    const char *giveClassName() const { return "LIBeam2d"; }
-    classType giveClassID() const { return LIBeam2dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "LIBeam2d"; }
+    virtual classType giveClassID() const { return LIBeam2dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _2dBeam; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _2dBeam; }
 
 protected:
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void giveEdgeDofMapping(IntArray &answer, int) const;
-    double computeEdgeVolumeAround(GaussPoint *, int);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
+    virtual void giveEdgeDofMapping(IntArray &answer, int) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *, int);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void computeGaussPoints();
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
+    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeGaussPoints();
     double giveLength();
     double givePitch();
 };

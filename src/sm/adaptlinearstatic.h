@@ -57,9 +57,9 @@ protected:
 
 public:
     AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { ee = NULL; }
-    ~AdaptiveLinearStatic() { }
+    virtual ~AdaptiveLinearStatic() { }
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     /**
      * Initializes the newly generated discretization state according to previous solution.
@@ -70,15 +70,15 @@ public:
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
+    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
 
     // identification
-    const char *giveClassName() const { return "AdaptiveLinearStatic"; }
-    classType giveClassID() const { return AdaptiveLinearStaticClass; }
+    virtual const char *giveClassName() const { return "AdaptiveLinearStatic"; }
+    virtual classType giveClassID() const { return AdaptiveLinearStaticClass; }
 };
 } // end namespace oofem
 #endif // adaptlinearstatic_h

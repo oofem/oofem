@@ -59,10 +59,10 @@ protected:
 
 public:
     CohesiveSurface3d(int n, Domain *d);
-    ~CohesiveSurface3d() {};
+    virtual ~CohesiveSurface3d() {};
 
-    void computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui);
-    double computeVolumeAround(GaussPoint *gp);
+    virtual void computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui);
+    virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeNumberOfDofs(EquationID ut) { return 6 * giveNumberOfNodes(); }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     double giveLength();
@@ -70,12 +70,12 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
-    const char *giveClassName() const { return "CohesiveSurface3d"; }
-    classType giveClassID() const { return CohesiveSurface3dClass; }
+    virtual const char *giveClassName() const { return "CohesiveSurface3d"; }
+    virtual classType giveClassID() const { return CohesiveSurface3dClass; }
 
     // input and output
-    IRResultType initializeFrom(InputRecord *ir);
-    void  printOutputAt(FILE *file, TimeStep *tStep);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -84,12 +84,12 @@ public:
 #endif
 
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
     void evaluateCenter();
     void evaluateLocalCoordinateSystem();
 public:
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _3dInterface; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _3dInterface; }
 };
 } // namespace oofem
 #endif

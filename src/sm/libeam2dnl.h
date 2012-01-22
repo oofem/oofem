@@ -51,56 +51,56 @@ protected:
 
 public:
     LIBeam2dNL(int n, Domain *d);
-    ~LIBeam2dNL() { }
+    virtual ~LIBeam2dNL() { }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // layered cross section support functions
-    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                             GaussPoint *slaveGp, TimeStep *tStep);
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double computeVolumeAround(GaussPoint *gp);
+    virtual  double computeVolumeAround(GaussPoint *gp);
 
     // definition & identification
-    const char *giveClassName() const { return "LIBeam2dNL"; }
-    classType giveClassID() const { return LIBeam2dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "LIBeam2dNL"; }
+    virtual classType giveClassID() const { return LIBeam2dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _2dBeam; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _2dBeam; }
 
 protected:
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
-    void giveEdgeDofMapping(IntArray &answer, int) const;
-    double computeEdgeVolumeAround(GaussPoint *, int);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
+    virtual void giveEdgeDofMapping(IntArray &answer, int) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *, int);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
+    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     //void computeTemperatureStrainVectorAt(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     // nonlinear part of geometrical eqs. for i-th component of strain vector.
-    void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
     double giveLength();
     double givePitch();
 };

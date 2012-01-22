@@ -49,7 +49,7 @@ class IsoInterfaceDamageMaterialStatus : public StructuralMaterialStatus
 protected:
     /// Scalar measure of the largest equivalent displacement ever reached in material.
     double kappa;
-    /// Nnon-equilibrated scalar measure of the largest equivalent displacement.
+    /// Non-equilibrated scalar measure of the largest equivalent displacement.
     double tempKappa;
     /// Damage level of material.
     double damage;
@@ -59,9 +59,9 @@ public:
     /// Constructor
     IsoInterfaceDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~IsoInterfaceDamageMaterialStatus();
+    virtual ~IsoInterfaceDamageMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -77,14 +77,14 @@ public:
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
     // definition
-    const char *giveClassName() const { return "IsoInterfaceDamageMaterialStatus"; }
-    classType giveClassID() const { return MaterialStatusClass; }
+    virtual const char *giveClassName() const { return "IsoInterfaceDamageMaterialStatus"; }
+    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -122,20 +122,20 @@ public:
     /// Constructor
     IsoInterfaceDamageMaterial(int n, Domain *d);
     /// Destructor
-    ~IsoInterfaceDamageMaterial();
+    virtual ~IsoInterfaceDamageMaterial();
 
-    int hasNonLinearBehaviour()   { return 1; }
+    virtual int hasNonLinearBehaviour()   { return 1; }
 
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "IsoInterfaceDamageMaterial"; }
-    classType giveClassID() const { return StructuralMaterialClass; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "IsoInterfaceDamageMaterial"; }
+    virtual classType giveClassID() const { return StructuralMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm, MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
@@ -176,10 +176,10 @@ public:
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsoInterfaceDamageMaterialStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsoInterfaceDamageMaterialStatus(1, domain, gp); }
 
 protected:
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,

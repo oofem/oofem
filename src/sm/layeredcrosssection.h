@@ -91,14 +91,14 @@ public:
         area = -1.0;
     }
 
-    ~LayeredCrossSection() { }
+    virtual ~LayeredCrossSection() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                           const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
-    void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
                                          MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
@@ -115,13 +115,13 @@ public:
 
 
 
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
+    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,
+    virtual void giveFullCharacteristicVector(FloatArray &answer,
                                       GaussPoint *gp, const FloatArray &strainVector);
 
-    FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
-    FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
+    virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
+    virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                       MaterialMode mmode, StructuralMaterial *mat) const;
@@ -132,21 +132,21 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a);
 
     /// Returns the total thickness of all layers.
     double computeIntegralThick();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "LayeredCrossSection"; }
-    classType giveClassID() const { return LayeredCrossSectionClass; }
-    void printYourself();
+    virtual const char *giveClassName() const { return "LayeredCrossSection"; }
+    virtual classType giveClassID() const { return LayeredCrossSectionClass; }
+    virtual void printYourself();
 
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)

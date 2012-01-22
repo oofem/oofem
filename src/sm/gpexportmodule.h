@@ -56,17 +56,17 @@ public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     GPExportModule(int n, EngngModel *e);
     /// Destructor
-    ~GPExportModule();
+    virtual ~GPExportModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    void doOutput(TimeStep *tStep);
-    void initialize();
-    void terminate();
+    virtual void doOutput(TimeStep *tStep);
+    virtual void initialize();
+    virtual void terminate();
     virtual const char *giveClassName() const { return "GPExportModuleClass"; }
 
 protected:
     /// Returns the output stream for given solution step
-    FILE *giveOutputStream(TimeStep *);
+    FILE *giveOutputStream(TimeStep *tStep);
 };
 
 } // namespace oofem

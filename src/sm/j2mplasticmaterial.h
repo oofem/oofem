@@ -54,13 +54,13 @@ protected:
 
 public:
     J2MPlasticMaterial(int n, Domain *d);
-    ~J2MPlasticMaterial();
+    virtual ~J2MPlasticMaterial();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "J2plasticMaterial"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "J2plasticMaterial"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
     virtual void computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,

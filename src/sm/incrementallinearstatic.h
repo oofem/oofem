@@ -72,22 +72,18 @@ protected:
 
 public:
     IncrementalLinearStatic(int i, EngngModel *_master = NULL);
-    ~IncrementalLinearStatic();
+    virtual ~IncrementalLinearStatic();
 
-    void solveYourself();
-    void solveYourselfAt(TimeStep *);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /**
-     * Updates nodal values.
-     * Calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system. The element internal state update is also forced using
-     * updateInternalState service.
-     */
-    virtual void updateYourself(TimeStep *);
+    virtual void solveYourself();
+    virtual void solveYourselfAt(TimeStep *tStep);
+
+    virtual void updateYourself(TimeStep *tStep);
     virtual double giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    TimeStep *giveNextStep();
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual TimeStep *giveNextStep();
 
     /**
      * This function returns time valid for iStep time step, used in integration
@@ -104,27 +100,20 @@ public:
     double giveDiscreteTime(int iStep);
     virtual double giveEndOfTimeOfInterest() { return endOfTimeOfInterest; }
 
-    NumericalMethod *giveNumericalMethod(TimeStep *);
-    /** DOF printing routine. Called by DofManagers to print Dof specific part.
-     * Dof class provides component printing routines, but emodel is responsible
-     * for what will be printed at DOF level.
-     * @param stream output stream
-     * @param iDof dof to be processed
-     * @param atTime solution step
-     */
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
-    fMode giveFormulation() { return TL; }
+    virtual fMode giveFormulation() { return TL; }
 
-    const char *giveClassName() const { return "IncrementalLinearStatic"; }
-    classType giveClassID() const { return IncrementalLinearStaticClass; }
+    virtual const char *giveClassName() const { return "IncrementalLinearStatic"; }
+    virtual classType giveClassID() const { return IncrementalLinearStaticClass; }
 
     virtual int requiresUnknownsDictionaryUpdate() { return true; }
     virtual bool requiresEquationRenumbering(TimeStep *) { return true; }
     virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *);
     // Here we store only total and incremental value; so hash is computed from mode value only
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return (int) mode; }
-    IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem
 #endif // incrementallinearstatic_h

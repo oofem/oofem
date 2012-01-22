@@ -46,18 +46,18 @@ class KelvinChainSolidMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     KelvinChainSolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~KelvinChainSolidMaterialStatus() {}
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual ~KelvinChainSolidMaterialStatus() {}
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
-    const char *giveClassName() const { return "KelvinChainSolidMaterialStatus"; }
-    classType giveClassID() const { return KelvinChainSolidMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "KelvinChainSolidMaterialStatus"; }
+    virtual classType giveClassID() const { return KelvinChainSolidMaterialStatusClass; }
 };
 
 
@@ -69,19 +69,19 @@ class KelvinChainSolidMaterial : public RheoChainMaterial
 {
 public:
     KelvinChainSolidMaterial(int n, Domain *d);
-    ~KelvinChainSolidMaterial() {}
+    virtual ~KelvinChainSolidMaterial() {}
 
-    void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
-    const char *giveClassName() const { return "KelvinChainSolidMaterial"; }
-    classType giveClassID() const { return KelvinChainSolidMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "KelvinChainSolidMaterial"; }
+    virtual classType giveClassID() const { return KelvinChainSolidMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
                                             MatResponseForm form,

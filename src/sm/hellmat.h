@@ -180,13 +180,15 @@ class HellmichMaterialStatus : public StructuralMaterialStatus, public Hydration
 protected:
     // 10.1.2004 hydration degree not stored here, but in HydrationModelStatus, accessed via HydrationModelStatusInterface
     virtual Interface *giveInterface(InterfaceType);
-    /// === non-isothermal analysis ===
-    // non-iso values are stored in material integration point in isothermal case
-    // includes also the time stamp when the variables are evaluated to avoid computing them several times
+    /**
+     * Non-isothermal analysis
+     * non-iso values are stored in material integration point in isothermal case
+     * includes also the time stamp when the variables are evaluated to avoid computing them several times
+     */
     NonisoData *nonisoData;
-    /// === plasticity ===
+    /// Plasticity
     PlastData *plastData;
-    /// === Creep strain vectors ===
+    /// Creep strain vectors
     CreepData *creepData;
 public:
     HellmichMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -590,7 +592,8 @@ protected:
     double autoShrinkageCoeff(double ksi);
     /// drying shrinkage strains
     double dryingShrinkageCoeff(double h);
-    /**!!! Prestress value
+    /**
+     * !!! Prestress value
      * For use of HellMat as prestressing cable material
      */
     double prestressValue(double time);
@@ -618,8 +621,8 @@ protected:
 
     /// returns Delta lambda1,2_n+1 for chi1_n, ksi_n+1
     // uses auxiliary variables stored in material!!!
-    void   projection(ActiveSurface &active, double &dlambda1, double &dlambda2, FloatArray &stress);
-    void   stressReturn(FloatArray &stress, FloatArray &trialStress, GaussPoint *gp, TimeStep *atTime);
+    void projection(ActiveSurface &active, double &dlambda1, double &dlambda2, FloatArray &stress);
+    void stressReturn(FloatArray &stress, FloatArray &trialStress, GaussPoint *gp, TimeStep *atTime);
 
     virtual void give1dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
@@ -659,11 +662,7 @@ public:
      */
     GaussPoint *giveMaterialGp();
 
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     * The parent class instanciateFrom method is called.
-     */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     /// destructor
     virtual ~HellmichMaterial();
@@ -749,13 +748,10 @@ public:
     void giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
                                GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
-    // return stress according to strain and gp material mode
-    void giveRealStressVector(FloatArray &, MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray &, MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
-
-    /// Prints output of the material-level gp if not uptodate
-    void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *atTime);
 
     // returns the time increment dt of step atTime
     double giveTimeIncrement(TimeStep *atTime);
@@ -772,28 +768,14 @@ public:
      * Initializes the status in given integration point.
      * The non-isothermal status is NOT initialized in each iteration, it is only initialized at step start in initAuxStatus.
      */
-    void initTempStatus(GaussPoint *gp);
+    virtual void initTempStatus(GaussPoint *gp);
 
-    /**
-     * Initializes the status in given integration point after step restart.
-     * Calls initAuxStatus if necessary and initTempStatus.
-     */
-    void initGpForNewStep(GaussPoint *gp);
+    virtual void initGpForNewStep(GaussPoint *gp);
 
-    /**
-     * Updates the status variables in given integration point. In case of isothermal analysis,
-     * also the non-iso status or material-level status is updated.
-     */
-    void updateYourself(GaussPoint *gp, TimeStep *atTime);
+    virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
 
-    /**
-     * Test for particular material mode capability.
-     * @param mode material mode requested
-     * @return nonzero if available
-     */
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    // calls give 1d/3d MaterialStiffnessMatrix, without plasticity in OOFEM - linMat->giveCharMatrix
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
 
@@ -815,50 +797,15 @@ public:
 
     // === identification and auxiliary functions ===
 
-    /// Returns "HellmichMaterial" - class  name of the receiver.
-    const char *giveClassName() const { return "HellmichMaterial"; }
-    /// Returns HellmichMaterialClass - classType id of receiver.
-    classType giveClassID()         const { return HellmichMaterialClass; }
+    virtual const char *giveClassName() const { return "HellmichMaterial"; }
+    virtual classType giveClassID() const { return HellmichMaterialClass; }
 
-    // for non-standard elements - returns time independent material constant
-    /**
-     *     Returns the value of material property 'aProperty'. Property must be identified
-     *     by unique int id.
-     *     @param aProperty id of peroperty requested
-     *     @param gp integration point
-     *     @return property value
-     */
-    double give(int, GaussPoint *);
+    virtual double give(int aProperty, GaussPoint *gp);
 
     // === Postprocessing functions ===
-    /**
-     * Returns the integration point corresponding value in Reduced form.
-     * @param answer contain corresponding ip value, zero sized if not available
-     * @param aGaussPoint integration point
-     * @param type determines the type of internal variable
-     * @param type determines the type of internal variable
-     * @returns nonzero if ok, zero if var not supported
-     */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    /**
-     * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
-     * @param type determines the internal variable requested (physical meaning)
-     * @returns nonzero if ok or error is generated for unknown mat mode.
-     */
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type determines the type of internal variable
-     * @returns type of internal variable
-     */
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    /**
-     * Returns the corresponding integration point  value size in Reduced form.
-     * @param type determines the type of internal variable
-     * @returns var size, zero if var not supported
-     */
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 
 protected:
@@ -870,18 +817,15 @@ protected:
 class HellmichMaterial : public StructuralMaterial
 {
 public:
-    /// === initialization ===
     /// Constructor
     HellmichMaterial(int n, Domain *d);
-    ~HellmichMaterial() {}
-    // return stress according to strain and gp material mode
-    void giveRealStressVector(FloatArray &answer, MatResponseForm f, GaussPoint *gp,
+    virtual ~HellmichMaterial() {}
+
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm f, GaussPoint *gp,
                               const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
 
-    /// Returns "HellmichMaterial" - class  name of the receiver.
-    const char *giveClassName() const { return "HellmichMaterial"; }
-    /// Returns HellmichMaterialClass - classType id of receiver.
-    classType giveClassID()         const { return HellmichMaterialClass; }
+    virtual const char *giveClassName() const { return "HellmichMaterial"; }
+    virtual classType giveClassID() const { return HellmichMaterialClass; }
 };
 #endif
 } // end namespace oofem

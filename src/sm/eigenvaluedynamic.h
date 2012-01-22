@@ -80,24 +80,24 @@ public:
         ndomains = 1;
         nMethod = NULL;
     }
-    ~EigenValueDynamic() {
+    virtual ~EigenValueDynamic() {
         delete  stiffnessMatrix;
         delete massMatrix;
         if ( nMethod ) { delete nMethod; } }
 
-    void solveYourselfAt(TimeStep *tStep);
-    void terminate(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *);
-    void setActiveVector(int i) { activeVector = i; }
-    int resolveCorrespondingEigenStepNumber(void *obj);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *);
+    virtual void setActiveVector(int i) { activeVector = i; }
+    virtual int resolveCorrespondingEigenStepNumber(void *obj);
 
 #ifdef __SLEPC_MODULE
     virtual void initPetscContexts();
@@ -114,8 +114,8 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
-    const char *giveClassName() const { return "EigenValueDynamic"; }
-    classType giveClassID() const { return EigenValueDynamicClass; }
+    virtual const char *giveClassName() const { return "EigenValueDynamic"; }
+    virtual classType giveClassID() const { return EigenValueDynamicClass; }
 };
 } // end namespace oofem
 #endif // eigenvaluedynamic_h

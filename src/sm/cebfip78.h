@@ -55,11 +55,11 @@ protected:
 
 public:
     CebFip78Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
-    ~CebFip78Material() { }
+    virtual ~CebFip78Material() { }
 
-    const char *giveClassName() const { return "CebFip78Material"; }
-    classType giveClassID() const { return CebFip78MaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "CebFip78Material"; }
+    virtual classType giveClassID() const { return CebFip78MaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
     virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);

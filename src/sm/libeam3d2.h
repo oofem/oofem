@@ -66,23 +66,25 @@ private:
 
 public:
     LIBeam3d2(int n, Domain *d);
-    ~LIBeam3d2() { }
+    virtual ~LIBeam3d2() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void updateYourself(TimeStep *tStep);
+
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
     virtual int testElementExtension(ElementExtension ext);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double computeVolumeAround(GaussPoint *gp);
-    int giveLocalCoordinateSystem(FloatMatrix &answer);
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
@@ -90,40 +92,39 @@ public:
     void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, GaussPoint *masterGp,
                                                                  GaussPoint *slaveGp, TimeStep *tStep);
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
     // definition & identification
-    const char *giveClassName() const { return "LIBeam3d"; }
-    classType giveClassID() const { return LIBeam3dClass; }
+    virtual const char *giveClassName() const { return "LIBeam3d"; }
+    virtual classType giveClassID() const { return LIBeam3dClass; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     void drawScalar(oofegGraphicContext &context);
-
 #endif
 
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _3dBeam; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _3dBeam; }
 
 protected:
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     //void computeTemperatureStrainVectorAt(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
     double giveLength();
 
     // nonlinearity
@@ -131,7 +132,6 @@ protected:
     void computeSMtrx(FloatMatrix &answer, FloatArray &vec);
     void computeRotMtrx(FloatMatrix &answer, FloatArray &psi);
     double giveCurrentLength(TimeStep *tStep);
-    void updateYourself(TimeStep *tStep);
     void initForNewStep();
 };
 } // end namespace oofem

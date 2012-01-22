@@ -87,9 +87,9 @@ public:
     /// Constructor
     IsotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~IsotropicDamageMaterialStatus();
+    virtual ~IsotropicDamageMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -131,14 +131,14 @@ public:
 #endif
 
     // definition
-    const char *giveClassName() const { return "IsotropicDamageMaterialModelStatus"; }
-    classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "IsotropicDamageMaterialModelStatus"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -171,13 +171,13 @@ public:
     /// Constructor
     IsotropicDamageMaterial(int n, Domain *d);
     /// Destructor
-    ~IsotropicDamageMaterial();
+    virtual ~IsotropicDamageMaterial();
 
-    int hasNonLinearBehaviour() { return 1; }
+    virtual int hasNonLinearBehaviour() { return 1; }
 
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "IsotropicDamageMaterial"; }
-    classType giveClassID() const { return IsotropicDamageMaterialClass; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "IsotropicDamageMaterial"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -187,7 +187,7 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
 
@@ -214,15 +214,8 @@ public:
      * @param gp Integration point.
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) = 0;
-    /**
-     * Instanciates the receiver from input record.
-     */
-    IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Setups the input record string of receiver.
-     * @param str String to be filled by input record.
-     * @param keyword Print record keyword (default true).
-     */
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsotropicDamageMaterialStatus(1, domain, gp); }
@@ -236,15 +229,15 @@ protected:
      */
     virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                GaussPoint *gp,
                                TimeStep *tStep);
 };

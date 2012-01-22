@@ -55,20 +55,19 @@ public:
     /// Constructor
     CohesiveInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~CohesiveInterfaceMaterialStatus();
+    virtual ~CohesiveInterfaceMaterialStatus();
 
-    /// Prints the receiver state to stream
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
-    const char *giveClassName() const { return "CohesiveInterfaceMaterialStatus"; }
-    classType giveClassID() const { return CohesiveInterfaceMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "CohesiveInterfaceMaterialStatus"; }
+    virtual classType giveClassID() const { return CohesiveInterfaceMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -87,13 +86,13 @@ public:
     /// Constructor
     CohesiveInterfaceMaterial(int n, Domain *d);
     /// Destructor
-    ~CohesiveInterfaceMaterial() {};
+    virtual ~CohesiveInterfaceMaterial() {};
 
-    int hasNonLinearBehaviour() { return 0; }
-    int hasMaterialModeCapability(MaterialMode mode) { return ( mode == _3dInterface ); }
+    virtual int hasNonLinearBehaviour() { return 0; }
+    virtual int hasMaterialModeCapability(MaterialMode mode) { return ( mode == _3dInterface ); }
 
-    const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
-    classType giveClassID() const { return CohesiveInterfaceMaterialClass; }
+    virtual const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
+    virtual classType giveClassID() const { return CohesiveInterfaceMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseForm, MatResponseMode,
@@ -102,7 +101,7 @@ public:
 
     double computeVolumetricStrain(GaussPoint *gp, TimeStep *atTime);
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
@@ -126,10 +125,10 @@ public:
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CohesiveInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CohesiveInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
 
 protected:
     // Overloaded to use specialized versions of these services possibly implemented by linearElastic member

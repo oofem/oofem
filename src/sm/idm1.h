@@ -85,19 +85,19 @@ public:
     /// Constructor
     IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~IsotropicDamageMaterial1Status() { }
+    virtual ~IsotropicDamageMaterial1Status() { }
 
     // definition
-    const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
-    classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 /**
@@ -184,14 +184,13 @@ public:
     /// Constructor
     IsotropicDamageMaterial1(int n, Domain *d);
     /// Destructor
-    ~IsotropicDamageMaterial1();
+    virtual ~IsotropicDamageMaterial1();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "IsotropicDamageMaterial1"; }
-    classType giveClassID() const { return IsotropicDamageMaterial1Class; }
-
-    const char *giveInputRecordName() const { return "idm1"; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "IsotropicDamageMaterial1"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterial1Class; }
+    virtual const char *giveInputRecordName() const { return "idm1"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
      * Computes invariants I1 and J2 of the strain tensor
@@ -201,22 +200,8 @@ public:
      * @param[out] J2e Output value of strain invariant J2.
      */
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
-    /**
-     * Computes the equivalent strain measure from given strain vector (full form).
-     * @param[out] kappa Return param, containing the corresponding equivalent strain.
-     * @param strain Total strain vector in full form.
-     * @param gp Integration point.
-     * @param tStep Time step.
-     */
+
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    /**
-     * Computes the value of damage parameter omega,
-     * based on a given value of equivalent strain
-     * @param[out] omega Contains the resulting damage.
-     * @param kappa Equivalent strain measure.
-     * @param strain Strain vector.
-     * @param gp Integration point.
-     */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
     /**
      * computes the value of damage parameter omega,
@@ -258,10 +243,10 @@ public:
     virtual int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *estrain = NULL);
     virtual int MMI_finish(TimeStep *tStep);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    MaterialStatus *giveStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
 protected:
     /**
@@ -272,7 +257,7 @@ protected:
      * @param totalStrainVector Current total strain vector.
      * @param gp Integration point.
      */
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
+    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // idm1_h

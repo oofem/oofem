@@ -77,7 +77,7 @@ protected:
 
 public:
     CCTPlate3d(int n, Domain *d);
-    ~CCTPlate3d() { delete GtoLRotationMatrix; }
+    virtual ~CCTPlate3d() { delete GtoLRotationMatrix; }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
@@ -88,34 +88,34 @@ protected:
     GaussPoint *giveMiddleGaussPoint();
 
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    int  giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    int  giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
 
     friend  class TR_SHELL01;
 
 public:
     // definition & identification
-    const char *giveClassName() const { return "CCTPlate3d"; }
-    classType giveClassID() const { return CCTPlate3dClass; }
+    virtual const char *giveClassName() const { return "CCTPlate3d"; }
+    virtual classType giveClassID() const { return CCTPlate3dClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual int computeNumberOfGlobalDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    const FloatMatrix *computeGtoLRotationMatrix();
+    virtual const FloatMatrix *computeGtoLRotationMatrix();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    int giveLocalCoordinateSystem(FloatMatrix &answer)
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
     { _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
       return 0; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // cct3d_h

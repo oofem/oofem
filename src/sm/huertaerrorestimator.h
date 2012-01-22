@@ -116,7 +116,7 @@ public:
     }
 
     /// Destructor
-    ~HuertaErrorEstimator() { }
+    virtual ~HuertaErrorEstimator() { }
 
     /**
      * Returns refinement level
@@ -133,13 +133,13 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    classType giveClassID() const { return HuertaErrorEstimatorClass; }
+    virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
+    virtual classType giveClassID() const { return HuertaErrorEstimatorClass; }
 
     AnalysisMode giveAnalysisMode() { return mode; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 private:
     /**
@@ -283,7 +283,7 @@ public:
     /// Constructor
     HuertaRemeshingCriteria(int n, ErrorEstimator *e);
     /// Destructor
-    ~HuertaRemeshingCriteria() { }
+    virtual ~HuertaRemeshingCriteria() { }
 
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
     virtual double giveDofManDensity(int num);
@@ -291,8 +291,8 @@ public:
     virtual int estimateMeshDensities(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "HuertaErrorEstimator"; }
-    classType giveClassID() const { return HuertaRemeshingCriteriaClass; }
+    virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
+    virtual classType giveClassID() const { return HuertaRemeshingCriteriaClass; }
 };
 
 

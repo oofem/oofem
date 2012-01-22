@@ -53,34 +53,23 @@ protected:
 
 public:
     InterfaceElem1d(int n, Domain *d);
-    ~InterfaceElem1d() { }
+    virtual ~InterfaceElem1d() { }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)  { computeLumpedMassMatrix(answer, tStep); }
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)  { computeLumpedMassMatrix(answer, tStep); }
 
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     *
-     */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (if point is inside element); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int computeNumberOfDofs(EquationID ut);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-    /** Interface requesting service */
-    Interface *giveInterface(InterfaceType it) { return NULL; }
+    virtual Interface *giveInterface(InterfaceType it) { return NULL; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -89,21 +78,21 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "InterfaceElem1d"; }
-    classType giveClassID() const { return InterfaceElem1dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_point; }
+    virtual const char *giveClassName() const { return "InterfaceElem1d"; }
+    virtual classType giveClassID() const { return InterfaceElem1dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
-    integrationDomain giveIntegrationDomain() { return _Point; }
-    MaterialMode giveMaterialMode();
+    virtual integrationDomain giveIntegrationDomain() { return _Point; }
+    virtual MaterialMode giveMaterialMode();
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
-    void computeGaussPoints();
-    void          evaluateLocalCoordinateSystem(FloatMatrix &);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) { }
+    virtual void computeGaussPoints();
+    void evaluateLocalCoordinateSystem(FloatMatrix &);
 
-    int giveApproxOrder() { return 1; }
+    virtual int giveApproxOrder() { return 1; }
 
     void computeLocalSlipDir(FloatArray &normal);
     cmode giveCoordMode() const { return this->mode; }

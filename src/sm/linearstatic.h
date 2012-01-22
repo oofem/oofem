@@ -76,31 +76,31 @@ protected:
 
 public:
     LinearStatic(int i, EngngModel *_master = NULL);
-    ~LinearStatic();
+    virtual ~LinearStatic();
     // solving
-    void solveYourself();
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourself();
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
-    void terminate(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
-    const char *giveClassName() const { return "LinearStatic"; }
-    classType giveClassID() const { return LinearStaticClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "LinearStatic"; }
+    virtual classType giveClassID() const { return LinearStaticClass; }
+    virtual fMode giveFormulation() { return TL; }
 
 #ifdef __PARALLEL_MODE
     int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);

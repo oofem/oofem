@@ -85,17 +85,17 @@ public:
         nMethod = NULL;
         ndomains = 1;
     }
-    ~LinearStability() {
+    virtual ~LinearStability() {
         delete  stiffnessMatrix;
         delete initialStressMatrix;
         if ( nMethodLS ) { delete nMethodLS; }
         if ( nMethod ) { delete nMethod; }
     }
 
-    void solveYourself();
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourself();
+    virtual void solveYourselfAt(TimeStep *tStep);
 
-    void terminate(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
     void terminateLinStatic(TimeStep *tStep);
     int requiresNewLsh() { return 0; }
     virtual void updateYourself(TimeStep *tStep);
@@ -105,22 +105,22 @@ public:
     // giveUnknownComponent method.
     // When DisplacementVector is requested, then if time==0 linear elastic solution displacement are returned,
     // otherwise corresponding eigen vector is considered as displacement vector
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    TimeStep *giveNextStep();
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual TimeStep *giveNextStep();
 
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
     SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
-    const char *giveClassName() const { return "LinearStability"; }
-    classType giveClassID() const { return LinearStabilityClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "LinearStability"; }
+    virtual classType giveClassID() const { return LinearStabilityClass; }
+    virtual fMode giveFormulation() { return TL; }
 };
 } // end namespace oofem
 #endif // linearstability_h

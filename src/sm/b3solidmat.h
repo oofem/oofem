@@ -50,19 +50,19 @@ protected:
 
 public:
     B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~B3SolidMaterialStatus() {}
+    virtual ~B3SolidMaterialStatus() {}
 
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     double giveMPS(void) { return microprestress_old; }
     void setMPS(const double src) { microprestress_new = src; }
 
     // definition
-    const char *giveClassName() const { return "B3SolidMaterialStatus"; }
-    classType giveClassID() const { return B3SolidMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "B3SolidMaterialStatus"; }
+    virtual classType giveClassID() const { return B3SolidMaterialStatusClass; }
 };
 
 
@@ -105,18 +105,18 @@ protected:
 
 public:
     B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) { shMode = B3_NoShrinkage; }
-    ~B3SolidMaterial() { }
+    virtual ~B3SolidMaterial() { }
 
-    void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                            GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    const char *giveClassName() const { return "B3SolidMaterial"; }
-    classType giveClassID() const { return B3SolidMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "B3SolidMaterial"; }
+    virtual classType giveClassID() const { return B3SolidMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

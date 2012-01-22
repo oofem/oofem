@@ -65,23 +65,23 @@ private:
 
 public:
     LIBeam3dNL2(int n, Domain *d);
-    ~LIBeam3dNL2() { }
+    virtual ~LIBeam3dNL2() { }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
     { computeLumpedMassMatrix(answer, tStep); }
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
-    const char *giveClassName() const { return "LIBeam3dNL"; }
-    classType giveClassID() const { return LIBeam3dNLClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "LIBeam3dNL"; }
+    virtual classType giveClassID() const { return LIBeam3dNLClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -91,37 +91,37 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _3dBeam; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _3dBeam; }
+
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
 
 protected:
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
-    void updateYourself(TimeStep *tStep);
-    void initForNewStep();
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void initForNewStep();
     //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int)
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int)
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
-
     // nonlinear part of geometrical eqs. for i-th component of strain vector.
     // void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int );
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
     double giveLength();
     //double givePitch ();
-    int giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     /**
      * Updates the temporary triad at the centre to the state identified by given solution step.

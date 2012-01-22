@@ -47,13 +47,13 @@ class LSpaceBB  : public LSpace
 {
 public:
     LSpaceBB(int n, Domain *d);
-    ~LSpaceBB() { }
+    virtual ~LSpaceBB() { }
 
-    const char *giveClassName() const { return "LSpaceBB"; }
-    classType giveClassID() const { return LSpaceBBClass; }
+    virtual const char *giveClassName() const { return "LSpaceBB"; }
+    virtual classType giveClassID() const { return LSpaceBBClass; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 };
 } // end namespace oofem
 #endif // lspacebb_h

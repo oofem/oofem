@@ -98,7 +98,7 @@ private:
     int energyNorm_comput_flag;
 public:
     FETISolver(int i, Domain *d, EngngModel *m);
-    ~FETISolver();
+    virtual ~FETISolver();
 
     /**
      * Solves the given linear system by LDL^T factorization.
@@ -109,18 +109,18 @@ public:
      * @param x Solution array
      * @return NM_Status value
      */
-    NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
     int estimateMaxPackSize(IntArray &, CommunicationBuffer &, int &);
     /// Sets up the communication maps
     void setUpCommunicationMaps();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "FETISolver"; }
-    classType giveClassID() const { return NumericalMethodClass; }
-    LinSystSolverType giveLinSystSolverType() const { return ST_Feti; }
+    virtual const char *giveClassName() const { return "FETISolver"; }
+    virtual classType giveClassID() const { return NumericalMethodClass; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_Feti; }
 
     void projection(FloatArray &v, FloatMatrix &l, FloatMatrix &l1);
 

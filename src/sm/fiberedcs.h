@@ -95,12 +95,12 @@ public:
         area = -1.0;
     }
 
-    ~FiberedCrossSection()  { }
+    virtual ~FiberedCrossSection()  { }
 
-    void giveRealStresses(FloatArray & answer, MatResponseForm, GaussPoint *,
+    virtual void giveRealStresses(FloatArray & answer, MatResponseForm, GaussPoint *,
                           const FloatArray &, TimeStep * tStep);
 
-    void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
                                          MatResponseMode rMode,
                                          GaussPoint *,
                                          TimeStep *tStep);
@@ -112,17 +112,17 @@ public:
 
 
 
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
+    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                             const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,
+    virtual void giveFullCharacteristicVector(FloatArray &answer,
                                       GaussPoint *gp, const FloatArray &charVector);
-    FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
-    FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
+    virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
+    virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStrainVector3d);
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                       MaterialMode mmode, StructuralMaterial *mat) const;
 
-    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
-    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode, Material *mat);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
     virtual void giveFiberMaterialStiffnessMatrix(FloatMatrix &fiberMatrix, MatResponseForm FullForm,
                                                   MatResponseMode rMode, GaussPoint *layerGp,
@@ -131,19 +131,19 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    double give(CrossSectionProperty a);
+    virtual double give(CrossSectionProperty a);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "FiberedCrossSection"; }
-    classType giveClassID() const { return FiberedCrossSectionClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    void printYourself();
+    virtual const char *giveClassName() const { return "FiberedCrossSection"; }
+    virtual classType giveClassID() const { return FiberedCrossSectionClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void printYourself();
     double computeIntegralThickWidth();
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)

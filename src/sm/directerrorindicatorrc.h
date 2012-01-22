@@ -105,13 +105,13 @@ public:
 
     virtual int estimateMeshDensities(TimeStep *tStep);
     virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
-    /// returns the minIndicatorDensity
+    /// Returns the minimum indicator limit.
     double giveMinIndicatorLimit() { return minIndicatorLimit; }
     double giveMinIndicatorDensity() { return minIndicatorDensity; }
 
     void giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity);
     double giveZeroIndicatorDensity() { return zeroIndicatorDensity; }
-    void reinitialize();
+    virtual void reinitialize();
 
     virtual void setDomain(Domain *d);
 

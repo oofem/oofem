@@ -46,18 +46,19 @@ class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     KelvinChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~KelvinChainMaterialStatus() {}
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual ~KelvinChainMaterialStatus() {}
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
-    const char *giveClassName() const { return "KelvinChainMaterialStatus"; }
-    classType giveClassID() const { return KelvinChainMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "KelvinChainMaterialStatus"; }
+    virtual classType giveClassID() const { return KelvinChainMaterialStatusClass; }
 };
 
 
@@ -69,20 +70,20 @@ class KelvinChainMaterial : public RheoChainMaterial
 {
 public:
     KelvinChainMaterial(int n, Domain *d);
-    ~KelvinChainMaterial() {}
+    virtual ~KelvinChainMaterial() {}
 
-    void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
-    const char *giveClassName() const { return "KelvinChainMaterial"; }
-    classType giveClassID() const { return KelvinChainMaterialClass; }
+    virtual const char *giveClassName() const { return "KelvinChainMaterial"; }
+    virtual classType giveClassID() const { return KelvinChainMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
                                             MatResponseForm form,

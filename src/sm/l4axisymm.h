@@ -56,44 +56,44 @@ protected:
 
 public:
     L4Axisymm(int n, Domain *d);
-    ~L4Axisymm();
+    virtual ~L4Axisymm();
 
 
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    double computeVolumeAround(GaussPoint *gp);
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
 
-    FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
     // definition & identification
-    const char *giveClassName() const { return "L4Axisymm"; }
-    classType giveClassID() const { return L4AxisymmClass; }
+    virtual const char *giveClassName() const { return "L4Axisymm"; }
+    virtual classType giveClassID() const { return L4AxisymmClass; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    //virtual void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -105,20 +105,20 @@ public:
     //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    integrationDomain giveIntegrationDomain() { return _Square; }
-    MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual integrationDomain giveIntegrationDomain() { return _Square; }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
 
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // l4axisymm_h

@@ -61,7 +61,7 @@ public:
     /// Constructor
     CombinedZZSIErrorEstimator(int n, Domain *d) : ErrorEstimator(n, d), zzee(n, d), siee(n, d) { eeType = EET_CZZSI; }
     /// Destructor
-    ~CombinedZZSIErrorEstimator() { }
+    virtual ~CombinedZZSIErrorEstimator() { }
 
     virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
@@ -69,9 +69,9 @@ public:
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
     virtual RemeshingCriteria *giveRemeshingCrit();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "CombinedZZSIErrorEstimator"; }
-    classType giveClassID() const { return CombinedZZSIErrorEstimatorClass; }
-    void setDomain(Domain *d);
+    virtual const char *giveClassName() const { return "CombinedZZSIErrorEstimator"; }
+    virtual classType giveClassID() const { return CombinedZZSIErrorEstimatorClass; }
+    virtual void setDomain(Domain *d);
 };
 
 /**
@@ -90,23 +90,23 @@ public:
 class CombinedZZSIRemeshingCriteria : public RemeshingCriteria
 {
 protected:
-
     ZZRemeshingCriteria zzrc;
     DirectErrorIndicatorRC dirc;
+
 public:
     /// Constructor
     CombinedZZSIRemeshingCriteria(int n, ErrorEstimator *e);
     /// Destructor
-    ~CombinedZZSIRemeshingCriteria() { }
+    virtual ~CombinedZZSIRemeshingCriteria() { }
 
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
     virtual double giveDofManDensity(int num);
     virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
     virtual int estimateMeshDensities(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "CombinedZZSIRemeshingCriteria"; }
-    classType giveClassID() const { return CombinedZZSIRemeshingCriteriaClass; }
-    void setDomain(Domain *d);
+    virtual const char *giveClassName() const { return "CombinedZZSIRemeshingCriteria"; }
+    virtual classType giveClassID() const { return CombinedZZSIRemeshingCriteriaClass; }
+    virtual void setDomain(Domain *d);
 };
 } // end namespace oofem
 #endif // combinedzzsiee_h

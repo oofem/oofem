@@ -82,22 +82,22 @@ protected:
 public:
     DEIDynamic(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
         nextDisplacementVector(), displacementVector(), velocityVector(), accelerationVector() { ndomains = 1; }
-    ~DEIDynamic();
+    virtual ~DEIDynamic();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
-    const char *giveClassName() const { return "DEIDynamic"; }
-    classType giveClassID() const { return DEIDynamicClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "DEIDynamic"; }
+    virtual classType giveClassID() const { return DEIDynamicClass; }
+    virtual fMode giveFormulation() { return TL; }
     virtual int giveNumberOfFirstStep() { return 0; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
 };

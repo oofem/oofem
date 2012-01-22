@@ -54,17 +54,17 @@ protected:
 
 public:
     J2Mat(int n, Domain *d);
-    ~J2Mat();
+    virtual ~J2Mat();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "J2Mat"; }
-    classType giveClassID() const { return J2MatClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "J2Mat"; }
+    virtual classType giveClassID() const { return J2MatClass; }
 
     virtual int giveSizeOfFullHardeningVarsVector();
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
     virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 2; }

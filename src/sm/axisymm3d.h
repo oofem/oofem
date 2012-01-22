@@ -63,21 +63,21 @@ protected:
 
 public:
     Axisymm3d(int n, Domain *d);
-    ~Axisymm3d();
+    virtual ~Axisymm3d();
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     // characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
-    double giveArea();
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveArea();
+    virtual double computeVolumeAround(GaussPoint *gp);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    Interface *giveInterface(InterfaceType it);
-    FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual Interface *giveInterface(InterfaceType it);
+    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -86,51 +86,51 @@ public:
     //void drawInternalState(oofegGraphicContext&);
 #endif
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
 
-    const char *giveClassName() const { return "Axisymm3d"; }
-    classType giveClassID() const { return Axisymm3dClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual const char *giveClassName() const { return "Axisymm3d"; }
+    virtual classType giveClassID() const { return Axisymm3dClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
 
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &, int iEdge, GaussPoint *gp);
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int iEdge, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // axisymm3d_h

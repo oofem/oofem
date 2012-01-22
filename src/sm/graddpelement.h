@@ -55,11 +55,11 @@ protected:
 
 public:
     GradDpElement();
-    ~GradDpElement() {}
+    virtual ~GradDpElement() {}
 
     // definition & identification
-    const char* giveClassName () const { return "GradDpElement"; }
-    classType giveClassID () const { return GradDpElementClass; }
+    virtual const char* giveClassName () const { return "GradDpElement"; }
+    virtual classType giveClassID () const { return GradDpElementClass; }
 
     virtual int getNprimNodes() { return 0; }
     virtual int getNprimVars() { return 0; }

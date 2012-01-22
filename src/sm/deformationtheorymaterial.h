@@ -47,12 +47,12 @@ class DeformationTheoryMaterial : public StructuralMaterial
 {
 public:
     DeformationTheoryMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
-    ~DeformationTheoryMaterial()  { }
+    virtual ~DeformationTheoryMaterial()  { }
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 1; }
-    const char *giveClassName() const { return "DeformationTheoryMaterial"; }
-    classType giveClassID() const { return DeformationTheoryMaterialClass; }
+    virtual const char *giveClassName() const { return "DeformationTheoryMaterial"; }
+    virtual classType giveClassID() const { return DeformationTheoryMaterialClass; }
 };
 } // end namespace oofem
 #endif // deformationtheorymaterial_h

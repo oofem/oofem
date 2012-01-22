@@ -114,7 +114,7 @@ protected:
 
 public:
     HydrationModelStatus(int n, Domain *d, GaussPoint *g);
-    ~HydrationModelStatus() { }
+    virtual ~HydrationModelStatus() { }
 
     // query temp hydration degree
     double giveTempHydrationDegree() { return tempHydrationDegree; }
@@ -124,20 +124,15 @@ public:
     void setTempHydrationDegree(double v) { tempHydrationDegree = v; }
 
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *tStep);
 
-    /// Prints status (hydrationDegree) into stream
-    void printOutputAt(FILE *file, TimeStep *atTime);
-    /// Saves current state (hydrationDegree) into stream
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /// Restores current state (hydrationDegree) from stream
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // --- identification and auxiliary functions ---
-    /// Returns "HydrationModelStatus" - class  name of the receiver.
-    const char *giveClassName() const { return "HydrationModelStatus"; }
-    /// Returns HydrationModelStatusClass - classType id of receiver.
-    classType giveClassID() const { return ( classType ) HydrationModelStatusClass; }
+    virtual const char *giveClassName() const { return "HydrationModelStatus"; }
+    virtual classType giveClassID() const { return ( classType ) HydrationModelStatusClass; }
 };
 
 
@@ -207,7 +202,7 @@ public:
     /// Constructor setting the mixture type and root-finding method
     HydrationModel(MixtureType mix, FindRootMethod usefr);
     /// Destructor
-    ~HydrationModel() { }
+    virtual ~HydrationModel() { }
 
 
     // === Hydration model services ===
@@ -222,7 +217,7 @@ public:
      * Not a standard material - initializes from master material record, doesn't call parent initializeFrom
      * Use hm_ prefix in parameter names to avoid confusion with master material parameters
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     /**
      * Returns the hydration degree at end of TimeStep atTime in given integraion point.
@@ -261,18 +256,16 @@ public:
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     // } end new 5.1.2004
-    /// returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector
-    double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime);
+    /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector
+    virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime);
 
     // --- identification and auxiliary functions ---
-    /// Returns "HydrationModel" - class  name of the receiver.
-    const char *giveClassName() const { return "HydrationModel"; }
-    /// Returns HydrationModelClass - classType id of receiver.
-    classType giveClassID()         const { return ( classType ) HydrationModelClass; }
+    virtual const char *giveClassName() const { return "HydrationModel"; }
+    virtual classType giveClassID() const { return ( classType ) HydrationModelClass; }
 
 protected:
     /// Creates and returns new HydrationModelStatus instance
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 
 // =========== Interfaces for materials using the hydration model ============
@@ -285,7 +278,7 @@ public:
     /// Constructor. Nulls the hydrationModelStatus pointer.
     HydrationModelStatusInterface() { hydrationModelStatus = NULL; }
     /// Destructor. Deletes the associated hydration model status.
-    ~HydrationModelStatusInterface() { delete hydrationModelStatus; }
+    virtual ~HydrationModelStatusInterface() { delete hydrationModelStatus; }
 
     /// Returns the associated hydration model status.
     HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus; }
@@ -302,7 +295,7 @@ class HydrationModelInterface : public Interface
 {
     // interface for material access to HydrationModel
 protected:
-    /// reference to the associated hydrationModel instance
+    /// Reference to the associated hydrationModel instance
     HydrationModel *hydrationModel;
     /// Material cast time - start of hydration
     double castAt;
@@ -310,8 +303,10 @@ protected:
     double constantHydrationDegree;
 
 public:
-    /// returns the associated hydration model.
+    /// Returns the associated hydration model.
     HydrationModel *giveHydrationModel() { return hydrationModel; }
+    /// Destructor. Deletes the associated hydration model.
+    virtual ~HydrationModelInterface() { delete hydrationModel; }
     /**
      * Creates and initializes the hydration model according to object description stored in input record.
      * The parent class instanciateFrom method is not called here.
@@ -341,8 +336,6 @@ public:
      * @return hydration degree or increment in given gp
      */
     double giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
-    /// Destructor. Deletes the associated hydration model.
-    ~HydrationModelInterface() { delete hydrationModel; }
 };
 } // end namespace oofem
 #endif // hydram_h

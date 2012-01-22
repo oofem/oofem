@@ -48,15 +48,15 @@ namespace oofem {
 class GPInitModule : public InitModule
 {
 public:
-    /// Constructor. Creates empty GPInitModule.
+    /// Creates empty GPInitModule.
     GPInitModule(int n, EngngModel *e);
 
     /// Destructor
-    ~GPInitModule();
+    virtual ~GPInitModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    void doInit();
-    virtual const char *giveClassName() const { return "GPInitModuleClass"; }
+    virtual void doInit();
+    virtual const char *giveClassName() const { return "GPInitModule"; }
 };
 
 } // namespace oofem

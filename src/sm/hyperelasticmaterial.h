@@ -50,17 +50,14 @@ public:
     /// Destructor
     virtual ~HyperElasticMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
-    const char *giveClassName() const { return "HyperElasticMaterialStatus"; }
-    classType giveClassID() const { return HyperElasticMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "HyperElasticMaterialStatus"; }
+    virtual classType giveClassID() const { return HyperElasticMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
-
-    contextIOResultType saveContext(FILE *stream, void *obj = NULL);
-    contextIOResultType restoreContext(FILE *stream, void *obj = NULL);
 };
 
 
@@ -73,7 +70,7 @@ protected:
 public:
     HyperElasticMaterial(int n, Domain *d);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
@@ -82,11 +79,11 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasMaterialModeCapability(MaterialMode);
-    const char *giveClassName() const { return "HyperElasticMaterial"; }
-    classType giveClassID() const { return HyperElasticMaterialClass; }
+    virtual const char *giveClassName() const { return "HyperElasticMaterial"; }
+    virtual classType giveClassID() const { return HyperElasticMaterialClass; }
 };
 } // end namespace oofem
 #endif

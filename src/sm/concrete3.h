@@ -57,15 +57,15 @@ private:
 
 public:
     Concrete3(int n, Domain *d);
-    ~Concrete3() { delete linearElasticMaterial; }
+    virtual ~Concrete3() { delete linearElasticMaterial; }
 
     // identification and auxiliary functions
-    IRResultType initializeFrom(InputRecord *ir);
-    int hasNonLinearBehaviour() { return 1; }
-    const char *giveClassName() const { return "Concrete3"; }
-    classType giveClassID() const { return Concrete3Class; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual const char *giveClassName() const { return "Concrete3"; }
+    virtual classType giveClassID() const { return Concrete3Class; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,

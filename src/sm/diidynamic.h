@@ -80,22 +80,22 @@ public:
         ndomains = 1;
         nMethod = NULL;
     }
-    ~DIIDynamic() {
+    virtual ~DIIDynamic() {
         delete  stiffnessMatrix;
         delete massMatrix;
         if ( nMethod ) { delete nMethod; } }
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
     // identification
-    const char *giveClassName() const { return "DIIDynamic"; }
-    classType giveClassID() const { return DIIDynamicClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "DIIDynamic"; }
+    virtual classType giveClassID() const { return DIIDynamicClass; }
+    virtual fMode giveFormulation() { return TL; }
     virtual int giveNumberOfFirstStep() { return 0; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return -1; }
 
