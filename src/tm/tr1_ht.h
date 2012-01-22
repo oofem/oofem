@@ -52,27 +52,27 @@ protected:
 
 public:
     Tr1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
-    ~Tr1_ht();
+    virtual ~Tr1_ht();
 
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     // definition
-    const char *giveClassName() const { return "Tr1_htElement"; }
-    classType giveClassID() const { return Tr1_htClass; }
+    virtual const char *giveClassName() const { return "Tr1_htElement"; }
+    virtual classType giveClassID() const { return Tr1_htClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 3; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
-    Interface *giveInterface(InterfaceType t);
+    virtual Interface *giveInterface(InterfaceType t);
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -86,7 +86,7 @@ public:
 #endif
 
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
 
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
@@ -94,12 +94,12 @@ protected:
 
     double giveArea();
 
-    void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void giveEdgeDofMapping(IntArray &mask, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
 
-    int giveApproxOrder(int unknownIndx) { return 1; }
+    virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
 } // end namespace oofem
 #endif // tr1_ht_h

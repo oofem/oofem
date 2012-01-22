@@ -71,32 +71,32 @@ public:
         ndomains = 1;
         nMethod = NULL;
     }
-    ~StationaryTransportProblem()
+    virtual ~StationaryTransportProblem()
     {
         delete  conductivityMatrix;
         if ( nMethod ) { delete nMethod; } }
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int checkConsistency();
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
-    const char *giveClassName() const { return "StationaryTransportProblem"; }
-    classType giveClassID() const { return StationaryTransportProblemClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "StationaryTransportProblem"; }
+    virtual classType giveClassID() const { return StationaryTransportProblemClass; }
+    virtual fMode giveFormulation() { return TL; }
 
 #ifdef __PETSC_MODULE
     virtual void initPetscContexts();

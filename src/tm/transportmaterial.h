@@ -69,15 +69,15 @@ public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     TransportMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~TransportMaterialStatus() { }
+    virtual ~TransportMaterialStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the const pointer to receiver's state vector.
     const FloatArray &giveStateVector() { return stateVector; }
@@ -86,8 +86,8 @@ public:
     /// Assigns temporary state vector from a given vector v.
     void letTempStateVectorBe(const FloatArray &v) { tempStateVector = v; }
 
-    const char *giveClassName() const { return "TransportMaterialStatus"; }
-    classType giveClassID() const { return TransportMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
+    virtual classType giveClassID() const { return TransportMaterialStatusClass; }
 };
 
 
@@ -114,7 +114,7 @@ public:
      */
     TransportMaterial(int n, Domain *d) : Material(n, d) { }
     /// Destructor.
-    ~TransportMaterial() { }
+    virtual ~TransportMaterial() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,

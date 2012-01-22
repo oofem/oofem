@@ -46,17 +46,17 @@ class HydratingTransportMaterialStatus : public TransportMaterialStatus, public 
 {
 public:
     HydratingTransportMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g), HydrationModelStatusInterface() { }
-    ~HydratingTransportMaterialStatus() { }
+    virtual ~HydratingTransportMaterialStatus() { }
 
     virtual Interface *giveInterface(InterfaceType t);
-    const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
-    classType giveClassID() const { return HydratingTransportMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
+    virtual classType giveClassID() const { return HydratingTransportMaterialStatusClass; }
 
     virtual void updateYourself(TimeStep *atTime) {
         HydrationModelStatusInterface :: updateYourself(atTime);
         TransportMaterialStatus :: updateYourself(atTime);
     }
-    void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual void printOutputAt(FILE *file, TimeStep *atTime);
 };
 
 /**
@@ -71,7 +71,7 @@ protected:
 
 public:
     HydratingIsoHeatMaterial(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }
-    ~HydratingIsoHeatMaterial() { }
+    virtual ~HydratingIsoHeatMaterial() { }
 
     void setMixture(MixtureType mix);
 
@@ -84,14 +84,14 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "HydratingIsoHeatMaterial"; }
-    classType giveClassID() const { return HydratingIsoHeatMaterialClass; }
+    virtual const char *giveClassName() const { return "HydratingIsoHeatMaterial"; }
+    virtual classType giveClassID() const { return HydratingIsoHeatMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

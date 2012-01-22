@@ -52,7 +52,7 @@ protected:
 
 public:
     IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
-    ~IsotropicHeatTransferMaterial() { }
+    virtual ~IsotropicHeatTransferMaterial() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -64,15 +64,15 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    
+
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
-    classType giveClassID() const { return IsotropicHeatTransferMaterialClass; }
+    virtual const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
+    virtual classType giveClassID() const { return IsotropicHeatTransferMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };

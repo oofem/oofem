@@ -50,7 +50,7 @@ protected:
 
 public:
     HydratingHeMoMaterial(int n, Domain *d) : HeMoTKMaterial(n, d), HydrationModelInterface() { }
-    ~HydratingHeMoMaterial() { }
+    virtual ~HydratingHeMoMaterial() { }
 
     void setMixture(MixtureType mix);
 
@@ -63,14 +63,14 @@ public:
                                            TimeStep *atTime);
 
     // saves current context(state) into stream
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "HydratingHeMoMaterial"; }
-    classType giveClassID() const { return HydratingHeMoMaterialClass; }
+    virtual const char *giveClassName() const { return "HydratingHeMoMaterial"; }
+    virtual classType giveClassID() const { return HydratingHeMoMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);

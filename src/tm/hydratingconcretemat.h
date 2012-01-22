@@ -49,7 +49,7 @@ class HydratingConcreteMat : public IsotropicHeatTransferMaterial
 {
 public:
     HydratingConcreteMat(int n, Domain *d);
-    ~HydratingConcreteMat();
+    virtual ~HydratingConcreteMat();
 
     /// Return true if hydration heat source is present.
     virtual int hasInternalSource() { return 1; };
@@ -60,14 +60,14 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "HydratingConcreteMat"; }
-    classType giveClassID() const { return HydratingConcreteMatClass; }
+    virtual const char *giveClassName() const { return "HydratingConcreteMat"; }
+    virtual classType giveClassID() const { return HydratingConcreteMatClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // post-processing
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
@@ -116,7 +116,7 @@ class HydratingConcreteMatStatus : public TransportMaterialStatus
 {
 public:
     HydratingConcreteMatStatus(int n, Domain *d, GaussPoint *g);
-    ~HydratingConcreteMatStatus();
+    virtual ~HydratingConcreteMatStatus();
     double power;
     double GivePower(TimeStep *atTime);
     /// Returns actual degree of hydration at last known equilibrium

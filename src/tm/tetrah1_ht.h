@@ -91,24 +91,24 @@ public:
 #endif
 
 protected:
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
 
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
     virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
 
-    void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void giveEdgeDofMapping(IntArray &mask, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
 
-    IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    void computeSurfaceNMatrixAt(FloatMatrix &n, GaussPoint *gp);
-    double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
-    void giveSurfaceDofMapping(IntArray &mask, int iEdge);
-    void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &n, GaussPoint *gp);
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void giveSurfaceDofMapping(IntArray &mask, int iEdge);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
 
-    int giveApproxOrder(int unknownIndx) { return 1; }
+    virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
 
 class Tetrah1_hmt : public Tetrah1_ht

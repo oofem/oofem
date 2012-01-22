@@ -74,7 +74,7 @@ public:
      */
     HeMoTKMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
     /// Destructor.
-    ~HeMoTKMaterial() { }
+    virtual ~HeMoTKMaterial() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -88,15 +88,15 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     // identification
-    const char *giveClassName() const { return "HeMoTKMaterial"; }
-    classType giveClassID() const { return HeMoTKMaterialClass; }
+    virtual const char *giveClassName() const { return "HeMoTKMaterial"; }
+    virtual classType giveClassID() const { return HeMoTKMaterialClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
 

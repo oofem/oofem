@@ -89,27 +89,27 @@ public:
     /// Constructor.
     NonStationaryTransportProblem(int i, EngngModel *_master);
     /// Destructor.
-    ~NonStationaryTransportProblem();
+    virtual ~NonStationaryTransportProblem();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
-    TimeStep *giveNextStep();
-    TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
+    virtual TimeStep *giveSolutionStepWhenIcApply();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int checkConsistency();
 
     // identification
-    const char *giveClassName() const { return "NonStationaryTransportProblem"; }
-    classType giveClassID() const { return NonStationaryTransportProblemClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "NonStationaryTransportProblem"; }
+    virtual classType giveClassID() const { return NonStationaryTransportProblemClass; }
+    virtual fMode giveFormulation() { return TL; }
 
     /// Allows to change number of equations during solution.
     virtual int requiresUnknownsDictionaryUpdate() { return changingProblemSize; }

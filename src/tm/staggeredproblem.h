@@ -119,12 +119,12 @@ public:
     void printYourself();
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) { }
-    TimeStep *giveNextStep();
-    TimeStep *giveSolutionStepWhenIcApply();
+    virtual TimeStep *giveNextStep();
+    virtual TimeStep *giveSolutionStepWhenIcApply();
 
     // identification
-    const char *giveClassName() const { return "StaggeredProblem"; }
-    classType giveClassID() const { return StaggeredProblemClass; }
+    virtual const char *giveClassName() const { return "StaggeredProblem"; }
+    virtual classType giveClassID() const { return StaggeredProblemClass; }
     virtual int isIncremental() { return 0; }
     virtual int useNonlocalStiffnessOption() { return 0; }
 

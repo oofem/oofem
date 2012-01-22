@@ -61,8 +61,8 @@ public:
     TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
     virtual ~TransportElement();
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     /** Computes the capacity matrix of the receiver */
     virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -87,12 +87,12 @@ public:
     virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // time step termination
-    void updateInternalState(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    const char *giveClassName() const { return "TransportElement"; }
-    classType giveClassID() const { return TransportElementClass; }
+    virtual const char *giveClassName() const { return "TransportElement"; }
+    virtual classType giveClassID() const { return TransportElementClass; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
 

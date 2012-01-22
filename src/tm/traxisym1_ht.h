@@ -45,16 +45,16 @@ class TrAxisym1_ht : public Tr1_ht
 {
 public:
     TrAxisym1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
-    ~TrAxisym1_ht();
+    virtual ~TrAxisym1_ht();
 
-    double computeVolumeAround(GaussPoint *gp);
-    const char *giveClassName() const { return "TrAxisym1_htElement"; }
-    classType giveClassID() const { return TrAxisym1_htClass; }
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual const char *giveClassName() const { return "TrAxisym1_htElement"; }
+    virtual classType giveClassID() const { return TrAxisym1_htClass; }
 
 protected:
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     double computeRadiusAt(GaussPoint *gp);
-    int giveApproxOrder(int unknownIndx) { return 2; }
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual int giveApproxOrder(int unknownIndx) { return 2; }
 };
 } // end namespace oofem
 #endif // traxisym1_ht_h

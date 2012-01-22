@@ -65,18 +65,18 @@ public:
     /// Constructor.
     NLTransientTransportProblem(int i, EngngModel *_master);
     /// Destructor.
-    ~NLTransientTransportProblem();
+    virtual ~NLTransientTransportProblem();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "NLTransientTransportProblem"; }
-    classType giveClassID() const { return NLTransientTransportProblemClass; }
-    fMode giveFormulation() { return nonLinFormulation; }
+    virtual const char *giveClassName() const { return "NLTransientTransportProblem"; }
+    virtual classType giveClassID() const { return NLTransientTransportProblemClass; }
+    virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
     /**
@@ -89,8 +89,8 @@ public:
     virtual void copyUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
 
 protected:
-    void updateInternalState(TimeStep *tStep);
-    void applyIC(TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void applyIC(TimeStep *tStep);
     void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
     void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, const UnknownNumberingScheme &s, TimeStep *tStep, int nite);
 };
