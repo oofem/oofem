@@ -69,15 +69,15 @@ protected:
 
 public:
     PlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~PlasticMaterialStatus();
+    virtual ~PlasticMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
     void giveTempPlasticStrainVector(FloatArray &answer) const { answer = tempPlasticStrainVector; }
@@ -100,8 +100,8 @@ public:
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
 
     // definition
-    const char *giveClassName() const { return "PlasticMaterialStatus"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "PlasticMaterialStatus"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 };
 
 /**
@@ -122,16 +122,16 @@ protected:
 
 public:
     PlasticMaterial(int n, Domain *d);
-    ~PlasticMaterial();
+    virtual ~PlasticMaterial();
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "PlasticMaterial"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "PlasticMaterial"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -142,7 +142,7 @@ public:
                                                TimeStep *tStep);
 
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
@@ -152,7 +152,7 @@ public:
 
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
     // add here some auxiliary functions if needed

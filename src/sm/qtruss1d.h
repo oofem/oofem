@@ -41,7 +41,7 @@
 
 namespace oofem {
 /**
- * This class implements a two-node truss bar element for two-dimensional
+ * This class implements a three-node truss bar element for one-dimensional
  * analysis.
  *
  * A truss bar element is characterized by its 'length' and its 'pitch'. The
@@ -64,9 +64,9 @@ protected:
 
 public:
     QTruss1d(int n, Domain *d);
-    ~QTruss1d() { }
+    virtual ~QTruss1d() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
@@ -74,29 +74,29 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 3; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
     { return this->giveLength(); }
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
     // definition & identification
-    const char *giveClassName() const { return "QTruss1d"; }
-    classType giveClassID() const { return QTruss1dClass; }
+    virtual const char *giveClassName() const { return "QTruss1d"; }
+    virtual classType giveClassID() const { return QTruss1dClass; }
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _1dMat; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
 
     double giveLength();
     double givePitch();
-    int giveApproxOrder() { return 2; }
+    virtual int giveApproxOrder() { return 2; }
 };
 } // end namespace oofem
 #endif // truss1d_h

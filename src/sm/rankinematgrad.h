@@ -59,13 +59,13 @@ protected:
 
 public:
     RankineMatGradStatus(int n, Domain *d, GaussPoint *g);
-    ~RankineMatGradStatus() { }
+    virtual ~RankineMatGradStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
-    const char *giveClassName() const { return "RankineMatGradStatus"; }
-    classType giveClassID() const { return RankineMatClass; }
+    virtual const char *giveClassName() const { return "RankineMatGradStatus"; }
+    virtual classType giveClassID() const { return RankineMatClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -78,7 +78,7 @@ public:
 
 
 /**
- * Gradient rankine material.
+ * Gradient Rankine material.
  */
 class RankineMatGrad : public RankineMat
 {
@@ -89,35 +89,35 @@ protected:
 
 public:
     RankineMatGrad(int n, Domain *d);
-    ~RankineMatGrad() {; }
+    virtual ~RankineMatGrad() {; }
 
-    const char *giveClassName() const { return "RankineMatGrad"; }
-    classType giveClassID() const { return RankineMatClass; }
-    const char *giveInputRecordName() const { return "RankineMatGrad"; }
+    virtual const char *giveClassName() const { return "RankineMatGrad"; }
+    virtual classType giveClassID() const { return RankineMatClass; }
+    virtual const char *giveInputRecordName() const { return "RankineMatGrad"; }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
     void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     double giveNonlocalCumPlasticStrain(GaussPoint *gp);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep);
-    InternalStateValueType giveIPValueType(InternalStateType type);
-    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *tStep);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatGradStatus(1, RankineMat :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatGradStatus(1, RankineMat :: domain, gp); }
 };
 } // end namespace oofem
 #define RankineMatGrad_h

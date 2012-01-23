@@ -116,16 +116,17 @@ public:
 
 
     // definition
-    const char *giveClassName() const { return "MDMStatus"; }
-    classType giveClassID() const { return MicroplaneDamageMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "MDMStatus"; }
+    virtual classType giveClassID() const { return MicroplaneDamageMaterialStatusClass; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
     /**
      * Interface requesting service.  In the case of nonlocal constitutive models,
      * the use of multiple inheritance is assumed. Typically, the class representing nonlocal
@@ -220,9 +221,9 @@ public:
         mdm_Ep = mdm_Efp = -1.0;
     }
     /// Destructor.
-    ~MDM() { if ( linearElasticMaterial ) { delete linearElasticMaterial; } }
+    virtual ~MDM() { if ( linearElasticMaterial ) { delete linearElasticMaterial; } }
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
@@ -243,7 +244,7 @@ public:
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
@@ -307,11 +308,11 @@ protected:
     void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp);
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
 
-    void givePlaneStrainStiffMtrx(FloatMatrix & answer,
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
                                   MatResponseForm form, MatResponseMode mmode, GaussPoint *gp,
                                   TimeStep *tStep);
 

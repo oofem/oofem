@@ -64,7 +64,6 @@ namespace oofem {
 class PerfectlyPlasticMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-
     FloatArray plasticStrainVector; // reduced form to save memory
     FloatArray plasticStrainIncrementVector;
     int yield_flag;
@@ -72,18 +71,19 @@ protected:
 
 public:
     PerfectlyPlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~PerfectlyPlasticMaterialStatus();
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual ~PerfectlyPlasticMaterialStatus();
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     int setTempYieldFlag(int i) { return temp_yield_flag = i; }
     int giveTempYieldFlag() { return temp_yield_flag; }
     int giveYieldFlag() { return yield_flag; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void initTempStatus();
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     void givePlasticStrainVector(FloatArray &answer) const { answer =  plasticStrainVector; }
     void givePlasticStrainIncrementVector(FloatArray &answer) const { answer = plasticStrainIncrementVector; }
@@ -91,8 +91,8 @@ public:
     void letPlasticStrainIncrementVectorBe(FloatArray &v) { plasticStrainIncrementVector = v; }
 
     // definition
-    const char *giveClassName() const { return "PerfectlyPlasticMaterialStatus"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "PerfectlyPlasticMaterialStatus"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialStatusClass; }
 };
 
 /**
@@ -131,9 +131,9 @@ public:
         linearElasticMaterial = NULL;
     }
 
-    ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
+    virtual ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
@@ -144,17 +144,17 @@ public:
                                  FloatArray *PlasticStrainVector3d) { }
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    int  hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "PerfectlyPlasticMaterial"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "PerfectlyPlasticMaterial"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode,

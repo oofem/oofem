@@ -54,9 +54,9 @@ public:
     /// Constructor
     MazarsNLMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~MazarsNLMaterialStatus();
+    virtual ~MazarsNLMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Returns the local equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
@@ -64,14 +64,15 @@ public:
     void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
     // definition
-    const char *giveClassName() const { return "MazarsNLMaterialStatus"; }
-    classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "MazarsNLMaterialStatus"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
     /**
      * Interface requesting service.
      * In the case of nonlocal constitutive models,
@@ -101,13 +102,13 @@ public:
     /// Constructor
     MazarsNLMaterial(int n, Domain *d);
     /// Destructor
-    ~MazarsNLMaterial();
+    virtual ~MazarsNLMaterial();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "MazarsNLMaterial"; }
-    classType giveClassID() const { return MazarsMaterialClass; }
+    virtual const char *giveClassName() const { return "MazarsNLMaterial"; }
+    virtual classType giveClassID() const { return MazarsMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
@@ -135,7 +136,7 @@ public:
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
 
 protected:
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);

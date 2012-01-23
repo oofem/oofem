@@ -122,7 +122,7 @@ public:
     /// Constructor
     MMAShapeFunctProjection();
     /// Destructor
-    ~MMAShapeFunctProjection();
+    virtual ~MMAShapeFunctProjection();
 
     virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
 
@@ -132,7 +132,7 @@ public:
 
     virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
 
-    const char *giveClassName() const { return "MMAShapeFunctProjectionInterface"; }
+    virtual const char *giveClassName() const { return "MMAShapeFunctProjectionInterface"; }
 };
 } // end namespace oofem
 #endif // mmashapefunctprojection_h

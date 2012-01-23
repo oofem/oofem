@@ -95,9 +95,9 @@ protected:
 
 public:
     RCM2MaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~RCM2MaterialStatus();
+    virtual ~RCM2MaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     void getPrincipalStrainVector(FloatArray &answer) const { answer =  principalStrain; }
     void getPrincipalStressVector(FloatArray &answer) const { answer =  principalStress; }
@@ -132,7 +132,7 @@ public:
     void letOldCrackStrainVectorBe(const FloatArray &a) { oldCrackStrainVector = a; }
 
     double giveCharLength(int icrack) const { if ( icrack ) { return charLengths.at(icrack); } else { return 0.0; } }
-    void   setCharLength(int icrack, double val) { charLengths.at(icrack) = val; }
+    void setCharLength(int icrack, double val) { charLengths.at(icrack) = val; }
 
     // query for non-tem variables (usefull for postprocessing)
     void giveCrackDirs(FloatMatrix &answer) { answer = crackDirs; }
@@ -140,15 +140,15 @@ public:
     int giveAlreadyCrack() const { return this->giveNumberOfActiveCracks(); }
 
     // definition
-    const char *giveClassName() const { return "RCM2MaterialStatus"; }
-    classType giveClassID() const { return RCMMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "RCM2MaterialStatus"; }
+    virtual classType giveClassID() const { return RCMMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
     // saves current context(state) into stream
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 /**
@@ -172,21 +172,21 @@ protected:
 
 public:
     RCM2Material(int n, Domain *d);
-    ~RCM2Material();
+    virtual ~RCM2Material();
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    const char *giveClassName() const { return "RCM2Material"; }
-    classType giveClassID() const { return RCMMaterialClass; }
+    virtual const char *giveClassName() const { return "RCM2Material"; }
+    virtual classType giveClassID() const { return RCMMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
@@ -195,7 +195,7 @@ public:
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
@@ -203,7 +203,7 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCM2MaterialStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCM2MaterialStatus(1, domain, gp); }
 
 protected:
 
@@ -252,22 +252,22 @@ protected:
     double giveResidualStrength() { return 0.01 * this->Ft; }
 
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                GaussPoint *gp,
                                TimeStep *tStep);
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
-    void give2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give2dPlateLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                    GaussPoint *gp,
                                    TimeStep *tStep);
-    void give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
+    virtual void give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
                                    GaussPoint *gp,
                                    TimeStep *tStep);
 };

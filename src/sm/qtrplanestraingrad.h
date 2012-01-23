@@ -47,12 +47,12 @@ protected:
 
 public:
     QTrPlaneStrainGrad(int n, Domain *d);
-    ~QTrPlaneStrainGrad() { }
+    virtual ~QTrPlaneStrainGrad() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "QTrPlaneStrainGrad"; }
-    classType giveClassID() const { return QTrPlaneStrainGradClass; }
+    virtual const char *giveClassName() const { return "QTrPlaneStrainGrad"; }
+    virtual classType giveClassID() const { return QTrPlaneStrainGradClass; }
 
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
@@ -62,9 +62,9 @@ protected:
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode){GradDpElement :: computeForceLoadVector(answer, stepN,mode);}
     virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode){GradDpElement :: computeNonForceLoadVector(answer,stepN,mode);}
     virtual int computeNumberOfDofs(EquationID ut) { return 15; }
-    void computeGaussPoints();
-    void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;
-    StructuralElement* giveStructuralElement() { return this; }
+    virtual void computeGaussPoints();
+    virtual void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;
+    virtual StructuralElement* giveStructuralElement() { return this; }
 };
 } // end namespace oofem
 #endif // qtrplanestraingrad_h

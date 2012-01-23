@@ -56,11 +56,11 @@ class MacroLSpace : public LSpace
 {
 public:
     MacroLSpace(int n, Domain *d);
-    ~MacroLSpace();
+    virtual ~MacroLSpace();
 
-    const char *giveClassName() const { return "MacroLSpace"; }
+    virtual const char *giveClassName() const { return "MacroLSpace"; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 

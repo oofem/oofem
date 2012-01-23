@@ -42,7 +42,7 @@
 
 namespace oofem {
 /**
- * Implemantation of polyline nonlocal barrier.
+ * Implementation of polyline nonlocal barrier.
  * It is a composite one-dimensional cell consisting of one or more connected lines.
  * The polyline is defined by an ordered list of n+1 vertices (nodes),
  * where n is the number of lines in the polyline.
@@ -69,7 +69,7 @@ protected:
 public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param n Element's number
+     * @param n Barrier's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
     PolylineNonlocalBarrier(int n, Domain *aDomain);
@@ -83,8 +83,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "PolylineNonlocalBarrier"; }
-    classType giveClassID() const { return PolylineNonlocalBarrierClass; }
+    virtual const char *giveClassName() const { return "PolylineNonlocalBarrier"; }
+    virtual classType giveClassID() const { return PolylineNonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // polylinenonlocalbarrier_h

@@ -53,7 +53,7 @@ public:
     /// Constructor.
     MazarsMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
-    ~MazarsMaterialStatus() { }
+    virtual ~MazarsMaterialStatus() { }
 
     /// Returns characteristic length stored in receiver.
     double giveLec() { return lec; }
@@ -61,11 +61,11 @@ public:
     void setLec(double ls) { lec = ls; }
 
     // definition
-    const char *giveClassName() const { return "MazarsMaterialStatus"; }
-    classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "MazarsMaterialStatus"; }
+    virtual classType giveClassID() const { return IsotropicDamageMaterialStatusClass; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -96,18 +96,18 @@ public:
     /// Constructor
     MazarsMaterial(int n, Domain *d);
     /// Destructor
-    ~MazarsMaterial();
+    virtual ~MazarsMaterial();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "MazarsMaterial"; }
-    classType giveClassID() const { return MazarsMaterialClass; }
+    virtual const char *giveClassName() const { return "MazarsMaterial"; }
+    virtual classType giveClassID() const { return MazarsMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
 
 protected:
     /**

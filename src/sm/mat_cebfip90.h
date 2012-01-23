@@ -60,9 +60,9 @@ public:
     /// Constructor.
     CebFipSlip90MaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
-    ~CebFipSlip90MaterialStatus();
+    virtual ~CebFipSlip90MaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -72,14 +72,14 @@ public:
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
 
     // definition
-    const char *giveClassName() const { return "CebFipSlip90MaterialStatus"; }
-    classType giveClassID() const { return MaterialStatusClass; }
+    virtual const char *giveClassName() const { return "CebFipSlip90MaterialStatus"; }
+    virtual classType giveClassID() const { return MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -109,20 +109,20 @@ public:
     /// Constructor
     CebFipSlip90Material(int n, Domain *d);
     /// Destructor
-    ~CebFipSlip90Material();
+    virtual ~CebFipSlip90Material();
 
-    int hasNonLinearBehaviour() { return 1; }
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    const char *giveClassName() const { return "CebFipSlip90Material"; }
-    classType giveClassID() const { return StructuralMaterialClass; }
+    virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
+    virtual classType giveClassID() const { return StructuralMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
@@ -157,11 +157,11 @@ public:
      */
     double computeBondForceStiffness(double kappa);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }
 
 protected:
     void give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,

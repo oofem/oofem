@@ -56,13 +56,13 @@ public:
     /// Constructor
     MMAClosestIPTransfer();
 
-    void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
+    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
 
-    void finish(TimeStep *tStep) { };
+    virtual void finish(TimeStep *tStep) { };
 
     virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
 
-    const char *giveClassName() const { return "MMAClosestIPTransfer"; }
+    virtual const char *giveClassName() const { return "MMAClosestIPTransfer"; }
 };
 } // end namespace oofem
 #endif // mmaclosestiptransfer_h

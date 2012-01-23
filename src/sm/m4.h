@@ -49,17 +49,17 @@ class M4MaterialStatus : public StructuralMaterialStatus
 {
 public:
     M4MaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~M4MaterialStatus();
+    virtual ~M4MaterialStatus();
 
     // definition
-    const char *giveClassName() const { return "M4MaterialStatus"; }
-    classType giveClassID() const { return M4MaterialStatusClass; }
+    virtual const char *giveClassName() const { return "M4MaterialStatus"; }
+    virtual classType giveClassID() const { return M4MaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -86,7 +86,7 @@ public:
      */
     M4Material(int n, Domain *d);
     /// Destructor.
-    ~M4Material() { }
+    virtual ~M4Material() { }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -94,7 +94,7 @@ public:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane, const FloatArray &strain, TimeStep *tStep);
 
@@ -108,14 +108,14 @@ public:
     double FT(double sn, double ev, double k1, double k2, double c10,
               double c11, double c12, double Et);
 
-    void updateVolumetricStressTo(Microplane *mPlane, double sigv);
+    virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv);
 
     virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "M4Material"; }
-    classType giveClassID() const { return M4MaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "M4Material"; }
+    virtual classType giveClassID() const { return M4MaterialClass; }
 
 protected:
     MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) { return new M4MaterialStatus(1, domain, gp); }

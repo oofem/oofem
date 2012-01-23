@@ -92,7 +92,7 @@ public:
      */
     MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) { numberOfMicroplanes = 0; }
     /// Destructor.
-    ~MicroplaneMaterial() { }
+    virtual ~MicroplaneMaterial() { }
 
     /**
      * Computes real stress vector on given microplane
@@ -163,16 +163,15 @@ public:
      */
     virtual MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode masterMode);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "MicroplaneMaterial"; }
-    classType giveClassID() const { return MicroplaneMaterialClass; }
+    virtual const char *giveClassName() const { return "MicroplaneMaterial"; }
+    virtual classType giveClassID() const { return MicroplaneMaterialClass; }
 
     virtual MaterialStatus *giveMicroplaneStatus(GaussPoint *gp);
 

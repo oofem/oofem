@@ -66,20 +66,21 @@ protected:
 
 public:
     QTruss1dGrad(int n, Domain *d);
-    ~QTruss1dGrad() { }
+    virtual ~QTruss1dGrad() { }
 
-    const char *giveClassName() const { return "QTruss1dGrad"; }
-    classType giveClassID() const { return QTruss1dGradClass; }
+    virtual const char *giveClassName() const { return "QTruss1dGrad"; }
+    virtual classType giveClassID() const { return QTruss1dGradClass; }
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-    integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _1dMatGrad; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual integrationDomain  giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _1dMatGrad; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-     int getNprimNodes() { return 3; }
-     int getNprimVars() { return 1; }
-     int getNsecNodes() { return 2; }
-     int getNsecVars() { return 1; }
+    int getNprimNodes() { return 3; }
+    int getNprimVars() { return 1; }
+    int getNsecNodes() { return 2; }
+    int getNsecVars() { return 1; }
+
 protected:
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
@@ -87,9 +88,9 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    void computeGaussPoints();
-    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    StructuralElement* giveStructuralElement(){return this;}
+    virtual void computeGaussPoints();
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual StructuralElement* giveStructuralElement(){return this;}
 };
 } // end namespace oofem
 #endif // truss1d_h

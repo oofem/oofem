@@ -52,31 +52,31 @@ protected:
     static FEI2dQuadQuad interpolation;
 public:
     QPlaneStrain(int N, Domain *d);
-    ~QPlaneStrain() { }
+    virtual ~QPlaneStrain() { }
 
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // definition & identification
-    const char *giveClassName() const { return "QPlaneStrain"; }
-    classType giveClassID() const { return QPlaneStrainClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "QPlaneStrain"; }
+    virtual classType giveClassID() const { return QPlaneStrainClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
     }
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
 #ifdef __OOFEG
@@ -85,8 +85,9 @@ public:
     void drawScalar(oofegGraphicContext &context);
     //void drawInternalState(DrawMode mode);
 #endif
-    integrationDomain giveIntegrationDomain() { return _Square; }
-    MaterialMode giveMaterialMode() { return _PlaneStrain; }
+
+    virtual integrationDomain giveIntegrationDomain() { return _Square; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

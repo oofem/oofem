@@ -86,7 +86,7 @@ protected:
 
 public:
     RankineMat(int n, Domain *d);
-    ~RankineMat() {; }
+    virtual ~RankineMat() { }
 
     double evalYieldFunction(const FloatArray &sigPrinc, const double kappa);
     double evalYieldStress(const double kappa);
@@ -96,27 +96,27 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    const char *giveClassName() const { return "RankineMat"; }
-    classType giveClassID() const { return RankineMatClass; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual const char *giveClassName() const { return "RankineMat"; }
+    virtual classType giveClassID() const { return RankineMatClass; }
 
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return ( a == 0. ); }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return ( a == 0. ); }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducesStrain, TimeStep *tStep);
 
 protected:
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                   MatResponseForm form, MatResponseMode mode,
                                   GaussPoint *gp,
                                   TimeStep *tStep);
@@ -192,7 +192,7 @@ protected:
 
 public:
     RankineMatStatus(int n, Domain *d, GaussPoint *g);
-    ~RankineMatStatus();
+    virtual ~RankineMatStatus();
 
     void givePlasticStrain(FloatArray &answer) { answer = plasticStrain; }
 
@@ -230,13 +230,13 @@ public:
 
     const FloatArray *givePlasDef() { return & plasticStrain; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.
@@ -252,7 +252,7 @@ public:
     /// Sets the density of dissipated work to given value.
     void setTempDissWork(double w) { tempDissWork = w; }
     /**
-     * computes the increment of total stress work and of dissipated work
+     * Computes the increment of total stress work and of dissipated work
      * (gf is the dissipation density per unit volume at complete failure,
      * it is needed only to determine which extremely small dissipation
      * can be set to zero to get clean results, but parameter gf can be
@@ -261,8 +261,8 @@ public:
     void computeWork(GaussPoint *gp, MaterialMode mode, double gf);
 #endif
 
-    const char *giveClassName() const { return "RankineMatStatus"; }
-    classType giveClassID() const { return RankineMatStatusClass; }
+    virtual const char *giveClassName() const { return "RankineMatStatus"; }
+    virtual classType giveClassID() const { return RankineMatStatusClass; }
 };
 } // end namespace oofem
 #endif // rankinemat_h

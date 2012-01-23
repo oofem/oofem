@@ -69,7 +69,6 @@ public:
     enum state_flag_values { PM_Elastic, PM_Yielding, PM_Unloading };
 
 protected:
-
     /// Plastic strain vector.
     FloatArray plasticStrainVector;
     FloatArray tempPlasticStrainVector;
@@ -89,15 +88,15 @@ protected:
 
 public:
     MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~MPlasticMaterialStatus();
+    virtual ~MPlasticMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the equilibrated strain vector.
     void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
@@ -129,9 +128,8 @@ public:
     void setTempGamma(const FloatArray &v) { tempGamma = v; }
 
     // definition
-    const char *giveClassName() const { return "MPlasticMaterialStatus"; }
-    classType             giveClassID() const
-    { return MPlasticMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "MPlasticMaterialStatus"; }
+    virtual classType giveClassID() const { return MPlasticMaterialStatusClass; }
 };
 
 /**
@@ -147,8 +145,6 @@ public:
 class MPlasticMaterial : public StructuralMaterial
 {
 protected:
-    // add common (same for every gauss point) material parameters here
-
     /// Reference to bulk (undamaged) material.
     LinearElasticMaterial *linearElasticMaterial;
     /// Number of yield surfaces.
@@ -158,16 +154,16 @@ protected:
     /// Type that allows to distinguish between yield function and loading function.
     enum functType { yieldFunction, loadFunction };
     enum plastType { associatedPT, nonassociatedPT } plType;
-public:
 
+public:
     MPlasticMaterial(int n, Domain *d);
     ~MPlasticMaterial();
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "MPlasticMaterial"; }
-    classType giveClassID() const { return MPlasticMaterialClass; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "MPlasticMaterial"; }
+    virtual classType giveClassID() const { return MPlasticMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -176,10 +172,7 @@ public:
      * Returns true if stiffness matrix of receiver is symmetric.
      * Default implementation returns true.
      */
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
-
-    // non-standard - returns time independent material constant
-    // double   give (int) ;
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseForm, MatResponseMode,
@@ -187,7 +180,7 @@ public:
                                                TimeStep * atTime);
 
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -200,10 +193,9 @@ public:
     virtual int giveSizeOfFullHardeningVarsVector()  { return 0; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 0; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-
     void closestPointReturn(FloatArray &answer, IntArray &activeConditionMap, FloatArray &gamma,
                             MatResponseForm form, GaussPoint *gp,
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
@@ -214,7 +206,6 @@ protected:
                             const FloatArray &totalStrain, FloatArray &plasticStrainR,
                             FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
 
-    // add here some auxiliary functions if needed
     void computeGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &fullStressVector,
                                const FloatArray &fullStressSpaceHardeningVars);
     void computeResidualVector(FloatArray &answer, GaussPoint *gp, const FloatArray &gamma,

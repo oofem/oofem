@@ -54,7 +54,7 @@ protected:
 
 public:
     RefinedElement(Domain *d, int elem, int level);
-    ~RefinedElement();
+    virtual ~RefinedElement();
 
     IntArray *giveFineNodeArray(int node);
     IntArray *giveBoundaryFlagArray(void) { return & boundaryFlag; }

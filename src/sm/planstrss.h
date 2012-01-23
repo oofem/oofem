@@ -63,42 +63,34 @@ protected:
 
 public:
     PlaneStress2d(int n, Domain *d);
-    ~PlaneStress2d();
+    virtual ~PlaneStress2d();
 
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
-    double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
-    double computeVolumeAround(GaussPoint *gp);
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
+    virtual double computeVolumeAround(GaussPoint *gp);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    /**
-     * Computes the element local coordinates from given global coordinates.
-     * @returns nonzero if successful (point inside); zero otherwise
-     */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
 
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    //virtual void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -111,9 +103,9 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
+    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
-    void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     { computeNmatrixAt(aGaussPoint, answer); }
 
     // HuertaRemeshingCriteriaInterface
@@ -136,12 +128,12 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "PlaneStress2d"; }
-    classType giveClassID() const { return PlaneStress2dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    integrationDomain giveIntegrationDomain() { return _Square; }
-    MaterialMode giveMaterialMode() { return _PlaneStress; }
+    virtual const char *giveClassName() const { return "PlaneStress2d"; }
+    virtual classType giveClassID() const { return PlaneStress2dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    virtual integrationDomain giveIntegrationDomain() { return _Square; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
     // edge load support
@@ -155,7 +147,7 @@ protected:
     void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }
     int giveNumberOfIPForMassMtrxIntegration() { return 4; }

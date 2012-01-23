@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/rcsde.h,v 1.5 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 //   ***************************************************************************************************************
 //   *** CLASS ROTATING SMEARED CRACK MODEL WITH TRANSITION TO SCALAR DAMAGE WITH EXPONENTIAL SOFTENING ************
 //   ***************************************************************************************************************
@@ -48,33 +46,11 @@ namespace oofem {
 #define pscm_SDTransitionCoeff 306
 #define RCSDE_DAMAGE_EPS 1.e-4
 
-
-class GaussPoint;
-
-
-//class PlasticSmearedCrackingMaterialStatus : public PerfectlyPlasticMaterialStatus
+/**
+ * This class implements associated Material Status to RCSDEMaterial.
+ */
 class RCSDEMaterialStatus : public RCM2MaterialStatus
 {
-    /*
-     * This class implements associated Material Status to SmearedCrackingMaterail.
-     * It is atribute of matStatusDictionary at every GaussPoint, for which this material
-     * is active.
-     * DESCRIPTION:
-     * Idea used there is that we have variables
-     * describing:
-     *   1) state at previous equilibrium state (variables without temp)
-     * 2) state during searching new equilibrium (variables with temp)
-     * when we start search new state from previous equilibrium one we copy
-     * non-tem variables into temp ones. And after we reach new equilibrium
-     * (now decribed by temp variables) we copy tem-var into non-tepm ones
-     * (see function updateYourself).
-     *
-     * variables description:
-     *
-     * TASK:
-     *
-     */
-
 public:
     enum __rcsdModeType { rcMode, sdMode };
 
@@ -127,51 +103,42 @@ public:
 };
 
 
-
+/**
+ * This class implements a Rotating Crack Model with transition to scalar damage
+ * for fracture in smeared fashion
+ * ( only material stiffness modification is required, no changes in
+ * mesh topology).
+ * Model according to Milan Jirasek RC-SD model.
+ */
 class RCSDEMaterial : public RCM2Material
 {
-    /*
-     *
-     * DESCRIPTION
-     * This class implements a Rotating Crack Model with transition to scalar damage
-     * for fracture in smeared fashion
-     * ( only material stiffness modification is required, no changes in
-     * mesh topology).
-     * Model according to Milan Jirasek RC-SD model.
-     *
-     */
-
 protected:
     double SDTransitionCoeff;
-public:
 
+public:
     RCSDEMaterial(int n, Domain *d);
-    ~RCSDEMaterial();
+    virtual ~RCSDEMaterial();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "RCSDEMaterial"; }
-    classType giveClassID()         const { return RCSDEMaterialClass; }
+    virtual const char *giveClassName() const { return "RCSDEMaterial"; }
+    virtual classType giveClassID() const { return RCSDEMaterialClass; }
 
-    // contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-    // contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    // non-standard - returns time independent material constant
-    double   give(int, GaussPoint *);
+    virtual double give(int aProperty, GaussPoint *gp);
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
-
 
 #ifdef __OOFEG
 #endif
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDEMaterialStatus(1, domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDEMaterialStatus(1, domain, gp); }
 
 protected:
-    double          computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);
+    double  computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to controll process, when
     // we try to find equlibrium state.
@@ -180,16 +147,15 @@ protected:
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *atTime);
 
-    ////
-    double          computeDamageCoeff(double, double, double);
+    double computeDamageCoeff(double, double, double);
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
                                        double crackStrain, int i);
-    //virtual     double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i);
+    //virtual double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i);
     virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i);
     virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
-    //virtual     void   updateStatusForNewCrack( GaussPoint*, int, double);
+    //virtual void updateStatusForNewCrack( GaussPoint*, int, double);
     virtual double computeStrength(GaussPoint *, double);
-    virtual int    checkSizeLimit(GaussPoint *gp, double);
+    virtual int checkSizeLimit(GaussPoint *gp, double);
     ////
 };
 } // end namespace oofem

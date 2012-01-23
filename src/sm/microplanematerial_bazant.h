@@ -57,7 +57,7 @@ public:
      */
     MicroplaneMaterial_Bazant(int n, Domain *d);
     /// Destructor.
-    ~MicroplaneMaterial_Bazant() { }
+    virtual ~MicroplaneMaterial_Bazant() { }
 
     virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
@@ -68,8 +68,8 @@ public:
      */
     virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv) = 0;
 
-    const char *giveClassName() const { return "MicroplaneMaterial_Bazant"; }
-    classType giveClassID() const { return MicroplaneMaterial_BazantClass; }
+    virtual const char *giveClassName() const { return "MicroplaneMaterial_Bazant"; }
+    virtual classType giveClassID() const { return MicroplaneMaterial_BazantClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralMaterialStatus(1, domain, gp); }
 };

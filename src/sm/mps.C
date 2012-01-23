@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2009   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -137,7 +137,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     double fc, c, wc, ac;
 
     /** scaling factor transforming PREDICTED stiffnesses q1, q2, q3 and q4 to desired
-     *  default value is 1.0 = no change	
+     *  default value is 1.0 = no change
      *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
     double stiffnessFactor;
 
@@ -165,7 +165,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         this->predictParametersFrom(fc, c, wc, ac, stiffnessFactor);
 
     } else { // read model parameters for creep
-        IR_GIVE_FIELD(ir, q1, IFT_MPSMaterial_q1, "q1"); 
+        IR_GIVE_FIELD(ir, q1, IFT_MPSMaterial_q1, "q1");
         IR_GIVE_FIELD(ir, q2, IFT_MPSMaterial_q2, "q2");
         IR_GIVE_FIELD(ir, q3, IFT_MPSMaterial_q3, "q3");
         IR_GIVE_FIELD(ir, q4, IFT_MPSMaterial_q4, "q4");
@@ -320,10 +320,10 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac, 
      */
 
     // Basic creep parameters
-    q1  = 1.e-12 * stiffnessFactor * 126.74271 / ( sqrt(fc) ); 
-    q2  = 1.e-12 * stiffnessFactor * 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9); 
-    q3  = 1.e-6 *  stiffnessFactor * 0.29 * __OOFEM_POW(wc, 4.) * q2; 
-    q4  = 1.e-12 * stiffnessFactor * 20.3 * __OOFEM_POW(ac, -0.7); 
+    q1  = 1.e-12 * stiffnessFactor * 126.74271 / ( sqrt(fc) );
+    q2  = 1.e-12 * stiffnessFactor * 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9);
+    q3  = 1.e-6 *  stiffnessFactor * 0.29 * __OOFEM_POW(wc, 4.) * q2;
+    q4  = 1.e-12 * stiffnessFactor * 20.3 * __OOFEM_POW(ac, -0.7);
 
     char buff [ 1024 ];
     sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf", q1, q2, q3, q4);
@@ -389,7 +389,7 @@ MPSMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, doubl
 
     // modulus of elasticity of the first unit of Kelvin chain.
     // (aging elastic spring with retardation time = 0)
-    double lambda0ToPowN = __OOFEM_POW(lambda0, 0.1);  
+    double lambda0ToPowN = __OOFEM_POW(lambda0, 0.1);
     tau0 = __OOFEM_POW(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
     EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0) );
 
@@ -596,13 +596,13 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
 	    // original version
 	    //A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
-	    
+
 	    if ( this->ct == 0. ) {
 	      reductFactor = 1.;
 	    } else if ( ( status->giveTmax() - T_new < 0. ) || atTime->isTheFirstStep() ) {
 	      status->setTmax(T_new);
-	      reductFactor = 1.;   
-	    } else {         
+	      reductFactor = 1.;
+	    } else {
 	      reductFactor = exp( - this->ct * fabs (T_new - status->giveTmax() ) );
 	    }
 

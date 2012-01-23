@@ -57,21 +57,21 @@ protected:
 
 public:
     QSpaceGrad(int n,Domain *d);
-    ~QSpaceGrad() {}
+    virtual ~QSpaceGrad() {}
 
-    IRResultType initializeFrom (InputRecord* ir);
+    virtual IRResultType initializeFrom (InputRecord* ir);
     virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
 
     // definition & identification
-    const char* giveClassName () const { return "QSpaceGrad"; }
-    classType giveClassID () const { return QSpaceGradClass; }
+    virtual const char* giveClassName () const { return "QSpaceGrad"; }
+    virtual classType giveClassID () const { return QSpaceGradClass; }
     virtual int computeNumberOfDofs (EquationID ut) {return 68;}
 
 protected:
-    void computeGaussPoints ();
-    void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    StructuralElement* giveStructuralElement() { return this; }
+    virtual void computeGaussPoints ();
+    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual StructuralElement* giveStructuralElement() { return this; }
 };
 
 }

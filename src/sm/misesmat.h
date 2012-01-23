@@ -79,7 +79,7 @@ protected:
 
 public:
     MisesMat(int n, Domain *d);
-    ~MisesMat();
+    virtual ~MisesMat();
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
@@ -87,16 +87,15 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    /// reads the model parameters from the input file
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    int hasNonLinearBehaviour() { return 1; }
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    const char *giveClassName() const { return "MisesMat"; }
-    classType giveClassID() const { return MisesMatClass; }
+    virtual const char *giveClassName() const { return "MisesMat"; }
+    virtual classType giveClassID() const { return MisesMatClass; }
 
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
@@ -104,14 +103,14 @@ public:
     //virtual int giveSizeOfFullHardeningVarsVector();
     //virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseForm form, MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep);
 
 protected:
@@ -131,9 +130,9 @@ protected:
                                          MatResponseForm form, MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give3dLSMaterialStiffnessMatrix(FloatMatrix &answer,
                                          MatResponseForm form, MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep);
@@ -189,7 +188,7 @@ protected:
 
 public:
     MisesMatStatus(int n, Domain *d, GaussPoint *g);
-    ~MisesMatStatus();
+    virtual ~MisesMatStatus();
 
     void givePlasticStrain(FloatArray &answer) { answer = plasticStrain; }
 
@@ -236,17 +235,17 @@ public:
 
     const FloatArray *givePlasDef() { return & plasticStrain; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
 
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const char *giveClassName() const { return "MisesMatStatus"; }
-    classType giveClassID() const { return MisesMatStatusClass; }
+    virtual const char *giveClassName() const { return "MisesMatStatus"; }
+    virtual classType giveClassID() const { return MisesMatStatusClass; }
 };
 } // end namespace oofem
 #endif // misesmat_h

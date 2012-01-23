@@ -66,8 +66,9 @@ protected:
 
 public:
     RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~RheoChainMaterialStatus();
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual ~RheoChainMaterialStatus();
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     FloatArray *giveHiddenVarsVector(int i) { return hiddenVars [ i - 1 ]; }
     FloatArray *letHiddenVarsVectorBe(int i, FloatArray *);
@@ -78,12 +79,12 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
-    const char *giveClassName() const { return "RheoChainMaterialStatus"; }
-    classType giveClassID() const { return RheoChainMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "RheoChainMaterialStatus"; }
+    virtual classType giveClassID() const { return RheoChainMaterialStatusClass; }
 };
 
 
@@ -129,7 +130,7 @@ protected:
 
 public:
     RheoChainMaterial(int n, Domain *d);
-    ~RheoChainMaterial();
+    virtual ~RheoChainMaterial();
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -155,13 +156,13 @@ public:
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "RheoChainMaterial"; }
-    classType giveClassID() const { return RheoChainMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "RheoChainMaterial"; }
+    virtual classType giveClassID() const { return RheoChainMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode,

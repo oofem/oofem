@@ -52,14 +52,14 @@ protected:
 
 public:
     RankinePlasticMaterial(int n, Domain *d);
-    ~RankinePlasticMaterial();
+    virtual ~RankinePlasticMaterial();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "RankinePlasticMaterial"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual const char *giveClassName() const { return "RankinePlasticMaterial"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
 
@@ -70,20 +70,20 @@ protected:
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
                                const FloatArray &stressSpaceHardeningVars);
 
-    void   computeHardeningReducedModuli(FloatMatrix &answer,
-                                         GaussPoint *gp,
-                                         const FloatArray &strainSpaceHardeningVariables,
-                                         TimeStep *atTime);
+    void computeHardeningReducedModuli(FloatMatrix &answer,
+                                       GaussPoint *gp,
+                                       const FloatArray &strainSpaceHardeningVariables,
+                                       TimeStep *atTime);
     void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
                                      const FloatArray &stressSpaceHardeningVars);
     void computeStressSpaceHardeningVarsReducedGradient(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp,
                                                         const FloatArray &stressVector,
                                                         const FloatArray &stressSpaceHardeningVars);
     int hasHardening() { return 0; }
-    void  computeReducedGradientMatrix(FloatMatrix &answer, int isurf,
-                                       GaussPoint *gp,
-                                       const FloatArray &stressVector,
-                                       const FloatArray &stressSpaceHardeningVars);
+    void computeReducedGradientMatrix(FloatMatrix &answer, int isurf,
+                                      GaussPoint *gp,
+                                      const FloatArray &stressVector,
+                                      const FloatArray &stressSpaceHardeningVars);
 
     void computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &strainSpaceHardeningVariables);

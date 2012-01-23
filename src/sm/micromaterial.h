@@ -64,16 +64,17 @@ public:
     MicroMaterialStatus(int, Domain *d, GaussPoint *gp);
 
     /// Destructor
-    ~MicroMaterialStatus();
-    void initTempStatus();
-    void updateYourself(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual ~MicroMaterialStatus();
 
-    const char *giveClassName() const { return "MicroMaterialStatus"; }
-    classType giveClassID() const { return MicroMaterialStatusClass; }
+    virtual void initTempStatus();
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual const char *giveClassName() const { return "MicroMaterialStatus"; }
+    virtual classType giveClassID() const { return MicroMaterialStatusClass; }
+
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -90,17 +91,17 @@ public:
     /// Constructor
     MicroMaterial(int n, Domain *d);
     /// Destructor
-    ~MicroMaterial();
+    virtual ~MicroMaterial();
 
     std::string inputFileNameMicro;
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "MicroMaterial"; }
+    virtual const char *giveClassName() const { return "MicroMaterial"; }
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     void giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, MatResponseMode rMode, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 

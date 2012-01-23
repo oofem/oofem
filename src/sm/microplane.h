@@ -84,9 +84,9 @@ public:
      */
     Microplane(IntegrationRule *ir, int n, MaterialMode mode);
     /// Destructor
-    ~Microplane();
+    virtual ~Microplane();
 
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     double giveWeight()
     { return ( ( MicroplaneMaterial * ) this->giveMaterial() )->giveMicroplaneIntegrationWeight(this); }
@@ -94,10 +94,10 @@ public:
     void giveMicroplaneNormal(FloatArray &answer)
     { ( ( MicroplaneMaterial * ) this->giveMaterial() )->giveMicroplaneNormal(answer, this); }
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    classType giveClassID() const { return MicroplaneClass; }
-    const char *giveClassName() const { return "Microplane"; }
+    virtual classType giveClassID() const { return MicroplaneClass; }
+    virtual const char *giveClassName() const { return "Microplane"; }
 };
 } // end namespace oofem
 #endif // microplane_h

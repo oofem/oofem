@@ -46,18 +46,19 @@ class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     MaxwellChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~MaxwellChainMaterialStatus() {}
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual ~MaxwellChainMaterialStatus() {}
+
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
-    const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
-    classType giveClassID() const { return MaxwellChainMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
+    virtual classType giveClassID() const { return MaxwellChainMaterialStatusClass; }
 };
 
 
@@ -70,19 +71,19 @@ class MaxwellChainMaterial : public RheoChainMaterial
 {
 public:
     MaxwellChainMaterial(int n, Domain *d);
-    ~MaxwellChainMaterial() {}
+    virtual ~MaxwellChainMaterial() {}
 
     virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour()   { return 0; }
-    const char *giveClassName() const { return "MaxwellChainMaterial"; }
-    classType giveClassID() const { return MaxwellChainMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "MaxwellChainMaterial"; }
+    virtual classType giveClassID() const { return MaxwellChainMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // store & restore context functions
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void giveShrinkageStrainVector(FloatArray &answer,
                                            MatResponseForm form,
@@ -99,9 +100,9 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
     virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
-    void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime);
+    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime);
 
-    double giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem

@@ -96,30 +96,30 @@ public:
         helpPlaneNormal = NULL;
         cs_type = unknownCS;
     }
-    ~OrthotropicLinearElasticMaterial()
+    virtual ~OrthotropicLinearElasticMaterial()
     {
         if ( localCoordinateSystem ) { delete localCoordinateSystem; }
 
         if ( helpPlaneNormal ) { delete helpPlaneNormal; }
     }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
-    classType giveClassID() const { return OrthotropicLinearElasticMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
+    virtual classType giveClassID() const { return OrthotropicLinearElasticMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseForm form, MatResponseMode mode, GaussPoint * gp,
                                        TimeStep *tStep);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /// Computes local 3d stiffness matrix of the receiver.
-    void give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
                                             MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
                                             TimeStep *tStep);
 

@@ -66,25 +66,26 @@ protected:
 
 public:
     RerShell(int n, Domain *d);
-    ~RerShell() { delete GtoLRotationMatrix; }
+    virtual ~RerShell() { delete GtoLRotationMatrix; }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    FloatMatrix *computeGtoLRotationMatrix();
-    int giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual FloatMatrix *computeGtoLRotationMatrix();
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+
     void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
 
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     //
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // layered cross section support functions
-    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                                   GaussPoint *slaveGp, TimeStep *tStep);
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -92,14 +93,14 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                    InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
@@ -114,22 +115,22 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "RerShell"; }
-    classType giveClassID() const { return RerShellClass; }
+    virtual const char *giveClassName() const { return "RerShell"; }
+    virtual classType giveClassID() const { return RerShellClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode() { return _3dShell; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual MaterialMode giveMaterialMode() { return _3dShell; }
 
 protected:
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    //virtual void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    void computeGaussPoints();
-    double giveArea();
+    virtual void computeGaussPoints();
+    virtual double giveArea();
 };
 } // end namespace oofem
 #endif // rershell_h

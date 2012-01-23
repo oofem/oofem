@@ -50,24 +50,24 @@ public:
     /// Constructor
     PlaneStress2dXfem(int n, Domain *d) : PlaneStress2d(n, d), XfemElementInterface(this) { }
     /// Destructor
-    ~PlaneStress2dXfem() { };
+    virtual ~PlaneStress2dXfem() { };
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
-    /// computes the enriched part of the location array
-    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
-    const char *giveClassName() const { return "PlaneStress2dXfem"; }
-    classType giveClassID() const { return PlaneStress2dXfemClass; }
-    int computeNumberOfDofs(EquationID ut);
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
+    /// Computes the enriched part of the location array
+    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
+    virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
+    virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
+    virtual int computeNumberOfDofs(EquationID ut);
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-    void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
-    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
-    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    double computeArea() const;
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
+    virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    virtual double computeArea() const;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

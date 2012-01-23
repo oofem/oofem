@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/rcsd.h,v 1.5 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -49,30 +48,11 @@ namespace oofem {
 
 class GaussPoint;
 
-
-//class PlasticSmearedCrackingMaterialStatus : public PerfectlyPlasticMaterialStatus
+/**
+ * This class implements associated Material Status to RCSDMaterial
+ */
 class RCSDMaterialStatus : public RCM2MaterialStatus
 {
-    /*
-     * This class implements associated Material Status to SmearedCrackingMaterail.
-     * It is atribute of matStatusDictionary at every GaussPoint, for which this material
-     * is active.
-     * DESCRIPTION:
-     * Idea used there is that we have variables
-     * describing:
-     *   1) state at previous equilibrium state (variables without temp)
-     * 2) state during searching new equilibrium (variables with temp)
-     * when we start search new state from previous equilibrium one we copy
-     * non-tem variables into temp ones. And after we reach new equilibrium
-     * (now decribed by temp variables) we copy tem-var into non-tepm ones
-     * (see function updateYourself).
-     *
-     * variables description:
-     *
-     * TASK:
-     *
-     */
-
 public:
     enum rcsdMode { rcMode, sdMode };
 
@@ -82,111 +62,101 @@ protected:
     FloatMatrix Ds0;
     double damageStiffCoeff, depsf, depsp;
     rcsdMode mode, tempMode;
+
 public:
-
     RCSDMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~RCSDMaterialStatus();
+    virtual ~RCSDMaterialStatus();
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     double giveTempMaxEquivStrain() { return tempMaxEquivStrain; }
-    void   setTempMaxEquivStrain(double val) { tempMaxEquivStrain = val; }
+    void setTempMaxEquivStrain(double val) { tempMaxEquivStrain = val; }
     double giveDamageStiffCoeff() { return damageStiffCoeff; }
-    void   setDamageStiffCoeff(double val) { damageStiffCoeff = val; }
+    void setDamageStiffCoeff(double val) { damageStiffCoeff = val; }
     double giveTempDamageCoeff() { return tempDamageCoeff; }
-    void   setTempDamageCoeff(double val) { tempDamageCoeff = val; }
+    void setTempDamageCoeff(double val) { tempDamageCoeff = val; }
     const FloatMatrix *giveDs0Matrix() { return & Ds0; }
-    void   setDs0Matrix(FloatMatrix &mtrx) { Ds0 = mtrx; }
+    void setDs0Matrix(FloatMatrix &mtrx) { Ds0 = mtrx; }
     double giveDamageEpsfCoeff() { return depsf; }
-    void   setDamageEpsfCoeff(double val) { depsf = val; }
+    void setDamageEpsfCoeff(double val) { depsf = val; }
     double giveDamageEpspCoeff() { return depsp; }
-    void   setDamageEpspCoeff(double val) { depsp = val; }
+    void setDamageEpspCoeff(double val) { depsp = val; }
 
     rcsdMode giveTempMode() { return tempMode; }
-    void     setTempMode(rcsdMode mode) { tempMode = mode; }
+    void setTempMode(rcsdMode mode) { tempMode = mode; }
 
     // query for non-tem variables (usefull for postprocessing)
     double giveMaxEquivStrain() { return maxEquivStrain; }
     double giveDamageCoeff() { return damageCoeff; }
 
     rcsdMode giveMode() { return mode; }
+
     // definition
-    const char *giveClassName() const { return "RCSDMaterialStatus"; }
-    classType             giveClassID() const { return RCSDMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "RCSDMaterialStatus"; }
+    virtual classType giveClassID() const { return RCSDMaterialStatusClass; }
 
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *tStep);
 
     // saves current context(state) into stream
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
-
+/**
+ * This class implements a Rotating Crack Model with transition to scalar damage
+ * for fracture in smeared fashion
+ * ( only material stiffness modification is required, no changes in
+ * mesh topology).
+ * Model according to Milan Jirasek RC-SD model.
+ */
 class RCSDMaterial : public RCM2Material
 {
-    /*
-     *
-     * DESCRIPTION
-     * This class implements a Rotating Crack Model with transition to scalar damage
-     * for fracture in smeared fashion
-     * ( only material stiffness modification is required, no changes in
-     * mesh topology).
-     * Model according to Milan Jirasek RC-SD model.
-     *
-     */
-
 protected:
     double SDTransitionCoeff;
-public:
 
+public:
     RCSDMaterial(int n, Domain *d);
-    ~RCSDMaterial();
+    virtual ~RCSDMaterial();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "RCSDMaterial"; }
-    classType giveClassID()         const { return RCSDMaterialClass; }
+    virtual const char *giveClassName() const { return "RCSDMaterial"; }
+    virtual classType giveClassID() const { return RCSDMaterialClass; }
 
-    // contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-    // contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    // non-standard - returns time independent material constant
-    double   give(int, GaussPoint *);
+    virtual double give(int aProperty, GaussPoint *gp);
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
-
 
 #ifdef __OOFEG
 #endif
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDMaterialStatus(1, domain, gp); }
-
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDMaterialStatus(1, domain, gp); }
 
 protected:
-    double          computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);
+    double computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);
     // two functions used to initialize and updating temporary variables in
-    // gp's status. These variables are used to controll process, when
-    // we try to find equlibrium state.
+    // gp's status. These variables are used to control process, when
+    // we try to find equilibrium state.
 
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *atTime);
 
-    ////
-    double          computeDamageCoeff(double, double, double, double);
+    double computeDamageCoeff(double, double, double, double);
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
                                        double crackStrain, int i);
-    //virtual     double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i);
+    //virtual double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i);
     virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i);
     virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
-    //virtual     void   updateStatusForNewCrack( GaussPoint*, int, double);
+    //virtual void updateStatusForNewCrack( GaussPoint*, int, double);
     virtual double computeStrength(GaussPoint *, double);
-    virtual int    checkSizeLimit(GaussPoint *gp, double);
+    virtual int checkSizeLimit(GaussPoint *gp, double);
     ////
 };
 } // end namespace oofem

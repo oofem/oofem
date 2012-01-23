@@ -49,16 +49,16 @@ protected:
 
 public:
     QTrPlaneStressGrad(int n, Domain *d);
-    ~QTrPlaneStressGrad() { }
+    virtual ~QTrPlaneStressGrad() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "QTrPlaneStressGrad"; }
-    classType giveClassID() const { return QTrPlaneStressGradClass; }
+    virtual const char *giveClassName() const { return "QTrPlaneStressGrad"; }
+    virtual classType giveClassID() const { return QTrPlaneStressGradClass; }
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode() { return _PlaneStressGrad; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStressGrad; }
     virtual int computeNumberOfDofs(EquationID ut) { return 15; }
 
 protected:
@@ -68,9 +68,9 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
     virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, stepN, mode); }
-    void computeGaussPoints();
-    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    StructuralElement *giveStructuralElement() { return this; }
+    virtual void computeGaussPoints();
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual StructuralElement *giveStructuralElement() { return this; }
 };
 } // end namespace oofem
 #endif // qtrplstrgrad_h

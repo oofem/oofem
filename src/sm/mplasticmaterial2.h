@@ -55,7 +55,7 @@ class GaussPoint;
  * It is attribute of matStatusDictionary at every GaussPoint, for which this material
  * is active.
  *
- * DESCRIPTION:
+ * Description:
  * Idea used there is that we have variables
  * describing:
  * -# state at previous equilibrium state (variables without temp)
@@ -71,7 +71,6 @@ public:
     enum state_flag_values { PM_Elastic, PM_Yielding, PM_Unloading };
 
 protected:
-
     /// Plastic strain vector.
     FloatArray plasticStrainVector;
     FloatArray tempPlasticStrainVector;
@@ -91,15 +90,15 @@ protected:
 
 public:
     MPlasticMaterial2Status(int n, Domain *d, GaussPoint *g);
-    ~MPlasticMaterial2Status();
+    virtual ~MPlasticMaterial2Status();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the equilibrated strain vector.
     void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
@@ -125,8 +124,8 @@ public:
     void setTempGamma(const FloatArray &v) { tempGamma = v; }
 
     // definition
-    const char *giveClassName() const { return "MPlasticMaterial2Status"; }
-    classType giveClassID() const { return MPlasticMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "MPlasticMaterial2Status"; }
+    virtual classType giveClassID() const { return MPlasticMaterialStatusClass; }
 };
 
 /**
@@ -155,7 +154,7 @@ public:
  * \label{ktc}
  * \lambda^i\ge0,\;f_i\le0,\;{\rm and}\ \lambda^i f_i=0
  * @f]
- * These conditions imply  that in the elastic regime the yield function must remain negative and the rate of the plastic multiplier is zero
+ * These conditions imply that in the elastic regime the yield function must remain negative and the rate of the plastic multiplier is zero
  * (plastic strain remains constant) while in the plastic regime the yield function must be equal to zero (stress remains on the surface) and the rate of the plastic multiplier is positive.
  * The evolution of vector of internal hardening/softening variables @f$ \kappa @f$  is expressed in terms of a general
  * hardening/softening law of the form
@@ -168,8 +167,6 @@ public:
 class MPlasticMaterial2 : public StructuralMaterial
 {
 protected:
-    // add common (same for every gauss point) material parameters here
-
     /// Reference to bulk (undamaged) material.
     LinearElasticMaterial *linearElasticMaterial;
     /// Number of yield surfaces.
@@ -185,24 +182,19 @@ protected:
     std :: set< long >populationSet;
 
 public:
-
     MPlasticMaterial2(int n, Domain *d);
-    ~MPlasticMaterial2();
+    virtual ~MPlasticMaterial2();
 
     // identification and auxiliary functions
-    int hasNonLinearBehaviour() { return 1; }
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "MPlasticMaterial2"; }
-    classType giveClassID() const { return MPlasticMaterialClass; }
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "MPlasticMaterial2"; }
+    virtual classType giveClassID() const { return MPlasticMaterialClass; }
 
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    /**
-     *  Returns true if stiffness matrix of receiver is symmetric
-     *  Default implementation returns true.
-     */
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseForm, MatResponseMode,
@@ -210,7 +202,7 @@ public:
                                                TimeStep * atTime);
 
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -223,7 +215,7 @@ public:
     virtual int giveSizeOfFullHardeningVarsVector()  { return 0; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 0; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
 
@@ -256,11 +248,11 @@ protected:
                                                   GaussPoint *gp,
                                                   TimeStep *atTime);
 
-    void  computeAlgorithmicModuli(FloatMatrix &answer,
-                                   GaussPoint *gp, const FloatMatrix &elasticModuliInverse,
-                                   const FloatArray &gamma, const IntArray &activeConditionMap,
-                                   const FloatArray &fullStressVector,
-                                   const FloatArray &strainSpaceHardeningVariables);
+    void computeAlgorithmicModuli(FloatMatrix &answer,
+                                  GaussPoint *gp, const FloatMatrix &elasticModuliInverse,
+                                  const FloatArray &gamma, const IntArray &activeConditionMap,
+                                  const FloatArray &fullStressVector,
+                                  const FloatArray &strainSpaceHardeningVariables);
 
     /*void  computeDiagModuli(FloatMatrix& answer,
      *                      GaussPoint *gp, FloatMatrix &elasticModuliInverse,

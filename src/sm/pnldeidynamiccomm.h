@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/pnldeidynamiccomm.h,v 1.2 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,18 +32,15 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// Class PNlDEIDynamicComunicator
-//
 
 #ifndef pnldeidynamiccomm_h
 #define pnldeidynamiccomm_h
 
 #ifdef __PARALLEL_MODE
 
- #include "communicator.h"
- #include "pnldeidynamic.h"
- #include "error.h"
+#include "communicator.h"
+#include "pnldeidynamic.h"
+#include "error.h"
 
 namespace oofem {
 /**
@@ -69,7 +65,7 @@ public:
      */
     PNlDEIDynamicComunicator(PNlDEIDynamic *emodel, int rank, int size, PNlDEIDynamicComunicatorMode mode);
     /// Destructor
-    ~PNlDEIDynamicComunicator();
+    virtual ~PNlDEIDynamicComunicator();
 
     /**
      * Service for setting up the communication patterns with other remote problems.
@@ -96,8 +92,8 @@ public:
      * @param map recv map
      */
     int setProblemComunicatorToRecvArry(ProblemComunicator< PNlDEIDynamic > *problemComm, IntArray &map);
-private:
 
+private:
     /**
      * Sorts given communication map, containing local DofManager numbers acording to their
      * corresponding global numbers. It could not be sorted by standard techniques, because
@@ -111,9 +107,9 @@ private:
     /// Partitioning used in quiksort
     int quickSortPartition( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
 
-    /// global dofManager number comparison function
+    /// Global dofManager number comparison function
     int DofManCmp(int, int);
-    /// global element comparison function
+    /// Global element comparison function
     int ElemCmp(int, int);
 
     /**

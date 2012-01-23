@@ -152,30 +152,25 @@ public:
     /// Constructor.
     PNlDEIDynamic(int i, EngngModel *_master = NULL);
     /// Destructor.
-    ~PNlDEIDynamic();
-    // solving
-    /**
-     * Starts solution process. Invokes  for each time step
-     * solveYourselfAt function with time step as parameter. Time steps are created
-     * using giveNextStep function (this will set current time step to newly created,
-     * and updates previous step).
-     */
-    void solveYourself();
+    virtual ~PNlDEIDynamic();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourself();
+    virtual void solveYourselfAt(TimeStep *tStep);
+
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void terminate(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
     /**
      * Assembles the nodal internal forces vector. It assembles the contribution from all elements in
      * particular domain. If runs in parallel mode, the nodal forces for shared nodes are exchanged and
@@ -186,9 +181,9 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification
-    const char *giveClassName() const { return "PNlDEIDynamic"; }
-    classType giveClassID() const { return PNlDEIDynamicClass; }
-    fMode giveFormulation() { return TL; }
+    virtual const char *giveClassName() const { return "PNlDEIDynamic"; }
+    virtual classType giveClassID() const { return PNlDEIDynamicClass; }
+    virtual fMode giveFormulation() { return TL; }
 
     virtual int giveNumberOfFirstStep() { return 0; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
@@ -235,6 +230,7 @@ protected:
      * @return Nonzero if success.
      */
     int exchangeRemoteElementData();
+
 public:
     /**
      * Determines the space necessary for send/receive buffer.

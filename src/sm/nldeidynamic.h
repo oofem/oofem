@@ -107,28 +107,27 @@ public:
         ndomains = 1;
         initFlag = 1;
     }
-    ~NlDEIDynamic();
+    virtual ~NlDEIDynamic();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void terminate(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
     void giveInternalForces(FloatArray &answer, TimeStep *tStep);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
-
     // identification
-    const char *giveClassName() const { return "NlDEIDynamic"; }
-    classType giveClassID() const { return NlDEIDynamicClass; }
-    fMode giveFormulation() { return nonLinFormulation; }
+    virtual const char *giveClassName() const { return "NlDEIDynamic"; }
+    virtual classType giveClassID() const { return NlDEIDynamicClass; }
+    virtual fMode giveFormulation() { return nonLinFormulation; }
 
     virtual int giveNumberOfFirstStep() { return 0; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }

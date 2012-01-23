@@ -52,27 +52,27 @@ protected:
 
 public:
     Q4Axisymm(int n, Domain *d);
-    ~Q4Axisymm();
+    virtual ~Q4Axisymm();
 
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double computeVolumeAround(GaussPoint *gp);
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
-    Interface *giveInterface(InterfaceType) { return NULL; }
-    const char *giveClassName() const { return "Q4axisymm"; }
-    classType giveClassID() const { return Q4AxisymmClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    integrationDomain giveIntegrationDomain() { return _Square; }
-    MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    virtual const char *giveClassName() const { return "Q4axisymm"; }
+    virtual classType giveClassID() const { return Q4AxisymmClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual integrationDomain giveIntegrationDomain() { return _Square; }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
 
     FloatArray *GiveDerivativeKsi(double, double);
     FloatArray *GiveDerivativeEta(double, double);

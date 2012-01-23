@@ -128,35 +128,34 @@ protected:
 
 public:
     NonLinearStatic(int i, EngngModel *_master = NULL);
-    ~NonLinearStatic();
+    virtual ~NonLinearStatic();
 
-    void solveYourself();
-    void solveYourselfAt(TimeStep *tStep);
-    void terminate(TimeStep *tStep);
+    virtual void solveYourself();
+    virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
-    void updateAttributes(TimeStep *tStep);
+    virtual void updateAttributes(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    IRResultType initializeFrom(InputRecord *ir);
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(UnknownType ut, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
 
     // identification
-    const char *giveClassName() const { return "NonLinearStatic"; }
-    classType giveClassID() const { return NonLinearStaticClass; }
-    int isIncremental() { return 1; }
-    fMode giveFormulation() { return nonLinFormulation; }
-    /// Returns nonzero if nonlocal stiffness option activated.
+    virtual const char *giveClassName() const { return "NonLinearStatic"; }
+    virtual classType giveClassID() const { return NonLinearStaticClass; }
+    virtual int isIncremental() { return 1; }
+    virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
@@ -205,7 +204,7 @@ protected:
     void giveInternalForces(FloatArray &answer, double &norm, const FloatArray &DeltaR, Domain *d, TimeStep *tStep);
     void proceedStep(int di, TimeStep *tStep);
     void updateLoadVectors(TimeStep *tStep);
-    void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
+    virtual void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
                                                  SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,

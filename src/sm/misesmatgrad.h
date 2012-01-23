@@ -59,13 +59,13 @@ protected:
 
 public:
     MisesMatGradStatus(int n, Domain *d, GaussPoint *g);
-    ~MisesMatGradStatus();
+    virtual ~MisesMatGradStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     // definition
-    const char *giveClassName() const { return "MisesMatGradStatus"; }
-    classType giveClassID() const { return MisesMatClass; }
+    virtual const char *giveClassName() const { return "MisesMatGradStatus"; }
+    virtual classType giveClassID() const { return MisesMatClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -83,17 +83,17 @@ protected:
 
 public:
     MisesMatGrad(int n, Domain *d);
-    ~MisesMatGrad();
+    virtual ~MisesMatGrad();
 
     // definition
-    const char *giveClassName() const { return "MisesMatGrad"; }
-    classType giveClassID() const { return MisesMatClass; }
-    const char *giveInputRecordName() const { return "MisesMatGrad"; }
+    virtual const char *giveClassName() const { return "MisesMatGrad"; }
+    virtual classType giveClassID() const { return MisesMatClass; }
+    virtual const char *giveInputRecordName() const { return "MisesMatGrad"; }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
     virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
@@ -110,12 +110,12 @@ public:
     void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatGradStatus(1, MisesMat :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatGradStatus(1, MisesMat :: domain, gp); }
 };
 } // end namespace oofem
 #define MisesMatGrad_h

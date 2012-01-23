@@ -62,60 +62,54 @@ protected:
     static FEI3dHexaQuad interpolation;
 
 public:
-    QSpace(int, Domain *);
-    ~QSpace() {}
+    QSpace(int n, Domain *d);
+    virtual ~QSpace() {}
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    double computeVolumeAround(GaussPoint *);
+    virtual double computeVolumeAround(GaussPoint *);
 
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    /// characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
     // definition & identification
-    const char *giveClassName() const { return "QSpace"; }
-    classType giveClassID() const { return QSpaceClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
+    virtual const char *giveClassName() const { return "QSpace"; }
+    virtual classType giveClassID() const { return QSpaceClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 60; }
 
-    integrationDomain giveIntegrationDomain() { return _Cube; }
-    MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual integrationDomain giveIntegrationDomain() { return _Cube; }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 protected:
-    void computeGaussPoints();
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeGaussPoints();
+    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
 
-    int giveApproxOrder() { return 2; }
-    int giveNumberOfIPForMassMtrxIntegration() { return 27; }
+    virtual int giveApproxOrder() { return 2; }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }
 
     /**
      * @name Surface load support

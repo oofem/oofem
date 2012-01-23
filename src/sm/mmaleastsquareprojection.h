@@ -86,7 +86,7 @@ public:
     /// Constructor
     MMALeastSquareProjection();
     /// Destructor
-    ~MMALeastSquareProjection();
+    virtual ~MMALeastSquareProjection();
 
     virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep);
 
@@ -98,11 +98,11 @@ public:
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    const char *giveClassName() const { return "MMALeastSquareProjectionPatchType"; }
+    virtual const char *giveClassName() const { return "MMALeastSquareProjectionPatchType"; }
 
 protected:
     void computePolynomialTerms(FloatArray &P, FloatArray &coords, MMALeastSquareProjectionPatchType type);
-    int  giveNumberOfUnknownPolynomialCoefficients(MMALeastSquareProjectionPatchType regType);
+    int giveNumberOfUnknownPolynomialCoefficients(MMALeastSquareProjectionPatchType regType);
 };
 } // end namespace oofem
 #endif // mmaleastsquareprojection_h

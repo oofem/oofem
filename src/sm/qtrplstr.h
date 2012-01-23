@@ -61,20 +61,20 @@ protected:
 
 public:
     QTrPlaneStress2d(int n, Domain *d);
-    ~QTrPlaneStress2d() { }
+    virtual ~QTrPlaneStress2d() { }
 
     virtual int  computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
-    FEInterpolation *giveInterpolation() { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
 
@@ -86,22 +86,22 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "QTrPlaneStress2d"; }
-    classType giveClassID() const { return QTrPlaneStress2dClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
+    virtual classType giveClassID() const { return QTrPlaneStress2dClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    //void SPRNodalRecoveryMI_giveIPValue(FloatArray& answer, int ipNum, InternalStateType type);
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    //virtual void SPRNodalRecoveryMI_giveIPValue(FloatArray& answer, int ipNum, InternalStateType type);
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
@@ -110,16 +110,15 @@ public:
                                                                  FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode() { return _PlaneStress; }
-
+    virtual integrationDomain  giveIntegrationDomain() { return _Triangle; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeGaussPoints();
-    int giveApproxOrder() { return 2; }
-    int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
+    virtual int giveApproxOrder() { return 2; }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
     void computeDerivativeKsi(FloatArray &, double, double);
     void computeDerivativeEta(FloatArray &, double, double);

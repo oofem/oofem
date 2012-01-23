@@ -79,13 +79,13 @@ protected:
 public:
 
     Masonry02(int n, Domain *d);
-    ~Masonry02();
+    virtual ~Masonry02();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    const char *giveClassName() const { return "Masonry02"; }
-    classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual const char *giveClassName() const { return "Masonry02"; }
+    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -109,7 +109,7 @@ public:
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 
 protected:
@@ -118,10 +118,10 @@ protected:
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
-    double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
+    virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
                                const FloatArray &stressSpaceHardeningVars);
 
-    void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
+    virtual void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
                                      const FloatArray &stressSpaceHardeningVars);
     virtual void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                                      const FloatArray &stress, const FloatArray &dlambda,
@@ -138,7 +138,7 @@ protected:
                                                         const FloatArray &fullStressVector,
                                                         const FloatArray &strainSpaceHardeningVars,
                                                         const FloatArray &gamma);
-    int hasHardening() { return 1; }
+    virtual int hasHardening() { return 1; }
 
     virtual void  computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
                                                  const FloatArray &strainSpaceHardeningVariables);

@@ -60,11 +60,11 @@ public:
     /**
      * Destructor.
      */
-    ~Particle(void) {}
+    virtual ~Particle(void) {}
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "Particle"; }
-    classType giveClassID() const { return ParticleClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "Particle"; }
+    virtual classType giveClassID() const { return ParticleClass; }
 
     /// Returns the radius of the particle.
     double giveRadius() const { return radius; }

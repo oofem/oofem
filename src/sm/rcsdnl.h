@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/rcsdnl.h,v 1.8 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -44,73 +43,51 @@
 #include "structuralnonlocalmaterialext.h"
 
 namespace oofem {
-class GaussPoint;
 
-
+/**
+ * This class implements associated Material Status to RCSDNLMaterial.
+ */
 class RCSDNLMaterialStatus : public RCSDEMaterialStatus, public StructuralNonlocalMaterialStatusExtensionInterface
 {
-    /*
-     * This class implements associated Material Status to RCSDNLMaterial.
-     *
-     */
-
 protected:
-
     FloatArray nonlocalStrainVector, tempNonlocalStrainVector, localStrainVectorForAverage;
 
 public:
-
     RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~RCSDNLMaterialStatus();
+    virtual ~RCSDNLMaterialStatus();
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    const FloatArray &giveNonlocalStrainVector()            { return nonlocalStrainVector; }
-    const FloatArray &giveTempNonlocalStrainVector()        { return tempNonlocalStrainVector; }
+    const FloatArray &giveNonlocalStrainVector() { return nonlocalStrainVector; }
+    const FloatArray &giveTempNonlocalStrainVector() { return tempNonlocalStrainVector; }
     void   setTempNonlocalStrainVector(const FloatArray &ls) { tempNonlocalStrainVector = ls; }
 
-    const FloatArray &giveLocalStrainVectorForAverage()     { return localStrainVectorForAverage; }
-    void   setLocalStrainVectorForAverage(const FloatArray &ls) { localStrainVectorForAverage = ls; }
+    const FloatArray &giveLocalStrainVectorForAverage() { return localStrainVectorForAverage; }
+    void setLocalStrainVectorForAverage(const FloatArray &ls) { localStrainVectorForAverage = ls; }
 
     // definition
-    const char *giveClassName() const { return "RCSDNLMaterialStatus"; }
-    classType             giveClassID() const { return RCSDNLMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "RCSDNLMaterialStatus"; }
+    virtual classType giveClassID() const { return RCSDNLMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
 
     // saves current context(state) into stream
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Interface requesting service.
-     * In the case of nonlocal constitutive models,
-     * the use of multiple inheritance is assumed. Typically, the class representing nonlocal
-     * constitutive model status is derived both from class representing local status and from class
-     * NonlocalMaterialStatusExtension or from one of its derived classes
-     * (which declare services and variables corresponding to specific analysis type).
-     * @return In both cases, this function returns pointer to this object, obtained by
-     * returning adress of component or using pointer conversion from receiver to base class
-     * NonlocalMaterialStatusExtension. If no nonlocal extension exists, NULL pointer is returned.
-     */
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
     virtual Interface *giveInterface(InterfaceType);
 };
 
 
-
+/**
+ * This class implements a Nonlocal Rotating Crack Model with transition to scalar damage
+ * for fracture in smeared fashion
+ * Only material stiffness modification is required, no changes in mesh topology.
+ * Model according to Milan Jirasek RC-SD model.
+ */
 class RCSDNLMaterial : public RCSDEMaterial, public StructuralNonlocalMaterialExtensionInterface
 {
-    /*
-     *
-     * DESCRIPTION
-     * This class implements a Nonlocal Rotating Crack Model with transition to scalar damage
-     * for fracture in smeared fashion
-     * ( only material stiffness modification is required, no changes in
-     * mesh topology).
-     * Model according to Milan Jirasek RC-SD model.
-     *
-     */
-
 protected:
     /**
      * Nondimensional parameter controlling the transition between rc and sd model,
@@ -128,25 +105,20 @@ protected:
     double ef;
 
 public:
-
     RCSDNLMaterial(int n, Domain *d);
-    ~RCSDNLMaterial();
+    virtual ~RCSDNLMaterial();
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "RCSDNLMaterial"; }
-    classType giveClassID()         const { return RCSDNLMaterialClass; }
+    virtual const char *giveClassName() const { return "RCSDNLMaterial"; }
+    virtual classType giveClassID() const { return RCSDNLMaterialClass; }
 
-    /** Interface requesting service */
-    virtual Interface *giveInterface(InterfaceType);
-    // contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-    // contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual Interface *giveInterface(InterfaceType t);
 
-    //virtual     void   updateStatusForNewCrack( GaussPoint*, int, double);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     /**
@@ -161,17 +133,7 @@ public:
      */
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
 
-    /**
-     * Computes the value of nonlocal weight function in given point.
-     * @param src coordinates of source point.
-     * @param coord coordinates of point, where nonlocal weight function is evaluated.
-     * @return value of weight function.
-     */
     virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
-    /**
-     * Determines, whether receiver has bounded weighting function (limited support)
-     * @return true if weighting function bounded, zero otherwise
-     */
     virtual int hasBoundedSupport() { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
@@ -180,38 +142,17 @@ public:
 
 
 #ifdef __PARALLEL_MODE
-    /**
-     * Updates domain before nonloc average (using updateDomainBeforeNonlocAverage service)
-     * to ensure, that the localStrainVectorForAverage variable is correctly updated and
-     * pack this localStrainVectorForAverage into given buffer.
-     * @see Material::packUnknowns for description.
-     * @param buff communication buffer
-     * @param stepN solution step
-     * @param ip integration point
-     */
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    /**
-     * Unpack localStrainVectorForAverage value from given buffer.
-     * @see Material::unpackAndUpdateUnknowns service.
-     * @param buff communication buffer
-     * @param stepN solution step.
-     * @param ip integration point
-     */
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
-    /**
-     * Estimates the necessary pack size to hold all packed data of receiver.
-     */
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDNLMaterialStatus(1, RCSDEMaterial :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDNLMaterialStatus(1, RCSDEMaterial :: domain, gp); }
 
 protected:
-    double giveCharacteristicElementLenght(GaussPoint *, const FloatArray &) { return 1.0; }
-    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
-    double computeStrength(GaussPoint *, double)  { return this->Ft; }
-
-    ////
+    virtual double giveCharacteristicElementLenght(GaussPoint *, const FloatArray &) { return 1.0; }
+    virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
+    virtual double computeStrength(GaussPoint *, double)  { return this->Ft; }
 };
 } // end namespace oofem
 #endif // rcsdnl_h

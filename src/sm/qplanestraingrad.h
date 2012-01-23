@@ -49,17 +49,16 @@ protected:
 
 public:
     QPlaneStrainGrad(int n, Domain *d);
-    ~QPlaneStrainGrad() { }
+    virtual ~QPlaneStrainGrad() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "QPlaneStrainGrad"; }
-    classType giveClassID() const { return QPlaneStrainGradClass; }
+    virtual const char *giveClassName() const { return "QPlaneStrainGrad"; }
+    virtual classType giveClassID() const { return QPlaneStrainGradClass; }
 
-
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode giveMaterialMode() { return _PlaneStrainGrad; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
+    virtual integrationDomain  giveIntegrationDomain() { return _Square; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrainGrad; }
     virtual int computeNumberOfDofs(EquationID ut) { return 20; }
 
 protected:
@@ -69,9 +68,9 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
     virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, stepN, mode); }
-    void computeGaussPoints();
-    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    StructuralElement *giveStructuralElement() { return this; }
+    virtual void computeGaussPoints();
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual StructuralElement *giveStructuralElement() { return this; }
 };
 } // end namespace oofem
 #endif // qplanestraingrad_h
