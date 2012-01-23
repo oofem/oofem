@@ -59,12 +59,12 @@ public:
     /// Destructor
     virtual ~TF1()  { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
-    classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
-    const char *giveClassName() const { return "TF1"; }
+    virtual classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
+    virtual const char *giveClassName() const { return "TF1"; }
 
 };
 } // end namespace oofem

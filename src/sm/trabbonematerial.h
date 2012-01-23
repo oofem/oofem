@@ -64,7 +64,7 @@ protected:
 
 public:
     TrabBoneMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~TrabBoneMaterialStatus();
+    virtual ~TrabBoneMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -91,14 +91,14 @@ public:
 
 
     // definition
-    const char *giveClassName() const { return "TrabBoneMaterialStatus"; }
-    classType giveClassID() const { return TrabBoneMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "TrabBoneMaterialStatus"; }
+    virtual classType giveClassID() const { return TrabBoneMaterialStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 
@@ -133,12 +133,12 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
-    const char *giveClassName() const { return "TrabBoneMaterial"; }
-    classType giveClassID() const { return TrabBoneMaterialClass; }
+    virtual const char *giveClassName() const { return "TrabBoneMaterial"; }
+    virtual classType giveClassID() const { return TrabBoneMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
 #define trabbonematerial_h

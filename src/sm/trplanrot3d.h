@@ -75,7 +75,7 @@ protected:
 
 public:
     TrPlaneStrRot3d(int n, Domain *d);
-    ~TrPlaneStrRot3d() { delete GtoLRotationMatrix; }
+    virtual ~TrPlaneStrRot3d() { delete GtoLRotationMatrix; }
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
@@ -84,18 +84,17 @@ protected:
     GaussPoint *giveMiddleGaussPoint();
 
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
 
     friend class TR_SHELL01;
 
 public:
-
     // definition & identification
-    const char *giveClassName() const { return "TrPlaneStrRot3d"; }
-    classType giveClassID() const { return TrPlaneStrRot3dClass; }
+    virtual const char *giveClassName() const { return "TrPlaneStrRot3d"; }
+    virtual classType giveClassID() const { return TrPlaneStrRot3dClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual int computeNumberOfGlobalDofs(EquationID ut) { return 18; }
@@ -104,7 +103,7 @@ public:
     const FloatMatrix *computeGtoLRotationMatrix();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif //  trplanrot3d_h

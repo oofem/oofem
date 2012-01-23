@@ -66,9 +66,9 @@ protected:
 
 public:
     TrabBone3DStatus(int n, Domain *d, GaussPoint *g);
-    ~TrabBone3DStatus();
+    virtual ~TrabBone3DStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     double giveKappa();
     double giveTempKappa();
@@ -102,14 +102,14 @@ public:
     void setNsubsteps(int n) { nss = n; }
 
     // definition
-    const char *giveClassName() const { return "TrabBone3DStatus"; }
-    classType giveClassID() const { return TrabBone3DStatusClass; }
+    virtual const char *giveClassName() const { return "TrabBone3DStatus"; }
+    virtual classType giveClassID() const { return TrabBone3DStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 /**
@@ -126,7 +126,7 @@ protected:
 public:
     TrabBone3D(int n, Domain *d);
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
     double evaluateCurrentYieldStress(const double kappa);
     double evaluateCurrentPlasticModulus(const double kappa);
     bool projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status);
@@ -166,12 +166,12 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
-    const char *giveClassName() const { return "TrabBone3D"; }
-    classType giveClassID() const { return TrabBone3DClass; }
+    virtual const char *giveClassName() const { return "TrabBone3D"; }
+    virtual classType giveClassID() const { return TrabBone3DClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);

@@ -71,8 +71,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "SymmetryBarrier"; }
-    classType giveClassID() const { return NonlocalBarrierClass; }
+    virtual const char *giveClassName() const { return "SymmetryBarrier"; }
+    virtual classType giveClassID() const { return NonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // symmetrybarrier_h

@@ -79,13 +79,10 @@ public:
      */
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
-    classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
-    const char *giveClassName() const { return "UserDefinedTemperatureField"; }
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     * Must be implemented in derived classes
-     */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual classType giveClassID() const { return UserDefinedTemperatureFieldClass; }
+    virtual const char *giveClassName() const { return "UserDefinedTemperatureField"; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem
 #endif // usrdeftempfield_h

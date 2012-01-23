@@ -66,9 +66,9 @@ protected:
 
 public:
     TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g);
-    ~TrabBoneEmbedStatus();
+    virtual ~TrabBoneEmbedStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     double giveTempTSED();
 
@@ -79,17 +79,15 @@ public:
     void setSmtrx(FloatMatrix smt) { smtrx = smt; }
 
     // definition
-    const char *giveClassName() const { return "TrabBoneEmbedStatus"; }
-    classType giveClassID() const { return TrabBoneEmbedStatusClass; }
-
+    virtual const char *giveClassName() const { return "TrabBoneEmbedStatus"; }
+    virtual classType giveClassID() const { return TrabBoneEmbedStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
-
 
 
 /**
@@ -123,12 +121,12 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode);
 
-    const char *giveClassName() const { return "TrabBoneEmbed"; }
-    classType giveClassID() const { return TrabBoneEmbedClass; }
+    virtual const char *giveClassName() const { return "TrabBoneEmbed"; }
+    virtual classType giveClassID() const { return TrabBoneEmbedClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);

@@ -41,7 +41,6 @@
 
 
 namespace oofem {
-/// CONSTRUCTOR
 TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     plate    = new CCTPlate3d(-1, aDomain);

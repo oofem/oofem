@@ -62,9 +62,9 @@ protected:
 
 public:
     TrabBoneNLEmbedStatus(int n, Domain *d, GaussPoint *g);
-    ~TrabBoneNLEmbedStatus();
+    virtual ~TrabBoneNLEmbedStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Gives the local cumulative plastic strain.
     double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
@@ -72,14 +72,14 @@ public:
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     // definition
-    const char *giveClassName() const { return "TrabBoneNLEmbedStatus"; }
-    classType giveClassID() const { return TrabBoneEmbedStatusClass; }
+    virtual const char *giveClassName() const { return "TrabBoneNLEmbedStatus"; }
+    virtual classType giveClassID() const { return TrabBoneEmbedStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual Interface *giveInterface(InterfaceType it);
 };
@@ -95,13 +95,13 @@ protected:
 
 public:
     TrabBoneNLEmbed(int n, Domain *d);
-    ~TrabBoneNLEmbed();
+    virtual ~TrabBoneNLEmbed();
 
-    const char *giveClassName() const { return "TrabBoneNLEmbed"; }
-    classType giveClassID() const { return TrabBoneEmbedClass; }
-    const char *giveInputRecordName() const { return "trabbonenlembed"; }
+    virtual const char *giveClassName() const { return "TrabBoneNLEmbed"; }
+    virtual classType giveClassID() const { return TrabBoneEmbedClass; }
+    virtual const char *giveInputRecordName() const { return "trabbonenlembed"; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
@@ -109,7 +109,7 @@ public:
 
     virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
     void computeLocalCumPlastStrain(double &alpha, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
     {
@@ -125,8 +125,7 @@ public:
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
 protected:
-    // Creates the corresponding material status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNLEmbedStatus(1, TrabBoneEmbed :: domain, gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNLEmbedStatus(1, TrabBoneEmbed :: domain, gp); }
 };
 } // end namespace oofem
 #define trabonenl3d_h

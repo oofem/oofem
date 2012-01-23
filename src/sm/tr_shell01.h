@@ -60,7 +60,7 @@ public:
     /// Constructor
     TR_SHELL01(int n, Domain *d);
     /// Destructor
-    ~TR_SHELL01() {
+    virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
     }
@@ -70,16 +70,16 @@ public:
     { plate->giveDofManDofIDMask(inode, ut, answer); }
 
     // definition & identification
-    const char *giveClassName() const { return "TR_SHELL01"; }
-    classType giveClassID() const { return TR_SHELL01Class; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "TR_SHELL01"; }
+    virtual classType giveClassID() const { return TR_SHELL01Class; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
 
-    void updateYourself(TimeStep *tStep);
-    void updateInternalState(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -88,36 +88,37 @@ public:
     //void drawInternalState(oofegGraphicContext &);
 #endif
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
-    MaterialMode giveMaterialMode() { return _Unknown; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual MaterialMode giveMaterialMode() { return _Unknown; }
 
 protected:
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
     { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &)
+    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &)
     { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
 
     /// @todo In time delete
 protected:
-    void computeGaussPoints()
+    virtual void computeGaussPoints()
     { _error("TR_SHELL01 :: computeGaussPoints: calling of this function is not allowed"); }
-    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+    virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
     { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
-    void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+    virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+
 public:
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
 };
 } // end namespace oofem

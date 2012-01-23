@@ -50,37 +50,37 @@ protected:
 
 public:
     TrPlaneStrRot(int, Domain *);
-    ~TrPlaneStrRot() { }
+    virtual ~TrPlaneStrRot() { }
 
 protected:
-    void computeGaussPoints();
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual double giveArea();
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
 
 public:
     // definition & identification
-    const char *giveClassName() const { return "TrPlaneStrRot"; }
-    classType giveClassID() const { return TrPlaneStrRotClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    MaterialMode giveMaterialMode() { return _PlaneStressRot; }
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    virtual const char *giveClassName() const { return "TrPlaneStrRot"; }
+    virtual classType giveClassID() const { return TrPlaneStrRotClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
+    virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
 
-    virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
 
     FloatArray *GivePitch();
     FloatArray *GiveDerivativeUX(GaussPoint *gp);
     FloatArray *GiveDerivativeVX(GaussPoint *gp);
     FloatArray *GiveDerivativeUY(GaussPoint *gp);
     FloatArray *GiveDerivativeVY(GaussPoint *gp);
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 };

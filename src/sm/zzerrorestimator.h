@@ -97,7 +97,7 @@ public:
         nodalRecoveryType = ZZRecovery;
     }
     /// Destructor
-    ~ZZErrorEstimator() { }
+    virtual ~ZZErrorEstimator() { }
 
     virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
@@ -106,8 +106,8 @@ public:
     virtual RemeshingCriteria *giveRemeshingCrit();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "ZZErrorEstimator"; }
-    classType giveClassID() const { return ZZErrorEstimatorClass; }
+    virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
+    virtual classType giveClassID() const { return ZZErrorEstimatorClass; }
 };
 
 
@@ -173,7 +173,7 @@ public:
     /// Constructor
     ZZRemeshingCriteria(int n, ErrorEstimator *e);
     /// Destructor
-    ~ZZRemeshingCriteria() { }
+    virtual ~ZZRemeshingCriteria() { }
 
 
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
@@ -182,8 +182,8 @@ public:
     virtual int estimateMeshDensities(TimeStep *tStep);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "ZZErrorEstimator"; }
-    classType giveClassID() const { return ZZRemeshingCriteriaClass; }
+    virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
+    virtual classType giveClassID() const { return ZZRemeshingCriteriaClass; }
 };
 
 /**

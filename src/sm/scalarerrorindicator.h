@@ -68,8 +68,8 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "ScalarErrorIndicator"; }
-    classType giveClassID() const { return ScalarErrorIndicatorClass; }
+    virtual const char *giveClassName() const { return "ScalarErrorIndicator"; }
+    virtual classType giveClassID() const { return ScalarErrorIndicatorClass; }
 };
 } // end namespace oofem
 #endif // scalarerrorindicator_h

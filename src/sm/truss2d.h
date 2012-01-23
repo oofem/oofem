@@ -60,22 +60,22 @@ protected:
 
 public:
     Truss2d(int n, Domain *d);
-    ~Truss2d() { }
+    virtual ~Truss2d() { }
 
-    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    int giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 4; }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
     { return this->giveLength(); }
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
@@ -85,29 +85,29 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "Truss2d"; }
-    classType giveClassID() const { return Truss2dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-    integrationDomain giveIntegrationDomain() { return _Line; }
-    MaterialMode giveMaterialMode() { return _1dMat; }
+    virtual const char *giveClassName() const { return "Truss2d"; }
+    virtual classType giveClassID() const { return Truss2dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+    virtual MaterialMode giveMaterialMode() { return _1dMat; }
 
 protected:
     // edge load support
     void resolveCoordIndices(int &c1, int &c2);
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
-    void computeGaussPoints();
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
+    virtual void computeGaussPoints();
 
     double giveLength();
     double givePitch();
-    int giveApproxOrder() { return 1; }
+    virtual int giveApproxOrder() { return 1; }
 };
 } // end namespace oofem
 #endif // truss2d_h

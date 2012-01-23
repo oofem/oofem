@@ -61,17 +61,17 @@ protected:
 
 public:
     TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g);
-    ~TrabBoneNL3DStatus();
+    virtual ~TrabBoneNL3DStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
     const FloatArray *giveLTangentContrib();
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     // definition
-    const char *giveClassName() const { return "TrabBoneNL3DStatus"; }
-    classType giveClassID() const { return TrabBone3DStatusClass; }
+    virtual const char *giveClassName() const { return "TrabBoneNL3DStatus"; }
+    virtual classType giveClassID() const { return TrabBone3DStatusClass; }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
@@ -92,13 +92,13 @@ protected:
 
 public:
     TrabBoneNL3D(int n, Domain *d);
-    ~TrabBoneNL3D();
+    virtual ~TrabBoneNL3D();
 
-    const char *giveClassName() const { return "TrabBoneNL3D"; }
-    classType giveClassID() const { return TrabBone3DClass; }
-    const char *giveInputRecordName() const { return "trabbonenl3d"; }
+    virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
+    virtual classType giveClassID() const { return TrabBone3DClass; }
+    virtual const char *giveInputRecordName() const { return "trabbonenl3d"; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual Interface *giveInterface(InterfaceType it);
@@ -153,7 +153,7 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 
@@ -165,11 +165,9 @@ public:
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 
 protected:

@@ -48,18 +48,17 @@ class Steel1 : public PerfectlyPlasticMaterial
 {
 public:
     Steel1(int n, Domain *d);
-    ~Steel1() { }
+    virtual ~Steel1() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "Steel1MaterialClass"; }
-    classType giveClassID() const { return Steel1MaterialClass; }
-    void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) { }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "Steel1MaterialClass"; }
+    virtual classType giveClassID() const { return Steel1MaterialClass; }
+    virtual void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) { }
+
 protected:
-
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
-
     virtual double      computeYCValueAt(GaussPoint *, FloatArray *, FloatArray *);
     virtual FloatArray *GiveYCStressGradient(GaussPoint *, FloatArray *, FloatArray *);
     virtual FloatArray *GiveLCStressGradient(GaussPoint *, FloatArray *, FloatArray *);
