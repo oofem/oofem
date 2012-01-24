@@ -53,13 +53,13 @@ modules.
 [3]   Installation (Unix, Linux)
 ==============================================================================
 - configure and build oofem-debug target without any external modules.
-  (if you want to inlude external modules, you have to add module library
+  (if you want to include external modules, you have to add module library
    manually by editing Jamroot configuration file).
 - change directory to python located in oofem top directory.
 - make a symbolic link named "boost" in this directory, pointing to your 
   Boost root directory. 
-  Or, alternatively, edit Jamroot and oost-build.jam files and adjust path
-  refering to the Boost root directory.
+  Or, alternatively, edit Jamroot and boost-build.jam files and adjust path
+  referring to the Boost root directory.
 
 - run bjam
 
@@ -87,7 +87,7 @@ modules.
 ==============================================================================
 3.1 Install the latest boost libraries distribution from http://www.boost.org/users/download/
     - extract the boost library archive into oofem top directory 
-      (eg. boost_library_1_48 directory with boost lib installation should be created)
+      (e.g., boost_library_1_48 directory with boost lib installation should be created)
 
 3.2 Build Boost library 
     - change your current directory to the Boost root directory
@@ -95,9 +95,9 @@ modules.
     - run ".\b2 --with-python"
     #the next is manual fix of bug in boost python liking procedure
     - copy stage\lib\boost_python-vc100-mt-gd-1_48.lib to the c:\python26\libs directory 
-      (since jam calls LINKer with that path included as lib path) 
+      (since jam calls Linker with that path included as lib path) 
 
-3.3 Build and install bost build 
+3.3 Build and install boost build 
     - go to the directory tools\build\v2 of your boost library dir
     - run "bootstrap.bat"
     - run "b2 install --prefix=PREFIX", where PREFIX is the directory where you want
@@ -111,7 +111,8 @@ modules.
       > set Path=C:\Program Files\Python26;C:\Program Files\Python26\libs;.....
       > set PYTHONPATH=bin\msvc-10.0\debug
 
-    - in the same command promp window, set these two variables as shown in listing (could be copied and pasted)
+    - in the same command prompt window, set these two variables as shown in 
+      listing (could be copied and pasted)
     - run the simple example by issuing "python test01.py"
 
 [4] Further documentation
