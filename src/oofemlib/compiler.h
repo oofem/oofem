@@ -38,8 +38,6 @@
 
 #include "oofemcfg.h"
 
-namespace oofem {
-
 #ifndef HAVE_STRNCASECMP
 int strncasecmp(const char *s1, const char *s2, int count);
 #endif
@@ -49,5 +47,4 @@ int strncasecmp(const char *s1, const char *s2, int count);
 #ifdef _MSC_VER // If Microsoft C do not complain about names longer than 255
  #pragma warning( disable : 4786 )
 #endif
-} // end namespace oofem
 #endif // compiler_h

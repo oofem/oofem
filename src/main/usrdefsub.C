@@ -33,6 +33,7 @@
  */
 
 #include "usrdefsub.h"
+#include "compiler.h" // to supply missing strncasecmp on some platforms
 #ifndef __MAKEDEPEND
  #include <string.h>
  #ifdef HAVE_STRINGS_H
