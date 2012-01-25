@@ -206,7 +206,7 @@ RigidArmNode :: computeMasterContribution()
     }
 
     if ( hasLocalCS() ) {
-        xyz.rotatedWith(* this->localCoordinateSystem, 'n');
+        xyz.rotatedWith(* this->localCoordinateSystem, 't');
     }
 
     for ( i = 1; i <= numberOfDofs; i++ ) {
