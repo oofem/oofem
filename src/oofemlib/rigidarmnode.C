@@ -206,7 +206,8 @@ RigidArmNode :: computeMasterContribution()
     }
 
     if ( hasLocalCS() ) {
-        xyz.rotatedWith(* this->localCoordinateSystem, 't');
+        // LCS is stored as global-to-local, so LCS*xyz_glob = xyz_loc
+        xyz.rotatedWith(* this->localCoordinateSystem, 'n');
     }
 
     for ( i = 1; i <= numberOfDofs; i++ ) {

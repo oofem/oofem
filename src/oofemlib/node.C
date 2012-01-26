@@ -190,7 +190,7 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
             // Transform from Global to Local c.s.
             if ( loadN->giveCoordSystMode() == NodalLoad :: BL_GlobalMode ) {
                 if ( this->computeL2GTransformation(L2G, dofIDarry) ) {
-                    contribution.rotatedWith(L2G, 'n');
+                    contribution.rotatedWith(L2G, 't');
                 }
             }
             answer.add(contribution);

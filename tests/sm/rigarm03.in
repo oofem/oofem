@@ -15,28 +15,28 @@ Beam2d 2 nodes 2 2 3 mat 1 crosssect 1
 SimpleCS 1 area 1. Iy 1.0 beamShearCoeff 1.e18
 IsoLE 1 d 1. E 2. n 0.2 tAlpha 1.2e-5
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-NodalLoad          2 loadTimeFunction 1 Components 3 3.0 0.0 0.0
+NodalLoad          2 loadTimeFunction 1 Components 3 3.0 0.0 0.0 cstype 0
 ConstantFunction 1 f(t) 1.
 #
 # exact solution
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions
-#REACTION tStep 1 number 1 dof 1 value -3.2141
-#REACTION tStep 1 number 1 dof 2 value  0.43301
-#REACTION tStep 1 number 3 dof 2 value  1.2321
+#REACTION tStep 1 number 1 dof 1 value -2.71132
+#REACTION tStep 1 number 1 dof 2 value  0.5
+#REACTION tStep 1 number 3 dof 2 value -0.57735
 ##
 ## check all nodes
 #NODE tStep 1 number 1 dof 1 unknown d value 0.0
 #NODE tStep 1 number 1 dof 2 unknown d value 0.0
-#NODE tStep 1 number 1 dof 3 unknown d value 1.25259123
-#NODE tStep 1 number 3 dof 1 unknown d value 5.56698849
+#NODE tStep 1 number 1 dof 3 unknown d value 1.15769
+#NODE tStep 1 number 3 dof 1 unknown d value 4.6961439
 #NODE tStep 1 number 3 dof 2 unknown d value 0.0
 ## check element no. 3 force vector
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value -3.2141
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 2  value  0.43301
+#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value -2.71132
+#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 2  value  0.5
 #BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 3  value  0.0
-#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 4  value  3.2141
-#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 5  value -0.43301
-#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 6  value -1.2990
+#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 4  value  2.71132
+#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 5  value -0.5
+#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 6  value -1.5
 #%END_CHECK%
