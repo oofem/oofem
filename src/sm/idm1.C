@@ -206,9 +206,9 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
       IR_GIVE_OPTIONAL_FIELD(ir, ecsm, IFT_IsotropicDamageMaterial1_md, "ecsm");
       switch ( ecsm ) {
       case 1: ecsMethod = ECSM_SquareRootOfArea; break;
-      case 2: ecsMethod = ECSM_ProjectionCentered; break;      
-      case 3: ecsMethod = ECSM_Oliver1; break;      
-      case 4: ecsMethod = ECSM_Oliver1modified; break;      
+      case 2: ecsMethod = ECSM_ProjectionCentered; break;
+      case 3: ecsMethod = ECSM_Oliver1; break;
+      case 4: ecsMethod = ECSM_Oliver1modified; break;
       default: ecsMethod = ECSM_Projection;
       }
     }
@@ -307,7 +307,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 	if ( this->equivStrainType == EST_ElasticEnergy ) {
 	  // standard elastic energy
 	  stress.beProductOf(de, strain);
-	  sum = dotProduct( strain, stress, strain.giveSize() );
+	  sum = strain.dotProduct(stress);
 	} else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
 	  // elastic energy corresponding to positive part of stress
 	  FloatArray fullStress, principalStress;

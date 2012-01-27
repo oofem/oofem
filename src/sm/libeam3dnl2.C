@@ -99,7 +99,7 @@ LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     answer.resize(3, 3);
     answer.zero();
 
-    psiSize = sqrt( dotProduct(psi, psi, 3) );
+    psiSize = psi.computeNorm();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 1.;
 
     if ( psiSize <= 1.e-40 ) {
@@ -134,7 +134,7 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
         centreSpin.at(2) = 0.5 * ( u.at(5) + u.at(11) );
         centreSpin.at(3) = 0.5 * ( u.at(6) + u.at(12) );
 
-        centreSpinSize = sqrt( dotProduct(centreSpin, centreSpin, 3) );
+        centreSpinSize = centreSpin.computeNorm();
         if ( centreSpinSize > 1.e-30 ) {
             centreSpin.normalize();
             q2.at(1) = sin(centreSpinSize / 2.) * centreSpin.at(1);
@@ -827,7 +827,6 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    ;
     FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3), tc(3, 3);
 
@@ -883,7 +882,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     this->computeRotMtrxFromQuaternion(Ro, this->q);
     Rn.beProductOf(dR, Ro);
 
-    acSize = dotProduct(ac, ac, 3);
+    acSize = ac.computeSquaredNorm();
 
     if ( acSize > 1.e-30 ) {
         FloatMatrix h(3, 3);
@@ -914,7 +913,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
         kapgn1.times(1. / 2.);
         kapgn1.add(omp);
 
-        coeff = 1. / ( 1. + 0.25 * dotProduct(om, om, 3) );
+        coeff = 1. / ( 1. + 0.25 * om.computeSquaredNorm() );
         kapgn1.times(coeff);
 
         answer.beTProductOf(Rn, kapgn1);

@@ -550,11 +550,11 @@ IsotropicDamageMaterialStatus :: computeWork(GaussPoint *gp)
 
     // increment of stress work density
     int n = deps.giveSize();
-    double dSW = ( dotProduct(tempStressVector, deps, n) + dotProduct(stressVector, deps, n) ) / 2.;
+    double dSW = ( tempStressVector.dotProduct(deps) + stressVector.dotProduct(deps) ) / 2.;
     tempStressWork = stressWork + dSW;
 
     // elastically stored energy density
-    double We = dotProduct(tempStressVector, tempStrainVector, n) / 2.;
+    double We = tempStressVector.dotProduct(tempStrainVector) / 2.;
 
     // dissipative work density
     tempDissWork = tempStressWork - We;

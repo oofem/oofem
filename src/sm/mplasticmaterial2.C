@@ -516,7 +516,7 @@ huhu:
                         continue;
                     }
 
-                    if ( yieldConsistency && ( sqrt( dotProduct( residualVectorR, residualVectorR, residualVectorR.giveSize() ) ) < RES_TOL ) ) {
+                    if ( yieldConsistency && ( residualVectorR.computeNorm() < RES_TOL ) ) {
                         return;
                     }
                 }

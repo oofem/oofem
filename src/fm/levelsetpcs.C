@@ -492,12 +492,12 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
             // compute ki
             for ( i = 1; i <= inodes; i++ ) {
                 if ( gfi_norm > 1.e-12 ) {
-                    // evaluate i-th normal (correcponding to side opposite to i-th vertex)
+                    // evaluate i-th normal (corresponding to side opposite to i-th vertex)
                     for ( j = 1; j <= nsd; j++ ) {
-		        n.at(j) = nsd * dN.at(i, j) * volume; //?
+                        n.at(j) = nsd * dN.at(i, j) * volume; //?
                     }
 
-                    k.at(i) = F * dotProduct(gfi, n, nsd) / ( nsd * gfi_norm );
+                    k.at(i) = F * gfi.dotProduct(n) / ( nsd * gfi_norm );
                 } else {
                     printf("zero gfi_norm for %d node\n", i);
                     k.at(i) = 0.0;

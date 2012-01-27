@@ -267,7 +267,7 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 
     n = n4;
     c.beVectorProductOf(b, a);
-    length = sqrt( dotProduct(c, c, 3) );
+    length = c.computeNorm();
 
     // if normal not found, try other nodes 1 3 4
     if ( length < 1.0e-10 ) {
@@ -277,7 +277,7 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 
         n = n2;
         c.beVectorProductOf(a, b);
-        length = sqrt( dotProduct(c, c, 3) );
+        length = c.computeNorm();
 
         if ( length < 1.0e-10 ) {
             OOFEM_ERROR("FEI3dHexaQuad :: surfaceGiveTransformationJacobian: degenerated surface");
@@ -293,7 +293,7 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
         }
 
         // check distance of all nodes to the reference node
-        if ( fabs( dotProduct(b, c, 3) ) > 1.0e-6 ) {
+        if ( fabs( b.dotProduct(c) ) > 1.0e-6 ) {
             OOFEM_ERROR2( "FEI3dHexaQuad :: surfaceGiveTransformationJacobian: not planar surface, local node %d failed", snodes.at(i) );
         }
     }
@@ -330,7 +330,7 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 
     // map nodes to the surface (x,y) plane
     // get x and y unit vectors a and b (a is already computed as n3-n1)
-    length = sqrt( dotProduct(a, a, 3) );
+    length = a.computeNorm();
     a.times(1.0 / length);
     b.beVectorProductOf(c, a);
 
@@ -348,15 +348,15 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
         c.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
-    sn [ 1 ].at(1) = dotProduct(c, a, 3);
-    sn [ 1 ].at(2) = dotProduct(c, b, 3);
+    sn [ 1 ].at(1) = c.dotProduct(a);
+    sn [ 1 ].at(2) = c.dotProduct(b);
 
     for ( i = 1; i <= 3; i++ ) {
         c.at(i) = cellgeo.giveVertexCoordinates(n4)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
-    sn [ 3 ].at(1) = dotProduct(c, a, 3);
-    sn [ 3 ].at(2) = dotProduct(c, b, 3);
+    sn [ 3 ].at(1) = c.dotProduct(a);
+    sn [ 3 ].at(2) = c.dotProduct(b);
 
     double ksi, eta, x, y;
     FloatArray nx(4), ny(4);

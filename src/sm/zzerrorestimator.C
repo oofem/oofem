@@ -290,8 +290,8 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
             diff.subtract(sig);
 
-            eNorm += dotProduct( diff.givePointer(), diff.givePointer(), diff.giveSize() ) * dV;
-            sNorm += dotProduct( sig.givePointer(),  sig.givePointer(), sig.giveSize() )   * dV;
+            eNorm += diff.computeSquaredNorm() * dV;
+            sNorm += sig.computeSquaredNorm() * dV;
         }
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
         FloatArray help;
@@ -321,9 +321,9 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             diff.subtract(sig);
 
             help.beProductOf(DInv, diff);
-            eNorm += dotProduct( diff.givePointer(), help.givePointer(), diff.giveSize() ) * dV;
+            eNorm += diff.dotProduct(help) * dV;
             help.beProductOf(DInv, sig);
-            sNorm += dotProduct( sig.givePointer(),  help.givePointer(), sig.giveSize() )   * dV;
+            sNorm += sig.dotProduct(help)   * dV;
         }
     } else {
         OOFEM_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");

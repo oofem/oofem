@@ -108,7 +108,7 @@ TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
 
     totalStress.beProductOf(elasticity, strainVector);
 
-    tempTSED = dotProduct(0.5 * strainVector, totalStress, 6);
+    tempTSED = 0.5 * strainVector.dotProduct(totalStress);
 
     answer.resize(6);
     answer = totalStress;

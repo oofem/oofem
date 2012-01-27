@@ -72,7 +72,7 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
     for ( i = 0; i < nip; i++ ) {
         result = elem->giveIPValue(val, iRule->getIntegrationPoint(i), varType, tStep);
         if ( result ) {
-            sval = sqrt( dotProduct( val, val, val.giveSize() ) );
+            sval = val.computeNorm();
             if ( i == 0 ) {
                 maxVal = sval;
             } else {

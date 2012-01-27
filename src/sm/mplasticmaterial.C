@@ -323,7 +323,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
                     }
                 }
 
-                if ( yieldConsistency && ( sqrt( dotProduct( residualVectorR, residualVectorR, residualVectorR.giveSize() ) ) < RES_TOL ) ) {
+                if ( yieldConsistency && ( residualVectorR.computeNorm() < RES_TOL ) ) {
                     answer = fullStressVector;
                     printf(" (%d iterations)", nIterations);
                     return;
@@ -351,11 +351,11 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
 
                         for ( j = 1; j <= this->nsurf; j++ ) {
                             if ( activeConditionMap.at(j) ) {
-                                gmat.at(i, j) = dotProduct( ( * loadGradVecPtr ) [ j - 1 ], helpVector, helpVector.giveSize() );
+                                gmat.at(i, j) = ( * loadGradVecPtr ) [ j - 1 ].dotProduct(helpVector);
                             }
                         }
 
-                        rhs.at(i) = yieldValue - dotProduct( helpVector, residualVectorR, residualVectorR.giveSize() );
+                        rhs.at(i) = yieldValue - residualVectorR.dotProduct( helpVector);
                     }
                 }
 
@@ -566,7 +566,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
 
                         for ( j = 1; j <= this->nsurf; j++ ) {
                             if ( ( jindx = activeConditionMap.at(j) ) ) {
-                                gmatInv.at(iindx, jindx) = dotProduct( ( * loadGradVecPtr ) [ j - 1 ], helpVector, helpVector.giveSize() );
+                                gmatInv.at(iindx, jindx) = ( * loadGradVecPtr ) [ j - 1 ].dotProduct(helpVector);
                             }
                         }
                     }

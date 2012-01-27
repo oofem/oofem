@@ -150,7 +150,7 @@ TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 
     totalStress.beProductOf(elasticity, totalStrain);
 
-    tempTSED = dotProduct(0.5 * totalStrain, totalStress, 6);
+    tempTSED = 0.5 * totalStrain.dotProduct(totalStress);
 
     answer.resize(6);
     answer = totalStress;

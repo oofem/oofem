@@ -97,7 +97,7 @@ LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     answer.resize(3, 3);
     answer.zero();
 
-    psiSize = sqrt( dotProduct(psi, psi, 3) );
+    psiSize = psi.computeNorm();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 1.;
 
     if ( psiSize <= 1.e-40 ) {

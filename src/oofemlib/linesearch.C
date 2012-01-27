@@ -82,7 +82,7 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
         g.at( eqnmask.at(ii) ) = 0.0;
     }
 
-    s0 = ( -1.0 ) * dotProduct(g, * dr, neq);
+    s0 = ( -1.0 ) * g.dotProduct(* dr);
     if ( s0 >= 0.0 ) {
         //printf ("\nLineSearchNM::solve starting inner product uphill, val=%e",s0);
         OOFEM_LOG_DEBUG("LS: product uphill, eta=%e\n", 1.0);
@@ -130,7 +130,7 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
         }
 
         // compute current inner-product ratio
-        si = ( -1.0 ) * dotProduct(g, * dr, neq) / s0;
+        si = ( -1.0 ) * g.dotProduct(*dr) / s0;
         prod.at(ils) = si;
 
         // check if line-search tolerance is satisfied

@@ -93,9 +93,9 @@ void Line :: computeProjection(FloatArray &answer) {
 double Line :: computeTangentialDistanceToEnd(FloatArray *point) {
     FloatArray projection;
     this->computeProjection(projection);
-    FloatArray t(2);
-    t = projection * ( 1.0 / projection.computeNorm() );
-    return dotProduct(* point - * vertices->at(2), t, 2);
+    FloatArray tmp;
+    tmp.beDifferenceOf(*point, *vertices->at(2));
+    return tmp.dotProduct(projection)/projection.computeNorm();
 }
 
 int Line :: computeNumberOfIntersectionPoints(Element *element) {

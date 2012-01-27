@@ -1358,7 +1358,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         d.negated();
 
         /*  vypocet nulteho citatele  */
-        nom = dotProduct( g, g, g.giveSize() );
+        nom = g.computeSquaredNorm();
 
         //#ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_DEBUG("\nIteration process\n");
@@ -1415,8 +1415,8 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         }
 
         if ( rank == 0 ) {
-            /*  vypocet jmenovatele zlomku definujiciho alphu  */
-            denom = dotProduct( d, p, masterCommunicator->giveNumberOfEquations() );
+            /*  calculation of the denominator of the fraction defining Alpha */
+            denom = d.dotProduct(p);
 
             if ( fabs(denom) < FETISOLVER_ZERONUM ) {
                 OOFEM_LOG_RELEVANT("FETISolver::solve :  v modifikovane metode sdruzenych gradientu je nulovy jmenovatel u soucinitele alpha\n");
@@ -1456,7 +1456,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                 break;
             }
 
-            nom = dotProduct( g, g, masterCommunicator->giveNumberOfEquations() );
+            nom = g.computeSquaredNorm();
 
             if ( nom < err ) {
                 commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
@@ -1541,7 +1541,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
             }
 
             if ( rank == 0 ) {
-                energyNorm = dotProduct( p, w, w.giveSize() );
+                energyNorm = p.dotProduct(w);
             }
         }
 

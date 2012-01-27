@@ -832,7 +832,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                 for ( k = 0; k < nip; k++ ) {
                     result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
                     if ( result ) {
-                        sval = sqrt( dotProduct( val, val, val.giveSize() ) );
+                        sval = val.computeNorm();
                         maxVal = max(maxVal, sval);
                     }
                 }
@@ -950,7 +950,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         for ( k = 0; k < nip; k++ ) {
             result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
             if ( result ) {
-                sval = sqrt( dotProduct( val, val, val.giveSize() ) );
+                sval = val.computeNorm();
                 maxVal = max(maxVal, sval);
             }
         }
@@ -3188,11 +3188,10 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
                 this->extractVectorFrom(element, coarseSolution, coarseVector, dofs, refinedTStep);
                 coarseVectorGp.beProductOf(Nmatrix, coarseVector);
 
-                elementNorm += dotProduct( elementVectorGp.givePointer(), elementVectorGp.givePointer(), elementVectorGp.giveSize() ) * dV;
-                mixedNorm += dotProduct( elementVectorGp.givePointer(), patchVectorGp.givePointer(), elementVectorGp.giveSize() ) * dV;
-                patchNorm += dotProduct( patchVectorGp.givePointer(), patchVectorGp.givePointer(), patchVectorGp.giveSize() ) * dV;
-
-                uNorm += dotProduct( coarseVectorGp.givePointer(), coarseVectorGp.givePointer(), coarseVectorGp.giveSize() ) * dV;
+                elementNorm += elementVectorGp.computeSquaredNorm() * dV;
+                mixedNorm += elementVectorGp.dotProduct(patchVectorGp) * dV;
+                patchNorm += patchVectorGp.computeSquaredNorm() * dV;
+                uNorm += coarseVectorGp.computeSquaredNorm() * dV;
             }
 
             if ( fabs(elementNorm) < 1.0e-30 ) {
@@ -3237,12 +3236,11 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
             this->extractVectorFrom(element, coarseSolution, coarseVector, dofs, refinedTStep);
 
             tmpVector.beProductOf(mat, elementVector);
-            elementNorm = dotProduct( tmpVector.givePointer(), elementVector.givePointer(), elementVector.giveSize() );
-
-            mixedNorm = dotProduct( tmpVector.givePointer(), patchVector.givePointer(), elementVector.giveSize() );
+            elementNorm = tmpVector.dotProduct(elementVector);
+            mixedNorm = tmpVector.dotProduct(patchVector);
 
             tmpVector.beProductOf(mat, patchVector);
-            patchNorm = dotProduct( tmpVector.givePointer(), patchVector.givePointer(), patchVector.giveSize() );
+            patchNorm = tmpVector.dotProduct(patchVector);
 
             if ( fabs(elementNorm) < 1.0e-30 ) {
                 if ( elementNorm == 0.0 ) {
@@ -3272,7 +3270,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
              * eEnorm = dotProduct(tmpVector.givePointer(), elementVector.givePointer(), elementVector.giveSize());
              */
             tmpVector.beProductOf(mat, coarseVector);
-            uNorm += dotProduct( tmpVector.givePointer(), coarseVector.givePointer(), coarseVector.giveSize() );
+            uNorm += tmpVector.dotProduct(coarseVector);
 
 #ifdef PRINT_FINE_ERROR
             if ( exactFlag == false ) {
@@ -3979,17 +3977,17 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
 
                 this->extractVectorFrom(element, errorSolution, errorVector, dofs, refinedTStep);
                 errorVectorGp.beProductOf(Nmatrix, errorVector);
-                exactENorm += dotProduct( errorVectorGp.givePointer(), errorVectorGp.givePointer(), errorVectorGp.giveSize() ) * dV;
+                exactENorm += errorVectorGp.computeSquaredNorm() * dV;
 
                 this->extractVectorFrom(element, coarseSolution, coarseVector, dofs, refinedTStep);
                 coarseVectorGp.beProductOf(Nmatrix, coarseVector);
-                coarseUNorm += dotProduct( coarseVectorGp.givePointer(), coarseVectorGp.givePointer(), coarseVectorGp.giveSize() ) * dV;
+                coarseUNorm += coarseVectorGp.computeSquaredNorm() * dV;
 
-                mixedNorm += dotProduct( coarseVectorGp.givePointer(), errorVectorGp.givePointer(), errorVectorGp.giveSize() ) * dV;
+                mixedNorm += coarseVectorGp.dotProduct(errorVectorGp) * dV;
 
                 this->extractVectorFrom(element, fineSolution, fineVector, dofs, refinedTStep);
                 fineVectorGp.beProductOf(Nmatrix, fineVector);
-                fineUNorm += dotProduct( fineVectorGp.givePointer(), fineVectorGp.givePointer(), fineVectorGp.giveSize() ) * dV;
+                fineUNorm += fineVectorGp.computeSquaredNorm() * dV;
             }
         }
     } else if ( this->normType == HuertaErrorEstimator :: EnergyNorm ) {
@@ -4044,20 +4042,19 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
 
             this->extractVectorFrom(element, errorSolution, errorVector, dofs, refinedTStep);
             tmpVector.beProductOf(mat, errorVector);
-            exactENorm += dotProduct( tmpVector.givePointer(), errorVector.givePointer(), errorVector.giveSize() );
-
-            fineENorm = dotProduct( tmpVector.givePointer(), errorVector.givePointer(), errorVector.giveSize() );
+            exactENorm += tmpVector.dotProduct(errorVector); // Coarse and fine are identical? Also, unused.
+            fineENorm = tmpVector.dotProduct(errorVector);
             coarseENorm += fineENorm;
 
             this->extractVectorFrom(element, coarseSolution, coarseVector, dofs, refinedTStep);
             tmpVector.beProductOf(mat, coarseVector);
-            coarseUNorm += dotProduct( tmpVector.givePointer(), coarseVector.givePointer(), coarseVector.giveSize() );
+            coarseUNorm += tmpVector.dotProduct(coarseVector);
 
-            mixedNorm += dotProduct( tmpVector.givePointer(), errorVector.givePointer(), errorVector.giveSize() );
+            mixedNorm += tmpVector.dotProduct(errorVector);
 
             this->extractVectorFrom(element, fineSolution, fineVector, dofs, refinedTStep);
             tmpVector.beProductOf(mat, fineVector);
-            fineUNorm += dotProduct( tmpVector.givePointer(), fineVector.givePointer(), fineVector.giveSize() );
+            fineUNorm += tmpVector.dotProduct(fineVector);
 
  #ifdef PRINT_ERROR
             exactFineError.at(ielem) = fineENorm;

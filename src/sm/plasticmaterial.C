@@ -209,10 +209,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
                                                       gradientVectorR);
 
         // check for end of iteration
-        if ( ( yieldValue < YIELD_TOL ) &&
-            ( sqrt( dotProduct( residualVectorR->givePointer(),
-                               residualVectorR->givePointer(),
-                               residualVectorR->giveSize() ) ) < RES_TOL ) ) {
+        if ( ( yieldValue < YIELD_TOL ) && ( residualVectorR->computeNorm() < RES_TOL ) ) {
             //delete elasticStrainVectorR;
             delete fullStressSpaceHardeningVars;
             delete gradientVectorR;
@@ -564,8 +561,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     gradientVector = this->ComputeGradientVector(gp, & fullStressVector, stressSpaceHardeningVars);
     helpVector.beProductOf(consistentModuli, * gradientVector);
-    s = ( -1. ) * dotProduct( gradientVector->givePointer(), helpVector.givePointer(), gradientVector->giveSize() );
-    //delete helpVector;
+    s = ( -1. ) * gradientVector->dotProduct(helpVector);
 
     answerR.beSubMatrixOf(consistentModuli, 1, sizeR, 1, sizeR);
     //consistentSubModuli.beSubMatrixOf (consistentModuli, 1,gradientVector->giveSize(), 1, sizeR);

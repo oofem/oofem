@@ -308,7 +308,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
         h1.beDifferenceOf(* domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
         h2.beDifferenceOf(* domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
         n.beVectorProductOf(h1, h2);
-        if ( dotProduct(n, n, 3) > 1.e-6 ) {
+        if ( n.computeSquaredNorm() > 1.e-6 ) {
             n.normalize();
         }
 
@@ -316,7 +316,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     }
 
     nn.times(1. / 4.);
-    if ( dotProduct(nn, nn, 3) < 1.e-6 ) {
+    if ( nn.computeSquaredNorm() < 1.e-6 ) {
         answer.zero();
         return 1;
     }

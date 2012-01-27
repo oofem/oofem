@@ -59,8 +59,6 @@ FEI3dHexaLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
     answer.at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
     answer.at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
-
-    return;
 }
 
 void
@@ -213,7 +211,7 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
         r.at(3) = c1 + u * c2 + v * c3 + w * c4 + u * v * c5 + u * w * c6 + v * w * c7 + u * v * w * c8 - 8.0 * zp;
 
         // check for convergence
-        if ( dotProduct(r, r, 3) < 1.e-20 ) {
+        if ( r.computeSquaredNorm() < 1.e-20 ) {
             break;                                  // sqrt(1.e-20) = 1.e-10
         }
 
@@ -391,8 +389,6 @@ FEI3dHexaLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, cons
     answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
     answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
     answer.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
-
-    return;
 }
 
 void
@@ -454,7 +450,7 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
 
     n = n4;
     c.beVectorProductOf(b, a);
-    length = sqrt( dotProduct(c, c, 3) );
+    length = c.computeNorm();
 
     if ( length < 1.0e-10 ) {
         // try nodes 1 3 4
@@ -464,7 +460,7 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
 
         n = n2;
         c.beVectorProductOf(a, b);
-        length = sqrt( dotProduct(c, c, 3) );
+        length = c.computeNorm();
 
         if ( length < 1.0e-10 ) {
             OOFEM_ERROR("FEI3dHexaLin :: surfaceGiveTransformationJacobian: degenerated surface");
@@ -477,13 +473,13 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
     }
 
     // check distance of the 4th node n
-    if ( fabs( dotProduct(b, c, 3) ) > 1.0e-6 ) {
+    if ( fabs( b.dotProduct(c) ) > 1.0e-6 ) {
         OOFEM_ERROR("FEI3dHexaLin :: surfaceGiveTransformationJacobian: not planar surface");
     }
 
     // map nodes to the surface (x,y) plane
     // get x and y unit vectors a and b (a is already computed as n3-n1)
-    length = sqrt( dotProduct(a, a, 3) );
+    length = a.computeNorm();
     a.times(1.0 / length);
     b.beVectorProductOf(c, a);
 
@@ -501,15 +497,15 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
         c.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
-    sn [ 1 ].at(1) = dotProduct(c, a, 3);
-    sn [ 1 ].at(2) = dotProduct(c, b, 3);
+    sn [ 1 ].at(1) = c.dotProduct(a);
+    sn [ 1 ].at(2) = c.dotProduct(b);
 
     for ( i = 1; i <= 3; i++ ) {
         c.at(i) = cellgeo.giveVertexCoordinates(n4)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
-    sn [ 3 ].at(1) = dotProduct(c, a, 3);
-    sn [ 3 ].at(2) = dotProduct(c, b, 3);
+    sn [ 3 ].at(1) = c.dotProduct(a);
+    sn [ 3 ].at(2) = c.dotProduct(b);
 
     double ksi, eta, x, y;
     FloatArray nx(4), ny(4);

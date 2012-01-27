@@ -298,7 +298,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
                 this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {
                     help.beProductOf(A, u);
-                    answer.at(i) += 0.5 * dotProduct( u, help, u.giveSize() );
+                    answer.at(i) += 0.5 * u.dotProduct(help);
                 }
             }
         }

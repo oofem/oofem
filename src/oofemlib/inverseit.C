@@ -138,7 +138,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
 
         /*  evaluation of Rayleigh quotients  */
         for ( j = 0; j < nc; j++ ) {
-            w.at(j + 1) = dotProduct(zz [ j ], x [ j ], nn);
+            w.at(j + 1) = zz [ j ].dotProduct(x [ j ]);
         }
 
         //mmc_sky (m,x,z,adrm,n,niv);
@@ -147,7 +147,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
         }
 
         for ( j = 0; j < nc; j++ ) {
-            c = dotProduct(z [ j ], x [ j ], nn);
+            c = z [ j ].dotProduct(x [ j ]);
             w.at(j + 1) /= c;
         }
 
@@ -171,7 +171,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
             }
 
             for ( ii = 0; ii < j; ii++ ) {
-                c = dotProduct(x [ ii ], t, nn);
+                c = x [ ii ].dotProduct(t);
                 ptr = & x [ j ];
                 ptr2 = & x [ ii ];
                 for ( k = 1; k <= nn; k++ ) {
@@ -180,7 +180,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
             }
 
             b->times(x [ j ], t);
-            c =   dotProduct(x [ j ], t, nn);
+            c = x [ j ].dotProduct(t);
             x [ j ].times( 1.0 / sqrt(c) );
         }
 

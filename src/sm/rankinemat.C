@@ -817,13 +817,13 @@ RankineMatStatus :: computeWork(GaussPoint *gp, MaterialMode mode, double gf)
     deps.beDifferenceOf(tempStrainVector, strainVector, n);
 
     // increment of stress work density
-    double dSW = ( dotProduct(tempStressVector, deps, n) + dotProduct(stressVector, deps, n) ) / 2.;
+    double dSW = ( tempStressVector.dotProduct(deps, n) + stressVector.dotProduct(deps, n) ) / 2.;
     tempStressWork = stressWork + dSW;
 
     // elastically stored energy density
     FloatArray tempElasticStrainVector;
     tempElasticStrainVector.beDifferenceOf(tempStrainVector, tempPlasticStrain, n);
-    double We = dotProduct(tempStressVector, tempElasticStrainVector, n) / 2.;
+    double We = tempStressVector.dotProduct(tempElasticStrainVector, n) / 2.;
 
     // dissipative work density
     tempDissWork = tempStressWork - We;

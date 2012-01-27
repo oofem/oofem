@@ -131,9 +131,13 @@ StructuralEngngModel :: computeReactions(FloatArray &answer, TimeStep *tStep, in
     // Internal forces contribution
 
     this->computeInternalForceReactionContribution(contribution, tStep, di);
+    printf("************************************************** internal\n");
+    contribution.printYourself();
     answer.add(contribution);
     // External loading contribution
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
+    printf("************************************************** external (subtracted)\n");
+    contribution.printYourself();
     answer.subtract(contribution);
 
 #ifdef __PARALLEL_MODE

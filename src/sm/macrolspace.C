@@ -218,7 +218,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
             for ( j = 1; j <= 3; j++ ) {
                 this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
                 DofMan->giveDof(j)->setBcId(counter);
-                displ = dotProduct(n, j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ), 8);
+                displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
                 sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %e", counter, displ);
                 //OOFEM_LOG_INFO("%s\n", str);
                 ir->setRecordString(str);

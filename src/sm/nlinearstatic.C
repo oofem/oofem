@@ -420,7 +420,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
         // if (charVec->containsOnlyZeroes ()) continue;
         answer.assemble(charVec, loc);
         // compute element norm contribution
-        ebeNorm += dotProduct( charVec, charVec, charVec.giveSize() );
+        ebeNorm += charVec.computeSquaredNorm();
 
         /*
          * // debug loop

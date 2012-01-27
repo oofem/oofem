@@ -318,10 +318,10 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
     }
 
 
-    answer.at(1, 1) =  dotProduct(dnx, u1, 4);
-    answer.at(1, 2) =  dotProduct(dny, u1, 4);
-    answer.at(2, 1) =  dotProduct(dnx, u2, 4);
-    answer.at(2, 2) =  dotProduct(dny, u2, 4);
+    answer.at(1, 1) =  u1.dotProduct(dnx);
+    answer.at(1, 2) =  u1.dotProduct(dny);
+    answer.at(2, 1) =  u2.dotProduct(dnx);
+    answer.at(2, 2) =  u2.dotProduct(dny);
 }
 
 void
@@ -372,7 +372,7 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    norm_un = sqrt( dotProduct(u, u, 8) );
+    norm_un = u.computeNorm();
 
     this->computeAdvectionTerm(N, atTime);
     this->computeAdvectionDeltaTerm(N_d, atTime);
