@@ -103,8 +103,6 @@ public:
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
-
-protected:
 };
 } // end namespace oofem
 #endif // diidynamic_h

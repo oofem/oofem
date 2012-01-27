@@ -63,8 +63,6 @@ namespace oofem {
  * see diidynamic.h for difference.
  * So, when You specify initial conditions, you specify them in time step 0.
  *
- * @note FloatMatrix::Lumped() works only for elements with Linear displacement filed !
- *
  * Tasks:
  * - Creating Numerical method for solving Ax=b
  * - Interfacing Numerical method to Elements

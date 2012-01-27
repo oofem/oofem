@@ -82,11 +82,19 @@ protected:
 
     virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                                   GaussPoint *gp, TimeStep *atTime);
+    /// Free shrinkage at material point, requires staggered analysis.
     virtual void computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                       GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     void predictParametersFrom(double, double, double, double, double, double, double);
     virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 
+    /**
+     * Function calculates relative humidity from water content (inverse relation form sorption isotherm).
+     * Relative humidity (phi) is from range 0.2 - 0.98 !!!
+     * Sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
+     * PhD-thesis, Technical University of Denmark, Lingby.
+     * @param w Water content (kg/kg).
+     */
     double inverse_sorption_isotherm(double w);
 };
 } // end namespace oofem

@@ -80,11 +80,7 @@ LinearStatic :: ~LinearStatic()
 }
 
 
-
 NumericalMethod *LinearStatic :: giveNumericalMethod(TimeStep *atTime)
-// only one has reason for LinearStatic
-//     - SolutionOfLinearEquations
-
 {
     if ( nMethod ) {
         return nMethod;
@@ -112,9 +108,6 @@ LinearStatic :: initializeFrom(InputRecord *ir)
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_LinearStatic_smtype, "smtype"); // Macro
     sparseMtrxType = ( SparseMtrxType ) val;
-    /* The following done in updateAttributes
-     * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
-     */
 
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
@@ -160,8 +153,6 @@ double LinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
         } else {
             return 0.;
         }
-
-    // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
 
     default:
         _error("giveUnknownComponent: Unknown is of undefined type for this problem");
@@ -338,7 +329,6 @@ contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode 
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)

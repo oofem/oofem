@@ -200,7 +200,7 @@ protected:
                                            StructuralMaterial *mat,
                                            TimeStep *tStep);
 
-    FloatArray *GiveIntegrated3dShellStress(GaussPoint *gp);
+    void giveIntegrated3dShellStress(FloatArray &answer, GaussPoint *gp);
 
     double giveArea();
 

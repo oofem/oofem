@@ -65,7 +65,6 @@ LIBeam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
     double l, ksi, n1, n2, n1x, n2x;
-    // FloatMatrix* answer ;
 
     l     = this->giveLength();
     ksi   = aGaussPoint->giveCoordinate(1);
@@ -99,9 +98,8 @@ LIBeam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
     answer.at(6, 6)  = n1x;
     answer.at(6, 12) = n2x;
-
-    return;
 }
+
 
 void
 LIBeam3d :: computeGaussPoints()
@@ -114,7 +112,6 @@ LIBeam3d :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
     }
 }
-
 
 
 void
@@ -141,7 +138,6 @@ LIBeam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
-    // FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
@@ -172,7 +168,6 @@ LIBeam3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, T
 {
     this->StructuralElement :: computeStiffnessMatrix(answer, rMode, tStep);
 }
-
 
 
 bool
@@ -208,12 +203,12 @@ LIBeam3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+LIBeam3d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(6);
 
     answer.at(1) = D_u;
@@ -241,7 +236,6 @@ LIBeam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
 
     return 1;
 }
-
 
 
 /*

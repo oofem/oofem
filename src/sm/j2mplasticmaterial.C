@@ -197,7 +197,6 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
         return;
     }
 
-    //FloatMatrix* answer = new FloatMatrix (size, size);
     answer.resize(size, size);
     answer.zero();
 
@@ -212,8 +211,6 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
     if ( this->isotropicHardeningFlag ) {
         answer.at(size, size) = this->isotropicModuli;
     }
-
-    return;
 }
 
 
@@ -327,7 +324,6 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
     size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 
-    //FloatMatrix* answer = new FloatMatrix(size,size);
     answer.resize(size, size);
     answer.zero();
 
@@ -338,7 +334,6 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
             this->giveStressBackVector(backStress, stressSpaceHardeningVars);
             helpVector = stressVector;
             helpVector.add(backStress);
-            //delete backStress;
         } else {
             helpVector = stressVector;
         }
@@ -414,11 +409,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
         }
     }
 
-    //delete df;
-    //delete mask;
     /* for isotropic hardening: the corresponding part of gradient matrix is zero valued */
-
-    return;
 }
 
 
@@ -428,8 +419,6 @@ J2MPlasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                              TimeStep *atTime)
 {
     /* Returns 3d elastic moduli */
-    //FloatMatrix *FullConstitutiveMatrix = new FloatMatrix (6,6);
-
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, FullForm, ElasticStiffness, gp, atTime);
 }
 
@@ -503,9 +492,7 @@ J2MPlasticMaterial :: giveStressBackVector(FloatArray &answer,
 
         return;
     }
-
     answer.resize(0);
-    return;
 }
 
 

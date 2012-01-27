@@ -179,7 +179,7 @@ HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
 
-    /// Read material properties here
+    // Read material properties here
 
     IR_GIVE_FIELD(ir, K, IFT_HyperElasticMaterial_k, "k"); // Macro
     IR_GIVE_FIELD(ir, G, IFT_HyperElasticMaterial_g, "g");
@@ -201,7 +201,7 @@ HyperElasticMaterialStatus :: ~HyperElasticMaterialStatus()
 void
 HyperElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    /// print state to output stream
+    // print state to output stream
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

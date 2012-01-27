@@ -44,7 +44,6 @@ namespace oofem {
  * for storing history  variables in particular integration point
  * (microplane). Unique copy for each microplane must exist.
  */
-
 class M4MaterialStatus : public StructuralMaterialStatus
 {
 public:

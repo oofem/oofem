@@ -51,7 +51,7 @@ namespace oofem {
 LumpedMassElement :: LumpedMassElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 // Constructor.
 {
-    numberOfDofMans     = 1;
+    numberOfDofMans = 1;
 }
 
 
@@ -69,6 +69,7 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     }
 }
 
+
 IRResultType
 LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
@@ -80,6 +81,7 @@ LumpedMassElement :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 int
 LumpedMassElement :: checkConsistency()

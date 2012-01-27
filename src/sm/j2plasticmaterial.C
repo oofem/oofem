@@ -187,7 +187,6 @@ J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
         return;
     }
 
-    //FloatMatrix* answer = new FloatMatrix (size, size);
     answer.resize(size, size);
     answer.zero();
 
@@ -202,8 +201,6 @@ J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
     if ( this->isotropicHardeningFlag ) {
         answer.at(size, size) = this->isotropicModuli;
     }
-
-    return;
 }
 
 
@@ -288,8 +285,6 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *
         for ( i = 1; i <= kcount; i++ ) {
             answer->at(i) = reducedKinematicGrad.at(i);
         }
-
-        //delete reducedKinematicGrad;
     }
 
     if ( this->isotropicHardeningFlag ) {
@@ -325,7 +320,6 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
     size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) +
            this->giveSizeOfReducedHardeningVarsVector(gp);
 
-    //FloatMatrix* answer = new FloatMatrix(size,size);
     answer.resize(size, size);
     answer.zero();
 
@@ -355,8 +349,6 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
         df.at(4) = 2. * helpVector.at(4);
         df.at(5) = 2. * helpVector.at(5);
         df.at(6) = 2. * helpVector.at(6);
-
-        //delete helpVector;
 
         for ( i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
@@ -411,12 +403,7 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
             }
         }
     }
-
-    //delete df;
-    //delete mask;
     /* for isotropic hardening: the corresponding part of gradient matrix is zero valued */
-
-    return;
 }
 
 
@@ -435,10 +422,6 @@ J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
 
     reducedAnswer.beProductOf(reducedModuli, strainIncrement);
     crossSection->giveFullCharacteristicVector(answer, gp, reducedAnswer);
-    //delete reducedAnswer;
-    //delete reducedModuli;
-
-    return;
 }
 
 
@@ -448,8 +431,6 @@ J2plasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                             TimeStep *atTime)
 {
     /* Returns 3d elastic moduli */
-    //FloatMatrix *FullConstitutiveMatrix = new FloatMatrix (6,6);
-
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, FullForm, ElasticStiffness, gp, atTime);
 }
 

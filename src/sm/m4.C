@@ -115,9 +115,6 @@ M4Material :: giveCharacteristicMatrix(FloatMatrix &answer,
                                        GaussPoint *gp,
                                        TimeStep *atTime)
 {
-    // size answer
-    // uncomment this
-    //answer.checkSizeTowards (6,6);
     answer.resize(6, 6);
     answer.zero();
     // elastic stiffness matrix
@@ -335,14 +332,11 @@ M4Material :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
     answer.at(1) = talpha;
     answer.at(2) = talpha;
     answer.at(3) = talpha;
-
-    return;
 }
 
 

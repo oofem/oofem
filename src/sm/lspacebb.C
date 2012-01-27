@@ -109,8 +109,5 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
         answer.at(6, 3 * i - 2) += dnx.at(i, 2);
         answer.at(6, 3 * i - 1) += dnx.at(i, 1);
     }
-
-
-    return;
 }
 } // end namespace oofem

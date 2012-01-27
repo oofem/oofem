@@ -244,49 +244,6 @@ CCTPlate :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 9) = l3;
 }
 
-
-/*
- * int
- * CCTPlate :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0 ;}
- *
- * answer.resize (9,9); answer.zero();
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*3+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = 1.0 ;
- * answer.at(ii,ii+1)   = 0.0 ;
- * answer.at(ii,ii+2)   = 0.0 ;
- * answer.at(ii+1,ii)   = 0.0 ;
- * answer.at(ii+1,ii+1) = triplet->at(1,1) ;
- * answer.at(ii+1,ii+2) = triplet->at(1,2) ;
- * answer.at(ii+2,ii)   = 0.0 ;
- * answer.at(ii+2,ii+1) = triplet->at(2,1) ;
- * answer.at(ii+2,ii+2) = triplet->at(2,2) ;
- *
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * answer.at(ii+2,ii+2) = 1.0;
- * }
- * }
- *
- * return 1;
- * }
- */
 /*
  * void
  * CCTPlate :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
@@ -500,23 +457,6 @@ CCTPlate :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
 
     return 1;
 }
-// {
-//   // get node coordinates
-//   double x1,x2,x3, y1,y2,y3;
-//   this->giveNodeCoordinates (x1,x2,x3, y1,y2,y3);
-//
-//   l1 = lcoords.at(1);
-//   l2 = lcoords.at(2);
-//   l3 = 1.0 - l1 - l2;
-//
-//   //
-//   answer.resize(3);
-//   answer.at(1) = l1 * x1  +  l2 * x2  +  l3 * x3;
-//   answer.at(2) = l1 * y1  +  l2 * y2  +  l3 * y3;
-//   answer.at(3) = ...;
-//
-//     return 1;
-// }
 
 
 #define POINT_TOL 1.e-3

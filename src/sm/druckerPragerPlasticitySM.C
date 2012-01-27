@@ -130,8 +130,6 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "\t\thardening parameter ");
     // print hardening parameter
     fprintf(file, " % .4e\n", kappa);
-
-    return;
 }
 
 contextIOResultType
@@ -319,8 +317,6 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
         ( ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() ) )
         ->giveFullCharacteristicVector( answer, gp, status->giveTempStressVector() );
     }
-
-    return;
 }
 
 void
@@ -392,8 +388,6 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     plasticStrainDeviator.subtract(elasticStrainDeviator);
     status->letTempPlasticStrainDeviatorBe(plasticStrainDeviator);
     status->letTempVolumetricPlasticStrainBe(volumetricStrain - volumetricStress / 3. / kM);
-
-    return;
 }
 
 bool
@@ -482,7 +476,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
 #ifdef PRINTFDP
     printf("iterationCount in regular return = %d\n", iterationCount) ;
 #endif
-    
+
     if ( deltaLambda < 0. ) {
         _error("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
     }
@@ -701,7 +695,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     if(hStar == 0.){
         OOFEM_ERROR("DruckerPragerPlasticitySM :: computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
     }
-    
+
     const double a_const = 1. + deltaLambdaStar;
     const double b_const = 3. * alpha * alphaPsi * kM / hStar - deltaLambdaStar / 3.;
     const double c_const = 3. * sqrt(2.) * alphaPsi * kM / 2. / hStar;
@@ -828,8 +822,6 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     }
 
     answer.times(a_const);
-
-    return;
 }
 
 int

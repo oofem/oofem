@@ -65,6 +65,7 @@ NumericalMethod *DEIDynamic :: giveNumericalMethod(TimeStep *)
     return NULL;  // not necessary here - diagonal matrix is used-simple inversion
 }
 
+
 IRResultType
 DEIDynamic :: initializeFrom(InputRecord *ir)
 {
@@ -78,9 +79,6 @@ DEIDynamic :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
-
-
 
 
 double DEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
@@ -143,8 +141,8 @@ TimeStep *DEIDynamic :: giveNextStep()
 }
 
 
-
-void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
+void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
+{
     //
     // creates system of governing eq's and solves them at given time step
     //
@@ -374,6 +372,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     velocityVector.times(c2);
 }
 
+
 void DEIDynamic :: updateYourself(TimeStep *stepN)
 {
     this->updateInternalState(stepN);
@@ -381,8 +380,7 @@ void DEIDynamic :: updateYourself(TimeStep *stepN)
 }
 
 
-void
-DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
+void DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     static char dofchar[] = "dva";
     static ValueModeType dofmodes[] = {

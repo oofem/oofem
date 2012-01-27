@@ -62,13 +62,11 @@ FEI3dTrLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
-    , DirectErrorIndicatorRCInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(), DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 
 {
-    // Constructor.
     numberOfDofMans  = 4;
     numberOfGaussPoints = 1;
 }
@@ -247,17 +245,12 @@ void
 LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    FloatArray *coord1;
     GaussPoint *gp;
     double dV, mss1;
 
     answer.resize(12, 12);
     answer.zero();
-    coord1             = new FloatArray(3);
-    coord1->at(1)    = 0;
-    coord1->at(2)    = 0;
-    coord1->at(3)    = 0;
-    gp                 = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
     mss1 = dV * this->giveMaterial()->give('d', gp) / 4.;
@@ -269,12 +262,12 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LTRSpace ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+LTRSpace ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(3);
 
     answer.at(1) = D_u;
@@ -339,7 +332,6 @@ LTRSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
      * for (j=1; j<=8; j++)
      * answer.at(i,i+(j-1)*6) = n.at(j);
      *******/
-    return;
 }
 
 void
@@ -375,6 +367,7 @@ LTRSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
     pap.at(4) = this->giveNode(4)->giveNumber();
 }
 
+
 void
 LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
@@ -394,6 +387,7 @@ LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     }
 }
 
+
 int
 LTRSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 { return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
@@ -404,6 +398,7 @@ LTRSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, Ga
 {
     this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
 }
+
 
 SPRPatchType
 LTRSpace :: SPRNodalRecoveryMI_givePatchType()
@@ -740,12 +735,14 @@ LTRSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
+
 int
 LTRSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
+
 
 double
 LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -780,6 +777,7 @@ LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
     double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this), 0.0);
     return __OOFEM_POW(volume * 6.0, 1. / 3.);
 }
+
 
 int
 LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
@@ -936,6 +934,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     }
 }
 
+
 double
 LTRSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
@@ -1045,6 +1044,7 @@ LTRSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
+
 IntegrationRule *
 LTRSpace :: GetSurfaceIntegrationRule(int approxOrder)
 {
@@ -1053,6 +1053,7 @@ LTRSpace :: GetSurfaceIntegrationRule(int approxOrder)
     iRule->setUpIntegrationPoints(_Triangle, npoints, _Unknown);
     return iRule;
 }
+
 
 double
 LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
@@ -1068,6 +1069,7 @@ LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     // the following works only for 1 GP !!!
     // return interpolation.surfaceGiveTransformationJacobian (iSurf, domain, nodeArray, *gp->giveCoordinates(), 0.0);
 }
+
 
 void
 LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)

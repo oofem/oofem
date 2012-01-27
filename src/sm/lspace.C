@@ -69,6 +69,7 @@ LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNo
     numberOfGaussPoints = 8;
 }
 
+
 Interface *
 LSpace :: giveInterface(InterfaceType interface)
 {
@@ -90,6 +91,7 @@ LSpace :: giveInterface(InterfaceType interface)
 
     return NULL;
 }
+
 
 void
 LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
@@ -121,9 +123,8 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
         answer.at(6, 3 * i - 2) = dnx.at(i, 2);
         answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
-
-    return;
 }
+
 
 void
 LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
@@ -147,6 +148,7 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         }
     }
 }
+
 
 void
 LSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
@@ -199,9 +201,8 @@ LSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
             }
         }
     }
-
-    return;
 }
+
 
 MaterialMode
 LSpace :: giveMaterialMode()
@@ -247,8 +248,6 @@ LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(2, 3 * i - 1) = n.at(i);
         answer.at(3, 3 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -260,8 +259,8 @@ double LSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
                                                                        FEIElementGeometryWrapper(this), 0.0) );
 
 
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
 
     return volume;
 }
@@ -287,6 +286,7 @@ LSpace :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 void
 LSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
@@ -294,14 +294,11 @@ LSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(3);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-
-    return;
 }
 
 
@@ -328,8 +325,6 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
 }
 
 
-
-
 int
 LSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
@@ -348,6 +343,7 @@ LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
+
 
 void
 LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
@@ -368,6 +364,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     }
 }
 
+
 int
 LSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 { return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
@@ -378,6 +375,7 @@ LSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, Gaus
 {
     this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
 }
+
 
 SPRPatchType
 LSpace :: SPRNodalRecoveryMI_givePatchType()
@@ -501,6 +499,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     }
 }
 
+
 void
 LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                     InternalStateType type, TimeStep *tStep)
@@ -522,6 +521,7 @@ LSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
+
 
 double
 LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -548,7 +548,6 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
 
     return dist;
 }
-
 
 
 int
@@ -583,11 +582,13 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
     return result;
 }
 
+
 void
 LSpace :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
+
 
 void
 LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
@@ -685,8 +686,6 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
 }
 
 
-
-
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
@@ -733,6 +732,7 @@ void LSpace :: drawRawGeometry(oofegGraphicContext &gc)
      * this->drawTriad (c,1);
      */
 }
+
 
 void LSpace :: drawTriad(FloatArray &coords, int isurf)
 {
@@ -1014,7 +1014,6 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
 #endif
 
 
-
 void
 LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {
@@ -1044,8 +1043,6 @@ LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
     answer.at(2, 5) = n.at(2);
     answer.at(3, 3) = n.at(1);
     answer.at(3, 6) = n.at(2);
-
-    return;
 }
 
 void
@@ -1144,9 +1141,8 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
+
 
 double
 LSpace :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
@@ -1178,6 +1174,7 @@ LSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPo
     return 1;
 }
 
+
 void
 LSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
 {
@@ -1202,6 +1199,7 @@ LSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
     answer.at(3, 9) = n.at(3);
     answer.at(3, 12) = n.at(4);
 }
+
 
 void
 LSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
@@ -1308,6 +1306,7 @@ LSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
+
 IntegrationRule *
 LSpace :: GetSurfaceIntegrationRule(int approxOrder)
 {
@@ -1316,6 +1315,7 @@ LSpace :: GetSurfaceIntegrationRule(int approxOrder)
     iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
     return iRule;
 }
+
 
 double
 LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
@@ -1328,6 +1328,7 @@ LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 
     return volume;
 }
+
 
 void
 LSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)

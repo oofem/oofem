@@ -115,7 +115,7 @@ LIBeam3dNL ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 
 
 void
-LIBeam3dNL ::     updateTempTriad(TimeStep *tStep)
+LIBeam3dNL :: updateTempTriad(TimeStep *tStep)
 {
     // test if not previously done
     if ( tStep->giveSolutionStateCounter() == tempTcCounter ) {
@@ -141,6 +141,7 @@ LIBeam3dNL ::     updateTempTriad(TimeStep *tStep)
     // remember timestamp
     tempTcCounter = tStep->giveSolutionStateCounter();
 }
+
 
 void
 LIBeam3dNL :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
@@ -169,6 +170,7 @@ LIBeam3dNL :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *
     answer.at(6) = curv.at(3); // kappa_3
 }
 
+
 void
 LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep) {
     int i, j;
@@ -192,6 +194,7 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep) {
         }
     }
 }
+
 
 void
 LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
@@ -464,8 +467,6 @@ LIBeam3dNL :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     // fi_z
     answer.at(6, 6)  = n1;
     answer.at(6, 12) = n2;
-
-    return;
 }
 
 
@@ -485,7 +486,6 @@ LIBeam3dNL ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) con
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(6);
 
     answer.at(1) = D_u;

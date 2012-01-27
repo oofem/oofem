@@ -213,7 +213,6 @@ J2Mat :: computeStressGradientVector(FloatArray &answer, functType ftype, int is
 }
 
 
-
 void
 J2Mat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &stress, const FloatArray &dlambda,
@@ -330,7 +329,6 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
     size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
 
-    //FloatMatrix* answer = new FloatMatrix(size,size);
     gradientMatrix.resize(size, size);
     gradientMatrix.zero();
 
@@ -341,7 +339,6 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
             this->giveStressBackVector(backStress, gp, strainSpaceHardeningVars);
             helpVector = fullStressVector;
             helpVector.add(backStress);
-            //delete backStress;
         } else {
             helpVector = fullStressVector;
         }
@@ -414,8 +411,6 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
             }
         }
     }
-
-    return;
 }
 
 
@@ -450,8 +445,6 @@ J2Mat :: hasHardening()
 }
 
 
-
-
 double
 J2Mat :: computeJ2InvariantAt(const FloatArray &stressVector)
 {
@@ -471,6 +464,7 @@ J2Mat :: computeJ2InvariantAt(const FloatArray &stressVector)
 
     return answer;
 }
+
 
 void
 J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,

@@ -622,7 +622,6 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 { }
 
 
-/// Prints the receiver state to stream
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     int i, j, maxComponents;

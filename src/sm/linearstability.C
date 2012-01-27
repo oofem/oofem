@@ -32,17 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// W A R N I N G :
-//
-// Warning: current implementation optimized for use
-// ldlt factorization and subspace iteration as numerical
-// methods to solve governing equations.
-// If you want use another numerical method,
-// you must uncomment marked section in source code
-// inside this file to obtain full independency of
-// used numerical method.
-
 // please activate or de-activate next line
 //#define LIN_STAB_COMPATIBILITY_MODE
 
@@ -73,12 +62,8 @@
  #include "oofeggraphiccontext.h"
 #endif
 
-//#include "gjacobi.h"
 namespace oofem {
 NumericalMethod *LinearStability :: giveNumericalMethod(TimeStep *stepN)
-// only one is awailable now
-//     - SubspaceIteration
-
 {
     if ( nMethod ) {
         return nMethod;
@@ -227,7 +212,7 @@ TimeStep *LinearStability :: giveNextStep()
 
 void LinearStability :: solveYourself()
 {
-    // update state ccording to new meta step
+    // update state according to new meta step
     this->giveNextStep();
     this->updateAttributes( this->giveCurrentStep() );
     this->solveYourselfAt( this->giveCurrentStep() );
@@ -253,7 +238,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //
-        // allocate space for displacementVector
+        // allocate space for displacement Vector
         //
         displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         //
@@ -291,13 +276,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
-    // call numerical model to solve arised problem
+    // call numerical model to solve problem
     //
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving linear static problem\n");
 #endif
 
-    //nMethodLS -> solveYourselfAt(tStep);
     nMethodLS->solve(stiffnessMatrix, & loadVector, & displacementVector);
     // terminate linear static computation (necessary, in order to compute stresses in elements).
     this->terminateLinStatic( this->giveCurrentStep() );
@@ -342,7 +326,6 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    //nMethod -> solveYourselfAt(tStep);
     nMethod->solve(stiffnessMatrix, initialStressMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
     // compute eigen frequencies
     //for (i = 1; i<= numberOfRequiredEigenValues; i++)
@@ -414,7 +397,6 @@ LinearStability :: terminateLinStatic(TimeStep *stepN)
 }
 
 
-
 void LinearStability :: terminate(TimeStep *stepN)
 {
     Domain *domain = this->giveDomain(1);
@@ -426,7 +408,6 @@ void LinearStability :: terminate(TimeStep *stepN)
     // print eigen values on output
     fprintf(outputStream, "\nLinear Stability:");
     fprintf(outputStream, "\nEigen Values are:\n-----------------\n");
-    //this->giveNumericalMethod(stepN)->giveFloatArrayComponent(EigenValues,&eigv);
 
     for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         fprintf( outputStream, "%15.8e ", eigVal.at(i) );
@@ -462,25 +443,6 @@ void LinearStability :: terminate(TimeStep *stepN)
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
 #  endif
-
-    /*  int nelem = domain->giveNumberOfElements ();
-     * for (j=1 ; j<=nelem ; j++) {
-     *  elem = domain -> giveElement(j) ;
-     * elem -> updateYourself(stepN) ;}
-     *
-     #  ifdef VERBOSE
-     * VERBOSE_PRINT0("Updated Elements ",nelem)
-     #  endif
-     *
-     * REMARK:
-     * I dont update elements - because it invokes updating strain and streses
-     * in GaussPoints - it not necesarry now - so I omit this part of code
-     */
-
-
-    // for (j=1 ; j<=nnodes ; j++)
-    //  domain -> giveNode(j) -> updateYourself() ;
-
     // save context if required
     this->saveStepContext(stepN);
 }

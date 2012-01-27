@@ -106,9 +106,6 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
 }
 
 
-
-
-
 double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                                   TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, eigenvalue.
@@ -134,7 +131,6 @@ double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType 
 
     return 0.;
 }
-
 
 
 double EigenValueDynamic ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
@@ -183,6 +179,7 @@ TimeStep *EigenValueDynamic :: giveNextStep()
 
     return currentStep;
 }
+
 
 void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
 {
@@ -238,9 +235,9 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     stiffnessMatrix = massMatrix = NULL;
 }
 
+
 void EigenValueDynamic :: updateYourself(TimeStep *stepN)
 { }
-
 
 
 void EigenValueDynamic :: terminate(TimeStep *stepN)
@@ -339,7 +336,6 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream *stream, Context
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)

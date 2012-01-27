@@ -61,11 +61,12 @@ namespace oofem {
 InterfaceElem1d :: InterfaceElem1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
-    numberOfDofMans       = 2;
+    numberOfDofMans = 2;
     referenceNode = 0;
     normal.resize(3);
     normal.zero();
 }
+
 
 void
 InterfaceElem1d :: setCoordMode()
@@ -95,9 +96,8 @@ InterfaceElem1d :: setCoordMode()
     default:
         _error("setCoordMode: Unsupported domain type")
     }
-
-    return;
 }
+
 
 MaterialMode
 InterfaceElem1d :: giveMaterialMode()
@@ -124,7 +124,6 @@ InterfaceElem1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     answer.resize(ndofs, ndofs);
     answer.zero();
-    return;
 }
 
 
@@ -170,9 +169,8 @@ InterfaceElem1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 
     bLoc.times(area);
     answer.beProductOf(lcs, bLoc);
-
-    return;
 }
+
 
 void
 InterfaceElem1d :: evaluateLocalCoordinateSystem(FloatMatrix &lcs)
@@ -225,10 +223,7 @@ InterfaceElem1d :: evaluateLocalCoordinateSystem(FloatMatrix &lcs)
     default:
         _error("giveDofManDofIDMask: unsupported mode");
     }
-
-    return;
 }
-
 
 
 void
@@ -245,7 +240,6 @@ InterfaceElem1d :: computeGaussPoints()
 }
 
 
-
 int
 InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
@@ -258,14 +252,12 @@ InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray
 }
 
 
-
 int
 InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     _error("Not implemented");
     return 0;
 }
-
 
 
 double
@@ -275,6 +267,7 @@ InterfaceElem1d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     return 1.0;
 }
+
 
 IRResultType
 InterfaceElem1d :: initializeFrom(InputRecord *ir)
@@ -292,6 +285,7 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     this->computeGaussPoints();
     return IRRT_OK;
 }
+
 
 int
 InterfaceElem1d :: computeNumberOfDofs(EquationID)
@@ -313,7 +307,8 @@ InterfaceElem1d :: computeNumberOfDofs(EquationID)
 
 
 void
-InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -374,8 +369,6 @@ InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer
     default:
         _error("giveDofManDofIDMask: unsupported mode");
     }
-
-    return;
 }
 
 

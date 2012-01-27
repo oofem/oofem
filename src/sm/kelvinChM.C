@@ -116,8 +116,6 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     for ( i = 1; i <= this->nUnits; i++ ) {
         answer.at(i) = 1. / answer.at(i);
     }
-
-    return;
 }
 
 const FloatArray &
@@ -166,7 +164,6 @@ KelvinChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, dou
     }
 
     answer.at(1) = from;
-    return;
 }
 
 double
@@ -254,8 +251,6 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
     }
-
-    return;
 }
 
 
@@ -407,7 +402,6 @@ KelvinChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, v
 contextIOResultType
 KelvinChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    //PH int i;
     contextIOResultType iores;
 
     if ( ( iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

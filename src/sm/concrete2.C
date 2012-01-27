@@ -172,10 +172,6 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 }
 
 
-
-
-
-
 void
 Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                    const FloatArray &strain,
@@ -198,10 +194,7 @@ Concrete2 ::  giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
     default:
         _error("giveRealStresses : unsupported stressMode\n");
     }
-
-    return;
 }
-
 
 
 void
@@ -356,32 +349,24 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
             currentStress.at(i) = 0.;
         }
 
-        // delete pVal;
-        //delete pDir;
         delete ep;
         delete pStress;
         delete strainIncr;
 
-        //delete currentStrain;
-        //delete currentEffStrain;
 
         // note in status are reduced space variables
         status->letTempStrainVectorBe(totalStrain);
 
         crossSection->giveReducedCharacteristicVector(helpR, gp, currentStress);
         status->letTempStressVectorBe(helpR);
-        //delete help;
-        //delete helpR;
+
         crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
         status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
         plasticStrainIncrementVector.subtract(plasticStrainVector);
         plasticStrainIncrementVector.add(help);
         status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
-        //delete help;
         //   plasticStrain->negated()->add (status->givePlasticStrainVector());
         //      status->givePlasticStrainIncrementVector()-> add(plasticStrain);
-
-        //delete plasticStrain;
 
         if ( form == FullForm ) {
             answer =  currentStress;
@@ -389,7 +374,6 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         }
 
         crossSection->giveReducedCharacteristicVector(answer, gp, currentStress);
-        //delete currentStress;
         return;
     }
 
@@ -696,15 +680,9 @@ label18:
         status->giveTempCurrentStrainInZDir() = ez;
     }
 
-    //delete pVal;
-    //delete pDir;
     delete ep;
     delete pStress;
     delete strainIncr;
-    //delete strainIncrement;
-
-    //delete currentStrain;
-    //delete currentEffStrain;
 
     //totalStrainVector = status->giveStrainVector();
     //totalStrainVector.add (totalStrainIncrement);
@@ -712,19 +690,15 @@ label18:
 
     crossSection->giveReducedCharacteristicVector(helpR, gp, currentStress);
     status->letTempStressVectorBe(helpR);
-    //delete help; delete helpR;
 
     crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
     status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
     plasticStrainIncrementVector.subtract(plasticStrainVector);
     plasticStrainIncrementVector.add(help);
     status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
-    //delete help;
 
     //plasticStrain->negated()->add (status->givePlasticStrainVector());
     //status->givePlasticStrainIncrementVector()-> add(plasticStrain);
-
-    //delete plasticStrain;
 
     if ( form == FullForm ) {
         answer =  currentStress;
@@ -732,8 +706,6 @@ label18:
     }
 
     crossSection->giveReducedCharacteristicVector(answer, gp, currentStress);
-    //delete currentStress;
-    return;
 }
 
 
@@ -938,8 +910,6 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
             }
         }
     }
-
-    return;
 }
 
 void

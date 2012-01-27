@@ -125,20 +125,17 @@ void
 B3Material :: giveThermalDilatationVector(FloatArray &answer,
                                           GaussPoint *gp,  TimeStep *tStep)
 //
-// returns a FloatArray(6) of initial strain vector
+// returns strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
 // caused by unit temperature in direction of
 // gp (element) local axes
 //
 {
-    //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
     answer.at(1) = ( talpha );
     answer.at(2) = ( talpha );
     answer.at(3) = ( talpha );
-
-    return;
 }
 
 
@@ -293,8 +290,6 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
     } else {
         this->computeShrinkageStrainVector(answer, form, gp, atTime, mode);
     }
-
-    return;
 }
 
 void
@@ -357,7 +352,6 @@ void
 B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                            GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 {
-    // free shrinkage at material point, requires staggered analaysis
     // additional material parameters required:
     //  es0     - final shrinkage at material point
     //  r       - coefficient
@@ -379,7 +373,6 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
 
     fullAnswer.resize(size);
     fullAnswer.zero();
-
 
 
     /* ask for humidity and temperature from external sources, if provided */
@@ -481,14 +474,9 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
 
 double
 B3Material :: inverse_sorption_isotherm(double w)
-// Function calculates relative humidity from water content (inverse relation form sorption isotherm).
-// Relative humidity (phi) is from range 0.2 - 0.98 !!!
-// sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
-//                      PhD-thesis, Technical University of Denmark, Lingby.
-// w (kg/kg) ... water content
-// phi ... relative humidity
-// w_h, n, a ... constants obtained from experiments
 {
+    // phi ... relative humidity
+    // w_h, n, a ... constants obtained from experiments
     double phi;
 
     // relative humidity

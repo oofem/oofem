@@ -442,18 +442,15 @@ public:
     // === Status services ===
     // Call data init/update according to material options
     virtual void initTempStatus(); // equilibrated -> temp - start of new iteration
-    virtual void updateYourself(TimeStep *atTime); // temp->equilib - end of step
+    virtual void updateYourself(TimeStep *atTime);
 
-    /// Outputs the status variables
-    void printOutputAt(FILE *file, TimeStep *atTime);
-    /// Saves current context(state) into stream. Saves equilib variables after updateYourself at step end
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /// Restores context from stream, reads equilib variables
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual void printOutputAt(FILE *file, TimeStep *atTime);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // identification
-    const char *giveClassName() const { return "HellmichMaterialStatus"; }
-    classType   giveClassID() const { return ( classType ) HellmichMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "HellmichMaterialStatus"; }
+    virtual classType giveClassID() const { return ( classType ) HellmichMaterialStatusClass; }
 };
 
 
@@ -512,7 +509,7 @@ protected:
            tc0; // ft,8
 
     // === Prestress ===
-    //!!! should not be here, HellmichMaterial used as linear elastic steel prestressed cable, no relaxation...
+    // !!! should not be here, HellmichMaterial used as linear elastic steel prestressed cable, no relaxation...
     // prestress stress in x direction (should add DOF components array) [Pa]
     double prestress;
     // time of start and end of prestress application (may be identical)

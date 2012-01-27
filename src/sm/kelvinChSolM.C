@@ -132,8 +132,6 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
     }
-
-    return;
 }
 
 double

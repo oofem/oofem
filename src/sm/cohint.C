@@ -267,14 +267,11 @@ CohesiveInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
     answer.at(1) = this->tempDillatCoeff;
     answer.at(2) = this->tempDillatCoeff;
     answer.at(3) = this->tempDillatCoeff;
-
-    return;
 }
 
 IRResultType

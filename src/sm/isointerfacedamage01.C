@@ -140,7 +140,6 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, MatRespon
     status->letTempStressVectorBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
-    return;
 }
 
 void
@@ -169,7 +168,7 @@ int
 IsoInterfaceDamageMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
 //
 // returns the size of reduced stress-strain vector
-// acording to mode given by gp.
+// according to mode given by gp.
 //
 {
     switch ( mode ) {
@@ -201,6 +200,7 @@ IsoInterfaceDamageMaterial :: giveStressStrainComponentIndOf(MatResponseForm for
         return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
     }
 }
+
 
 void
 IsoInterfaceDamageMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
@@ -340,8 +340,6 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
     }  else {
         _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
-
-    return;
 }
 
 
@@ -400,8 +398,6 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
     }  else {
         _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
-
-    return;
 }
 
 
@@ -425,8 +421,6 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGauss
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
 
 
 InternalStateValueType
@@ -484,14 +478,11 @@ IsoInterfaceDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
     answer.at(1) = this->tempDillatCoeff;
     answer.at(2) = this->tempDillatCoeff;
     answer.at(3) = this->tempDillatCoeff;
-
-    return;
 }
 
 
@@ -546,7 +537,6 @@ IsoInterfaceDamageMaterial :: computeDamageParam(double &omega, double kappa, co
         omega = 0.0;
     }
 }
-
 
 
 IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)

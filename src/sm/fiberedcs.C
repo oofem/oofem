@@ -101,8 +101,6 @@ FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
     // now we must update master gp
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(stressVect);
-
-    return;
 }
 
 
@@ -118,7 +116,6 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
                                         mat, tStep);
-    return;
 }
 
 
@@ -232,9 +229,7 @@ FiberedCrossSection :: give3dBeamMaterialStiffnessMatrix(FloatMatrix &answer, Ma
 
     G /= A;
     Ik = A * A * A * A / ( 40.0 * Ip );
-    answer.at(4, 4)    = G * Ik;
-
-    return;
+    answer.at(4, 4) = G * Ik;
 }
 
 
@@ -251,7 +246,6 @@ FiberedCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, Gauss
 
 //
 {
-    // FloatArray* answer;
     MaterialMode mode = gp->giveMaterialMode();
     int size = charVector3d.giveSize();
 
@@ -260,7 +254,6 @@ FiberedCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, Gauss
             _error("giveReducedCharacteristicVector: stressVector3d size mismatch");
         }
 
-        //answer = new FloatArray (5);
         answer.resize(3);
 
         answer.at(1) = charVector3d.at(1);
@@ -275,9 +268,8 @@ FiberedCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, Gauss
     } else {
         this->StructuralCrossSection :: giveReducedCharacteristicVector(answer, gp, charVector3d);
     }
-
-    return;
 }
+
 
 void
 FiberedCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
@@ -292,7 +284,6 @@ FiberedCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoi
 
 //
 {
-    // FloatArray* answer;
     MaterialMode mode = gp->giveMaterialMode();
     int size = charVector.giveSize();
 
@@ -301,7 +292,6 @@ FiberedCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoi
             _error("giveFullCharacteristicVector: stressVector size mismatch");
         }
 
-        //answer = new FloatArray (6);
         answer.resize(6);
         answer.zero();
 
@@ -317,8 +307,6 @@ FiberedCrossSection :: giveFullCharacteristicVector(FloatArray &answer, GaussPoi
     } else {
         this->StructuralCrossSection :: giveFullCharacteristicVector(answer, gp, charVector);
     }
-
-    return;
 }
 
 
@@ -358,7 +346,6 @@ FiberedCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 
     return gradientStressVector3d;
 }
-
 
 
 FloatArray *
@@ -415,14 +402,12 @@ FiberedCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm fo
         if ( form == ReducedForm ) {
             switch ( mmode ) {
             case _1dFiber:
-                //indx = new IntArray (3);
                 answer.resize(3);
                 answer.at(1) = 1;
                 answer.at(2) = 5;
                 answer.at(3) = 6;
                 break;
             case _3dBeam:
-                //indx = new IntArray (8);
                 answer.resize(6);
                 for ( i = 1; i <= 6; i++ ) {
                     answer.at(i) = i;
@@ -435,7 +420,6 @@ FiberedCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm fo
         } else if ( form == FullForm ) {
             switch ( mmode ) {
             case _1dFiber:
-                //indx = new IntArray (8);
                 answer.resize(6);
                 answer.zero();
                 answer.at(1) = 1;
@@ -443,7 +427,6 @@ FiberedCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm fo
                 answer.at(6) = 3;
                 break;
             case _3dBeam:
-                //indx = new IntArray (8);
                 answer.resize(6);
                 answer.zero();
                 for ( i = 1; i <= 6; i++ ) {
@@ -698,7 +681,6 @@ FiberedCrossSection :: GiveIntegrated3dBeamStress(GaussPoint *masterGp)
 // 2) strainVectorShell {eps_x, gamma_xz, gamma_xy, \der{phi_x}{x}, kappa_y, kappa_z}
 //
 {
-    //Material * mat = masterGp->giveElement()->giveMaterial();
     Material *fiberMat;
     StructuralMaterialStatus *fiberStatus;
     FloatArray *answer, fiberStress, reducedFiberStress;
@@ -718,7 +700,6 @@ FiberedCrossSection :: GiveIntegrated3dBeamStress(GaussPoint *masterGp)
         if ( fiberStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
             reducedFiberStress = fiberStatus->giveTempStressVector();
             giveFullCharacteristicVector(fiberStress, fiberGp, reducedFiberStress);
-            // delete reducedLayerStress;
         } else { // no total stress
             continue; // skip gp without stress
         }
@@ -743,13 +724,10 @@ FiberedCrossSection :: GiveIntegrated3dBeamStress(GaussPoint *masterGp)
                            fiberStress.at(6) * fiberWidth * fiberThick * fiberZCoord );
         answer->at(5) += fiberStress.at(1) * fiberWidth * fiberThick * fiberZCoord;
         answer->at(6) -= fiberStress.at(1) * fiberWidth * fiberThick * fiberYCoord;
-        // delete layerStress;
     }
 
     return answer;
 }
-
-
 
 
 double
@@ -765,6 +743,7 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty)
 
     return CrossSection :: give(aProperty);
 }
+
 
 double FiberedCrossSection :: giveArea()
 {

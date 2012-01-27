@@ -35,12 +35,12 @@ void AgingIsoLEMaterial :: setE(double newE) {
 
 // --------- class HellmichMaterial implementation---------
 HellmichMaterial :: HellmichMaterial(int n, Domain *d) : StructuralMaterial(n, d), HydrationModelInterface()
-    /// Constructor - does nothing, initialization is done in initializeFrom(ir);
+// Constructor - does nothing, initialization is done in initializeFrom(ir);
 { }
 
 void
 HellmichMaterial :: initializeParameters()
-/// Initializes the auxiliary material constants for plasticity according to material options and parameters
+// Initializes the auxiliary material constants for plasticity according to material options and parameters
 {
     alpha = sqrt(2. / 3.) * ( kappa - 1 ) / ( 2 * kappa - 1 ); // 3.20
 
@@ -61,7 +61,7 @@ HellmichMaterial :: initializeParameters()
 
 void
 HellmichMaterial :: createMaterialGp()
-/**
+/*
  * Creates isothermal analysis (material-level) gp that contains the auxiliary status values constant in material.
  * Uses virtual Element instance to have reference to material.
  * Sets gp number to 0 to let status services know it's the material-level gp.
@@ -267,7 +267,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         }
     }
 
-    //!!! Prestress (as initial stress)
+    // !!! Prestress (as initial stress)
     prestress = 0;
     prestressFrom = -1;
     prestressTo = -1;
@@ -426,7 +426,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         }
 
         // Compute plastic multiplier directly, not using the local Newton iteration
-        //!!! not sure whether works correctly in 3D corner
+        // !!! not sure whether works correctly in 3D corner
         if ( ( options & moPlasticity ) && ( ir->hasField(IFT_HellmichMaterial_computedl, "computedl") ) ) {
             options = options | moComputedl;
             printf("\nHellMat: Direct computation of plastic multiplier dlambda1.");
@@ -444,7 +444,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
 }
 
 HellmichMaterial :: ~HellmichMaterial()
-/// Destructor
+// Destructor
 {
     if ( linMat ) {
         delete linMat;
@@ -463,7 +463,7 @@ HellmichMaterial :: ~HellmichMaterial()
 
 double
 HellmichMaterial :: agingE(double ksi)
-/// Returns the Young modulus of material at given hydration degree ksi
+// Returns the Young modulus of material at given hydration degree ksi
 // Hellmich A.14
 {
     if ( ( options & moLinearEModulus ) || ( mixture == mtHuber ) ) {
@@ -475,7 +475,7 @@ HellmichMaterial :: agingE(double ksi)
 
 void
 HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff)
-/**
+/*
  * Returns the isotropic linear elastic stress vector for the given strain vector.
  * Uses the attached aging linear elastic material for material modes other than 3dMat or 1dMat.
  * If coeff is true, uses kv and gv creep coefficients according to moDeviatoricCreep settings
@@ -532,7 +532,7 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
 }
 
 void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stress, GaussPoint *gp, TimeStep *atTime, MatResponseForm form, int coeff)
-/// Returns the isotropic linear elastic strain vector for the given stress vector
+// Returns the isotropic linear elastic strain vector for the given stress vector
 {
     int i;
     double ksi, E, Gv, Kv, svE;
@@ -591,6 +591,8 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
         }
     }
 }
+
+
 double HellmichMaterial :: prestressValue(double time)
 {
     if ( prestress ) {
@@ -605,6 +607,8 @@ double HellmichMaterial :: prestressValue(double time)
         return 0.;
     }
 }
+
+
 double HellmichMaterial :: autoShrinkageCoeff(double ksi)
 // A.15
 {
@@ -614,6 +618,8 @@ double HellmichMaterial :: autoShrinkageCoeff(double ksi)
         return ( 0. );
     }
 }
+
+
 double HellmichMaterial :: dryingShrinkageCoeff(double h)
 // added 17/02/2004
 // shrinkage as function of relative humidity
@@ -625,15 +631,19 @@ double HellmichMaterial :: dryingShrinkageCoeff(double h)
         return 0.;
     }
 }
+
+
 // --------- creep ---------
 inline double HellmichMaterial :: twTime(double ksi)
-/// Linear dependence of the short-term creep characteristic time on the hydration degree
+// Linear dependence of the short-term creep characteristic time on the hydration degree
 // 3.48
 {
     return ( tw * ksi );
 }
+
+
 double HellmichMaterial :: computeGamma0(double t, double T)
-/**
+/*
  * Micropresstress force at time and temperature of material setting point (ksi0).
  * Integrated analytically for isothermal conditions
  */
@@ -641,8 +651,10 @@ double HellmichMaterial :: computeGamma0(double t, double T)
 {
     return ( 1. / ( modulusH * t * exp( -ur * ( 1 / T - 1 / refT ) ) ) );
 }
+
+
 double HellmichMaterial :: computeViscousSlipIncrement(GaussPoint *gp, TimeStep *atTime)
-/**
+/*
  * Computes and returns the viscous slip increment for given time increment, temperature, humidity and previous prestress and slip values.
  * Positive root of quadratic equation for viscous slip increment.
  */
@@ -677,7 +689,7 @@ double HellmichMaterial :: computeViscousSlipIncrement(GaussPoint *gp, TimeStep 
 }
 
 double HellmichMaterial :: computeViscosity(GaussPoint *gp, TimeStep *atTime)
-/// returns the flow creep viscosity 1/ny,f for given viscous slip -> microprestress
+// returns the flow creep viscosity 1/ny,f for given viscous slip -> microprestress
 // viscosity is saved in nonisothermal status, could be removed and computed from gamma directly when needed
 {
     double base, gamma, T;
@@ -723,6 +735,8 @@ double HellmichMaterial :: rcThreshold(double chi1, double ksi)
         return ( fcStrength(ksi) );
     }
 }
+
+
 double HellmichMaterial :: dRcdchi1(double chi1, double ksi)
 // full dRcdchi1 = fcStrength(ksi)*(1-omega) * (chi1u-chi1)/(chi1u*sqrt(chi1*(2*chi1u-chi1)))
 {
@@ -1209,8 +1223,6 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             answer(i, j) /= 2.;
         }
     }
-
-    return;
 }
 
 // when solving for dlambda in projection algorithm, approximates df/dx with dx = NEWTON_DERIVATIVEDX
@@ -1333,8 +1345,6 @@ void principalStresses(double *answer, double *s, stressStrainPrincMode mode)
             }
         }
     }
-
-    return;
 }
 
 
@@ -1347,6 +1357,7 @@ LoadTimeFunction *HellmichMaterial :: giveTTimeFunction()
 
     return this->giveDomain()->giveLoadTimeFunction(tTimeFunction);
 }
+
 LoadTimeFunction *HellmichMaterial :: givehTimeFunction()
 // Returns the load-time function of the receiver.
 {
@@ -1398,8 +1409,6 @@ void HellmichMaterial :: plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep
     inv = invariantI1(stress);
     snorm = deviatorNorm(stress);
     fprintf(outputStream, "%.15g %.15g\n", inv, snorm); // corrected stress
-
-    return;
 }
 
 void HellmichMaterial :: plotStressStrain(FILE *outputStream, GaussPoint *gp, TimeStep *atTime, int idx, int id, double err)
@@ -1467,6 +1476,7 @@ void HellmichMaterial :: plotStressStrain(FILE *outputStream, GaussPoint *gp, Ti
     fprintf(outputStream, "%.15g %.15g %.15g %.15g %.15f %d %.2g %.15g %.15g %15g %.15g\n",
             stress, strain, epl, chi, ksi, id, err, evisc, eflow, atTime->giveTargetTime(), eshr);
 }
+
 void HellmichMaterial :: plotStressPath(FILE *outputStream, GaussPoint *gp, TimeStep *atTime, int id, bool trial)
 // I1-|s| stress path output
 {
@@ -1511,17 +1521,20 @@ HellmichMaterial :: printOutputAt(FILE *file, TimeStep *atTime)
         giveStatus( giveMaterialGp() )->printOutputAt(file, atTime);
     }
 }
+
 double HellmichMaterial :: giveTimeIncrement(TimeStep *atTime)
 // returns the time increment of step atTime
 // needed to enable time scaling
 {
     return atTime->giveTimeIncrement() * timeScale;
 }
+
 double HellmichMaterial :: giveTime(TimeStep *atTime)
 // returns the time of step atTime
 {
     return atTime->giveTargetTime() * timeScale;
 }
+
 void
 HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
 /*
@@ -1707,7 +1720,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
 }
 double
 HellmichMaterial :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
-/**
+/*
  * Returns the hydration degree in given integration point. Overrides the giveHydrationDegree from HydrationModelInterface
  * to enable isothermal/noniso switch.
  */
@@ -1724,7 +1737,7 @@ HellmichMaterial :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueM
 }
 
 double HellmichMaterial :: giveTemperature(GaussPoint *gp)
-/**
+/*
  * Returns the temperature in given integration point.
  */
 {
@@ -1771,7 +1784,7 @@ double HellmichMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 
 //10.6.2004 - unused
 double HellmichMaterial :: giveViscousSlip(GaussPoint *gp)
-/**
+/*
  * Returns the viscous slip in given integration point.
  */
 {
@@ -1783,7 +1796,7 @@ double HellmichMaterial :: giveViscousSlip(GaussPoint *gp)
 }
 
 double HellmichMaterial :: giveGamma0(GaussPoint *gp)
-/**
+/*
  * Returns the base microprestress in given integration point.
  */
 {
@@ -1847,7 +1860,7 @@ double HellmichMaterial :: giveKvCoeff(GaussPoint *gp, TimeStep *atTime)
 }
 //ev        //fv
 void HellmichMaterial :: giveKvCoeffs(GaussPoint *gp, TimeStep *atTime, double &kv, double &gv, ValueModeType mode)
-/**
+/*
  * Coefficient accounting for the influence of visco-elasticity and viscous flow
  * on the modulus of elasticity of the stress-strain relation
  * zh 13.6.2004:
@@ -2193,7 +2206,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
     // === evaluate the trial stress ===
     if ( mode == VM_Incremental ) {
         // trial stress = sigma_n  +  1/Kv * (Ce:(depsep = deps - deT - deshr + evaux*dev_n) - (evaux*Jv + dt*viscosity)*E*sigma_n)
-        //!!! auxiliary status - stored in material for stress return
+        // !!! auxiliary status - stored in material for stress return
         // e.g. parallel - goes to hell (several gp's giveRealStressVector use the same material auxiliary variables)
         auxksi = giveHydrationDegree(gp, atTime, VM_Total);
         auxchi1 = status->giveHardeningVar();
@@ -2512,7 +2525,7 @@ contextIOResultType HellmichMaterial :: saveContext(DataStream *stream, ContextM
 }
 contextIOResultType HellmichMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 // restores full status for this material, also invokes restoring for sub-objects of this.
-//!!! gp is passed in obj
+// !!! gp is passed in obj
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
@@ -2585,7 +2598,7 @@ int HellmichMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 HellmichMaterial :: initGpForNewStep(GaussPoint *gp)
-/**
+/*
  * Step restart initialization
  * Standard function - calls initTempStatus(gp)
  * Furthermore, calls initAuxStatus(gp, currentStep) for each gp, in any case of status->nonisodata->updateflag
@@ -2678,7 +2691,7 @@ void HellmichMaterial :: setMixture(MixtureType mix)
 {
     mixture = mix;
     // Set also hydration model to use given mixture
-    /*!!! Ensure that hydrationModel is available at time of calling setMixture
+    /* !!! Ensure that hydrationModel is available at time of calling setMixture
      * - hydrationModel is set up at beginning of initializeFrom if applicable */
     if ( hydrationModel ) {
         hydrationModel->setMixture(mix);
@@ -2761,7 +2774,7 @@ HellmichMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
-/**
+/*
  * Returns the value of the property aProperty.
  * Only the final values of the Young and shear modulus andPoisson ratio are returned.
  */
@@ -2805,6 +2818,7 @@ HellmichMaterial :: giveIPValueType(InternalStateType type)
         return StructuralMaterial :: giveIPValueType(type);
     }
 }
+
 int
 HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
@@ -2829,6 +2843,7 @@ HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
     }
 }
+
 int
 HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
@@ -2852,8 +2867,10 @@ PlastData :: PlastData() : plasticStrainVector(), tempPlasticStrainVector(), tri
     activeSurface = asNone;
     flowIncrement = 0;
 }
+
+
 NonisoData :: NonisoData()
-/**
+/*
  * Initializes the non-isothermal status variables.
  * Also used as material level status for isothermal analysis. Temperature is initialized via setInitialTemperature.
  */
@@ -2907,7 +2924,7 @@ HellmichMaterialStatus :: ~HellmichMaterialStatus()
 
 MaterialOptions
 HellmichMaterialStatus :: giveMaterialOptions()
-/// Returns the material options mask.
+// Returns the material options mask.
 {
     if ( gp->giveNumber() ) {
         return ( ( HellmichMaterial * ) gp->giveMaterial() )->giveOptions();
@@ -2926,7 +2943,7 @@ HellmichMaterialStatus :: setInitialTemperature(double v)
     }
 }
 
-/// necessary for proper cast to interface, can't be done from outside
+// necessary for proper cast to interface, can't be done from outside
 Interface *
 HellmichMaterialStatus :: giveInterface(InterfaceType type)
 {
@@ -2970,7 +2987,7 @@ void CreepData :: initTempStatus(GaussPoint *gp)
 }
 
 void HellmichMaterialStatus :: initTempStatus()
-/**
+/*
  * Sets temp variables to last equilibrium state. Called at start of each iteration.
  * Allocates the status vectors if necessary.
  */
@@ -3011,8 +3028,7 @@ void NonisoData :: updateYourself()
     auxStatusUpdateFlag = 0;
 }
 void HellmichMaterialStatus :: updateYourself(TimeStep *atTime)
-
-/// Update after equilibrium has been reached: temp -> equilib.
+// Update after equilibrium has been reached: temp -> equilib.
 {
     HydrationModelStatusInterface :: updateYourself(atTime);
     StructuralMaterialStatus :: updateYourself(atTime);
@@ -3313,7 +3329,7 @@ NonisoData :: restoreContext(DataStream *stream, ContextMode mode)
 }
 contextIOResultType
 HellmichMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-/// Restores full information stored in stream to this Status
+// Restores full information stored in stream to this Status
 {
     contextIOResultType iores;
     // read flag for each module to enable consistency check

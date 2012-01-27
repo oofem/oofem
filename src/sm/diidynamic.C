@@ -63,6 +63,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(TimeStep *)
     return nm;
 }
 
+
 IRResultType
 DIIDynamic :: initializeFrom(InputRecord *ir)
 {
@@ -85,9 +86,6 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
-
-
 
 
 double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
@@ -168,14 +166,6 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         //
         // first step  assemble stiffness and mass Matrices
         //
-        /*
-         * IntArray* mht = this -> GiveBanWidthVector ();
-         * stiffnessMatrix = new Skyline ();
-         * massMatrix      = new Skyline ();
-         * stiffnessMatrix ->  checkSizeTowardsBanWidth (mht) ;
-         * massMatrix      ->  checkSizeTowardsBanWidth (mht) ;
-         * delete mht;
-         */
         stiffnessMatrix = new Skyline();
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
         massMatrix = stiffnessMatrix->GiveCopy();
@@ -185,10 +175,6 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         //
         // determining starting displacemnts, velocities, accelerations
         //
-        //previousLoadVector = new FloatArray (neq);
-        //displacementVector = new FloatArray (neq);
-        //velocityVector     = new FloatArray (neq);
-        //accelerationVector = new FloatArray (neq);
         previousLoadVector.resize(neq);
         previousLoadVector.zero();
         displacementVector.resize(neq);
@@ -266,24 +252,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
-        /*
-         *  Element* element;
-         *  IntArray* loc ;
-         *
-         *  int nelem = domain -> giveNumberOfElements ();
-         *  FloatMatrix *charMtrx1,*charMtrx2;
-         *  for ( i = 1; i <= nelem ; i++ ) {
-         *    element = domain -> giveElement(i);
-         *    loc = element -> giveLocationArray ();
-         *    charMtrx1 = element -> GiveCharacteristicMatrix (StiffnessMatrix, tStep );
-         *    charMtrx2 = element -> GiveCharacteristicMatrix (MassMatrix, tStep);
-         *    charMtrx2 -> times(a0);
-         *    charMtrx1 -> plus (charMtrx2);
-         *    stiffnessMatrix ->  assemble (charMtrx1, loc) ;
-         * delete charMtrx1;
-         * delete charMtrx2;
-         * }
-         */
+
         delete stepWhenIcApply;
     }   // end of initializaton for first time step
 
@@ -330,11 +299,6 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // set-up numerical model
     //
     help.zero();
-    /*
-     * nMethod -> setSparseMtrxAsComponent ( LinearEquationLhs , stiffnessMatrix) ;
-     * nMethod -> setFloatArrayAsComponent ( LinearEquationRhs , &rhs) ;
-     * nMethod -> setFloatArrayAsComponent ( LinearEquationSolution, &help);
-     */
     //
     // call numerical model to solve arised problem
     //
@@ -370,11 +334,9 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
 
     if ( type == DIIModifiedStiffnessMatrix ) {
         Element *element;
-        // IntArray loc ;
         FloatMatrix charMtrx1, charMtrx2;
 
         element = domain->giveElement(num);
-        // element -> giveLocationArray (loc);
         element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrx2, MassMatrix, tStep);
         charMtrx2.times(this->a0);

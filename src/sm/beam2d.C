@@ -612,8 +612,6 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
         fprintf( File, " % .4e", rl.at(i) );
     }
 
-    // delete rl;
-
     fprintf(File, "\n  local end forces    ");
     n = Fl.giveSize();
     for ( i = 1; i <= n; i++ ) {

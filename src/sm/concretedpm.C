@@ -155,8 +155,6 @@ ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     // end of record
     fprintf(file, "}\n");
-
-    return;
 }
 
 contextIOResultType
@@ -484,8 +482,6 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     } else {
         crossSection->giveFullCharacteristicVector(answer, gp, stress);
     }
-
-    return;
 }
 
 
@@ -523,7 +519,7 @@ ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVect
     if ( tempKappaP <= 1.0 || tempKappaP == kappaP ) {
         tempEquivStrain = equivStrain;
         return;
-    } else if ( tempKappaP > 1.0 && tempKappaP != kappaP )       {
+    } else if ( tempKappaP > 1.0 && tempKappaP != kappaP ) {
         StrainVector plasticStrain(matMode);
         StrainVector tempPlasticStrain(matMode);
         status->giveTempPlasticStrain(tempPlasticStrain);
@@ -561,7 +557,6 @@ ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVect
 
     status->letTempEquivStrainBe(tempEquivStrain);
     status->letDeltaEquivStrainBe(deltaEquivStrain);
-    return;
 }
 
 double
@@ -757,7 +752,6 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     tempPlasticStrain = strain;
     tempPlasticStrain.subtract(elasticStrain);
     status->letTempPlasticStrainBe(tempPlasticStrain);
-    return;
 }
 
 
@@ -1007,8 +1001,6 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
     } else   {
         effectiveStress = stressTemp;
     }
-
-    return;
 }
 
 void
@@ -1108,7 +1100,6 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
     }
 
     vertexType = VT_Regular;
-    return;
 }
 
 
@@ -1296,8 +1287,6 @@ ConcreteDPM :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
     answer(0) = ( dEquivalentDGDStressDInv(0) * ductilityMeasure - equivalentDGDStress * dDuctilityMeasureDInv(0) ) / pow(ductilityMeasure, 2.);
 
     answer(1) = ( dEquivalentDGDStressDInv(1) * ductilityMeasure - equivalentDGDStress * dDuctilityMeasureDInv(1) ) / pow(ductilityMeasure, 2.);
-
-    return;
 }
 
 double
@@ -1390,8 +1379,6 @@ ConcreteDPM :: computeDDuctilityMeasureDInv(FloatArray &answer,
         answer(0) = dDuctilityMeasureDX * dXDSig;
         answer(1) = 0.;
     }
-
-    return;
 }
 
 
@@ -1423,8 +1410,6 @@ ConcreteDPM :: computeDGDInv(FloatArray &answer,
 
     answer(0) = dgdsig;
     answer(1) = dgdrho;
-
-    return;
 }
 
 
@@ -1492,8 +1477,6 @@ ConcreteDPM :: computeDDGDInvDKappa(FloatArray &answer,
 
     answer(0) = dDGDSigDKappa;
     answer(1) = dDGDRhoDKappa;
-
-    return;
 }
 
 void
@@ -1542,8 +1525,6 @@ ConcreteDPM :: computeDDGDDInv(FloatMatrix &answer,
     answer(0, 1) = ddgdSigdRho;
     answer(1, 0) = ddgdRhodSig;
     answer(1, 1) = ddgddRho;
-
-    return;
 }
 
 void
@@ -1579,7 +1560,6 @@ ConcreteDPM :: computeAMatrix(FloatMatrix &answer,
     aMatrixInverse(2, 2) = -1. + deltaLambda * dDKappaDDeltaLambdaDKappa;
 
     answer.beInverseOf(aMatrixInverse);
-    return;
 }
 
 
@@ -1632,8 +1612,6 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             answer.times(1. - omega);
         }
     }
-
-    return;
 }
 
 void
@@ -1644,7 +1622,6 @@ ConcreteDPM :: computeTrialCoordinates(const StressVector &stress)
                                                      sig);
     rho = deviatoricStress.computeSecondCoordinate();
     thetaTrial = deviatoricStress.computeThirdCoordinate();
-    return;
 }
 
 
@@ -1711,8 +1688,6 @@ ConcreteDPM :: computeDRhoDStress(FloatArray &answer,
     dRhoDStress.times(1. / rho);
 
     answer = dRhoDStress;
-
-    return;
 }
 
 void
@@ -1726,8 +1701,6 @@ ConcreteDPM :: computeDSigDStress(FloatArray &answer) const
     for ( int i = 3; i < size; i++ ) {
         answer(i) = 0.;
     }
-
-    return;
 }
 
 
@@ -1789,7 +1762,6 @@ ConcreteDPM :: computeDDRhoDDStress(FloatMatrix &answer,
     help1.times( -1. / ( rho * rho * rho ) );
     ddRhoddStress.add(help1);
     answer = ddRhoddStress;
-    return;
 }
 
 void
@@ -1829,7 +1801,6 @@ ConcreteDPM :: computeDCosThetaDStress(FloatArray &answer,
     help.times( -sqrt(3. / 2.) * principalDeviatoricStress(0) / pow(rho, 2.) );
     dCosThetaDStress.add(help);
     answer = dCosThetaDStress;
-    return;
 }
 
 double

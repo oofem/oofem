@@ -97,8 +97,6 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
     answer.times(1.0 - om);
-
-    return;
 }
 
 
@@ -179,7 +177,6 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 #ifdef keep_track_of_dissipated_energy
     status->computeWork(gp);
 #endif
-    return;
 }
 
 
@@ -197,8 +194,6 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     answer.times(1.0 - om);
-
-    return;
 }
 
 
@@ -216,9 +211,9 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     answer.times(1.0 - om);
-
-    return;
 }
+
+
 void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                       GaussPoint *gp, TimeStep *atTime)
 {
@@ -233,13 +228,10 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     answer.times(1.0 - om);
-
-    return;
 }
 
 #ifdef __OOFEG
 #endif
-
 
 
 int
@@ -287,8 +279,6 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
 
     return 1; // to make the compiler happy
 }
-
-
 
 
 InternalStateValueType
@@ -371,14 +361,11 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
     answer.at(1) = this->tempDillatCoeff;
     answer.at(2) = this->tempDillatCoeff;
     answer.at(3) = this->tempDillatCoeff;
-
-    return;
 }
 
 
@@ -460,6 +447,7 @@ IsotropicDamageMaterialStatus :: initTempStatus()
     this->tempDissWork = this->dissWork;
 #endif
 }
+
 
 void
 IsotropicDamageMaterialStatus :: updateYourself(TimeStep *atTime)

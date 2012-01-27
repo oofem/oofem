@@ -230,7 +230,7 @@ InterfaceElement3dTrLin :: computeLCS(FloatMatrix &answer)
 bool
 InterfaceElement3dTrLin :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
-    // planar geonetry is assumed
+    // planar geometry is assumed
     int i, j;
     FloatMatrix lcs(3, 3);
     this->computeLCS(lcs);

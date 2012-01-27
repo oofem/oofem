@@ -155,7 +155,6 @@ LIBeam3d2 :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // luated at aGaussPoint.
 {
     double ksi, n1, n2;
-    // FloatMatrix* answer ;
 
     ksi = aGaussPoint->giveCoordinate(1);
     n1  = ( 1. - ksi ) * 0.5;
@@ -179,6 +178,7 @@ LIBeam3d2 :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(6, 12) = n2;
 }
 
+
 void
 LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 // Returns the stiffness matrix of the receiver, expressed in the global
@@ -188,9 +188,8 @@ LIBeam3d2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 }
 
 
-
 bool
-LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer) // giveRotationMatrix ()
+LIBeam3d2 :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     int i, j;
 
@@ -237,12 +236,12 @@ LIBeam3d2 :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam3d2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+LIBeam3d2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(6);
 
     answer.at(1) = D_u;
@@ -270,7 +269,6 @@ LIBeam3d2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
 
     return 1;
 }
-
 
 
 /*
@@ -338,7 +336,6 @@ LIBeam3d2 :: giveLength()
 
     return length;
 }
-
 
 
 IRResultType
@@ -414,6 +411,7 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     }
 }
 
+
 double
 LIBeam3d2 ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
@@ -453,12 +451,14 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     return 1;
 }
 
+
 void
 LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
   answer.times(this->giveCrossSection()->give(CS_Area));
 }
+
 
 int
 LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
@@ -572,7 +572,6 @@ LIBeam3d2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 }
 
 
-
 void
 LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
@@ -590,6 +589,7 @@ LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
     answer.at(3, 1) = -vec.at(2);
     answer.at(3, 2) =  vec.at(1);
 }
+
 
 void
 LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) {
@@ -610,6 +610,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         }
     }
 }
+
 
 double
 LIBeam3d2 :: giveCurrentLength(TimeStep *tStep)
@@ -645,6 +646,7 @@ void LIBeam3d2 :: updateYourself(TimeStep *tStep)
     //this->computeTempCurv (curv, tStep);
     //kappa = curv;
 }
+
 
 void
 LIBeam3d2 :: initForNewStep()
@@ -812,6 +814,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     }
 }
 
+
 void
 LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
 {
@@ -873,8 +876,6 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
     EGWithMaskChangeAttributes(LAYER_MASK | FILL_MASK | MTYPE_MASK, go);
     EMAddGraphicsToModel(ESIModel(), go);
 }
-
-
 
 #endif
 } // end namespace oofem

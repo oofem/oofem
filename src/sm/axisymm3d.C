@@ -107,10 +107,7 @@ Axisymm3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
-
 
 
 void
@@ -118,7 +115,6 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 // Returns the [6x6] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    //FloatMatrix *answer ;
     int i;
     double x, r;
     int size, ind = 1;
@@ -188,9 +184,8 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         answer.at(ind, 6) = dnx.at(3, 1);
         ind++;
     }
-
-    return;
 }
+
 
 double
 Axisymm3d :: giveArea()
@@ -199,29 +194,10 @@ Axisymm3d :: giveArea()
     if ( area > 0 ) {
         return area;         // check if previously computed
     }
-
-    Node *node1, *node2, *node3;
-    double x1, x2, x3, y1, y2, y3;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-    if ( area < 0. ) {
-        area = -area;
-    }
-
+    area = fabs( this->interpolation.giveArea(FEIElementGeometryWrapper(this)) );
     return area;
 }
+
 
 double
 Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -241,8 +217,8 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this), 0.0) );
 
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight * r;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight * r;
 
     return volume;
 }
@@ -260,6 +236,7 @@ Axisymm3d :: computeGaussPoints()
         integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfFiAndShGaussPoints, _3dMat);
     }
 }
+
 
 IRResultType
 Axisymm3d :: initializeFrom(InputRecord *ir)
@@ -291,6 +268,7 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
 
 void
 Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
@@ -341,8 +319,6 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
                 if ( A.isNotEmpty() ) {
                     help.beProductOf(A, u);
                     answer.at(i) += 0.5 * u.dotProduct(help);
-                    // delete help;
-                    //delete A;
                 }
             }
         }
@@ -394,7 +370,6 @@ Axisymm3d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) c
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
@@ -1008,7 +983,8 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  * p[0].z = 0.;
  * p[1].x = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
  * p[1].y = (FPNum) this->giveNode(2)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
- * p[1].z = 0.;
+ * p[1].z = 0.;                    // delete help;
+                    //delete A;
  * p[2].x = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(1,tStep,DisplacementVector,defScale);
  * p[2].y = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(2,tStep,DisplacementVector,defScale);
  * p[2].z = 0.;

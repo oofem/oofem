@@ -340,8 +340,6 @@ B3SolidMaterial :: computeCharTimes()
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
         charTimes.at(mu) = Tau1 * __OOFEM_POW(10., mu - 1);
     }
-
-    return;
 }
 
 
@@ -425,8 +423,6 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
             answer.at(i) = 1.e6 / answer.at(i);
         }
     }
-
-    return;
 }
 
 double
@@ -531,8 +527,6 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     } else {
         this->computeShrinkageStrainVector(answer, form, gp, atTime, mode);
     }
-
-    return;
 }
 
 void
@@ -627,6 +621,7 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, MatR
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }
 
+
 double
 B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
 // compute the relative volume of the solidified material at given age (in days)
@@ -646,6 +641,7 @@ B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
     return v;
 }
 
+
 double
 B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 //used for evaluation of the flow term viscosity (term containing q4)
@@ -664,6 +660,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
     return eta;
 }
+
 
 void
 B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
@@ -708,9 +705,8 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
     }
-
-    return;
 }
+
 
 void
 B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
@@ -834,6 +830,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     }
 }
 
+
 double
 B3SolidMaterial :: inverse_sorption_isotherm(double w)
 // Function calculates relative humidity from water content (inverse relation form sorption isotherm).
@@ -857,6 +854,7 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
 
     return phi;
 }
+
 
 double
 B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int option)
@@ -954,6 +952,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
     return Stemp;
 }
 
+
 double
 B3SolidMaterial :: giveInitMicroPrestress(void)
 {
@@ -961,6 +960,7 @@ B3SolidMaterial :: giveInitMicroPrestress(void)
     S0 = 1 / ( c0 * tS0 );
     return S0;
 }
+
 
 double
 B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes humidity at given TimeStep
@@ -991,6 +991,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes hum
 
     return humidity;
 }
+
 
 double
 B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //computes humidity increment at given TimeStep
@@ -1026,6 +1027,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //com
     return humIncrement;
 }
 
+
 MaterialStatus *
 B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 /*
@@ -1034,6 +1036,7 @@ B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
 {
     return new B3SolidMaterialStatus(1, this->giveDomain(), gp, nUnits);
 }
+
 
 void
 B3SolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)

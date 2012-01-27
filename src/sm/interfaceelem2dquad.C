@@ -88,8 +88,6 @@ InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &an
     answer.at(1, 8) = answer.at(2, 7) = n1;
     answer.at(1, 10) = answer.at(2, 9) = n2;
     answer.at(1, 12) = answer.at(2, 11) = n3;
-
-    return;
 }
 
 void
@@ -104,7 +102,6 @@ InterfaceElem2dQuad :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 4, _2dInterface);
     }
 }
-
 
 
 int
@@ -126,14 +123,12 @@ InterfaceElem2dQuad :: computeGlobalCoordinates(FloatArray &answer, const FloatA
 }
 
 
-
 int
 InterfaceElem2dQuad :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     _error("Not implemented");
     return 0;
 }
-
 
 
 double
@@ -161,6 +156,7 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *aGaussPoint)
     return sqrt(dx * dx + dy * dy) * weight * thickness;
 }
 
+
 IRResultType
 InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 {
@@ -171,17 +167,16 @@ InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 
 
 void
-InterfaceElem2dQuad ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+InterfaceElem2dQuad ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-    return;
 }
 
 

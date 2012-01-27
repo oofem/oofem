@@ -219,8 +219,8 @@ L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this), 0.0) );
 
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight * r;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight * r;
 
     return volume;
 }
@@ -348,7 +348,6 @@ L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
@@ -468,7 +467,6 @@ void
 L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {
     /*
-     *
      * computes interpolation matrix for element edge.
      * we assemble locally this matrix for only nonzero
      * shape functions.
@@ -569,11 +567,11 @@ L4Axisymm :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     this->interpolation.computeEdgeMapping(edgeNodes, dofManArray, iEdge);
 
     // edge nodes are global numbers, not local element numbers
-    nodeA   = domain->giveNode( edgeNodes.at(1) );
-    nodeB   = domain->giveNode( edgeNodes.at(2) );
+    nodeA  = domain->giveNode( edgeNodes.at(1) );
+    nodeB  = domain->giveNode( edgeNodes.at(2) );
 
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+    dx     = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+    dy     = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
 
     answer.at(1, 1) = dx / length;
