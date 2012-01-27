@@ -40,7 +40,6 @@
 
 #include "timestep.h"
 #include "engngm.h"
-#include "strreader.h"
 #include "node.h"
 #include "mathfem.h"
 #include "oofem_limits.h"

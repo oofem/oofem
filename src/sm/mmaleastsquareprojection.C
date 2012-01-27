@@ -42,7 +42,6 @@
 #include "timestep.h"
 #include "integrationrule.h"
 #include "conTable.h"
-#include "strreader.h"
 
 namespace oofem {
 MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorithm()

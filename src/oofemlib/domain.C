@@ -48,7 +48,6 @@
 
 #include "clock.h"
 #include "verbose.h"
-#include "strreader.h"
 
 #include "conTable.h"
 #include "outputmanager.h"

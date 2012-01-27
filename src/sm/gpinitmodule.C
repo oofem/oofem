@@ -43,7 +43,6 @@
 #include "domain.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "strreader.h"
 #include "structuralms.h"
 #ifndef __MAKEDEPEND
  #include <vector>

@@ -37,7 +37,6 @@
 #include "cltypes.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "strreader.h"
 #include "dofmanager.h"
 #include "dof.h"
 #include "mathfem.h"

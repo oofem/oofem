@@ -35,7 +35,6 @@
 #include "vtkxmlexportmodule.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "strreader.h"
 #include "node.h"
 #include "materialinterface.h"
 #include "mathfem.h"

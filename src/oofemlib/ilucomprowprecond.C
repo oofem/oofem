@@ -38,7 +38,6 @@
 #include "dyncomprow.h"
 #include "ilucomprowprecond.h"
 #include "verbose.h"
-#include "strreader.h"
 
 #ifdef TIME_REPORT
  #ifndef __MAKEDEPEND

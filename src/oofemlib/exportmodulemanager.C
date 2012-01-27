@@ -36,7 +36,6 @@
 #include "modulemanager.h"
 #include "engngm.h"
 #include "exportmodule.h"
-#include "strreader.h"
 
 #include "usrdefsub.h"
 #include "util.h"
