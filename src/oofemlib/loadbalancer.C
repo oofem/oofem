@@ -41,6 +41,7 @@
 #include "timestep.h"
 #include "flotarry.h"
 #include "usrdefsub.h"
+#include "element.h"
 
 #include "parallel.h"
 #include "processcomm.h"

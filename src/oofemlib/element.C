@@ -33,8 +33,9 @@
  */
 
 #include "element.h"
-
+#include "crosssection.h"
 #include "integrationrule.h"
+#include "errorestimator.h"
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"

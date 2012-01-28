@@ -32,6 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "xfemmanager.h"
 #include "flotmtrx.h"
 #include "enrichmentitem.h"
 #include "geometry.h"

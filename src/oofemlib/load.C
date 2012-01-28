@@ -40,6 +40,7 @@
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "timestep.h"
+#include "loadtime.h"
 #ifndef __MAKEDEPEND
  #include <stdlib.h>
 #endif

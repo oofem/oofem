@@ -33,6 +33,7 @@
  */
 
 #include "subdivision.h"
+#include "material.h"
 #include "errorestimator.h"
 #include "domain.h"
 #include "node.h"
@@ -48,6 +49,8 @@
 #include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
 #include "util.h"
+#include "crosssection.h"
+#include "loadtime.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

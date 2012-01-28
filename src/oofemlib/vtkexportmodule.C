@@ -49,12 +49,14 @@
 
 #include "vtkexportmodule.h"
 #include "timestep.h"
+#include "gausspnt.h"
 #include "engngm.h"
 #include "node.h"
 #include "materialinterface.h"
 #include "mathfem.h"
 #include "oofem_limits.h"
 #include "cltypes.h"
+#include "element.h"
 #include "material.h"
 #include "usrdefsub.h"
 

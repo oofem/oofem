@@ -67,9 +67,6 @@
 
 namespace oofem {
 NumericalMethod *CBS :: giveNumericalMethod(TimeStep *atTime)
-// only one has reason for LinearStatic
-//     - SolutionOfLinearEquations
-
 {
     if ( nMethod ) {
         return nMethod;
@@ -459,7 +456,6 @@ CBS :: updateYourself(TimeStep *stepN)
 }
 
 
-
 void
 CBS :: updateInternalState(TimeStep *stepN)
 {
@@ -482,7 +478,6 @@ CBS :: updateInternalState(TimeStep *stepN)
         }
     }
 }
-
 
 
 contextIOResultType
@@ -526,11 +521,10 @@ CBS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType
@@ -575,7 +569,7 @@ CBS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -648,6 +642,7 @@ CBS :: updateDomainLinks()
     this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
 }
 
+
 void
 CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
@@ -662,6 +657,7 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         _error("printDofOutputAt: unsupported dof type");
     }
 }
+
 
 void
 CBS :: applyIC(TimeStep *stepWhenIcApply)
@@ -727,6 +723,7 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     }
 }
 
+
 int
 CBS :: giveNewEquationNumber(int domain, DofIDItem id)
 {
@@ -740,6 +737,7 @@ CBS :: giveNewEquationNumber(int domain, DofIDItem id)
 
     return 0;
 }
+
 
 int
 CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
@@ -755,7 +753,10 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
     return 0;
 }
 
-int CBS :: giveNumberOfEquations(EquationID id) {
+
+int
+CBS :: giveNumberOfEquations(EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -777,7 +778,9 @@ int CBS :: giveNumberOfEquations(EquationID id) {
     return 0;
 }
 
-int CBS :: giveNumberOfPrescribedEquations(EquationID id) {
+
+int CBS :: giveNumberOfPrescribedEquations(EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -799,7 +802,9 @@ int CBS :: giveNumberOfPrescribedEquations(EquationID id) {
     return 0;
 }
 
-int CBS :: giveNumberOfDomainEquations(int d, EquationID id) {
+
+int CBS :: giveNumberOfDomainEquations(int d, EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -821,7 +826,9 @@ int CBS :: giveNumberOfDomainEquations(int d, EquationID id) {
     return 0;
 }
 
-int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id) {
+
+int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -842,6 +849,7 @@ int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id) {
 
     return 0;
 }
+
 
 double CBS :: giveVariableScale(VarScaleType varID)
 {

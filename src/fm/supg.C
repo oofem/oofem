@@ -54,6 +54,7 @@
 #include "leplic.h"
 #include "levelsetpcs.h"
 #include "datastream.h"
+#include "loadtime.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
@@ -71,9 +72,6 @@ namespace oofem {
 
 
 NumericalMethod *SUPG :: giveNumericalMethod(TimeStep *atTime)
-// only one has reason for LinearStatic
-//     - SolutionOfLinearEquations
-
 {
     if ( nMethod ) {
         return nMethod;

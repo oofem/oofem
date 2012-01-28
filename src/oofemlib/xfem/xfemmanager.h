@@ -36,6 +36,13 @@
 #define xfemmanager_h
 
 #include "alist.h"
+#include "datareader.h"
+#include "dofiditem.h"
+#include "inputrecord.h"
+#include "classtype.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
+#include "timestep.h"
 
 namespace oofem {
 class EngngModel;
@@ -43,7 +50,9 @@ class Domain;
 class BasicGeometry;
 class EnrichmentItem;
 class EnrichmentFunction;
-
+class IntArray;
+class Element;
+class DataStream;
 
 /**
  * This class manages the xfem part as well as takes over some functions which would appear

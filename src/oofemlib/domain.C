@@ -62,6 +62,7 @@
 #include "domaintransactionmanager.h"
 #include "xfemmanager.h"
 #include "topologydescription.h"
+#include "randomfieldgenerator.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"

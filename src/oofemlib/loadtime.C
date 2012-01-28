@@ -42,6 +42,7 @@
 #include "constant.h"
 #include "domain.h"
 #include "usrdefsub.h"
+#include "timestep.h"
 #ifndef __MAKEDEPEND
  #include <stdlib.h>
  #include <stdio.h>

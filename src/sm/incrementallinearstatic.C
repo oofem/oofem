@@ -40,6 +40,7 @@
 #include "node.h"
 #include "dof.h"
 #include "sparsemtrx.h"
+#include "dictionr.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

@@ -37,41 +37,51 @@
  * User defined Subroutines
  */
 
-#include "domain.h"
-#include "element.h"
-#include "crosssection.h"
-#include "engngm.h"
-#include "xfemmanager.h"
-#include "load.h"
-#include "loadtime.h"
-#include "material.h"
-#include "sparselinsystemnm.h"
-#include "sparsegeneigenvalsystemnm.h"
-#include "materialmappingalgorithm.h"
-#include "materialmappingalgorithmtype.h"
-#include "meshpackagetype.h"
-#include "mesherinterface.h"
-//#include "nonlocalbarrier.h"
-#include "randomfieldgenerator.h"
-#include "classtype.h"
-#include "sparsemtrxtype.h"
-#include "geneigvalsolvertype.h"
-#include "errorestimatortype.h"
-#include "enrichmentitem.h"
-#include "exportmodule.h"
-#include "initmodule.h"
-#include "patch.h"
-#include "nodalrecoverymodel.h"
-#include "errorestimator.h"
-#ifdef __PARALLEL_MODE
- #include "loadbalancer.h"
-#endif
-
-
 #ifndef usrdefsub_h
 #define usrdefsub_h
 
+#include "classtype.h"
+#include "sparselinsystemnm.h" // for LinSystSolverType
+#include "patch.h" // for PatchType
+#include "nodalrecoverymodel.h" // for NodalRecoveryModelType
+#include "materialmappingalgorithmtype.h"
+#include "meshpackagetype.h"
+#include "sparsemtrxtype.h"
+#include "geneigvalsolvertype.h"
+//#include "nonlinearsolvertype.h"
+#include "errorestimatortype.h"
+
 namespace oofem {
+
+class Element;
+class DofManager;
+class CrossSection;
+class EngngModel;
+class GeneralBoundaryCondition;
+class LoadTimeFunction;
+class Material;
+class TopologyDescription;
+class SparseMtrx;
+class SparseLinearSystemNM;
+class SparseGeneralEigenValueSystemNM;
+class SparseNonLinearSystemNM;
+class ErrorEstimator;
+class ExportModule;
+class InitModule;
+class NonlocalBarrier;
+class RandomFieldGenerator;
+class IntegrationRule;
+class Dof;
+class MaterialMappingAlgorithm;
+class MesherInterface;
+class EnrichmentItem;
+class EnrichmentFunction;
+class BasicGeometry;
+class Patch;
+class NodalRecoveryModel;
+class LoadBalancerMonitor;
+class LoadBalancer;
+
 /**
  * Creates new instance of element corresponding to given element keyword.
  * @param name Keyword string determining the type of new instance.
@@ -155,11 +165,19 @@ SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, D
  * @param st Solver type.
  * @param i Component number.
  * @param d Domain.
- * @param m Engineerig model.
+ * @param m Engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m);
-
+/**
+ * Creates new instance of Generalized Eigenvalue Solver of given type (the constructor with no parameters is called).
+ * @param st Solver type.
+ * @param i Component number.
+ * @param d Domain.
+ * @param m Engineering model.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+//SparseNonLinearSystemNM *CreateUsrDefNonlinearSolver(NonlinearSolverType st, int i, Domain *d, EngngModel *m);
 /**
  * Creates new instance of Error Estimator of given type.
  * @param type Determines Error Estimator type.

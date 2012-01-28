@@ -45,6 +45,7 @@
 #include "flotmtrx.h"
 #include "datastream.h"
 #include "mathfem.h"
+#include "element.h"
 // includes for HPC - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "dof.h"

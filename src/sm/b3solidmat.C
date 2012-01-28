@@ -938,8 +938,6 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
     }
 
     //following section is used if humidity remains constant
-    double help;
-    help = ( humNew - humOld );
     if ( ( humNew - humOld ) == 0. ) {
         Stemp = 1 / ( 1 / S + c0 * deltaT );
     } else {     // the following section is used only if there is a change in humidity

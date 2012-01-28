@@ -332,6 +332,9 @@
 #include "simpleslavedof.h"
 #include "activedof.h"
 
+// XFEM
+#include "enrichmentfunction.h"
+#include "enrichmentitem.h"
 
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"

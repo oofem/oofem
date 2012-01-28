@@ -54,6 +54,7 @@
 #include "clock.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
+#include "errorestimator.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>

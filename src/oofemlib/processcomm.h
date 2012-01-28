@@ -42,7 +42,7 @@
  #include "commbufftype.h"
  #include "communicatormode.h"
  #include "flotmtrx.h"
-
+ #include "flotarry.h"
 
  #ifndef __MAKEDEPEND
   #include <mpi.h>
