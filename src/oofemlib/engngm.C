@@ -1121,14 +1121,10 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 
 #endif
         if ( charVec.isNotEmpty() ) {
-            charVec.printYourself();
             node->giveCompleteLocationArray(loc, s);
             if (node->computeM2LTransformation(R, dofIDarry)) {
                 charVec.rotatedWith(R, 't');
             }
-            printf("Assembling charvec =\n");
-            charVec.printYourself();
-            loc.printYourself();
             answer.assemble(charVec, loc);
         }
     }
@@ -1235,17 +1231,10 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
 
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
-            printf("Reactions, internal, from element, before rotation: \n");
-            charVec.printYourself();
             if ( element->giveRotationMatrix(R, ut) ) {
                 charVec.rotatedWith(R, 't');
-                R.printYourself();
             }
-            printf("charVec rotated\n");
-            charVec.printYourself();
-            loc.printYourself();
             answer.assemble(charVec, loc);
-            answer.printYourself();
         }
     }
 
