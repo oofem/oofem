@@ -131,32 +131,28 @@ StructuralEngngModel :: computeReactions(FloatArray &answer, TimeStep *tStep, in
     // Internal forces contribution
 
     this->computeInternalForceReactionContribution(contribution, tStep, di);
-    printf("************************************************** internal\n");
-    contribution.printYourself();
     answer.add(contribution);
     // External loading contribution
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
-    printf("************************************************** external (subtracted)\n");
-    contribution.printYourself();
     answer.subtract(contribution);
 
 #ifdef __PARALLEL_MODE
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Packing reactions", this->giveRank() );
+        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: computeReactions", "Packing reactions", this->giveRank() );
  #endif
 
         communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packReactions );
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Exchange of reactions started", this->giveRank() );
+        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: computeReactions", "Exchange of reactions started", this->giveRank() );
  #endif
 
         communicator->initExchange(999);
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Receiving and unpacking of reactions started", this->giveRank() );
+        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: computeReactions", "Receiving and unpacking of reactions started", this->giveRank() );
  #endif
 
         communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackReactions );

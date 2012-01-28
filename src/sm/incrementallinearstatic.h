@@ -104,6 +104,8 @@ public:
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
+    virtual void terminate(TimeStep *tStep);
+
     virtual fMode giveFormulation() { return TL; }
 
     virtual const char *giveClassName() const { return "IncrementalLinearStatic"; }

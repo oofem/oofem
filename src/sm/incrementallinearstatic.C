@@ -102,7 +102,8 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
         endOfTimeOfInterest = discreteTimes.at(discreteTimes.giveSize());
         fixedSteps = false;
     } else {
-        IR_GIVE_FIELD(ir, deltaT, IFT_IncrementalLinearStatic_deltat, "deltat");
+        deltaT = 1.0;
+        IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_IncrementalLinearStatic_deltat, "deltat");
         IR_GIVE_FIELD(ir, numberOfSteps, IFT_EngngModel_nsteps, "nsteps");
         endOfTimeOfInterest = deltaT*numberOfSteps;
         fixedSteps = true;
@@ -318,6 +319,13 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 void IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
+}
+
+
+void IncrementalLinearStatic :: terminate(TimeStep *tStep)
+{
+    StructuralEngngModel :: terminate(tStep);
+    this->printReactionForces(tStep, 1);
 }
 
 
