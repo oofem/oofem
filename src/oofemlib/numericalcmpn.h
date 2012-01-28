@@ -38,7 +38,7 @@
 namespace oofem {
 /**
  * Type representing numerical component. The components of characteristic equations are mapped
- * to their corresponding numrical counterparts using these common component types.
+ * to their corresponding numerical counterparts using these common component types.
  * All numerical methods solving the same problem have to use the same and compulsory
  * NumericalCmpn values. This allows to use generally any numerical method instance (even added in future)
  * without changing any code.
@@ -47,26 +47,6 @@ enum NumericalCmpn {
     InternalRhs,
     NonLinearLhs,
     NonLinearRhs_Incremental,
-    // Deprecated:
-    LinearEquationLhs,
-    LinearEquationRhs,
-    LinearEquationSolution,
-    EigenValues,
-    EigenVectors,
-    AEigvMtrx,
-    BEigvMtrx,
-    NumberOfEigenValues,
-    PrescribedTolerancy,
-    ReachedLevel,
-    IncrementOfSolution,
-    RequiredIterations,
-    NonLinearRhs_Total,
-    InitialNonLinearRhs,
-    TotalNonLinearSolution,
-    StepLength,
-    CurrentLevel,
-    IncrementOfNonlinearSolution,
-    InternalState
 };
 } // end namespace oofem
 #endif // numericalcmpn_h

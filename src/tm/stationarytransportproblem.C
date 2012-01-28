@@ -137,20 +137,6 @@ double StationaryTransportProblem ::  giveUnknownComponent(EquationID chc, Value
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
     }
 
-    /*
-     * switch (mode)
-     * {
-     * case VM_Total:
-     * case VM_Incremental:
-     * if (solutionVector.isNotEmpty()) return solutionVector.at(eq);
-     * else return 0.;
-     * // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
-     *
-     * default:
-     * _error ("giveUnknownComponent: Unknown is of undefined type for this problem");
-     * }
-     * return 0.;
-     */
     return 0.;
 }
 

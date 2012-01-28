@@ -174,7 +174,7 @@ public:
      */
     int exchangeRemoteElementData();
 
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
+    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
     /**
      * Initializes communication maps of the receiver.
      */
@@ -190,7 +190,7 @@ public:
 #endif
 
 protected:
-    void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
     /**
      * Evaluates the nodal representation of internal forces by assembling

@@ -33,13 +33,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-
-//
-// file stationaryflow.C
-//
-
-
 #include "stationaryflow.h"
 #include "nummet.h"
 #include "ldltfact.h"
@@ -105,8 +98,6 @@ double StationaryFlow ::  giveUnknownComponent(EquationID chc, ValueModeType mod
             return 0.;
         }
 
-    // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
-
     default:
         _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
@@ -146,13 +137,6 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
         //
         // first step  assemble conductivity Matrix
         //
-        /*
-         * IntArray* mht = this -> GiveBanWidthVector ();
-         * conductivityMatrix = new Skyline ();
-         * conductivityMatrix ->  checkSizeTowardsBanWidth (mht) ;
-         * delete mht;
-         */
-
         conductivityMatrix = new Skyline();
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
@@ -163,7 +147,6 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
         //
         // alocate space for fluxVector
         //
-        //fluxVector = new FloatArray (this->giveNumberOfEquations());
         fluxVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
         fluxVector.zero();
     }
@@ -175,7 +158,6 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
     //
     // assembling the element part of load vector
     //
-    //loadVector = new FloatArray (this->giveNumberOfEquations());
     loadVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
     loadVector.zero();
     this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total,
@@ -187,14 +169,6 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
     this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    //
-    // set-up numerical model
-    //
-    /*
-     * nMethod -> setSparseMtrxAsComponent ( LinearEquationLhs ,conductivityMatrix) ;
-     * nMethod -> setFloatArrayAsComponent ( LinearEquationRhs , &loadVector) ;
-     * nMethod -> setFloatArrayAsComponent ( LinearEquationSolution, &fluxVector) ;
-     */
     //
     // call numerical model to solve arised problem
     //

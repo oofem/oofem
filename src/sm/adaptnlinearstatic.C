@@ -223,8 +223,6 @@ double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueMod
         if ( chc == EID_MomentumBalance ) {
             switch ( mode ) {
             case VM_Incremental:
-                // return incrementOfDisplacement -> at(eq);
-                // return nMethod-> giveUnknownComponent(IncrementOfSolution, eq);
                 if ( d2_incrementOfDisplacement.isNotEmpty() ) {
                     return d2_incrementOfDisplacement.at(eq);
                 } else {
@@ -428,9 +426,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         this->terminate( this->giveCurrentStep() );
         this->updateLoadVectors( this->giveCurrentStep() );
 
-        //loadLevel =  nMethod -> giveUnknownComponent (ReachedLevel ,1);
         // restore old step length
-        //nMethod -> setDoubleAsComponent (StepLength, deltaL);
         nMethod->setStepLength(deltaL);
 
         stiffMode = oldStiffMode;
@@ -769,9 +765,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         this->terminate( this->giveCurrentStep() );
         // this->updateLoadVectors (this->giveCurrentStep()); // already in terminate
 
-        //loadLevel =  nMethod -> giveUnknownComponent (ReachedLevel ,1);
         // restore old step length
-        //nMethod -> setDoubleAsComponent (StepLength, deltaL);
         nMethod->setStepLength(deltaL);
 
         stiffMode = oldStiffMode;

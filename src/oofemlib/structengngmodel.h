@@ -124,24 +124,13 @@ protected:
      * @param di Domain number.
      */
     void computeNodalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
-
-    /*
-     * Compute element equivForces in dof managers (nodes and sides).
-     * It subtracts part corresponding to non-nodal loading from internal forces vector.
-     * @param answer Returned equivalent forces.
-     * @param tStep Time step.
-     * @param ielem Element number.
-     * @param mode ValueModeType (TotalMode should be used).
-     */
-    //void computeElementEquivForces (FloatArray& answer, TimeStep *tStep, StructuralElement* ielem, ValueModeType mode) const;
-
     /**
      * Updates nodal values
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
      * if model supports changes of static system). The element internal state update is also forced using
      * updateInternalState service.
      */
-    void updateInternalState(TimeStep *);
+    void updateInternalState(TimeStep *tStep);
 public:
     /// Creates new StructuralEngngModel with number i, associated to domain d.
     StructuralEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
