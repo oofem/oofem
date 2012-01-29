@@ -47,9 +47,9 @@ namespace oofem {
 class SmoothedNodalInternalVariableField : public Field
 {
 protected:
-    /// smoother type
+    /// Smoother type
     NodalRecoveryModel::NodalRecoveryModelType stype;
-    /// smoother
+    /// Smoother
     NodalRecoveryModel *smoother;
     /// InternalStateType.
     InternalStateType istType;
@@ -69,7 +69,7 @@ public:
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
     virtual int evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime);
-    
+
     InternalStateType giveType() { return istType; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);

@@ -537,7 +537,6 @@ IsotropicDamageMaterialStatus :: computeWork(GaussPoint *gp)
     deps.beDifferenceOf(tempStrainVector, strainVector);
 
     // increment of stress work density
-    int n = deps.giveSize();
     double dSW = ( tempStressVector.dotProduct(deps) + stressVector.dotProduct(deps) ) / 2.;
     tempStressWork = stressWork + dSW;
 

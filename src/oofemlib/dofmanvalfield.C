@@ -35,6 +35,8 @@
 #include "dofmanvalfield.h"
 #include "spatiallocalizer.h"
 #include "usrdefsub.h"
+#include "element.h"
+#include "timestep.h"
 
 namespace oofem {
 DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanvallist()
@@ -50,46 +52,46 @@ DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanv
 int
 DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
 {
-  int i, result = 0; // assume ok
-  FloatArray lc, n;
+    int i, result = 0; // assume ok
+    FloatArray lc, n;
 
-  // request element containing target point
-  Element* elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-  if (elem) { // ok element containing target point found
-    FEInterpolation* interp = elem->giveInterpolation();
-    if (interp) {
-      // map target point to element local coordinates
-      if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem), atTime->giveTargetTime())) {
-	// evaluate interpolation functions at target point
-	interp->evalN(n, lc, FEIElementGeometryWrapper(elem), atTime->giveTargetTime());
-	// loop over element nodes
-	for (i=1; i<=n.giveSize(); i++) {
-	  // multiply nodal value by value of corresponding shape function and add this to answer
-	  answer.add(n.at(i), *this->dmanvallist.at(elem->giveDofManagerNumber(i)));
-	}
-      } else { // mapping from global to local coordinates failed
-	result = 1; // failed
-      }
-    } else {  // element without interpolation 
-      result = 1; // failed
+    // request element containing target point
+    Element* elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    if (elem) { // ok element containing target point found
+        FEInterpolation* interp = elem->giveInterpolation();
+        if (interp) {
+            // map target point to element local coordinates
+            if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem), atTime->giveTargetTime())) {
+                // evaluate interpolation functions at target point
+                interp->evalN(n, lc, FEIElementGeometryWrapper(elem), atTime->giveTargetTime());
+                // loop over element nodes
+                for (i=1; i<=n.giveSize(); i++) {
+                    // multiply nodal value by value of corresponding shape function and add this to answer
+                    answer.add(n.at(i), *this->dmanvallist.at(elem->giveDofManagerNumber(i)));
+                }
+            } else { // mapping from global to local coordinates failed
+                result = 1; // failed
+            }
+        } else {  // element without interpolation
+            result = 1; // failed
+        }
+    } else { // no element containing given point found
+        result = 1; // failed
     }
-  } else { // no element containing given point found
-    result = 1; // failed
-  }
-  return result; 
+    return result;
 }
-  
+
 int
 DofManValueField::evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
 {
-  answer=*this->dmanvallist.at(dman->giveNumber());
-  return 1;
+    answer=*this->dmanvallist.at(dman->giveNumber());
+    return 1;
 }
 
 void
 DofManValueField::setDofManValue (int dofMan, const FloatArray &value)
 {
-  (*this->dmanvallist.at(dofMan)) = value;
+    (*this->dmanvallist.at(dofMan)) = value;
 }
 
 contextIOResultType

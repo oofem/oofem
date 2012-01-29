@@ -35,6 +35,8 @@
 #include "smoothednodalintvarfield.h"
 #include "spatiallocalizer.h"
 #include "usrdefsub.h"
+#include "element.h"
+#include "timestep.h"
 
 namespace oofem {
 SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel::NodalRecoveryModelType st, Domain *d) : Field(ft)
@@ -57,52 +59,52 @@ SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField()
 int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
 {
-  int i, region = 1, result = 0; // assume ok
-  FloatArray lc, n;
-  const FloatArray *nodalValue;
+    int i, region = 1, result = 0; // assume ok
+    FloatArray lc, n;
+    const FloatArray *nodalValue;
 
-  this->smoother->recoverValues(istType, atTime);
-  // request element containing target point
-  Element* elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-  if (elem) { // ok element containing target point found
-    FEInterpolation* interp = elem->giveInterpolation();
-    if (interp) {
-      // map target point to element local coordinates
-      if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem), atTime->giveTargetTime())) {
-	// evaluate interpolation functions at target point
-	interp->evalN(n, lc, FEIElementGeometryWrapper(elem), atTime->giveTargetTime());
-	// loop over element nodes
-	for (i=1; i<=n.giveSize(); i++) {
-	  // request nodal value
-	  this->smoother->giveNodalVector(nodalValue, elem->giveDofManagerNumber(i), region);
-	  // multiply nodal value by value of corresponding shape function and add this to answer
-	  answer.add(n.at(i), *nodalValue);
-	}
-      } else { // mapping from global to local coordinates failed
-	result = 1; // failed
-      }
-    } else {  // element without interpolation 
-      result = 1; // failed
+    this->smoother->recoverValues(istType, atTime);
+    // request element containing target point
+    Element* elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    if (elem) { // ok element containing target point found
+        FEInterpolation* interp = elem->giveInterpolation();
+        if (interp) {
+            // map target point to element local coordinates
+            if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem), atTime->giveTargetTime())) {
+                // evaluate interpolation functions at target point
+                interp->evalN(n, lc, FEIElementGeometryWrapper(elem), atTime->giveTargetTime());
+                // loop over element nodes
+                for (i=1; i<=n.giveSize(); i++) {
+                    // request nodal value
+                    this->smoother->giveNodalVector(nodalValue, elem->giveDofManagerNumber(i), region);
+                    // multiply nodal value by value of corresponding shape function and add this to answer
+                    answer.add(n.at(i), *nodalValue);
+                }
+            } else { // mapping from global to local coordinates failed
+                result = 1; // failed
+            }
+        } else {  // element without interpolation
+            result = 1; // failed
+        }
+    } else { // no element containing given point found
+        result = 1; // failed
     }
-  } else { // no element containing given point found
-    result = 1; // failed
-  }
-  return result; 
+    return result;
 }
-  
+
 int
 SmoothedNodalInternalVariableField::evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
 {
-  int region = 1;
-  if (dman->hasCoordinates()) {
-    const FloatArray* val;
-    int result = this->smoother->giveNodalVector(val, dman->giveNumber(), region);
-    answer=*val;
-    return (result == 1);
+    int region = 1;
+    if (dman->hasCoordinates()) {
+        const FloatArray* val;
+        int result = this->smoother->giveNodalVector(val, dman->giveNumber(), region);
+        answer=*val;
+        return (result == 1);
 
-  } else {
-    return 1; // failed -> dman without coordinates
-  }
+    } else {
+        return 1; // failed -> dman without coordinates
+    }
 }
 
 contextIOResultType
