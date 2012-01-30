@@ -40,6 +40,8 @@
  #include "flotarry.h"
  #include "engngm.h"
  #include "domain.h"
+ #include "element.h"
+ #include "dofmanager.h"
  #include "DSSolver.h"
  #ifndef __MAKEDEPEND
   #include <set>

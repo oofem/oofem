@@ -437,7 +437,6 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
     IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
     IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
-    topologytype[0] = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
 
     // read optional number of nonlocalBarriers
