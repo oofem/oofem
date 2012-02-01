@@ -48,7 +48,6 @@
 #include "meshpackagetype.h"
 #include "sparsemtrxtype.h"
 #include "geneigvalsolvertype.h"
-//#include "nonlinearsolvertype.h"
 #include "errorestimatortype.h"
 
 namespace oofem {
@@ -146,13 +145,13 @@ Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
  */
 TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);
 /**
- * Creates new empty instance of sparse matrix of given type (the constructor with no parameters is called).
+ * Creates new empty instance of sparse matrix of given type.
  * @param type Determines sparseMtrx type.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type);
 /**
- * Creates new Instance of Linear Sparse Solver of given type (the constructor with no parameters is called).
+ * Creates new Instance of Linear Sparse Solver of given type.
  * @param st Solver type.
  * @param i Component number.
  * @param d Domain.
@@ -161,7 +160,7 @@ SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type);
  */
 SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m);
 /**
- * Creates new instance of Generalized Eigenvalue Solver of given type (the constructor with no parameters is called).
+ * Creates new instance of Generalized Eigenvalue Solver of given type.
  * @param st Solver type.
  * @param i Component number.
  * @param d Domain.
@@ -170,14 +169,14 @@ SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, D
  */
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m);
 /**
- * Creates new instance of Generalized Eigenvalue Solver of given type (the constructor with no parameters is called).
- * @param st Solver type.
+ * Creates new instance of a nonlinear solver of given name.
+ * @param name Keyword string determining the type of new instance.
  * @param i Component number.
  * @param d Domain.
  * @param m Engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-//SparseNonLinearSystemNM *CreateUsrDefNonlinearSolver(NonlinearSolverType st, int i, Domain *d, EngngModel *m);
+SparseNonLinearSystemNM *CreateUsrDefNonlinearSolver(const char *name, int i, Domain *d, EngngModel *m);
 /**
  * Creates new instance of Error Estimator of given type.
  * @param type Determines Error Estimator type.

@@ -66,7 +66,6 @@
 #include "imlsolver.h"
 #include "spoolessolver.h"
 #include "petscsolver.h"
-#include "slepcsolver.h"
 #include "dsssolver.h"
 #ifdef __PARALLEL_MODE
  #include "fetisolver.h"
@@ -74,6 +73,12 @@
 
 #include "subspaceit.h"
 #include "inverseit.h"
+#include "slepcsolver.h"
+
+// Nonlinear solvers
+#include "nrsolver.h"
+#include "nrsolver2.h"
+#include "calmls.h"
 
 // materials in oofemlib
 #include "dummymaterial.h"
@@ -746,6 +751,21 @@ SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigv
     }
 
     return nm;
+}
+
+
+template < typename T > SparseNonLinearSystemNM* nonlinCreator( int n, Domain *d, EngngModel *m, EquationID eid ) { return ( new T(n, d, m, eid) ); }
+std::map< std::string, SparseNonLinearSystemNM*(*)(int,Domain*,EngngModel*,EquationID), CaseComp > nonlinList;
+
+SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, int number, Domain *d, EngngModel *emodel, EquationID eid)
+{
+    if ( nonlinList.size() == 0 ) {
+        //nonlinList["snes"]       = nonlinCreator< PETScSNES >;
+        nonlinList["nrsolver"]   = nonlinCreator< NRSolver >;
+        nonlinList["nrsolver2"]  = nonlinCreator< NRSolver2 >;
+        nonlinList["calm"]       = nonlinCreator< CylindricalALM >;
+    }
+    return (nonlinList.count(aClass) == 1) ? nonlinList[aClass](number, d, emodel, eid) : NULL;
 }
 
 ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
