@@ -239,6 +239,7 @@
  #include "trabbonenlembed.h"
  #include "trabbonenl3d.h"
  #include "concretedpm.h"
+ #include "concretedpm2.h"
  #include "cohint.h"
 
  #include "scalarerrorindicator.h"
@@ -615,6 +616,7 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         matList["concreteidm"]      = matCreator< ConcreteDPM >; // for compatibility with old inputfiles
         matList["cohint"]           = matCreator< CohesiveInterfaceMaterial >;
         matList["simpleintermat"]   = matCreator< SimpleInterfaceMaterial >;
+        matList["con2dpm"]      = matCreator< ConcreteDPM2 >;
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
         matList["isoheat"]              = matCreator< IsotropicHeatTransferMaterial >;

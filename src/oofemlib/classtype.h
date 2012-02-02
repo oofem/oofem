@@ -268,6 +268,7 @@ enum classType {
     FE2SinteringMaterialClass,
     AbaqusUserMaterialClass,
     AbaqusUserMaterialStatusClass,
+    ConcreteDPM2Class,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -318,6 +319,7 @@ enum classType {
     TrabBoneEmbedStatusClass,
     ConcreteDPMStatusClass,
     FE2SinteringMaterialStatusClass,
+    ConcreteDPM2StatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
@@ -389,6 +391,8 @@ enum classType {
 
     WallClockLoadBalancerMonitorClass,
     ParmetisLoadBalancerClass
+    
+    
 };
 } // end namespace oofem
 #endif // classtype_h
