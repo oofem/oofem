@@ -130,7 +130,7 @@ gpstate_re = re.compile (r"""
         state\s*
         ([\s+-e\d]+)
         """,re.X)
-        
+
 gpflow_re = re.compile (r"""
         flow\s*
         ([\s+-e\d]+)
@@ -456,7 +456,7 @@ def match_gpsubrec (context, aline):
         if debug: print "     HeatPower rec"
         return 1
     return 0
-    
+
 def match_singlegprec (context, line):
     global rectime, recnumber, recirule, recgpnum, debug
     match=gp_re.search(line)
@@ -531,17 +531,17 @@ def check_results (context, tolerance):
             err = float(rec[-1])
         if (abs(err) > float(tolerance)):
             if (success): print header # print header before reporting error for the first time
-            print "\tError when checking rule ",irec,": err = ",err
+            print "\tError when checking rule ",irec,": err = ",err, ", value is ",float(context.recVal[irec])," and should be ",float(rec[-1])
             # print rec, recVal
             success = 0
 
 
     if success:
         print header+"[  OK  ]"
-        return 0 
+        return 0
     else:
         print header+"[FAILED]"
-        return 1 
+        return 1
 
 
 def print_step_results (context):
@@ -589,9 +589,9 @@ value, where 'd' stands for displavement, 'v' for velocity,
 'a' for acceleration, 't' for temperature, and 'f' for flux.
 The output is printed to stdout, one row per each solution step,
 In particular columns, the extracted values are printed, preserving
-their order in input file. 
+their order in input file.
 The include directive allows to process slave extractor input files
-from a single master file (one level recursion allowed). If any 
+from a single master file (one level recursion allowed). If any
 slave file fails, master fails as well.
 
 Example (for checker mode):
@@ -607,7 +607,7 @@ def process_file (infilename, parentfilename):
     #parentfilename name of master file name, none otherwise
     global userrec, mode, tolerance, recursion_level
     context = Context();
-    
+
     result = 0
 
 
@@ -649,7 +649,7 @@ def process_file (infilename, parentfilename):
             #print "Processing include ", match.group(2)
             recursion_level = recursion_level+1
             if (recursion_level < 2):
-                
+
                 result=result+process_file (match.group(2), context.infilename)
                 context.userrec.append (('include',result)) #remember result
 		recursion_level = recursion_level-1
@@ -695,7 +695,7 @@ def process_file (infilename, parentfilename):
     elif mode =='e':
         print_step_results(context)
 	return 0
-        
+
 
 
 #########################################################
