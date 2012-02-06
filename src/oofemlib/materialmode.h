@@ -77,7 +77,8 @@ namespace oofem {
     ENUM_ITEM(_2dFlow) \
     ENUM_ITEM(_2dAxiFlow) \
     ENUM_ITEM(_3dFlow) \
-
+\
+    ENUM_ITEM(_2dLattice) \
 /**
  * Type representing material mode of integration point.
  */
