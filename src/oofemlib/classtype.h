@@ -166,6 +166,9 @@ enum classType {
     PlaneStress2dXfemClass,
     LumpedMassElementClass,
     SpringElementClass,
+    LatticeStructuralElementClass,
+    Lattice2dClass,
+    LatticeMaterialStatusClass,
 
     MacroLSpaceClass,
     MicroMaterialClass,

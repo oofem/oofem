@@ -32,45 +32,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef domaintype_h
-#define domaintype_h
-
-#include "enumitem.h"
+#include "latticestructuralelement.h"
 
 namespace oofem {
+LatticeStructuralElement :: LatticeStructuralElement (int n, Domain* aDomain) : StructuralElement (n,aDomain)
+{
 
-#define domainType_DEF \
-    ENUM_ITEM(_unknownMode) \
-    ENUM_ITEM(_2dPlaneStressMode) \
-    ENUM_ITEM(_PlaneStrainMode) \
-    ENUM_ITEM(_2dPlaneStressRotMode) \
-    ENUM_ITEM(_3dMode) \
-    ENUM_ITEM(_3dAxisymmMode) \
-    ENUM_ITEM(_2dMindlinPlateMode) \
-    ENUM_ITEM(_3dShellMode) \
-    ENUM_ITEM(_2dTrussMode) \
-    ENUM_ITEM(_1dTrussMode) \
-    ENUM_ITEM(_2dBeamMode) \
-    ENUM_ITEM(_HeatTransferMode) \
-    ENUM_ITEM(_HeatMass1Mode) /* Coupled heat and mass (1 matter) transfer */   \
-    ENUM_ITEM(_2dIncompressibleFlow) /* 2d Incompressible flow, no energy eq */ \
-      ENUM_ITEM(_3dIncompressibleFlow) /* 3d Incompressible flow, no energy eq */ \
-      ENUM_ITEM(_2dLatticeMode)\
+}
 
-/**
- * Type representing type of domain.
- * Domain type (the member value of Domain class) is used to determine the default
- * number of DOFs per node and side and to determine their corresponding physical meaning.
- */
-enum domainType {
-    domainType_DEF
-};
+LatticeStructuralElement :: ~LatticeStructuralElement ()
+{
 
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
+}
 
+IRResultType
+LatticeStructuralElement :: initializeFrom (InputRecord* ir)
+{
 
-const char *__domainTypeToString(domainType _value);
+  // first call parent 
+  StructuralElement :: initializeFrom (ir);
+
+  return IRRT_OK;
+}
 } // end namespace oofem
-#endif // domaintype_h

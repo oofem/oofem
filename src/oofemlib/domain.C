@@ -862,6 +862,11 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_w;
         defaultNodeDofIDArry.at(3) = R_v;
+    } else if  (dType == _2dLatticeMode) {
+      defaultNodeDofIDArry.resize (3);
+      defaultNodeDofIDArry.at(1)=D_u; 
+      defaultNodeDofIDArry.at(2)=D_v; 
+      defaultNodeDofIDArry.at(3)=R_w;
     } else if  ( dType == _HeatTransferMode ) {
         defaultNodeDofIDArry.resize(1);
         defaultNodeDofIDArry.at(1) = T_f;
@@ -933,7 +938,10 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _1dTrussMode;
     } else if  ( !strncasecmp(typeName, "2dbeam", 6) ) {
         dType = _2dBeamMode;
-    } else if  ( !strncasecmp(typeName, "heattransfer", 11) ) {
+    } else if  ( !strncasecmp(typeName, "2dlattice", 9) ) {
+      dType = _2dLatticeMode;
+    }
+    else if  ( !strncasecmp(typeName, "heattransfer", 11) ) {
         dType = _HeatTransferMode;
     } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
@@ -944,9 +952,10 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
     } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
-        _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
-        return;
+      _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
+      return;
     }
+
 }
 
 
@@ -1073,6 +1082,7 @@ Domain ::  giveCorrespondingCoordinateIndex(int idof)
 
     case _2dPlaneStressMode:
     case _PlaneStrainMode:
+    case _2dLattice:
         if ( idof == 1 ) {
             return 1;
         } else if ( idof == 2 ) {

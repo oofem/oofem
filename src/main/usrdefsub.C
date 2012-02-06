@@ -166,6 +166,8 @@
  #include "lumpedmasselement.h"
  #include "springelement.h"
  #include "particle.h"
+ #include "lattice2d.h"
+
 // iga elements
  #include "igaelements.h"
 
@@ -417,6 +419,8 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         elemList["nurbsplanestresselement"]   = elemCreator< NURBSPlaneStressElement >;
         elemList["tsplineplanestresselement"] = elemCreator< TSplinePlaneStressElement >;
         elemList["nurbs3delement"]            = elemCreator< NURBSSpace3dElement >;
+        elemList["lattice2d"]            = elemCreator< Lattice2d >;
+
 #endif
 #ifdef __FM_MODULE
         elemList["tr1cbs"]         = elemCreator< TR1_2D_CBS >;

@@ -447,6 +447,10 @@ enum InputFieldType {
     IFT_TR12DSUPG2_mat0,
     IFT_TR12DSUPG2_mat1,
 
+    IFT_Lattice2d_thick,
+    IFT_Lattice2d_width,
+    IFT_Lattice2d_gpcoords,
+
     IFT_SimpleCrossSection_thick,
     IFT_SimpleCrossSection_width,
     IFT_SimpleCrossSection_area,
