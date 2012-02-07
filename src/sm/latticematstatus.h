@@ -58,54 +58,35 @@ protected:
     GaussPoint *gp;
 public:
 
-    /**
-     * Constructor.
-     * @param n receiver's number
-     * @param d domain to which new status belongs
-     * @param g associated integration point
-     */
     LatticeMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
-    ~LatticeMaterialStatus() { }
+    virtual ~LatticeMaterialStatus() { }
     /// Print receiver's output to given stream.
-   void   printOutputAt(FILE *, TimeStep *) { }
+    void printOutputAt(FILE *, TimeStep *) { }
 
-    /**
-     * Initializes the temporary internal variables, describing the current state according to
-     * previously reached equilibrium internal variables.
-     */
     virtual void initTempStatus() { }
-    /**
-     * Update equilibrium history variables according to temp-variables.
-     * Invoked, after new equilibrium state has been reached.
-     */
+
     virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
 
     // definition
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "LatticeMaterialStatus"; }
     /// Returns classType id of receiver.
-    classType                giveClassID() const
-    { return LatticeMaterialStatusClass; }
+    classType giveClassID() const { return LatticeMaterialStatusClass; }
 
-   
     ///Sets the temp_crack_flag
-    virtual void setTempCrackFlag  (int val ) = 0;
-    
+    virtual void setTempCrackFlag(int val) = 0;
+
     /// Returns the crack_flag
-    virtual  int giveCrackFlag () {return 0;}
-    
-    virtual double giveCrackWidth () {return 0;}
+    virtual int giveCrackFlag() { return 0; }
 
-    virtual double giveDissipation () {return 0;}
+    virtual double giveCrackWidth() { return 0; }
 
-    virtual double giveDeltaDissipation () {return 0;}
+    virtual double giveDissipation() { return 0; }
+
+    virtual double giveDeltaDissipation() { return 0; }
 
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // matstatus_h
-
-
-
-

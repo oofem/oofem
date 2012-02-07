@@ -38,31 +38,28 @@
 #include "structuralelement.h"
 
 namespace oofem {
+/**
+ *  This class implements a base lattice element
+ *
+ */
 
 class LatticeStructuralElement : public StructuralElement
 {
-  /**
-  *  This class implements a base lattice element    
-  *
-  */
+public:
+    LatticeStructuralElement(int, Domain *);                     // constructor
+    ~LatticeStructuralElement();                                 // destructor
 
- public:
-  LatticeStructuralElement (int,Domain*) ;                       // constructor
-  ~LatticeStructuralElement () ;                                 // destructor
-  
-  IRResultType initializeFrom (InputRecord* ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
-  virtual  double giveArea() {return 0;}
-  virtual  double giveLength() {return 0;}
-  virtual  int giveCrackFlag() {return 0;}
-  virtual  int giveNumberOfCrossSectionNodes() {return 0;}
-  virtual void giveCrossSectionCoordinates(FloatArray & coords){};
-  virtual  double giveCrackWidth() {return 0;}
-  virtual  void giveGPCoords(FloatArray & gpcoords) { }
-  virtual  double giveDissipation() {return 0;}
-  virtual  double giveDeltaDissipation() {return 0;}
- 
-
+    virtual double giveArea() { return 0; }
+    virtual double giveLength() { return 0; }
+    virtual int giveCrackFlag() { return 0; }
+    virtual int giveNumberOfCrossSectionNodes() { return 0; }
+    virtual void giveCrossSectionCoordinates(FloatArray &coords) {};
+    virtual double giveCrackWidth() { return 0; }
+    virtual void giveGPCoords(FloatArray &gpcoords) { }
+    virtual double giveDissipation() { return 0; }
+    virtual double giveDeltaDissipation() { return 0; }
 };
 } // end namespace oofem
 #endif

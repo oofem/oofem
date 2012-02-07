@@ -42,88 +42,77 @@ namespace oofem {
  * This class implements a 2-dimensional lattice element
  */
 
-class Lattice2d : public  LatticeStructuralElement
+class Lattice2d : public LatticeStructuralElement
 {
-
 protected:
-  double kappa,pitch, length;
+    double kappa, pitch, length;
 
-  double width, thickness;
-  FloatArray gpCoords;
-  
+    double width, thickness;
+    FloatArray gpCoords;
+
 public:
-  Lattice2d (int,Domain*) ;                       // constructor
-  ~Lattice2d () ;                                 // destructor
+    Lattice2d(int, Domain *);  // constructor
+    virtual ~Lattice2d(); // destructor
 
-  int           giveLocalCoordinateSystem (FloatMatrix& answer);
+    int giveLocalCoordinateSystem(FloatMatrix &answer);
 
- /**
-  Computes the global coordinates from given element's local coordinates.
-  @returns returns nonzero if successful
-  */
- virtual int computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords) ;
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
- int giveCrackFlag();
- 
- void giveCrossSectionCoordinates(FloatArray & coords);
+    virtual int giveCrackFlag();
 
- double giveCrackWidth();
+    virtual void giveCrossSectionCoordinates(FloatArray &coords);
 
- // characteristic length in gp (for some material models)
-  double        giveCharacteristicLenght (GaussPoint*, const FloatArray&) 
-  {return this->giveLength();}
-  
-  double        giveLength () ;
+    virtual double giveCrackWidth();
 
-  void giveGPCoords(FloatArray& coords){coords = this->gpCoords;} 
-  double giveArea(){return this->width*this->thickness;}
-  double giveDissipation();
-  double giveDeltaDissipation();
+    // characteristic length in gp (for some material models)
+    double giveCharacteristicLenght(GaussPoint *, const FloatArray &)
+    { return this->giveLength(); }
 
-  Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual double giveLength();
 
+    virtual void giveGPCoords(FloatArray &coords) { coords = this->gpCoords; }
+    virtual double giveArea() { return this->width * this->thickness; }
+    virtual double giveDissipation();
+    virtual double giveDeltaDissipation();
 
-  virtual int testElementExtension (ElementExtension ext) {return ((ext==Element_EdgeLoadSupport)?1:0);}
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
 
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
- virtual int            computeNumberOfDofs (EquationID ut) {return 6;}
- virtual void           giveDofManDofIDMask  (int inode, EquationID, IntArray& ) const;
-  double        computeVolumeAround (GaussPoint*) ;
+    virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual double computeVolumeAround(GaussPoint *gp);
 
-// 
-// definition & identification
-//
-  const char* giveClassName () const { return "Lattice2d" ;}
-  classType            giveClassID () const { return Lattice2dClass; } 
-  IRResultType initializeFrom (InputRecord* ir);
+    //
+    // definition & identification
+    //
+    const char *giveClassName() const { return "Lattice2d"; }
+    classType giveClassID() const { return Lattice2dClass; }
+    IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
 
-  void          drawYourself (oofegGraphicContext& context);
-  void          drawRawGeometry (oofegGraphicContext&);
-  //  void          drawRawVoronoi (oofegGraphicContext&);
-  void          drawDeformedGeometry(oofegGraphicContext&, UnknownType);
-  //  void          drawDeformedVoronoi(oofegGraphicContext&, UnknownType);
+    void drawYourself(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &);
+    //  void          drawRawVoronoi (oofegGraphicContext&);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    //  void          drawDeformedVoronoi(oofegGraphicContext&, UnknownType);
 
-  //  void drawScalar   (oofegGraphicContext& context);
+    //  void drawScalar   (oofegGraphicContext& context);
 
-  void drawSpecial(oofegGraphicContext& gc);
+    virtual void drawSpecial(oofegGraphicContext &gc);
 #endif
 
 protected:
 
-  void          computeBmatrixAt (GaussPoint*, FloatMatrix&, int=1, int=ALL_STRAINS) ;
-  void          computeNmatrixAt (GaussPoint*, FloatMatrix &){;}  ;
-  bool           computeGtoLRotationMatrix (FloatMatrix&);
-
-  void  computeStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, TimeStep* tStep);
-    
-  int giveNumberOfCrossSectionNodes(){return 2;}
-
-  double        givePitch () ;
-  void          computeGaussPoints () ;
-  integrationDomain  giveIntegrationDomain () {return _Line;}
-  
-} ;
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &) {; };
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    int giveNumberOfCrossSectionNodes() { return 2; }
+    double givePitch();
+    virtual void computeGaussPoints();
+    virtual integrationDomain giveIntegrationDomain() { return _Line; }
+};
 } // end namespace oofem
 #endif
