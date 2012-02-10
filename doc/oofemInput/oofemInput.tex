@@ -338,7 +338,10 @@ problem. The export modules are specified after initialization modules. Export m
 allow to export computed data into external software for
 postprocessing. The available export modules are described in section
 \ref{ExportModulesSec}.
-\item \param{nxfemman} - number of xfem managers. Xfem managers wrap eXtended Finite Element (xfem) data: they  manage the list of enrichment items and associated enrichment functions, and their geometry representation. The number of xfem managers required is problem dependent, typically a single xfem manager is used. The syntax of xfem manager record and related records is described in section \ref{_XFEMManagerRecords}.
+\item \param{nxfemman} - number of xfem managers.
+Xfem managers wrap eXtended Finite Element (xfem) data: they  manage the list of enrichment items and associated enrichment functions, and their geometry representation. The number of xfem managers required is problem dependent, typically a single xfem manager is used. The syntax of xfem manager record and related records is described in section \ref{_XFEMManagerRecords}.
+\item \param{eetype} - optional error estimator type used for the problem.
+Used for adaptive analysis, but can also be used to compute and write error estimates to the output files. See adaptive engineering models for details.
 \end{itemize}
 
 \end{itemize}
