@@ -2209,14 +2209,6 @@ int
 ConcreteDPM2 :: computeInverseOfJacobian(FloatMatrix &answer, const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
 {
-
-#  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
-    }
-
-#  endif
-
     int nRows = src.giveNumberOfRows();
 
     //gaussian elimination - slow but safe
