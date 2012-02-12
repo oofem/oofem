@@ -50,13 +50,11 @@ namespace oofem {
 class AdaptiveLinearStatic : public LinearStatic
 {
 protected:
-    /// Error estimator used for determining the need for refinements.
-    ErrorEstimator *ee;
     /// Meshing package used for refinements.
     MeshPackageType meshPackage;
 
 public:
-    AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { ee = NULL; }
+    AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { }
     virtual ~AdaptiveLinearStatic() { }
 
     virtual void solveYourselfAt(TimeStep *tStep);
@@ -73,8 +71,6 @@ public:
     virtual void updateDomainLinks();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
 
     // identification
     virtual const char *giveClassName() const { return "AdaptiveLinearStatic"; }

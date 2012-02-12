@@ -73,8 +73,6 @@ protected:
      * mapping and optional consistency recovery.
      */
     bool preMappingLoadBalancingFlag;
-    /// Error estimator used for refinements
-    ErrorEstimator *ee;
     /**
      * Array storing the load levels reached in corresponding time steps.
      * It is necessary to keep track of this load level history,
@@ -94,7 +92,6 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return ee; }
     virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
 
     /**

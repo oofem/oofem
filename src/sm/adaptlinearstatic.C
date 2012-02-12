@@ -55,9 +55,9 @@ AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     // perform error evaluation
     // evaluate error of the reached solution
-    this->ee->estimateError( temporaryEM, this->giveCurrentStep() );
-    // this->ee->estimateError (equilibratedEM, this->giveCurrentStep());
-    RemeshingStrategy strategy = this->ee->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
+    this->defaultErrEstimator->estimateError( temporaryEM, this->giveCurrentStep() );
+    // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
+    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
 
     if ( strategy == NoRemeshing_RS ) {
         return;
@@ -141,13 +141,6 @@ AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
 
     LinearStatic :: initializeFrom(ir);
 
-    int eeTypeId = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, eeTypeId, IFT_AdaptiveLinearStatic_eetype, "eetype"); // Macro
-    eeType = ( ErrorEstimatorType ) eeTypeId;
-    this->ee = CreateUsrDefErrorEstimator( eeType, 1, this->giveDomain(1) );
-
-    ee->initializeFrom(ir);
-
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveLinearStatic_meshpackage, "meshpackage"); // Macro
 
@@ -168,6 +161,6 @@ AdaptiveLinearStatic :: updateDomainLinks()
 {
     LinearStatic :: updateDomainLinks();
     // associate ee to possibly newly restored mesh
-    this->ee->setDomain( this->giveDomain(1) );
+    this->defaultErrEstimator->setDomain( this->giveDomain(1) );
 }
 } // end namespace oofem

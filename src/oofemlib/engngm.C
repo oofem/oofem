@@ -65,6 +65,7 @@
 #include "outputmanager.h"
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
+#include "usrdefsub.h"
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
@@ -161,6 +162,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     currentStep = NULL;
     previousStep = NULL;
     stepWhenIcApply = NULL;
+    defaultErrEstimator = NULL;
     numberOfSteps = 0;
     numberOfEquations = 0;
     numberOfPrescribedEquations = 0;
@@ -241,6 +243,10 @@ EngngModel ::  ~EngngModel()
     //fclose (inputStream) ;
     if ( outputStream ) {
         fclose(outputStream);
+    }
+
+    if ( defaultErrEstimator ) {
+        delete defaultErrEstimator;
     }
 
 #ifdef __PARALLEL_MODE
@@ -378,6 +384,13 @@ EngngModel :: initializeFrom(InputRecord *ir)
     int _val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_EngngModel_nonLinFormulation, "nonlinform");
     nonLinFormulation = ( fMode ) _val;
+
+    int eeTypeId = -1;
+    IR_GIVE_OPTIONAL_FIELD(ir, eeTypeId, IFT_EngngModel_eetype, "eetype");
+    if (eeTypeId >= 0) {
+        this->defaultErrEstimator = CreateUsrDefErrorEstimator( ( ErrorEstimatorType ) eeTypeId, 1, this->giveDomain(1) );
+        this->defaultErrEstimator->initializeFrom(ir);
+    }
 
 #ifdef __PARALLEL_MODE
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, IFT_EngngModel_parallelflag, "parallelflag"); // Macro
@@ -861,6 +874,11 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Materials ", nelem)
 #  endif
+    }
+
+    // if there is an error estimator, it should be updated so that values can be exported.
+    if ( this->defaultErrEstimator ) {
+        this->defaultErrEstimator->estimateError( equilibratedEM, stepN );
     }
 }
 

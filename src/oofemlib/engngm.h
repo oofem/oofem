@@ -250,6 +250,8 @@ protected:
     int nxfemman;
     /// Type of non linear formulation (total or updated formulation).
     enum fMode nonLinFormulation;
+    /// Error estimator. Useful for adaptivity, or simply printing errors output.
+    ErrorEstimator *defaultErrEstimator;
 
 #ifdef __PARALLEL_MODE
     /// Domain rank in a group of collaborating processes (0..groupSize-1).
@@ -302,7 +304,7 @@ public:
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
     /** Service for accessing ErrorEstimator corresponding to particular domain */
-    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return NULL; }
+    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
     /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
     /** Returns XfemManager at a particular position */

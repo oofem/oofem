@@ -74,6 +74,7 @@ enum InputFieldType {
     IFT_EngngModel_probdescription,
     IFT_EngngModel_nxfemman,
     IFT_EngngModel_nonLinFormulation,
+    IFT_EngngModel_eetype,
 
     IFT_MetaStep_nsteps,
 
@@ -167,10 +168,8 @@ enum InputFieldType {
     IFT_LinearStatic_lstype,
     IFT_LinearStatic_smtype,
 
-    IFT_AdaptiveLinearStatic_eetype,
     IFT_AdaptiveLinearStatic_meshpackage,
 
-    IFT_AdaptiveNonLinearStatic_eetype,
     IFT_AdaptiveNonLinearStatic_meshpackage,
     IFT_AdaptiveNonLinearStatic_equilmc,
     IFT_AdaptiveNonLinearStatic_controllmode,

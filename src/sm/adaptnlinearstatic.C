@@ -72,11 +72,8 @@
 
 namespace oofem {
 AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) : NonLinearStatic(i, _master),
-    d2_totalDisplacement(), d2_incrementOfDisplacement(), timeStepLoadLevels() {
-    //
-    // constructor
-    //
-    ee = NULL;
+    d2_totalDisplacement(), d2_incrementOfDisplacement(), timeStepLoadLevels()
+{
     meshPackage = MPT_T3D;
     equilibrateMappedConfigurationFlag = 0;
 
@@ -86,14 +83,10 @@ AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) :
 }
 
 
-AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic() {
-    //
-    // destructor
-    //
-    if ( ee ) {
-        delete ee;
-    }
+AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic()
+{
 }
+
 
 IRResultType
 AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
@@ -104,12 +97,6 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     int _val;
 
     NonLinearStatic :: initializeFrom(ir);
-    _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_eetype, "eetype"); // Macro
-    ErrorEstimatorType eeType = ( ErrorEstimatorType ) _val;
-    this->ee = CreateUsrDefErrorEstimator( eeType, 1, this->giveDomain(1) );
-
-    ee->initializeFrom(ir);
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage"); // Macro
     meshPackage = ( MeshPackageType ) meshPackageId;
@@ -142,10 +129,10 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
 #endif
 
     // evaluate error of the reached solution
-    this->ee->estimateError( equilibratedEM, this->giveCurrentStep() );
-    //this->ee->estimateError( temporaryEM, this->giveCurrentStep() );
-    this->ee->giveRemeshingCrit()->estimateMeshDensities( this->giveCurrentStep() );
-    RemeshingStrategy strategy = this->ee->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
+    this->defaultErrEstimator->estimateError( equilibratedEM, this->giveCurrentStep() );
+    //this->defaultErrEstimator->estimateError( temporaryEM, this->giveCurrentStep() );
+    this->defaultErrEstimator->giveRemeshingCrit()->estimateMeshDensities( this->giveCurrentStep() );
+    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
 
     // if ((strategy == RemeshingFromCurrentState_RS) && (this->giveDomain(1)->giveSerialNumber() == 0))
     //  strategy = RemeshingFromPreviousState_RS;
@@ -849,7 +836,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
 void
 AdaptiveNonLinearStatic :: updateDomainLinks() {
     NonLinearStatic :: updateDomainLinks();
-    this->ee->setDomain( this->giveDomain(1) );
+    this->defaultErrEstimator->setDomain( this->giveDomain(1) );
 }
 
 
