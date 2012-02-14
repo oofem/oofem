@@ -486,22 +486,20 @@ class PyDofManager : public DofManager, public wrapper<DofManager>
 public:
   PyDofManager (int n, Domain *d) : DofManager (n,d) {}
   
-  /*
   void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
 			 EquationID type, ValueModeType mode, TimeStep *stepN) {
     if (override f = this->get_override("giveUnknownVector")) {
       f (answer, dofMask, type, mode, stepN); return;}
     DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);
   }
-  void computeDofTransformation(FloatMatrix &answer, IntArray &dofIDArry, DofManTransfType mode) {
-    if (override f = this->get_override("computeDofTransformation")) {f(answer, &dofIDArry, mode); return;}
-    DofManager::computeDofTransformation(answer, &dofIDArry, mode);
+  bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) {
+    if (override f = this->get_override("computeL2GTransformation")) {return f(answer, dofIDArry); }
+    return DofManager::computeL2GTransformation(answer, dofIDArry);
   }
 
   void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
 				 EquationID type, ValueModeType mode, TimeStep *stepN) 
   {return this->DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);}
-  */
 };
 
 void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
@@ -515,7 +513,7 @@ void pyclass_DofManager()
     .def("giveCoordinate", &DofManager::giveCoordinate)
     .def("giveLabel", &DofManager::giveLabel)
     .def("giveUnknownVector", giveUnknownVector_1)
-    .def("computeDofTransformation", &DofManager::computeDofTransformation)
+    .def("computeL2GTransformation", &DofManager::computeL2GTransformation)
     ;
 }
 
@@ -766,18 +764,6 @@ void pyenum_ValueModeType()
 
 
 /*****************************************************
-* DofManTransfType
-*****************************************************/
-void pyenum_DofManTransfType()
-{
-  enum_<DofManTransfType>("DofManTransfType")
-    .value("_toGlobalCS", _toGlobalCS)
-    .value("_toNodalCS", _toNodalCS)
-    ;
-}
-
-
-/*****************************************************
 * DofIDItem
 *****************************************************/
 void pyenum_DofIDItem()
@@ -884,7 +870,6 @@ BOOST_PYTHON_MODULE (oofemlib)
   pyenum_Element_Geometry_Type();
   pyenum_EquationID();
   pyenum_ValueModeType();
-  pyenum_DofManTransfType();
   pyenum_DofIDItem();
   pyenum_FieldType();
   pyenum_InternalStateType();
