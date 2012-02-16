@@ -374,6 +374,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
     IntArray loc;
     FloatArray charVec;
     int nelems;
+    FloatMatrix R;
     EModelDefaultEquationNumbering en;
 
     answer.resize( DeltaR.giveSize() );
@@ -411,6 +412,9 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
         element->giveLocationArray(loc, EID_MomentumBalance, en);
         element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
         // if (charVec->containsOnlyZeroes ()) continue;
+        if ( element->giveRotationMatrix(R, EID_MomentumBalance) ) {
+            charVec.rotatedWith(R, 't');
+        }
         answer.assemble(charVec, loc);
         // compute element norm contribution
         ebeNorm += charVec.computeSquaredNorm();
