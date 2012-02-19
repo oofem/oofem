@@ -39,8 +39,16 @@
 
 namespace oofem {
 /**
- *  This class implements a base lattice element
- *
+ * This class implements the base of a special lattice element following 
+ * the concepts orginally developed by John Bolander. In this lattice 
+ * framework, elements consists of rigid bodies connected by a set of axial 
+ * tranversal and rotational springs at the position of the GP. 
+ * In the case of an irregular arrangement of lattice elements, 
+ * the position of the GP is not 
+ * placed at the midpoint of the element, but the midpoint of the element's midcross-section.
+ * There is no way to relate the element geometry to the position of the GP. Instead, this information
+ * is part of the input.
+ * In this base class common interfaces of derived elements are defined.
  */
 
 class LatticeStructuralElement : public StructuralElement
@@ -51,14 +59,55 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
 
+    /**
+     * Returns the cross-sectional area of the lattice element.
+     * @return cross-section area
+     */
     virtual double giveArea() { return 0; }
+
+    /**
+     * Returns the element length
+     * @return element length
+     */
     virtual double giveLength() { return 0; }
+
+    /** 
+     * Returns the crack flag
+     * @return crack flag
+     */
     virtual int giveCrackFlag() { return 0; }
+
+    /**
+     * Returns the number of crossSection nodes
+     * @return number of crosssection nodes 
+     */
     virtual int giveNumberOfCrossSectionNodes() { return 0; }
-    virtual void giveCrossSectionCoordinates(FloatArray &coords) {};
+
+    /**
+     * @return crack width
+     */
     virtual double giveCrackWidth() { return 0; }
-    virtual void giveGPCoords(FloatArray &gpcoords) { }
+
+    /**
+     * Returns the energy dissipation computed at the GaussPoint of the element. 
+     * This function is used for the lattice specific vtk export.
+     * @return dissipation
+     */
     virtual double giveDissipation() { return 0; }
+
+    
+    /** 
+     * Usually computes interpolation function, which is not needed for the lattice elements.
+     * However, structural element requires implementation. 
+     */
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){return ;}
+
+
+    /**
+     * Returns the increment of dissipation computed at the GaussPoint of the element.
+     * This function is used for the lattice specific vtk export.
+     * @return increment of dissipation
+     */
     virtual double giveDeltaDissipation() { return 0; }
 };
 } // end namespace oofem

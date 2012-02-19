@@ -37,9 +37,5 @@
 namespace oofem {
 LatticeMaterialStatus :: LatticeMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
-    this->gp = g;
 }
 } // end namespace oofem
-
-
-

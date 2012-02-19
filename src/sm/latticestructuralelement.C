@@ -35,23 +35,18 @@
 #include "latticestructuralelement.h"
 
 namespace oofem {
-LatticeStructuralElement :: LatticeStructuralElement (int n, Domain* aDomain) : StructuralElement (n,aDomain)
-{
+LatticeStructuralElement :: LatticeStructuralElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+{}
 
-}
-
-LatticeStructuralElement :: ~LatticeStructuralElement ()
-{
-
-}
+LatticeStructuralElement :: ~LatticeStructuralElement()
+{}
 
 IRResultType
-LatticeStructuralElement :: initializeFrom (InputRecord* ir)
+LatticeStructuralElement :: initializeFrom(InputRecord *ir)
 {
+    // first call parent
+    StructuralElement :: initializeFrom(ir);
 
-  // first call parent 
-  StructuralElement :: initializeFrom (ir);
-
-  return IRRT_OK;
+    return IRRT_OK;
 }
 } // end namespace oofem

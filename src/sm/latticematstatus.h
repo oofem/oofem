@@ -49,13 +49,14 @@ class NonlocalMaterialStatusExtension;
 
 namespace oofem {
 /**
- * This class implements a lattice material status.
+ * This class implements a base lattice material status.
+ * In this class services are defined that are usef by other 
+ * lattice material statuses.
  */
 class LatticeMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    /// Associated intagration point.
-    GaussPoint *gp;
+
 public:
 
     LatticeMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -67,23 +68,37 @@ public:
     virtual void initTempStatus() { }
 
     virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
-
-    // definition
-    /// Returns class name of the receiver.
+    
     const char *giveClassName() const { return "LatticeMaterialStatus"; }
-    /// Returns classType id of receiver.
+
     classType giveClassID() const { return LatticeMaterialStatusClass; }
 
     ///Sets the temp_crack_flag
     virtual void setTempCrackFlag(int val) = 0;
 
-    /// Returns the crack_flag
+    /** 
+     * Returns the crack flag
+     * @return crack flag
+     */
     virtual int giveCrackFlag() { return 0; }
 
+    /**
+     * @return crack width
+     */
     virtual double giveCrackWidth() { return 0; }
 
+    /**
+     * Returns the energy dissipation computed at the GaussPoint of the element. 
+     * This function is used for the lattice specific vtk export.
+     * @return dissipation
+     */
     virtual double giveDissipation() { return 0; }
 
+    /**
+     * Returns the increment of dissipation computed at the GaussPoint of the element.
+     * This function is used for the lattice specific vtk export.
+     * @return increment of dissipation
+     */
     virtual double giveDeltaDissipation() { return 0; }
 
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

@@ -56,33 +56,33 @@ public:
 
     int giveLocalCoordinateSystem(FloatMatrix &answer);
 
+    /**
+     * This function is different from the standard computeGlobalCorrdinates
+     * function as it returns the global coordinates of the gausspoint
+     * independent to the value of the lcoords.
+     */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    virtual int giveCrackFlag();
-
-    virtual void giveCrossSectionCoordinates(FloatArray &coords);
-
-    virtual double giveCrackWidth();
-
-    // characteristic length in gp (for some material models)
-    double giveCharacteristicLenght(GaussPoint *, const FloatArray &)
+    /**
+     * This function returns the length of the element
+     * independent of the FloatArray.
+     */
+    virtual double giveCharacteristicLenght(GaussPoint *, const FloatArray &)
     { return this->giveLength(); }
 
     virtual double giveLength();
 
-    virtual void giveGPCoords(FloatArray &coords) { coords = this->gpCoords; }
     virtual double giveArea() { return this->width * this->thickness; }
-    virtual double giveDissipation();
-    virtual double giveDeltaDissipation();
-
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
+    virtual int giveCrackFlag();
+
+    virtual double giveCrackWidth();
+    virtual double giveDissipation();
+    virtual double giveDeltaDissipation();
     //
     // definition & identification
     //
@@ -94,22 +94,17 @@ public:
 
     void drawYourself(oofegGraphicContext &context);
     virtual void drawRawGeometry(oofegGraphicContext &);
-    //  void          drawRawVoronoi (oofegGraphicContext&);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    //  void          drawDeformedVoronoi(oofegGraphicContext&, UnknownType);
-
-    //  void drawScalar   (oofegGraphicContext& context);
-
     virtual void drawSpecial(oofegGraphicContext &gc);
 #endif
 
 protected:
 
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &) {; };
     virtual bool computeGtoLRotationMatrix(FloatMatrix &);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    int giveNumberOfCrossSectionNodes() { return 2; }
+
+    virtual int giveNumberOfCrossSectionNodes() { return 2; }
     double givePitch();
     virtual void computeGaussPoints();
     virtual integrationDomain giveIntegrationDomain() { return _Line; }
