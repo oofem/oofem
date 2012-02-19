@@ -243,6 +243,7 @@
  #include "concretedpm.h"
  #include "concretedpm2.h"
  #include "cohint.h"
+ #include "latticedamage2d.h"
 
  #include "scalarerrorindicator.h"
  #include "zzerrorestimator.h"
@@ -265,6 +266,7 @@
 
 // random generators
  #include "localgaussianrandomgenerator.h"
+ #include "externalfieldgenerator.h"
 
 // mesher interfaces
  #include "t3dinterface.h"
@@ -621,6 +623,7 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         matList["cohint"]           = matCreator< CohesiveInterfaceMaterial >;
         matList["simpleintermat"]   = matCreator< SimpleInterfaceMaterial >;
         matList["con2dpm"]      = matCreator< ConcreteDPM2 >;
+	matList["latticedamage2d"] = matCreator< LatticeDamage2d >;
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
         matList["isoheat"]              = matCreator< IsotropicHeatTransferMaterial >;
@@ -855,6 +858,7 @@ RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int n
     if ( randomFieldList.size() == 0 ) {
 #ifdef __SM_MODULE
         randomFieldList["localgaussrandomgenerator"] = randomFieldCreator< LocalGaussianRandomGenerator >;
+	//        randomFieldList["externalfieldgenerator"] = randomFieldCreator< ExternalFieldGenerator >;
 #endif
     }
     return (randomFieldList.count(aClass) == 1) ? randomFieldList[aClass](number, domain) : NULL;

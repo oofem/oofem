@@ -1027,6 +1027,21 @@ enum InputFieldType {
     IFT_ConcreteDPM2_helem,
     IFT_ConcreteDPM2_isoflag,
 
+    IFT_LatticeDamage2d_eNormal,
+    IFT_LatticeDamage2d_alphaOne,
+    IFT_LatticeDamage2d_alphaTwo,
+    IFT_LatticeDamage2d_aSoft,
+    IFT_LatticeDamage2d_softeningType,
+    IFT_LatticeDamage2d_wf,
+    IFT_LatticeDamage2d_wfOne,
+    IFT_LatticeDamage2d_localrandomtype,
+    IFT_LatticeDamage2d_coefficientOfVariation,
+    IFT_LatticeDamage2d_equivType,
+    IFT_LatticeDamage2d_e0,
+    IFT_LatticeDamage2d_coh,
+    IFT_LatticeDamage2d_ec,
+    IFT_LatticeDamage2d_paramDuct,
+
     IFT_LsMasterMat_slaveMat,
 
     IFT_ConcreteDPMnlMaterial_r,
@@ -1165,6 +1180,8 @@ enum InputFieldType {
     IFT_LocalGaussianRandomGenerator_mean,
     IFT_LocalGaussianRandomGenerator_variance,
     IFT_LocalGaussianRandomGenerator_seed,
+
+    IFT_ExternalFieldGenerator_name,
 
     IFT_RandomMaterialExt_randVariables,
     IFT_RandomMaterialExt_randGen,

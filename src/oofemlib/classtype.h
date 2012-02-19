@@ -272,6 +272,7 @@ enum classType {
     AbaqusUserMaterialClass,
     AbaqusUserMaterialStatusClass,
     ConcreteDPM2Class,
+    LatticeDamage2dClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -323,6 +324,8 @@ enum classType {
     ConcreteDPMStatusClass,
     FE2SinteringMaterialStatusClass,
     ConcreteDPM2StatusClass,
+    LatticeDamage2dStatusClass,
+
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
