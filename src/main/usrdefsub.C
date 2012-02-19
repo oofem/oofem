@@ -858,7 +858,7 @@ RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int n
     if ( randomFieldList.size() == 0 ) {
 #ifdef __SM_MODULE
         randomFieldList["localgaussrandomgenerator"] = randomFieldCreator< LocalGaussianRandomGenerator >;
-	//        randomFieldList["externalfieldgenerator"] = randomFieldCreator< ExternalFieldGenerator >;
+	randomFieldList["externalfieldgenerator"] = randomFieldCreator< ExternalFieldGenerator >;
 #endif
     }
     return (randomFieldList.count(aClass) == 1) ? randomFieldList[aClass](number, domain) : NULL;
