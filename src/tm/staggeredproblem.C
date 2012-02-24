@@ -82,7 +82,7 @@ StaggeredProblem ::  ~StaggeredProblem()
 
 ///////////
 int
-StaggeredProblem :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dataOutputFileName, char *desc)
+StaggeredProblem :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 {
     int result;
     // call parent
