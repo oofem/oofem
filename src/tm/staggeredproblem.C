@@ -77,7 +77,8 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
 StaggeredProblem ::  ~StaggeredProblem()
 {
     delete emodelList;
-    delete inputStreamNames;
+    // inputStreamNames;
+    delete [] inputStreamNames;
 }
 
 ///////////

@@ -104,10 +104,12 @@ namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
 // constructor
 {
+
     number = i;
     currentStep = NULL;
     previousStep = NULL;
     stepWhenIcApply = NULL;
+    defaultErrEstimator = NULL;
     numberOfSteps = 0;
     numberOfEquations = 0;
     numberOfPrescribedEquations = 0;
@@ -215,7 +217,7 @@ EngngModel ::  ~EngngModel()
       delete previousStep;
     }
 
-    if(!stepWhenIcApply){
+    if(stepWhenIcApply){
       delete stepWhenIcApply;
     }
 

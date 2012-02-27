@@ -749,7 +749,8 @@ RheoChainMaterialStatus :: ~RheoChainMaterialStatus()
             delete hiddenVars [ i ];
         }
 
-        delete hiddenVars;
+        //delete hiddenVars;
+	delete [] hiddenVars;
     }
 }
 

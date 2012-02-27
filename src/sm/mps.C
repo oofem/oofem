@@ -181,6 +181,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     }
 
     this->CoupledAnalysis = ( coupledAnalysisType ) type;
+    this->kSh = 0.;
 
     if ( this->CoupledAnalysis == MPS ) {
         // muS- the only parameter necessary for evaluation of the flow-term viscosity
@@ -192,7 +193,6 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 
         // age when drying or thermal changes begin [days] - necessary to determine initial viscosity
         IR_GIVE_FIELD(ir, t0, IFT_MPSMaterial_t0, "t0");
-        this->kSh = 0.;
         IR_GIVE_OPTIONAL_FIELD(ir, kSh, IFT_MPSMaterial_ksh, "ksh");
 
         // Parameters for desorption isotherm
