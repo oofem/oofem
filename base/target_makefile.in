@@ -42,8 +42,7 @@ tests:
 	echo ################################################## >> ${RESULT}
 	echo started `date`         >> ${RESULT}
 	echo                        >> ${RESULT}
-	if [ -f  ${OOFEM} ] && [ -f ${CHECKER} ] ;\
-	then \
+	if [ -f  ${OOFEM} ] && [ -f ${CHECKER} ] ; then \
 	  echo "using ${OOFEM}" >> ${RESULT};\
 	  echo                >> ${RESULT};\
 	  for module in @TEST_TARGETS@;\
@@ -57,8 +56,12 @@ tests:
 	      echo $${ib};\
 	      echo;\
 	      ${OOFEM} -f $$i -l 2;\
-	      ${PYTHON} ${CHECKER} ${CHECKER_PARAMS} -f $$i    >> ${RESULT};\
-	      rm $${ib%.in}.out;\
+              if [ $$? -eq 0 ] ; then\
+		      ${PYTHON} ${CHECKER} ${CHECKER_PARAMS} -f $$i    >> ${RESULT};\
+		      rm $${ib%.in}.out;\
+	      else \
+		      echo "FAILED: Error return code detected ($$?)";\
+	      fi;\
 	    done;\
 	  done;\
 	  echo finished `date`  >> ${RESULT};\
