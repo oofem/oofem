@@ -60,7 +60,8 @@ tests:
 		      ${PYTHON} ${CHECKER} ${CHECKER_PARAMS} -f $$i    >> ${RESULT};\
 		      rm $${ib%.in}.out;\
 	      else \
-		      echo "FAILED: Error return code detected ($$?)";\
+		      echo "OOFEM: $${ib} - Error Return Code detected ($$?)" >> ${RESULT};\
+		      echo "                                                                   [FAILED]">> ${RESULT};\
 	      fi;\
 	    done;\
 	  done;\
