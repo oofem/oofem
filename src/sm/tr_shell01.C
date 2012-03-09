@@ -35,6 +35,7 @@
 #include "tr_shell01.h"
 
 #ifdef __OOFEG
+ #include "node.h"
  #include "oofeggraphiccontext.h"
  #include "conTable.h"
 #endif

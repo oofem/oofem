@@ -2330,7 +2330,7 @@ static void
 toggleTransparentContours(Widget w, XtPointer ptr, XtPointer call_data)
 {
     if ( IsContourBgTransparent() ) {
-        SetContourBgTransparent();
+        SetContourBgTransparent(true);
     } else {
         SetContourBgTransparent(true);
     }

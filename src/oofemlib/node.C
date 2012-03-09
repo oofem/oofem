@@ -814,15 +814,12 @@ Node :: drawYourself(oofegGraphicContext &gc)
             pp [ 1 ].x = pp [ 1 ].x = pp [ 1 ].x = 0.0;
 
             FloatArray load;
-            if ( this->requiresTransformation() ) {
-                FloatArray lload;
-                FloatMatrix t;
-                computeLoadVectorAt(lload, tStep, VM_Total);
-                this->computeLoadTransformation(t, NULL, _toGlobalCS);
-                load.beProductOf(t, lload);
-            } else {
-                computeLoadVectorAt(load, tStep, VM_Total);
-            }
+            FloatMatrix t;
+            IntArray dofIDArry(0);
+            computeLoadVectorAt(load, tStep, VM_Total);
+            if (computeL2GTransformation(t, dofIDArry)) {
+	      load.rotatedWith(t,'n');
+	    }
 
             FloatArray force(3), momentum(3);
             for ( i = 1; i <= numberOfDofs; i++ ) {

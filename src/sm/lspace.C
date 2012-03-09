@@ -777,7 +777,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
         h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
         h2.subtract(gc);
         n.beVectorProductOf(h1, h2);
-        if ( dotProduct(n, n, 3) > 1.e-6 ) {
+        if ( n.dotProduct(n, 3) > 1.e-6 ) {
             n.normalize();
         }
 
@@ -785,7 +785,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
     }
 
     nn.times(1. / 4.);
-    if ( dotProduct(nn, nn, 3) < 1.e-6 ) {
+    if ( nn.dotProduct(nn, 3) < 1.e-6 ) {
         return;
     }
 
