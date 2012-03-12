@@ -146,7 +146,10 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
     int istep = this->giveNumberOfFirstStep();
     //int mstep = 1;
     StateCounterType counter = 1;
-    delete previousStep;
+    
+    if (previousStep != NULL){
+        delete previousStep;
+    }
 
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;

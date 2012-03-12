@@ -339,7 +339,10 @@ TimeStep *NonLinearStatic :: giveNextStep()
         deltaTtmp = 0.;
     }
 
-    delete previousStep;
+    if (previousStep != NULL){
+        delete previousStep;
+    }
+
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep =  currentStep->giveNumber() + 1;

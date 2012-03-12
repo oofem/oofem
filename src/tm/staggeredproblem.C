@@ -201,15 +201,21 @@ StaggeredProblem :: giveNextStep()
     int istep = this->giveNumberOfFirstStep();
     double totalTime = 0;
     StateCounterType counter = 1;
-    delete previousStep;
-
+    
+    if (previousStep != NULL){
+        delete previousStep;
+        previousStep = NULL;
+    }
+    
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
         totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
+        TimeStep *newStep;  
         // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
+        newStep = giveSolutionStepWhenIcApply();
+        currentStep = new TimeStep( *newStep );
     }
 
     /*
@@ -241,6 +247,7 @@ StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
         EngngModel *emodel = this->giveSlaveProblem(i);
         emodel->solveYourselfAt(stepN);
     }
+    stepN->incrementStateCounter();
 }
 
 int
@@ -263,6 +270,7 @@ StaggeredProblem :: updateYourself(TimeStep *stepN)
     for ( int i = 1; i <= nModels; i++ ) {
         this->giveSlaveProblem(i)->updateYourself(stepN);
     }
+    EngngModel :: updateYourself(stepN);
 }
 
 void

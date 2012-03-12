@@ -197,7 +197,10 @@ TimeStep *PNlDEIDynamic :: giveNextStep()
     double totalTime = 0;
     StateCounterType counter = 1;
 
-    delete previousStep;
+    if (previousStep != NULL){
+        delete previousStep;
+    }    
+    
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;

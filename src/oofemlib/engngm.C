@@ -211,13 +211,19 @@ EngngModel ::  ~EngngModel()
 // destructor
 {
     if (previousStep == currentStep) {
-      delete currentStep;
+        if(previousStep != NULL) {
+            delete this->currentStep;
+        }
     } else {
-      delete currentStep;
-      delete previousStep;
+        if(currentStep != NULL) {
+            delete currentStep;
+        }
+        if(previousStep != NULL) {
+            delete previousStep;
+        }
     }
 
-    if(stepWhenIcApply){
+    if(stepWhenIcApply != NULL){
       delete stepWhenIcApply;
     }
 

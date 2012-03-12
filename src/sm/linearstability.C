@@ -197,7 +197,10 @@ TimeStep *LinearStability :: giveNextStep()
     int istep = giveNumberOfFirstStep();
     StateCounterType counter = 1;
 
-    delete previousStep;
+    if (previousStep != NULL){
+        delete previousStep;
+    }
+    
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;

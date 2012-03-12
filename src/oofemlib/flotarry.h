@@ -114,7 +114,11 @@ public:
      */
     FloatArray(const FloatArray &x);
     /// Destructor.
-    virtual ~FloatArray() { if ( values ) { freeDouble(values); } }
+    virtual ~FloatArray() { 
+        if ( values ) { 
+            freeDouble(values); 
+        } 
+    }
 
     /// Assignment operator
     FloatArray &operator=(const FloatArray &);   // assignment: cleanup and copy

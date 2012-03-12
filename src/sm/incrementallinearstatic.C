@@ -150,7 +150,10 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
 
-    delete previousStep;
+    if (previousStep != NULL){
+        delete previousStep;
+    }
+    
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, mstepNum, this->giveDiscreteTime(istep), dt, counter);
     return currentStep;
