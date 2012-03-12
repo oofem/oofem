@@ -59,7 +59,7 @@
 #include "contextioerr.h"
 
 namespace oofem {
-///Constructor
+
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
 {
     UnknownsField = NULL;
@@ -72,7 +72,7 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
 }
-///Destructor
+
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
 {
     if ( lhs ) {
@@ -245,8 +245,6 @@ NonStationaryTransportProblem :: giveNextStep()
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
         totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
-        //istep =  currentStep->giveNumber() + 1   ;
-        //totalTime = currentStep->giveTime() + deltaT;
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
@@ -263,7 +261,8 @@ NonStationaryTransportProblem :: giveNextStep()
 }
 
 
-void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
+void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
+{
     // Creates system of governing eq's and solves them at given tStep
     // The solution is stored in UnknownsField. If the problem is growing/decreasing, the UnknownsField is projected on DoFs when needed.
     // If equations are not renumbered, the algorithm is efficient without projecting unknowns to DoFs (nodes).
@@ -278,7 +277,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
     //Solution at the first time step needs history. Therefore, return back one time increment and create it.
     if ( tStep->isTheFirstStep() ) {
-        stepWhenIcApply = tStep->givePreviousStep();
+        this->giveSolutionStepWhenIcApply();
 
         bcRhs.resize(neq); //rhs vector from solution step i-1
         bcRhs.zero();
@@ -368,7 +367,6 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
-
     UnknownsField->giveSolutionVector(tStep)->resize(neq);
     nMethod->solve( lhs, & rhs, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
@@ -552,11 +550,9 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
 
     if ( ( type == NSTP_MidpointLhs ) || ( type == NSTP_MidpointRhs ) ) {
         Element *element;
-        // IntArray loc ;
         FloatMatrix charMtrx1, charMtrx2;
 
         element = domain->giveElement(num);
-        // element -> giveLocationArray (loc);
         element->giveCharacteristicMatrix(answer, ConductivityMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
 
@@ -746,7 +742,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
 
 }
 
-///needed for CemhydMat
+// needed for CemhydMat
 void
 NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
 {
@@ -785,7 +781,6 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
         }
     }
 }
-
 
 
 #ifdef __PETSC_MODULE
