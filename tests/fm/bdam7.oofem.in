@@ -1,9 +1,9 @@
 bdam7.oofem.out
 collapse of water column 
-supg nsteps 20 lstype 0 smtype 1 deltaT 1.e-2 rtolv 1.e-4 alpha 0.5 miflag 1 refVol 2.678062e-3 
+supg nsteps 4 lstype 0 smtype 1 deltaT 1.e-2 rtolv 1.e-4 alpha 0.5 miflag 1 refVol 2.678062e-3 
 #vtk tstep_step 10 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
-OutputManager tsteps_out {20} dofman_all element_all
+OutputManager tsteps_out {4} dofman_all element_all
 #ndofman 9 nelem 8 ncrosssect 1 nmat 1 nbc 4 nic 1 nltf 2
 ndofman 558 nelem 1020 ncrosssect 1 nmat 3 nbc 3 nic 0 nltf 1
 node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 3 1 1 0
@@ -1599,8 +1599,13 @@ deadweight 3 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 3.24171062e-02  number 1 dof 3 unknown p value  4.19138564e+02
-#NODE tStep 3.24171062e-02  number 2 dof 1 unknown v value  6.32980127e-01
-#NODE tStep 3.24171062e-02  number 4 dof 2 unknown v value -5.06245980e-01
+##Solution time at step 4
+#NODE tStep 1.73057456e-02  number 1 dof 3 unknown p value  3.80460826e+02
+#NODE tStep 1.73057456e-02  number 2 dof 1 unknown v value  4.06807867e-01
+#NODE tStep 1.73057456e-02  number 4 dof 2 unknown v value -9.33888921e-02
+##Solution time at step 20
+##NODE tStep 3.24171062e-02  number 1 dof 3 unknown p value  4.19138564e+02
+##NODE tStep 3.24171062e-02  number 2 dof 1 unknown v value  6.32980127e-01
+##NODE tStep 3.24171062e-02  number 4 dof 2 unknown v value -5.06245980e-01
 #%END_CHECK%
 
