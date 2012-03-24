@@ -335,7 +335,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             for ( inode = 1; inode <= regionDofMans; inode++ ) {
                 coords = d->giveNode(mapL2G.at(inode))->giveCoordinates();
                 int dims = coords->giveSize();
-                nodes->InsertNextPoint(coords->at(1), dims >= 2 ? coords->at(2) : 0.0, dims >= 3 ? coords->at(2) : 0.0);
+                nodes->InsertNextPoint(coords->at(1), dims >= 2 ? coords->at(2) : 0.0, dims >= 3 ? coords->at(3) : 0.0);
             }
             stream->SetPoints(nodes);
 #else
