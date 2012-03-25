@@ -864,8 +864,8 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.at(3) = R_v;
     } else if  (dType == _2dLatticeMode) {
       defaultNodeDofIDArry.resize (3);
-      defaultNodeDofIDArry.at(1)=D_u; 
-      defaultNodeDofIDArry.at(2)=D_v; 
+      defaultNodeDofIDArry.at(1)=D_u;
+      defaultNodeDofIDArry.at(2)=D_v;
       defaultNodeDofIDArry.at(3)=R_w;
     } else if  ( dType == _HeatTransferMode ) {
         defaultNodeDofIDArry.resize(1);
@@ -1082,7 +1082,7 @@ Domain ::  giveCorrespondingCoordinateIndex(int idof)
 
     case _2dPlaneStressMode:
     case _PlaneStrainMode:
-    case _2dLattice:
+    case _2dLatticeMode:
         if ( idof == 1 ) {
             return 1;
         } else if ( idof == 2 ) {
