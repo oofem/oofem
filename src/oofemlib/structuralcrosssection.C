@@ -34,9 +34,9 @@
 
 #include "structuralcrosssection.h"
 #include "simplecrosssection.h"
-//#include "layeredcrosssection.h"
 #include "structuralelement.h"
 #include "gausspnt.h"
+#include "element.h"
 #include "structuralmaterial.h"
 #include "flotarry.h"
 #include "verbose.h"
@@ -60,10 +60,6 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
     if ( mat->hasMaterialModeCapability(mode) ) {
         ( ( StructuralMaterial * ) gp->giveElement()->giveMaterial() )
         ->giveRealStressVector(answer, form, gp, strain, tStep);
-
-        // reducedStressVector = this -> GiveReducedStressVector (gp, stressVector3d);
-        // delete stressVector3d;
-
         return;
     } else {
         _error("giveRealStresses : unsupported mode");
@@ -80,7 +76,6 @@ StructuralCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
-//
 {
     this->giveMaterialStiffnessMatrixOf(answer, ReducedForm, rMode, gp,
                                         dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() ),
@@ -95,7 +90,6 @@ StructuralCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                                             TimeStep *tStep)
 //
 // only interface to material class, forcing returned matrix to be in reduced form.
-//
 //
 {
     this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
@@ -142,12 +136,10 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrix(FloatMatrix &answer,
 {
     /* returns compliance matrix according to stress strain mode in gp */
     FloatMatrix redInvAnswer;
-    // IntArray* mask;
 
     this->giveCharMaterialStiffnessMatrix(redInvAnswer, rMode, gp, tStep);
     answer.beInverseOf(redInvAnswer);
 
-    //delete redInvAnswer;
     return;
 }
 
@@ -172,15 +164,11 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode(),
                                    static_cast< StructuralMaterial * >( gp->giveMaterial() ) );
         answer.beSubMatrixOfSizeOf(redAnswer, mask, 6);
-        //delete mask;
-        // delete redAnswer;
     } else if ( form == ReducedForm ) {
         answer = redAnswer;
     } else {
         _error("giveCharMaterialComplianceMatrix - unsupported form mode");
     }
-
-    // delete redInvAnswer;
     return;
 }
 
@@ -372,7 +360,6 @@ StructuralCrossSection :: computeStressIndependentStrainVector(FloatArray &answe
 // takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
 //
 {
-    // MaterialMode matmode = gp-> giveMaterialMode ();
     StructuralMaterial *mat = ( StructuralMaterial * ) gp->giveElement()->giveMaterial();
     FloatArray e0, fullAnswer;
 

@@ -37,26 +37,27 @@
 
 #include "crosssection.h"
 #include "structuralmaterial.h"
-#include "gausspnt.h"
-#include "element.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
 
 namespace oofem {
+
+class GaussPoint;
+class Element;
+class FloatArray;
+class FloatMatrix;
+
 /**
  * Abstract base class for all structural cross section models. It declares commons services provided by all
  * structural cross section models. The implementation of this services is left on derived classes,
- * which will implement cross section model dependent part. Howewer, some general services are
+ * which will implement cross section model dependent part. However, some general services are
  * implemented here.
  * For information, how to introduce integration points in cross section volume for
  * macro integration point, see @ref CrossSection reference manual.
  *
  * At structural level of cross section or constitutive models are introduced several stress/strain modes.
- * Full and reduced formats of stress/strain vectors are also introduced for convinience.
+ * Full and reduced formats of stress/strain vectors are also introduced for convenience.
  * The full format includes all components, even if they are zero due to stress/strain mode nature,
  * but in the reduced format, only generally nonzero components are stored.
- * (full format must used only if absolutely necessary, to avoid vasting of space. It is used
+ * (full format must used only if absolutely necessary, to avoid wasting of space. It is used
  * by output routines to print results in general form). Methods for converting vectors between
  * full and reduced format are provided.
  * General full strain vector has one of the following forms:
@@ -66,26 +67,6 @@ namespace oofem {
  */
 class StructuralCrossSection : public CrossSection
 {
-    /*
-     * This class implements a structural cross section in a finite element problem. A cross
-     * section  is an attribute of a domain. It is usually also attribute of many
-     * elements. This class is base class for SimpleCrossSection, LayeredCrossSection,
-     * FibredCrossSection, ....
-     *
-     * DESCRIPTION
-     * The attribute 'propertyDictionary' contains all the properties of a
-     * cross section, like its area or thickness.
-     *
-     * TASK
-     * - Returning standard material stiffness marices (like 3dstress-strain, 2d plane ,
-     *   plate, 3dbeam, 2d beam ..) according to current state determined by parametr
-     *   StressMode by calling gp->material->GiveMaterialStiffnessMatrix (....) and by
-     *   possible modifiing returned matrix. (for example in layerde mode aproach
-     *   each layer  is asked for 3dMatrialStiffnes and this is integrated for example
-     *   over thickness for plate bending broblems)
-     * - Returning RealStress state in gauss point and for given Stress mode.
-     * - Returning a properties of cross section like thickness or area.
-     */
 public:
     /**
      * Constructor. Creates cross section with given number, belonging to given domain.
@@ -94,14 +75,14 @@ public:
      */
     StructuralCrossSection(int n, Domain *d) : CrossSection(n, d) { }
     /// Destructor.
-    ~StructuralCrossSection() { }
+    virtual ~StructuralCrossSection() { }
 
     /**
      * Computes the real stress vector for given strain and integration point.
      * The service should use previously reached equilibrium history variables. Also
      * it should update temporary history variables in status according to newly reached state.
      * The temporary history variables are moved into equilibrium ones after global structure
-     * equlibrium has been reached by iteration process.
+     * equilibrium has been reached by iteration process.
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
@@ -116,7 +97,7 @@ public:
 
     /**
      * Computes the stiffness matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equlibrium  history variables stored in integration point status
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
@@ -129,24 +110,20 @@ public:
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
                                                  TimeStep *tStep);
 
-    // next function is intended to be used if some object would like to obtain
-    // char matrix form different material which is not associated with gp and its element.
-    // (mainly for obtaining linear elastic matrix)
-    // stress-strain mode is taken from gp.
-    // NORMALLY - PLEASE USE GiveCharMaterialStiffnessMatrix function
     /**
      * Computes the stiffness matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equlibrium history variables stored in integration point status
+     * The algorithm should use temporary or equilibrium history variables stored in integration point status
      * to compute and return required result.
      * Passed material mode is always used instead of mode of given integration point.
      * (Therefore, this function should be used if some object would like to obtain
      * char matrix with different material form than that is associated with gp and its element)
-     * But please use GiveCharMaterialStiffnessMatrix, this service will not be supported in future
-     * releases.
      *
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
+     *
+     * @deprecated Please use giveCharMaterialStiffnessMatrix, this service will not be supported in future releases.
+     *
      * @param answer Contains result.
      * @param form Material response form.
      * @param mode Material response mode.
@@ -160,7 +137,7 @@ public:
                                                    TimeStep *tStep);
     /**
      * Computes the compliance matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equlibrium  history variables stored in integration point status
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
@@ -174,29 +151,25 @@ public:
                                                   MatResponseMode mode, GaussPoint *gp,
                                                   TimeStep *tStep);
 
-    // next function is intendet to be used if we would like to obtain
-    // char matrix form different material which is not associated with gp and its element.
-    // (mainly for obtaining linear elastic matrix)
-    // stress-strain mode is taken from gp.
-    // NORMALLY - PLEASE USE GiveCharMaterialStiffnessMatrix function
     /**
      * Computes the compliance matrix of receiver in given integration point, respecting its history.
-     * The algorithm should use temporary or equlibrium  history variables stored in integration point status
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
      * Passed material mode is always used instead of mode of given integration point.
      * (Therefore, this function should be used if some object would like to obtain
      * char matrix with different material form than that is associated with gp and its element)
-     * But please use giveCharMaterialComplianceMatrix, this service will not be supported in future
-     * releases.
      *
      * Elements should always pass their requests to their cross section model, which
      * performs necessary integration over its volume and invokes necessary material
      * services for corresponding material model defined for given integration point.
+     *
+     * @deprecated Please use giveCharMaterialComplianceMatrix, this service will not be supported in future releases.
+     *
      * @param answer Contains result.
      * @param form Material response form.
      * @param mode Material response mode.
      * @param gp Integration point.
-     * @param mat Material to evalute for.
+     * @param mat Material to evaluate for.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void giveCharMaterialComplianceMatrixOf(FloatMatrix &answer,
@@ -206,10 +179,10 @@ public:
                                                     TimeStep *tStep);
 
     /**
-     * Computes reduced strain vector not dependent on sresses in given integration point. 
+     * Computes reduced strain vector not dependent on stresses in given integration point.
      * Returned vector is generated by temperature or shrinkage effects, for example.
      * The load mode (Incremental or Total Load form) passed as parameter is taken into account.
-     * Depend on load form, tre resulting strain is total strain or its increment from previous
+     * Depend on load form, true resulting strain is total strain or its increment from previous
      * step.
      * @param answer Stress independent strain vector.
      * @param gp Integration point.
@@ -222,7 +195,7 @@ public:
     /**
      * Computes reduced stress/strain vector from full stress/strain vector.
      * The stress/strain mode is determined form given integration point.
-     * @param answer charVector3d reduced.
+     * @param answer Characteristic vector in reduced form.
      * @param gp Integration point.
      * @param charVector3d Full 3d stress/strain vector.
      */
@@ -242,11 +215,11 @@ public:
      * bring stresses back to yield surface.
      * Method imposes zeros on places, where zero stress occurs. if energetically connected
      * strain is zero, we do not impose zero there, because stress exist and
-     * must be taken into account when computing yeld function. In such case
+     * must be taken into account when computing yield function. In such case
      * a problem is assumed to be full 3d with some explicit strain equal to 0.
      * On the other hand, if some stress is imposed to be zero, we understand
-     * such case as subspace of 3d case (like a classical plane stess problem, with no
-     * tracing of ez, sigma_z)
+     * such case as subspace of 3d case (like a classical plane stress problem, with no
+     * tracing of e_z, sigma_z)
      * @param gp Integration point.
      * @param gradientStressVector3d General 3d stress gradient.
      */
@@ -271,21 +244,15 @@ public:
      * @param answer Assembled mask.
      * @param form Material response form.
      * @param mode Determines load mode.
-     * @param mat Material to evalute for.
+     * @param mat Material to evaluate for.
      */
     virtual void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mode, StructuralMaterial *mat) const;
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "StructuralCrossSection"; }
-    classType giveClassID() const { return StructuralCrossSectionClass; }
+    virtual const char *giveClassName() const { return "StructuralCrossSection"; }
+    virtual classType giveClassID() const { return StructuralCrossSectionClass; }
 
-    /**
-     * Requests cross section model mode capability.
-     * @param ext Cross section to test.
-     * @return Nonzero if available.
-     */
-    int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
-    //virtual int hasStructuralCapability () {return 1;}
+    virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
 protected:
     /**

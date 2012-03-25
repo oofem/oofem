@@ -622,8 +622,8 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         matList["concreteidm"]      = matCreator< ConcreteDPM >; // for compatibility with old inputfiles
         matList["cohint"]           = matCreator< CohesiveInterfaceMaterial >;
         matList["simpleintermat"]   = matCreator< SimpleInterfaceMaterial >;
-        matList["con2dpm"]      = matCreator< ConcreteDPM2 >;
-	matList["latticedamage2d"] = matCreator< LatticeDamage2d >;
+        matList["con2dpm"]          = matCreator< ConcreteDPM2 >;
+        matList["latticedamage2d"]  = matCreator< LatticeDamage2d >;
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
         matList["isoheat"]              = matCreator< IsotropicHeatTransferMaterial >;

@@ -36,7 +36,6 @@
 #define crosssection_h
 
 #include "femcmpnn.h"
-#include "dictionr.h"
 #include "gausspnt.h"
 #include "materialmode.h"
 #include "matresponsemode.h"
@@ -45,7 +44,6 @@
 #include "classtype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
-#include "materialmode.h"
 #include "crosssectextension.h"
 
 namespace oofem {
@@ -86,7 +84,7 @@ enum CrossSectionProperty {
  * Integration point generally can contain list of slave integration points
  * therefore is called as master point. Slaves are used for example to implement
  * layered or fibered cross sections by cross section class. Then in one
- * "macro" master gauss point, cross section creates few slaves (one per layer)
+ * "macro" master Gauss point, cross section creates few slaves (one per layer)
  * and puts them into master list. When cross sections completes requests for
  * particular master integration point, it performs integration over layers.
  * It therefore calls material class for each layer, sending corresponding
@@ -112,7 +110,7 @@ public:
     CrossSection(int n, Domain *d) : FEMComponent(n, d)
     { propertyDictionary = new Dictionary(); }
     /// Destructor.
-    ~CrossSection() { delete propertyDictionary; }
+    virtual ~CrossSection() { delete propertyDictionary; }
 
     /**
      * Returns the value of cross section property.
@@ -130,8 +128,7 @@ public:
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
 
-    /// Prints receiver state on stdout. Useful for debugging.
-    void printYourself();
+    virtual void printYourself();
 
     /**
      * Returns a newly allocated cross section, with type depending on parameter.
@@ -249,12 +246,12 @@ public:
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 #endif
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "CrossSection"; }
-    classType giveClassID() const { return CrossSectionClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "CrossSection"; }
+    virtual classType giveClassID() const { return CrossSectionClass; }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     friend class Material;
 };

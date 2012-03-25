@@ -90,7 +90,6 @@ Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, kappa;
-    // FloatMatrix* answer ;
 
     l     = this->giveLength();
     ksi   = 0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
@@ -352,7 +351,6 @@ Beam2d :: giveKappaCoeff()
 
         this->computeConstitutiveMatrixAt( d, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
         kappa = 6. * d.at(2, 2) / ( d.at(3, 3) * l * l );
-        // delete d;
     }
 
     return kappa;

@@ -33,6 +33,7 @@
  */
 
 #include "crosssection.h"
+#include "dictionr.h"
 #include "simplecrosssection.h"
 #include "structuralelement.h"
 #include "emptycs.h"
