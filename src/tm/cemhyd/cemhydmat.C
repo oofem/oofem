@@ -673,17 +673,19 @@ void CemhydMatStatus :: initializeMicrostructure()
     TargDoHelas = 0.; //stores DoH at which to perform analytic homogenization
     //definitions originally from CemhydMat.h
 
-    CEM = 100;      /* and greater */
-    CEMID = 1;          /* phase identifier for cement */
-    C2SID = 2;          /* phase identified for C2S cement */
-    GYPID = 5;          /* phase identifier for gypsum */
+    //for generation of microstructures
+    CEM = 100;       /* and greater */
+    CEMID = 1;       /* phase identifier for cement */
+    C2SID = 2;       /* phase identified for C2S cement */
+    GYPID = 5;       /* phase identifier for gypsum */
     HEMIHYDRATE = 6; /* phase identifier for hemihydrate */
-    POZZID = 8;      /* phase identifier for pozzolanic material */
-    INERTID = 9;     /* phase identifier for inert material */
-    SLAGID = 10; /* phase identifier for slag */
-    AGG = 28;        /* phase identifier for flat aggregate */
-    FLYASH = 30;     /* phase identifier for all fly ash components */
+    POZZID = 8;      /* phase identifier for pozzolanic material - REACTIVE */
+    INERTID = 9;     /* phase identifier for inert material - UNREACTIVE */
+    SLAGID = 10;     /* phase identifier for slag - REACTIVE */
+    AGG = 28;        /* phase identifier for flat aggregate - UNREACTIVE */
+    FLYASH = 30;     /* phase identifier for all fly ash components - UNREACTIVE*/
 
+    //for hydration part
     POROSITY = 0;
     C3S = 1;
     C2S = 2;
@@ -1892,7 +1894,7 @@ int CemhydMatStatus :: create(void) {
 #ifdef PRINTF
                 printf("%d \n", inval);
 #endif
-            } while ( ( inval != CEMID ) && ( inval != C2SID ) && ( inval != GYPID ) && ( inval != HEMIHYDRATE ) && ( inval != ANHYDRITE ) && ( inval != POZZID ) && ( inval != INERTID ) && ( inval != SLAGID ) && ( inval != FLYASH ) && ( inval != CACO3 ) );
+            } while ( ( inval != CEMID ) && ( inval != C2SID ) && ( inval != GYPID ) && ( inval != HEMIHYDRATE ) && ( inval != ANHYDRITE ) && ( inval != POZZID ) && ( inval != INERTID ) && ( inval != SLAGID ) && ( inval != FLYASH ) && ( inval != CACO3 ) && ( inval != AGG ) && ( inval != ASG ) );
 
             sphase [ isph ] = inval;
             if ( inval == CEMID ) {
@@ -5030,7 +5032,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
     }
 
     molesdh2o = 0.0;
-    alpha = 0.0;  /* degree of hydration */
+    alpha = 0.0;  /* degree of hydration of clinker minerals*/
     /* heat4 contains measured heat release for C4AF hydration from  */
     /* Fukuhara et al., Cem. and Conc. Res. article */
     heat4 = 0.0;
@@ -7099,7 +7101,7 @@ void CemhydMatStatus :: disrealnew_init(void)
     strcpy(phrname, "parthydr.out");
     perc_phases = fopen("perc_phases.out", "w");
     adiafile = fopen(adianame, "w");
-    fprintf(adiafile, "Cyc Time(h) Temperature  Alpha  Krate   Cp_now  Mass_cem kpozz/khyd kslag/khyd\n");
+    fprintf(adiafile, "Cyc Time(h) Temperature  Alpha  Krate   Cp_now  Mass_cem kpozz/khyd kslag/khyd DoR_Blend\n");
     elasfile = fopen("elas.out", "w");
     fprintf(elasfile, "Cyc\tTime[h] Alpha E_paste nu_paste E_paste_fil nu_paste_fil E_mortar nu_mortar E_concrete nu_concrete\n");
     CSHfile = fopen("CSH.out", "w");
@@ -7267,7 +7269,7 @@ void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int fl
 
 
 #ifdef OUTFILES
-        fprintf(adiafile, "%d \t %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f\n", cyccnt, time_cur, temp_cur, alpha_cur, krate, Cp_now, mass_cem_now, kpozz / krate, kslag / krate);
+        fprintf(adiafile, "%d \t %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f %.4f\n", cyccnt, time_cur, temp_cur, alpha_cur, krate, Cp_now, mass_cem_now, kpozz / krate, kslag / krate, alpha_fa_cur);
         fprintf( heatfile, "%d %f %f %f %f %f  %f \n",
                 cyccnt - 1, time_cur, alpha, alpha_cur, heat_new * heat_cf, gsratio2, ( ( 0.68 * alpha_cur ) / ( 0.32 * alpha_cur + w_to_c ) ) );
         fflush(adiafile);

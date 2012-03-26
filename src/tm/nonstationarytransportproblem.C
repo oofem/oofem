@@ -67,6 +67,7 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     nMethod = NULL;
     ndomains = 1;
     lumpedCapacityStab = 0;
+    deltaT = 0.;
     //exportFieldFlag = 0;
     dtTimeFunction = 0;
     internalVarUpdateStamp = 0;
@@ -125,8 +126,13 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonStationaryTransportProblem_smtype, "smtype"); // Macro
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_dtf, "dtf"); // Macro
+    if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
+        IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
+    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltatfunction") ){
+        IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_dtf, "deltatfunction"); // Macro
+    } else {
+        OOFEM_ERROR("Time step not defined");
+    }
 
     IR_GIVE_FIELD(ir, alpha, IFT_NonStationaryTransportProblem_alpha, "alpha"); // Macro
     /* The following done in updateAttributes
@@ -202,10 +208,9 @@ TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
 {
     if ( stepWhenIcApply == NULL ) {
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       -deltaT, deltaT, 0);
+        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -giveDeltaT(giveNumberOfFirstStep()), giveDeltaT(giveNumberOfFirstStep()), 0);
+        //stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0);
     }
-
     return stepWhenIcApply;
 }
 
@@ -225,7 +230,7 @@ double
 NonStationaryTransportProblem :: giveDeltaT(int n)
 {
     if ( giveDtTimeFunction() ) {
-        return deltaT * giveDtTimeFunction()->__at(n);
+        return giveDtTimeFunction()->__at(n);
     }
 
     return deltaT;

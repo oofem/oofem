@@ -97,7 +97,9 @@ double Parser :: term(bool get) // multiply and divide
             }
             error("divide by 0");
             return 1;
-
+        case POW:
+            left = pow(left,prim(true));
+            break;
         default:
             return left;
         }
@@ -192,7 +194,6 @@ double Parser :: prim(bool get) // handle primaries
         return time<e?0:1;
     }
     
-    
     default:
         error("primary expected");
         return 1;
@@ -246,6 +247,7 @@ Parser :: Token_value Parser :: get_token()
 
     case '*':
     case '/':
+    case '^':
     case '+':
     case '-':
     case '(':
