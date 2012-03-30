@@ -216,6 +216,8 @@ protected:
 
     /// Path to output stream.
     std::string dataOutputFileName;
+    /// String with core output file name
+    std::string coreOutputFileName;
     /// Output stream.
     FILE *outputStream;
     /// Domain context output mode.

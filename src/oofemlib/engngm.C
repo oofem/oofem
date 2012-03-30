@@ -279,6 +279,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     int i;
     bool inputReaderFinish = true;
 
+    this->coreOutputFileName = std::string(dataOutputFileName);
     this->dataOutputFileName = std::string(dataOutputFileName);
 
     if ( this->giveProblemMode() ==   _postProcessor ) {
@@ -1703,7 +1704,7 @@ EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersio
 // returns nonzero on success
 //
 {
-    std::string fname = this->dataOutputFileName;
+    std::string fname = this->coreOutputFileName;
     char fext[100];
     sprintf(fext, ".%d.%d.osf", stepNumber, stepVersion);
     fname += fext;
@@ -1728,7 +1729,7 @@ EngngModel :: giveContextFile(FILE **contextFile, int stepNumber, int stepVersio
 bool
 EngngModel :: testContextFile(int stepNumber, int stepVersion)
 {
-    std::string fname = this->dataOutputFileName;
+    std::string fname = this->coreOutputFileName;
     char fext[100];
     sprintf(fext, ".%d.%d.osf", stepNumber, stepVersion);
     fname.append(fext);
