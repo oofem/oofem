@@ -1741,7 +1741,10 @@ modes declare two default dofs per node (u-displacement, v-displacement),
 \item The \entKeywordInst{3d} mode declares three default dofs per
 node (u-displacement, v-displacement, w-displacement),
 \item The \entKeywordInst{2dMindlinPlate} mode declares three default
-dofs per node (w-displacent, u-rotation, v-rotation).
+dofs per node (w-displacent, u-rotation, v-rotation). Strain vector contains
+$\kappa_{xx}$, $\kappa_{yy}$, $\kappa_{xy}$, $\gamma_{xz}$, $\gamma_{yz}$. Stress vector
+contains $m_{xx}$, $m_{yy}$, $m_{xy}$, $q_{xz}$, $q_{yz}$.
+
 \item The \entKeywordInst{3dShell} mode declares six default dofs
 per node (displacement and rotation along each axis).
 \item The \entKeywordInst{2dBeam} mode declares three default dofs per

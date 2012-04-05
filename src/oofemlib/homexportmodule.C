@@ -220,8 +220,8 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 
         fprintf(this->stream, "Vol %06.5e ", VolTot);
         fprintf(this->stream, "\n");
-        fflush(this->stream);
     }
+    fflush(this->stream);
 }
 
 void
@@ -240,6 +240,7 @@ HOMExportModule :: initialize()
     } else {
         fprintf(this->stream, "#Time   AvrStrain (xx, yy, zz, yz, zx, xy)                                           AvrStress (xx, yy, zz, yz, zx, xy)                                             AvrEigenstrain (xx, yy, zz, yz, zx, xy)\n");
     }
+    fflush(this->stream);
 }
 
 

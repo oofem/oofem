@@ -134,7 +134,7 @@ def UNV2467Reader(file,FEM):
                 dataline=Line2Int(line1)
                 groupname=line2
                 if(len(dataline)==0):
-                    print "Group %s is empty, did you remesh the object and lost the members?", groupname
+                    print "Group %s is empty, did you remesh the object and lost the members?" % groupname
                     exit(0)
                 id=dataline[0]
                 nitems=dataline[7]

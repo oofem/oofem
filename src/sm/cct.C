@@ -533,7 +533,7 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
 int
 CCTPlate :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor) ) {
         return 5;
     }
 
@@ -554,7 +554,7 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     l2 = aGaussPoint->giveCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor) ) {
         answer.resize(1, 3);
     } else {
         return;
@@ -578,6 +578,9 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     if ( ( type == IST_ShellForceMomentumTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
     } else {
         answer.resize(0);
     }
