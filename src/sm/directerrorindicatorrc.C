@@ -58,20 +58,9 @@ DirectErrorIndicatorRC :: ~DirectErrorIndicatorRC()
 void
 DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity)
 {
-    int isize;
-    const IntArray *con;
-    Domain *d = this->giveDomain();
-    ConnectivityTable *ct = d->giveConnectivityTable();
-
-    con = ct->giveDofManConnectivityArray(inode);
-    isize = con->giveSize();
-
     currDensity = this->giveDofManDensity(inode);
     indicatorVal =  this->giveDofManIndicator(inode, tStep);
 }
-
-
-
 
 
 double
@@ -344,7 +333,6 @@ int
 DirectErrorIndicatorRC :: packSharedDofManLocalDensities(ProcessCommunicator &processComm)
 {
     int result = 1, i, size;
-    //Domain *d = this->giveDomain();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     IntArray const *toSendMap = processComm.giveToSendMap();
 

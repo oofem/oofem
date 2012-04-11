@@ -37,7 +37,6 @@
 #include "inputrecord.h"
 #include "usrdefsub.h"
 #include "sparsemtrx.h"
-
 #include "line2boundaryelement.h"
 
 #include "tr21stokes.h"

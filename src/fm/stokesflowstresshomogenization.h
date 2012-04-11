@@ -37,6 +37,7 @@
 
 #include "inputrecord.h"
 #include "stokesflow.h"
+#include "flotmtrx.h"
 
 #include "sparsemtrxtype.h"
 #include "sparselinsystemnm.h"
@@ -109,8 +110,8 @@ public:
 
     virtual SparseLinearSystemNM *giveLinearNumericalMethod();
 
-    const char *giveClassName() const { return "StokesFlowStressStressHomogenization"; }
-    classType giveClassID() const { return StokesFlowStressHomogenizationClass; }
+    virtual const char *giveClassName() const { return "StokesFlowStressStressHomogenization"; }
+    virtual classType giveClassID() const { return StokesFlowStressHomogenizationClass; }
 };
 } // end namespace oofem
 
