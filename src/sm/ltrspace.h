@@ -69,8 +69,7 @@ public:
     virtual ~LTRSpace() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { computeLumpedMassMatrix(answer, tStep); }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
