@@ -129,16 +129,16 @@ class CylindricalALM : public SparseNonLinearSystemNM
 protected:
     /// CALM mode type; determines the calm step length control.
     enum calm_ControllType {
-        calm_hpc_off = 0, /// Full ALM with quadratic constrain and all dofs.
-        calm_hpc_on, /// Full ALM with quadratic constrain, taking into account only selected dofs.
-        calml_hpc, ///  Linearized ALM (only displacements), taking into account only selected dofs with given weight.
+        calm_hpc_off = 0, ///< Full ALM with quadratic constrain and all dofs.
+        calm_hpc_on, ///< Full ALM with quadratic constrain, taking into account only selected dofs.
+        calml_hpc, ///<  Linearized ALM (only displacements), taking into account only selected dofs with given weight.
     };
 
-    // TODO: Document me
+    /// Controlling mode of Newton-Raphson Method.
     enum calm_NR_ModeType {
-        calm_modifiedNRM,
-        calm_fullNRM,
-        calm_accelNRM,
+        calm_modifiedNRM, ///< Keeps the old tangent.
+        calm_fullNRM, ///< Updates the tangent every iteration.
+        calm_accelNRM, ///< Updates the tangent after a few steps.
     };
 
     typedef std :: set< DofIDItem >__DofIDSet;
@@ -228,23 +228,27 @@ public:
 protected:
     void convertHPCMap();
     SparseLinearSystemNM *giveLinearSolver();
-    int  computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, FloatArray &deltaRt,
-                            FloatArray &deltaR_, FloatArray &R, double RR, double eta,
-                            double deltaL, double DeltaLambda0, int neq);
+
+    /**
+     * @return If 0 then ok, 1 then failure (restart).
+     */
+    int computeDeltaLambda(double &deltaLambda, const FloatArray &DeltaR, const FloatArray &deltaRt,
+                           const FloatArray &deltaR_, const FloatArray &R, double RR, double eta,
+                           double deltaL, double DeltaLambda0, int neq);
 
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp,
                 double maxeta, double mineta, int &status);
 
     /// Evaluates the convergence criteria.
-    bool checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
-                          FloatArray &r, FloatArray &rIterIncr,
+    bool checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
+                          const FloatArray &r, const FloatArray &rIterIncr,
                           double Lambda, double RR0, double RR, double drProduct,
                           double internalForcesEBENorm, int nite, bool &errorOutOfRange);
 
     /// Perform line search optimization of step length
-    void do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray &deltaR_, FloatArray &deltaRt,
-                       FloatArray &DeltaRm1, FloatArray &DeltaR, FloatArray &deltaR,
-                       FloatArray &R, FloatArray *R0, FloatArray &F,
+    void do_lineSearch(FloatArray &r, const FloatArray &rInitial, const FloatArray &deltaR_, const FloatArray &deltaRt,
+                       const FloatArray &DeltaRm1, FloatArray &DeltaR, FloatArray &deltaR,
+                       const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                        double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
                        double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);
 };

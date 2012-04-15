@@ -117,19 +117,18 @@ CylindricalALM ::  ~CylindricalALM()
 
 
 NM_Status
-CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
+CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                         FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
                         double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tNow)
 {
-    FloatArray rhs, *R, deltaRt, deltaR_, DeltaRm1;
-    FloatArray rInitial;
+    FloatArray rhs, deltaRt, deltaR_, DeltaRm1, rInitial;
     FloatArray deltaR; // total increment of displacements in iteration
-    double Bergan_k0 = 1.0;
-    double rr, RR, RR0, rR, p = 0.0, bk;
+    //double Bergan_k0 = 1.0, bk;
+    double rr, RR, RR0, rR, p = 0.0;
     double deltaLambda, Lambda, eta, DeltaLambdam1, DeltaLambda = 0.0;
     double drProduct = 0.0;
-    int neq = Ri->giveSize();
+    int neq = R->giveSize();
     int irest = 0;
     int HPsize, i, ind;
     double _RR, _rr;
@@ -163,14 +162,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
 
     rInitial = * r;
     deltaR.resize(neq);
-    // compute proportional load vector R
-    R = Ri;
-    /*
-     * if (R0 && (refLoadInputMode == rlm_total)) {
-     * R = Rt->GiveCopy();
-     * R -> subtract (R0);
-     * } else R = Rt;
-     */
+    deltaRt.resize(neq);
 
     status = NM_None;
     this->giveLinearSolver();
@@ -196,31 +188,25 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
     // A  initial step (predictor)
     //
     //
-    //
-    // A.1. calculation of (0)VarRt
-    //
-    // A1:
-restart:
-    //DeltaR -> zero();
-
-    deltaRt.resize( R->giveSize() );
-#ifdef __PARALLEL_MODE
- #ifdef __VERBOSE_PARALLEL
-    //VERBOSEPARALLEL_PRINT("calm:: Solving linear system","", engngModel->giveRank());
- #endif
-#endif
-    linSolver->solve(k, R, & deltaRt);
 
     //
     // A.2.   We assume positive-definitive (0)Kt (tangent stiffness mtrx).
     //
-    // A2:
 #ifdef __PARALLEL_MODE
     RR = parallel_context->localNorm(*R);
     RR *= RR;
 #else
     RR = R->computeSquaredNorm();
 #endif
+
+restart:
+    //
+    // A.1. calculation of (0)VarRt
+    //
+    DeltaR->zero();
+    //engngModel->updateComponent(tNow, InternalRhs, domain); // By not updating this, one obtains the old equilibrated tangent.
+    engngModel->updateComponent(tNow, NonLinearLhs, domain);
+    linSolver->solve(k, R, & deltaRt);
 
     if ( calm_Controll == calm_hpc_off ) {
 #ifdef __PARALLEL_MODE
@@ -266,22 +252,17 @@ restart:
 #endif
     }
 
-
-
 #ifdef __PARALLEL_MODE
-    rR = parallel_context->localDotProduct(deltaRt, *R); // This is what the old code did? But its not the same as the sequential version. // Mikael
-    //rR = parallel_context->localNorm(deltaRt);
-    //rR *= rR;
+    rR = parallel_context->localDotProduct(deltaRt, *R);
 #else
-    rR = deltaRt.computeSquaredNorm();
+    rR = deltaRt.dotProduct(*R);
 #endif
     /* rR is unscaled Bergan's param of current stiffness rR = deltaRt^T k deltaRt
      * this is used to test whether k has negative or positive slope */
 
     Lambda = ReachedLambda;
     DeltaLambda = deltaLambda = sgn(rR) * deltaL / p;
-    // prevLambda = Lambda ;
-    Lambda += DeltaLambda;                 // *
+    Lambda += DeltaLambda;
     //
     // A.3.
     //
@@ -291,8 +272,6 @@ restart:
     if ( R0 ) {
         rhs.add(*R0);
     }
-
-    // DeltaR -> zero();
     linSolver->solve(k, & rhs, DeltaR);
     r->add(*DeltaR);
 
@@ -306,6 +285,7 @@ restart:
         nite++;
         DeltaRm1 = * DeltaR;
         DeltaLambdam1 = DeltaLambda;
+
         //
         // B  - iteration MNRM is used
         //
@@ -317,7 +297,7 @@ restart:
             //
             // we assemble new tangent stiffness and compute new deltaRt
             // internal state of elements is updated by previous calling
-            // of F = engngModel->GiveInternalForces(DeltaR,tNow);
+            // InternalRhs
             //
             engngModel->updateComponent(tNow, NonLinearLhs, domain);
             //
@@ -355,13 +335,11 @@ restart:
                 }
 
                 // restore previous total displacement vector
-                r->operator = ( rInitial );
+                *r = rInitial;
                 // reset all changes fro previous equilibrium state
                 DeltaR->zero();
                 // restore initial stiffness
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
-                //delete F;
-                //delete deltaR_;
 
                 OOFEM_LOG_INFO("CALMLS :: solve - Iteration Reset ...\n");
 
@@ -439,13 +417,12 @@ restart:
                 }
 
                 // restore previous total displacement vector
-                r->operator = ( rInitial );
-                // reset all changes fro previous equilibrium state
+                *r = rInitial;
+                // reset all changes from previous equilibrium state
                 engngModel->initStepIncrements();
                 DeltaR->zero();
                 // restore initial stiffness
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
-                //delete F; F = NULL;
 
                 OOFEM_LOG_INFO("CALMLS :: solve - Iteration Reset ...\n");
 
@@ -468,8 +445,10 @@ restart:
 #ifdef VERBOSE
     // printf ("\nCALM - step iteration finished") ;
 #endif
-    /* compute Bergan's parameter of current stiffness */
 
+    // Seems to be completely unused / Mikael
+#if 0
+    /* compute Bergan's parameter of current stiffness */
 #ifdef __PARALLEL_MODE
     double RDR = parallel_context->localDotProduct(*R,*DeltaR);
     double DR = parallel_context->localNorm(*DeltaR);
@@ -485,6 +464,7 @@ restart:
         bk = bk / Bergan_k0;
         //if (fabs(bk) < CALM_TANGENT_STIFF_TRESHOLD) status |= NM_KeepTangent;
     }
+#endif
 
     /* we have computed Bergan's  parameter -> you can adjust deltaL according
      * to this value */
@@ -509,10 +489,6 @@ restart:
 
     OOFEM_LOG_INFO("CALMLS :: solve - Adjusted step length: %-15e\n", deltaL);
 
-    // delete proportional load vector (if allocated)
-    // if (R0 && (refLoadInputMode == rlm_total)) delete R;
-
-
     status = NM_Success;
     solved = 1;
     ReachedLambda = Lambda;
@@ -521,8 +497,8 @@ restart:
 }
 
 bool
-CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
-                                   FloatArray &r, FloatArray &rIterIncr,
+CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
+                                   const FloatArray &r, const FloatArray &rIterIncr,
                                    double Lambda, double RR0, double RR, double drProduct,
                                    double internalForcesEBENorm, int nite, bool &errorOutOfRange)
 {
@@ -537,7 +513,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
     DofManager *_idofmanptr;
     Element *_ielemptr;
     Dof *_idofptr;
-    FloatArray rhs; // residual of momentum balance eq (unballanced nodal forces)
+    FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
     bool answer;
     EModelDefaultEquationNumbering dn;
@@ -930,7 +906,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         maxEta = 15.0;
     }
 
-    /** initialize optional dof groups for convergence criteria evaluation */
+    /* initialize optional dof groups for convergence criteria evaluation */
     this->nccdg = 0; // default, no dof cc group, all norms evaluated for all dofs
     IR_GIVE_OPTIONAL_FIELD(ir, nccdg, IFT_CylindricalALM_nccdg, "nccdg"); // Macro
 
@@ -1077,7 +1053,8 @@ void CylindricalALM  :: convertHPCMap()
 
 
 contextIOResultType
-CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
+CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
     // write current deltaL
     if ( !stream->write(& deltaL, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -1086,8 +1063,10 @@ CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
     return CIO_OK;
 }
 
+
 contextIOResultType
-CylindricalALM :: restoreContext(DataStream *stream, ContextMode mode, void *obj) {
+CylindricalALM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
     // read last deltaL
     if ( !stream->read(& deltaL, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -1096,8 +1075,10 @@ CylindricalALM :: restoreContext(DataStream *stream, ContextMode mode, void *obj
     return CIO_OK;
 }
 
+
 SparseLinearSystemNM *
-CylindricalALM :: giveLinearSolver() {
+CylindricalALM :: giveLinearSolver()
+{
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
             return linSolver;
@@ -1115,15 +1096,9 @@ CylindricalALM :: giveLinearSolver() {
 }
 
 
-
-/*
- * CylindricalALM :: computeDeltaLambda RETURN Values:
- * 0 .. ok
- * 1 .. failed (restart)
- */
 int
-CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, FloatArray &deltaRt,
-                                     FloatArray &deltaR_, FloatArray &R, double RR, double eta,
+CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &DeltaR, const FloatArray &deltaRt,
+                                     const FloatArray &deltaR_, const FloatArray &R, double RR, double eta,
                                      double deltaL, double DeltaLambda0, int neq)
 {
     double a1 = 0.0, a2 = 0.0, a3 = 0.0, a4, a5;
@@ -1276,6 +1251,8 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
 
 #ifdef __PARALLEL_MODE
         FloatArray myv(2), colv(2);
+        myv(0) = nom;
+        myv(1) = denom;
         parallel_context->accumulate(myv, colv);
         nom = colv(0);
         denom = colv(1);
@@ -1353,7 +1330,7 @@ CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double am
         }
 
         eta.at(istep + 1) = etaint;
-        return;
+
     } else { // ineq == 0
         // allow extrapolation
         double etamaxstep = amp * etamax;
@@ -1376,14 +1353,12 @@ CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double am
             eta.at(istep + 1) = maxetalim;
         }
     }
-
-    return;
 }
 
 void
-CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray &deltaR_, FloatArray &deltaRt,
-                                FloatArray &DeltaRm1, FloatArray &DeltaR, FloatArray &deltaR,
-                                FloatArray &R, FloatArray *R0, FloatArray &F,
+CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const FloatArray &deltaR_, const FloatArray &deltaRt,
+                                const FloatArray &DeltaRm1, FloatArray &DeltaR, FloatArray &deltaR,
+                                const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                                 double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
                                 double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow)
 {
@@ -1551,12 +1526,8 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
         DeltaLambda = DeltaLambdam1 + deltaLambda;
         Lambda = ReachedLambda + DeltaLambda;
 
-        //printf ("\ncalm fi...eta = %e, err=%d, ", 1.0,ls_failed);
-        //printf ("dLambda=%e, lerr=%d", deltaLambda, dl_failed);
         OOFEM_LOG_INFO("CALMLS :: do_lineSearch - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, 1.0, deltaLambda);
     } else {
-        //printf ("\ncalm fi...eta = %e, err=%d, ", currEta,ls_failed);
-        //printf ("dLambda=%e, lerr=%d", deltaLambda, dl_failed);
         OOFEM_LOG_INFO("CALMLS :: do_lineSearch - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
     }
 }

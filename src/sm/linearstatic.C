@@ -39,6 +39,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "elementside.h"
+#include "sparsemtrx.h"
 
 #include "verbose.h"
 #include "conTable.h"
@@ -47,10 +48,6 @@
 #include "usrdefsub.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifdef __PETSC_MODULE
- #include "petscsolver.h"
-#endif
 
 namespace oofem {
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
@@ -124,7 +121,6 @@ LinearStatic :: initializeFrom(InputRecord *ir)
 }
 
 
-
 double LinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                              TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
@@ -167,7 +163,7 @@ TimeStep *LinearStatic :: giveNextStep()
     int istep = this->giveNumberOfFirstStep();
     //int mstep = 1;
     StateCounterType counter = 1;
-    
+
     if (previousStep != NULL){
         delete previousStep;
     }
@@ -238,13 +234,6 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         displacementVector.zero();
 
-#ifdef __PETSC_MODULE
-        if ( solverType == ST_Petsc ) {
-            this->givePetscContext(1, EID_MomentumBalance)->createVecGlobal(& _loadVec);
-            this->givePetscContext(1, EID_MomentumBalance)->createVecGlobal(& _dispVec);
-        }
-
-#endif
         initFlag = 0;
     }
 
@@ -261,9 +250,9 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
+    // TODO: Remove ElementNonForceLoadVector and just use NodalInternalForces instead (leaving it for now, StructuralEvaluator doesn't support NodalInternalForces (or therefore no nonlinear problems either)).
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
     //
     // assembling the nodal part of load vector
     //

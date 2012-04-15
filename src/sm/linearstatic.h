@@ -37,9 +37,11 @@
 
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
+#include "sparsemtrxtype.h"
 
 namespace oofem {
+
+class SparseMtrx;
 
 /**
  * This class implements linear static engineering problem.
@@ -65,19 +67,15 @@ protected:
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
-    /// Numerical method used to solve the problem
+    /// Numerical method used to solve the problem.
     SparseLinearSystemNM *nMethod;
 
     int initFlag;
 
-#ifdef __PETSC_MODULE
-    Vec _loadVec, _dispVec;
-#endif
-
 public:
     LinearStatic(int i, EngngModel *_master = NULL);
     virtual ~LinearStatic();
-    // solving
+
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
 

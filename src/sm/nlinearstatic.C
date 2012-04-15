@@ -105,9 +105,6 @@ NonLinearStatic :: ~NonLinearStatic()
 
 
 NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
-// only one has been implemented yet.
-//     - Cylindrical Arc Lenght Method ( with MNRM scheme )
-
 {
     const char *__proc = "giveNumericalMethod"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                     // Required by IR_GIVE_FIELD macro
@@ -227,7 +224,6 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
     LinearStatic :: initializeFrom(ir);
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearStatic_nonlocstiff, "nonlocstiff"); // Macro
-    //sparseMtrxType = (SparseMtrxType) readInteger (initString, "smtype");
 
 #ifdef __PARALLEL_MODE
     //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
@@ -359,7 +355,8 @@ TimeStep *NonLinearStatic :: giveNextStep()
 
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, mstepNum, totalTime, deltaTtmp, counter);
-    // dt variable are set eq to 0 for staics - has no meaning
+    // dt variable are set eq to 0 for statics - has no meaning
+    // *Wrong* It has meaning for viscoelastic materials.
 
     return currentStep;
 }
@@ -394,7 +391,6 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
 
 #endif
 
-    // this -> deltaR = deltaR;
     nelems = domain->giveNumberOfElements();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
@@ -591,14 +587,11 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     // first assemble problem at current time step
     //
 
-    MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
-
     if ( initFlag ) {
         //
         // first step  create space for stiffness Matrix
         //
         int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-        //totalDisplacement = new FloatArray (neq) ;
         internalForces.resize(neq);
         internalForces.zero();
 
@@ -611,7 +604,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         }
 
         if ( nonlocalStiffnessFlag ) {
-            //stiffnessMatrix = new SkylineUnsym ();
             if ( !stiffnessMatrix->isAsymmetric() ) {
                 _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
             }
@@ -620,44 +612,26 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
     }
 
-    /*
-     * if ((mstep->giveFirstStepNumber() == tStep->giveNumber())) {
-     *#ifdef VERBOSE
-     * OOFEM_LOG_INFO("Reseting load level\n");
-     *#endif
-     * if (mstepCumulateLoadLevelFlag) cumulatedLoadLevel += loadLevel;
-     * else cumulatedLoadLevel = 0.0;
-     *
-     * this->loadLevel = 0.0;
-     * }
-     */
+#if 0
+     if ((mstep->giveFirstStepNumber() == tStep->giveNumber())) {
+#ifdef VERBOSE
+        OOFEM_LOG_INFO("Resetting load level\n");
+#endif
+        if (mstepCumulateLoadLevelFlag) cumulatedLoadLevel += loadLevel;
+        else cumulatedLoadLevel = 0.0;
+        this->loadLevel = 0.0;
+     }
+#endif
 
     if ( loadInitFlag || ( controllMode == nls_directControll ) || ( controllMode == nls_directControll2 ) ) {
 #ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling load\n");
+        OOFEM_LOG_INFO("Assembling reference load\n");
 #endif
-        /*
-         * loadVector.resize (this->giveNumberOfEquations());
-         * loadVector.zero();
-         * // assemble the total load vector
-         * this->assemble (loadVector, tStep, ElementForceLoadVector_Total, this->giveDomain(1)) ;
-         * this->assemble(loadVector, tStep, NodalLoadVector_Total, this->giveDomain(1));
-         */
         //
         // assemble the incremental reference load vector
         //
         this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
                                                       refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
-
-        if ( ( controllMode == nls_directControll ) || ( controllMode == nls_directControll2 ) ) {
-            incrementalBCLoadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-            incrementalBCLoadVector.zero();
-            this->assembleVectorFromElements( incrementalBCLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector,
-                                             VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
-        } else {
-            incrementalBCLoadVector.resize(0);
-            incrementalBCLoadVector.resize(0);
-        }
 
         loadInitFlag = 0;
     }
@@ -674,39 +648,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     //    ->   BEGINNING OF LOAD (OR DISPLACEMENT) STEP  <-
     //
     incrementOfDisplacement.zero();
-
-    if ( !( numMetStatus & NM_KeepTangent ) ) {
-        // check message from numMet from previous
-        // step
-        //
-        // assembling a tangential or secant  stiffness
-        //
-        if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness ) ) {
-#ifdef VERBOSE
-            OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
-#endif
-            stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(di) );
-        } else if ( stiffMode == nls_tangentStiffness ) {
-#ifdef VERBOSE
-            OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
-#endif
-            stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(di) );
-        } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag || ( mstep->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
-#ifdef VERBOSE
-            OOFEM_LOG_INFO("Assembling elastic stiffness matrix\n");
-#endif
-            stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix,
-                           EModelDefaultEquationNumbering(), this->giveDomain(di) );
-        }
-    }
-
-    // set initflag to zero;
-    initFlag = 0;
 
     //
     // set-up numerical model
@@ -729,11 +670,8 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 
-    //
-    // update data on this level according to solution
-    //
+    // TODO: Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
-
     prevStepLength =  currentStepLength;
 }
 
@@ -756,8 +694,8 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
 //
 // updates some component, which is used by numerical method
 // to newly reached state. used mainly by numerical method
-// when new tanget stiffness is needed during finding
-// of new equlibrium stage.
+// when new tangent stiffness is needed during finding
+// of new equilibrium stage.
 //
 {
     switch ( cmpn ) {
@@ -769,13 +707,23 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
 #endif
             this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
-        } else if ( stiffMode == nls_secantStiffness ) {
+        } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag) ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
             this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
+            initFlag = 0;
+        } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
+                ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
+#ifdef VERBOSE
+            OOFEM_LOG_INFO("Assembling elastic stiffness matrix\n");
+#endif
+            stiffnessMatrix->zero(); // zero stiffness matrix
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix,
+                            EModelDefaultEquationNumbering(), d);
+            initFlag = 0;
         } else {
             // currently no action , this method is mainly intended to
             // assemble new tangent stiffness after each iteration
@@ -878,7 +826,7 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -948,7 +896,7 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }

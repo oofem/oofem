@@ -43,7 +43,6 @@
 #include "imlsolver.h"
 #include "timestep.h"
 #include "flotmtrx.h"
-//#include "nlinearstatic.h"
 #include "mathfem.h"
 #include "usrdefsub.h"
 
@@ -56,7 +55,8 @@ namespace oofem {
 
 
 NRSolver2 :: NRSolver2(int i, Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(i, d, m, ut) {
+    SparseNonLinearSystemNM(i, d, m, ut)
+{
     //
     // constructor
     //
@@ -73,7 +73,8 @@ NRSolver2 :: NRSolver2(int i, Domain *d, EngngModel *m, EquationID ut) :
     lsFlag = 0; // no line-search
 }
 
-NRSolver2 ::  ~NRSolver2() {
+NRSolver2 :: ~NRSolver2()
+{
     //
     // destructor
     //
@@ -98,9 +99,7 @@ NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 //
 //
 {
-    FloatArray rhs, deltaR, RT;
-    FloatArray rInitial;
-    //FloatArray F;
+    FloatArray rhs, deltaR, RT, rInitial;
     double RRT, forceErr, dispErr = 0.;
     double drr;
     int neq = R->giveSize();
@@ -124,22 +123,15 @@ NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
 restart:
     DeltaR->zero();
-
-    //linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
+    engngModel->updateComponent(tNow, NonLinearLhs, domain);
 
     deltaL = tNow->giveTimeIncrement();
 
     deltaR.resize(neq);
-    // if (tNow ->giveNumber() == 1) {
-    rhs =  * R;
-    // if (R0) rhs.add(*R0);
-
-    //engngModel->updateComponent (tNow, NonLinearRhs_Total);
+    engngModel->updateComponent(tNow, InternalRhs, domain);
+    rhs.beDifferenceOf(RT, *F);
 
     RRT = RT.computeSquaredNorm();
-
-    //if (R0) RR0 = dotProduct(R0->givePointer(),R0->givePointer(),neq);
-    //else RR0 = 0.0;
 
     nite = 0;
 
@@ -149,18 +141,7 @@ restart:
         if ( nite > 1 ) {
             if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
-                //linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
             }
-        }
-
-        /*
-         * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,&rhs);
-         * linSolver -> setFloatArrayAsComponent (LinearEquationSolution,&deltaR);
-         * linSolver -> solveYourselfAt (tNow);
-         * linSolver -> updateYourselfExceptLhs ();
-         */
-        if ( ( nite == 1 ) && ( Rr->giveSize() ) ) {
-            rhs.add(* Rr);
         }
 
         linSolver->solve(k, & rhs, & deltaR);
@@ -182,13 +163,10 @@ restart:
             //
             // Convergence check
             //
-            //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
             engngModel->updateComponent(tNow, InternalRhs, domain);
-            //F->negated();
         }
 
         rhs.beDifferenceOf(RT, *F);
-        //if (R0) rhs.add(*R0);
 
         //
         // compute forceError
@@ -239,16 +217,10 @@ restart:
                  */
 
                 // restore previous total displacement vector
-                r->times(0.);
-                r->add(rInitial);
+                *r = rInitial;
                 // reset all changes fro previous equilibrium state
                 engngModel->initStepIncrements();
                 DeltaR->zero();
-                // restore initial stiffness
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
-                // recalculate new Load Vector R
-                engngModel->updateComponent(tNow, NonLinearRhs_Incremental, domain);
-                //delete F; F = NULL;
 #ifdef VERBOSE
                 OOFEM_LOG_INFO("NRSolver2 iteration Reset ...\n");
 #endif
@@ -259,7 +231,6 @@ restart:
             } else {
                 status = NM_NoSuccess;
                 _warning2("NRSolver2 - convergence not reached after %d iterations", nsmax);
-                // exit(1);
                 break;
             }
         }
@@ -267,19 +238,9 @@ restart:
         OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTargetTime(), nite, forceErr, dispErr);
     } while ( ( fabs(forceErr) > rtol ) || ( fabs(dispErr) > rtol ) || ( nite < minIterations ) );
 
-    //delete F;
     //
     // end of iteration
     //
-    // ls ->letSolutionBe(deltar);
-    // Lambda += DeltaLambda ;      // *
-    //
-    // update dofs,nodes,Elemms and print result
-    //
-#ifdef VERBOSE
-    // printf ("\nCALM - step iteration finished") ;
-#endif
-
     status |= NM_Success;
     solved = 1;
     return status;
@@ -333,19 +294,24 @@ NRSolver2 :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 contextIOResultType
-NRSolver2 :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
+NRSolver2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
     return CIO_OK;
 }
 
+
 contextIOResultType
-NRSolver2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj) {
+NRSolver2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
     return CIO_OK;
 }
 
 
 SparseLinearSystemNM *
-NRSolver2 :: giveLinearSolver() {
+NRSolver2 :: giveLinearSolver()
+{
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
             return linSolver;

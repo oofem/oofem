@@ -43,7 +43,6 @@
 #include "imlsolver.h"
 #include "timestep.h"
 #include "flotmtrx.h"
-//#include "nlinearstatic.h"
 #include "structengngmodel.h"
 #include "mathfem.h"
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
@@ -68,7 +67,8 @@ namespace oofem {
 
 
 NRSolver :: NRSolver(int i, Domain *d, EngngModel *m, EquationID ut) :
-    SparseNonLinearSystemNM(i, d, m, ut), prescribedDofs(), prescribedDofsValues()  {
+    SparseNonLinearSystemNM(i, d, m, ut), prescribedDofs(), prescribedDofsValues()
+{
     //
     // constructor
     //
@@ -77,7 +77,7 @@ NRSolver :: NRSolver(int i, Domain *d, EngngModel *m, EquationID ut) :
     deltaL = 1.0;
     solved = 0;
     NR_Mode = NR_OldMode = nrsolverModifiedNRM;
-    NR_ModeTick = -1; // do not swith to calm_NR_OldMode
+    NR_ModeTick = -1; // do not switch to calm_NR_OldMode
     MANRMSteps = 0;
     numberOfPrescribedDofs = 0;
     prescribedDofsFlag = false;
@@ -92,7 +92,9 @@ NRSolver :: NRSolver(int i, Domain *d, EngngModel *m, EquationID ut) :
 #endif
 }
 
-NRSolver ::  ~NRSolver() {
+
+NRSolver :: ~NRSolver()
+{
     //
     // destructor
     //
@@ -109,254 +111,13 @@ NRSolver ::  ~NRSolver() {
     if ( prescribedEgsIS_defined ) {
         ISDestroy(&prescribedEgsIS);
     }
-
  #endif
 #endif
 }
 
-
-NM_Status
-NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                  FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
-                  double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                  int &nite, TimeStep *tNow)
-//
-// this function solve the problem of the unbalanced equilibrium
-// using NR scheme
-//
-//
-{
-    FloatArray rhs, deltaR, RT;
-    FloatArray rInitial;
-    //FloatArray F;
-    double RRT;
-    int neq = r->giveSize();
-    int irest = 0;
-    NM_Status status;
-    bool converged, errorOutOfRangeFlag;
-#ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    PetscContext *parallel_context  = engngModel->givePetscContext(1, ut); // TODO hard wired domain no 1
- #endif
-#endif
-
-    OOFEM_LOG_INFO("Time       Iteration       ForceError      DisplError\n__________________________________________________________\n");
-
-    rInitial = * r;
-    l = 1.0;
-
-    status = NM_None;
-    this->giveLinearSolver();
-
-    if ( this->prescribedDofsFlag ) {
-        if ( !prescribedEqsInitFlag ) {
-            this->initPrescribedEqs();
-        }
-
-        //this->computeBCLoadVector (*Rr, k, tNow);
-        applyConstraintsToStiffness(k);
-    }
-
-    // compute total load R = R+R0
-    RT = * R;
-    if ( R0 ) {
-        RT.add(*R0);
-    }
-
-restart:
-    DeltaR->zero();
-
-    //linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
-
-    //deltaL = tNow->giveTimeIncrement();
-
-    deltaR.resize(neq);
-    // if (tNow ->giveNumber() == 1) {
-    rhs =  * R;
-    // if (R0) rhs.add(*R0);
-
-    //engngModel->updateComponent (tNow, NonLinearRhs_Total);
-
-#ifdef __PARALLEL_MODE
-    RRT = parallel_context->localNorm(RT);
-    RRT *= RRT;
-#else
-    RRT = RT.computeSquaredNorm();
-#endif
-    //if (R0) RR0 = dotProduct(R0->givePointer(),R0->givePointer(),neq);
-    //else RR0 = 0.0;
-
-    nite = 0;
-
-    do {
-        nite++;
-
-        if ( nite > 1 ) {
-            if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
-                //linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
-                applyConstraintsToStiffness(k);
-            }
-        }
-
-        /*
-         * if ((nite == 1) && (numberOfPrescribedDofs)) {
-         * // modify t
-         * rhs.add (*Rr);
-         * }
-         */
-        if ( this->prescribedDofsFlag ) {
-            this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tNow);
-        }
-
-        if ( ( nite == 1 ) && ( Rr->giveSize() ) ) {
-            rhs.add(* Rr);
-        }
-
-        if ( ( nite == 1 ) && ( deltaL < 1.0 ) ) { // deltaL < 1 means no increment applied, only equlibrate current state
-            rhs.times(0.0);
-            R->times(0.0);
-            deltaR = rhs;
-        } else {
-            linSolver->solve(k, & rhs, & deltaR);
-        }
-
-        //
-        // update solution
-        //
-        if ( this->lsFlag && ( nite != 1 ) ) {
-            // line search
-            LineSearchNM :: LS_status status;
-            double eta;
-            this->giveLineSearchSolver()->solve(r, & deltaR, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
-            DeltaR->add(deltaR);
-        } else {
-            r->add(deltaR);
-            DeltaR->add(deltaR);
-            tNow->incrementStateCounter();     // update solution state counter
-            //
-            // convergence check
-            //
-            //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
-            engngModel->updateComponent(tNow, InternalRhs, domain);
-            //F->negated();
-        }
-
-        // evaluate residual of momentum balance
-        rhs.beDifferenceOf(RT, *F);
-        // account for quasi BC
-        for ( int ii = 1; ii <= numberOfPrescribedDofs; ii++ ) {
-            rhs.at( prescribedEqs.at(ii) ) = 0.0;
-        }
-
-        // convergence check
-        converged = this->checkConvergence(RT, * F, rhs, deltaR, * r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
-
-
-        if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
-            if ( irest <= NRSOLVER_MAX_RESTARTS ) {
-                // convergence problems
-                // there must be step restart followed by decrease of step length
-                // status |= NM_ForceRestart;
-                // reduce step length
-
-                /*
-                 * double time;
-                 * time = tNow->giveTime() - tNow->giveTimeIncrement()*(1.-NRSOLVER_RESET_STEP_REDUCE) ;
-                 * deltaL =  deltaL * NRSOLVER_RESET_STEP_REDUCE ;
-                 * if (deltaL < minStepLength)  deltaL = minStepLength;
-                 *
-                 * tNow -> setTime(time);
-                 * tNow -> setTimeIncrement(tNow->giveTimeIncrement()*NRSOLVER_RESET_STEP_REDUCE);
-                 * tNow->incrementStateCounter();              // update solution state counter
-                 */
-
-                // restore previous total displacement vector
-                r->times(0.);
-                r->add(rInitial);
-                // reset all changes fro previous equilibrium state
-                engngModel->initStepIncrements();
-                DeltaR->zero();
-                // restore initial stiffness
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
-                // recalculate new Load Vector R
-                // engngModel->updateComponent (tNow, NonLinearRhs_Incremental);
-                //delete F; F = NULL;
-#ifdef VERBOSE
-                OOFEM_LOG_INFO("NRSolver iteration Reset ...\n");
-#endif
-                NR_OldMode  = NR_Mode;
-                NR_Mode     = nrsolverFullNRM;
-                NR_ModeTick = NRSOLVER_DEFAULT_NRM_TICKS;
-                goto restart;
-            } else {
-                status = NM_NoSuccess;
-                _warning2("NRSolver - convergence not reached after %d iterations", nsmax);
-                // exit(1);
-                break;
-            }
-        }
-    } while ( ( !converged ) || ( nite < minIterations ) );
-
-    //
-    // end of iteration
-    //
-    // ls ->letSolutionBe(deltar);
-    // Lambda += DeltaLambda ;      // *
-    //
-    // update dofs,nodes,Elemms and print result
-    //
-#ifdef VERBOSE
-    // printf ("\nCALM - step iteration finished") ;
-#endif
-
-    status |= NM_Success;
-    solved = 1;
-
-    // Modify Load vector to include "quasi reaction"
-    if ( R0 ) {
-        for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
-        }
-    } else {
-        for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
-        }
-    }
-
-    this->lastReactions.resize(numberOfPrescribedDofs);
-#ifdef VERBOSE
-    // print quasi reactions if direct displacement control used
-    OOFEM_LOG_INFO("\n  Quasi reaction table:\n\n");
-    OOFEM_LOG_INFO("  node  dof   displacement         force\n");
-    OOFEM_LOG_INFO("========================================\n");
-#endif
-    double reaction;
-    for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-        reaction = R->at( prescribedEqs.at(i) );
-        if ( R0 ) {
-            reaction += R0->at( prescribedEqs.at(i) );
-        }
-
-        lastReactions.at(i) = reaction;
-#ifdef VERBOSE
-        OOFEM_LOG_INFO("%6d  %3d   %+11.5e  %+11.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
-                       r->at( prescribedEqs.at(i) ), reaction);
-#endif
-    }
-
-#ifdef VERBOSE
-    OOFEM_LOG_INFO("========================================\n");
-#endif
-
-    return status;
-}
 
 IRResultType
 NRSolver :: initializeFrom(InputRecord *ir)
-//
-//
-//
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
@@ -417,7 +178,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
         this->giveLineSearchSolver()->initializeFrom(ir);
     }
 
-    /** initialize optional dof groups for convergence criteria evaluation */
+    /* initialize optional dof groups for convergence criteria evaluation */
     this->nccdg = 0; // default, no dof cc group, all norms evaluated for all dofs
     IR_GIVE_OPTIONAL_FIELD(ir, nccdg, IFT_NRSolver_nccdg, "nccdg"); // Macro
     if ( nccdg >= 1 ) {
@@ -464,24 +225,207 @@ NRSolver :: initializeFrom(InputRecord *ir)
         rtold.at(1) = _rtol;
     }
 
-
-
     return IRRT_OK;
 }
 
+
 contextIOResultType
-NRSolver :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
+NRSolver :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
     return CIO_OK;
 }
 
+
 contextIOResultType
-NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj) {
+NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
     return CIO_OK;
+}
+
+
+NM_Status
+NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
+                  FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                  double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                  int &nite, TimeStep *tNow)
+//
+// this function solve the problem of the unbalanced equilibrium
+// using NR scheme
+//
+//
+{
+    FloatArray rhs, deltaR, RT, rInitial;
+    double RRT;
+    int neq = r->giveSize();
+    int irest = 0;
+    NM_Status status;
+    bool converged, errorOutOfRangeFlag;
+#ifdef __PARALLEL_MODE
+ #ifdef __PETSC_MODULE
+    PetscContext *parallel_context  = engngModel->givePetscContext(1, ut); // TODO hard wired domain no 1
+ #endif
+#endif
+
+    OOFEM_LOG_INFO("Time       Iteration       ForceError      DisplError\n__________________________________________________________\n");
+
+    rInitial = * r; // Stored in case of divergence.
+    l = 1.0;
+
+    status = NM_None;
+    this->giveLinearSolver();
+
+    // compute total load R = R+R0
+    RT = * R;
+    if ( R0 ) {
+        RT.add(*R0);
+    }
+
+#ifdef __PARALLEL_MODE
+    RRT = parallel_context->localNorm(RT);
+    RRT *= RRT;
+#else
+    RRT = RT.computeSquaredNorm();
+#endif
+
+restart:
+    DeltaR->zero();
+    deltaR.resize(neq);
+
+    // Fetch the matrix before evaluating internal forces.
+    // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.
+    // (This old tangent is just used
+    engngModel->updateComponent(tNow, NonLinearLhs, domain);
+    if ( this->prescribedDofsFlag ) {
+        if ( !prescribedEqsInitFlag ) {
+            this->initPrescribedEqs();
+        }
+        applyConstraintsToStiffness(k);
+    }
+
+    for (nite = 0; true; ++nite) {
+
+        // Compute the residual
+        engngModel->updateComponent(tNow, InternalRhs, domain);
+        rhs.beDifferenceOf(RT, *F);
+
+        if ( this->prescribedDofsFlag ) {
+            this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tNow);
+        }
+
+        // convergence check
+        converged = this->checkConvergence(RT, * F, rhs, deltaR, * r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
+
+        if (converged && nite >= minIterations ) {
+            break;
+        } else if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
+            if ( irest <= NRSOLVER_MAX_RESTARTS ) {
+                // convergence problems
+                // there must be step restart followed by decrease of step length
+                // status |= NM_ForceRestart;
+                // reduce step length
+
+                /*
+                 * double time;
+                 * time = tNow->giveTime() - tNow->giveTimeIncrement()*(1.-NRSOLVER_RESET_STEP_REDUCE) ;
+                 * deltaL =  deltaL * NRSOLVER_RESET_STEP_REDUCE ;
+                 * if (deltaL < minStepLength)  deltaL = minStepLength;
+                 *
+                 * tNow -> setTime(time);
+                 * tNow -> setTimeIncrement(tNow->giveTimeIncrement()*NRSOLVER_RESET_STEP_REDUCE);
+                 * tNow->incrementStateCounter();              // update solution state counter
+                 */
+
+                // restore previous total displacement vector
+                *r = rInitial;
+                // reset all changes fro previous equilibrium state
+                engngModel->initStepIncrements();
+                #ifdef VERBOSE
+                OOFEM_LOG_INFO("NRSolver iteration Reset ...\n");
+                #endif
+                NR_OldMode  = NR_Mode;
+                NR_Mode     = nrsolverFullNRM;
+                NR_ModeTick = NRSOLVER_DEFAULT_NRM_TICKS;
+                goto restart;
+            } else {
+                status = NM_NoSuccess;
+                OOFEM_WARNING2("NRSolver - convergence not reached after %d iterations", nsmax);
+                break;
+            }
+        }
+
+        if ( nite > 0 ) {
+            if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
+                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                applyConstraintsToStiffness(k);
+            }
+        }
+
+        if ( ( nite == 0 ) && ( deltaL < 1.0 ) ) { // deltaL < 1 means no increment applied, only equilibrate current state
+            rhs.zero();
+            R->zero();
+            deltaR = rhs;
+        } else {
+            linSolver->solve(k, & rhs, & deltaR);
+        }
+
+        //
+        // update solution
+        //
+        if ( this->lsFlag && ( nite > 0 ) ) { // Why not nite == 0 ?
+            // line search
+            LineSearchNM :: LS_status status;
+            double eta;
+            this->giveLineSearchSolver()->solve(r, & deltaR, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
+        }
+        r->add(deltaR);
+        DeltaR->add(deltaR);
+        tNow->incrementStateCounter(); // update solution state counter
+    }
+    //
+    // end of iteration
+    //
+
+    status |= NM_Success;
+    solved = 1;
+
+    // Modify Load vector to include "quasi reaction"
+    if ( R0 ) {
+        for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
+        }
+    } else {
+        for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
+        }
+    }
+
+    this->lastReactions.resize(numberOfPrescribedDofs);
+#ifdef VERBOSE
+    // print quasi reactions if direct displacement control used
+    OOFEM_LOG_INFO("\n  Quasi reaction table:\n\n");
+    OOFEM_LOG_INFO("  node  dof   displacement         force\n");
+    OOFEM_LOG_INFO("========================================\n");
+    double reaction;
+    for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
+        reaction = R->at( prescribedEqs.at(i) );
+        if ( R0 ) {
+            reaction += R0->at( prescribedEqs.at(i) );
+        }
+
+        lastReactions.at(i) = reaction;
+        OOFEM_LOG_INFO("%6d  %3d   %+11.5e  %+11.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
+                       r->at( prescribedEqs.at(i) ), reaction);
+    }
+    OOFEM_LOG_INFO("========================================\n");
+#endif
+
+    return status;
 }
 
 
 SparseLinearSystemNM *
-NRSolver :: giveLinearSolver() {
+NRSolver :: giveLinearSolver()
+{
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
             return linSolver;
@@ -498,6 +442,7 @@ NRSolver :: giveLinearSolver() {
     return linSolver;
 }
 
+
 LineSearchNM *
 NRSolver :: giveLineSearchSolver()
 {
@@ -507,7 +452,6 @@ NRSolver :: giveLineSearchSolver()
 
     return linesearchSolver;
 }
-
 
 
 void
@@ -558,23 +502,6 @@ NRSolver :: initPrescribedEqs()
     this->prescribedEqsInitFlag = true;
 }
 
-/*
- * void
- * NRSolver :: computeBCLoadVector (FloatArray& answer, SparseMtrx* k, TimeStep* atTime)
- * {
- * FloatArray rr(k->giveNumberOfRows());
- * int i;
- *
- * double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->at(atTime->giveTime());
- *
- * for (i=1; i<=numberOfPrescribedDofs; i++) {
- * rr.at(prescribedEqs.at(i)) = prescribedDofsValues.at(i)*factor;
- * }
- *
- * k->times (rr, answer);
- * answer.times(-1.0);
- * }
- */
 
 void
 NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
@@ -688,7 +615,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
                   __at( atTime->giveTargetTime() - atTime->giveTimeIncrement() );
     }
 
-    if ( nite == 1 ) {
+    if ( nite == 0 ) {
 #if 0
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
@@ -763,7 +690,6 @@ NRSolver :: printState(FILE *outputStream)
     fprintf(outputStream, "\nQuasi reaction table:\n\n");
     fprintf(outputStream, "  node  dof            force\n");
     fprintf(outputStream, "============================\n");
-#endif
     if ( lastReactions.giveSize() == 0 ) {
         return;
     }
@@ -771,12 +697,8 @@ NRSolver :: printState(FILE *outputStream)
     double reaction;
     for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
         reaction = lastReactions.at(i);
-#ifdef VERBOSE
         fprintf(outputStream, "%6d  %3d   %+11.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i), reaction);
-#endif
     }
-
-#ifdef VERBOSE
     fprintf(outputStream, "============================\n\n");
 #endif
 }
@@ -872,42 +794,41 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
 
  #endif
-        // Aren't internal dofmanagers listed along with all the other dofmanagers, and included in the loop above? / Mikael
-        // loop over element internal Dofs
-        for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
-            _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
-            // loop over individual dofs
-            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
-                // loop over dof groups
-                for ( _dg = 1; _dg <= _ng; _dg++ ) {
-                    // test if dof ID is in active set
-                    if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
-                        _eq = _idofptr->giveEquationNumber(dn);
+            // Aren't internal dofmanagers listed along with all the other dofmanagers, and included in the loop above? / Mikael
+            // loop over element internal Dofs
+            for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
+                _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
+                // loop over individual dofs
+                for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+                    _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
+                    // loop over dof groups
+                    for ( _dg = 1; _dg <= _ng; _dg++ ) {
+                        // test if dof ID is in active set
+                        if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+                            _eq = _idofptr->giveEquationNumber(dn);
 
-                        if ( _eq ) {
+                            if ( _eq ) {
  #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-                            if ( !n2l->giveNewEq(_eq) ) {
-                                continue;
-                            }
-
+                                if ( !n2l->giveNewEq(_eq) ) {
+                                    continue;
+                                }
  #endif
 
-                            _val = rhs.at(_eq);
-                            dg_forceErr.at(_dg) += _val * _val;
-                            _val = deltaR.at(_eq);
-                            dg_dispErr.at(_dg)  += _val * _val;
-                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-                            _val = RT.at(_eq);
-                            dg_totalLoadLevel.at(_dg) += _val * _val;
-                            _val = r.at(_eq);
-                            dg_totalDisp.at(_dg) += _val * _val;
+                                _val = rhs.at(_eq);
+                                dg_forceErr.at(_dg) += _val * _val;
+                                _val = deltaR.at(_eq);
+                                dg_dispErr.at(_dg)  += _val * _val;
+                                // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+                                _val = RT.at(_eq);
+                                dg_totalLoadLevel.at(_dg) += _val * _val;
+                                _val = r.at(_eq);
+                                dg_totalDisp.at(_dg) += _val * _val;
+                            }
                         }
-                    }
-                } // end loop over dof groups
-            } // end loop over DOFs
-       } // end loop over element internal dofmans
-    } // end loop over elements
+                    } // end loop over dof groups
+                } // end loop over DOFs
+            } // end loop over element internal dofmans
+        } // end loop over elements
 
  #ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
