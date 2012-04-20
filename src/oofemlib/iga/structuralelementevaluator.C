@@ -112,21 +112,140 @@ int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArra
 }
 
 
-
 void StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                             CharType mtrx, TimeStep *tStep)
 //
-// returns characteristics matrix of receiver accordind to mtrx
+// returns characteristics matrix of receiver according to mtrx
 //
 {
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
+    } else if ( mtrx == MassMatrix ) {
+        double mass;
+        this->computeConsistentMassMatrix(answer, tStep, mass);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        this->computeLumpedMassMatrix(answer, tStep);
     } else {
         OOFEM_ERROR2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
-
-    return;
 }
+
+
+void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+// Returns the lumped mass matrix of the receiver.
+{
+    double mass;
+    Element *elem = this->giveElement();
+    int numberOfDofMans = elem->giveNumberOfDofManagers();
+    IntArray nodeDofIDMask, dimFlag(3);
+    int i, j, indx = 0, k, ldofs, dim;
+    double summ;
+
+    if ( !this->isActivated(tStep) ) {
+        int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+        answer.resize(ndofs, ndofs);
+        answer.zero();
+        return;
+    }
+
+    this->computeConsistentMassMatrix(answer, tStep, mass);
+    ldofs = answer.giveNumberOfRows();
+
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        elem->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
+        for ( j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
+            indx++;
+            // zero all off-diagonal terms
+            for ( k = 1; k <= ldofs; k++ ) {
+                if ( k != indx ) {
+                    answer.at(indx, k) = 0.;
+                    answer.at(k, indx) = 0.;
+                }
+            }
+
+            if ( ( nodeDofIDMask.at(j) != D_u ) && ( nodeDofIDMask.at(j) != D_v ) && ( nodeDofIDMask.at(j) != D_w ) ) {
+                // zero corresponding diagonal member too <= no displacement dof
+                answer.at(indx, indx) = 0.;
+            } else if ( nodeDofIDMask.at(j) == D_u ) {
+                dimFlag.at(1) = 1;
+            } else if ( nodeDofIDMask.at(j) == D_v ) {
+                dimFlag.at(2) = 1;
+            } else if ( nodeDofIDMask.at(j) == D_w ) {
+                dimFlag.at(3) = 1;
+            }
+        }
+    }
+
+    if ( indx != ldofs ) {
+        OOFEM_ERROR("computeMassMatrix : internal consistency check failed");
+    }
+
+    dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
+    for ( summ = 0., k = 1; k <= ldofs; k++ ) {
+        summ += answer.at(k, k);
+    }
+
+    answer.times(dim * mass / summ);
+}
+
+
+void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass)
+// Computes numerically the consistent (full) mass matrix of the receiver.
+{
+    Element *elem = this->giveElement();
+    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+    double density, dV;
+    FloatMatrix n;
+    GaussPoint *gp;
+    IntegrationRule *iRule;
+    IntArray mask;
+
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
+
+    if ( ( iRule = this->giveMassMtrxIntegrationRule() ) ) {
+        OOFEM_ERROR("computeConsistentMassMatrix no integration rule available");
+    }
+
+    this->giveMassMtrxIntegrationMask(mask);
+
+    mass = 0.;
+
+    for ( int ip = 0; ip < iRule->getNumberOfIntegrationPoints(); ip++ ) {
+        gp      = iRule->getIntegrationPoint(ip);
+        density = elem->giveMaterial()->give('d', gp);
+        dV      = this->computeVolumeAround(gp);
+        mass   += density * dV;
+        this->computeNMatrixAt(n, gp);
+
+        if ( mask.isEmpty() ) {
+            answer.plusProductSymmUpper(n, n, density * dV);
+        } else {
+            double summ;
+
+            for ( int i = 1; i <= ndofs; i++ ) {
+                for ( int j = i; j <= ndofs; j++ ) {
+                    summ = 0.;
+                    for ( int k = 1; k <= n.giveNumberOfRows(); k++ ) {
+                        if ( mask.at(k) == 0 ) {
+                            continue;
+                        }
+
+                        summ += n.at(k, i) * n.at(k, j);
+                    }
+
+                    answer.at(i, j) += summ * density * dV;
+                }
+            }
+        }
+    }
+
+    answer.symmetrized();
+}
+
 
 void StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the load vector due to the boundary conditions acting on the
@@ -155,8 +274,6 @@ void StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, Tim
         answer.beProductOf(s, d);
         answer.negated();
     }
-
-    // delete d ;
 
     // if engngmodel supports dynamic change of static system
     // we must test if element has not been removed in previous step
@@ -196,17 +313,10 @@ void StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, Tim
                         answer.at(k) -= prevInternalForces.at(k);
                     }
                 }
-
-                //delete elementNodeMask;
-                //delete dofMask;
             }
         }
     }
-
-    return;
 }
-
-
 
 
 void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)

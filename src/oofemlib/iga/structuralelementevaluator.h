@@ -70,6 +70,45 @@ protected:
         }
     }
 
+    /**
+     * Returns the integration rule for mass matrices, if relevant.
+     * @return Number of integration points for mass matrix.
+     */
+    virtual IntegrationRule* giveMassMtrxIntegrationRule() { return NULL; }
+    /**
+     * Returns mask indicating, which unknowns (their type and ordering is the same as
+     * element unknown vector) participate in mass matrix integration.
+     * Nonzero value at i-th position
+     * indicates that corresponding row in interpolation matrix N will participate in
+     * mass matrix integration (typically only displacements are taken into account).
+     * @param answer Integration mask, if zero sized, all unknowns participate. This is default.
+     */
+    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.resize(0); }
+    /**
+     * Computes lumped mass matrix of receiver. Default implementation returns lumped consistent mass matrix.
+     * Then returns lumped mass transformed into nodal coordinate system.
+     * The lumping procedure zeroes all off-diagonal members and zeroes also all diagonal members
+     * corresponding to non-displacement DOFs. Such diagonal matrix is then rescaled, to preserve
+     * the element mass.
+     * Requires the computeNmatrixAt and giveMassMtrxIntegrationgMask services to be implemented.
+     * @param answer Lumped mass matrix.
+     * @param tStep Time step.
+     */
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    /**
+     * Computes consistent mass matrix of receiver using numerical integration over element volume.
+     * Mass matrix is computed as @f$ M = \int_V N^{\mathrm{T}} \rho N dV @f$, where @f$ N @f$ is displacement approximation matrix.
+     * The number of necessary integration points  is determined using this->giveNumberOfIPForMassMtrxIntegration
+     * service. Only selected degrees of freedom participate in integration of mass matrix. This is described
+     * using dof mass integration mask. This mask is obtained from this->giveMassMtrxIntegrationgMask service.
+     * The nonzero mask value at i-th position indicates that i-th element DOF participates in mass matrix
+     * computation. The result is in element local coordinate system.
+     * @param answer Mass matrix.
+     * @param tStep Time step.
+     * @param mass Total mass of receiver.
+     */
+    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
+
 protected:
     virtual Element *giveElement() = 0;
     virtual void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) = 0;
@@ -128,6 +167,8 @@ protected:
 #ifdef __OOFEG
     friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
 #endif
+    public:
+    void elem(int arg1, EquationID arg2, IntArray arg3);
 };
 } // end namespace oofem
 #endif //structuralelementevaluator_h
