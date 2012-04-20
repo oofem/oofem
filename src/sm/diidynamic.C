@@ -40,27 +40,92 @@
 #include "node.h"
 #include "elementside.h"
 #include "dof.h"
+#include "contextioerr.h"
+#include "datastream.h"
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
 
 #include "verbose.h"
 #include "skyline.h"
+#include "structuralelement.h"
+#include "structuralelementevaluator.h"
+#include "usrdefsub.h"
+
+#ifdef __PETSC_MODULE
+ #include "petscsolver.h"
+#endif
+
+#ifdef __PARALLEL_MODE
+ #include "fetisolver.h"
+#endif
 
 namespace oofem {
-NumericalMethod *DIIDynamic :: giveNumericalMethod(TimeStep *)
-// only one has reason for DIIDynamic
-//     - SolutionOfLinearEquations
-
+DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
+    loadVector(), previousLoadVector(), rhs(), displacementVector(), velocityVector(), accelerationVector(),
+    previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), help()
 {
+    initFlag = true;
+    commInitFlag = true;
+    stiffnessMatrix = NULL;
+    ndomains = 1;
+    nMethod = NULL;
+#ifdef __PARALLEL_MODE
+    commMode = ProblemCommMode__NODE_CUT;
+    nonlocalExt = 0;
+    communicator = nonlocCommunicator = NULL;
+    commBuff = NULL;
+#endif
+}
+
+DIIDynamic :: ~DIIDynamic()
+{
+    if ( stiffnessMatrix ) {
+        delete stiffnessMatrix;
+    }
+
+    if ( nMethod ) {
+        delete nMethod;
+    }
+}
+
+NumericalMethod *DIIDynamic :: giveNumericalMethod(TimeStep *)
+// Only one has reason for DIIDynamic
+// - SolutionOfLinearEquations
+{
+#ifdef __PARALLEL_MODE
+
     if ( nMethod ) {
         return nMethod;
     }
 
-    SparseLinearSystemNM *nm;
-    nm = ( SparseLinearSystemNM * ) new LDLTFactorization(1, this->giveDomain(1), this);
-    nMethod = nm;
-    return nm;
+    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+        if ( nMethod ) {
+            return nMethod;
+        }
+
+        nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    }
+
+    if ( nMethod == NULL ) {
+        _error("giveNumericalMethod: linear solver creation failed (unknown type or no parallel support)");
+    }
+
+    return nMethod;
+
+#endif
+
+    if ( nMethod ) {
+        return nMethod;
+    }
+
+    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    if ( nMethod == NULL ) {
+        _error("giveNumericalMethod: linear solver creation failed");
+    }
+
+    return nMethod;
 }
 
 
@@ -71,6 +136,23 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
+    int val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_lstype, "lstype"); // Macro
+    solverType = ( LinSystSolverType ) val;
+
+    val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_smtype, "smtype"); // Macro
+    sparseMtrxType = ( SparseMtrxType ) val;
+
+#ifdef __PARALLEL_MODE
+    if ( isParallel() ) {
+        commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
+        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
+                                               this->giveNumberOfProcesses(),
+                                               this->commMode);
+    }
+
+#endif
 
     IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat"); // Macro
     IR_GIVE_FIELD(ir, alpha, IFT_DIIDynamic_alpha, "alpha"); // Macro
@@ -90,8 +172,8 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
 double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                            TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
+// Returns unknown quantity like displaacement, velocity of equation eq.
+// This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
@@ -136,47 +218,52 @@ TimeStep *DIIDynamic :: giveNextStep()
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
+        counter   = currentStep->giveSolutionStateCounter() + 1;
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
 
     return currentStep;
 }
 
+void DIIDynamic :: solveYourself()
+{
+#ifdef __PARALLEL_MODE
+    if ( commInitFlag ) {
+        this->initializeCommMaps();
+        commInitFlag = false;
+    }
+
+#endif
+
+    StructuralEngngModel :: solveYourself();
+}
 
 void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
-    //
-    // creates system of governing eq's and solves them at given time step
-    //
-    // first assemble problem at current time step
+#ifdef __PARALLEL_MODE
+    if ( commInitFlag ) {
+        this->initializeCommMaps();
+        commInitFlag = false;
+    }
+
+#endif
+
+    // Determine the constants
+    deltaT = tStep->giveTimeIncrement();
+    this->determineConstants();
+
     Domain *domain = this->giveDomain(1);
-    FloatArray help;
     int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
-    int i;
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
-#ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling stiffness and mass matrices\n");
-#endif
-
         //
-        // first step  assemble stiffness and mass Matrices
+        // Determine initial displacements, velocities, accelerations
         //
-        stiffnessMatrix = new Skyline();
-        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
-        massMatrix = stiffnessMatrix->GiveCopy();
-
-        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix, EModelDefaultEquationNumbering(), domain);
-
-        //
-        // determining starting displacemnts, velocities, accelerations
-        //
-        previousLoadVector.resize(neq);
-        previousLoadVector.zero();
+        loadVector.resize(neq);
+        loadVector.zero();
         displacementVector.resize(neq);
         displacementVector.zero();
         velocityVector.resize(neq);
@@ -194,8 +281,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
             nDofs = node->giveNumberOfDofs();
 
             for ( k = 1; k <= nDofs; k++ ) {
-                // ask for initial values obtained from
-                // bc (boundary conditions) and ic (initial conditions)
+                //
+                // Ask for initial values obtained from boundary conditions and initial conditions
+                //
                 iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
@@ -210,117 +298,84 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
             }
         }
 
-        //
-        // determining constants a0 .. a10
-        //
-        if ( Psi < 1.1 ) { // Newmark Method
-            Psi = 1.;
-            double dt2 = deltaT * deltaT;
-            a0  = ( 4. + 2. * alpha * deltaT ) / ( dt2 + 2. * beta * deltaT );
-            a1  = 4. / dt2 + 2 * ( alpha - a0 * beta ) / deltaT;
-            a2  = 4. / deltaT + alpha - a0 * beta;
-            a3  = 1.;
-            a4  = 4. / ( dt2 + 2. * beta * deltaT );
-            a5  = -a4;
-            a6  = a5 * ( deltaT + beta );
-            a7  = -1.;
-            a8  = deltaT / 2.;
-            a9  = dt2 / 4.;
-            a10 = a9;
-        } else {     // Wilson Method
-            if ( Psi < 1.37 ) {
-                Psi = 1.37;
-            }
+        delete stepWhenIcApply;
+    }   // End of initialization.
 
-            double tau = Psi * deltaT;
-            a0  = ( 6. + 3. * alpha * tau ) / ( tau * tau + 3. * beta * tau );
-            a1  = 6. / ( tau * tau ) + 3. * ( alpha - beta * a0 ) / tau;
-            a2  = 6. / tau + 2. * ( alpha - beta * a0 );
-            a3  = 2. + tau * ( alpha - beta * a0 ) / 2.;
-            a4  = 3. / ( ( 3. * beta + tau ) * tau );
-            a5  = 3. * beta * a4 / tau - 6. / ( Psi * tau * tau );
-            a6  = 2. * beta * a4 - 6. / ( Psi * tau );
-            a7  = 1. - 3. / Psi + beta * tau * a4 / 2.;
-            a8  = deltaT / 2.;
-            a9  = deltaT * deltaT / 3.;
-            a10 = deltaT * deltaT / 6.;
+    if ( initFlag ) {
+#ifdef VERBOSE
+        OOFEM_LOG_INFO("Assembling stiffness matrix\n");
+#endif
+        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        if ( stiffnessMatrix == NULL ) {
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        //
-        // assemble LHS of problem ( K* = K + a0*M)
-        //
+        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
-        delete stepWhenIcApply;
-    }   // end of initializaton for first time step
+        help.resize(neq);
+        help.zero();
+
+        previousDisplacementVector.resize(neq);
+        previousVelocityVector.resize(neq);
+        previousAccelerationVector.resize(neq);
+        previousLoadVector.resize(neq);
+
+        for ( int i = 1; i <= neq; i++ ) {
+            previousDisplacementVector.at(i) = displacementVector.at(i);
+            previousVelocityVector.at(i)     = velocityVector.at(i);
+            previousAccelerationVector.at(i) = accelerationVector.at(i);
+            previousLoadVector.at(i)         = loadVector.at(i);
+        }
+
+        initFlag = false;
+    }
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling load\n");
 #endif
 
-    //
-    // assembling the element part of load vector
-    //
-    //loadVector = new FloatArray (this->giveNumberOfEquations());
-    loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-    loadVector.zero();
-
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
-                                     VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleLoadVector(loadVector, domain, VM_Total, tStep);
 
     //
-    // assembling the nodal part of load vector
+    // Assemble effective load vector (rhs).
     //
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector,
-                                        VM_Total, EModelDefaultEquationNumbering(), domain);
 
-    //
-    // assembling modified load vector
-    //
-    help.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-    for ( i = 1; i <= neq; i++ ) {
-        help.at(i) = a1 * displacementVector.at(i) +
-                     a2 *velocityVector.at(i)     +
-                     a3 *accelerationVector.at(i);
+    for ( int i = 1; i <= neq; i++ ) {
+        help.at(i) = a1 * previousDisplacementVector.at(i) +
+                     a2 * previousVelocityVector.at(i)     +
+                     a3 * previousAccelerationVector.at(i);
     }
 
-    massMatrix->times(help, rhs);
-    //delete help;
-    for ( i = 1; i <= neq; i++ ) {
+    this->timesMassMtrx(help, rhs, domain, tStep);
+    help.zero();
+
+    for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += previousLoadVector.at(i) +
                      Psi * ( loadVector.at(i) - previousLoadVector.at(i) );
-        // store load vector
-        previousLoadVector.at(i) = loadVector.at(i);
     }
 
     //
-    // set-up numerical model
-    //
-    help.zero();
-    //
-    // call numerical model to solve arised problem
+    // Call numerical model to solve arised problem.
     //
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    //nMethod -> solveYourselfAt(tStep);
     nMethod->solve(stiffnessMatrix, & rhs, & help);
 
-    //
-    // compute displacements, velocities and accelerations at t+dt
-    //
-    for ( i = 1; i <= neq; i++ ) {
-        rhs.at(i) = a4 * help.at(i) + a5 *displacementVector.at(i) +
-                    a6 *velocityVector.at(i) +
-                    a7 *accelerationVector.at(i);
-        displacementVector.at(i) += deltaT * velocityVector.at(i) +
-                                    a9 *accelerationVector.at(i) +
+    for ( int i = 1; i <= neq; i++ ) {
+        rhs.at(i) = a4 * help.at(i) + a5 *previousDisplacementVector.at(i) +
+                    a6 *previousVelocityVector.at(i) +
+                    a7 *previousAccelerationVector.at(i);
+
+        displacementVector.at(i) += deltaT * previousVelocityVector.at(i) +
+                                    a9 *previousAccelerationVector.at(i) +
                                     a10 *rhs.at(i);
-        velocityVector.at(i) += a8 * ( accelerationVector.at(i) + rhs.at(i) );
-        accelerationVector.at(i) = rhs.at(i);
+        velocityVector.at(i)     += a8 * ( previousAccelerationVector.at(i) + rhs.at(i) );
+        accelerationVector.at(i)  = rhs.at(i);
     }
 }
 
@@ -351,6 +406,15 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
 
 void DIIDynamic :: updateYourself(TimeStep *stepN)
 {
+    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+
+    for ( int i = 1; i <= neq; i++ ) {
+        previousDisplacementVector.at(i) = displacementVector.at(i);
+        previousVelocityVector.at(i)     = velocityVector.at(i);
+        previousAccelerationVector.at(i) = accelerationVector.at(i);
+        previousLoadVector.at(i)         = loadVector.at(i);
+    }
+
     this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
 }
@@ -366,4 +430,242 @@ DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
 }
+
+void
+DIIDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *domain, TimeStep *tStep)
+{
+    int nelem = domain->giveNumberOfElements();
+    int neq   = this->giveNumberOfEquations(EID_MomentumBalance);
+    int i, j, k, jj, kk, n;
+    FloatMatrix charMtrx;
+    IntArray loc;
+    Element *element;
+    EModelDefaultEquationNumbering en;
+
+    answer.resize(neq);
+    answer.zero();
+
+    for ( i = 1; i <= nelem; i++ ) {
+        element = domain->giveElement(i);
+#ifdef __PARALLEL_MODE
+        // Skip remote elements.
+        if ( element->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
+#endif
+
+        element->giveLocationArray(loc, EID_MomentumBalance, en);
+        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
+
+#ifdef DEBUG
+        if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
+            _error("solveYourselfAt : dimension mismatch");
+        }
+
+#endif
+
+        n = loc.giveSize();
+        for ( j = 1; j <= n; j++ ) {
+            jj = loc.at(j);
+            if ( jj ) {
+                for ( k = 1; k <= n; k++ ) {
+                    kk = loc.at(k);
+                    if ( kk ) {
+                        answer.at(jj) += charMtrx.at(j, k) * vec.at(kk);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
+DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep)
+{
+    _loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    _loadVector.zero();
+
+    this->assembleVectorFromDofManagers(_loadVector, tStep, EID_MomentumBalance, NodalLoadVector, mode,
+                                        EModelDefaultEquationNumbering(), domain);
+
+    this->assembleVectorFromElements(_loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, mode,
+                                     EModelDefaultEquationNumbering(), domain);
+}
+
+void
+DIIDynamic :: determineConstants()
+{
+    if ( Psi < 1.1 ) { // Newmark Method
+        Psi = 1.;
+        double dt2 = deltaT * deltaT;
+        a0  = ( 4. + 2. * alpha * deltaT ) / ( dt2 + 2. * beta * deltaT );
+        a1  = 4. / dt2 + 2 * ( alpha - a0 * beta ) / deltaT;
+        a2  = 4. / deltaT + alpha - a0 * beta;
+        a3  = 1.;
+        a4  = 4. / ( dt2 + 2. * beta * deltaT );
+        a5  = -a4;
+        a6  = a5 * ( deltaT + beta );
+        a7  = -1.;
+        a8  = deltaT / 2.;
+        a9  = dt2 / 4.;
+        a10 = a9;
+    } else {     // Wilson Method
+        if ( Psi < 1.37 ) {
+            Psi = 1.37;
+        }
+
+        double tau = Psi * deltaT;
+        a0  = ( 6. + 3. * alpha * tau ) / ( tau * tau + 3. * beta * tau );
+        a1  = 6. / ( tau * tau ) + 3. * ( alpha - beta * a0 ) / tau;
+        a2  = 6. / tau + 2. * ( alpha - beta * a0 );
+        a3  = 2. + tau * ( alpha - beta * a0 ) / 2.;
+        a4  = 3. / ( ( 3. * beta + tau ) * tau );
+        a5  = 3. * beta * a4 / tau - 6. / ( Psi * tau * tau );
+        a6  = 2. * beta * a4 - 6. / ( Psi * tau );
+        a7  = 1. - 3. / Psi + beta * tau * a4 / 2.;
+        a8  = deltaT / 2.;
+        a9  = deltaT * deltaT / 3.;
+        a10 = deltaT * deltaT / 6.;
+    }
+}
+
+int
+DIIDynamic :: checkConsistency()
+{
+    // check internal consistency
+    // if success returns nonzero
+    int i, nelem;
+    Element *ePtr;
+    StructuralElement *sePtr;
+    StructuralElementEvaluator *see;
+    Domain *domain = this->giveDomain(1);
+
+    nelem = domain->giveNumberOfElements();
+    // check for proper element type
+
+    for ( i = 1; i <= nelem; i++ ) {
+        ePtr = domain->giveElement(i);
+        sePtr = dynamic_cast< StructuralElement * >( ePtr );
+        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
+
+        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
+            _warning2("checkConsistency: element %d has no Structural support", i);
+            return 0;
+        }
+    }
+
+    EngngModel :: checkConsistency();
+
+    return 1;
+}
+
+contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    int closeFlag = 0;
+    contextIOResultType iores;
+    FILE *file;
+
+    if ( stream == NULL ) {
+        if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
+                                    this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
+            THROW_CIOERR(CIO_IOERR); // override
+        }
+
+        stream = new FileDataStream(file);
+        closeFlag = 1;
+    }
+
+    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = displacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = loadVector.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( closeFlag ) {
+        fclose(file);
+        delete stream;
+        stream = NULL;
+    }
+
+    return CIO_OK;
+}
+
+contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    int closeFlag = 0;
+    int istep, iversion;
+    contextIOResultType iores;
+    FILE *file;
+
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
+    if ( stream == NULL ) {
+        if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
+            THROW_CIOERR(CIO_IOERR); // override
+        }
+
+        stream = new FileDataStream(file);
+        closeFlag = 1;
+    }
+
+    // save element context
+    if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = displacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = loadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( closeFlag ) {
+        fclose(file);
+        delete stream;
+        stream = NULL;
+    }
+
+    return CIO_OK;
+}
+
+#ifdef __PARALLEL_MODE
+void
+DIIDynamic :: initializeCommMaps()
+{
+ #ifdef __VERBOSE_PARALLEL
+    // force equation numbering before setting up comm maps
+    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
+ #endif
+    // set up communication patterns
+    communicator->setUpCommunicationMaps(this, true);
+    if ( nonlocalExt ) {
+        nonlocCommunicator->setUpCommunicationMaps(this, true);
+    }
+}
+#endif
 } // end namespace oofem

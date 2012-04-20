@@ -123,6 +123,8 @@ enum InputFieldType {
     IFT_DEIDynamic_dumpcoef,
     IFT_DEIDynamic_deltat,
 
+    IFT_DIIDynamic_lstype,
+    IFT_DIIDynamic_smtype,
     IFT_DIIDynamic_deltat,
     IFT_DIIDynamic_alpha,
     IFT_DIIDynamic_beta,

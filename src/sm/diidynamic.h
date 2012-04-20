@@ -39,6 +39,11 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "processcomm.h"
+#endif
+
 namespace oofem {
 /**
  * This class implements Direct Implicit Integration of Dynamic problem
@@ -62,29 +67,26 @@ namespace oofem {
 class DIIDynamic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix, *massMatrix;
+    bool initFlag, commInitFlag;
+    SparseMtrx *stiffnessMatrix;
     FloatArray loadVector, previousLoadVector, rhs;
     FloatArray displacementVector, velocityVector, accelerationVector;
+    FloatArray previousDisplacementVector, previousVelocityVector, previousAccelerationVector;
+    FloatArray help;
     double a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
     double alpha, beta, deltaT;
     double Psi;
+
+    LinSystSolverType solverType;
+    SparseMtrxType sparseMtrxType;
     /// Numerical method used to solve the problem
     SparseLinearSystemNM *nMethod;
 
 public:
-    DIIDynamic(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master),  loadVector(), previousLoadVector(),
-        rhs(), displacementVector(), velocityVector(), accelerationVector()
-    {
-        stiffnessMatrix = NULL;
-        massMatrix = NULL;
-        ndomains = 1;
-        nMethod = NULL;
-    }
-    virtual ~DIIDynamic() {
-        delete  stiffnessMatrix;
-        delete massMatrix;
-        if ( nMethod ) { delete nMethod; } }
+    DIIDynamic(int i, EngngModel *_master = NULL);
+    virtual ~DIIDynamic();
 
+    virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
     virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
@@ -103,6 +105,17 @@ public:
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+
+    void timesMassMtrx(FloatArray &answer, FloatArray &vec, Domain *domain, TimeStep *tStep);
+    void assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep);
+    void determineConstants();
+    virtual int checkConsistency();
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+#ifdef __PARALLEL_MODE
+    void initializeCommMaps();
+#endif
 };
 } // end namespace oofem
 #endif // diidynamic_h
