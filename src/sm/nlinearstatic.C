@@ -1023,22 +1023,21 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
         this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
                                             NodalLoadVector, VM_Incremental, en, sourceDomain);
 
-        this->assemblePrescribedVectorFromElements(_incrementalLoadVector, tStep, ut,
-                                                   ElementForceLoadVector, VM_Incremental, sourceDomain);
-        this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-                                            NodalLoadVector, VM_Incremental,
-                                            EModelDefaultPrescribedEquationNumbering(), sourceDomain);
+        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut, ElementForceLoadVector,
+                                         VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
+        /// @todo Probably wrong? Should be prescribed equation numbering! (No test case runs this code. Perhaps rlm_inceremental is just deprecated? ) / Mikael
+        this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut, NodalLoadVector,
+                                            VM_Incremental, en, sourceDomain);
     } else {
         this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut,
                                          ElementForceLoadVector, VM_Total, en, sourceDomain);
         this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
                                             NodalLoadVector, VM_Total, en, sourceDomain);
 
-        this->assemblePrescribedVectorFromElements(_incrementalLoadVectorOfPrescribed, tStep, ut,
-                                                   ElementForceLoadVector, VM_Total, sourceDomain);
-        this->assembleVectorFromDofManagers(_incrementalLoadVectorOfPrescribed, tStep, ut,
-                                            NodalLoadVector, VM_Total,
-                                            EModelDefaultPrescribedEquationNumbering(), sourceDomain);
+        this->assembleVectorFromElements(_incrementalLoadVectorOfPrescribed, tStep, ut, ElementForceLoadVector,
+                                         VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
+        this->assembleVectorFromDofManagers(_incrementalLoadVectorOfPrescribed, tStep, ut, NodalLoadVector,
+                                            VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 
 #ifdef __PARALLEL_MODE

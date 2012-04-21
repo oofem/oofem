@@ -58,6 +58,7 @@ StructuralEngngModel :: ~StructuralEngngModel()
 #endif
 }
 
+
 void
 StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 //
@@ -113,9 +114,8 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 #endif
         }
     }
-
-    return;
 }
+
 
 void
 StructuralEngngModel :: computeReactions(FloatArray &answer, TimeStep *tStep, int di)
@@ -129,7 +129,6 @@ StructuralEngngModel :: computeReactions(FloatArray &answer, TimeStep *tStep, in
     answer.zero();
 
     // Internal forces contribution
-
     this->computeInternalForceReactionContribution(contribution, tStep, di);
     answer.add(contribution);
     // External loading contribution
@@ -168,10 +167,10 @@ StructuralEngngModel :: computeInternalForceReactionContribution(FloatArray &rea
 {
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    this->assemblePrescribedVectorFromElements( reactions, tStep, EID_MomentumBalance,
-                                               LastEquilibratedNodalInternalForcesVector,
-                                               VM_Total, this->giveDomain(di) );
+    this->assembleVectorFromElements( reactions, tStep, EID_MomentumBalance, LastEquilibratedNodalInternalForcesVector, VM_Total,
+                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
+
 
 void
 StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
@@ -193,16 +192,18 @@ StructuralEngngModel :: computeElementLoadReactionContribution(FloatArray &react
 {
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    this->assemblePrescribedVectorFromElements( reactions, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(di) );
+    this->assembleVectorFromElements( reactions, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
+                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
+
 
 void
 StructuralEngngModel :: computeNodalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
 {
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    assembleVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-                                  EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    this->assembleVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
+                                         EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
 
@@ -271,10 +272,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
             }
         }
     }
-
-    return;
 }
-
 
 
 #ifdef __PARALLEL_MODE
@@ -346,6 +344,7 @@ StructuralEngngModel :: unpackInternalForces(FloatArray *dest, ProcessCommunicat
     return result;
 }
 
+
 int
 StructuralEngngModel :: packLoad(FloatArray *src, ProcessCommunicator &processComm)
 {
@@ -412,6 +411,7 @@ StructuralEngngModel :: unpackLoad(FloatArray *dest, ProcessCommunicator &proces
     return result;
 }
 
+
 int
 StructuralEngngModel :: packRemoteElementData(ProcessCommunicator &processComm)
 {
@@ -429,6 +429,7 @@ StructuralEngngModel :: packRemoteElementData(ProcessCommunicator &processComm)
 
     return result;
 }
+
 
 int
 StructuralEngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
@@ -522,8 +523,8 @@ StructuralEngngModel :: unpackReactions(FloatArray *dest, ProcessCommunicator &p
 
     return result;
 }
-
 #endif
+
 
 #ifdef __PETSC_MODULE
 void
@@ -539,8 +540,6 @@ StructuralEngngModel :: initPetscContexts()
     }
 }
 #endif
-
-
 
 
 #ifdef __OOFEG
@@ -562,6 +561,6 @@ StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &c
         domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
     }
 }
-
 #endif
+
 } // end namespace oofem

@@ -291,8 +291,9 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         prescribedTractionPressure.resize(presneq_prescribed);
         nodalPrescribedTractionPressureConnectivity.resize(presneq_prescribed);
-        this->assemblePrescribedVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_ConservationEquation,
-                                                   NumberOfNodalPrescribedTractionPressureContributions, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_ConservationEquation,
+                                          NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
+                                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
 
 
         lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
@@ -384,8 +385,9 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     /* STEP 2 - calculates pressure (implicit solver) */
     rhs.resize(presneq);
     rhs.zero();
-    this->assemblePrescribedVectorFromElements( prescribedTractionPressure, tStep, EID_ConservationEquation,
-                                               DensityPrescribedTractionPressure, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_ConservationEquation,
+                                      DensityPrescribedTractionPressure, VM_Total,
+                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
     for ( i = 1; i <= presneq_prescribed; i++ ) {
         prescribedTractionPressure.at(i) /= nodalPrescribedTractionPressureConnectivity.at(i);
     }

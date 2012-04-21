@@ -1220,54 +1220,6 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
 
-void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                                        CharType type, ValueModeType mode, Domain *domain)
-//
-// assembles matrix answer by  calling
-// element(i) -> giveCharacteristicMatrix ( type, tStep );
-// for each element in domain
-// and assembling every contribution to answer
-//
-//
-{
-    int i;
-    IntArray loc;
-    FloatMatrix R;
-    FloatArray charVec;
-    Element *element;
-    EModelDefaultPrescribedEquationNumbering dpn;
-
-    int nelem = domain->giveNumberOfElements();
-
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-    for ( i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-#endif
-        element->giveLocationArray(loc, ut, dpn);
-        if ( loc.containsOnlyZeroes() ) {
-            continue;
-        }
-
-        this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
-        if ( charVec.isNotEmpty() ) {
-            if ( element->giveRotationMatrix(R, ut) ) {
-                charVec.rotatedWith(R, 't');
-            }
-            answer.assemble(charVec, loc);
-        }
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-}
-
 
 void
 EngngModel :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)

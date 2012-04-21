@@ -838,18 +838,6 @@ protected:
     void assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                     CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain);
-    /**
-     * Assembles prescribed characteristic vector of required type from elements into given vector.
-     * @param answer Assembled vector.
-     * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
-     * @param mode Mode of unknown (total, incremental, rate of change).
-     * @param type Characteristic components of type type are requested
-     * from elements and assembled using prescribed eqn numbers.
-     * @param domain Domain to assemble from.
-     */
-    void assemblePrescribedVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                CharType type, ValueModeType mode, Domain *domain);
 
 #ifdef __PARALLEL_MODE
     /**
@@ -890,7 +878,7 @@ public:
      * Corresponding function for element gauss points is invoked
      * (gaussPoint::printOutputAt).
      */
-    virtual void printOutputAt(FILE *, TimeStep *);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 
     // input / output
