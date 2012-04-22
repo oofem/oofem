@@ -58,6 +58,7 @@ class FloatArray;
 class IntArray;
 class SparseMtrx; // required by addNonlocalStiffnessContributions declaration
 class IDNLMaterial;
+
 /**
  * Abstract base class for all "structural" finite elements. It declares common interface provided
  * by all derived elements. The implementation of these services is partly left on derived classes,
@@ -112,10 +113,10 @@ public:
      */
     StructuralElement(int n, Domain *d);
     /// Destructor.
-    ~StructuralElement();
+    virtual ~StructuralElement();
 
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
-    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     /**
      * Computes mass matrix of receiver. Default implementation returns consistent mass matrix and uses
@@ -207,16 +208,6 @@ public:
     }
 
     /**
-     * Computes element load vector of receiver induced by non force influences.
-     * Parts due to prescribed strains (like temperature) and due to  prescribed displacement are included.
-     * (Precisely, result is computePrescribedStrainLoadVectorAt contribution plus
-     * contribution of computeBcLoadVectorAt service)
-     * @param answer Computed element load vector in global c.s.
-     * @param tStep Time step.
-     * @param mode Determines response mode.
-     */
-    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    /**
      * Computes force dependent part of load vector. It is load vector induced by applied force loading.
      * Element body load and element boundary load (edge and surface load) is included.
      * (precisely result is summation of computeBodyLoadVectorAt, computeEdgeLoadVectorAt and
@@ -261,12 +252,6 @@ public:
      */
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    /*
-     * Returns the integration point corresponding value.
-     * @param answer Contain corresponding ip value, zero sized if not available.
-     * @param aGaussPoint Integration point.
-     * @param type Determines the type of internal variable.
-     */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     /**
      * Computes at given time (stepN) the the resulting temperature component array.
@@ -335,12 +320,12 @@ public:
 
     // Overloaded methods.
     virtual int adaptiveUpdate(TimeStep *tStep);
-    void updateInternalState(TimeStep *tStep);
+    virtual void updateInternalState(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
     virtual int checkConsistency();
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "StructuralElement"; }
-    classType giveClassID() const { return StructuralElementClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "StructuralElement"; }
+    virtual classType giveClassID() const { return StructuralElementClass; }
 
 #ifdef __OOFEG
     /**
@@ -377,15 +362,6 @@ protected:
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep);
 
-    /**
-     * Computes load vector of receiver due to the prescribed displacements of receiver nodes.
-     * Implementation supports the changes of static system (must be also supported by
-     * engineering model).
-     * @param answer Load vector due to prescribed b.c., zero sized answer if load vector is zero.
-     * @param tStep Time step when load vector is assembled.
-     * @param mode Determines response mode.
-     */
-    void computeBcLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /**
      * Computes the load vector due to body load acting on receiver, at given time step.
      * Default implementation computes body load vector numerically as @f$ l=\int_V N^{\mathrm{T}} f \rho\;\mathrm{d}V @f$
@@ -580,6 +556,7 @@ protected:
      * @param answer Computed load vector contribution.
      * @param tStep Time step.
      * @param mode Load vector mode.
+     * @todo Deprecated, should be removed as soon as nonlinear beams are handled properly.
      */
     void computePrescribedStrainLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
@@ -614,7 +591,7 @@ protected:
      * @param gp Integration point for which answer is assembled.
      * @param answer Interpolation matrix evaluated at gp.
      */
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)  = 0;
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
     /**
      * Returns maximum approximation order used by receiver.

@@ -100,6 +100,7 @@ GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, GaussPo
     }
 }
 
+
 void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
     StructuralElement* elem = this->giveStructuralElement();
@@ -113,6 +114,7 @@ void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, GaussP
         answer.at(i) = u.at(locK.at(i));
     }
 }
+
 
 void
 GradDpElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
@@ -142,6 +144,7 @@ GradDpElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
     answer.at(size+1) = nlKappa;
 }
 
+
 void
 GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
@@ -159,6 +162,8 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
     this->computeDisplacementDegreesOfFreedom(u, gp,stepN);
     answer.beProductOf(b, u);
 }
+
+
 void
 GradDpElement :: computeNonlocalCumPlasticStrain(double &answer, GaussPoint *gp, TimeStep *stepN)
 {
@@ -175,7 +180,6 @@ GradDpElement :: computeNonlocalCumPlasticStrain(double &answer, GaussPoint *gp,
     aux.beProductOf(Nk, u);
     answer = aux.at(1);
 }
-
 
 
 void
@@ -256,6 +260,7 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
     }
 }
 
+
 void
 GradDpElement :: giveInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord)
 {
@@ -279,6 +284,7 @@ GradDpElement :: giveInternalForcesVector(FloatArray &answer,TimeStep *tStep, in
     answer.assemble(answerK,locK);
 }
 
+
 void
 GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 {
@@ -297,26 +303,6 @@ GradDpElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN, Val
 
     answer.assemble(localForces,locU);
     answer.assemble(nlForces,locK);
-}
-
-void
-GradDpElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-{
-    //set displacement and nonlocal location array
-    this->setDisplacementLocationArray(locU,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-    this->setNonlocalLocationArray(locK,nPrimNodes, nPrimVars, nSecNodes, nSecVars);
-
-
-
-    FloatArray localForces(locSize);
-    FloatArray nlForces(nlSize);
-    answer.resize(totalSize);
-    answer.zero();
-
-    this->computeLocNonForceLoadVector(answer,stepN,mode);
-    //answer.assemble(localForces,locU);
-    //answer.assemble(nlForces,locK);
-    //answer = localForces;
 }
 
 
@@ -341,31 +327,6 @@ GradDpElement :: computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, 
 }
 
 
-
-void
-GradDpElement :: computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
-{
-    FloatArray helpLoadVector;
-    StructuralElement* elem = this->giveStructuralElement();
-    answer.resize(0);
-
-
-
-    elem->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
-    }
-
-
-    elem->computeBcLoadVectorAt(helpLoadVector, stepN, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
-    }
-}
-
-
-
 void
 GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -388,7 +349,6 @@ GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
     answer.assemble(answer3,locK,locU);
     answer.assemble(answer4,locK);
 }
-
 
 
 void
@@ -423,6 +383,7 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
         answer.symmetrized();
     }
 }
+
 
 void
 GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)

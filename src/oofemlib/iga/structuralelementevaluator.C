@@ -120,8 +120,6 @@ void StructuralElementEvaluator :: giveCharacteristicVector(FloatArray &answer, 
         this->giveInternalForcesVector(answer, tStep, false); /// @todo Only for total value mode type (?)
     } else if ( type == LastEquilibratedNodalInternalForcesVector ) {
         this->giveInternalForcesVector(answer, tStep, true); ///  @todo Only for total value mode type (?)
-    } else if ( type == ElementNonForceLoadVector ) {
-        this->computeNonForceLoadVector(answer, tStep, mode);
     } else {
         answer.resize(0);
     }
@@ -317,78 +315,6 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
 }
 
 
-void StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector due to the boundary conditions acting on the
-// receiver's nodes, at stepN. Returns NULL if this array contains only
-// zeroes.
-{
-    FloatArray d, dp;
-    FloatMatrix s;
-    Element *elem = this->giveElement();
-    int numberOfDofMans = elem->giveNumberOfDofManagers();
-    /*
-     * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN, d) ;
-     * if ((stepN->giveLoadResponseMode()==IncrementOfLoad) && (!stepN->isTheFirstStep())) {
-     * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN->givePreviousStep(), dp);
-     * d.subtract (dp);
-     * //delete dp;
-     * }
-     */
-    this->computeVectorOfPrescribed(EID_MomentumBalance, mode, stepN, d);
-    //this -> computeVectorOfPrescribed(DisplacementVector,umode,stepN, d) ;
-
-    if ( d.containsOnlyZeroes() ) {
-        answer.resize(0);
-    } else {
-        this->computeStiffnessMatrix(s, TangentStiffness, stepN);
-        answer.beProductOf(s, d);
-        answer.negated();
-    }
-
-    // if engngmodel supports dynamic change of static system
-    // we must test if element has not been removed in previous step
-    // if not, we must also test if there was previous BC on some DOF and now it is released.
-    // if was, it is necessary to load it by reaction force.
-    if ( elem->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-        FloatArray prevInternalForces;
-        IntArray elementNodeMask, dofMask;
-        DofManager *nodeI;
-        Dof *dofJ;
-        int nDofs, i, j, k = 0;
-
-        if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-            for ( i = 1; i <= numberOfDofMans; i++ ) {
-                nodeI = elem->giveDofManager(i);
-                elem->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
-                nodeI->giveDofArray(elementNodeMask, dofMask);
-                nDofs = dofMask.giveSize();
-                for ( j = 1; j <= nDofs; j++ ) {
-                    dofJ = nodeI->giveDof( dofMask.at(j) );
-                    k++;
-                    if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
-                        if ( prevInternalForces.giveSize() == 0 ) {
-                            // allocate and compute only if needed
-                            // use updated gp record
-                            this->giveInternalForcesVector(prevInternalForces,
-                                                           stepN->givePreviousStep(), 1);
-                        }
-
-                        // check for allocated answer
-                        if ( answer.giveSize() == 0 ) {
-                            answer.resize( elem->computeNumberOfDofs(EID_MomentumBalance) );
-                            answer.zero();
-                        }
-
-                        // add element part of reaction  to load vector
-                        answer.at(k) -= prevInternalForces.at(k);
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
     FloatArray u;
@@ -510,39 +436,6 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
      *    }
      * }
      */
-}
-
-
-void StructuralElementEvaluator :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
-{
-    FloatArray helpLoadVector;
-
-    answer.resize(0);
-
-    // test for deactivation of receiver
-    if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-        if ( isActivated( stepN->givePreviousStep() ) && !isActivated(stepN) ) {
-            // use updated gp record
-            this->giveInternalForcesVector(answer, stepN->givePreviousStep(), 1);
-        }
-    }
-
-    if ( !this->isActivated(stepN) ) {
-        return;
-    }
-
-    /*
-     * this->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
-     * if ( helpLoadVector.giveSize() ) {
-     * answer.add(helpLoadVector);
-     * }
-     */
-
-    this->computeBcLoadVectorAt(helpLoadVector, stepN, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
-    }
 }
 
 

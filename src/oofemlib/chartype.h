@@ -105,7 +105,6 @@ namespace oofem {
     ENUM_ITEM(LastEquilibratedNodalInternalForcesVector)                  \
     ENUM_ITEM(ElementPPDELoadVector)                                      \
     ENUM_ITEM(ElementForceLoadVector)                                     \
-    ENUM_ITEM(ElementNonForceLoadVector)                                  \
     ENUM_ITEM(NodalLoadVector)                                            \
     ENUM_ITEM(BcLhsDueToConvection)                                       \
     ENUM_ITEM(ElementHEMOLoadVector)                                      \

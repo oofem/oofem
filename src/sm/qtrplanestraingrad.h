@@ -60,7 +60,6 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep){GradDpElement ::computeStiffnessMatrix(answer, rMode,tStep);}
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) {GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);}
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode){GradDpElement :: computeForceLoadVector(answer, stepN,mode);}
-    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode){GradDpElement :: computeNonForceLoadVector(answer,stepN,mode);}
     virtual int computeNumberOfDofs(EquationID ut) { return 15; }
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, EquationID,IntArray &) const;

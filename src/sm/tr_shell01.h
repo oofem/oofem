@@ -104,13 +104,9 @@ protected:
     { _error("TR_SHELL01 :: computeGaussPoints: calling of this function is not allowed"); }
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
     { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
-    virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
-    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
     { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
 
 public:

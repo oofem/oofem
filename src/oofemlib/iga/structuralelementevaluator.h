@@ -109,8 +109,6 @@ protected:
     virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeBcLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord = false);
     void computeVectorOf(EquationID type, ValueModeType u,
                          TimeStep *stepN, FloatArray &answer) {

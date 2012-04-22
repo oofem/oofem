@@ -84,6 +84,7 @@ QTruss1dGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
     }
 }
 
+
 IRResultType
 QTruss1dGrad :: initializeFrom(InputRecord *ir)
 {
@@ -95,6 +96,7 @@ QTruss1dGrad :: initializeFrom(InputRecord *ir)
     this->computeGaussPoints();
     return IRRT_OK;
 }
+
 
 void
 QTruss1dGrad :: computeGaussPoints()
@@ -112,6 +114,7 @@ QTruss1dGrad :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMod
     GradDpElement ::computeStiffnessMatrix(answer, rMode,tStep);
 }
 
+
 void
 QTruss1dGrad :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
@@ -123,14 +126,6 @@ void
 QTruss1dGrad :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     GradDpElement :: computeForceLoadVector(answer, tStep,mode);
-}
-
-
-void
-QTruss1dGrad :: computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
-    GradDpElement :: computeNonForceLoadVector(answer,tStep,mode);
-
 }
 
 
@@ -158,6 +153,4 @@ QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     answer.at(1,2) = b.at(2,1);
 }
 
-
 }
-

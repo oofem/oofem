@@ -104,68 +104,6 @@ StructuralElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
     ->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 }
 
-void
-StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector due to the boundary conditions acting on the
-// receiver's nodes, at stepN. Returns NULL if this array contains only
-// zeroes.
-{
-    FloatArray d, dp;
-    FloatMatrix s;
-
-    this->computeVectorOfPrescribed(EID_MomentumBalance, mode, stepN, d);
-
-    if ( d.containsOnlyZeroes() ) {
-        answer.resize(0);
-    } else {
-        this->computeStiffnessMatrix(s, TangentStiffness, stepN);
-        answer.beProductOf(s, d);
-        answer.negated();
-    }
-
-    // if engngmodel supports dynamic change of static system
-    // we must test if element has not been removed in previous step
-    // if not, we must also test if there was previous BC on some DOF and now it is released.
-    // if was, it is necessary to load it by reaction force.
-    if ( domain->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-        FloatArray prevInternalForces;
-        IntArray elementNodeMask, dofMask;
-        DofManager *nodeI;
-        Dof *dofJ;
-        int nDofs, i, j, k = 0;
-
-        if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-            for ( i = 1; i <= numberOfDofMans; i++ ) {
-                nodeI = this->giveDofManager(i);
-                this->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
-                nodeI->giveDofArray(elementNodeMask, dofMask);
-                nDofs = dofMask.giveSize();
-                for ( j = 1; j <= nDofs; j++ ) {
-                    dofJ = nodeI->giveDof( dofMask.at(j) );
-                    k++;
-                    if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
-                        if ( prevInternalForces.giveSize() == 0 ) {
-                            // allocate and compute only if needed
-                            // use updated gp record
-                            this->giveInternalForcesVector(prevInternalForces,
-                                                           stepN->givePreviousStep(), 1);
-                        }
-
-                        // check for allocated answer
-                        if ( answer.giveSize() == 0 ) {
-                            answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
-                            answer.zero();
-                        }
-
-                        // add element part of reaction  to load vector
-                        answer.at(k) -= prevInternalForces.at(k);
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 void
 StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
@@ -593,38 +531,6 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
 {
     this->computeLocalForceLoadVector(answer, stepN, mode);
 }
-
-
-void
-StructuralElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Computes the load vector of the receiver, at stepN.
-{
-    FloatArray helpLoadVector;
-    answer.resize(0);
-    // test for deactivation of receiver
-    if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-        if ( isActivated( stepN->givePreviousStep() ) && !isActivated(stepN) ) {
-            // use updated gp record
-            this->giveInternalForcesVector(answer, stepN->givePreviousStep(), 1);
-        }
-    }
-
-    if ( !this->isActivated(stepN) ) {
-        return;
-    }
-
-    this->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
-    }
-
-
-    this->computeBcLoadVectorAt(helpLoadVector, stepN, mode);
-    if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
-    }
-}
-
 
 
 void
@@ -1155,8 +1061,6 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
 {
     if ( mtrx == ElementForceLoadVector ) {
         this->computeForceLoadVector(answer, tStep, mode);
-    } else if ( mtrx == ElementNonForceLoadVector ) {
-        this->computeNonForceLoadVector(answer, tStep, mode);
     } else if ( ( mtrx == NodalInternalForcesVector ) && ( mode == VM_Total ) ) {
         this->giveInternalForcesVector(answer, tStep);
     } else if ( ( mtrx == LastEquilibratedNodalInternalForcesVector ) && ( mode == VM_Total ) ) {

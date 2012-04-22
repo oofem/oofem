@@ -94,8 +94,6 @@ protected:
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
     void computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
 };
 
 } // end namespace oofem

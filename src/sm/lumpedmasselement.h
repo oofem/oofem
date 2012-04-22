@@ -63,8 +63,6 @@ public:
     { answer.resize(0, 0); }
     virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     { answer.resize(0, 0); }
-    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-    { answer.resize(0); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType)
     { answer.resize(0); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
