@@ -1180,11 +1180,8 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
                                               CharType type, ValueModeType mode,
                                               const UnknownNumberingScheme &s, Domain *domain)
 //
-// assembles matrix answer by  calling
-// element(i) -> giveCharacteristicMatrix ( type, tStep );
 // for each element in domain
 // and assembling every contribution to answer
-//
 //
 {
     int i;

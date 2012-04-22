@@ -62,13 +62,7 @@ protected:
 
     StructuralElementEvaluator();
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
-        if ( type == ElementNonForceLoadVector ) {
-            this->computeNonForceLoadVector(answer, tStep, mode);
-        } else {
-            answer.resize(0);
-        }
-    }
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     /**
      * Returns the integration rule for mass matrices, if relevant.
@@ -116,11 +110,8 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeBcLoadVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
-    virtual void giveInternalForcesVector(FloatArray &answer,
-                                          TimeStep *, int useUpdatedGpRecord = 0) {
-        answer.resize(0);
-    }
+    void computeBcLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord = false);
     void computeVectorOf(EquationID type, ValueModeType u,
                          TimeStep *stepN, FloatArray &answer) {
         this->giveElement()->computeVectorOf(type, u, stepN, answer);

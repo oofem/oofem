@@ -43,6 +43,8 @@
 #include "matresponsemode.h"
 #include "crosssection.h"
 #include "structuralcrosssection.h"
+#include "structuralmaterial.h"
+#include "structuralms.h"
 #include "mathfem.h"
 #include "iga.h"
 
@@ -108,6 +110,20 @@ int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArra
         return 1;
     } else {
         return 0;
+    }
+}
+
+
+void StructuralElementEvaluator :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    if ( type == NodalInternalForcesVector ) {
+        this->giveInternalForcesVector(answer, tStep, false); /// @todo Only for total value mode type (?)
+    } else if ( type == LastEquilibratedNodalInternalForcesVector ) {
+        this->giveInternalForcesVector(answer, tStep, true); ///  @todo Only for total value mode type (?)
+    } else if ( type == ElementNonForceLoadVector ) {
+        this->computeNonForceLoadVector(answer, tStep, mode);
+    } else {
+        answer.resize(0);
     }
 }
 
@@ -244,6 +260,60 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     }
 
     answer.symmetrized();
+}
+
+
+void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord)
+{
+    Element *elem = this->giveElement();
+    GaussPoint *gp;
+    Material *mat = elem->giveMaterial();
+    IntegrationRule *iRule;
+    int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
+    FloatMatrix b;
+    FloatArray bs, stress, temp;
+    IntArray irlocnum;
+    double dV;
+
+    answer.resize(ndofs);
+    FloatArray *m = & answer;
+    if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
+        m = & temp;
+    }
+
+    int numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
+    // loop over individual integration rules
+    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+        m->resize(0);
+        iRule = elem->giveIntegrationRule(ir);
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            gp = iRule->getIntegrationPoint(i);
+            this->computeBMatrixAt(b, gp);
+            if ( useUpdatedGpRecord ) {
+                stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+            } else {
+                this->computeStressVector(stress, gp, tStep);
+            }
+
+            if ( stress.giveSize() == 0 ) {
+                break;
+            }
+
+            // compute nodal representation of internal forces using f = B^T*Sigma dV
+            dV  = this->computeVolumeAround(gp);
+            bs.beTProductOf(b, stress);
+            m->add(dV, bs);
+        }
+        // localize irule contribution into element matrix
+        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {
+            answer.assemble(* m, irlocnum);
+        }
+    } // end loop over irules
+
+    // if inactive update state, but no contribution to global system
+    if ( !this->isActivated(tStep) ) {
+        answer.zero();
+    }
 }
 
 

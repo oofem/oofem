@@ -200,7 +200,7 @@ TimeStep *LinearStability :: giveNextStep()
     if (previousStep != NULL){
         delete previousStep;
     }
-    
+
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -267,9 +267,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     displacementVector.zero();
     loadVector.zero();
 
+    // Internal forces first, negated;
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, NodalInternalForcesVector, VM_Total,
+                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    loadVector.negated();
+
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //

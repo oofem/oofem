@@ -228,18 +228,18 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-        //
-        // allocate space for displacementVector
-        //
-        displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
-        displacementVector.zero();
-
         initFlag = 0;
     }
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling load\n");
 #endif
+
+    //
+    // allocate space for displacementVector
+    //
+    displacementVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
+    displacementVector.zero();
 
     //
     // assembling the element part of load vector
@@ -249,15 +249,20 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-    // TODO: Remove ElementNonForceLoadVector and just use NodalInternalForces instead (leaving it for now, StructuralEvaluator doesn't support NodalInternalForces (or therefore no nonlinear problems either)).
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // assembling the nodal part of load vector
     //
     this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
+    //
+    // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
+    //
+    FloatArray internalForces( this->giveNumberOfEquations(EID_MomentumBalance) );
+    internalForces.zero();
+    this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance, NodalInternalForcesVector, VM_Total,
+                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    loadVector.subtract(internalForces);
 
     //
     // set-up numerical model
@@ -270,7 +275,6 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
-
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
     if ( !(s & NM_Success) ) {
         OOFEM_ERROR("LinearStatic :: solverYourselfAt - No success in solving system.");
