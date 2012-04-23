@@ -49,7 +49,6 @@ SimpleCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form
 // IMPORTANT:
 //
 {
-    //FloatArray *reducedStressIncrement;
     MaterialMode mode = gp->giveMaterialMode();
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
 
@@ -59,8 +58,6 @@ SimpleCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form
     } else {
         _error("giveRealStresses : unsupported mode");
     }
-
-    return;
 }
 
 
@@ -78,7 +75,6 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
     this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
     return;
 }
-
 
 
 void
@@ -102,6 +98,7 @@ SimpleCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
     }
 }
 
+
 void
 SimpleCrossSection :: giveFullCharacteristicVector(FloatArray &answer,
                                                    GaussPoint *gp,
@@ -124,12 +121,10 @@ SimpleCrossSection :: giveFullCharacteristicVector(FloatArray &answer,
 //
 //
 {
-    // FloatArray *answer;
     MaterialMode mode = gp->giveMaterialMode();
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveMaterial() );
     IntArray indx;
     int i, j, answerSize = 0;
-
 
     //if (mode ==  _3dShell) {answer =  strainVector; return ;}
     //if (mode ==  _3dBeam)  {answer =  strainVector; return ;}
@@ -142,7 +137,6 @@ SimpleCrossSection :: giveFullCharacteristicVector(FloatArray &answer,
             answerSize = 7;
         }
 
-        //answer = new FloatArray (answerSize);
         answer.resize(answerSize);
         answer.zero();
 
@@ -153,7 +147,6 @@ SimpleCrossSection :: giveFullCharacteristicVector(FloatArray &answer,
             }
         }
 
-        //delete indx;
         return;
     } else {
         StructuralCrossSection :: giveFullCharacteristicVector(answer, gp, strainVector);
@@ -175,7 +168,6 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
     IntArray indx;
     int size = charVector3d.giveSize();
     int i, j;
-    //FloatArray* answer;
 
     if ( ( mode == _3dShell ) || ( mode == _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) ) {
         if ( size != 12 ) {
@@ -184,7 +176,6 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
         }
 
         mat->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );
-        //answer = new FloatArray (indx->giveSize());
         answer.resize( indx.giveSize() );
         answer.zero();
 
@@ -194,7 +185,6 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
             }
         }
 
-        //delete indx;
         return;
     } else if ( mode == _3dBeam ) {
         if ( size != 6 ) {
@@ -211,7 +201,6 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
         }
 
         mat->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );
-        //answer = new FloatArray (indx->giveSize());
         answer.resize( indx.giveSize() );
         answer.zero();
 
@@ -221,14 +210,12 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
             }
         }
 
-        //delete indx;
         return;
     } else {
         StructuralCrossSection :: giveReducedCharacteristicVector(answer, gp, charVector3d);
         return;
     }
 }
-
 
 
 IRResultType
@@ -254,7 +241,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, width, IFT_SimpleCrossSection_width, "width"); // Macro
         propertyDictionary->add(CS_Width, width);
     }
-    
+
     double area = 0.0;
     if ( ir->hasField(IFT_SimpleCrossSection_area, "area") ) {
         IR_GIVE_FIELD(ir, area, IFT_SimpleCrossSection_area, "area"); // Macro
@@ -262,7 +249,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
         area = thick*width;
     }
     propertyDictionary->add(CS_Area, area);
-    
+
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iy, "iy"); // Macro
     propertyDictionary->add(CS_InertiaMomentY, value);
@@ -283,7 +270,7 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareay, "shearareay"); // Macro
     if (value == 0.0) value=beamshearcoeff * area;
     propertyDictionary->add(CS_SHEAR_AREA_Y, value);
-    
+
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearareaz, "shearareaz"); // Macro
     if (value == 0.0) value=beamshearcoeff * area;
@@ -309,7 +296,6 @@ SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
 }
 
 
-
 double
 SimpleCrossSection :: give(CrossSectionProperty aProperty)
 {
@@ -318,11 +304,12 @@ SimpleCrossSection :: give(CrossSectionProperty aProperty)
     if ( propertyDictionary->includes(aProperty) )   {
         value = propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR3("Simple cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);  
+        OOFEM_ERROR3("Simple cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
     }
 
     return value;
 }
+
 
 void
 SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
@@ -334,72 +321,73 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 //
 {
     StructuralMaterial *mat = ( StructuralMaterial * ) gp->giveElement()->giveMaterial();
-    /*
-     * MaterialMode matmode = gp-> giveMaterialMode ();
-     * FloatArray et, e0, fullAnswer;
-     * double thick, width;
-     *
-     * if ((matmode == _2dBeam) || (matmode == _3dBeam) || (matmode == _3dShell) || (matmode == _2dPlate)) {
-     *
-     * StructuralElement *elem = (StructuralElement*)gp->giveElement();
-     * elem -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
-     * FloatArray redAnswer;
-     *
-     * if (et.giveSize() == 0) {answer.resize(0); return ;}
-     * if (et.giveSize() < 1) {
-     * _error ("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
-     * exit (1);
-     * }
-     * mat->giveThermalDilatationVector (e0, gp,stepN);
-     *
-     * if (matmode == _2dBeam) {
-     * answer.resize (3);
-     * answer.zero();
-     * answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
-     * if (et.giveSize() > 1) {
-     * thick = this->give(THICKNESS);
-     * answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
-     * }
-     * } else if (matmode == _3dBeam) {
-     * answer.resize (6);
-     * answer.zero();
-     *
-     * answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
-     * if (et.giveSize() > 1) {
-     * thick = this->give(THICKNESS);
-     * width = this->give(WIDTH);
-     * answer.at(5) = e0.at(1) * et.at(2)/ thick;   // kappa_y
-     * if (et.giveSize() > 2)
-     * answer.at(6) = e0.at(1) * et.at(3)/ width;   // kappa_z
-     * }
-     * } else if (matmode == _2dPlate) {
-     *
-     * if (et.giveSize() > 1) {
-     * answer.resize (5);
-     * answer.zero();
-     *
-     * thick = this->give(THICKNESS);
-     * if (et.giveSize() > 1) {
-     * answer.at(1) = e0.at(1) * et.at(2)/ thick;   // kappa_x
-     * answer.at(2) = e0.at(2) * et.at(2)/ thick;   // kappa_y
-     * }
-     * }
-     * } else if (matmode == _3dShell) {
-     * answer.resize (8);
-     * answer.zero();
-     *
-     * answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
-     * answer.at(2) = e0.at(2) * (et.at(1)- mat->giveReferenceTemperature());
-     * if (et.giveSize() > 1) {
-     * thick = this->give(THICKNESS);
-     * answer.at(4) = e0.at(1) * et.at(2)/ thick;   // kappa_x
-     * answer.at(5) = e0.at(2) * et.at(2)/ thick;   // kappa_y
-     * }
-     * } else _error ("Unsupported material mode");
-     * } else {
-     * mat->computeStressIndependentStrainVector (answer, gp, stepN, mode);
-     * }
-     */
+    ///@todo  Deprecated or not? If so, remove it! / Mikael
+#if 0
+    MaterialMode matmode = gp-> giveMaterialMode ();
+    FloatArray et, e0, fullAnswer;
+    double thick, width;
+
+    if ((matmode == _2dBeam) || (matmode == _3dBeam) || (matmode == _3dShell) || (matmode == _2dPlate)) {
+
+        StructuralElement *elem = (StructuralElement*)gp->giveElement();
+        elem -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
+        FloatArray redAnswer;
+
+        if (et.giveSize() == 0) {answer.resize(0); return ;}
+        if (et.giveSize() < 1) {
+            _error ("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
+            exit (1);
+        }
+        mat->giveThermalDilatationVector (e0, gp,stepN);
+
+        if (matmode == _2dBeam) {
+            answer.resize (3);
+            answer.zero();
+            answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
+            if (et.giveSize() > 1) {
+                thick = this->give(THICKNESS);
+                answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
+            }
+        } else if (matmode == _3dBeam) {
+            answer.resize (6);
+            answer.zero();
+
+            answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
+            if (et.giveSize() > 1) {
+                thick = this->give(THICKNESS);
+                width = this->give(WIDTH);
+                answer.at(5) = e0.at(1) * et.at(2)/ thick;   // kappa_y
+                if (et.giveSize() > 2)
+                    answer.at(6) = e0.at(1) * et.at(3)/ width;   // kappa_z
+            }
+        } else if (matmode == _2dPlate) {
+
+            if (et.giveSize() > 1) {
+                answer.resize (5);
+                answer.zero();
+
+                thick = this->give(THICKNESS);
+                if (et.giveSize() > 1) {
+                    answer.at(1) = e0.at(1) * et.at(2)/ thick;   // kappa_x
+                    answer.at(2) = e0.at(2) * et.at(2)/ thick;   // kappa_y
+                }
+            }
+        } else if (matmode == _3dShell) {
+            answer.resize (8);
+            answer.zero();
+
+            answer.at(1) = e0.at(1) * (et.at(1)- mat->giveReferenceTemperature());
+            answer.at(2) = e0.at(2) * (et.at(1)- mat->giveReferenceTemperature());
+            if (et.giveSize() > 1) {
+                thick = this->give(THICKNESS);
+                answer.at(4) = e0.at(1) * et.at(2)/ thick;   // kappa_x
+                answer.at(5) = e0.at(2) * et.at(2)/ thick;   // kappa_y
+            }
+        } else _error ("Unsupported material mode");
+    } else {
+        mat->computeStressIndependentStrainVector (answer, gp, stepN, mode);
+    }
+#endif
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
 } // end namespace oofem

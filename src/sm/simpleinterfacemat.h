@@ -33,7 +33,7 @@
  */
 
 //   **********************************************************************
-//   *** CLASS SIMPLE INTERFACE MATERIAL FOR INTERFACE ELEMENTS   ************
+//   *** CLASS SIMPLE INTERFACE MATERIAL FOR INTERFACE ELEMENTS   *********
 //   **********************************************************************
 
 #ifndef simpleinterfacemat_h
@@ -120,10 +120,10 @@ public:
     virtual int giveStressStrainComponentIndOf(MatResponseForm, MaterialMode mmode, int);
     virtual void giveStressStrainMask(IntArray & answer, MatResponseForm, MaterialMode mmode) const;
     virtual int giveSizeOfReducedStressStrainVector(MaterialMode);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
+    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &charVector3d);
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *,
-                                      const FloatArray &);
+    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp,
+                                      const FloatArray &strainVector);
 
 #ifdef __OOFEG
 #endif
@@ -132,7 +132,7 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);

@@ -304,10 +304,6 @@ LIBeam3d2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
  *  answer.at(6) = e0.at(1) * et.at(3)/ width;   // kappa_z
  * }
  * }
- * //delete et;
- * //delete e0;
- *
- * return ;
  * }
  */
 

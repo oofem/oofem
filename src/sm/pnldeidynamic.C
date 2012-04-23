@@ -79,14 +79,8 @@ PNlDEIDynamic ::  PNlDEIDynamic(int i, EngngModel *_master) : StructuralEngngMod
 }
 
 
-PNlDEIDynamic :: ~PNlDEIDynamic()  {
-    //delete massMatrix;
-    //delete loadVector;
-    //delete previousIncrementOfDisplacementVector;
-    //delete incrementOfDisplacementVector;
-    //delete displacementVector;
-    //delete velocityVector;
-    //delete accelerationVector;
+PNlDEIDynamic :: ~PNlDEIDynamic()
+{
 }
 
 NumericalMethod *PNlDEIDynamic :: giveNumericalMethod(TimeStep *atTime)
@@ -94,11 +88,6 @@ NumericalMethod *PNlDEIDynamic :: giveNumericalMethod(TimeStep *atTime)
 //     - SolutionOfLinearEquations
 
 {
-    /*  if (nMethod) return nMethod ;
-     * NumericalMethod* nm;
-     * nm = (NumericalMethod*) new LDLTFactorization (1,domain,this);
-     * nMethod = nm;
-     * return nm; */
     return NULL;  // not necessary here - diagonal matrix is used-simple inversion
 }
 
@@ -152,7 +141,7 @@ PNlDEIDynamic :: initializeFrom(InputRecord *ir)
 
 double PNlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                               TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
+// returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
@@ -199,8 +188,8 @@ TimeStep *PNlDEIDynamic :: giveNextStep()
 
     if (previousStep != NULL){
         delete previousStep;
-    }    
-    
+    }
+
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
@@ -218,8 +207,6 @@ TimeStep *PNlDEIDynamic :: giveNextStep()
 
 void PNlDEIDynamic :: solveYourself()
 {
-    //this -> giveNumericalMethod ();     // can be awoided
-
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
     // force equation numbering before setting up comm maps
@@ -240,9 +227,8 @@ void PNlDEIDynamic :: solveYourself()
     StructuralEngngModel :: solveYourself();
 }
 
-
-
-void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
+void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
+{
     //
     // creates system of governing eq's and solves them at given time step
     //
@@ -328,9 +314,6 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             }
         }
 
-
-
-
         initFlag = 0;
     }
 
@@ -375,7 +358,6 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
         //
 
         // try to determine the best deltaT
-        // PI = 3.1415926535897932384626383279; // PI =  3.1415926535897931160E0
         maxDt = 2.0 / sqrt(maxOm);
         if ( deltaT > maxDt ) {
             // print reduced time step increment and minimum period Tmin
@@ -807,13 +789,11 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
         //charMtrx.beLumpedOf (fullCharMtrx);
 
-        //delete fullCharMtrx;
-
         // ---> COMMENT REGION IF NO LOCAL VARIANT OF ZERO MASS REPLACENMENT IS NEEDED
         element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
         // <--- END REGION
         //
-        // assemble it manualy
+        // assemble it manually
         //
 #ifdef DEBUG
         if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
@@ -881,7 +861,6 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
      * diagonalStiffMtrx.at(jj) += charMtrx.at(j,j);
      * }
      * }
-     * //delete charMtrx;
      * }
      * // find find minimun period of vibration
      * // - global variant
@@ -905,7 +884,6 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
      * massMatrix.at(i) = diagonalStiffMtrx.at(i) / maxOm;
      * }
      * }
-     * //delete diagonalStiffMtrx;
      * // end global variant
      *
      * // <--- END REGION
@@ -1343,7 +1321,7 @@ contextIOResultType PNlDEIDynamic :: saveContext(DataStream *stream, ContextMode
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }

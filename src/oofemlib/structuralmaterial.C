@@ -38,13 +38,11 @@
 #include "verbose.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralms.h"
-
+#include "structuralelement.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-
 #include "mathfem.h"
-
 #include "engngm.h"
 #include "fieldmanager.h"
 
@@ -112,9 +110,8 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
         return;
     }
-
-    return;
 }
+
 
 void
 StructuralMaterial :: giveCharacteristicComplianceMatrix(FloatMatrix &answer,
@@ -135,15 +132,11 @@ StructuralMaterial :: giveCharacteristicComplianceMatrix(FloatMatrix &answer,
     if ( form == FullForm ) {
         this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
         answer.beSubMatrixOf(redAnswer, mask);
-        // delete redAnswer;
     } else if ( form == ReducedForm ) {
         answer = redAnswer;
     } else {
         _error("giveCharacteristicComplianceMatrix - unsupported form mode");
     }
-
-    // delete redInvAnswer;
-    return;
 }
 
 
@@ -184,10 +177,7 @@ StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm fo
         _error2( "reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
         return;
     }
-
-    return;
 }
-
 
 
 void
@@ -227,8 +217,6 @@ StructuralMaterial ::  reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm fo
         _error2( "reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
         return;
     }
-
-    return;
 }
 
 
@@ -249,8 +237,6 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
     if ( epsilonTemperature.giveSize() ) {
         answer.subtract(epsilonTemperature);
     }
-
-    return;
 }
 
 
@@ -258,7 +244,7 @@ int
 StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
 //
 // returns the size of reduced stress-strain vector
-// acording to mode given by gp.
+// according to mode given by gp.
 //
 {
     switch ( mode ) {
@@ -651,7 +637,6 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
 }
 
 
-
 void
 StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                            MaterialMode mmode) const
@@ -914,40 +899,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
     } else {
         _error("giveStressStrainMask : unknown form mode");
     }
-
-    return;
 }
-
-/*
- * FloatArray*
- * StructuralMaterial :: ReduceStressStrainVector (MatResponseForm form, GaussPoint* gp,
- *              FloatArray* vec)
- * //
- * // this function reduces (from full to reduced or from reduced to full)
- * // strain or stress vector acording to stressStrain mode of given gp.
- * //
- * // General strain vector has one of the following forms:
- * // 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
- * // 2) strainVectorShell {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy, kappa_x,kappa_y,kappa_y,kappa_yz,kappa_xz,kappa_xy}
- * //
- * // you must assigng your stress strain mode to one of the folloving modes (or add new)
- * // FullForm of MaterialStiffnessMatrix must have the same form.
- * //
- * {
- * int size = vec->giveSize();
- * FloatArray *answer;
- * IntArray indx;
- *
- * if (form == ReducedForm)
- * this-> giveStressStrainMask(indx, FullForm, gp);
- * else
- * this-> giveStressStrainMask(indx, ReducedForm, gp);
- *
- * answer = vec->GiveSubArray (&indx);
- * //delete indx;
- * return answer;
- * }
- */
 
 
 void
@@ -967,7 +919,6 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
         inv3d.beInverseOf(stiffMtrx3d);
 
-        //invAnswer = new FloatMatrix(3,3);
         invAnswer.resize(3, 3);
 
         invAnswer.at(1, 1) = inv3d.at(1, 1);
@@ -982,15 +933,11 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
         invAnswer.at(3, 2) = inv3d.at(6, 2);
         invAnswer.at(3, 3) = inv3d.at(6, 6);
 
-
-        // delete inv3d;
         reducedAnswer.beInverseOf(invAnswer);
-        // delete invAnswer;
 
         if ( form == ReducedForm ) {
             answer = reducedAnswer;
         } else {
-            //answer = new FloatMatrix(6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1003,8 +950,6 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
             answer.at(6, 6) = reducedAnswer.at(3, 3);
             answer.at(6, 1) = reducedAnswer.at(3, 1);
             answer.at(6, 2) = reducedAnswer.at(3, 2);
-
-            //delete reducedAnswer;
         }
 
         return;
@@ -1012,8 +957,6 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
         _error("reduceToPlaneStressStiffMtrx : stiffMtrx size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1028,11 +971,9 @@ StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
 // but we take ez, SigmaZ into account.
 //
 {
-    // FloatMatrix *answer;
     // check if stiffMtrx is proper
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix(4,4);
             answer.resize(4, 4);
             answer.zero();
 
@@ -1052,7 +993,6 @@ StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
             answer.at(4, 2) = stiffMtrx3d.at(6, 2);
             answer.at(4, 4) = stiffMtrx3d.at(6, 6);
         } else {
-            //answer = new FloatMatrix(6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1078,8 +1018,6 @@ StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
         _error("reduceToPlaneStrainStiffMtrx :: stiffMtrx size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1102,15 +1040,12 @@ StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
         inv3d.beInverseOf(stiffMtrx3d);
         val11 = inv3d.at(1, 1);
-        //delete inv3d;
 
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix (1,1);
             answer.resize(1, 1);
 
             answer.at(1, 1) = 1. / val11;
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1122,10 +1057,7 @@ StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
         _error("reduceTo1dStressStiffMtrx:: stiffMtrx3d size mismatch");
         exit(1);
     }
-
-    return;
 }
-
 
 
 void
@@ -1143,7 +1075,7 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     FloatMatrix invMat3d, invMatLayer(5, 5), matLayer;
-    // double thickness3,thickness;
+
     int i, j;
 
     if ( !( ( mode == _2dPlateLayer ) || ( mode == _3dShellLayer ) ) ) {
@@ -1153,11 +1085,6 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
 
     // check if stiffMtrx is proper
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        // thickness = this-> give(THICKNESS);
-        // thickness3 = thickness*thickness*thickness;
-
-        //  invMat3d = mat3d->GiveInverse ();
-        //  delete mat3d;
         invMat3d.beInverseOf(stiffMtrx3d);
 
 
@@ -1181,14 +1108,11 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
             }
         }
 
-        // delete invMat3d;
         matLayer.beInverseOf(invMatLayer);
-        // delete invMatLayer;
 
         if ( form == ReducedForm ) {
             answer = matLayer;
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1217,11 +1141,7 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
         _error("reduceTo2dPlateLayerStiffMtrx : stiffMtrx size mismatch");
         exit(1);
     }
-
-    return;
 }
-
-
 
 
 void
@@ -1241,7 +1161,6 @@ StructuralMaterial :: reduceTo3dShellLayerStiffMtrx(FloatMatrix &answer,
 }
 
 
-
 void
 StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                                    MatResponseForm form,
@@ -1257,37 +1176,24 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     FloatMatrix invMat3d, invMatLayer(2, 2), matLayer;
-    // double thickness3,thickness;
-    // int i,j;
 
     if ( mode != _2dBeamLayer ) {
         _error("ReduceTo2dBeamLayerStiffMtrx : unsupported mode");
     }
 
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        // mat3d = this -> Give3dMaterialStiffnessMatrix (FullForm, gp, strainIncrement);
-        // thickness = this-> give(THICKNESS);
-        // thickness3 = thickness*thickness*thickness;
-
-        /* invMat3d = mat3d->GiveInverse ();
-         * delete mat3d; */
         invMat3d.beInverseOf(stiffMtrx3d);
-
-        //invMatLayer = new FloatMatrix(2,2);
 
         invMatLayer.at(1, 1) = invMat3d.at(1, 1);
         invMatLayer.at(1, 2) = invMat3d.at(1, 5);
         invMatLayer.at(2, 1) = invMat3d.at(5, 1);
         invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-        // delete invMat3d;
 
         matLayer.beInverseOf(invMatLayer);
-        //delete invMatLayer;
 
         if ( form == ReducedForm ) {
             answer = matLayer;
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1302,8 +1208,6 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
         _error("reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1322,23 +1226,13 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
 {
     MaterialMode mode = gp->giveMaterialMode();
     FloatMatrix invMat3d, invMatLayer(3, 3), matLayer;
-    // double thickness3,thickness;
-    // int i,j;
 
     if ( mode != _1dFiber ) {
         _error("reduceTo1dFiberStiffMtrx : unsupported mode");
     }
 
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
-        // mat3d = this -> Give3dMaterialStiffnessMatrix (FullForm, gp, strainIncrement);
-        // thickness = this-> give(THICKNESS);
-        // thickness3 = thickness*thickness*thickness;
-
-        /* invMat3d = mat3d->GiveInverse ();
-         * delete mat3d; */
         invMat3d.beInverseOf(stiffMtrx3d);
-
-        //invMatLayer = new FloatMatrix(2,2);
 
         invMatLayer.at(1, 1) = invMat3d.at(1, 1);
         invMatLayer.at(1, 2) = invMat3d.at(1, 5);
@@ -1349,15 +1243,12 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
         invMatLayer.at(3, 1) = invMat3d.at(6, 1);
         invMatLayer.at(3, 2) = invMat3d.at(6, 5);
         invMatLayer.at(3, 3) = invMat3d.at(6, 6);
-        // delete invMat3d;
 
         matLayer.beInverseOf(invMatLayer);
-        //delete invMatLayer;
 
         if ( form == ReducedForm ) {
             answer = matLayer;
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1377,16 +1268,12 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
         _error("reduceTo1dFiberStiffMtrx: stiffMtrx3d size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
-
 //
-// Copliance reduction functions
+// Compliance reduction functions
 //
-
 void
 StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
                                                    MatResponseForm form, GaussPoint *gp,
@@ -1398,12 +1285,9 @@ StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
 // This method works for general 3d compl matrix
 //
 {
-    //FloatMatrix *answer;
-
     // check if complMtrx is proper
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix(3,3);
             answer.resize(3, 3);
             answer.zero();
 
@@ -1417,7 +1301,6 @@ StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
             answer.at(3, 1) = complMtrx3d.at(6, 1);
             answer.at(3, 2) = complMtrx3d.at(6, 2);
         } else {
-            //answer = new FloatMatrix(6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1437,8 +1320,6 @@ StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
         _error("reduceToPlaneStressComplMtrx : complMtrx size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1459,8 +1340,6 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
         inv3d.beInverseOf(complMtrx3d);
 
-        // invAnswer = new FloatMatrix(3,3);
-
         invAnswer.at(1, 1) = inv3d.at(1, 1);
         invAnswer.at(1, 2) = inv3d.at(1, 2);
         invAnswer.at(1, 3) = inv3d.at(1, 6);
@@ -1473,13 +1352,9 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
         invAnswer.at(3, 2) = inv3d.at(6, 2);
         invAnswer.at(3, 3) = inv3d.at(6, 6);
 
-
-        // delete inv3d;
         reducedAnswer.beInverseOf(invAnswer);
-        //delete invAnswer;
 
         if ( form == ReducedForm ) {
-            //answer=new FloatMatrix(4,4);
             answer.resize(4, 4);
             answer.zero();
 
@@ -1494,10 +1369,7 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
             answer.at(4, 1) = reducedAnswer.at(3, 1);
             answer.at(4, 2) = reducedAnswer.at(3, 2);
             answer.at(4, 4) = reducedAnswer.at(3, 3);
-
-            //delete reducedAnswer;
         } else {
-            //answer = new FloatMatrix(6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1510,8 +1382,6 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
             answer.at(6, 6) = reducedAnswer.at(3, 3);
             answer.at(6, 1) = reducedAnswer.at(3, 1);
             answer.at(6, 2) = reducedAnswer.at(3, 2);
-
-            //delete reducedAnswer;
         }
 
         return;
@@ -1519,8 +1389,6 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
         _error("reduceToPlaneStrainComplMtrx :: complMtrx size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1534,17 +1402,13 @@ StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
 // general 3dMatrialComplianceMatrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    //FloatMatrix *answer;
-
     // check if complMtrx is proper
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix (1,1);
             answer.resize(1, 1);
 
             answer.at(1, 1) = complMtrx3d.at(1, 1);
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1556,8 +1420,6 @@ StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
         _error("reduceTo1dStressComplMtrx:: complMtrx3d size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1576,7 +1438,6 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    //FloatMatrix  *answer;
     int i, j;
 
     if ( !( ( mode == _2dPlateLayer ) || ( mode == _3dShellLayer ) ) ) {
@@ -1587,7 +1448,6 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
     // check if complMtrx is proper
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix(5,5);
             answer.resize(5, 5);
             answer.zero();
 
@@ -1610,7 +1470,6 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
                 }
             }
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1639,11 +1498,7 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
         _error("reduceTo2dPlateLayerComplMtrx : stiffMtrx size mismatch");
         exit(1);
     }
-
-    return;
 }
-
-
 
 
 void
@@ -1660,7 +1515,6 @@ StructuralMaterial :: reduceTo3dShellLayerComplMtrx(FloatMatrix &answer,
 
 {
     this->reduceTo2dPlateLayerComplMtrx(answer, form, gp, complMtrx3d);
-    return;
 }
 
 
@@ -1679,8 +1533,6 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    // FloatMatrix  *answer;
-    // int i,j;
 
     if ( mode != _2dBeamLayer ) {
         _error("reduceTo2dBeamLayerComplMtrx : unsupported mode");
@@ -1688,7 +1540,6 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
 
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix (2,2);
             answer.resize(2, 2);
 
             answer.at(1, 1) = complMtrx3d.at(1, 1);
@@ -1696,7 +1547,6 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
             answer.at(2, 1) = complMtrx3d.at(5, 1);
             answer.at(2, 2) = complMtrx3d.at(5, 5);
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1711,8 +1561,6 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
         _error("reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 
@@ -1730,8 +1578,6 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    // FloatMatrix  *answer;
-    // int i,j;
 
     if ( mode != _1dFiber ) {
         _error("reduceTo1dFiberComplMtrx : unsupported mode");
@@ -1739,7 +1585,6 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
 
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
         if ( form == ReducedForm ) {
-            //answer = new FloatMatrix (2,2);
             answer.resize(3, 3);
 
             answer.at(1, 1) = complMtrx3d.at(1, 1);
@@ -1752,7 +1597,6 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
             answer.at(3, 2) = complMtrx3d.at(6, 5);
             answer.at(3, 3) = complMtrx3d.at(6, 6);
         } else {
-            //answer = new FloatMatrix (6,6);
             answer.resize(6, 6);
             answer.zero();
 
@@ -1772,8 +1616,6 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
         _error("reduceTo1dFiberComplMtrx: stiffMtrx3d size mismatch");
         exit(1);
     }
-
-    return;
 }
 
 //
@@ -1794,8 +1636,6 @@ StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceToPlaneStressStiffMtrx(answer, form, gp, m3d);
-    // delete m3d;
-    return;
 }
 
 void
@@ -1804,15 +1644,13 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 //
-// return material stiffenss matrix for PlaneStrain mode
+// return material stiffness matrix for PlaneStrain mode
 //
 {
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceToPlaneStrainStiffMtrx(answer, form, gp, m3d);
-    //delete m3d;
-    return;
 }
 
 void
@@ -1821,15 +1659,13 @@ StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                             GaussPoint *gp,
                                             TimeStep *atTime)
 //
-// return material stiffenss matrix for 1d stress strain mode
+// return material stiffness matrix for 1d stress strain mode
 //
 {
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceTo1dStressStiffMtrx(answer, form, gp, m3d);
-    // delete m3d;
-    return;
 }
 
 
@@ -1839,17 +1675,14 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                                GaussPoint *gp,
                                                TimeStep *atTime)
 //
-// return material stiffenss matrix for2dBeamLayer mode
+// return material stiffness matrix for2dBeamLayer mode
 //
 {
     FloatMatrix m3d;
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceTo2dBeamLayerStiffMtrx(answer, form, gp, m3d);
-    //delete m3d;
-    return;
 }
-
 
 
 void
@@ -1865,8 +1698,6 @@ StructuralMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceTo2dPlateLayerStiffMtrx(answer, form, gp, m3d);
-    // delete m3d;
-    return;
 }
 
 void
@@ -1882,8 +1713,6 @@ StructuralMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceTo1dFiberStiffMtrx(answer, form, gp, m3d);
-    // delete m3d;
-    return;
 }
 
 
@@ -1900,11 +1729,7 @@ StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 
     this->give3dMaterialStiffnessMatrix(m3d, FullForm, mode, gp, atTime);
     this->reduceTo3dShellLayerStiffMtrx(answer, form, gp, m3d);
-    // delete m3d;
-    return;
 }
-
-
 
 
 void
@@ -1933,7 +1758,6 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
 //    array sp -> principal strains or stresses
 //
 {
-    //FloatArray *sp;
     int size = s.giveSize();
     double swap;
     int nonzeroFlag = 0;
@@ -2205,8 +2029,6 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
             }
         }
     }
-
-    return;
 }
 
 
@@ -2244,7 +2066,6 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 //
 {
     FloatMatrix t;
-    //tt = new FloatMatrix (6,6);
     answer.resize(6, 6);
     answer.zero();
 
@@ -2295,12 +2116,7 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
-
-
-    //if(transpose == 1) delete t;
-    return;
 }
-
 
 
 void
@@ -2367,9 +2183,8 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
-
-    return;
 }
+
 
 void
 StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer,
@@ -2405,10 +2220,7 @@ StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer
     answer.at(3, 1) = t.at(1, 1) * t.at(1, 2);
     answer.at(3, 2) = t.at(2, 1) * t.at(2, 2);
     answer.at(3, 3) = t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2);
-
-    return;
 }
-
 
 
 void
@@ -2424,15 +2236,10 @@ StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMat
 // If transpose == 1 we transpose base matrix before transforming
 {
     FloatMatrix tt;
-    //FloatArray *answer;
 
     this->giveStrainVectorTranformationMtrx(tt, base, transpose);
-
     answer.beProductOf(tt, strainVector);
-    //delete tt;
-    return;
 }
-
 
 
 void
@@ -2450,13 +2257,9 @@ StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMat
 
 {
     FloatMatrix tt;
-    //FloatArray *answer;
 
     this->giveStressVectorTranformationMtrx(tt, base, transpose);
-
     answer.beProductOf(tt, stressVector);
-    //delete tt;
-    return;
 }
 
 
@@ -2524,9 +2327,8 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
             }
         }
     }
-
-    return;
 }
+
 
 int
 StructuralMaterial :: setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
@@ -2657,8 +2459,6 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
 
 
 InternalStateValueType
@@ -2911,7 +2711,6 @@ StructuralMaterial :: giveFullCharacteristicVector(FloatArray &answer,
     MaterialMode mode = gp->giveMaterialMode();
     IntArray indx;
     int i, j, answerSize = 6;
-    //FloatArray* answer;
 
     if ( this->hasMaterialModeCapability(mode) ) {
         if ( mode == _3dMat ) {
@@ -2934,10 +2733,7 @@ StructuralMaterial :: giveFullCharacteristicVector(FloatArray &answer,
         _error("giveFullCharacteristicVector - invalid mode");
         exit(0);
     }
-
-    return;
 }
-
 
 
 void
@@ -2952,7 +2748,6 @@ StructuralMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
     IntArray indx;
     int size = charVector3d.giveSize();
     int i, j;
-    //FloatArray* answer;
 
     if ( this->hasMaterialModeCapability(mode) ) {
         if ( ( mode == _3dMat ) || ( mode == _3dMicroplane ) ) {
@@ -2980,9 +2775,8 @@ StructuralMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
         _error("giveFullCharacteristicVector - invalid mode");
         exit(0);
     }
-
-    return;
 }
+
 
 IRResultType
 StructuralMaterial :: initializeFrom(InputRecord *ir)
@@ -3013,4 +2807,5 @@ StructuralMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
 } // end namespace oofem

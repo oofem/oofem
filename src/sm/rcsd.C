@@ -49,9 +49,9 @@
 
 namespace oofem {
 RCSDMaterial :: RCSDMaterial(int n, Domain *d) : RCM2Material(n, d)
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
@@ -64,6 +64,7 @@ RCSDMaterial :: ~RCSDMaterial()
 {
     delete linearElasticMaterial;
 }
+
 
 void
 RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
@@ -84,7 +85,6 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     FloatMatrix tempCrackDirs;
     RCSDMaterialStatus *status = ( RCSDMaterialStatus * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    // IntArray *mask;
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -108,24 +108,18 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
         // rotating crack mode
 
         this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, atTime);
-
-        //
-        // this -> giveRealPrincipalStressVector3d (princStress, gp, strainIncrement, atTime);
         princStress.resize(6);
         status->giveTempCrackDirs(tempCrackDirs);
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
-        //delete strainIncrement;
 
         crossSection->giveReducedCharacteristicVector(reducedSpaceStressVector, gp, answer);
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
         status->giveCrackStrainVector(crackStrain);
         this->updateCrackStatus(gp, crackStrain);
-        //delete crackStrain;
 
         if ( form == ReducedForm ) {
             crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
-            //delete answer;
             answer = reducedAnswer;
         }
 
@@ -193,9 +187,8 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     }
 
     status->letTempStrainVectorBe(totalStrain);
-
-    return;
 }
+
 
 void
 RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -243,9 +236,8 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
         }
     }
-
-    return;
 }
+
 
 double
 RCSDMaterial :: computeDamageCoeff(double equivStrain, double dStiffCoeff, double ep, double ef)
@@ -257,6 +249,7 @@ RCSDMaterial :: computeDamageCoeff(double equivStrain, double dStiffCoeff, doubl
 
     return damage;
 }
+
 
 double
 RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reducedTotalStrainVector, double e, TimeStep *atTime)
@@ -334,7 +327,6 @@ RCSDMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 
-
 double
 RCSDMaterial :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
@@ -346,7 +338,6 @@ RCSDMaterial :: give(int aProperty, GaussPoint *gp)
 
     return RCM2Material :: give(aProperty, gp);
 }
-
 
 
 int
@@ -366,6 +357,7 @@ RCSDMaterial :: checkSizeLimit(GaussPoint *gp, double charLength)
     LeCrit = 2.0 * Gf * Ee / ( Ft * Ft );
     return ( charLength < LeCrit );
 }
+
 
 double
 RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength)
@@ -389,7 +381,6 @@ RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength)
         //
         OOFEM_LOG_RELEVANT("Reducing Ft to %f in element %d, gp %d, Le %f\n",
                            Ft, gp->giveElement()->giveNumber(), gp->giveNumber(), charLength);
-        //
     }
 
     return Ft;
@@ -542,9 +533,6 @@ RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int
     return answer;
 }
 
-#ifdef __OOFEG
-#endif
-
 
 
 
@@ -624,7 +612,6 @@ RCSDMaterialStatus :: initTempStatus()
 }
 
 
-
 void
 RCSDMaterialStatus :: updateYourself(TimeStep *atTime)
 //
@@ -639,7 +626,6 @@ RCSDMaterialStatus :: updateYourself(TimeStep *atTime)
     damageCoeff = tempDamageCoeff;
     mode = tempMode;
 }
-
 
 
 contextIOResultType
@@ -676,6 +662,7 @@ RCSDMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
     return CIO_OK;
 }
 
+
 contextIOResultType
 RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -708,4 +695,5 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
 
     return CIO_OK; // return succes
 }
+
 } // end namespace oofem

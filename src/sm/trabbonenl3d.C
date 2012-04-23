@@ -33,6 +33,7 @@
  */
 
 #include "trabbonenl3d.h"
+#include "structuralelement.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
@@ -346,7 +347,6 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     nlStatus->setTempDam(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);
-    return;
 }
 
 
@@ -515,6 +515,7 @@ TrabBoneNL3D :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPo
  #endif
 }
 
+
 int
 TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
@@ -530,6 +531,7 @@ TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *ste
 
  #endif
 }
+
 
 int
 TrabBoneNL3D :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)

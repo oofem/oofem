@@ -132,40 +132,6 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
 }
 
 
-/*
- * void
- * NLStructuralElement :: computeStressVector (FloatArray& answer, GaussPoint* gp, TimeStep* stepN)
- * // Computes the vector containing the stresses at the Gauss point gp of
- * // the receiver, at time step stepN. The nature of these stresses depends
- * // on the element's type.
- * // this version assumes TOTAL LAGRANGE APPROACH
- * {
- * FloatArray PrevEpsilon,Epsilon, incrementOfStrains ;
- * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
- * Material *mat = this->giveMaterial();
- *
- * this->computeStrainVector (Epsilon, gp,stepN) ;
- * PrevEpsilon = ((StructuralMaterialStatus*) mat->giveStatus(gp)) -> giveStrainVector ();
- *
- * if (PrevEpsilon.giveSize()) {
- * incrementOfStrains = PrevEpsilon;
- * incrementOfStrains.negated() ;
- * incrementOfStrains.add (Epsilon) ;
- * } else {
- *  incrementOfStrains = Epsilon;
- * }
- *
- * cs -> giveRealStresses (answer, ReducedForm, gp, strain ,stepN);
- *
- * //delete Epsilon;
- *
- * return  ;
- * }
- */
-
-
-
-
 void
 NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
                                                 TimeStep *tStep, int useUpdatedGpRecord)
@@ -219,7 +185,6 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         } // end nlGeometry
 
         bt.beTranspositionOf(b);
-        // TotalStressVector = gp->giveStressVector() ;
         if ( useUpdatedGpRecord == 1 ) {
             TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
                                 ->giveStressVector();
@@ -435,7 +400,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                             this->computeNLBMatrixAt(A, gp, l + iStartIndx);
                             if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                                 b2.beProductOf(* ut, A);
-                                //delete A;
                                 for ( m = 1; m <= bi.giveNumberOfColumns(); m++ ) {
                                     // add nonlinear contribution to each component
                                     bi.at(l + 1, m) += b2.at(1, m); //mj
@@ -450,7 +414,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                             this->computeNLBMatrixAt(A, gp, l + jStartIndx);
                             if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                                 b2.beProductOf(* ut, A);
-                                //delete A;
                                 for ( m = 1; m <= bj.giveNumberOfColumns(); m++ ) {
                                     // add nonlinear contribution to each component
                                     bj.at(l + 1, m) += b2.at(1, m); //mj
@@ -482,18 +445,14 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     this->computeNLBMatrixAt(A, gp, l);
                     if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
                         b2.beProductOf(* ut, A);
-                        //delete A;
                         for ( k = 1; k <= bj.giveNumberOfColumns(); k++ ) {
                             // add nonlinear contribution to each component
                             bj.at(l, k) += b2.at(1, k); //mj
                         }
-
-                        //delete b2;
                     }
                 }
             } // end nlGeometry
 
-            //      d  = this -> giveConstitutiveMatrix() ;
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
@@ -596,7 +555,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
                 }
             } // end nlGeometry
 
-            //      d  = this -> giveConstitutiveMatrix() ;
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);

@@ -117,7 +117,7 @@ public:
         this->castingTime = -1;
     }
     /// Destructor.
-    ~Material() { delete propertyDictionary; }
+    virtual ~Material() { delete propertyDictionary; }
 
     /**
      * Computes characteristic matrix of receiver in given integration point.
@@ -251,11 +251,11 @@ public:
         return ISVT_UNDEFINED;
     }
 
-    const char *giveClassName() const { return "Material"; }
-    classType giveClassID() const { return MaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "Material"; }
+    virtual classType giveClassID() const { return MaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    void printYourself();
+    virtual void printYourself();
 
     /**
      * Returns a newly allocated material, with type depending on parameter.
@@ -268,8 +268,8 @@ public:
      */
     Material *ofType(const char *aClass);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Initialize integration point (must be inside  material region associated to receiver)

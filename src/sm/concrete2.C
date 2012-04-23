@@ -591,7 +591,6 @@ label18:
                                              pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
             }
 
-            //delete pVal; pVal = NULL;
             pVal.zero();
             goto label18;
         }

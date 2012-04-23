@@ -36,6 +36,7 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "node.h"
+#include "structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"

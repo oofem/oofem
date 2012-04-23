@@ -353,8 +353,6 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
         df.at(5) = 2. * helpVector.at(5);
         df.at(6) = 2. * helpVector.at(6);
 
-        //delete helpVector;
-
         for ( i = 1; i <= 3; i++ ) {
             if ( ( imask = mask.at(i) ) == 0 ) {
                 continue;

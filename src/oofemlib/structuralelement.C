@@ -602,48 +602,6 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 }
 
 
-
-/*
- * FloatArray*
- * StructuralElement :: ComputeResultingBodyForceAt (TimeStep* stepN)
- * // Computes at stepN the resulting force due to all body loads that act
- * // on the receiver. This force is used by the element for computing its
- * // body load vector.
- * // body loads are assumed to be input in global coordinate system,
- * // but resulting force is returned in local coordinate system.
- * {
- * int         i,n,nLoads ;
- * Load*   load ;
- * FloatArray  force,*resultant ;
- * FloatMatrix *R;
- *
- * resultant = new FloatArray(0) ;
- * nLoads    = this -> giveBodyLoadArray() -> giveSize() ;
- * for (i=1 ; i<=nLoads ; i++) {
- *    n     = bodyLoadArray -> at(i) ;
- *    load  = domain->giveLoad(n) ;
- *    if (load->giveClassID() == BodyLoadGT) {
- * load -> computeComponentArrayAt(force, stepN);
- * force.times(this->giveMaterial() -> give('d'));
- * resultant -> add(&force) ;
- * //delete force ;
- * }
- * }
- *
- * if (resultant->giveSize() == 0) {
- *    delete resultant ;
- *    return NULL ;}
- * else {
- * // ask for transformation from global cs to local cs.
- *    R = this-> GiveGtoLRotationMatrix ();
- * if (R == NULL) return resultant;
- * resultant -> rotatedWith(R,'n') ;
- * delete R;
- * return resultant ;
- * }
- * }
- */
-
 void
 StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeStep *stepN, GaussPoint *gp, ValueModeType mode)
 // Computes at stepN the resulting force due to all temperature loads that act
@@ -756,7 +714,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
         for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
             this->computeBmatrixAt(gp, bj);
-            //      d  = this -> giveConstitutiveMatrix() ;
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);

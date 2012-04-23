@@ -33,6 +33,7 @@
  */
 
 #include "compodamagemat.h"
+#include "structuralelement.h"
 #include "material.h"
 #include "linearelasticmaterial.h"
 #include "ortholinearelasticmaterial.h"
@@ -46,12 +47,13 @@
 namespace oofem {
 CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
-    /// Constructor
+    // Constructor
 }
+
 
 CompoDamageMat :: ~CompoDamageMat()
 {
-    /// destructor
+    // destructor
 }
 
 
@@ -349,7 +351,8 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
 }
 
 //used for output in *.hom a *.out
-int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime) {
+int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
     CompoDamageMatStatus *status = ( CompoDamageMatStatus * ) this->giveStatus(aGaussPoint);
     if ( type == IST_DamageTensor ) {
         answer.resize(6);
@@ -380,8 +383,7 @@ int CompoDamageMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
     }
 }
 
-int
-CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+int CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_DamageTensor ) {
         answer.resize(9);
@@ -398,7 +400,8 @@ CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType typ
 }
 
 
-void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp) {
+void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp)
+{
     double denom;
     double ex, ey, ez, nxy, nxz, nyz, gyz, gzx, gxy;
     double a, b, c, d, e, f;
@@ -474,9 +477,12 @@ int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint
     return 0;
 }
 
-//determine characteristic fracture area for three orthogonal cracks, based on the size of element (crack band model). Since the orientation of cracks is aligned with the orientation of material, determination is based only on the geometry (not on the direction of principal stress etc.). Assumption that fracture localizes into all integration points on element. Material orientation in global c.s. is passed. Called in the first run
-void
-CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs) {
+// determine characteristic fracture area for three orthogonal cracks, based on the size of element (crack band model).
+// Since the orientation of cracks is aligned with the orientation of material, determination is based only on the geometry (not on the direction of principal stress etc.).
+// Assumption that fracture localizes into all integration points on element.
+// Material orientation in global c.s. is passed. Called in the first run
+void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs)
+{
     int i, j;
     FloatArray crackPlaneNormal(3);
 
@@ -507,7 +513,6 @@ CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *g
     charLenModes.at(5) = ( st->elemCharLength.at(3) + st->elemCharLength.at(1) ) / 2.; //average two directions
     charLenModes.at(6) = ( st->elemCharLength.at(1) + st->elemCharLength.at(2) ) / 2.; //average two directions
 }
-
 
 //check that elemnt is small enough to prevent snap-back
 void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {

@@ -476,10 +476,6 @@ LIBeam2dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
  * answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
  * }
  * }
- * //delete et;
- * //delete e0;
- *
- * return ;
  * }
  */
 

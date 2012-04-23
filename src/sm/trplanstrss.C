@@ -1198,8 +1198,6 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                         EMAddGraphicsToModel(ESIModel(), tr);
                     }
                 }
-
-                //delete crackDir;
             }
         }
     }

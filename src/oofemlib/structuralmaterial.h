@@ -36,12 +36,9 @@
 #define structuralmaterial_h
 
 #include "material.h"
-#include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "matconst.h"
-#include "structuralelement.h"
 #include "matstatus.h"
 #include "stressstrainprincmode.h"
 
@@ -103,24 +100,6 @@ class GaussPoint;
  */
 class StructuralMaterial : public Material
 {
-    /*
-     * This class implements a material in a finite element problem. A material
-     * is an attribute of a domain. It is usually also attribute of many elements.
-     * DESCRIPTION
-     * The attribute 'propertyDictionary' contains all the properties of a material,
-     * like its Young modulus, its mass density or poisson ratio.
-     * TASK
-     * - Returning standard material stiffness and flexibility marices for 3d-case.
-     * according to current state determined by using data stored
-     * in Gausspoint.
-     * - Returning standard material stiffness for other stress states for point
-     * in 3d continua - (2dPlanaStress, 2dPlaneStrain, 1dStress);
-     * - Returning a material property (method 'give'). Only for non-standard elements.
-     * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     * - Imposing constrains according to stressStrain mode in gp to 3dstiffmessMatrix
-     * (function reduceTo).
-     * - storing / restoring context
-     */
 protected:
     /// Reference temperature (temperature, when material has been built into structure).
     double referenceTemperature;
@@ -133,7 +112,7 @@ public:
      */
     StructuralMaterial(int n, Domain *d) : Material(n, d) { }
     /// Destructor.
-    ~StructuralMaterial() { }
+    virtual ~StructuralMaterial() { }
 
     /**
      * Computes the stiffness matrix of receiver in given integration point, respecting its history.
@@ -213,9 +192,9 @@ public:
     // identification and auxiliary functions
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "StructuralMaterial"; }
-    classType giveClassID() const { return StructuralMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "StructuralMaterial"; }
+    virtual classType giveClassID() const { return StructuralMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
      * Auxiliary member function that computes principal values of stress/strain vector.

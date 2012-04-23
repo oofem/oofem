@@ -436,8 +436,6 @@ ConcreteDPM2 :: ConcreteDPM2(int n, Domain *d) :
 ConcreteDPM2 :: ~ConcreteDPM2()
 {
     delete linearElasticMaterial;
-
-    //delete ILEMaterial ;
 }
 
 IRResultType

@@ -89,7 +89,6 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-
 void
 RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
                                           GaussPoint *gp,
@@ -158,10 +157,8 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     }
 
     // expand the stress to full form if needed
-    //FloatArray helpAnswer;
     ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )
     ->giveFullCharacteristicVector(answer, gp, stressVector);
-    return;
 }
 
 
@@ -232,8 +229,6 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
         totalDeltaSigma += deltaSigma.at(k);
         answer.at(k) = sig0 - totalDeltaSigma;
     }
-
-    return;
 }
 
 
@@ -272,8 +267,6 @@ RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, doubl
     if ( fromIncluded ) {
         answer.at(1) = from;
     }
-
-    return;
 }
 
 
@@ -321,7 +314,6 @@ RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
                                         form, TangentStiffness, gp,
                                         this->giveLinearElasticMaterial(),
                                         tStep);
-    return;
 }
 
 void
@@ -339,7 +331,6 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
     giveCharMaterialComplianceMatrixOf(answer, form, TangentStiffness, gp,
                                        this->giveLinearElasticMaterial(),
                                        tStep);
-    return;
 }
 
 
@@ -496,8 +487,6 @@ RheoChainMaterial :: computeCharTimes()
     for ( i = 1; i <= nsteps; i++ ) {
         charTimes.at(i + 1) = exp(log(Tau1) + help * i);
     }
-
-    return;
 }
 
 
@@ -513,7 +502,6 @@ RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     //
     this->giveUnitStiffnessMatrix(answer, form, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 
@@ -529,7 +517,6 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, form, mode, gp,
                                                                      atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 
@@ -544,7 +531,6 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     //
     this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, form, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 void
@@ -558,7 +544,6 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     //
     this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, form, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 
@@ -573,7 +558,6 @@ RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     //
     this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, form, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 
@@ -588,7 +572,6 @@ RheoChainMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
     //
     this->giveLinearElasticMaterial()->give2dBeamLayerStiffMtrx(answer, form, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 
@@ -603,7 +586,6 @@ RheoChainMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
     //
     this->giveLinearElasticMaterial()->give2dPlateLayerStiffMtrx(answer, form, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 
@@ -749,8 +731,7 @@ RheoChainMaterialStatus :: ~RheoChainMaterialStatus()
             delete hiddenVars [ i ];
         }
 
-        //delete hiddenVars;
-	delete [] hiddenVars;
+        delete [] hiddenVars;
     }
 }
 

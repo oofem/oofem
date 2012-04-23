@@ -33,6 +33,7 @@
  */
 
 #include "rankinematnl.h"
+#include "structuralelement.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
@@ -62,9 +63,9 @@
 
 namespace oofem {
 RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {}
 
 void
@@ -474,7 +475,6 @@ RankineMatNlStatus :: initTempStatus()
 }
 
 
-
 void
 RankineMatNlStatus :: updateYourself(TimeStep *atTime)
 //
@@ -485,7 +485,6 @@ RankineMatNlStatus :: updateYourself(TimeStep *atTime)
 {
     RankineMatStatus :: updateYourself(atTime);
 }
-
 
 
 contextIOResultType

@@ -67,7 +67,7 @@ public:
 
     // STATE VARIABLE
     // declare state variable access and modification methods
-    double giveLocalCumPlasticStrainForAverage()     { return localCumPlasticStrainForAverage; }
+    double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
     const FloatArray *giveLTangentContrib();
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
@@ -168,7 +168,6 @@ public:
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip);
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
-
 
 protected:
     // Creates the corresponding material status

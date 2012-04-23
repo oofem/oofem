@@ -34,6 +34,7 @@
 
 #include "linearelasticmaterial.h"
 #include "ortholinearelasticmaterial.h"
+#include "structuralelement.h"
 #include "material.h"
 #include "structuralms.h"
 #include "domain.h"
@@ -249,6 +250,7 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
     answer.rotatedWith(rotationMatrix);
 }
 
+
 void
 OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
                                                                        MatResponseForm form,
@@ -268,7 +270,6 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
 
     eksi = 1. - ( nxy * nyx + nyz * nzy + nzx * nxz ) - ( nxy * nyz * nzx + nyx * nzy * nxz );
 
-    //constitutiveMatrix = new FloatMatrix(6,6) ;
     answer.resize(6, 6);
     answer.zero();
     // switched letters from original oofem -> now produces same material stiffness matrix as Abaqus method
@@ -286,12 +287,9 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
         }
     }
 
-
     answer.at(4, 4) =  this->give(Gyz, gp);
     answer.at(5, 5) =  this->give(Gxz, gp);
     answer.at(6, 6) =  this->give(Gxy, gp);
-
-    return;
 }
 
 
@@ -346,7 +344,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         }
 
         //
-        // possible rotation about local z-axix should be considered in future
+        // possible rotation about local z-axis should be considered in future
         //
         /*
          * //

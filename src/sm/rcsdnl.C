@@ -116,8 +116,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     FloatMatrix tempCrackDirs;
     RCSDNLMaterialStatus *nonlocStatus, *status = ( RCSDNLMaterialStatus * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    // IntArray *mask;
-    //localIntegrationRecord* ir;
+
     FloatArray nonlocalContribution;
     FloatArray reducedLocalStrainVector, localStrain;
 
@@ -173,7 +172,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         ////# princStress.resize (6);
         ////#  status->giveTempCrackDirs (tempCrackDirs);
         ////#  this -> transformStressVectorTo (answer, tempCrackDirs, princStress, 1);
-        ////#  //delete strainIncrement;
 
         ////#  crossSection->giveReducedCharacteristicVector(stressIncrement, gp, answer);
         ////# stressIncrement.subtract (status -> giveStressVector());
@@ -184,11 +182,9 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
 
         ////#
         this->giveMaterialStiffnessMatrix(Ds0, ReducedForm, SecantStiffness, gp, atTime);
-        //delete crackStrain;
 
         ////#  if (form == ReducedForm) {
         ////#   crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
-        ////#   //delete answer;
         ////#   answer = reducedAnswer;
         ////#  }
 
@@ -367,8 +363,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
 
     status->letTempStrainVectorBe(totalStrain);
     status->setTempNonlocalStrainVector(reducedNonlocStrainVector);
-
-    return;
 }
 
 
@@ -411,11 +405,13 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 double
 RCSDNLMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
 {
     return 1.e6; //this->ef;
 }
+
 
 contextIOResultType
 RCSDNLMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -559,7 +555,6 @@ RCSDNLMaterialStatus :: initTempStatus()
 }
 
 
-
 void
 RCSDNLMaterialStatus :: updateYourself(TimeStep *atTime)
 //
@@ -571,7 +566,6 @@ RCSDNLMaterialStatus :: updateYourself(TimeStep *atTime)
     RCSDEMaterialStatus :: updateYourself(atTime);
     nonlocalStrainVector = tempNonlocalStrainVector;
 }
-
 
 
 contextIOResultType
@@ -596,6 +590,7 @@ RCSDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
     return CIO_OK;
 }
 
+
 contextIOResultType
 RCSDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -615,9 +610,8 @@ RCSDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    return CIO_OK; // return succes
+    return CIO_OK; // return success
 }
-
 
 
 Interface *
@@ -629,8 +623,6 @@ RCSDNLMaterialStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
-
-
 
 
 #ifdef __PARALLEL_MODE

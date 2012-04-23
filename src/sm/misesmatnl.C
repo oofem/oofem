@@ -33,6 +33,7 @@
  */
 
 #include "misesmatnl.h"
+#include "structuralelement.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
@@ -62,7 +63,6 @@
 
 namespace oofem {
 double sign(double number)
-
 {
     if ( number > 0 ) {
         return 1;
@@ -75,9 +75,9 @@ double sign(double number)
 
 
 MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
     Rf = 0.;
     exponent = 1.;
@@ -90,6 +90,7 @@ MisesMatNl :: ~MisesMatNl()
 // destructor
 //
 { }
+
 
 void
 MisesMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
@@ -108,10 +109,7 @@ MisesMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);
-
-    return;
 }
-
 
 
 void
@@ -146,29 +144,8 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, M
         answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sign(stress);
     }
 }
-/*
- * double
- * MisesMatNl:: computeWeightFunction(double distance)
- * {
- * if((distance>=0.) && (distance<=this->cl))
- *  {
- *    double help = (1-distance*distance/(cl*cl));
- *    return help*help;
- *  }
- * return 0.;
- *
- * }
- *
- *
- * double
- * MisesMatNl:: computeWeightFunction(const FloatArray& src, const FloatArray &coord)
- * {
- * double dist = src.distance(coord);
- * double answer = this->computeWeightFunction(dist);
- * return answer;
- *
- * }
- */
+
+
 void
 MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
 {
@@ -195,6 +172,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
         this->modifyNonlocalWeightFunctionAround(gp);
     }
 }
+
 
 void
 MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
@@ -407,6 +385,7 @@ MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
     return tempDam;
 }
 
+
 void
 MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                    GaussPoint *gp, TimeStep *atTime)
@@ -444,6 +423,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
     }
 }
 
+
 dynaList< localIntegrationRecord > *
 MisesMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
@@ -451,7 +431,6 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(Gauss
     this->buildNonlocalPointTable(gp);
     return status->giveIntegrationDomainList();
 }
-
 
 
 int
@@ -531,11 +510,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
 }
 
 
-
-
 /*********************************************status**************************************************************/
-
-
 
 MisesMatNlStatus :: MisesMatNlStatus(int n, Domain *d, GaussPoint *g) :
     MisesMatStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
@@ -553,13 +528,10 @@ MisesMatNlStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
-    // if ( this->damage > 0.0 ) {
     fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
-
-    //}
-
     fprintf(file, "}\n");
 }
+
 
 void
 MisesMatNlStatus :: initTempStatus()
@@ -572,7 +544,6 @@ MisesMatNlStatus :: initTempStatus()
 }
 
 
-
 void
 MisesMatNlStatus :: updateYourself(TimeStep *atTime)
 //
@@ -583,7 +554,6 @@ MisesMatNlStatus :: updateYourself(TimeStep *atTime)
 {
     MisesMatStatus :: updateYourself(atTime);
 }
-
 
 
 contextIOResultType
@@ -603,6 +573,7 @@ MisesMatNlStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     return CIO_OK;
 }
 
+
 contextIOResultType
 MisesMatNlStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -620,6 +591,7 @@ MisesMatNlStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
 
     return CIO_OK;
 }
+
 
 Interface *
 MisesMatNlStatus :: giveInterface(InterfaceType type)
@@ -644,6 +616,7 @@ MisesMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoin
     return buff.packDouble( nlStatus->giveLocalCumPlasticStrainForAverage() );
 }
 
+
 int
 MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
@@ -655,6 +628,7 @@ MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN
     nlStatus->setLocalCumPlasticStrainForAverage(localCumPlasticStrainForAverage);
     return result;
 }
+
 
 int
 MisesMatNl :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)

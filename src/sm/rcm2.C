@@ -49,9 +49,9 @@ namespace oofem {
 #define rcm_RESIDUALSTIFFFACTOR 1.e-3
 
 RCM2Material :: RCM2Material(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
     linearElasticMaterial = NULL;
     Gf = Ft = 0.;
@@ -96,8 +96,6 @@ RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
  *
  * this -> giveEffectiveMaterialStiffnessMatrix (def, TangentStiffness,gp,atTime);
  * answer.beProductOf (def, strainIncrement);
- * //delete def;
- * return ;
  * }
  */
 
@@ -121,8 +119,6 @@ RCM2Material :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
      */
     this->giveEffectiveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
     // def is full matrix for current gp stress strain mode.
-
-    return;
 }
 
 
@@ -141,7 +137,6 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     FloatMatrix tempCrackDirs;
     RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    // IntArray *mask;
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -161,28 +156,22 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 
     this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, atTime);
 
-    //
-    // this -> giveRealPrincipalStressVector3d (princStress, gp, strainIncrement, atTime);
     princStress.resize(6);
     status->giveTempCrackDirs(tempCrackDirs);
     this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
-    //delete strainIncrement;
 
     status->letTempStrainVectorBe(totalStrain);
     crossSection->giveReducedCharacteristicVector(reducedStressVector, gp, answer);
     status->letTempStressVectorBe(reducedStressVector);
     status->giveCrackStrainVector(crackStrain);
     this->updateCrackStatus(gp, crackStrain);
-    //delete crackStrain;
 
     if ( form == FullForm ) {
         return;
     }
 
     crossSection->giveReducedCharacteristicVector(reducedAnswer, gp, answer);
-    //delete answer;
     answer = reducedAnswer;
-    return;
 }
 
 
@@ -248,8 +237,6 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
         status->letTempCrackDirsBe(tempCrackDirs);
     }
 
-    //delete totalStrainVector;
-
     // compute de in local system
     // for iso materials no transformation if stiffness required
     //
@@ -281,32 +268,18 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             fullDecr = de;
             fullDecr.add(dcr);
             decr.beSubMatrixOf(fullDecr, crackMapping);
-            //delete fullDecr;
-            //delete dcr;
 
-            /*   decr = de->GiveCopy();
-             * for (i = 1; i <= 3; i++) {
-             *  if ((ind = this->giveStressStrainComponentIndOf(FullForm,gp,i)))
-             *   decr->at(ind,ind) += dcr -> at(i,i);
-             * }
-             * delete dcr;
-             */
             if ( dSigma.giveSize() == 0 ) {
                 fullDSigma.beProductOf(de, strainIncrement);
                 dSigma.beSubArrayOf(fullDSigma, crackMapping);
-                //delete fullDSigma;
             }
 
             decr.solveForRhs(dSigma, crackStrainIterativeIncrement);
-            //delete dSigma;
             for ( i = 1; i <= 3; i++ ) {
                 if ( ( ind = crackMapping.at(i) ) ) {
                     crackStrainVector.at(i) += crackStrainIterativeIncrement.at(ind);
                 }
             }
-
-            //delete crackStrainIterativeIncrement;
-            //delete decr;
 
             // check for crack closing, updates also cracking map
             this->checkIfClosedCracks(gp, crackStrainVector, crackMapping);
@@ -314,10 +287,8 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             // elastic strain component
             elastStrain.beDifferenceOf(principalStrain, crackStrainVector);
             sigmaEl.beProductOf(de, elastStrain);
-            //delete elastStrain;
 
             // Stress in cracks
-            //sigmaCr = new FloatArray (3);
             for ( i = 1; i <= 3; i++ ) {
                 if ( crackMapping.at(i) ) {
                     sigmaCr.at(i) = giveNormalCrackingStress(gp, crackStrainVector.at(i), i);
@@ -333,7 +304,6 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             elastStrain.beDifferenceOf(principalStrain, crackStrainVector);
             sigmaEl.beProductOf(de, elastStrain);
             sigmaCr.zero();
-            //delete elastStrain;
         }
 
         // check for new cracks
@@ -355,10 +325,9 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
         fullDSigma = sigmaEl;
         fullDSigma.subtract(sigmaCr);
         dSigma.beSubArrayOf(fullDSigma, crackMapping);
-        //delete fullDSigma;
         // find max error in dSigma
         // if max err < allovedErr -> stop iteration
-        // alloved Err is computed relative to Ft;
+        // allowed Err is computed relative to Ft;
 
         // check only for active cracks
         maxErr = 0.;
@@ -369,42 +338,15 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
         }
 
         if ( maxErr < rcm_STRESSRELERROR * this->give(pscm_Ft, gp) ) {
-            //delete dSigma;
-
             status->letPrincipalStressVectorBe(sigmaEl);
             answer = sigmaEl;
-
-            //delete sigmaCr;
-            //delete strainIncrement;
-            // delete plasticStrainVector;
-            //delete crackStrainVector;
-            //delete de;
-
             return;
         }
-
-        //delete sigmaCr;
-        //delete sigmaEl;
     } // loop
 
     // convergence not reached
     _error("GiveRealStressVector3d - convergence not reached");
-
-    //delete dSigma;
-    //delete sigmaEl;
-    //delete sigmaCr;
-
-
-    //delete strainIncrement;
-    // delete plasticStrainVector;
-    //delete crackStrainVector;
-    //delete de;
-
-    return;
 }
-
-
-
 
 
 void
@@ -420,7 +362,6 @@ RCM2Material :: initTempStatus(GaussPoint *gp)
 }
 
 
-
 void
 RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
                                         const FloatArray &crackStrain,
@@ -432,7 +373,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
 // is newly activated or
 // closed crack is reopened
 // return 0 if no crack is activated or reactivated.
-// modifies crackStressVector for newly activeted crack.
+// modifies crackStressVector for newly activated crack.
 //
 {
     double initStress, Le = 0.0;
@@ -474,7 +415,6 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
                 // Le = gp->giveElement()->giveCharacteristicLenght (gp, &crackPlaneNormal);
                 Le = this->giveCharacteristicElementLenght(gp, crackPlaneNormal);
                 initStress = this->computeStrength(gp, Le);
-                //delete crackPlaneNormal;
                 upd = 1;
             }
 
@@ -495,7 +435,6 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
     }
 
     answer.resize(0);
-    return;
 }
 
 double
@@ -537,7 +476,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
 // which describing previously reached equlibrium. After a new equilibrium
 // is reached, this->updateYourself is called which invokes matStatus->
 // updateYourself(), which copies temporary variables to variables
-// describing equlibrium.
+// describing equilibrium.
 //
 //
 {
@@ -551,7 +490,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
     // check if material previously cracked
     // and compute possible crack planes
     // or if newer cracked, so we compute principal stresses
-    // (for iso mat. concide with princ strains)
+    // (for iso mat. coincide with princ strains)
     // and compare them with reduced tension strength
     // as a criterion for crack initiation
 
@@ -627,7 +566,6 @@ RCM2Material :: checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVecto
     }
 
     status->giveCrackMap(crackMap); // update crack Map
-    return;
 }
 
 
@@ -648,7 +586,6 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     int i, j, sd;
 
     lMat->giveCharacteristicMatrix(de, FullForm, rMode, gp, atTime);
-    // fullAnswer = new FloatMatrix (3,3);
     // copy first 3x3 submatrix to answer
     for ( i = 1; i <= 3; i++ ) {
         for ( j = 1; j <= 3; j++ ) {
@@ -656,12 +593,11 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         }
     }
 
-    // delete de;
     if ( form == FullForm ) { // 3x3 full form required
         answer = fullAnswer;
     } else {
         // reduced form for only
-        // nonzero normal streses
+        // nonzero normal stresses
         //
         // first find spatial dimension of problem
         sd = 0;
@@ -671,7 +607,6 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
             }
         }
 
-        //answer = new FloatMatrix(sd,sd);
         answer.resize(sd, sd);
         answer.zero();
 
@@ -684,13 +619,8 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                 }
             }
         }
-
-        //delete fullAnswer;
-        //delete mask;
         return;
     }
-
-    return;
 }
 
 
@@ -725,10 +655,9 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     status->giveTempCrackDirs(tempCrackDirs);
     this->giveNormalElasticStiffnessMatrix(de, ReducedForm, rMode, gp, atTime,
                                            tempCrackDirs);
-    invDe.beInverseOf(de); //delete de;
+    invDe.beInverseOf(de);
     this->giveCrackedStiffnessMatrix(dcr, rMode, gp, atTime);
     this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-    //compliance = new FloatMatrix (mask->giveSize(),mask->giveSize());
     compliance.resize( mask.giveSize(), mask.giveSize() );
 
     // we will set
@@ -751,8 +680,6 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             }
         }
     }
-
-    // delete dcr; delete invDe;
 
     status->getPrincipalStressVector(principalStressVector);
     status->getPrincipalStrainVector(principalStrainVector);
@@ -790,14 +717,10 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     d.beInverseOf(compliance);
     // delete compliance;
     //
-    // now let d to grov to Full Format
+    // now let d to grow to Full Format
     //
-    //delete mask;
     this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
     df.beSubMatrixOfSizeOf(d, mask, 6);
-    //delete mask;
-    //df = this ->FullFormStiffMtrx (gp, d);
-    //delete d;
     //
     // final step - transform stiffnes to global c.s
     //
@@ -806,8 +729,6 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     tt.beTranspositionOf(t);
     df.rotatedWith(tt);
 
-    //delete tt;  //delete df;
-
 
     if ( form == FullForm ) {
         answer = df;
@@ -815,9 +736,6 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
         this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
         answer.beSubMatrixOf(df, mask);
     }
-
-    // answer = df;
-    return;
 }
 
 

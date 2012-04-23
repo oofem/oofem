@@ -67,7 +67,7 @@ public:
     RankineMatNlStatus(int n, Domain *d, GaussPoint *g);
     virtual ~RankineMatNlStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
     const FloatArray *giveLTangentContrib();

@@ -330,7 +330,6 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
             this->giveStressBackVector(backStress, stressSpaceHardeningVars);
             helpVector = stressVector;
             helpVector.add(backStress);
-            //delete backStress;
         } else {
             helpVector = stressVector;
         }

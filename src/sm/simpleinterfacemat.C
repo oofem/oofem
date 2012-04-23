@@ -33,6 +33,7 @@
  */
 
 #include "simpleinterfacemat.h"
+#include "structuralelement.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
@@ -43,9 +44,9 @@
 
 namespace oofem {
 SimpleInterfaceMaterial :: SimpleInterfaceMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+//
+// constructor
+//
 { }
 
 
@@ -80,7 +81,6 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     _error("give3dMaterialStiffnessMatrix: not implemented");
-    return;
 }
 
 
@@ -156,8 +156,8 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     status->setTempShearStressShift(tempShearStressShift);
     status->letTempStrainVectorBe(strainVector);
     status->letTempStressVectorBe(answer);
-    return;
 }
+
 
 void
 SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -231,8 +231,6 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
         return;
 
-        return;
-
     default:
         StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
     }
@@ -243,7 +241,7 @@ int
 SimpleInterfaceMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
 //
 // returns the size of reduced stress-strain vector
-// acording to mode given by gp.
+// according to mode given by gp.
 //
 {
     switch ( mode ) {
@@ -356,8 +354,6 @@ SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
 }
 
 
-
-
 InternalStateValueType
 SimpleInterfaceMaterial :: giveIPValueType(InternalStateType type)
 {
@@ -383,7 +379,7 @@ void
 SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                        GaussPoint *gp,  TimeStep *tStep)
 //
-// returns a FloatArray(6) of initial strain vector
+// returns a strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
 // caused by unit temperature in direction of
 // gp (element) local axes
@@ -391,8 +387,6 @@ SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
 {
     answer.resize(1);
     answer.at(1) = 0.0;
-
-    return;
 }
 
 
@@ -428,9 +422,6 @@ SimpleInterfaceMaterial :: giveInputRecordString(std :: string &str, bool keywor
 }
 
 
-
-
-
 SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
     shearStressShift.resize(2);
@@ -461,6 +452,7 @@ SimpleInterfaceMaterialStatus :: initTempStatus()
     tempShearStressShift = shearStressShift;
 }
 
+
 void
 SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *atTime)
 {
@@ -468,12 +460,14 @@ SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *atTime)
     shearStressShift = tempShearStressShift;
 }
 
+
 FloatArray
 SimpleInterfaceMaterialStatus :: giveShearStressShift()
 {
     FloatArray answer = shearStressShift;
     return answer;
 }
+
 
 FloatArray
 SimpleInterfaceMaterialStatus :: giveTempShearStressShift()
@@ -501,6 +495,7 @@ SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
     return CIO_OK;
 }
 
+
 contextIOResultType
 SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -518,4 +513,5 @@ SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
 
     return CIO_OK;
 }
+
 } // end namespace oofem

@@ -721,7 +721,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     mass = l * area * density;
 }
 
-
+///@todo Deprecated? If so, remove it. /Mikael
 /*
  * void
  * Beam2d :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
@@ -752,10 +752,6 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
  * answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
  * }
  * }
- * //delete et;
- * //delete e0;
- *
- * return ;
  * }
  */
 

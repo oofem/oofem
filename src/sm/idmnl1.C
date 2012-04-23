@@ -38,6 +38,7 @@
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "structuralelement.h"
 
 #include "sparsemtrx.h"
 #include "isolinearelasticmaterial.h"
@@ -814,7 +815,6 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 }
 
 
-
 void
 IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode,
@@ -828,7 +828,6 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
     answer.resize(3, 3);
     lMat->giveCharacteristicMatrix(de, FullForm, rMode, gp, atTime);
-    // fullAnswer = new FloatMatrix (3,3);
     // copy first 3x3 submatrix to answer
     for ( i = 1; i <= 3; i++ ) {
         for ( j = 1; j <= 3; j++ ) {
@@ -836,10 +835,6 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         }
     }
 }
-
-
-
-
 
 
 IDNLMaterialStatus :: IDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
@@ -874,7 +869,7 @@ IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 IDNLMaterialStatus :: initTempStatus()
 //
-// initializes temp variables according to variables form previous equlibrium state.
+// initializes temp variables according to variables form previous equilibrium state.
 // builds new crackMap
 //
 {

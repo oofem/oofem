@@ -208,6 +208,7 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
     return 1;
 }
 
+///@todo Deprecated? Is so, remove it. / Mikael
 /*
  * void
  * InterfaceElem2dQuad :: computeStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode,
@@ -229,7 +230,6 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
  * for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
  *  gp = iRule->getIntegrationPoint(j) ;
  *  this -> computeBmatrixAt(gp, bjl) ;
- *  //      d  = this -> giveConstitutiveMatrix() ;
  *  this -> computeConstitutiveMatrixAt(d, rMode, gp, tStep);
  *  this -> computeGtoLRotationMatrix(t, gp);
  *  bj.beProductOf(bjl,t);
@@ -238,7 +238,6 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
  *  if (matStiffSymmFlag) answer.plusProductSymmUpper (bj,dbj,dV); else answer.plusProductUnsym (bj,dbj,dV);
  *
  * }
- * return  ;
  * }
  */
 
