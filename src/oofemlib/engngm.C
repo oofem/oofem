@@ -1114,6 +1114,16 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 }
 
 
+void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, Domain *domain)
+{
+    this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain);
+    this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain);
+    this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain);
+}
+
+
 void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                  CharType type, ValueModeType mode,
                                                  const UnknownNumberingScheme &s, Domain *domain)

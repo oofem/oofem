@@ -797,6 +797,20 @@ public:
 
 protected:
     /**
+     * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
+     * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
+     * @param answer Assembled vector.
+     * @param eid Determines type of equation and corresponding element code numbers.
+     * @param mode Mode of unknown (total, incremental, rate of change).
+     * @param tStep Time step, when answer is assembled.
+     * @param type Characteristic components of type type are requested.
+     * @param s Determines the equation numbering scheme.
+     * @param domain Domain to assemble from.
+     */
+    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, Domain *domain);
+    /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
      * @param eid Determines type of equation and corresponding element code numbers.
