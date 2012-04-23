@@ -2728,7 +2728,7 @@ HellmichMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
         }
 
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         int indx;
         FloatArray st(6), s;
         if ( options & moPlasticity ) {
@@ -2847,9 +2847,9 @@ HellmichMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
 int
 HellmichMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else if ( ( type == IST_DamageTensor ) || ( type == IST_HydrationDegree ) || ( type == IST_Temperature ) ) {
         return 1;

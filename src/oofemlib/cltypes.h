@@ -43,9 +43,6 @@ namespace oofem {
 /// @return Character corresponding to given ValueModeType.
 char cltypesGiveUnknownTypeModeKey(ValueModeType mode);
 
-/// @return True if ValueModeType is incremental, otherwise false.
-bool isUnknownTypeModeIncremental(ValueModeType);
-
 /// @return The value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType(InternalStateType type);
 } // end namespace oofem

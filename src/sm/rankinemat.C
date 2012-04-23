@@ -57,12 +57,14 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
     sig0 = 0.;
 }
 
+
 // specifies whether a given material mode is supported by this model
 int
 RankineMat :: hasMaterialModeCapability(MaterialMode mode)
 {
     return ( mode == _PlaneStress );
 }
+
 
 // reads the model parameters from the input file
 IRResultType
@@ -107,6 +109,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 // creates a new material status  corresponding to this class
 MaterialStatus *
 RankineMat :: CreateStatus(GaussPoint *gp) const
@@ -115,6 +118,7 @@ RankineMat :: CreateStatus(GaussPoint *gp) const
     status = new RankineMatStatus(1, this->giveDomain(), gp);
     return status;
 }
+
 
 // computes the stress vector corresponding to given (final) strain
 void
@@ -153,17 +157,20 @@ RankineMat :: giveRealStressVector(FloatArray &answer,
 #endif
 }
 
+
 double
 RankineMat :: evalYieldFunction(const FloatArray &sigPrinc, const double kappa)
 {
     return sigPrinc.at(1) - evalYieldStress(kappa);
 }
 
+
 double
 RankineMat :: evalYieldStress(const double kappa)
 {
     return sig0 + H * kappa;
 }
+
 
 // computes the stress according to elastoplasticity
 // (return of trial stress to the yield surface)
@@ -575,7 +582,7 @@ RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, M
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( ( type == IST_DamageScalar ) ) {
+    } else if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -591,6 +598,7 @@ RankineMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, M
 
     return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 }
+
 
 int
 RankineMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
@@ -644,8 +652,10 @@ RankineMatStatus :: RankineMatStatus(int n, Domain *d, GaussPoint *g) :
 #endif
 }
 
+
 RankineMatStatus :: ~RankineMatStatus()
 { }
+
 
 void
 RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -679,6 +689,7 @@ RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
+
 // initializes temporary variables based on their values at the previous equlibrium state
 void RankineMatStatus :: initTempStatus()
 {
@@ -698,6 +709,7 @@ void RankineMatStatus :: initTempStatus()
 #endif
 }
 
+
 // updates internal variables when equilibrium is reached
 void
 RankineMatStatus :: updateYourself(TimeStep *atTime)
@@ -712,6 +724,7 @@ RankineMatStatus :: updateYourself(TimeStep *atTime)
     dissWork = tempDissWork;
 #endif
 }
+
 
 // saves full information stored in this status
 // temporary variables are NOT stored
@@ -757,7 +770,6 @@ RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 
-
 contextIOResultType
 RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -800,6 +812,7 @@ RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     return CIO_OK; // return success
 }
 
+
 #ifdef keep_track_of_dissipated_energy
 void
 RankineMatStatus :: computeWork(GaussPoint *gp, MaterialMode mode, double gf)
@@ -834,4 +847,5 @@ RankineMatStatus :: computeWork(GaussPoint *gp, MaterialMode mode, double gf)
     }
 }
 #endif
+
 } // end namespace oofem

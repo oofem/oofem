@@ -134,7 +134,7 @@ void FE2SinteringMaterial::givePlaneStressStiffMtrx(FloatMatrix &answer, MatResp
 
 int FE2SinteringMaterial::hasMaterialModeCapability(MaterialMode mode)
 {
-    if ((mode == _PlaneStress)) { // _2dFlow
+    if ( mode == _PlaneStress ) { // _2dFlow
         return 1;
     }
     return 0;

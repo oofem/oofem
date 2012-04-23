@@ -115,7 +115,7 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
 // each separate layer has its own slave gp.)
 //
 {
-    if ( ( gaussPointArray == NULL ) ) {
+    if ( gaussPointArray == NULL ) {
         return NULL;
     }
 

@@ -33,7 +33,6 @@
  */
 
 #include "perfectlyplasticmaterial.h"
-//#include "yieldcriteria.h"
 #include "structuralcrosssection.h"
 #include "domain.h"
 #include "verbose.h"
@@ -72,7 +71,6 @@ PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-
 void
 PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
                                                  GaussPoint *gp,
@@ -90,7 +88,6 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
 //
 // Note: formulated in full stress strain space
 {
-    //  FloatMatrix* Material :: (*dfunc) (GaussPoint*, FloatArray* = NULL);
     FloatArray elasticStressIncrement;
     FloatArray workStress, *yieldStressGrad, workStress2, stressVector3d;
     FloatArray mStrainIncrement3d, mStressElasticIncrement3d, PlasticStrainVector3d;
@@ -107,7 +104,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     double f0, f1, f2, help, dLambda, r, r1, m;
     int i;
 
-    // init temp variables (of YC,LC,Material) at the begining of step
+    // init temp variables (of YC,LC,Material) at the beginning of step
     this->initTempStatus(gp);
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
@@ -118,7 +115,6 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     reducedStrainIncrement.beDifferenceOf(reducedStrain, status->giveStrainVector());
 
     crossSection->giveFullCharacteristicVector(strainIncrement, gp, reducedStrainIncrement);
-    //delete reducedStrainIncrement;
     status->givePlasticStrainVector(plasticStrainVector);
     crossSection->giveFullCharacteristicVector(statusFullPlasticVector,
                                                gp, plasticStrainVector);
@@ -142,7 +138,6 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
 
     f1 = this->computeYCValueAt(gp, & workStress,
                                 & statusFullPlasticVector);
-    //delete workStress;
 
     PlasticStrainVector3d = statusFullPlasticVector;
 
@@ -169,7 +164,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
 
             f2 = this->computeYCValueAt(gp, & workStress2,
                                         & statusFullPlasticVector);
-            //delete workStress2;
+
             if ( fabs(help) > 1.e-6 ) {
                 r = r1 - f2 / help; // improved value of r (Nayak & Zienkiewicz, 1972)
             } else {
@@ -183,10 +178,6 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
         stressVector3d =  elasticStressIncrement;
         stressVector3d.times(r);
         stressVector3d.add(statusFullStressVector);
-
-        //  helpArray = strainIncrementIn3d -> Times (r);
-        //  strainVector3d -> add(helpArray);
-        //  delete helpArray;
 
         m = STRAIN_STEPS;
         mStrainIncrement3d = strainIncrement;
@@ -254,13 +245,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
 
             delete loadingStressGrad;
             delete stressCorrection;
-            // delete yieldStressGrad;
-            // delete dp;
-            // delete dSigmaIncrement3d;
         }
-
-        //delete mStrainIncrement3d;
-        //delete mStressElasticIncrement3d;
 
         // compute total stress increment during strainIncrement
         //  totalStressIncrement = statusFullStressVector;
@@ -272,20 +257,17 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
 
         status->letTempStressVectorBe(helpArry);
         status->letTempStrainVectorBe(totalStrain);
-        //delete totalStressIncrement;
     } else {
         // element not yielding - set the print status
         status->setTempYieldFlag(0);
         stressVector3d = statusFullStressVector;
         stressVector3d.add(elasticStressIncrement);
-        // strainVector3d -> add (strainIncrementIn3d);
         // test if fracture or failure occurs
         this->updateIfFailure(gp, & stressVector3d, & PlasticStrainVector3d);
         // update gp
         status->letTempStrainVectorBe(totalStrain);
         crossSection->giveReducedCharacteristicVector(helpArray, gp, stressVector3d);
         status->letTempStressVectorBe(helpArray);
-        //delete totalStressIncrement;
     }
 
     // update gp plastic strain
@@ -294,12 +276,6 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     plasticStrainIncrement3d.add(PlasticStrainVector3d);
     crossSection->giveReducedCharacteristicVector(helpArray, gp, plasticStrainIncrement3d);
     status->letPlasticStrainIncrementVectorBe(helpArray);
-    //delete plasticStrainIncrement3d;
-    //delete PlasticStrainVector3d;
-    //delete strainIncrement;
-    //delete elasticStressIncrement;
-    //delete statusFullPlasticVector;
-    //delete statusFullStressVector;
 
     if ( form == FullForm ) {
         answer = stressVector3d;
@@ -307,276 +283,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     }
 
     crossSection->giveReducedCharacteristicVector(answer, gp, stressVector3d);
-    //delete stressVector3d;
-    return;
 }
-
-
-
-/*
- * FloatArray*
- * PerfectlyPlasticMaterial :: GiveRealStressVector3d (GaussPoint* gp,
- *                  FloatArray* strainIncrementIn3d)
- * //
- * // returns total stress vector in 3d stress space of receiver according to
- * // previous level of stress and current
- * // strain increment, the only way, how to correctly update gp records
- * //
- * //
- * // may be good idea for nonlinear materials overload this function in order to
- * // capture strain - stress history for proper modelling receiver behaviour
- * // and in order to capture possible failure of material
- * //
- *
- * {
- * FloatArray *mtrialStressIncrement;
- * FloatArray *mStrainIncrement3d, *totalStress;
- * FloatArray *helpArry;
- * int yeFlag;
- *
- * // this-> initTempStatus(gp); - done by initGpForNewStep;
- *
- * PerfectlyPlasticMaterialStatus* status = (PerfectlyPlasticMaterialStatus*) this->giveStatus(gp);
- *
- * this -> initGpForNewStep (gp);
- *
- * mStrainIncrement3d = strainIncrementIn3d->Times(1.0);
- * mtrialStressIncrement = this->ComputeTrialStressIncrement(gp, mStrainIncrement3d);
- *
- * // update gp to trial state
- * gp->giveStrainIncrementVector()->add (mStrainIncrement3d);
- * gp->giveStressIncrementVector()->add (mtrialStressIncrement);
- *
- * // perform stress correction due to yielding and cracking
- * // there should be included some iteration to fulfill all criteria
- * yeFlag = this -> updateYieldStatus (gp, mStrainIncrement3d);
- *
- * delete mtrialStressIncrement;
- *
- * delete mStrainIncrement3d;
- *
- * // compute  total stress vector
- * if (gp->giveStressVector() == NULL) {
- * totalStress = new FloatArray(6);
- * } else {
- * totalStress = gp->giveStressVector()->GiveCopy();
- * }
- * totalStress -> add(gp->giveStressIncrementVector());
- *
- * return totalStress;
- * }
- *
- *
- *
- *
- *
- * int
- * PerfectlyPlasticMaterial ::  updateYieldStatus (GaussPoint* gp, FloatArray* strainIncrementIn3d)
- * //
- * // updates total stress vector in 3d stress space of receiver according to
- * // previous level of stress and current
- * // strain increment, the only way, how to correctly update gp records
- * //
- * //
- * // may be good idea for nonlinear materials overload this function in order to
- * // capture strain - stress history for proper modelling receiver behaviour
- * // and in order to capture possible failure of material
- * //
- * //
- * // returns nonzero if some modification due to plasticity was necessary
- * {
- * //  FloatMatrix* Material :: (*dfunc) (GaussPoint*, FloatArray* = NULL);
- * FloatArray* trialStressIncrement, *totalStress;
- * FloatArray* workStress ,*yieldStressGrad, *workStress2, *stressVector3d ;
- * FloatArray* mStrainIncrement3d, *mStressTrialIncrement3d, *PlasticStrainVector3d;
- * FloatArray* dSigmaIncrement3d, *stressCorrection, *loadingStressGrad;
- * FloatArray *totalStressIncrement= NULL, *strainVector3d, *helpArray;
- * FloatArray* plasticStrainIncrement3d;
- * YieldCriteria* yieldCriteria = domain->giveYieldCriteria(this->yieldCriteria);
- * YieldCriteria* loadingCriteria = domain->giveYieldCriteria(this->loadingCriteria);
- * PerfectlyPlasticMaterialStatus* status = (PerfectlyPlasticMaterialStatus*) this->giveStatus(gp);
- *
- * FloatMatrix* d, *dp;
- * MaterialMode mode  = gp -> giveMaterialMode ();
- * CrossSection *crossSection = gp -> giveElement()->giveCrossSection();
- * double f0,f1,f2,help,dLambda,r,r1,m;
- * int i, retFlag;
- *
- *
- * totalStress = gp->giveStressVector()->GiveCopy();
- * totalStress -> add (gp->giveStressIncrementVector());
- *
- *
- * trialStressIncrement = gp->giveStressIncrementVector();
- * // strainVector3d = crossSection -> GiveStrainVector3d (gp, gp->giveStrainVector());
- * //
- * // calculate deltaSigmaPlastic
- * //
- *
- * f0 = yieldCriteria->
- * computeValueAt(gp->giveStressVector(),
- *     gp->givePlasticStrainVector(),
- *     gp-> giveHardeningParam());
- *
- * f1 = yieldCriteria-> computeValueAt(totalStress,
- *           gp->givePlasticStrainVector(),
- *           gp-> giveHardeningParam());
- *
- * PlasticStrainVector3d = gp->givePlasticStrainVector()->GiveCopy();
- *
- * if (f1 >= 0.) {   // loading surface violated by the elastic trial set
- *
- * if (f0 < 0.) {  // previously in elastic area
- * // element not yielding - set the print status
- * status->setTempYieldFlag(0);
- * // compute scaling factor
- * r1 = -f0/(f1-f0); // linear interpolation in f (Zienkiewicz, 1969)
- * yieldStressGrad = yieldCriteria->
- *  GiveStressGradient (gp, gp->giveStressVector(),
- *          gp->givePlasticStrainVector(),
- *          gp-> giveHardeningParam());
- * crossSection->imposeStressConstrainsOnGradient(gp, yieldStressGrad);
- *
- * for (help = 0., i=1; i<=6; i++)
- *  help += yieldStressGrad->at(i) * trialStressIncrement->at(i);
- *
- * delete yieldStressGrad;
- *
- * workStress2 = trialStressIncrement->GiveCopy();
- * workStress2->times(r1);
- * workStress2->add(gp->giveStressVector());
- *
- * f2 = yieldCriteria-> computeValueAt(workStress2,
- *             gp->givePlasticStrainVector(),
- *             gp-> giveHardeningParam());
- * delete workStress2;
- * if (fabs(help) > 1.e-6) {
- *  r = r1 - f2/help;  // improved value of r (Nayak & Zienkiewicz, 1972)
- * } else {
- *  r = r1;
- * }
- *
- * } else { // f0 should be zero
- * r  = 0.;
- * r1 = 1.;
- * }
- * stressVector3d =  trialStressIncrement->GiveCopy();
- * stressVector3d -> times (r);
- * stressVector3d -> add (gp->giveStressVector());
- *
- * //  helpArray = strainIncrementIn3d -> Times (r);
- * //  strainVector3d -> add(helpArray);
- * //  delete helpArray;
- *
- * m = STRAIN_STEPS;
- * mStrainIncrement3d = strainIncrementIn3d->Times ((1.0-r)/m);
- * mStressTrialIncrement3d = trialStressIncrement->Times((1.0-r)/m);
- *
- * // test if fracture or failure occurs
- * this-> updateIfFailure (gp,stressVector3d, PlasticStrainVector3d);
- * // element yielding - set the print status
- * status->setTempYieldFlag(1);
- * // loop over m-steps
- * for (i=1; i<=m; i++) {
- * //   yieldStressGrad = yieldCriteria->
- * //    GiveStressGradient (gp, stressVector3d,
- * //            PlasticStrainVector3d,
- * //            gp-> giveHardeningParam());
- *
- * // compute dLambda and dp
- * dp = this->ComputePlasticStiffnessAt (gp,
- *               stressVector3d,
- *               PlasticStrainVector3d,
- *               gp-> giveHardeningParam(),
- *               mStrainIncrement3d,
- *               dLambda);
- * if (dLambda < 0.) dLambda = 0.;
- * dSigmaIncrement3d = dp -> Times(mStrainIncrement3d);
- * dSigmaIncrement3d -> times(-1.0);
- * dSigmaIncrement3d -> add (mStressTrialIncrement3d);
- * // compute normal to loading surface
- * loadingStressGrad = loadingCriteria->
- *  GiveStressGradient (gp, stressVector3d,
- *          PlasticStrainVector3d,
- *          gp-> giveHardeningParam());
- *
- * // update the stress state
- * stressVector3d-> add(dSigmaIncrement3d);
- * // compute stress corrections
- *
- * stressCorrection = this ->
- *  GiveStressCorrectionBackToYieldSurface (gp, stressVector3d,
- *                PlasticStrainVector3d,
- *                gp-> giveHardeningParam());
- * // apply the stress correction -> correction is in the direction of
- * // the normal to the yield surface
- * stressVector3d-> add(stressCorrection);
- * //   test = yieldCriteria-> computeValueAt(stressVector3d,
- * //                 PlasticStrainVector3d,
- * //                 gp-> giveHardeningParam());
- *
- * // calculate plastic strain increment
- *
- * crossSection-> imposeStrainConstrainsOnGradient (gp, loadingStressGrad);
- * loadingStressGrad->times(dLambda);
- * PlasticStrainVector3d -> add (loadingStressGrad);
- * // strainVector3d -> add (mStrainIncrement3d);
- *
- * // update yieldCriteria and loading criteria records to newly reache state
- * // in loadingStressGrad is stored current plastic vector increment
- * yieldCriteria -> update(gp,stressVector3d, PlasticStrainVector3d);
- * loadingCriteria->update(gp,stressVector3d, PlasticStrainVector3d);
- *
- * // test if fracture or failure occurs
- * this-> updateIfFailure (gp,stressVector3d, PlasticStrainVector3d);
- *
- * delete loadingStressGrad;
- * delete stressCorrection;
- * // delete yieldStressGrad;
- * delete dp; delete dSigmaIncrement3d;
- *
- * }
- * delete mStrainIncrement3d;
- * delete mStressTrialIncrement3d;
- *
- * // compute total stress increment during strainIncrement
- * totalStressIncrement = gp->giveStressVector()->GiveCopy();
- * totalStressIncrement -> times (-1.0);
- * totalStressIncrement -> add (stressVector3d);
- * // update gp
- * gp->letStressIncrementVectorBe (totalStressIncrement);
- * gp->letStrainIncrementVectorBe (strainIncrementIn3d->GiveCopy());
- * retFlag = 1;
- *
- * } else {
- * // element not yielding - set the print status
- * status->setTempYieldFlag(0);
- * totalStressIncrement = trialStressIncrement->GiveCopy();
- * stressVector3d = gp->giveStressVector()->
- * GiveCopy()->add(totalStressIncrement);
- * // strainVector3d -> add (strainIncrementIn3d);
- * // test if fracture or failure occurs
- * this-> updateIfFailure (gp,stressVector3d, PlasticStrainVector3d);
- * // update gp
- * gp->letStrainIncrementVectorBe (strainIncrementIn3d->GiveCopy());
- * gp->letStressIncrementVectorBe (totalStressIncrement);
- * retFlag = 0;
- * }
- * // update gp plastic strain
- * plasticStrainIncrement3d = gp->givePlasticStrainVector()->GiveCopy();
- * plasticStrainIncrement3d -> times(-1.0);
- * plasticStrainIncrement3d -> add (PlasticStrainVector3d);
- * gp-> letPlasticStrainIncrementVectorBe (plasticStrainIncrement3d);
- *
- * delete stressVector3d;
- * delete PlasticStrainVector3d;
- * delete totalStress;
- * return retFlag;
- *
- * }
- */
-
-
 
 
 void
@@ -607,8 +314,6 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
         _error("giveEffectiveMaterialStiffnessMatrix: usupported material mode");
         exit(1);
     }
-
-    return;
 }
 
 #define YIELD_BOUNDARY -0.0001
@@ -634,7 +339,6 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 // current stress-strain mode in gp. This is reached by using
 // impose constraints functions
 {
-    // FloatMatrix *de; // elastic matrix respecting fracture or failure
     FloatArray statusFullStressVector, statusFullPlasticVector, plasticStrainVector;
     double lambda;
     PerfectlyPlasticMaterialStatus *status = ( PerfectlyPlasticMaterialStatus * ) this->giveStatus(gp);
@@ -653,7 +357,7 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
         return;
     }
 
-    // if secant stiffness requested assume initial elastic matric
+    // if secant stiffness requested assume initial elastic matrix
     if ( mode == SecantStiffness ) {
         return;
     }
@@ -673,7 +377,6 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
                                     lambda);
     answer.add(dp);
 }
-
 
 
 void
@@ -702,7 +405,6 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // 3d_response is forced, not regarding current MaterilMode in gp.
 //
 {
-    // FloatMatrix* answer;
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
         _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
@@ -722,8 +424,6 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     } else {
         this->giveMaterialStiffnessMatrix(answer, mode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -753,12 +453,8 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
             answer.beSubMatrixOf(fullAnswer, mask);
-            //delete mask;
-            //delete fullAnswer;
         }
     }
-
-    return;
 }
 
 
@@ -786,12 +482,8 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
             answer.beSubMatrixOf(fullAnswer, mask);
-            //delete mask;
-            // delete fullAnswer;
         }
     }
-
-    return;
 }
 
 
@@ -817,12 +509,8 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
             answer.beSubMatrixOf(fullAnswer, mask);
-            //delete mask;
-            // delete fullAnswer;
         }
     }
-
-    return;
 }
 
 
@@ -852,14 +540,9 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
             answer.beSubMatrixOf(fullAnswer, mask);
-            //delete mask;
-            // delete fullAnswer;
         }
     }
-
-    return;
 }
-
 
 
 void
@@ -878,7 +561,6 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix fullAnswer;
     IntArray mask;
-    // int i,j;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else {
@@ -888,14 +570,9 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
             answer.beSubMatrixOf(fullAnswer, mask);
-            //delete mask;
-            //delete fullAnswer;
         }
     }
-
-    return;
 }
-
 
 
 void
@@ -915,7 +592,6 @@ PerfectlyPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 {
     this->give2dPlateLayerStiffMtrx(answer, form, mode, gp, atTime);
 }
-
 
 
 void
@@ -988,17 +664,13 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     delete yeldStressGradMat;
     gsfsde.beProductOf(* loadingStressGradMat, fsde);
     delete loadingStressGradMat;
-    // delete fsde;
 
     denominator = 0.;
     for ( i = 1; i <= 6; i++ ) {
         denominator += yeldStressGrad->at(i) * help.at(i);
     }
 
-    // delete help;
-
     answer.beProductOf(de, gsfsde);
-    //delete gsfsde;
 
     answer.times( -( 1. / denominator ) );
 
@@ -1010,12 +682,9 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
         }
 
         lambda = nominator / denominator;
-        // delete help;
     }
 
-    // delete de;
     delete yeldStressGrad;
-    return;
 }
 
 
@@ -1091,8 +760,6 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
 }
 
 
-
-
 MaterialStatus *
 PerfectlyPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 /*
@@ -1146,9 +813,6 @@ PerfectlyPlasticMaterial :: restoreContext(DataStream *stream, ContextMode mode,
 }
 
 
-
-
-
 void
 PerfectlyPlasticMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 //
@@ -1169,7 +833,7 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPo
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         int indx;
         FloatArray st(6), s;
 
@@ -1207,10 +871,10 @@ PerfectlyPlasticMaterial :: giveIPValueType(InternalStateType type)
 int
 PerfectlyPlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         this->giveStressStrainMask(answer, FullForm, mmode);
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         answer.resize(6);
         answer.at(1) = 1;
         answer.at(2) = 2;
@@ -1225,20 +889,14 @@ PerfectlyPlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalSta
 int
 PerfectlyPlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }
-
-
-
-#ifdef __OOFEG
-#endif
-
 
 
 //##################################################################################################
@@ -1307,7 +965,6 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-
 void
 PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
@@ -1322,8 +979,6 @@ PerfectlyPlasticMaterialStatus :: initTempStatus()
 // initialize record at the begining of new load step
 //
 {
-    //FloatArray * helpArry;
-
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {

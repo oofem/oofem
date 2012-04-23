@@ -76,6 +76,7 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     fprintf(File, "\n");
 }
 
+
 void TransportMaterialStatus :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
@@ -87,7 +88,7 @@ void TransportMaterialStatus :: updateYourself(TimeStep *tStep)
 void
 TransportMaterialStatus :: initTempStatus()
 //
-// initialize record at the begining of new load step
+// initialize record at the beginning of new load step
 //
 {
     MaterialStatus :: initTempStatus();
@@ -144,7 +145,6 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 }
 
 
-
 int
 TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 // IST_Humidity must be overriden!
@@ -156,7 +156,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
-    } else if ( ( type == IST_TemperatureFlow ) ) {
+    } else if ( type == IST_TemperatureFlow ) {
         TransportElement *transpElem = ( TransportElement * ) aGaussPoint->giveElement();
         transpElem->computeFlow(answer, aGaussPoint, atTime);
         return 1;
@@ -164,6 +164,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
+
 
 InternalStateValueType
 TransportMaterial :: giveIPValueType(InternalStateType type)
@@ -174,6 +175,7 @@ TransportMaterial :: giveIPValueType(InternalStateType type)
         return Material :: giveIPValueType(type);
     }
 }
+
 
 int
 TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
@@ -192,6 +194,7 @@ TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType 
         return Material :: giveIntVarCompFullIndx(answer, type, mmode);
     }
 }
+
 
 int
 TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
@@ -213,10 +216,11 @@ TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussP
 
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
         return 1;
-    } else if ( ( type == IST_TemperatureFlow ) ) {
+    } else if ( type == IST_TemperatureFlow ) {
         return size;
     } else {
         return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
+
 } // end namespace oofem

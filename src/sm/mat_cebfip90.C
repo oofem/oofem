@@ -43,9 +43,9 @@
 
 namespace oofem {
 CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
+//
+// constructor
+//
 { }
 
 
@@ -80,7 +80,6 @@ CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     _error("give3dMaterialStiffnessMatrix: not implemented");
-    return;
 }
 
 
@@ -130,8 +129,8 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, MatResponseForm
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
     status->setTempKappa(tempKappa);
-    return;
 }
+
 
 void
 CebFipSlip90Material :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -156,7 +155,7 @@ int
 CebFipSlip90Material :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
 //
 // returns the size of reduced stress-strain vector
-// acording to mode given by gp.
+// according to mode given by gp.
 //
 {
     switch ( mode ) {
@@ -185,6 +184,7 @@ CebFipSlip90Material :: giveStressStrainComponentIndOf(MatResponseForm form, Mat
         return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
     }
 }
+
 
 void
 CebFipSlip90Material :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
@@ -277,13 +277,11 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
         } else {
             answer.at(1, 1) = computeBondForceStiffness(0.0);
         }
-    } else if ( ( rMode == TangentStiffness ) ) {
+    } else if ( rMode == TangentStiffness ) {
         answer.at(1, 1) = computeBondForceStiffness( status->giveTempKappa() );
     }  else {
         _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
     }
-
-    return;
 }
 
 
@@ -292,8 +290,6 @@ CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint,
 {
     return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
-
-
 
 
 InternalStateValueType
@@ -329,8 +325,6 @@ CebFipSlip90Material :: giveThermalDilatationVector(FloatArray &answer,
 {
     answer.resize(1);
     answer.at(1) = 0.0;
-
-    return;
 }
 
 
@@ -365,6 +359,7 @@ CebFipSlip90Material :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
+
 double
 CebFipSlip90Material :: computeBondForce(double s)
 {
@@ -378,6 +373,7 @@ CebFipSlip90Material :: computeBondForce(double s)
         return tres;
     }
 }
+
 
 double
 CebFipSlip90Material :: computeBondForceStiffness(double s)
@@ -395,7 +391,6 @@ CebFipSlip90Material :: computeBondForceStiffness(double s)
         return 1.e-6; // should be zero
     }
 }
-
 
 
 CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
@@ -426,6 +421,7 @@ CebFipSlip90MaterialStatus :: initTempStatus()
     this->tempKappa = this->kappa;
 }
 
+
 void
 CebFipSlip90MaterialStatus :: updateYourself(TimeStep *atTime)
 {
@@ -451,6 +447,7 @@ CebFipSlip90MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 
     return CIO_OK;
 }
+
 
 contextIOResultType
 CebFipSlip90MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)

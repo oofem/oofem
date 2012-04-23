@@ -364,7 +364,7 @@ huhu:
                 for ( i = 1; i <= nsurf; i++ ) {
                     if ( activeConditionMap.at(i) ) {
                         yieldValue = this->computeYieldValueAt(gp, i, fullStressVector, strainSpaceHardeningVariables);
-                        if ( ( fabs(yieldValue) >= YIELD_TOL ) ) {
+                        if ( fabs(yieldValue) >= YIELD_TOL ) {
                             yieldConsistency = false;
                         }
 
@@ -1093,7 +1093,7 @@ huhu:
             for ( i = 1; i <= nsurf; i++ ) {
                 if ( activeConditionMap.at(i) ) {
                     yieldValue = this->computeYieldValueAt(gp, i, fullStressVector, strainSpaceHardeningVariables);
-                    if ( ( fabs(yieldValue) >= YIELD_TOL ) ) {
+                    if ( fabs(yieldValue) >= YIELD_TOL ) {
                         yieldConsistency = false;
                     }
                 }
@@ -1456,9 +1456,9 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     crossSection->giveFullCharacteristicVector(fullStressVector, gp, stressVector);
     status->giveTempStrainSpaceHardeningVarsVector(strainSpaceHardeningVariables);
 
-    ///
-    /// compute consistent moduli
-    ///
+    //
+    // compute consistent moduli
+    //
     this->computeAlgorithmicModuli(consistentModuli, gp, elasticModuliInverse, gamma,
                                    activeConditionMap, fullStressVector, strainSpaceHardeningVariables);
 
@@ -2008,7 +2008,7 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         int indx;
         FloatArray st(6), s;
 
@@ -2034,7 +2034,7 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 InternalStateValueType
 MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
 {
-    // strains components packed in enginnering notation
+    // strains components packed in engineering notation
     if ( ( type == IST_PlasticStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ) {
         return ISVT_TENSOR_S3E;
     } else {
@@ -2046,10 +2046,10 @@ MPlasticMaterial2 :: giveIPValueType(InternalStateType type)
 int
 MPlasticMaterial2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         this->giveStressStrainMask(answer, FullForm, mmode);
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         answer.resize(6);
         answer.at(1) = 1;
         answer.at(2) = 2;
@@ -2064,9 +2064,9 @@ MPlasticMaterial2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType 
 int
 MPlasticMaterial2 :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
@@ -2130,7 +2130,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
     result.resize(size);
 
     // first try candidate if compatible
-    if ( ( candDegree <= degree ) ) {
+    if ( candDegree <= degree ) {
         // generate candite popul value
         val = getPopulationSignature(candidateMask);
 

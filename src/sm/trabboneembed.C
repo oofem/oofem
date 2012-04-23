@@ -49,7 +49,7 @@ TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 int
 TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) ) {
+    if ( mode == _3dMat ) {
         return 1;
     }
 
@@ -171,8 +171,6 @@ TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0,
     answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = -nu0 / eps0;
     answer.at(3, 1) = answer.at(2, 3) = answer.at(3, 2) = -nu0 / eps0;
     answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = 1 / mu0;
-
-    return;
 }
 
 

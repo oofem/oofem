@@ -61,7 +61,6 @@ MPlasticMaterial :: MPlasticMaterial(int n, Domain *d)  : StructuralMaterial(n, 
 }
 
 
-
 MPlasticMaterial :: ~MPlasticMaterial()
 //
 // destructor
@@ -93,6 +92,7 @@ MPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 
+
 MaterialStatus *
 MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 /*
@@ -104,6 +104,7 @@ MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
     status = new MPlasticMaterialStatus(1, this->giveDomain(), gp);
     return status;
 }
+
 
 void
 MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
@@ -214,7 +215,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
     FloatArray fullStressVector;
     FloatArray strainIncrement, elasticStrainVectorR;
     FloatArray fullStressSpaceHardeningVars, residualVectorR, gradientVectorR;
-    ;
+
     FloatArray helpVector, helpVector2;
     FloatArray dgamma, tempGamma;
     FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
@@ -442,6 +443,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
     }
 }
 
+
 void
 MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
                                        IntArray &activeConditionMap,
@@ -510,9 +512,9 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     }
 
     if ( !elastic ) {
-        ///
-        /// compute consistent moduli
-        ///
+        //
+        // compute consistent moduli
+        //
         sizeR = elasticModuli.giveNumberOfRows();
         size = sizeR + hardeningModuli.giveNumberOfRows();
 
@@ -691,9 +693,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
 
     printf(" (%d iterations)", nIterations);
     answer = fullStressVector;
-    return;
 }
-
 
 
 void
@@ -780,10 +780,6 @@ MPlasticMaterial :: computeResidualVector(FloatArray &answer, GaussPoint *gp, co
 }
 
 
-
-
-
-
 void
 MPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                                 const FloatArray &elasticStrainVectorR,
@@ -803,8 +799,6 @@ MPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *
      */
     reducedAnswer.beProductOf(de, elasticStrainVectorR);
     crossSection->giveFullCharacteristicVector(answer, gp, reducedAnswer);
-
-    return;
 }
 
 
@@ -875,8 +869,6 @@ MPlasticMaterial :: computeAlgorithmicModuli(FloatMatrix &answer,
     } else {
         answer.beInverseOf(helpInverse);
     }
-
-    return;
 }
 
 // ----------------------------------------------------------------------------//
@@ -959,9 +951,9 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
 
-    ///
-    /// compute consistent moduli
-    ///
+    //
+    // compute consistent moduli
+    //
     this->computeAlgorithmicModuli(consistentModuli, gp, elasticModuliInverse, hardeningModuliInverse, gamma,
                                    activeConditionMap, fullStressVector, stressSpaceHardeningVars);
 
@@ -1038,9 +1030,8 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
         answerR = answer;
         answer.beSubMatrixOfSizeOf(answerR, mask, 6);
     }
-
-    return;
 }
+
 
 void
 MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
@@ -1112,9 +1103,9 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
 
-    ///
-    /// compute consistent moduli
-    ///
+    //
+    // compute consistent moduli
+    //
     size = elasticModuli.giveNumberOfRows() + hardeningModuli.giveNumberOfRows();
     dmat.resize(size, size);
     dmat.zero();
@@ -1193,8 +1184,6 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
         helpMtrx = answer;
         answer.beSubMatrixOfSizeOf(helpMtrx, mask, 6);
     }
-
-    return;
 }
 
 
@@ -1216,7 +1205,6 @@ MPlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
         size2 = size1;
     }
 
-    //answer = new FloatMatrix (size2, size2);
     answer.resize(size2, size2);
     answer.zero();
 
@@ -1231,8 +1219,6 @@ MPlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
             answer.at(i, j) = hardeningModuliInverse.at(i - size1, j - size1);
         }
     }
-
-    return;
 }
 
 
@@ -1241,11 +1227,9 @@ MPlasticMaterial :: computeReducedElasticModuli(FloatMatrix &answer,
                                                 GaussPoint *gp,
                                                 TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
-   // FloatMatrix *answer;
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
                                                                 ElasticStiffness,
                                                                 gp, atTime);
-    return;
 }
 
 
@@ -1272,7 +1256,6 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
 //
 //
 {
-    // FloatMatrix* answer;
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
         _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
@@ -1293,8 +1276,6 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -1320,8 +1301,6 @@ MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseFor
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -1337,7 +1316,6 @@ MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseFor
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    // FloatMatrix* answer;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
@@ -1345,8 +1323,6 @@ MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseFor
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -1360,7 +1336,6 @@ MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm f
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    // FloatMatrix* answer;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
@@ -1368,10 +1343,7 @@ MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm f
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
-
 
 
 void
@@ -1395,10 +1367,7 @@ MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseFor
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
-
 
 
 void
@@ -1415,7 +1384,6 @@ MPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    // FloatMatrix* answer;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
@@ -1423,9 +1391,8 @@ MPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
+
 
 void
 MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
@@ -1449,8 +1416,6 @@ MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -1475,8 +1440,6 @@ MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseFo
     } else {
         this->giveElastoPlasticStiffnessMatrix(answer, form, mode, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -1487,7 +1450,7 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         int indx;
         FloatArray st(6), s;
 
@@ -1508,8 +1471,6 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Int
 }
 
 
-
-
 InternalStateValueType
 MPlasticMaterial :: giveIPValueType(InternalStateType type)
 {
@@ -1525,10 +1486,10 @@ MPlasticMaterial :: giveIPValueType(InternalStateType type)
 int
 MPlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         this->giveStressStrainMask(answer, FullForm, mmode);
         return 1;
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         answer.resize(6);
         answer.at(1) = 1;
         answer.at(2) = 2;
@@ -1543,29 +1504,15 @@ MPlasticMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
 int
 MPlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
         return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalPlasticStrainTensor ) ) {
+    } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }
 
-
-
-
-#ifdef __OOFEG
-#endif
-
-
-
-
-
-
-//
-// SmearedCrackingMaterialStatus Class
-//
 
 MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
@@ -1575,8 +1522,10 @@ MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g
     gamma = tempGamma = 0.;
 }
 
+
 MPlasticMaterialStatus :: ~MPlasticMaterialStatus()
 { }
+
 
 void
 MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -1641,7 +1590,6 @@ void MPlasticMaterialStatus :: initTempStatus()
 }
 
 
-
 void
 MPlasticMaterialStatus :: updateYourself(TimeStep *atTime)
 //
@@ -1659,8 +1607,6 @@ MPlasticMaterialStatus :: updateYourself(TimeStep *atTime)
     gamma = tempGamma;
     activeConditionMap = tempActiveConditionMap;
 }
-
-
 
 
 contextIOResultType
@@ -1701,7 +1647,6 @@ MPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
 
     return CIO_OK;
 }
-
 
 
 contextIOResultType

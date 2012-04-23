@@ -1558,15 +1558,15 @@ Graph :: vertex2IntersectionVertex(node *v, node *l1, node *l2)
     node *pv = prev_node(v->prev);
 
     if ( v->status == NS_IntersectionVertex ) {
-        if ( ( v->neighbor->status == NS_IntersectionVertex ) ) {
+        if ( v->neighbor->status == NS_IntersectionVertex ) {
             if ( ( v->neighbor == l1 ) || ( v->neighbor == l2 ) ) {
                 return 0;
             } else {
                 THROW_GT_EXCEPTIONM("Graph::vertex2IntersectionVertex: topology error, neighbor is unrelated intersectionVertex");
             }
-        } else if ( ( ( prev_node(v->neighbor->prev) == l1 ) && ( next_node(v->neighbor->next) == l2 ) ) ) {
+        } else if ( ( prev_node(v->neighbor->prev) == l1 ) && ( next_node(v->neighbor->next) == l2 ) ) {
             return 0;
-        } else if ( ( ( prev_node(v->neighbor->prev) == l2 ) && ( next_node(v->neighbor->next) == l1 ) ) ) {
+        } else if ( ( prev_node(v->neighbor->prev) == l2 ) && ( next_node(v->neighbor->next) == l1 ) ) {
             return 0;
         } else {
             // intersection vertex associated to neiborhing edge -> move it to common vertex

@@ -515,7 +515,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
     MetaStep *mstep = this->giveMetaStep( stepN->giveMetaStepNumber() );
     bool isLastMetaStep = ( stepN->giveNumber() == mstep->giveLastStepNumber() );
 
-    if ( ( controllMode == nls_indirectControll ) ) {
+    if ( controllMode == nls_indirectControll ) {
         //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
@@ -700,7 +700,7 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
 {
     switch ( cmpn ) {
     case NonLinearLhs:
-        if ( ( stiffMode == nls_tangentStiffness ) ) {
+        if ( stiffMode == nls_tangentStiffness ) {
             stiffnessMatrix->zero(); // zero stiffness matrix
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");

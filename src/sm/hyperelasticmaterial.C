@@ -53,12 +53,13 @@ HyperElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports the given mode
 //
 {
-    if ( ( mode == _3dMat ) ) {
+    if ( mode == _3dMat ) {
         return 1;
     }
 
     return 0;
 }
+
 
 void
 HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
@@ -166,8 +167,6 @@ HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
     status = new StructuralMaterialStatus(1, this->giveDomain(), gp);
     return status;
 }
-
-
 
 
 IRResultType

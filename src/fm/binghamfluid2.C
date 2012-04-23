@@ -58,7 +58,7 @@ BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
 {
     if ( ( mode == _2dFlow ) || ( mode == _3dFlow ) ) {
         return 1;
-    } 
+    }
 
 
     return 0;
@@ -158,9 +158,9 @@ BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    if ( ( aProperty == Viscosity ) ) {
+    if ( aProperty == Viscosity ) {
         return mu_0;
-    } else if ( ( aProperty == YieldStress ) ) {
+    } else if ( aProperty == YieldStress ) {
         return tau_0;
     } else {
         return FluidDynamicMaterial :: give(aProperty, gp);
@@ -464,7 +464,7 @@ BinghamFluidMaterial2 :: computeDevStrainMagnitude(MaterialMode mmode, const Flo
         _val = (1/6.)*((epsd.at(1)-epsd.at(2))*(epsd.at(1)-epsd.at(2)) + (epsd.at(2)-epsd.at(3))*(epsd.at(2)-epsd.at(3)) +
                 (epsd.at(3)-epsd.at(1))*(epsd.at(3)-epsd.at(1)) + epsd.at(4) * epsd.at(4)/4.0);
     } else if ( mmode == _3dFlow ) {
-        _val = 2.0 * (epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) + epsd.at(3) * epsd.at(3) ) 
+        _val = 2.0 * (epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) + epsd.at(3) * epsd.at(3) )
 	                  + epsd.at(4) * epsd.at(4) + epsd.at(5) * epsd.at(5) + epsd.at(6) * epsd.at(6);
     } else {
         _error("computeDevStrainMagnitude: unsupported material mode");

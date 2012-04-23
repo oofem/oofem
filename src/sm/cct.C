@@ -154,7 +154,6 @@ CCTPlate :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
     area = this->giveArea();
 
-    //answer = new FloatMatrix(5,9);
     answer.resize(5, 9);
     answer.zero();
 
@@ -275,10 +274,6 @@ CCTPlate :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
  *
  * }
  * }
- * //delete et;
- * //delete e0;
- *
- * return ;
  * }
  */
 
@@ -515,10 +510,10 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 int
 CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( type == IST_ShellForceMomentumTensor ) {
         answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(aGaussPoint) )->giveStressVector();
         return 1;
-    } else if ( ( IST_ShellStrainCurvatureTensor ) ) {
+    } else if ( type == IST_ShellStrainCurvatureTensor ) {
         answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(aGaussPoint) )->giveStrainVector();
         return 1;
     } else {
@@ -554,7 +549,7 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     l2 = aGaussPoint->giveCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
-    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor) ) {
+    if ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) {
         answer.resize(1, 3);
     } else {
         return;
@@ -575,7 +570,7 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( type == IST_ShellForceMomentumTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStressVector();
     } else if ( type == IST_ShellStrainCurvatureTensor ) {

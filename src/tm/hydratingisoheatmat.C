@@ -280,7 +280,7 @@ HydratingIsoHeatMaterial :: giveIPValueType(InternalStateType type)
 int
 HydratingIsoHeatMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_HydrationDegree ) ) {
+    if ( type == IST_HydrationDegree ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -314,7 +314,7 @@ HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *atTime)
     TransportMaterialStatus :: printOutputAt(file, atTime);
 }
 
-/// necessary for proper cast to interface, can't be done from outside
+// necessary for proper cast to interface, can't be done from outside
 Interface *
 HydratingTransportMaterialStatus :: giveInterface(InterfaceType type)
 {

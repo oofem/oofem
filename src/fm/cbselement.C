@@ -154,7 +154,7 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
     this->computeConsistentMassMtrx(mass, tStep);
     this->computeVectorOfPrescribed(EID_AuxMomentumBalance, mode, tStep, usp);
     answer.beProductOf(mass, usp);
-    answer.times(-1.0);
+    answer.negated();
 }
 
 /*
@@ -262,7 +262,7 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
 int
 CBSElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_Velocity ) ) {
+    if ( type == IST_Velocity ) {
         IntArray mask;
         int indx = 1;
         answer.resize(3);

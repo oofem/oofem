@@ -50,7 +50,7 @@ TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d
 int
 TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _1dMat ) ) {
+    if ( mode == _1dMat ) {
         return 1;
     }
 
@@ -258,7 +258,7 @@ TrabBoneMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    /// Read material properties here
+    // Read material properties here
 
     IR_GIVE_FIELD(ir, E0, IFT_TrabBoneMaterial_E0, "e0"); // Macro
     IR_GIVE_FIELD(ir, Eil, IFT_TrabBoneMaterial_Eil, "eil"); // Macro

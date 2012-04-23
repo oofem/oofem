@@ -791,17 +791,13 @@ RerShell ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
  * answer.at(5) = e0.at(2) * et.at(2)/ thick;   // kappa_y
  * }
  * }
- * //delete et;
- * //delete e0;
- *
- * return ;
  * }
  */
 
 int
 RerShell :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( type == IST_ShellForceMomentumTensor ) {
         return 12;
     }
 
@@ -822,7 +818,7 @@ RerShell :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     l2 = aGaussPoint->giveCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( type == IST_ShellForceMomentumTensor ) {
         answer.resize(1, 3);
     } else {
         return;
@@ -854,7 +850,7 @@ RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int si
 int
 RerShell :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_ShellForceMomentumTensor ) ) {
+    if ( type == IST_ShellForceMomentumTensor ) {
         answer.resize(12);
         for ( int i = 1; i <= 12; i++ ) {
             answer.at(i) = i;

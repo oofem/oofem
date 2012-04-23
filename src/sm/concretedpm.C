@@ -1886,7 +1886,7 @@ int
 ConcreteDPM :: giveIPValueSize(InternalStateType type,
                                GaussPoint *gp)
 {
-    if ( ( type == IST_PlasticStrainTensor ) ) {
+    if ( type == IST_PlasticStrainTensor ) {
       return 6;
     } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
       return 1;

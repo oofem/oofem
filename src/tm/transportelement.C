@@ -510,7 +510,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
     answer.resize( this->giveNumberOfDofManagers() );
     answer.zero();
 
-    if ( ( ( load->giveType() == TransmissionBC ) || ( load->giveType() == ConvectionBC ) ) ) {
+    if ( ( load->giveType() == TransmissionBC ) || ( load->giveType() == ConvectionBC ) ) {
         BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
         if ( edgeLoad->isDofExcluded(indx) ) {
             return;
@@ -651,7 +651,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
         n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
         id    = boundaryLoadArray.at(i * 2);
         load  = ( Load * ) domain->giveLoad(n);
-        if ( ( load->giveType() == ConvectionBC ) ) {
+        if ( load->giveType() == ConvectionBC ) {
             ltype = load->giveBCGeoType();
             if ( ltype == EdgeLoadBGT ) {
                 BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);

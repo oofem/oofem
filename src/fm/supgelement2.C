@@ -348,7 +348,7 @@ SUPGElement2 :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
 int
 SUPGElement2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    if ( ( type == IST_Velocity ) ) {
+    if ( type == IST_Velocity ) {
         IntArray mask;
         int indx = 1;
         answer.resize(3);

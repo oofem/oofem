@@ -194,6 +194,7 @@ protected:
             this->parallel_mode = Element_local;
 #endif
         }
+        virtual ~RS_Element() {}
 
         /// Returns true if element has some irregular nodes
         bool hasIrregulars() { return !irregular_nodes.containsOnlyZeroes(); }

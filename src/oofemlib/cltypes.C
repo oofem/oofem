@@ -75,15 +75,6 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
     return 0;
 }
 
-// TODO: This function seems completely redundant.
-bool isUnknownTypeModeIncremental(ValueModeType mode)
-{
-    if ( ( mode == VM_Incremental ) ) {
-        return true;
-    }
-
-    return false;
-}
 
 InternalStateValueType giveInternalStateValueType(InternalStateType type)
 {

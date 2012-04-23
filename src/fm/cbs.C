@@ -653,7 +653,7 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, uscale);
-    } else if ( ( type == P_f ) ) {
+    } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");

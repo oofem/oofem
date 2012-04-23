@@ -108,7 +108,7 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    if ( ( aProperty == Viscosity ) ) {
+    if ( aProperty == Viscosity ) {
         return viscosity;
     } else {
         return FluidDynamicMaterial :: give(aProperty, gp);

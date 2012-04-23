@@ -50,7 +50,7 @@ TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
 int
 TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) ) {
+    if ( mode == _3dMat ) {
         return 1;
     }
 
@@ -484,7 +484,6 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
 }
 
 
-
 // BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
 // returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
@@ -556,6 +555,7 @@ TrabBone3D :: constructAnisoComplTensor(FloatMatrix &answer)
     answer.at(6, 6) = 1 / ( mu0k * m1l * m2l );
 }
 
+
 void
 TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer, const int posSignFlag)
 {
@@ -590,6 +590,7 @@ TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer, const int posSignF
     answer.at(5, 5) = 1 / ( tau0p * m3q * m1q );
     answer.at(6, 6) = 1 / ( tau0p * m1q * m2q );
 }
+
 
 void
 TrabBone3D :: constructNormAdjustTensor(FloatMatrix &answer)

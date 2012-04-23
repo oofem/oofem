@@ -1314,7 +1314,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
                     for ( j = 1; j <= numberOfDofs; j++ ) {
                         id = dman->giveDof(j)->giveDofID();
-                        if ( ( id == P_f ) ) {
+                        if ( id == P_f ) {
                             iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
                         }
                     }
