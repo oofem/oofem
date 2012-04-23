@@ -89,7 +89,7 @@
 #include "constantsurfaceload.h"
 #include "pointload.h"
 #include "prescribedgradient.h"
-//#include "mixedgradientpressurebc.h"
+#include "mixedgradientpressurebc.h"
 #include "surfacetensionbc.h"
 
 // ltf in OOFEMLIB
@@ -532,7 +532,7 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *aClass
 {
     if (bcList.size() == 0) {
         bcList["prescribedgradient"]    = bcCreator< PrescribedGradient >;
-        //bcList["mixedgradientpressure"] = bcCreator< MixedGradientPressureBC >;
+        bcList["mixedgradientpressure"] = bcCreator< MixedGradientPressureBC >;
         bcList["linearedgeload"]        = bcCreator< LinearEdgeLoad >;
         bcList["constantedgeload"]      = bcCreator< ConstantEdgeLoad >;
         bcList["constantsurfaceload"]   = bcCreator< ConstantSurfaceLoad >;

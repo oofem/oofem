@@ -17,7 +17,7 @@
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\grad}{\nabla}
 \newcommand{\vect}[1]{\mathbf{#1}} % not for Greek letters
-\newcommand{\tens}[1]{\pmb{#1}} % A second-order tensor
+\newcommand{\tens}[1]{\boldsymbol{#1}} % A second-order tensor
 
 \newcommand{\strain}{\varepsilon}
 \newcommand{\stress}{\sigma}
@@ -102,7 +102,8 @@ This report describes in details the format and structure of OOFEM
 text input file. Input file can be created by any available text editor or can be generated
 by some conversion program or by some FEM pre-processor.
 
-\Pmode{Some parts of this document are related parallel version of the code (POOFEM). These parts are distinguished by typing the text in sans serif font family.}
+\Pmode{Some parts of this document are related parallel version of the code (POOFEM).
+These parts are distinguished by typing the text in sans serif font family.}
 \Pmode{In a parallel mode a set of input files must be provided, each one for
 particular process and related partition. The input file corresponding to some
 partition is called partition input file. Its name is composed from two parts. The fist part (referred as base
@@ -128,30 +129,30 @@ The program may be executed by typing\\
 on the command line prompt with the following command line options:
 \begin{itemize}
 \item
-{\bf -f string}\\ oofem input file name, if not present, program interactively
+\textbf{-f string}\\ oofem input file name, if not present, program interactively
 reads this parameter.
 \item
-{\bf -r int}\\
+\textbf{-r int}\\
 Restarts the analysis from given solution step. The corresponding
 context file (*.osf) must exist.
 \item
-{\bf -rn}\\
+\textbf{-rn}\\
 Turns on the profile renumbering. Default is off. It will not work in parallel mode.
 \item
-{\bf -ar int}\\
+\textbf{-ar int}\\
 Restarts the adaptive computation from given solution step.
 Requires the corresponding context file (*.osf) and domain input file
 (*.din) to exists. The domain input file describes the new mesh, its
 syntax is identical to syntax of input file, but it does not contains
 the output file record, job description record and analysis record.
 \item
-{\bf -qo string}\\
+\textbf{-qo string}\\
 Redirect the standard output stream (stdout) to given file.
 \item
-{\bf -qe string}\\
+\textbf{-qe string}\\
 Redirect standard error stream (stderr) to given file.
 \item
-{\bf -context}\\
+\textbf{-context}\\
 Forces the creation of context file for each solution step.
 \end{itemize}
 
@@ -356,7 +357,7 @@ Currently, supported analysis types are
 \ref{NlDEIDynamic},
 \item Direct explicit (linear) dynamics, see section \ref{DEIDynamic},
 \item Implicit linear dynamic, see section \ref{DIIDynamic},
-\item Incremental {\bf linear} static problem, see section \ref{IncrementalLinearStatic},
+\item Incremental \textbf{linear} static problem, see section \ref{IncrementalLinearStatic},
 \item Non-linear static analysis, see section \ref{NonLinearStatic}.
 \end{itemize}
 
@@ -443,7 +444,7 @@ for all processors. Parallel version requires PETSc and SLEPc modules.}
 Represents the direct explicit  nonlinear dynamic  integration.
 The central difference method with diagonal mass matrix is used,
 damping matrix is assumed to be proportional to mass matrix, $\mbf{C}
-= {\rm dumpcoef} * \mbf{M}$, where
+= \mathrm{dumpcoef} * \mbf{M}$, where
 $\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
 integration, which may be reduced by program in order to satisfy
 solution stability conditions. Parameter \param{nsteps} specifies
@@ -494,9 +495,9 @@ this approach for node-cut partitioning).
 \recentry{}{\field{dumpcoef}{rn}} \recentry{}{\optField{deltaT}{rn}}
 \end{record}
 
-Represent the {\bf linear} explicit
+Represent the \textbf{linear} explicit
 integration scheme for dynamic problem solution. The central difference method with diagonal mass matrix is used,
-damping matrix is assumed to be proportional to mass matrix, $\mbf{C} = {\rm dumpcoef} * \mbf{M}$, where
+damping matrix is assumed to be proportional to mass matrix, $\mbf{C} = \mathrm{dumpcoef} * \mbf{M}$, where
 $\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
 integration, which may be reduced by program in order to satisfy
 solution stability conditions. Parameter \param{nsteps} specifies
@@ -533,7 +534,7 @@ performed. It will not work in parallel mode.
 \end{record}
 
 
-Represents incremental {\bf linear} static problem.
+Represents incremental \textbf{linear} static problem.
 The problem is solved as series of linear solutions and is intended to
 be used for solving linear creep problems or incremental perfect plasticity.
 Nonzero value of optional parameter \param{renumber} turns on the
@@ -957,7 +958,7 @@ and take them into account, if they support such feature.
 \recentry{}{\optField{changingProblemSize}{}}
 \end{record}
 
-{\bf Linear} implicit
+\textbf{Linear} implicit
 integration scheme for transient transport problems. The generalized
 midpoint rule (sometimes called $\alpha$-method) is used for time discretization, with alpha parameter,
 which has limits $0\le\alpha\le1$. For $\alpha=0$ explicit Euler
@@ -987,7 +988,7 @@ Dirichlet boundary conditions during solution. This feature is enabled with \par
 storing solution values on nodes (DoFs) directly. If the problem does not grow/decrease during solution, it is more efficient
 to use conventional solution strategy and the parameter should not be mentioned.
 
-Note: This problem type {\bf requires transport module} and it
+Note: This problem type \textbf{requires transport module} and it
 can be used only when this module is included in your oofem
 configuration.
 
@@ -1035,7 +1036,7 @@ See the Section~\ref{StationaryTransport} for an explanation on
 \param{exportfields}. The meaning 
 of \param{changingProblemSize} is given in Section~\ref{LinearTransientTransport}.
 
-Note: This problem type {\bf requires transport module} and it
+Note: This problem type \textbf{requires transport module} and it
 can be used only when this module is included in your oofem
 configuration.
 
@@ -1059,9 +1060,9 @@ temperature field, is not solved.
 Parameter \param{nsteps} determines number of solution
 steps. Parameter \param{deltaT} is time step length used for
 integration. This time step will be automatically adjusted to satisfy
-integration stability limits $\Delta t \le {h\over{\vert
-  \mbf{u}\vert}}$ and $\Delta t \le {{h^2}\over{2\nu}}$, if necessary. Parameters \param{theta1}
-and \param{theta2} are integration constants, $\theta_1, \theta_2 \in <{1\over 2}, 1>$. If \param{cmflag} is given a nonzero value, then
+integration stability limits $\Delta t \le {\frac{h}{\vert\mbf{u}\vert}}$ and $\Delta t \le {\frac{h^2}{2\nu}}$, if necessary.
+Parameters \param{theta1} and \param{theta2} are integration constants, $\theta_1, \theta_2 \in \langle{\frac12}, 1\rangle$.
+If \param{cmflag} is given a nonzero value, then
 consistent mass matrix will be used instead of (default) lumped one.
 
 The characteristic equations can be solved in non-dimensional form. To
@@ -1194,7 +1195,7 @@ integration, \param{nsteps} parameter specifies
 number of time steps to be solved. \param{stepMultiplier} multiplies all 
 times with a given constant. Default is 1.
 
-Note: This problem type {\bf is included in transport module} and it
+Note: This problem type \textbf{is included in transport module} and it
 can be used only when this module is configured.
 Note: All material models derived from StructuralMaterial base will
 take into account the external registered temperature field, if
@@ -1227,7 +1228,7 @@ The allowed \param{lstype} and \param{smtype} combinations are
 summarized in the table (\ref{linsolvstoragecompattable}), together
 with solver parameters related to specific solver.
 
-\begin{table}[h]
+\begin{table}[ht]
 \begin{center}
 %%\scalebox{0.50}{
 \begin{tabular}{|l|c|c|c|c|c|c|}
@@ -1259,7 +1260,7 @@ Storage format & id & \multicolumn{5}{c|}{Sparse solver} \\
 The solver parameters in \param{solverParams} depend on the solver
 type and are summarized in table (\ref{sparsesolverparams}).
 
-\begin{table}[h]
+\begin{table}[ht]
 \begin{center}
 \begin{tabular}{|l|l|l|}
 \hline
@@ -1295,7 +1296,7 @@ used. The possible values of \param{lsprecond} together with supported
 storage schemes and their descriptions are summarized in table
 (\ref{precondtable}).
 
-\begin{table}[h]
+\begin{table}[ht]
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
@@ -1336,7 +1337,7 @@ The eigensolverparams field has the following general syntax:\\
 where parameter \param{stype} allows to select solver type. Parameter \param{smtype} allows to select sparse matrix storage
 scheme. The scheme should be compatible with solver type. Currently supported values of \param{stype} are summarized in table~\ref{eigenvaluesolverparamtable}.
 
-\begin{table}[h]
+\begin{table}[ht]
 \begin{center}
 %%\scalebox{0.50}{
 \begin{tabular}{|l|l|l|}
@@ -1400,7 +1401,7 @@ EET\_CZZSI - The implementation of combined criteria: Zienkiewicz Zhu Error Esti
 scalar error indicator in non-linear regime.
 \end{itemize}
 
-\begin{table}[h]
+\begin{table}[ht]
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -1856,8 +1857,8 @@ should be equal to \param{ndofs} value. Each item of \param{DofIDMask}
 array describes the physical meaning of corresponding DOF in dof manager. Currently
 the following values are supported: \{u-displacement=1, v-displacement=2,
  w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9,
-temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}. {\bf It is not allowed to have two DOFs
-with the same physical meaning in the same DofManager.}
+temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}.
+\textbf{It is not allowed to have two DOFs with the same physical meaning in the same DofManager.}
 
 Parameters \param{dofType} and \param{masterMask} allows to connect some dof manager's dofs
 (so-called ``slave'' dofs)
@@ -2093,7 +2094,7 @@ corresponding element is local (this array should have size equal to one).
 
 
 Available material models, their outline and
-corresponding parameters are described in separate {\bf Element Library Manual.}
+corresponding parameters are described in separate \textbf{Element Library Manual.}
 
 \subsection{Cross section records}
 \label{_CrossSectionRecords}
@@ -2159,7 +2160,7 @@ geometrical hypothesis, that cross sections remain planar after
 deformation (3d generalization of layered approach for beams).
 Paramater \param{nfibers} determines the number of fibers that together form the overall cross section.
 The model requires to specify a material model corresponding to particular fiber using \param{fibermaterials} array. This array should contain for each fibre corresponding material model number (the material model specified on element level has no meaning in this particular case).
-{\bf The geometry of cross section is determined from fiber dimensions and fiber positions, all input in local coordinate system of the beam (yz plane).} The thick and width of each fiber are determined using \param{thicks} and \param{widths} arrays. The overall thick and width are specified using parameters \param{thick} and \param{width}. Positions of particular fibers are specified by providing coordinates of center of each fiber using \param{fiberycentrecoords} array for y-coordinates and \param{fiberzcentrecoords} array for z-coordinates.
+\textbf{The geometry of cross section is determined from fiber dimensions and fiber positions, all input in local coordinate system of the beam (yz plane).} The thick and width of each fiber are determined using \param{thicks} and \param{widths} arrays. The overall thick and width are specified using parameters \param{thick} and \param{width}. Positions of particular fibers are specified by providing coordinates of center of each fiber using \param{fiberycentrecoords} array for y-coordinates and \param{fiberzcentrecoords} array for z-coordinates.
 %%\item \entKeywordInst{HeatCS} \field{thick}{rn}
 %%\field{width}{rn}\\
 %%Represents cross section abstraction for heat transfer problems.
@@ -2183,7 +2184,7 @@ Material density is compulsory parameter and it's value is given by
 \param{d} parameter.
 
 Available material models, their outline and
-corresponding parameters are described in separate {\bf Material Library Manual}.
+corresponding parameters are described in separate \textbf{Material Library Manual}.
 
 \subsection{Nonlocal barrier records}
 \label{_NonlocalBarrierRecords}
@@ -2300,6 +2301,24 @@ The parameter \param{cCoords} defaults to zero.
 This is typical boundary condition in multiscale analysis where $ d = \partial_x s$
 would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
 It is also convenient to use when one wants to test a arbitrary specimen for shear. 
+
+\item Mixed prescribed gradient / pressure boundary condition (Active Dirichlet type)
+
+  \begin{record}[0.9\textwidth]
+    \recentry{\entKeywordInst{MixedGradientPressure}}{\field{devGradient}{ra}}
+    \recentry{}{\field{pressure}{rn}}
+    \recentry{}{\optField{cCoords}{ra}}
+    \recentry{}{\optField{isImposedTimeFunction}{in}}
+  \end{record}
+
+  Prescribes $ v_i = d_{\mathrm{dev},ij}(x_j-\bar{x}_j) + d_{\mathrm{vol}}(x_i-\bar{x}_i)$, and a pressure $p$.
+where $ v_i $ are primary unknowns, $x_j$ is the coordinate of the node, $\bar x$ is \param{cCoords} and $d_{\mathrm{dev}}$ is \param{devGradient}.
+The parameter \param{cCoords} defaults to zero.
+An additional unknown appears, $d_{\mathrm{vol}}$, which is handled by the boundary condition itself (no control from the input file).
+This unknown is in a way related to the applied pressure.
+This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. 
+It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
+
 
 \item Nodal fluxes (loads)
 
@@ -2572,7 +2591,7 @@ shown in fig. (\ref{ex01}). The linear static analysis is required,
 the influence of shear is neglected. Please note that one input line
 which is too long to fit to page, is separated into two lines using
 backslash '$\backslash$' character, but OOFEM requires that it must be typed as one single line.
-\begin{figure}[tb]
+\begin{figure}[htb]
 \begin{htmlonly}
   \centerline{\includegraphics[width=0.7\textwidth]{ex01.eps}}
 \end{htmlonly}
@@ -2620,7 +2639,7 @@ PeakFunction 2 t 2.0 f(t) 1.
 PeakFunction 3 t 3.0 f(t) 1.
 \end{verbatim}}
 \subsection {Plane stress example}
-\begin{figure}[tb]
+\begin{figure}[htb]
 \begin{htmlonly}
   \centerline{\includegraphics[width=0.7\textwidth]{ex02.eps}}
 \end{htmlonly}
