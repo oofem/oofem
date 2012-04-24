@@ -623,7 +623,7 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVector( answer, stepN, EID_MomentumBalance, InternalForcesVector, mode,
+    this->assembleVector( answer, stepN, EID_MomentumBalance, ExternalForcesVector, mode,
                           EModelDefaultEquationNumbering(), domain);
 
     /*
