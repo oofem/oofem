@@ -111,20 +111,6 @@ protected:
      */
     virtual void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     /**
-     * Computes the contribution of element load to reaction forces in given domain.
-     * @param reactions contains the computed contributions.
-     * @param tStep Solution step.
-     * @param di Domain number.
-     */
-    void computeElementLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
-    /**
-     * Computes the contribution of nodal load to reaction forces in given domain.
-     * @param reactions Contains the computed contributions.
-     * @param tStep Solution step.
-     * @param di Domain number.
-     */
-    void computeNodalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
-    /**
      * Updates nodal values
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
      * if model supports changes of static system). The element internal state update is also forced using

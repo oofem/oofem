@@ -100,22 +100,15 @@ namespace oofem {
     ENUM_ITEM(AdvectionTerm_MB)                                           \
     ENUM_ITEM(DiffusionTerm_MB)                                           \
     /* characteristic vectors */ \
-    ENUM_ITEM(LoadVector)                                                 \
-    ENUM_ITEM(NodalInternalForcesVector)                                  \
-    ENUM_ITEM(LastEquilibratedNodalInternalForcesVector)                  \
-    ENUM_ITEM(ElementPPDELoadVector)                                      \
-    ENUM_ITEM(ElementForceLoadVector)                                     \
-    ENUM_ITEM(NodalLoadVector)                                            \
-    ENUM_ITEM(BcLhsDueToConvection)                                       \
-    ENUM_ITEM(ElementHEMOLoadVector)                                      \
+    ENUM_ITEM(ExternalForcesVector)                                         \
+    ENUM_ITEM(InternalForcesVector)                                       \
+    ENUM_ITEM(LastEquilibratedInternalForcesVector)                       \
     ENUM_ITEM(ElementBCTransportVector)                                   \
     ENUM_ITEM(ElementInternalSourceVector)                                \
     ENUM_ITEM(LHSBCMatrix) /* LHS due to Boundary Conditions (Transport problems) */  \
     ENUM_ITEM(NSTP_MidpointLhs) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
     ENUM_ITEM(NSTP_MidpointRhs) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
     ENUM_ITEM(IntSourceLHSMatrix) /* LHS due to material internal source (Transport problems) */  \
-    ENUM_ITEM(ElementForceLoadVectorOfPrescribed) /* Prescribed here means corresponding to prescribed dofs*/  \
-    ENUM_ITEM(NodalLoadVectorOfPrescribed)                                \
     ENUM_ITEM(PrescribedRhsVector)
 
 enum CharType {

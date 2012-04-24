@@ -149,9 +149,9 @@ void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
                                             TimeStep *tStep)
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
-    if ( mtrx == LoadVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         this->computeLoadVector(answer, tStep);
-    } else if ( mtrx == NodalInternalForcesVector ) {
+    } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
@@ -261,7 +261,7 @@ void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, Time
     GaussPoint *gp;
     FloatArray N, gVector, *lcoords, temparray(30);
     double dA, detJ, rho;
-    
+
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {

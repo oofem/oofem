@@ -45,6 +45,7 @@
 
 namespace oofem {
 class PrescribedGradient;
+class MixedGradientPressureBC;
 
 /**
  * Stokes flow model with homogenization for stress-strainrate.
@@ -69,6 +70,10 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     PrescribedGradient *giveDirichletBC();
+
+    MixedGradientPressureBC *giveMixedDirichletBC();
+
+    //void solveYourselfAt(TimeStep *tStep); // Temporary debugging
 
     /**
      * Computes the volume of the whole microscopic domain (pores included).

@@ -142,8 +142,9 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
 
         this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, BcLhsDueToConvection,
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        ///@todo This BcLhsDueToConvection didn't exists anywhere else. Perhaps this whole class is deprecated? / Mikael
+        //this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, BcLhsDueToConvection,
+        //               EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // alocate space for fluxVector
         //
@@ -160,13 +161,14 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
     //
     loadVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
     loadVector.zero();
-    this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    ///@todo This ElementPPDELoadVector didn't exists anywhere else. Perhaps this whole class is deprecated? / Mikael
+    //this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total,
+    //                                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
+    this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //

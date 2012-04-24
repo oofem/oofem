@@ -486,11 +486,8 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     _loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     _loadVector.zero();
 
-    this->assembleVectorFromDofManagers(_loadVector, tStep, EID_MomentumBalance, NodalLoadVector, mode,
-                                        EModelDefaultEquationNumbering(), domain);
-
-    this->assembleVectorFromElements(_loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, mode,
-                                     EModelDefaultEquationNumbering(), domain);
+    this->assembleVector( _loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
+                          EModelDefaultEquationNumbering(), domain);
 }
 
 void

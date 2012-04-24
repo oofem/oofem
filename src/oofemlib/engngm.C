@@ -1135,25 +1135,23 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 //
 //
 {
-    int i;
+    if ( type != ExternalForcesVector ) { // Dof managers can only have external loads.
+        return;
+    }
     IntArray loc;
     FloatArray charVec;
     FloatMatrix R;
     IntArray dofIDarry(0);
     DofManager *node;
-#ifdef __PARALLEL_MODE
-    double scale;
-#endif
     int nnode = domain->giveNumberOfDofManagers();
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         node = domain->giveDofManager(i);
         node->computeLoadVectorAt(charVec, tStep, mode);
 #ifdef __PARALLEL_MODE
         if ( node->giveParallelMode() == DofManager_shared ) {
-            scale = 1. / ( node->givePartitionsConnectivitySize() );
-            charVec.times(scale);
+            charVec.times( 1./( node->givePartitionsConnectivitySize() ) );
         }
 
 #endif

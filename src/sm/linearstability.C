@@ -268,18 +268,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
 
     // Internal forces first, negated;
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, NodalInternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( loadVector, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     loadVector.negated();
 
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-    //
-    // assembling the nodal part of load vector
-    //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // call numerical model to solve problem

@@ -146,7 +146,7 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
     int istep = this->giveNumberOfFirstStep();
     //int mstep = 1;
     StateCounterType counter = 1;
-    
+
     if (previousStep != NULL){
         delete previousStep;
     }
@@ -213,7 +213,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
+    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //

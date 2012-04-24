@@ -651,8 +651,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
      *
      * loadVector.resize (this->numberOfEquations);
      * loadVector.zero();
-     * this->assemble (loadVector, this->giveCurrentStep(), ElementForceLoadVector_Total, this->giveDomain(1)) ;
-     * this->assemble (loadVector, this->giveCurrentStep(), NodalLoadVector_Total, this->giveDomain(1));
+     * this->assemble (loadVector, this->giveCurrentStep(), ExternalForcesVector_Total, this->giveDomain(1)) ;
+     * this->assemble (loadVector, this->giveCurrentStep(), ExternalForcesVector_Total, this->giveDomain(1));
      *
      * rhs =  loadVector;
      * rhs.times(loadLevel);

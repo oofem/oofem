@@ -141,7 +141,7 @@ TimeStep *NlDEIDynamic :: giveNextStep()
     if (previousStep != NULL){
         delete previousStep;
     }
-    
+
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
@@ -309,10 +309,8 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             loadRefVector.resize(neq);
             loadRefVector.zero();
 
-            this->assembleVectorFromElements(loadRefVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-                                             EModelDefaultEquationNumbering(), domain);
-            this->assembleVectorFromDofManagers(loadRefVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-                                                EModelDefaultEquationNumbering(), domain);
+            this->assembleVector( loadRefVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+                                  EModelDefaultEquationNumbering(), domain);
 
             // compute the load vector norm pMp
             this->pMp = 0.0;
@@ -416,9 +414,10 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         loadVector.zero();
 
-        this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
+        this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
                                          EModelDefaultEquationNumbering(), domain);
-        this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
+        ///@todo Is this really supposed to be the internal forces vector? I doubt it / Mikael
+        this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
                                             EModelDefaultEquationNumbering(), domain);
         //
         // assembling additional parts of right hand side
@@ -523,7 +522,7 @@ NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     for ( int i = 1; i <= nelems; i++ ) {
         element = ( NLStructuralElement * ) domain->giveElement(i);
         element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
+        element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
         if ( charVec.containsOnlyZeroes() ) {
             continue;
         }

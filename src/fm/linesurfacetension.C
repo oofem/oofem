@@ -143,9 +143,9 @@ void LineSurfaceTension :: giveDofManDofIDMask(int inode, EquationID ut, IntArra
 
 void LineSurfaceTension :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
 {
-    if( mtrx == LoadVector )  {
+    if( mtrx == ExternalForcesVector )  {
         this->computeLoadVector(answer, mode, tStep);
-    } else if ( mtrx == NodalInternalForcesVector ){
+    } else if ( mtrx == InternalForcesVector ){
         answer.resize(0);
     } else {
         OOFEM_ERROR2("giveCharacteristicVector: Unknown CharType (%s).",__CharTypeToString(mtrx));

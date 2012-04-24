@@ -153,7 +153,7 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     if (previousStep != NULL){
         delete previousStep;
     }
-    
+
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, mstepNum, this->giveDiscreteTime(istep), dt, counter);
     return currentStep;
@@ -219,19 +219,13 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     // Assembling the element part of load vector
     internalLoadVector.resize(neq);
     internalLoadVector.zero();
-    this->assembleVectorFromElements( internalLoadVector, tStep, EID_MomentumBalance, NodalInternalForcesVector,
-                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( internalLoadVector, tStep, EID_MomentumBalance, InternalForcesVector,
+                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.resize(neq);
     loadVector.zero();
-    // Which one?
-    //this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, LoadVector,
-    //                                 VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
-                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector,
-                                        VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
 

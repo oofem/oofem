@@ -242,26 +242,21 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     displacementVector.zero();
 
     //
-    // assembling the element part of load vector
+    // assembling the load vector
     //
     loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     loadVector.zero();
-
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    //
-    // assembling the nodal part of load vector
-    //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // internal forces (from Dirichlet b.c's, or thermal expansion, etc.)
     //
     FloatArray internalForces( this->giveNumberOfEquations(EID_MomentumBalance) );
     internalForces.zero();
-    this->assembleVectorFromElements( internalForces, tStep, EID_MomentumBalance, NodalInternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
     loadVector.subtract(internalForces);
 
     //

@@ -173,7 +173,7 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         this->computeBCRhsTerm_MC(answer, tStep);
     } else if ( mtrx == DiffusionTerm_MC ) {
         this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == LoadVector ) {
+    } else if ( mtrx == ExternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -186,7 +186,7 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep);
         answer.assemble(h, ploc);
-    } else if ( mtrx == NodalInternalForcesVector ) {
+    } else if ( mtrx == InternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -232,11 +232,7 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
-
-
 
 
 double
@@ -250,7 +246,6 @@ SUPGElement2 :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 
     return 0.0;
 }
-
 
 
 int
@@ -270,6 +265,7 @@ SUPGElement2 :: checkConsistency()
      */
     return result;
 }
+
 
 void
 SUPGElement2 :: updateInternalState(TimeStep *stepN)
@@ -477,14 +473,12 @@ void
 SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
     FloatMatrix n, b, bn, grad_u, grad_uN, N;
-    FloatArray u;
     double dV, rho;
     int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
 
     answer.resize(undofs, undofs);
     answer.zero();
-    //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MB);
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];

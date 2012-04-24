@@ -137,7 +137,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain)
 {
-    if (type != NodalInternalForcesVector) {
+    if (type != InternalForcesVector) {
         return;
     }
     if (eid == EID_MomentumBalance_ConservationEquation) {

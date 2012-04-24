@@ -48,6 +48,8 @@
  #include "sparsemtrx.h"
 
 namespace oofem {
+///@todo Remove this class
+///@deprecated Using normal linear static should work fine even in parallell.
 class PLinearStatic : public LinearStatic
 {
     /*

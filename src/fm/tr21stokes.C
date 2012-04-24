@@ -137,9 +137,9 @@ void Tr21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, V
                                             TimeStep *tStep)
 {
     // Compute characteristic vector for this element. I.e the load vector(s)
-    if ( mtrx == LoadVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         this->computeLoadVector(answer, tStep);
-    } else if ( mtrx == NodalInternalForcesVector ) {
+    } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
         OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");

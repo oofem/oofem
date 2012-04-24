@@ -116,9 +116,9 @@ int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArra
 
 void StructuralElementEvaluator :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-    if ( type == NodalInternalForcesVector ) {
+    if ( type == InternalForcesVector ) {
         this->giveInternalForcesVector(answer, tStep, false); /// @todo Only for total value mode type (?)
-    } else if ( type == LastEquilibratedNodalInternalForcesVector ) {
+    } else if ( type == LastEquilibratedInternalForcesVector ) {
         this->giveInternalForcesVector(answer, tStep, true); ///  @todo Only for total value mode type (?)
     } else {
         answer.resize(0);

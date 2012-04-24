@@ -161,7 +161,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         this->computeBCRhsTerm_MC(answer, tStep);
     } else if ( mtrx == DiffusionTerm_MC ) {
         this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == LoadVector) {
+    } else if ( mtrx == ExternalForcesVector) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;
@@ -171,7 +171,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.resize(size); answer.zero();
         this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
-    } else if ( mtrx == NodalInternalForcesVector) {
+    } else if ( mtrx == InternalForcesVector) {
         // stokes flow
         IntArray vloc, ploc;
         FloatArray h;

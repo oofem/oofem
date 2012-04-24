@@ -246,7 +246,7 @@ void MixedGradientPressureBC :: setPrescribedDeviatoricGradientFromVoigt(const F
 void MixedGradientPressureBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                     CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain)
 {
-    if (type != LoadVector)
+    if (type != ExternalForcesVector)
         return;
 
     if (eid == EID_MomentumBalance_ConservationEquation)

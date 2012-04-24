@@ -167,8 +167,8 @@ StructuralEngngModel :: computeInternalForceReactionContribution(FloatArray &rea
 {
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    this->assembleVectorFromElements( reactions, tStep, EID_MomentumBalance, LastEquilibratedNodalInternalForcesVector, VM_Total,
-                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    this->assembleVector( reactions, tStep, EID_MomentumBalance, LastEquilibratedInternalForcesVector, VM_Total,
+                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
 
@@ -180,30 +180,10 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
     reactions.zero();
     FloatArray contribution(numRestrDofs);
 
-    this->computeElementLoadReactionContribution(contribution, tStep, di);
-    reactions.add(contribution);
-    this->computeNodalLoadReactionContribution(contribution, tStep, di);
-    reactions.add(contribution);
-}
-
-
-void
-StructuralEngngModel :: computeElementLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    this->assembleVectorFromElements( reactions, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
-}
-
-
-void
-StructuralEngngModel :: computeNodalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
-    reactions.zero();
-    this->assembleVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-                                         EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
 

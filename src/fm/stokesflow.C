@@ -143,10 +143,8 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVectorFromElements( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromActiveBC( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
 
@@ -202,10 +200,8 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
     if (cmpn == InternalRhs) {
         this->internalForces.zero();
-        this->assembleVectorFromElements(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
-                EModelDefaultEquationNumbering(), d);
-        this->assembleVectorFromActiveBC(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
-                EModelDefaultEquationNumbering(), d);
+        this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
         return;
 
     } else if (cmpn == NonLinearLhs) {

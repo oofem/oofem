@@ -34,9 +34,11 @@
 
 #include "stokesflowstresshomogenization.h"
 #include "prescribedgradient.h"
+#include "mixedgradientpressurebc.h"
 #include "inputrecord.h"
 #include "usrdefsub.h"
 #include "sparsemtrx.h"
+#include "timestep.h"
 #include "line2boundaryelement.h"
 
 #include "tr21stokes.h"
@@ -80,12 +82,76 @@ PrescribedGradient *StokesFlowStressHomogenization :: giveDirichletBC()
     return pt;
 }
 
+
+MixedGradientPressureBC *StokesFlowStressHomogenization :: giveMixedDirichletBC()
+{
+    MixedGradientPressureBC *mixed = dynamic_cast< MixedGradientPressureBC * >( this->giveDomain(1)->giveBc(1) );
+    if ( mixed == NULL ) {
+        OOFEM_ERROR("StokesFlowStressHomogenization :: computeMacroStress - Wrong boundary conditions");
+    }
+    return mixed;
+}
+
+
+///////////////////////////////////////// REMOVE
+#if 0
+void StokesFlowStressHomogenization :: solveYourselfAt(TimeStep *tStep)
+{
+    StokesFlow :: solveYourselfAt(tStep);
+
+    double total_area = this->computeSize(1);
+    int npeq = this->giveNumberOfPrescribedEquations(EID_MomentumBalance_ConservationEquation);
+    FloatArray R_int(npeq), R_ext(npeq);
+    R_int.zero();
+    R_ext.zero();
+
+    this->assembleVectorFromElements( R_int, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( R_ext, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+
+    R_int.subtract(R_ext);
+    R_int.times(1/total_area);
+    //double d_vol = solutionVector->at(neq);
+    double fluid_area = this->giveDomain(1)->giveArea();
+    double voffraction = fluid_area/total_area;
+    printf("porosity = %e. sigma = ",voffraction); R_int.printYourself();
+
+    // Saving results;
+    FILE *fid = fopen("results.txt","a");
+    fprintf(fid,"%e %e %e %e %e\n", tStep->giveIntrinsicTime(), voffraction, R_int.at(1),R_int.at(2),R_int.at(3));
+    fclose(fid);
+}
+#endif
+///////////////////////////////////////// REMOVE
+
+
 bool StokesFlowStressHomogenization :: computeMacroStress(FloatArray &answer, const FloatArray &input, TimeStep *tStep)
 {
-    this->giveDirichletBC()->setPrescribedGradientVoigt(input);
-    this->solveYourselfAt(tStep);
-    this->computeMacroStressFromDirichlet(answer, tStep);
-    return true;
+    if (0) { // Change to this eventually; (Move more of it to the macro boundary condition perhaps?
+        this->giveMixedDirichletBC()->setPrescribedDeviatoricGradientFromVoigt(input);
+        this->solveYourselfAt(tStep);
+
+        double volume;
+        int npeq = this->giveNumberOfPrescribedEquations(EID_MomentumBalance_ConservationEquation);
+        FloatArray R_ext(npeq);
+        answer.resize(npeq);
+        answer.zero();
+        R_ext.zero();
+        this->assembleVectorFromElements( answer, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( R_ext, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+                                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+        answer.subtract(R_ext);
+        //volume = this->computeSize(1);
+        //answer.times(1/volume);
+
+        this->computeMacroStressFromDirichlet(answer, tStep);
+        return true;
+    } else {
+        this->giveDirichletBC()->setPrescribedGradientVoigt(input);
+        this->solveYourselfAt(tStep);
+        this->computeMacroStressFromDirichlet(answer, tStep);
+        return true;
+    }
 }
 
 void StokesFlowStressHomogenization :: computeMacroTangent(FloatMatrix &answer, TimeStep *tStep)
@@ -141,10 +207,10 @@ void StokesFlowStressHomogenization :: computeMacroStressFromDirichlet(FloatArra
     FloatArray R_c(npeq), R_ext(npeq);
     R_c.zero();
     R_ext.zero();
-    this->assembleVectorFromElements( R_c, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
-                                     EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( R_ext, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
-                                     EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( R_c, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( R_ext, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
     R_c.subtract(R_ext);
     if (!this->C.isNotEmpty()) {
         this->giveDirichletBC()->updateCoefficientMatrix(this->C);

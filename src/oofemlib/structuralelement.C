@@ -1016,11 +1016,11 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
 // returns characteristics vector of receiver according to mtrx
 //
 {
-    if ( mtrx == ElementForceLoadVector ) {
+    if ( mtrx == ExternalForcesVector ) {
         this->computeForceLoadVector(answer, tStep, mode);
-    } else if ( ( mtrx == NodalInternalForcesVector ) && ( mode == VM_Total ) ) {
+    } else if ( ( mtrx == InternalForcesVector ) && ( mode == VM_Total ) ) {
         this->giveInternalForcesVector(answer, tStep);
-    } else if ( ( mtrx == LastEquilibratedNodalInternalForcesVector ) && ( mode == VM_Total ) ) {
+    } else if ( ( mtrx == LastEquilibratedInternalForcesVector ) && ( mode == VM_Total ) ) {
         /* here tstep is not relevant, we set useUpdatedGpRecord = 1
          * and this will cause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */

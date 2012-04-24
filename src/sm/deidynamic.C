@@ -292,18 +292,14 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
     previousDisplacementVector = displacementVector;
     displacementVector         = nextDisplacementVector;
-    //nextDisplacementVector     = new FloatArray(displacementVector->giveSize());
 
     //
     // assembling the element part of load vector
     //
-    //loadVector = new FloatArray (this->giveNumberOfEquations());
     loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     loadVector.zero();
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
-                                     VM_Total, EModelDefaultEquationNumbering(), domain);
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector,
-                                        VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+                         VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling additional parts of right hand side

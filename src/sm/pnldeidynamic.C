@@ -263,8 +263,8 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             loadRefVector.zero();
 
             this->computeLoadVector(loadRefVector, VM_Total, tStep);
-            //this->assembleVectorFromElements (loadRefVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, domain) ;
-            //this->assembleVectorFromDofManagers(loadRefVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, domain);
+            //this->assembleVectorFromElements (loadRefVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total, domain) ;
+            //this->assembleVectorFromDofManagers(loadRefVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total, domain);
 
 #ifdef __PARALLEL_MODE
             // compute the processor part of load vector norm pMp
@@ -623,9 +623,8 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode,
-                                        EModelDefaultEquationNumbering(), domain);
-
+    this->assembleVector( answer, stepN, EID_MomentumBalance, InternalForcesVector, mode,
+                          EModelDefaultEquationNumbering(), domain);
 
     /*
      * #ifdef __PARALLEL_MODE
@@ -654,12 +653,6 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
      * }
      *#endif
      */
-    //
-    // assembling the element part of load vector
-    //
-    this->assembleVectorFromElements(answer, stepN, EID_MomentumBalance, ElementForceLoadVector, mode,
-                                     EModelDefaultEquationNumbering(), domain);
-
 
     // exchange contributions
 
@@ -693,7 +686,6 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     Element *element;
     IntArray loc;
     FloatArray charVec;
-    //FloatArray* answer = new FloatArray(displacementVector->giveSize());
     int nelems;
     EModelDefaultEquationNumbering en;
 
@@ -717,7 +709,7 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
         //   error ("giveInternalForces: element with no non-linear capability encountered\n");
         // }
         element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
+        element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
         if ( charVec.containsOnlyZeroes() ) {
             continue;
         }
@@ -773,7 +765,6 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
     maxOm = 0.;
     massMatrix.resize(neq);
     massMatrix.zero();
-    //diagonalStiffMtrx.resize (neq); diagonalStiffMtrx.zero();
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE

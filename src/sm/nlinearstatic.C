@@ -409,7 +409,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
 
 #endif
         element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
+        element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
         // if (charVec->containsOnlyZeroes ()) continue;
         if ( element->giveRotationMatrix(R, EID_MomentumBalance) ) {
             charVec.rotatedWith(R, 't');
@@ -1010,34 +1010,23 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                                                            SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                            Domain *sourceDomain, EquationID ut, TimeStep *tStep)
 {
-    EModelDefaultEquationNumbering en;
-
     _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance) );
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_inceremental ) {
-        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut, ElementForceLoadVector,
-                                         VM_Incremental, en, sourceDomain);
-        this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-                                            NodalLoadVector, VM_Incremental, en, sourceDomain);
+        this->assembleVector( _incrementalLoadVector, tStep, ut, ExternalForcesVector,
+                              VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut, ElementForceLoadVector,
-                                         VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
-        /// @todo Probably wrong? Should be prescribed equation numbering! (No test case runs this code. Perhaps rlm_inceremental is just deprecated? ) / Mikael
-        this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut, NodalLoadVector,
-                                            VM_Incremental, en, sourceDomain);
+        this->assembleVector( _incrementalLoadVector, tStep, ut, ExternalForcesVector,
+                              VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
-        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut,
-                                         ElementForceLoadVector, VM_Total, en, sourceDomain);
-        this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-                                            NodalLoadVector, VM_Total, en, sourceDomain);
+        this->assembleVector( _incrementalLoadVector, tStep, ut, ExternalForcesVector,
+                              VM_Total, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVectorFromElements(_incrementalLoadVectorOfPrescribed, tStep, ut, ElementForceLoadVector,
-                                         VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
-        this->assembleVectorFromDofManagers(_incrementalLoadVectorOfPrescribed, tStep, ut, NodalLoadVector,
-                                            VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
+        this->assembleVector( _incrementalLoadVectorOfPrescribed, tStep, ut, ExternalForcesVector,
+                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 
 #ifdef __PARALLEL_MODE

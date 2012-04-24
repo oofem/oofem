@@ -74,6 +74,9 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
                                                     const UnknownNumberingScheme &s,
                                                     Domain *domain)
 {
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
     /*
      * Assembles characteristic vector of required type into given vector.
      * Overloaded in order to properly handle nodal loading of shared DofManagers.
@@ -89,7 +92,7 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
 
     int nnode = domain->giveNumberOfDofManagers();
 
-    if ( type == NodalLoadVector ) {
+    if ( type == ExternalForcesVector ) {
         DofManager *node;
         for ( i = 1; i <= nnode; i++ ) {
             node = domain->giveDofManager(i);
