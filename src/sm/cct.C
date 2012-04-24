@@ -243,40 +243,6 @@ CCTPlate :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(3, 9) = l3;
 }
 
-/*
- * void
- * CCTPlate :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
- * {
- * // computes temperature strain vector of the receiver
- * StructuralMaterial * mat = (StructuralMaterial*) this->giveMaterial();
- * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
- * FloatArray  et, e0;
- * double thick;
- *
- * if (this -> giveBodyLoadArray() -> isEmpty()) {answer.resize(0); return;}
- *
- * this -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
- * if (et.giveSize() == 0) {answer.resize(0); return;}
- * if (et.giveSize() < 1) {
- * _error ("computeTemperatureStrainVectorAt - Bad format of TemperatureLoad");
- * exit (1);
- * }
- * mat->giveThermalDilatationVector (e0, gp,stepN);
- *
- * if (e0.giveSize()) {
- * if (et.giveSize() > 1) {
- * answer.resize (5);
- * answer.zero();
- *
- * thick = cs->give(THICKNESS);
- * answer.at(1) = e0.at(1) * et.at(2)/ thick;   // kappa_x
- * answer.at(2) = e0.at(2) * et.at(2)/ thick;   // kappa_y
- *
- * }
- * }
- * }
- */
-
 
 double
 CCTPlate :: giveArea()

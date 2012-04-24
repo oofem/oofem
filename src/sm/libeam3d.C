@@ -238,42 +238,6 @@ LIBeam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
 }
 
 
-/*
- * void
- * LIBeam3d :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
- * {
- * // computes temperature strain vector of the receiver in local c.s.
- * StructuralMaterial * mat = (StructuralMaterial*) this->giveMaterial();
- * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
- * FloatArray  et, e0 ;
- * double thick, width;
- *
- * if (this -> giveBodyLoadArray() -> isEmpty()) {answer.resize(0); return;}
- *
- * this -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
- * if (et.giveSize() == 0) {answer.resize(0); return;}
- * if (et.giveSize() < 1) {
- * _error ("computeTemperatureStrainVectorAt - Bad format of TemperatureLoad");
- * exit (1);
- * }
- * mat->giveThermalDilatationVector (e0, gp,stepN);
- *
- * if (e0.giveSize()) {
- * answer.resize (6);
- * answer.zero();
- *
- * answer.at(1) = e0.at(1) * et.at(1);
- * if (et.giveSize() > 1) {
- * thick = cs->give(THICKNESS);
- * width = cs->give(WIDTH);
- * answer.at(5) = e0.at(1) * et.at(2)/ thick;   // kappa_y
- * if (et.giveSize() > 2)
- *  answer.at(6) = e0.at(1) * et.at(3)/ width;   // kappa_z
- * }
- * }
- * }
- */
-
 int
 LIBeam3d :: testElementExtension(ElementExtension ext)
 {

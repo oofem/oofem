@@ -446,39 +446,6 @@ LIBeam2dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 }
 
 
-/*
- * void
- * LIBeam2dNL :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
- * {
- * // computes temperature strain vector of the receiver
- * StructuralMaterial * mat = (StructuralMaterial*) this->giveMaterial();
- * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
- * FloatArray  et, e0 ;
- * double thick;
- *
- * if ( this -> giveBodyLoadArray() -> isEmpty()) {answer.resize(0); return;}
- *
- * this -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
- * if (et.giveSize() == 0) {answer.resize(0); return;}
- * if (et.giveSize() < 1) {
- * _error ("computeTemperatureStrainVectorAt - Bad format of TemperatureLoad");
- * exit (1);
- * }
- * mat->giveThermalDilatationVector (e0, gp,stepN);
- *
- * if (e0.giveSize()) {
- * answer.resize (3);
- * answer.zero();
- *
- * answer.at(1) = e0.at(1) * et.at(1);
- * if (et.giveSize() > 1) {
- * thick = cs->give(THICKNESS);
- * answer.at(2) = e0.at(1) * et.at(2)/ thick;   // kappa_x
- * }
- * }
- * }
- */
-
 double LIBeam2dNL :: giveLength()
 // Returns the length of the receiver.
 {

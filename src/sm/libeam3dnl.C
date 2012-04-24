@@ -514,27 +514,6 @@ LIBeam3dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     return 1;
 }
 
-/*
- * void
- * LIBeam3dNL :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
- * {
- * // computes temperature strain vector of the receiver
- * FloatArray  et, e0 ;
- *
- * if ( this -> giveBodyLoadArray() -> isEmpty()) {answer.resize(0); return;}
- *
- * this -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
- * if (et.giveSize() == 0) {answer.resize(0); return;}
- * if (et.giveSize() < 1) {
- * _error ("computeTemperatureStrainVectorAt - Bad format of TemperatureLoad");
- * exit (1);
- * }
- *
- * _error ("computeTemperatureStrainVectorAt: not supported");
- * return ;
- * }
- */
-
 
 void
 LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)

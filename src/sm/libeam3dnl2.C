@@ -596,31 +596,6 @@ LIBeam3dNL2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lc
 }
 
 
-
-/*
- * void
- * LIBeam3dNL2 :: computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint* gp, TimeStep* stepN, ValueModeType mode)
- * {
- * // computes temperature strain vector of the receiver
- * //StructuralMaterial * mat = (StructuralMaterial*) this->giveMaterial();
- * //StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
- * FloatArray  et, e0 ;
- * //double thick;
- *
- * if ( this -> giveBodyLoadArray() -> isEmpty()) {answer.resize(0); return;}
- *
- * this -> computeResultingIPTemperatureAt (et, stepN, gp, mode);
- * if (et.giveSize() == 0) {answer.resize(0); return;}
- * if (et.giveSize() < 1) {
- * _error ("computeTemperatureStrainVectorAt - Bad format of TemperatureLoad");
- * exit (1);
- * }
- *
- * _error ("computeTemperatureStrainVectorAt: not supported");
- * return ;
- * }
- */
-
 void
 LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {

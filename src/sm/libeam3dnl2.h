@@ -110,7 +110,6 @@ protected:
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void initForNewStep();
-    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int)
     { _error("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
