@@ -888,6 +888,35 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
     }
 }
 
+
+void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
+// Adds aMatrix to the receiver. If the receiver has a null size,
+// adjusts its size to that of aMatrix. Returns the modified receiver.
+{
+    register int i;
+    int n, m;
+    double *P1, *P2;
+
+    n = aMatrix.nRows;
+    m = aMatrix.nColumns;
+    if ( nRows * nColumns == 0 ) {
+        this->operator = ( aMatrix );
+        this->times(s);
+    } else {
+        #     ifdef DEBUG
+        if ( (n != nRows || m != nColumns) && aMatrix.isNotEmpty() )
+            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
+        #     endif
+
+            P1 = values;
+            P2 = aMatrix.values;
+            i  = n * m;
+            while ( i-- ) {
+                * P1++ += s *(* P2++);
+            }
+    }
+}
+
 void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.

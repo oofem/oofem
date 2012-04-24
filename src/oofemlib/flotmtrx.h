@@ -382,6 +382,13 @@ public:
      */
     void add(const FloatMatrix &a);
     /**
+     * Adds matrix to the receiver scaled by s.
+     * If receiver has zero size, size is accordingly adjusted.
+     * @param s Scaling factor.
+     * @param a Matrix to be added.
+     */
+    void add(double s, const FloatMatrix &a);
+    /**
      * Subtracts matrix from the receiver.
      * @param a Matrix to be subtracted.
      */
@@ -454,7 +461,7 @@ public:
      * @return Pointer to the values of the matrix.
      */
     double *givePointer()  const { return values; }
-    
+
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);

@@ -69,7 +69,8 @@ using namespace std;
 namespace oofem {
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed(), incrementalBCLoadVector() {
+    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed(), incrementalBCLoadVector()
+{
     //
     // constructor
     //
@@ -102,14 +103,14 @@ NonLinearDynamic :: ~NonLinearDynamic()
 
 NumericalMethod *NonLinearDynamic :: giveNumericalMethod(TimeStep *atTime)
 {
-    const char *__proc = "giveNumericalMethod"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                     // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "giveNumericalMethod"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                     // Required by IR_GIVE_FIELD macro
 
     if ( atTime == NULL ) {
         _error("giveNumericalMethod: undefined time step");
     }
 
-    MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
+    //MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
 
     SparseNonLinearSystemNM *nm = NULL;
 
@@ -127,6 +128,7 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(TimeStep *atTime)
 
     return nm;
 }
+
 
 void
 NonLinearDynamic :: updateAttributes(TimeStep *atTime)
@@ -380,7 +382,6 @@ NonLinearDynamic :: giveInternalForces(FloatArray &answer, double &ebeNorm, cons
 
     // remember last internal vars update time stamp
     internalVarUpdateStamp = stepN->giveSolutionStateCounter();
-    return;
 }
 
 
@@ -445,7 +446,6 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // first assemble problem at current time step
 
     deltaT = tStep->giveTimeIncrement();
-    MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
 
     // Newmark constants
@@ -588,23 +588,17 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
 
     if ( type == ModifiedStiffnessMatrix ) {
         Element *element;
-        // IntArray loc ;
-        FloatMatrix charMtrx1, charMtrx2, charMtrx3;
+        FloatMatrix charMtrx2, charMtrx3;
 
         element = ( NLStructuralElement * ) domain->giveElement(num);
-        // element -> giveLocationArray (loc);
+
         element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrx2, MassMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrx3, MassMatrix, tStep);
 
-        charMtrx2.times(this->a0);
-        charMtrx3.times(this->a1);
-        charMtrx3.times(dumpingCoef);
-
         // Basically, performing Task.4
-        answer.add(charMtrx2);
-        answer.add(charMtrx3);
-
+        answer.add(this->a0, charMtrx2);
+        answer.add(this->a1*dumpingCoef, charMtrx3);
         return;
     } else {
         StructuralEngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
@@ -698,7 +692,7 @@ NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
+    fprintf(File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
     fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
 
@@ -724,7 +718,7 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
 // saves state variable - displacement vector
 //
 {
-    bool noSolveYourself = false;
+    //bool noSolveYourself = false;
 
     int closeFlag = 0;
     contextIOResultType iores;
@@ -996,7 +990,7 @@ void
 NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+    //int neq = this->giveNumberOfEquations(EID_MomentumBalance);
     int i, j, k, jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
@@ -1021,7 +1015,7 @@ NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *d
         element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
 
         //
-        // assemble it manualy
+        // assemble it manually
         //
 #ifdef DEBUG
         if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {

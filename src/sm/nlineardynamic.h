@@ -66,9 +66,10 @@ namespace oofem {
  * Using implicit Newmark scheme described in,
  * A SURVEY OF DIRECT TIME-INTEGRATION METHODS IN COMPUTATIONAL STRUCTURAL DYNAMICS - II. IMPLICIT METHODS
  * K. Subbaraj and M. A. Dokainish
- * Computers &Structures Vol. 32. No. 6. pp. 1387-1401, 1989
+ * Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989
+ *
+ * @author A. Feymark
  */
-
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
@@ -132,36 +133,36 @@ protected:
 
 public:
     NonLinearDynamic(int i, EngngModel *_master = NULL);
-    ~NonLinearDynamic();
+    virtual ~NonLinearDynamic();
 
-    void solveYourself();
-    void solveYourselfAt(TimeStep *tStep);
-    void terminate(TimeStep *tStep);
+    virtual void solveYourself();
+    virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void terminate(TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
-    void updateAttributes(TimeStep *tStep);
+    virtual void updateAttributes(TimeStep *tStep);
 
-    double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
-    IRResultType initializeFrom(InputRecord *ir);
-    TimeStep *giveNextStep();
-    NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual TimeStep *giveNextStep();
+    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void updateDomainLinks();
+    virtual void updateDomainLinks();
+    virtual int checkConsistency();
 
     // identification
-    const char *giveClassName() const { return "NonLinearDynamic"; }
-    classType giveClassID() const { return NonLinearDynamicClass; }
-    int isIncremental() { return 1; }
-    fMode giveFormulation() { return nonLinFormulation; }
-    /// Returns nonzero if nonlocal stiffness option activated.
+    virtual const char *giveClassName() const { return "NonLinearDynamic"; }
+    virtual classType giveClassID() const { return NonLinearDynamicClass; }
+    virtual int isIncremental() { return 1; }
+    virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
@@ -185,9 +186,6 @@ public:
     /**
      * Initializes communication maps of the receiver.
      */
-
-    virtual int checkConsistency();
-
     void initializeCommMaps(bool forceInit = false);
 
     virtual LoadBalancer *giveLoadBalancer();
@@ -232,7 +230,6 @@ protected:
      */
     virtual void unpackMigratingData(TimeStep *tStep);
 #endif
-    void times(SparseMtrx &mtrx, const FloatArray &x, FloatArray &answer) const;
 };
 } // end namespace oofem
 #endif // nlineardynamic_h
