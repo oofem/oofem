@@ -303,7 +303,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
     if ( initFlag ) {
 #ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling stiffness matrix\n");
+        OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
@@ -312,7 +312,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, ModifiedStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -334,7 +334,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     }
 
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Assembling load\n");
+    OOFEM_LOG_DEBUG("Assembling load\n");
 #endif
 
     this->assembleLoadVector(loadVector, domain, VM_Total, tStep);
@@ -361,7 +361,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // Call numerical model to solve arised problem.
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
     nMethod->solve(stiffnessMatrix, & rhs, & help);
@@ -387,7 +387,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
     // engngm classes may require special modification of base types supported on
     // element class level
 
-    if ( type == DIIModifiedStiffnessMatrix ) {
+    if ( type == ModifiedStiffnessMatrix ) {
         Element *element;
         FloatMatrix charMtrx1, charMtrx2;
 

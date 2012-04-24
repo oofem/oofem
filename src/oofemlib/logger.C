@@ -179,12 +179,21 @@ Logger :: appendlogTo(char *fname)
 void
 Logger :: writeLogMsg(logLevelType level, const char *format, ...)
 {
-    va_list args;
+    int rank = 0;
 
-    if ( level <= this->logLevel ) {
-        va_start(args, format);
-        vfprintf(mylogStream, format, args);
-        va_end(args);
+#ifdef __PARALLEL_MODE
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+
+    if ( rank == 0 )
+    {
+        va_list args;
+
+        if ( level <= this->logLevel ) {
+            va_start(args, format);
+            vfprintf(mylogStream, format, args);
+            va_end(args);
+        }
     }
 
     if ( ( level == LOG_LEVEL_FATAL ) || ( level == LOG_LEVEL_ERROR ) ) {
@@ -193,7 +202,6 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
         numberOfWrn++;
     }
 }
-
 
 void
 Logger :: writeELogMsg(logLevelType level, const char *_file, int _line, const char *format, ...)

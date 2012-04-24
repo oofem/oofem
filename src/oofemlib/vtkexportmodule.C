@@ -138,7 +138,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         // asemble local->global region map
         this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
 
-        printf("vktexportModule: %d %d\n", nnodes, regionDofMans);
+        OOFEM_LOG_DEBUG("vktexportModule: %d %d\n", nnodes, regionDofMans);
         for ( inode = 1; inode <= regionDofMans; inode++ ) {
             coords = d->giveNode( map.at(inode) )->giveCoordinates();
             for ( i = 1; i <= coords->giveSize(); i++ ) {

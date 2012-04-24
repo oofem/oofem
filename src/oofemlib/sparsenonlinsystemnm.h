@@ -70,7 +70,7 @@ public:
      */
     enum referenceLoadInputModeType {
         rlm_total=0, ///< The reference incremental load vector is defined as totalLoadVector assembled at given time.
-        rlm_inceremental=1, ///< The reference load vector is obtained as incremental load vector at given time.
+        rlm_incremental=1, ///< The reference load vector is obtained as incremental load vector at given time.
     };
 
 protected:

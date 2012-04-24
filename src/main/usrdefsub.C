@@ -173,6 +173,7 @@
 
 // Emodels of SM module
  #include "nlinearstatic.h"
+ #include "nlineardynamic.h"
  #include "eigenvaluedynamic.h"
  #include "deidynamic.h"
  #include "nldeidynamic.h"
@@ -496,6 +497,7 @@ EngngModel *CreateUsrDefEngngModelOfType(const char *aClass, int number, EngngMo
         engngList["stationaryflow"]     = engngCreator< StationaryFlow >;
         engngList["eigenvaluedynamic"]  = engngCreator< EigenValueDynamic >;
         engngList["nonlinearstatic"]    = engngCreator< NonLinearStatic >;
+        engngList["nonlineardynamic"]   = engngCreator< NonLinearDynamic >;
         engngList["nldeidynamic"]       = engngCreator< NlDEIDynamic >;
         engngList["pnldeidynamic"]      = engngCreator< PNlDEIDynamic >;
         engngList["deidynamic"]         = engngCreator< DEIDynamic >;

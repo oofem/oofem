@@ -83,6 +83,9 @@ void oofem_print_help();
 void oofem_print_version();
 void oofem_print_epilog();
 
+// Finalize PETSc SLEPc and MPI
+void oofem_finalize_modules();
+
 /* Default oofem loggers */
 Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
@@ -101,17 +104,21 @@ int main(int argc, char *argv[])
     char inputFileName [ MAX_FILENAME_LENGTH + 10 ], buff [ MAX_FILENAME_LENGTH ];
     EngngModel *problem = 0;
 
-    // print prg header on stdout
-    printf("%s", PRG_HEADER_SM);
+    int rank = 0;
 
 #ifdef __PARALLEL_MODE
     char fileName [ MAX_FILENAME_LENGTH ];
-    int rank = 0;
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
  #endif
 #endif
+
+    if ( rank == 0 ) {
+        // print prg header on stdout
+        printf("%s\n", PRG_HEADER_SM);
+        int rank = 0;
+    }
 
 #ifdef __PETSC_MODULE
     PetscInitialize(& argc, & argv, PETSC_NULL, PETSC_NULL);
@@ -129,9 +136,12 @@ int main(int argc, char *argv[])
             if ( ( strcmp(argv [ i ], "-context") == 0 ) || ( strcmp(argv [ i ], "-c") == 0 ) ) {
                 contextFlag = 1;
             } else if ( strcmp(argv [ i ], "-v") == 0 ) {
-                oofem_print_version();
+                if ( rank == 0 ) {
+                    oofem_print_version();
+                }
                 if ( argc == 2 ) {
-                    exit(1);     // exit if only "-v" option
+                    oofem_finalize_modules();
+                    exit(EXIT_SUCCESS);     // exit if only "-v" option
                 }
             } else if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
@@ -188,8 +198,12 @@ int main(int argc, char *argv[])
             }
         }
     } else {
-        oofem_print_help();
-        exit(1);
+        if ( rank == 0 ) {
+            oofem_print_help();
+        }
+
+        oofem_finalize_modules();
+        exit(EXIT_SUCCESS);
     }
 
     // check if input file given
@@ -197,8 +211,13 @@ int main(int argc, char *argv[])
         /*
          * ::giveInputDataFileName(inputFileName, MAX_FILENAME_LENGTH);
          */
-        fprintf(stderr, "\nInput file not specified\a\n");
-        exit(1);
+        if ( rank == 0 )
+        {
+            fprintf(stderr, "\nInput file not specified\a\n\n");
+        }
+
+        oofem_finalize_modules();
+        exit(EXIT_SUCCESS);
     }
 
 #ifdef __PARALLEL_MODE
@@ -240,17 +259,8 @@ int main(int argc, char *argv[])
         problem->solveYourself();
     } catch(OOFEM_Terminate & c) {
         delete problem;
-#ifdef __PETSC_MODULE
-        PetscFinalize();
-#endif
 
-#ifdef __SLEPC_MODULE
-        SlepcFinalize();
-#endif
-
-#ifdef __PARALLEL_MODE
-        MPI_Finalize();
-#endif
+        oofem_finalize_modules();
 
         return 1;
     }
@@ -262,17 +272,7 @@ int main(int argc, char *argv[])
     oofem_errLogger.printStatistics();
     delete problem;
 
-#ifdef __PETSC_MODULE
-    PetscFinalize();
-#endif
-
-#ifdef __SLEPC_MODULE
-    SlepcFinalize();
-#endif
-
-#ifdef __USE_MPI
-    MPI_Finalize();
-#endif
+    oofem_finalize_modules();
 
     return 0;
 }
@@ -307,6 +307,21 @@ oofem_print_epilog() {
     printf("\n%s\n", OOFEM_COPYRIGHT);
     printf("This is free software; see the source for copying conditions.  There is NO\n");
     printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
+}
+
+void
+oofem_finalize_modules() {
+#ifdef __PETSC_MODULE
+    PetscFinalize();
+#endif
+
+#ifdef __SLEPC_MODULE
+    SlepcFinalize();
+#endif
+
+#ifdef __USE_MPI
+    MPI_Finalize();
+#endif
 }
 
 #ifndef __MAKEDEPEND

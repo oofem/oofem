@@ -58,7 +58,7 @@ namespace oofem {
     ENUM_ITEM(ElasticStiffnessMatrix)             \
     ENUM_ITEM(MassMatrix)                         \
     ENUM_ITEM(LumpedMassMatrix)                   \
-    ENUM_ITEM(DIIModifiedStiffnessMatrix)         \
+    ENUM_ITEM(ModifiedStiffnessMatrix)            \
     ENUM_ITEM(ConductivityMatrix)                 \
     ENUM_ITEM(CapacityMatrix)                     \
     ENUM_ITEM(InitialStressMatrix)                \

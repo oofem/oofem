@@ -183,6 +183,7 @@ enum classType {
     EigenValueDynamicClass,
     LinearStaticClass,
     NonLinearStaticClass,
+    NonLinearDynamicClass,
     DEIDynamicClass,
     NlDEIDynamicClass,
     DIIDynamicClass,

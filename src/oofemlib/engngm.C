@@ -457,7 +457,7 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
     }
 
     this->numberOfSteps = istep - 1;
-    OOFEM_LOG_RELEVANT("Total number of solution steps %d\n", numberOfSteps);
+    OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n", numberOfSteps);
     return result;
 }
 
@@ -481,7 +481,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     int istep = this->giveNumberOfFirstStep() - 1;
     metaStepList->at(1)->setStepBounds(istep + 1);
 
-    OOFEM_LOG_RELEVANT("Total number of solution steps %d\n",  numberOfSteps);
+    OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n",  numberOfSteps);
     return 1;
 }
 
@@ -761,7 +761,7 @@ EngngModel :: solveYourself()
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             //this->timer.stopTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
             double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
-            OOFEM_LOG_INFO("\nEngngModel info: user time consumed by solution step %d: %.2fs\n",
+            OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
 
             fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",

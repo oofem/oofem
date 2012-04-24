@@ -266,7 +266,9 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
  #endif
 #endif
 
-    OOFEM_LOG_INFO("Time       Iteration       ForceError      DisplError\n__________________________________________________________\n");
+    OOFEM_LOG_INFO("----------------------------------------------------------\n");
+    OOFEM_LOG_INFO("Iteration       ForceError      DisplError                \n");
+    OOFEM_LOG_INFO("----------------------------------------------------------\n");
 
     rInitial = * r; // Stored in case of divergence.
     l = 1.0;
@@ -400,23 +402,25 @@ restart:
     }
 
     this->lastReactions.resize(numberOfPrescribedDofs);
-#ifdef VERBOSE
-    // print quasi reactions if direct displacement control used
-    OOFEM_LOG_INFO("\n  Quasi reaction table:\n\n");
-    OOFEM_LOG_INFO("  node  dof   displacement         force\n");
-    OOFEM_LOG_INFO("========================================\n");
-    double reaction;
-    for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-        reaction = R->at( prescribedEqs.at(i) );
-        if ( R0 ) {
-            reaction += R0->at( prescribedEqs.at(i) );
-        }
 
-        lastReactions.at(i) = reaction;
-        OOFEM_LOG_INFO("%6d  %3d   %+11.5e  %+11.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
-                       r->at( prescribedEqs.at(i) ), reaction);
+#ifdef VERBOSE
+    if (numberOfPrescribedDofs) {
+        // print quasi reactions if direct displacement control used
+        OOFEM_LOG_INFO("\n  Quasi reaction table:\n\n");
+        OOFEM_LOG_INFO("  node  dof   displacement         force\n");
+        OOFEM_LOG_INFO("========================================\n");
+        double reaction;
+        for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            reaction = R->at( prescribedEqs.at(i) );
+            if ( R0 ) {
+                reaction += R0->at( prescribedEqs.at(i) );
+            }
+            lastReactions.at(i) = reaction;
+            OOFEM_LOG_INFO("%6d  %3d   %+11.5e  %+11.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
+                           r->at( prescribedEqs.at(i) ), reaction);
+        }
+        OOFEM_LOG_INFO("========================================\n");
     }
-    OOFEM_LOG_INFO("========================================\n");
 #endif
 
     return status;
@@ -839,7 +843,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         parallel_context->accumulate(dg_totalDisp,      collectiveErr); dg_totalDisp      = collectiveErr;
  #endif
 
-        OOFEM_LOG_INFO("%-5d %-5d ", ( int ) tNow->giveTargetTime(), nite);
+        OOFEM_LOG_INFO("%-5d ", nite);
         // loop over dof groups
         for ( _dg = 1; _dg <= _ng; _dg++ ) {
             //  compute a relative error norm
@@ -955,7 +959,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             answer = false;
         }
 
-        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTargetTime(), nite, forceErr, dispErr);
+        OOFEM_LOG_INFO("%-15d %-15e %-15e\n", nite, forceErr, dispErr);
     } // end default case (all dofs conributing)
 
     return answer;
