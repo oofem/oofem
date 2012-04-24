@@ -183,7 +183,6 @@
  #include "linearstability.h"
  #include "plinearstatic.h"
  #include "linearstatic.h"
- #include "stationaryflow.h"
  #include "adaptnlinearstatic.h"
  #include "adaptlinearstatic.h"
 
@@ -494,7 +493,6 @@ EngngModel *CreateUsrDefEngngModelOfType(const char *aClass, int number, EngngMo
     if (engngList.size() == 0) {
 #ifdef __SM_MODULE
         engngList["linearstatic"]       = engngCreator< LinearStatic >;
-        engngList["stationaryflow"]     = engngCreator< StationaryFlow >;
         engngList["eigenvaluedynamic"]  = engngCreator< EigenValueDynamic >;
         engngList["nonlinearstatic"]    = engngCreator< NonLinearStatic >;
         engngList["nonlineardynamic"]   = engngCreator< NonLinearDynamic >;
