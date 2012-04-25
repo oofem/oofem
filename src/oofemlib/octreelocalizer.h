@@ -211,7 +211,7 @@ public:
         elementListsInitialized.resize(0);
     }
     /// Destructor - deletes the octree tree
-    ~OctreeSpatialLocalizer() { if ( rootCell ) { delete rootCell; } }
+    virtual ~OctreeSpatialLocalizer() { if ( rootCell ) { delete rootCell; } }
 
     /**
      * Returns the octreeMask value given by the index
@@ -233,8 +233,8 @@ public:
     void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
     void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
-    const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
-    classType giveClassID() const { return OctreeSpatialLocalizerClass; }
+    virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
+    virtual classType giveClassID() const { return OctreeSpatialLocalizerClass; }
 
 protected:
     /**

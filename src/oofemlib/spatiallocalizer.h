@@ -202,8 +202,8 @@ public:
     virtual int init(bool force = false) { return 1; }
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    const char *giveClassName() const { return "SpatialLocalizer"; }
-    classType giveClassID() const { return SpatialLocalizerClass; }
+    virtual const char *giveClassName() const { return "SpatialLocalizer"; }
+    virtual classType giveClassID() const { return SpatialLocalizerClass; }
 };
 } // end namespace oofem
 #endif // spatiallocalizer_h

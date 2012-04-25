@@ -40,7 +40,7 @@ using namespace std;
 #include "matresponsemode.h"
 #include "matresponseform.h"
 
- 
+
 namespace oofem {
 
 /* DefaulT oofem loggers */
@@ -72,12 +72,12 @@ void pyclass_FloatArray()
     .def(init< optional<int> >())
     //.def("set", at2, return_internal_reference<>())
     .def("__len__", &FloatArray::giveSize)
-    .def("__getitem__", &PyFloatArray::__getitem__) 
+    .def("__getitem__", &PyFloatArray::__getitem__)
     .def("__setitem__", &PyFloatArray::__setitem__)
     .def("resize", &FloatArray::resize, flotarry_overloads_resize())
     .def("giveSize", &FloatArray::giveSize)
     .def("isNotEmpty", &FloatArray::isNotEmpty)
-    .def("isEmpty", &FloatArray::isEmpty)  
+    .def("isEmpty", &FloatArray::isEmpty)
     //.def("negated", &FloatArray::negated)
     .def("printYourself", &FloatArray::printYourself)
     .def("zero", &FloatArray::zero)
@@ -161,7 +161,7 @@ void pyclass_IntArray()
   class_<PyIntArray, boost::noncopyable>("IntArray")
     .def(init< optional<int> >())
     .def("__len__", &IntArray::giveSize)
-    .def("__getitem__", &PyIntArray::__getitem__) 
+    .def("__getitem__", &PyIntArray::__getitem__)
     .def("__setitem__", &PyIntArray::__setitem__)
     .def("resize", &IntArray::resize, intarray_overloads_resize())
     .def("isEmpty", &IntArray::isEmpty)
@@ -210,7 +210,7 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
   int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) {
     return this->get_override("assemble")();
   }
-    
+
   bool canBeFactorized() const {
     return this->get_override("canBeFactorized")();
   }
@@ -218,11 +218,11 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
   void zero() {
     this->get_override("zero")();
   }
-  
+
   double &at(int i, int j) {
     return this->get_override("at")();
   }
-    
+
   double at(int i, int j) const {
     return this->get_override("at")();
   }
@@ -230,7 +230,7 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
   void toFloatMatrix(FloatMatrix &answer) const {
     this->get_override("toFloatMatrix")();
   }
-  
+
   void printYourself() const {
     this->get_override("printYourself")();
   }
@@ -266,7 +266,7 @@ void pyclass_SparseMtrx()
     .def("assembleu", sm_assemble_2)
     .def("buildInternalStructure", pure_virtual(sm_buildInternalStructure_1))
     .def("buildInternalStructure2", sm_buildInternalStructure_2)
-    
+
     //.def("zero", zero)
     ;
 }
@@ -280,6 +280,7 @@ void pyclass_SpatialLocalizer()
   class_<SpatialLocalizer, boost::noncopyable>("SpatialLocalizer", no_init)
     .def("giveElementContainingPoint", &SpatialLocalizer::giveElementContainingPoint, return_internal_reference<>())
     .def("giveElementCloseToPoint", &SpatialLocalizer::giveElementCloseToPoint, return_internal_reference<>())
+    .def("giveElementClosestToPoint", &SpatialLocalizer::giveElementClosestToPoint, return_internal_reference<>())
     .def("init", &SpatialLocalizer::init)
     .def("giveClassName", &SpatialLocalizer::giveClassName)
     ;
@@ -310,9 +311,9 @@ public:
   void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) {
     this->get_override("printDofOutputAt")();
   }
-  
+
   void solveYourself() {
-    if (override f = this->get_override("solveYourself")) {f();return;} 
+    if (override f = this->get_override("solveYourself")) {f();return;}
     EngngModel::solveYourself();
   }
   void solveYourselfAt(TimeStep *t) {
@@ -324,11 +325,11 @@ public:
     EngngModel::terminate(t);
   }
 
-  void updateYourself(TimeStep *t) {    
+  void updateYourself(TimeStep *t) {
     if (override f = this->get_override("updateYourself")) {f(t); return;}
     EngngModel::updateYourself(t);
   }
-    
+
   void default_solveYourself() {return this->EngngModel::solveYourself();}
   void default_solveYourselfAt(TimeStep*t) {return this->EngngModel::solveYourselfAt(t);}
   void default_terminate(TimeStep* t) {return this->EngngModel::terminate(t);}
@@ -377,7 +378,7 @@ void pyclass_Domain()
   .def("giveNode", &Domain::giveNode, return_internal_reference<>())
   .def("giveDofManager", &Domain::giveDofManager, return_internal_reference<>())
   .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
-  
+
   .def("giveNumberOfDofManagers", &Domain::giveNumberOfDofManagers)
   .def("giveNumberOfElements", &Domain::giveNumberOfElements)
   .def("giveNumberOfMaterialModels", &Domain::giveNumberOfMaterialModels)
@@ -385,7 +386,7 @@ void pyclass_Domain()
   .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
   .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
   .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
-  
+
   .def("checkConsistency", &Domain::checkConsistency)
   .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
   .def("giveSpatialLocalizer", &Domain::giveSpatialLocalizer, return_internal_reference<>())
@@ -410,7 +411,7 @@ struct PyDataReader : DataReader, wrapper<DataReader>
   void finish() {
     this->get_override("finish")();
   }
-    
+
   const char *giveDataSourceName() const {
     return this->get_override("giveDataSourceName")();
   }
@@ -440,15 +441,15 @@ class PyElement : public Element, public wrapper<Element>
 {
 public:
   PyElement (int n, Domain *d) : Element (n,d) {}
-  
+
   void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
     this->get_override("giveCharacteristicMatrix")();
   }
-    
+
   void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
     this->get_override("giveCharacteristicVector")();
   }
-  
+
   double giveCharacteristicValue(CharType, TimeStep *) {
     return this->get_override("giveCharacteristicValue")();
   }
@@ -456,7 +457,7 @@ public:
   void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
     this->get_override("giveDofManDofIDMask")();
   }
-    
+
 };
 
 void pyclass_Element()
@@ -485,7 +486,7 @@ class PyDofManager : public DofManager, public wrapper<DofManager>
 {
 public:
   PyDofManager (int n, Domain *d) : DofManager (n,d) {}
-  
+
   void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
 			 EquationID type, ValueModeType mode, TimeStep *stepN) {
     if (override f = this->get_override("giveUnknownVector")) {
@@ -498,7 +499,7 @@ public:
   }
 
   void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-				 EquationID type, ValueModeType mode, TimeStep *stepN) 
+				 EquationID type, ValueModeType mode, TimeStep *stepN)
   {return this->DofManager::giveUnknownVector(answer, dofMask, type, mode, stepN);}
 };
 
@@ -557,7 +558,7 @@ public:
   int evaluateAt(FloatArray &answer, DofManager* dman,
 		 ValueModeType mode, TimeStep *atTime) {
     return this->get_override("evaluateAt")(answer,dman,mode,atTime);
-  } 
+  }
   contextIOResultType saveContext(DataStream *stream, ContextMode mode) {
     return this->get_override("saveContext")(stream, mode);
   }
@@ -881,7 +882,7 @@ BOOST_PYTHON_MODULE (oofemlib)
   def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
   def("FieldManager_registerField", &FieldManager_registerField);
 
-  implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >(); 
+  implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
   register_ptr_to_python< std::auto_ptr<Field> >();
 }
 } // end namespace oofem

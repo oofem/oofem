@@ -82,9 +82,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
         reglist.resize( nodeConnectivity->giveSize() );
         reglist.resize(0);
         for ( int indx = 1; indx <= nodeConnectivity->giveSize(); indx++ ) {
-            if ( reglist.findFirstIndexOf( newd->giveElement( nodeConnectivity->at(indx) )->giveRegionNumber() ) == 0 ) {
-                reglist.followedBy( newd->giveElement( nodeConnectivity->at(indx) )->giveRegionNumber() );
-            }
+            reglist.insertSortedOnce( newd->giveElement( nodeConnectivity->at(indx) )->giveRegionNumber() );
         }
 
 #endif
@@ -124,33 +122,63 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
 {
     Element *oelem;
     EIPrimaryUnknownMapperInterface *interface;
+    SpatialLocalizer *sl = oldd->giveSpatialLocalizer();
 
+///@todo Change to the other version after checking that it works properly. Will render "giveElementCloseToPoint" obsolete (superseeded by giveElementClosestToPoint).
+#if 1
     if ( regList.isEmpty() ) {
-        oelem = oldd->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+        oelem = sl->giveElementContainingPoint(coords);
     } else {
-        oelem = oldd->giveSpatialLocalizer()->giveElementContainingPoint(coords, & regList);
+        oelem = sl->giveElementContainingPoint(coords, & regList);
     }
-
     if ( !oelem ) {
         if ( regList.isEmpty() ) {
             oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords);
         } else {
             oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords, & regList);
         }
-
         if ( !oelem ) {
-            return 0;
+            OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
+            return false;
         }
     }
+#else
+    FloatArray lcoords, closest;
+    if ( regList.isEmpty() ) {
+        oelem = sl->giveElementClosestToPoint(lcoords, closest, coords, 0 );
+    } else {
+        // Take the minimum of any region
+        double mindist = 0.0, distance;
+        for ( int i = 1; i < regList.giveSize(); ++i ) {
+            Element *tmpelem = sl->giveElementClosestToPoint(lcoords, closest, coords, regList.at(i) );
+            distance = closest.distance_square(coords);
+            if ( ( tmpelem != NULL &&  distance < mindist ) || i == 1) {
+                mindist = distance;
+                oelem = tmpelem;
+                if (distance == 0.0) {
+                    break;
+                }
+            }
+        }
+    }
+    if ( !oelem ) {
+        OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
+        return false;
+    }
+#endif
 
     interface = ( EIPrimaryUnknownMapperInterface * ) ( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
-        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(mode, tStep, coords, answer);
         interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
+#if 1
+        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(mode, tStep, coords, answer);
+#else
+        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+#endif
     } else {
         OOFEM_ERROR("EIPrimaryUnknownMapper :: evaluateAt - Element does not support EIPrimaryUnknownMapperInterface");
     }
 
-    return 1;
+    return true;
 }
 } // end namespace oofem
