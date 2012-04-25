@@ -76,7 +76,6 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, n1, n2, n1x, n2x, n3x;
-    // FloatMatrix* answer ;
 
     l    = this->giveLength();
     ksi  = aGaussPoint->giveCoordinate(1);
@@ -289,8 +288,6 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 }
 
 
-
-
 void LIBeam2dNL :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
@@ -301,7 +298,6 @@ void LIBeam2dNL :: computeGaussPoints()
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _2dBeam);
     }
 }
-
 
 
 void
@@ -415,12 +411,12 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterG
 
 
 void
-LIBeam2dNL ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+LIBeam2dNL ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(3);
 
     answer.at(1) = D_u;
@@ -483,6 +479,7 @@ double LIBeam2dNL :: givePitch()
     return pitch;
 }
 
+
 IRResultType
 LIBeam2dNL :: initializeFrom(InputRecord *ir)
 {
@@ -490,7 +487,6 @@ LIBeam2dNL :: initializeFrom(InputRecord *ir)
     this->computeGaussPoints();
     return IRRT_OK;
 }
-
 
 
 void
@@ -588,13 +584,13 @@ LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     return 0;
 }
 
+
 void
 LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
   StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
   answer.times(this->giveCrossSection()->give(CS_Area));
 }
-
 
 
 #ifdef __OOFEG

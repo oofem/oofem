@@ -49,8 +49,6 @@ FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICell
     answer.at(2) = lcoords.at(2);
     answer.at(3) = lcoords.at(3);
     answer.at(4) = 1. - lcoords.at(1) - lcoords.at(2) - lcoords.at(3);
-
-    return;
 }
 
 void
@@ -334,8 +332,6 @@ FEI3dTrLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const 
     answer.at(1) = lcoords.at(1);
     answer.at(2) = lcoords.at(2);
     answer.at(3) = 1. - lcoords.at(1) - lcoords.at(2);
-
-    return;
 }
 
 void

@@ -45,7 +45,6 @@ FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
 {
     answer.resize(1);
     answer.at(1) = 1;
-    return;
 }
 
 void

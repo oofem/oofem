@@ -47,8 +47,6 @@ FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGe
 
     answer.at(1) = ( 1. - ksi ) * 0.5;
     answer.at(2) = ( 1. + ksi ) * 0.5;
-
-    return;
 }
 
 void

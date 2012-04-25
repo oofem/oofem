@@ -86,8 +86,6 @@ Tetrah1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, i) = n.at(i);
     }
-
-    return;
 }
 
 void
@@ -215,8 +213,6 @@ Tetrah1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
     answer.resize(1, 2);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 2) = n.at(2);
-
-    return;
 }
 
 
@@ -259,8 +255,6 @@ Tetrah1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
 
 void
@@ -409,8 +403,6 @@ Tetrah1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &a
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
-
-    return;
 }
 
 

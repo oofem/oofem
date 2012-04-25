@@ -214,8 +214,6 @@ MicroplaneMaterial ::  giveMicroplaneNormal(FloatArray &answer, Microplane *mpla
     answer.at(1) = microplaneNormals [ mnumber - 1 ] [ 0 ];
     answer.at(2) = microplaneNormals [ mnumber - 1 ] [ 1 ];
     answer.at(3) = microplaneNormals [ mnumber - 1 ] [ 2 ];
-
-    return;
 }
 
 double
@@ -308,8 +306,6 @@ MicroplaneMaterial :: computeStrainVectorComponents(FloatArray &answer, Micropla
     answer.at(2) = en;
     answer.at(3) = el;
     answer.at(4) = em;
-
-    return;
 }
 
 IRResultType
@@ -722,7 +718,5 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
             L [ mPlane ] [ i ] = 0.5 * ( l.at(ii) * n.at(jj) + l.at(jj) * n.at(ii) );
         }
     }
-
-    return;
 }
 } // end namespace oofem

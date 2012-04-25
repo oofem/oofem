@@ -117,7 +117,6 @@ TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
     nlStatus->letTempStrainVectorBe(strainVector);
     nlStatus->letTempStressVectorBe(answer);
     nlStatus->setTempTSED(tempTSED);
-    return;
 }
 
 void

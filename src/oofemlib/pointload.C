@@ -47,7 +47,6 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coo
     // time distribution
     factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);
-    return;
 }
 
 IRResultType

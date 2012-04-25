@@ -1739,8 +1739,6 @@ TR1_2D_SUPG :: formMyVolumePoly(Polygon &me, LEPlic *matInterface, bool updFlag)
         v.setCoords(x, y);
         me.addVertex(v);
     }
-
-    return;
 }
 
 

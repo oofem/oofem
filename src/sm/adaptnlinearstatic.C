@@ -361,7 +361,6 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
             }
 
             if ( nonlocalStiffnessFlag ) {
-                //stiffnessMatrix = new SkylineUnsym ();
                 if ( !stiffnessMatrix->isAsymmetric() ) {
                     _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
                 }
@@ -702,7 +701,6 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
             }
 
             if ( nonlocalStiffnessFlag ) {
-                //stiffnessMatrix = new SkylineUnsym ();
                 if ( !stiffnessMatrix->isAsymmetric() ) {
                     _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
                 }

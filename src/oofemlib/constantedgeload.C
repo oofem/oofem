@@ -71,6 +71,5 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArr
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer = componentArray;
     answer.times(factor);
-    return;
 }
 } // end namespace oofem

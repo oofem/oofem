@@ -2154,7 +2154,6 @@ pass_setscale_command(Widget w, XtPointer ptr, XtPointer call_data)
 
 err_exit:
     ERptErrMessage(1, 1, "Set scale - bad input; must get 2 numbers", ERROR_GRADE);
-    return;
 }
 
 static void
@@ -2211,7 +2210,6 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
 
 err_exit:
     ERptErrMessage(1, 1, "Set animate - bad input; must get 2 numbers", ERROR_GRADE);
-    return;
 }
 
 
@@ -2267,7 +2265,6 @@ pass_setgreyscale_command(Widget w, XtPointer ptr, XtPointer call_data)
 
 err_exit:
     ERptErrMessage(1, 1, "Set scale - bad input; must get 2 numbers", ERROR_GRADE);
-    return;
 }
 
 static void
@@ -2604,8 +2601,6 @@ set_render(EView *v_p, caddr_t data, WCRec *p) {
     default:
         break;
     }
-
-    return;
 }
 
 void oofeg_toggle_axes(Widget w, XtPointer ptr, XtPointer call_data)

@@ -141,7 +141,5 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
 
     answer.at(1) = n1;
     answer.at(2) = n2;
-
-    return;
 }
 } // end namespace oofem

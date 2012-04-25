@@ -1001,8 +1001,6 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
             }
         }
     }
-
-    return;
 }
 
 

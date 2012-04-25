@@ -84,7 +84,6 @@ Beam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
 
-    //answer = new FloatMatrix(3,6) ;
     answer.resize(6, 12);
     answer.zero();
 

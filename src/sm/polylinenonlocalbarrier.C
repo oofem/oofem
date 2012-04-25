@@ -68,8 +68,6 @@ PolylineNonlocalBarrier :: applyConstraint(const FloatArray &c1, const FloatArra
     } else {
         shieldFlag = false;
     }
-
-    return;
 }
 
 

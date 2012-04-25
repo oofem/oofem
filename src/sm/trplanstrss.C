@@ -345,7 +345,6 @@ TrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 }
 
 
-
 void
 TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {
@@ -759,8 +758,6 @@ TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-
-    // IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
@@ -859,8 +856,6 @@ TrPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatr
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 void
@@ -1405,7 +1400,9 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &ans
 
 int
 TrPlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return 1; }
+{
+    return 1;
+}
 
 
 void
@@ -1562,7 +1559,5 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
     for ( i = 1; i <= n; i++ ) {
         answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i);
     }
-
-    return;
 }
 } // end namespace oofem

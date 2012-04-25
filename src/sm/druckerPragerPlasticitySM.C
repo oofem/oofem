@@ -480,8 +480,6 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
     if ( deltaLambda < 0. ) {
         _error("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
     }
-
-    return;
 }
 
 void
@@ -542,8 +540,6 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
     if ( deltaKappa < 0. ) {
         _error("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.\n");
     }
-
-    return;
 }
 
 double
@@ -649,8 +645,6 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         _error("Switch failed: Only elastic and tangent stiffness are supported.\n");
         break;
     }
-
-    return;
 }
 
 void
@@ -746,8 +740,6 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
 
     // answer is A_Matrix^-1 * De
     A_Matrix.solveForRhs(De, answer);
-
-    return;
 }
 
 void

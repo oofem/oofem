@@ -533,7 +533,6 @@ ConnectivityTable :: instanciateConnectivityTable()
     }
 
     nodalConnectivityFlag = 1;
-    return;
 }
 
 const IntArray *

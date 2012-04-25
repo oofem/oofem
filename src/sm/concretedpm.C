@@ -1223,8 +1223,6 @@ ConcreteDPM :: computeDFDInv(FloatArray &answer,
 
     answer(0) = dfdsig;
     answer(1) = dfdrho;
-
-    return;
 }
 
 double

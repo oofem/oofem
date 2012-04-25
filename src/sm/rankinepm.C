@@ -100,7 +100,6 @@ RankinePlasticMaterial :: computeStressGradientVector(FloatArray &answer, functT
     answer.at(6) = t.at(1, isurf) * t.at(2, isurf);
 
     //crossSection->giveReducedCharacteristicVector(answer, gp, fullAnswer);
-    return;
 }
 
 void

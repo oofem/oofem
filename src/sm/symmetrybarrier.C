@@ -121,8 +121,6 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
         // compute weight of mirrored source
         weight += nei->computeWeightFunction(c1, mc2);
     }
-
-    return;
 }
 
 IRResultType

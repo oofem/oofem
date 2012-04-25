@@ -308,8 +308,6 @@ StressVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
             }
         }
     }
-
-    return;
 }
 
 void
@@ -413,7 +411,6 @@ StressVector :: computeAllThreeHWCoordinates(double &xsi,
     this->computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
     rho = deviatoricStress.computeSecondCoordinate();
     theta = deviatoricStress.computeThirdCoordinate();
-    return;
 }
 
 
@@ -641,7 +638,5 @@ StressVector :: giveTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
-
-    return;
 }
 } // end namespace oofem

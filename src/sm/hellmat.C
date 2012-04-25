@@ -76,7 +76,6 @@ HellmichMaterial :: createMaterialGp()
     // initialize elem to have reference to this material
     elem->initializeFrom(& eir);
     // number 0, no coords, zero weight, unknown material mode
-    // materialGp = new GaussPoint(elem, 0, NULL, 0, _3dMat);
     materialGp = new GaussPoint(ir, 0, NULL, 0, _3dMat);
     if ( !materialGp ) {
         _error("Could not create the material-level gp.");
@@ -2485,7 +2484,6 @@ HellmichMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     answer.resize(0);
-    return;
 }
 
 contextIOResultType HellmichMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)

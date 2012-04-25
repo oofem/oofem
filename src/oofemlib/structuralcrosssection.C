@@ -64,8 +64,6 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
     } else {
         _error("giveRealStresses : unsupported mode");
     }
-
-    return;
 }
 
 
@@ -106,7 +104,6 @@ StructuralCrossSection :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp,
                                         mat, tStep);
-    return;
 }
 
 
@@ -124,7 +121,6 @@ StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 {
     // Material *mat = gp->giveElement()->giveMaterial();
     ( ( StructuralMaterial * ) mat )->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
-    return;
 }
 
 
@@ -139,8 +135,6 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrix(FloatMatrix &answer,
 
     this->giveCharMaterialStiffnessMatrix(redInvAnswer, rMode, gp, tStep);
     answer.beInverseOf(redInvAnswer);
-
-    return;
 }
 
 
@@ -169,7 +163,6 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer
     } else {
         _error("giveCharMaterialComplianceMatrix - unsupported form mode");
     }
-    return;
 }
 
 void

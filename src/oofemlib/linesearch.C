@@ -253,8 +253,6 @@ LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
             eta.at(istep + 1) = maxetalim;
         }
     }
-
-    return;
 }
 
 IRResultType

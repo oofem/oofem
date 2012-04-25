@@ -101,7 +101,6 @@ TrPlaneStrRot3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
 // DofId mask array determines the dof ordering requested from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
-// IntArray* answer = new IntArray (6);
 {
     answer.resize(6);
 

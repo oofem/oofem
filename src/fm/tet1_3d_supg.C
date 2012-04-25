@@ -199,8 +199,6 @@ Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
         answer.at(2, 3 * i - 1)  = n.at(i);
         answer.at(3, 3 * i - 0)  = n.at(i);
     }
-
-    return;
 }
 
 void
@@ -308,8 +306,6 @@ Tet1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
     answer.at(1, 2)  = n.at(2);
     answer.at(1, 3)  = n.at(3);
     answer.at(1, 4)  = n.at(4);
-
-    return;
 }
 
 
@@ -320,7 +316,6 @@ Tet1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.beTranspositionOf(dn);
-    return;
 }
 
 

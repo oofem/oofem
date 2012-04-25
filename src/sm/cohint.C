@@ -77,7 +77,6 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatRespons
     // update gp
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-    return;
 }
 
 void
@@ -110,7 +109,6 @@ CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     _error("give3dMaterialStiffnessMatrix: not implemented");
-    return;
 }
 
 int
@@ -229,8 +227,6 @@ CohesiveInterfaceMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix 
     answer.zero();
     answer.at(1, 1) = kn;
     answer.at(2, 2) = answer.at(3, 3) = ks;
-
-    return;
 }
 
 int

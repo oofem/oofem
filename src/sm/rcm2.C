@@ -175,7 +175,6 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 }
 
 
-
 void
 RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *gp,
                                                  FloatArray &principalStrain,
@@ -437,6 +436,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
     answer.resize(0);
 }
 
+
 double
 RCM2Material :: giveCharacteristicElementLenght(GaussPoint *gp, const FloatArray &crackPlaneNormal) {
     // returns characteristic element length for given crack plane normal
@@ -460,7 +460,6 @@ RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
     status->setCharLength(i, Le);
     //status ->  setMinCrackStrainsForFullyOpenCrack (i, this->giveMinCrackStrainsForFullyOpenCrack(gp,i));
 }
-
 
 
 void
@@ -536,6 +535,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
     } // end loop over prin directions
 
 }
+
 
 void
 RCM2Material :: checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVector,
@@ -622,8 +622,6 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         return;
     }
 }
-
-
 
 
 void
@@ -764,7 +762,6 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
 // this correction is made in this -> updateCrackStatus  (gp);
 {
     RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
-    // FloatMatrix *answer;
     int i;
     int numberOfActiveCracks = status->giveNumberOfTempActiveCracks();
     IntArray crackMap;
@@ -775,7 +772,6 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
         return;
     }
 
-    //answer  = new FloatMatrix(3, 3);
     answer.resize(3, 3);
     answer.zero();
 
@@ -788,8 +784,6 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
                                                         i);
         }
     }
-
-    return;
 }
 
 
@@ -821,7 +815,6 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
 
     // store modified map into status
     status->letCrackMapBe(crackMap);
-    return;
 }
 
 
@@ -882,7 +875,6 @@ RCM2Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 
-
 double
 RCM2Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
@@ -921,11 +913,6 @@ RCM2Material :: give(int aProperty, GaussPoint *gp)
 }
 
 
-
-
-
-
-
 int
 RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
@@ -958,8 +945,6 @@ RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
-
 
 
 InternalStateValueType
@@ -1019,17 +1004,6 @@ RCM2Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 }
 
 
-
-
-
-
-
-
-
-#ifdef __OOFEG
-#endif
-
-
 void
 RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               MatResponseForm form,
@@ -1061,7 +1035,6 @@ RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    return;
 }
 
 
@@ -1079,7 +1052,6 @@ RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 //
 {
     this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    return;
 }
 
 
@@ -1095,7 +1067,6 @@ RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
     this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    return;
 }
 
 
@@ -1115,7 +1086,6 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    return;
 }
 
 
@@ -1135,7 +1105,6 @@ RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    return;
 }
 
 
@@ -1156,7 +1125,6 @@ RCM2Material :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     this->give2dPlateLayerStiffMtrx(answer, form, mode, gp, atTime);
-    return;
 }
 
 

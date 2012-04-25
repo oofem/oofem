@@ -114,8 +114,6 @@ Tr1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 void
@@ -156,7 +154,6 @@ Tr1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
     answer.at(2, 3) = x2 - x1;
 
     answer.times( 1. / ( 2. * area ) );
-    return;
 }
 
 void
@@ -238,8 +235,6 @@ Tr1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 
     answer.at(1, 1) = n1;
     answer.at(1, 2) = n2;
-
-    return;
 }
 
 
@@ -295,8 +290,6 @@ Tr1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
 
 void
@@ -396,8 +389,6 @@ Tr1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
     for ( i = 1; i <= 3; i++ ) {
         answer.at(1, i)  = n.at(1, i);
     }
-
-    return;
 }
 
 

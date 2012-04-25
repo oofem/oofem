@@ -291,8 +291,6 @@ Quad10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
     answer.zero();
 
     answer.at(1, 1)  = n.at(1);
-
-    return;
 }
 
 

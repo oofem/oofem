@@ -1541,8 +1541,6 @@ TR1_2D_SUPG2_AXI :: formMyVolumePoly(Polygon &me, LEPlic *matInterface, bool upd
         v.setCoords(x, y);
         me.addVertex(v);
     }
-
-    return;
 }
 
 
@@ -1872,8 +1870,6 @@ TR1_2D_SUPG2_AXI :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMat
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-
-    return;
 }
 
 void

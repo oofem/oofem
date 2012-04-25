@@ -82,8 +82,6 @@ QPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &an
         answer.at(1) = D_u;
         answer.at(2) = D_v;
     }
-
-    return;
 }
 IRResultType
 QPlaneStrainGrad :: initializeFrom(InputRecord *ir)
@@ -131,8 +129,6 @@ QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, i) = n.at(i);
     }
-
-    return;
 }
 
 void

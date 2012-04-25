@@ -136,7 +136,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 
     double fc, c, wc, ac;
 
-    /** scaling factor transforming PREDICTED stiffnesses q1, q2, q3 and q4 to desired
+    /* scaling factor transforming PREDICTED stiffnesses q1, q2, q3 and q4 to desired
      *  default value is 1.0 = no change
      *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
     double stiffnessFactor;
@@ -255,8 +255,6 @@ MPSMaterial :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(1) = ( talpha );
     answer.at(2) = ( talpha );
     answer.at(3) = ( talpha );
-
-    return;
 }
 
 void
@@ -282,8 +280,6 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     } else {
         this->computePointShrinkageStrainVector(answer, form, gp, atTime);
     }
-
-    return;
 }
 
 MaterialStatus *
@@ -328,7 +324,6 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac, 
     char buff [ 1024 ];
     sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf", q1, q2, q3, q4);
     OOFEM_LOG_DEBUG("MPS[%d]: estimated params: %s\n", this->number, buff);
-    return;
 }
 
 void
@@ -374,8 +369,6 @@ MPSMaterial :: computeCharTimes()
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
         charTimes.at(mu) = Tau1 * __OOFEM_POW(10., mu - 1);
     }
-
-    return;
 }
 
 
@@ -403,8 +396,6 @@ MPSMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, doubl
     }
 
     answer.at(nUnits) /= 1.2;   // modulus of the last unit is reduced
-
-    return;
 }
 
 
@@ -628,7 +619,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
     return eta;
 }
 
-/// returns initial value of the flow term viscosity
+// returns initial value of the flow term viscosity
 double
 MPSMaterial :: giveInitViscosity(TimeStep *atTime)
 {
@@ -714,8 +705,6 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
     }
-
-    return;
 }
 
 

@@ -217,7 +217,6 @@ RerShell :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     c2 = x1 - x3;
     c3 = x2 - x1;
 
-    //answer = new FloatMatrix(5,18);
     answer.resize(5, 18);
     answer.zero();
 
@@ -420,6 +419,7 @@ RerShell :: computeGtoLRotationMatrix()
 
     return GtoLRotationMatrix;
 }
+
 
 int
 RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)

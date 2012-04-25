@@ -72,6 +72,5 @@ ConstantSurfaceLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, Float
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer = componentArray;
     answer.times(factor);
-    return;
 }
 } // end namespace oofem

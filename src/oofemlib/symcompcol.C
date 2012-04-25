@@ -273,8 +273,6 @@ void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
         answer(j) += sum;
         answer(j) += val_( colptr_(j) ) * rhs; // diagonal
     }
-
-    return;
 }
 
 void SymCompCol :: times(double x)

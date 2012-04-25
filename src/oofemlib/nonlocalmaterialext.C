@@ -588,8 +588,6 @@ NonlocalMaterialExtensionInterface :: applyBarrierConstraints(const FloatArray &
             return;
         }
     }
-
-    return;
 }
 
 void

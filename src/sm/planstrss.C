@@ -110,8 +110,6 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
         answer.at(3, 2 * i - 1) = dnx.at(i, 2);
         answer.at(3, 2 * i - 0) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 void
@@ -274,8 +272,6 @@ PlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -342,8 +338,6 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else {
         _error("giveEdgeDofMapping: wrong edge number");
     }
-
-    return;
 }
 
 double
@@ -547,18 +541,16 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 }
 
 void
-PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 
@@ -963,8 +955,6 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }
-
-    return;
 }
 
 
@@ -1310,7 +1300,9 @@ PlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
 
 int
 PlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
+{
+    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+}
 
 
 void

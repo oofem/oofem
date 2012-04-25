@@ -112,8 +112,6 @@ Truss2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int 
     answer.at(3, 3) = coeff;
     answer.at(4, 2) = coeff * ( -1 );
     answer.at(4, 4) = coeff;
-
-    return;
 }
 
 
@@ -292,8 +290,6 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
     } else {
         _error("resolveCoordIndices: Unknow cs_mode");
     }
-
-    return;
 }
 
 IRResultType
@@ -322,7 +318,6 @@ Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     // DofId mask array determines the dof ordering requested from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
     if ( cs_mode == 0 ) {
         answer.at(1) = D_u;
@@ -334,8 +329,6 @@ Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
         answer.at(1) = D_v;
         answer.at(2) = D_w;
     }
-
-    return;
 }
 
 void

@@ -253,7 +253,6 @@ void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const
     }
 
 #endif
-    return;
 }
 
 void DynCompCol :: times(double x)

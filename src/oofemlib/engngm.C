@@ -1648,8 +1648,6 @@ EngngModel :: resolveCorrespondingStepNumber(int &istep, int &iversion, void *ob
     if ( istep <= 0 ) {
         istep = 1;
     }
-
-    return;
 }
 
 

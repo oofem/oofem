@@ -53,8 +53,6 @@ FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
     answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
     answer.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
-
-    return;
 }
 
 void

@@ -118,8 +118,6 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
 
     // solve the linear system
     A.solveForRhs(rhs, answer);
-
-    return;
 }
 
 
@@ -206,8 +204,6 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
         /* error - total mode not implemented yet */
         _error("giveEigenStrainVector - mode is not supported");
     }
-
-    return;
 }
 
 

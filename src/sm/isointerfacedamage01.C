@@ -82,7 +82,6 @@ IsoInterfaceDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     _error("give3dMaterialStiffnessMatrix: not implemented");
-    return;
 }
 
 

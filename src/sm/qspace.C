@@ -96,8 +96,6 @@ QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-
-    return;
 }
 
 
@@ -156,8 +154,6 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(2, 3 * i - 1) = n.at(i);
         answer.at(3, 3 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -195,8 +191,6 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
         answer.at(6, 3 * i - 2) = dnx.at(i, 2);
         answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 
@@ -389,8 +383,6 @@ QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
     for ( i = 1; i <= 20; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
-
-    return;
 }
 
 int

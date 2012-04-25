@@ -639,8 +639,6 @@ Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResp
     } else {
         this->computeReducedElasticModuli(answer, gp, atTime);
     }
-
-    return;
 }
 
 
@@ -660,8 +658,6 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
                                                                     ElasticStiffness,
                                                                     gp, atTime);
     }
-
-    return;
 }
 
 /*

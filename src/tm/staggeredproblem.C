@@ -77,7 +77,6 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
 StaggeredProblem ::  ~StaggeredProblem()
 {
     delete emodelList;
-    // inputStreamNames;
     delete [] inputStreamNames;
 }
 
@@ -201,36 +200,26 @@ StaggeredProblem :: giveNextStep()
     int istep = this->giveNumberOfFirstStep();
     double totalTime = 0;
     StateCounterType counter = 1;
-    
-    if (previousStep != NULL){
+    double deltaT = giveDeltaT(istep);
+
+    if ( previousStep != NULL ) {
         delete previousStep;
         previousStep = NULL;
     }
-    
+
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
-        totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
+        totalTime = currentStep->giveTargetTime() + deltaT;
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
-        TimeStep *newStep;  
+        TimeStep *newStep;
         // first step -> generate initial step
         newStep = giveSolutionStepWhenIcApply();
         currentStep = new TimeStep( *newStep );
     }
 
-    /*
-     * if (currentStep != NULL) {
-     * totalTime = currentStep->giveTime() + deltaT;
-     * istep =  currentStep->giveNumber() + 1   ;
-     * counter = currentStep->giveSolutionStateCounter() + 1;
-     * } else {
-     * // first step -> generate initial step
-     * currentStep = new TimeStep (*giveSolutionStepWhenIcApply());
-     * }
-     */
     previousStep = currentStep;
-    //currentStep = new TimeStep (istep,this, 1, totalTime, deltaT, counter);
-    currentStep = new TimeStep(istep, this, 1, totalTime, giveDeltaT(istep), counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
 
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;

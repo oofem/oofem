@@ -484,7 +484,6 @@ Element :: giveCharacteristicMatrix(FloatMatrix &answer,
 //
 {
     _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
-    return;
 }
 
 
@@ -495,7 +494,6 @@ Element :: giveCharacteristicVector(FloatArray &answer, CharType type, ValueMode
 //
 {
     _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
-    return;
 }
 
 

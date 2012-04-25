@@ -134,7 +134,6 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         _error("ComputeBmatrixAt size mismatch");
     }
 
-    //gm = new FloatMatrix(size,16);
     answer.resize(size, 16);
     answer.zero();
 
@@ -200,7 +199,6 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     delete nx;
     delete ny;
-    return;
 }
 
 
@@ -425,7 +423,6 @@ Q4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;

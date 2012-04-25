@@ -395,7 +395,6 @@ PlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *g
     /* Computes the full trial elastic stress vector */
 
     _error("Unable to compute trial stress increment");
-    return;
 }
 
 

@@ -234,7 +234,6 @@ protected:
      * void  computeTrialStressIncrement (FloatArray& answer, GaussPoint *gp,
      * const FloatArray& strainIncrement, TimeStep* tStep);
      */
-    // FloatMatrix* GiveNMatrix (GaussPoint* gp);
     FloatMatrix *GiveCrackTransformationMtrx(GaussPoint *gp, int i);
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
                                                       MatResponseMode rMode,

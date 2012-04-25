@@ -137,7 +137,6 @@ QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 // Returns the [2x6] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    // FloatMatrix *answer ;
     Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3, area;
 

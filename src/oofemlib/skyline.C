@@ -194,12 +194,9 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
     // Returns a matrix, the receiver in a full storage form. This is useful
     // for debugging and printings.
 
-    //FloatMatrix* answer ;
     int i, j, d1, d2, pk, size;
-    // double       coeff ;
 
     size = this->giveNumberOfRows();
-    //answer = new FloatMatrix(size, size) ;
     answer.resize(size, size);
     answer.zero();
 
@@ -212,8 +209,6 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
             pk--;
         }
     }
-
-    return;
 }
 
 /*
@@ -269,8 +264,6 @@ int Skyline :: assemble(const IntArray &loc, const FloatMatrix &mat)
     // location array. The values in ke corresponding to a zero coefficient
     // in loc are not assembled.
 
-    //  IntArray loc ;
-    //  FloatMatrix mat;
     // int ielem,i,j,ac,ac1,ac2,ndofe;
     // Domain* domain = eModel->giveDomain();
     int i, j, ac, ac1, ac2, ndofe;
@@ -337,9 +330,6 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
     int i, k, ack, ack1, acs, n;
     int size = this->giveNumberOfRows();
     double s;
-
-    //solution = new FloatArray (y.giveSize());
-
 
     /************************************/
     /*  modification of right hand side */
@@ -586,7 +576,6 @@ void Skyline :: times(const FloatArray &x, FloatArray &answer) const
         OOFEM_ERROR("Skyline::times : size mismatch");
     }
 
-    //FloatArray *answer = new FloatArray(n);
     answer.resize(n);
     answer.zero();
 
@@ -612,8 +601,6 @@ void Skyline :: times(const FloatArray &x, FloatArray &answer) const
             aci++;
         }
     }
-
-    return;
 }
 
 

@@ -138,8 +138,6 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
     } else {
         OOFEM_ERROR("MisesMat::giveRealStressVector : unknown material response mode");
     }
-
-    return;
 }
 
 // returns the stress vector in 3d stress space
@@ -333,7 +331,6 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     status->letTempStressVectorBe(answer);
     status->letTempStrainVectorBe(e);
     status->letTempPlasticStrainBe(ep);
-    return;
 }
 
 // converts the deformation gradient stored by columns in FloatArray F
@@ -349,7 +346,6 @@ MisesMat :: convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E)
     E.at(2, 2) = E.at(2, 2) - 1;
     E.at(3, 3) = E.at(3, 3) - 1;
     E.times(1. / 2.);
-    return;
 }
 void
 MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J)
@@ -366,8 +362,6 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
     Ep.times( pow(J, -2. / 3.) );
     Ep.add(I);
     Ep.times(1. / 2.);
-
-    return;
 }
 // returns the stress vector in 3d stress space
 // computed from the previous plastic strain and current total strain
@@ -538,8 +532,6 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm f
     } else {
         OOFEM_ERROR("MisesMat::give3dMaterialStiffnessMatrix : unknown material response mode");
     }
-
-    return;
 }
 
 
@@ -603,7 +595,6 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
     stiffnessCorrection.times(scalar);
     answer.add(stiffnessCorrection);
-    return;
 }
 
 void
@@ -698,8 +689,6 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
     stiffnessCorrection.times(scalar);
     answer.add(stiffnessCorrection);
-
-    return;
 }
 
 void

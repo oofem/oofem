@@ -415,8 +415,6 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
             pap.at(++count) = idofMan;
         }
     }
-
-    return;
 }
 
 
@@ -555,8 +553,6 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
           ++dofManToDetermineListIter ) {
         dofManToDetermine.at(++count) = * dofManToDetermineListIter;
     }
-
-    return;
 }
 
 

@@ -73,7 +73,6 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
 //
 {
     this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp, mat, tStep);
-    return;
 }
 
 

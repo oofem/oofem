@@ -531,7 +531,6 @@ NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     }
 
     internalVarUpdateStamp = stepN->giveSolutionStateCounter();
-    return;
 }
 
 

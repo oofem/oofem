@@ -271,7 +271,6 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 {
     int i, j, k, p;
     double coeff;
-    // FloatMatrix* answer ;
 
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
@@ -281,7 +280,6 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 
     p = bMatrix.nColumns;
     this->resize(aMatrix.nRows, p);
-    // answer = new FloatMatrix(nRows,p) ;
     for ( i = 1; i <= aMatrix.nRows; i++ ) {
         for ( j = 1; j <= p; j++ ) {
             coeff = 0.;
@@ -356,7 +354,6 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
     int i, j, k, p;
     double coeff;
-    // FloatMatrix* answer ;
 
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
@@ -366,7 +363,6 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 
     p      = bMatrix.nColumns;
     this->resize(aMatrix.nColumns, p);
-    // answer = new FloatMatrix(nColumns,p) ;
     for ( i = 1; i <= aMatrix.nColumns; i++ ) {
         for ( j = 1; j <= p; j++ ) {
             coeff = 0.;
@@ -385,7 +381,6 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
     int i, j, k, p;
     double coeff;
-    // FloatMatrix* answer ;
 
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nColumns ) {
@@ -458,7 +453,6 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
 
     // allocate return value
     this->resize(bottomRow - topRm1, bottomCol - topCm1);
-    // FloatMatrix * subM = new FloatMatrix (bottomRow-topRm1,bottomCol-topCm1);
     for ( i = topRow; i <= bottomRow; i++ ) {
         for ( j = topCol; j <= bottomCol; j++ ) {
             this->at(i - topRm1, j - topCm1) = src.at(i, j);
@@ -771,7 +765,6 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
  */
 {
     int size, n, i, j, ii, jj;
-    // FloatMatrix *answer;
 
     if ( ( n = indx.giveSize() ) == 0 ) {
         this->resize(0, 0);
@@ -794,7 +787,6 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
         }
     }
 
-    //answer = new FloatMatrix (size,size);
     this->resize(size, size);
 
     for ( i = 1; i <= n; i++ ) {
@@ -822,7 +814,6 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
  */
 {
     int tsize, n, i, j, ii, jj;
-    //FloatMatrix *answer;
 
     if ( ( n = indx.giveSize() ) == 0 ) {
         this->resize(0, 0);
@@ -849,7 +840,6 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
     }
 
-    //answer = new FloatMatrix (size,size);
     this->resize(size, size);
 
     for ( i = 1; i <= n; i++ ) {

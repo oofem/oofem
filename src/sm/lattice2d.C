@@ -195,8 +195,6 @@ Lattice2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     //  answer.at(3,6) = this->width;
 
     answer.times(1. / l);
-
-    return;
 }
 
 
@@ -214,8 +212,6 @@ Lattice2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     dV = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     dbj.beProductOf(d, bj);
     answer.plusProductUnsym(bj, dbj, dV);
-
-    return;
 }
 
 
@@ -269,7 +265,6 @@ Lattice2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = R_w;
-    return;
 }
 
 

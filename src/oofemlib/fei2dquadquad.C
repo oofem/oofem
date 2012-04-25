@@ -73,8 +73,6 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     answer.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
     answer.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
     answer.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
-
-    return;
 }
 
 void

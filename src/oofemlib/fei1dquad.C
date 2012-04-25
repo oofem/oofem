@@ -49,8 +49,6 @@ FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellG
     answer.at(1) = ksi* ( ksi - 1. ) * 0.5;
     answer.at(2) = ksi* ( 1. + ksi ) * 0.5;
     answer.at(3) = (1. - ksi * ksi);
-
-    return;
 }
 
 void

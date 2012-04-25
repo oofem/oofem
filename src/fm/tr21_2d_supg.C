@@ -207,8 +207,6 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
         answer.at(1, 2 * i - 1)  = n.at(i);
         answer.at(2, 2 * i - 0)  = n.at(i);
     }
-
-    return;
 }
 
 void
@@ -277,8 +275,6 @@ TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
     answer.at(1, 1)  = n.at(1);
     answer.at(1, 2)  = n.at(2);
     answer.at(1, 3)  = n.at(3);
-
-    return;
 }
 
 
@@ -305,7 +301,6 @@ TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
     pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.beTranspositionOf(dn);
-    return;
 }
 
 
@@ -1519,8 +1514,6 @@ TR21_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix 
     answer.at(1, 4) = 4. * l1 * l2;
     answer.at(1, 5) = 4. * l2 * l3;
     answer.at(1, 6) = 4. * l3 * l1;
-
-    return;
 }
 
 

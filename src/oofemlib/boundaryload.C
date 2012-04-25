@@ -85,7 +85,6 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
 
     answer.times(factor);
-    return;
 }
 
 

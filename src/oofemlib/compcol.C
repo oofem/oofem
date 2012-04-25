@@ -162,8 +162,6 @@ void CompCol :: times(const FloatArray &x, FloatArray &answer) const
             answer( rowind_(t) ) += val_(t) * rhs;
         }
     }
-
-    return;
 }
 
 void CompCol :: times(double x)

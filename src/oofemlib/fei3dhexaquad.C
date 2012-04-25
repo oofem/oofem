@@ -103,8 +103,6 @@ FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     answer.at(18)  = 0.25 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 - w * w );
     answer.at(19)  = 0.25 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 - w * w );
     answer.at(20)  = 0.25 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 - w * w );
-
-    return;
 }
 
 void
@@ -204,8 +202,6 @@ FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, con
     answer.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
     answer.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
     answer.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
-
-    return;
 }
 
 

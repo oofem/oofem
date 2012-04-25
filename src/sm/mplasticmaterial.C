@@ -1195,7 +1195,6 @@ MPlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
     //
     // assembles diagonal moduli from elasticModuliInverse and hardeningModuliInverse
     //
-    // FloatMatrix *answer;
     int size1, size2, i, j;
 
     size1 = elasticModuliInverse.giveNumberOfRows();
@@ -1293,7 +1292,6 @@ MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseFor
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    // FloatMatrix* answer;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
@@ -1359,7 +1357,6 @@ MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseFor
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    // FloatMatrix* answer;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {
@@ -1408,7 +1405,6 @@ MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    // FloatMatrix* answer;
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     } else if ( rmType == mpm_ClosestPoint ) {

@@ -83,6 +83,8 @@ MisesMatGrad :: hasMaterialModeCapability(MaterialMode mode)
 
     return 0;
 }
+
+
 void
 MisesMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
                                          MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
@@ -149,10 +151,7 @@ MisesMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
         return;
     }
-
-    return;
 }
-
 
 
 void
@@ -255,9 +254,8 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm fo
         stiffnessCorrection.times( scalar * ( 1. - mParam ) );
         answer.add(stiffnessCorrection);
     }
-
-    return;
 }
+
 
 void
 MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
@@ -312,10 +310,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseFo
             answer.add(stiffnessCorrection);
         }
     }
-
-    return;
 }
-
 
 
 void
@@ -336,9 +331,9 @@ MisesMatGrad :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, Mat
         double factor = trialS * E / ( E + H );
         answer.at(1, 1) = factor;
     }
-
-    return;
 }
+
+
 void
 MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
@@ -358,9 +353,8 @@ MisesMatGrad :: givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseForm 
         double factor = sqrt(6.) * G / ( 3. * G + H ) / trialS;
         answer.times(factor);
     }
-
-    return;
 }
+
 
 void
 MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
@@ -380,8 +374,6 @@ MisesMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, Mat
         double factor = sqrt(6.) * G / ( 3. * G + H ) / trialS;
         answer.times(factor);
     }
-
-    return;
 }
 
 
@@ -509,8 +501,6 @@ MisesMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     status->setTempDamage(tempDam);
     status->letTempEffectiveStressBe(tempEffStress);
     status->letTempStressVectorBe(answer);
-
-    return;
 }
 
 

@@ -98,7 +98,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
  * // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
  * // luated at aGaussPoint.
  * {
- * // FloatMatrix *answer;
  * double x1,x2,x3,y1,y2,y3,b1,b2,b3,c1,c2,c3,area,l1,l2,l3;
  *
  * x1 = this -> giveNode(1) -> giveCoordinate(1);
@@ -123,7 +122,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
  * l2 = aGaussPoint -> giveCoordinate(2);
  * l3 = 1.-l1-l2;
  *
- * //answer = new FloatMatrix(3,12);
  * answer.resize (3,12);
  * answer.zero();
  *
@@ -156,7 +154,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
  * answer.at(3,12) = 4.*b3*l1+4.*l3*b1;
  *
  * answer.times(1./(2.*area));
- * return ;
  * }
  */
 

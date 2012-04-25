@@ -314,7 +314,6 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     //
     // create full 3d strain tensor
     //
-    //currentEffStrain = new FloatArray (6);
 
     if ( this->give(c2_IS_PLASTIC_FLOW, gp) > 0. ) {
         currentEffStrain.at(1) = currentStrain.at(1) - plasticStrain.at(1);
@@ -422,7 +421,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         ifsh = 1;
         //
         // optional iteration to achieve equilibrium in the z - direction.
-        //   // iterartion toleration limit tol (=0. -- no iteration)
+        //   // iteration toleration limit tol (=0. -- no iteration)
         // iteration only possible when stirrups present
         // Number of loops nez
         tol = 0.;
@@ -444,7 +443,7 @@ label18:
         //
         this->dtp3(gp, & pVal, pStress, ep, SCC, SCT, & ifplas);
         //
-        //  tranverse equilibrilium
+        //  transverse equilibrium
         //  transv strain  ez (flags -> at(SEZ))  its incr.  dez  ,
         //  stirrup stress flags->at(SRF)
         //
@@ -470,10 +469,10 @@ label18:
         // effective modulus was too small and, hence, the
         // last change dez of the transverse strain ez
         // too large in the previous increment), it loses sense.
-        // the jacobi iteration delivers just approximate princ.
+        // the Jacobi iteration delivers just approximate princ.
         // vectors which causes spurious pulses in us and fluctuations
         // in sxz,syz,qx,qz. they decrease
-        // when toli->0. they are succesfully managed by z equil.
+        // when toli->0. they are successfully managed by z equil.
         // iteration and do not harm the solution.
         //
         if ( ( ifplas ) && ( us < 0. ) ) {
@@ -1303,7 +1302,6 @@ Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     // error ("Give3dMaterialStiffnessMatrix: unable to compute");
     linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
-    return;
 }
 
 

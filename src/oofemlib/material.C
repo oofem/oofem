@@ -66,7 +66,6 @@ Material :: giveCharacteristicMatrix(FloatMatrix &answer,
 //
 {
     _error("Material::giveCharacteristicMatrix is fully abstract, no implementation");
-    return;
 }
 
 

@@ -156,8 +156,6 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     EpsV =  strain.at(1);
     EpsN =  strain.at(2);
-    //EpsL =  newTotalStrainVector.at(3);
-    //EpsM =  newTotalStrainVector.at(4);
     DEpsV = strainIncrement.at(1);
     DEpsN = strainIncrement.at(2);
     DEpsL = strainIncrement.at(3);

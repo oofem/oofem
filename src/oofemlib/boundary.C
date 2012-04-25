@@ -68,19 +68,6 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
-    //   char   key [32] ; // 'key' is eventually of size 1, but some words that are
-    //   double value ;    // read in the meantime in the data file can be larger !
-    //   int    nCond,i,j ;
-    //
-    //   prescribedValueDictionary = new Dictionary() ;
-    //   i     = 0 ;
-    //   nCond = this->readInteger("conditions",++i) ;
-
-    //   for (j=1 ; j<=nCond ; j++) {
-    //      this -> readString("conditions",++i,key) ;
-    //      value = this->read("conditions",++i) ;
-    //      prescribedValueDictionary -> add(key[0],value) ;}
-
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 

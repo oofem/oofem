@@ -255,8 +255,6 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "\t\tdamageCompression ");
     // print hardening parameter
     fprintf(file, " % .4e\n", damageCompression);
-
-    return;
 }
 
 contextIOResultType
@@ -651,8 +649,6 @@ ConcreteDPM2 :: giveRealStressVector(FloatArray &answer,
     } else {
         crossSection->giveFullCharacteristicVector(answer, gp, stress);
     }
-
-    return;
 }
 
 
@@ -808,8 +804,6 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
 
     answer.at(1) = tempDamageTension;
     answer.at(2) = tempDamageCompression;
-
-    return;
 }
 
 
@@ -1030,8 +1024,6 @@ ConcreteDPM2 :: computeEquivalentStrain(double &tempEquivStrain,
     } else   {
         tempEquivStrain = 0.;
     }
-
-    return;
 }
 
 
@@ -1260,8 +1252,6 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
 
     // update plastic strain
     status->letTempPlasticStrainBe(tempPlasticStrain);
-
-    return;
 }
 
 
@@ -1415,7 +1405,6 @@ ConcreteDPM2 :: performVertexReturn(StressVector &effectiveStress,
     }
 
     returnType = RT_Regular;
-    return;
 }
 
 
@@ -1718,8 +1707,6 @@ ConcreteDPM2 :: computeJacobian(FloatMatrix &answer,
     answer.at(4, 2) = dFDInv.at(2);
     answer.at(4, 3) = dFDKappa;
     answer.at(4, 4) = 0.;
-
-    return;
 }
 
 
@@ -1832,8 +1819,6 @@ ConcreteDPM2 :: computeDFDInv(FloatArray &answer,
 
     answer(0) = dfdsig;
     answer(1) = dfdrho;
-
-    return;
 }
 
 
@@ -1899,8 +1884,6 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
     answer(0) = ( dEquivalentDGDStressDInv(0) * ductilityMeasure - equivalentDGDStress * dDuctilityMeasureDInv(0) ) / pow(ductilityMeasure, 2.);
 
     answer(1) = ( dEquivalentDGDStressDInv(1) * ductilityMeasure - equivalentDGDStress * dDuctilityMeasureDInv(1) ) / pow(ductilityMeasure, 2.);
-
-    return;
 }
 
 
@@ -1969,8 +1952,6 @@ ConcreteDPM2 :: computeDDuctilityMeasureDInv(FloatArray &answer,
         answer(0) = dDuctilityMeasureDX * dXDSig;
         answer(1) = 0.;
     }
-
-    return;
 }
 
 
@@ -2005,8 +1986,6 @@ ConcreteDPM2 :: computeDGDInv(FloatArray &answer,
 
     answer(0) = dgdsig;
     answer(1) = dgdrho;
-
-    return;
 }
 
 
@@ -2073,8 +2052,6 @@ ConcreteDPM2 :: computeDDGDInvDKappa(FloatArray &answer,
 
     answer(0) = dDGDSigDKappa;
     answer(1) = dDGDRhoDKappa;
-
-    return;
 }
 
 
@@ -2126,8 +2103,6 @@ ConcreteDPM2 :: computeDDGDDInv(FloatMatrix &answer,
     answer(0, 1) = ddgdSigdRho;
     answer(1, 0) = ddgdRhodSig;
     answer(1, 1) = ddgddRho;
-
-    return;
 }
 
 
@@ -2343,8 +2318,6 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             _error("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
         }
     }
-
-    return;
 }
 
 void
@@ -2403,7 +2376,6 @@ ConcreteDPM2 :: computeSecantStiffness(FloatMatrix &answer,
 
 
     answer.times(1. - omegaTension);
-    return;
 }
 
 
@@ -2415,7 +2387,6 @@ ConcreteDPM2 :: computeTrialCoordinates(const StressVector &stress, double &sigN
     stress.computeDeviatoricVolumetricSplit(deviatoricStress, sigNew);
     rhoNew = deviatoricStress.computeSecondCoordinate();
     thetaNew = deviatoricStress.computeThirdCoordinate();
-    return;
 }
 
 
@@ -2478,8 +2449,6 @@ ConcreteDPM2 :: computeDRhoDStress(FloatArray &answer,
     dRhoDStress.times(1. / rho);
 
     answer = dRhoDStress;
-
-    return;
 }
 
 void
@@ -2493,8 +2462,6 @@ ConcreteDPM2 :: computeDSigDStress(FloatArray &answer) const
     for ( int i = 3; i < size; i++ ) {
         answer(i) = 0.;
     }
-
-    return;
 }
 
 
@@ -2556,7 +2523,6 @@ ConcreteDPM2 :: computeDDRhoDDStress(FloatMatrix &answer,
     help1.times( -1. / ( rho * rho * rho ) );
     ddRhoddStress.add(help1);
     answer = ddRhoddStress;
-    return;
 }
 
 int

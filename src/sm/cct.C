@@ -310,7 +310,6 @@ CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
-// IntArray* answer = new IntArray (3);
 {
     answer.resize(3);
 

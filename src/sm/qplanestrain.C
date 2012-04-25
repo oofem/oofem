@@ -90,8 +90,6 @@ QPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, i
         answer.at(4, 2 * i - 1) = dnx.at(i, 2);
         answer.at(4, 2 * i - 0) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 void
@@ -111,8 +109,6 @@ QPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 IRResultType
@@ -164,18 +160,16 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-QPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+QPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 
@@ -220,8 +214,6 @@ QPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix 
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1, i) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -470,8 +462,6 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }
-
-    return;
 }
 
 #endif

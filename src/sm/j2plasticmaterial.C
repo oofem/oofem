@@ -505,7 +505,6 @@ J2plasticMaterial :: giveStressBackVector(FloatArray &answer,
     }
 
     answer.resize(0);
-    return;
 }
 
 

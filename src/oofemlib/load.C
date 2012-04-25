@@ -72,7 +72,6 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *stepN, ValueModeTy
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer  = this->giveComponentArray();
     answer.times(factor);
-    return;
 }
 
 

@@ -679,8 +679,6 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
     default:
         _error("updateComponent: Unknown Type of component.");
     }
-
-    return;
 }
 
 void

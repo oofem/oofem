@@ -149,8 +149,6 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
             }
         }
     }
-
-    return;
 }
 
 

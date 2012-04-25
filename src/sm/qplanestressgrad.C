@@ -78,9 +78,9 @@ QPlaneStressGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &an
         answer.at(1) = D_u;
         answer.at(2) = D_v;
     }
-
-    return;
 }
+
+
 IRResultType
 QPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
@@ -100,6 +100,7 @@ QPlaneStressGrad :: initializeFrom(InputRecord *ir)
     this->computeGaussPoints();
     return IRRT_OK;
 }
+
 
 void
 QPlaneStressGrad :: computeGaussPoints()
@@ -127,8 +128,6 @@ QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, i) = n.at(i);
     }
-
-    return;
 }
 
 void

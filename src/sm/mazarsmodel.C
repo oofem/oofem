@@ -189,7 +189,6 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  *
  *  answer.resize(3, 3);
  *  lMat->give3dMaterialStiffnessMatrix(de, FullForm, rMode, gp, atTime);
- *  // fullAnswer = new FloatMatrix (3,3);
  *  // copy first 3x3 submatrix to answer
  *  for ( i = 1; i <= 3; i++ ) {
  *      for ( j = 1; j <= 3; j++ ) {

@@ -250,7 +250,6 @@ LIBeam2d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) cons
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (3);
     answer.resize(3);
 
     answer.at(1) = D_u;

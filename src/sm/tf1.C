@@ -64,8 +64,6 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, V
     }
 
     answer.at(1) = result;
-
-    return;
 }
 
 IRResultType

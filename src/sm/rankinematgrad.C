@@ -97,8 +97,6 @@ RankineMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
         return;
     }
-
-    return;
 }
 
 void
@@ -128,7 +126,6 @@ RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
     }
 
     evaluatePlaneStressStiffMtrx(answer, form, mode, gp, atTime, gprime);
-    return;
 }
 
 // derivative of kappa (result of stress return) wrt final strain
@@ -185,8 +182,6 @@ RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseFor
     answer.at(1, 1) = etaglob.at(1);
     answer.at(1, 2) = etaglob.at(2);
     answer.at(1, 3) = etaglob.at(3);
-
-    return;
 }
 
 // minus derivative of total stress wrt nonlocal kappa

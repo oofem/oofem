@@ -107,8 +107,6 @@ QTrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 IRResultType
@@ -148,8 +146,6 @@ QTrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
         answer.at(4, 2 * i - 1) = dnx.at(i, 2);
         answer.at(4, 2 * i - 0) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 double
@@ -204,8 +200,6 @@ QTrPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer)
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 
@@ -430,7 +424,6 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
 void
 QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 {
-    return;
 }
 
 #endif
@@ -489,8 +482,6 @@ QTrPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
     //  answer.at(1,4)  = 4.*l1*l2;
     //  answer.at(1,5)  = 4.*l2*l3;
     //  answer.at(1,6)  = 4.*l3*l1;
-
-    return;
 }
 
 

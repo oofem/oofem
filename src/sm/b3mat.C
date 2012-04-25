@@ -198,7 +198,6 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
     char buff [ 1024 ];
     sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf", q1, q2, q3, q4, q5, kt, EpsSinf);
     OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: %s\n", this->number, buff);
-    return;
 }
 
 

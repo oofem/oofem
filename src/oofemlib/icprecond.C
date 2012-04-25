@@ -188,8 +188,6 @@ CompCol_ICPreconditioner :: ICSolve(FloatArray &dest) const
 
         dest(i) = ( work(i) + dest(i) ) / val_( pntr_(i) );
     }
-
-    return;
 }
 
 

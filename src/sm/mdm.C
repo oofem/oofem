@@ -255,7 +255,6 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
         }
     }
 
-    //DamageTensor = DamageVector -> asFloatMatrix();
     if ( ndc == 3 ) {
         // 2d case
         damageTensor.resize(2, 2);
@@ -873,8 +872,6 @@ MDM :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(1) = this->tempDillatCoeff;
     answer.at(2) = this->tempDillatCoeff;
     answer.at(3) = this->tempDillatCoeff;
-
-    return;
 }
 
 

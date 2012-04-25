@@ -484,8 +484,6 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
     }
-
-    return;
 }
 
 

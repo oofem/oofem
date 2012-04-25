@@ -201,8 +201,6 @@ void DynCompRow :: times(const FloatArray &x, FloatArray &answer) const
 
         answer(j) = r;
     }
-
-    return;
 }
 
 void DynCompRow :: times(double x)

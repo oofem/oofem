@@ -48,8 +48,6 @@ FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICell
     answer.at(1) = lcoords.at(1);
     answer.at(2) = lcoords.at(2);
     answer.at(3) = 1. - lcoords.at(1) - lcoords.at(2);
-
-    return;
 }
 
 void

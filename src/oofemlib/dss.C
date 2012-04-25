@@ -113,13 +113,11 @@ SparseMtrx *DSSMatrix :: GiveCopy() const
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
     OOFEM_ERROR("DSSMatrix::times -- not implemented");
-    return;
 }
 
 void DSSMatrix :: times(double x)
 {
     OOFEM_ERROR("DSSMatrix::times -- not implemented");
-    return;
 }
 
 int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)

@@ -600,7 +600,6 @@ RheoChainMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
     //
     this->giveLinearElasticMaterial()->give3dShellLayerStiffMtrx(answer, form, mode, gp, atTime);
     answer.times( this->giveEModulus(gp, atTime) );
-    return;
 }
 
 

@@ -149,8 +149,6 @@ SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
 
 

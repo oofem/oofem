@@ -310,10 +310,9 @@ void
 InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
+    // DofId mask array determines the dof ordering requested from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     /*
      * cmode mode = giveCoordMode();
      * if ( mode == ie1d_1d ) {

@@ -92,8 +92,6 @@ QPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
         answer.at(3, 2 * i - 1) = dnx.at(i, 2);
         answer.at(3, 2 * i - 0) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 void
@@ -113,8 +111,6 @@ QPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 IRResultType
@@ -166,18 +162,16 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-QPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+QPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     // returns DofId mask array for inode element node.
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-    //IntArray* answer = new IntArray (2);
     answer.resize(2);
 
     answer.at(1) = D_u;
     answer.at(2) = D_v;
-
-    return;
 }
 
 
@@ -518,8 +512,6 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }
-
-    return;
 }
 #endif
 
@@ -555,8 +547,6 @@ QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
-
-    return;
 }
 
 
