@@ -211,7 +211,7 @@ double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 TimeStep *DIIDynamic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();
-    double totalTime = 0;
+    double totalTime = deltaT;
     StateCounterType counter = 1;
 
     delete previousStep;

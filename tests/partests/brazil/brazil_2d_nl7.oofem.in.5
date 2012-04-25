@@ -6,11 +6,16 @@ brazil_2d_nl7.oofem.out.5
 #
 nonlinearstatic nsteps 1 nmsteps 5 renumber 1 nonlocalext lstype 4 smtype 7
 #
-metastep 1 nsteps 4 stiffMode 2 controllmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 3 smtype 7
-metastep 2 nsteps 3 stiffMode 2 controllmode 0 psi 0.0 steplength 0.00002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 3 smtype 7
-metastep 3 nsteps 4 stiffMode 2 controllmode 0 psi 0.0 steplength 0.00001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 3 smtype 7
-metastep 4 nsteps 9 stiffMode 2 controllmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 3 smtype 7
-metastep 5 nsteps 10 stiffMode 2 controllmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 3 smtype 7
+#metastep 1
+nsteps 4 stiffMode 2 controllmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 2
+nsteps 3 stiffMode 2 controllmode 0 psi 0.0 steplength 0.00002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 3
+nsteps 4 stiffMode 2 controllmode 0 psi 0.0 steplength 0.00001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 4
+nsteps 9 stiffMode 2 controllmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
+#metastep 5
+nsteps 10 stiffMode 2 controllmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
 #
 domain PlaneStrain
 OutputManager tstep_all dofman_all element_all

@@ -519,7 +519,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
         //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
-                OOFEM_LOG_RELEVANT("NonLinearStatic: fixed load level\n");
+                OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
                 if ( initialLoadVector.isEmpty() ) {
@@ -547,7 +547,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
             initialLoadVector.resize( incrementalLoadVector.giveSize() );
         }
 
-        OOFEM_LOG_RELEVANT("NonLinearStatic: fixed load level\n");
+        OOFEM_LOG_DEBUG("Fixed load level\n");
 
         incrementalLoadVector.times(loadLevel);
         initialLoadVector.add(incrementalLoadVector);
@@ -625,7 +625,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
     if ( loadInitFlag || ( controllMode == nls_directControll ) || ( controllMode == nls_directControll2 ) ) {
 #ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling reference load\n");
+        OOFEM_LOG_DEBUG("Assembling reference load\n");
 #endif
         //
         // assemble the incremental reference load vector
@@ -657,7 +657,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     // call numerical model to solve arise problem
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "\n\nSolving [step number %5d.%d]\n", tStep->giveNumber(), tStep->giveVersion() );
+    OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d]\n\n", tStep->giveNumber(), tStep->giveVersion() );
 #endif
 
     if ( initialLoadVector.isNotEmpty() ) {
@@ -703,13 +703,13 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
         if ( stiffMode == nls_tangentStiffness ) {
             stiffnessMatrix->zero(); // zero stiffness matrix
 #ifdef VERBOSE
-            OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
+            OOFEM_LOG_DEBUG("Assembling tangent stiffness matrix\n");
 #endif
             this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
         } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag) ) {
 #ifdef VERBOSE
-            OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
+            OOFEM_LOG_DEBUG("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
             this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix,
@@ -718,7 +718,7 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
                 ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
 #ifdef VERBOSE
-            OOFEM_LOG_INFO("Assembling elastic stiffness matrix\n");
+            OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
             this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix,
@@ -953,7 +953,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
 #ifdef TIME_REPORT
     oofem_timeval tfin;
     getRelativeUtime(tfin, tstart);
-    OOFEM_LOG_INFO( "NonLinearStatic info: user time consumed by assembly: %.2fs\n",
+    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n",
                    ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 }

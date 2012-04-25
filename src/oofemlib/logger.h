@@ -68,7 +68,6 @@ protected:
     logLevelType logLevel;
     /// Counter of all warning and error messages.
     int numberOfWrn, numberOfErr;
-
 public:
     Logger(logLevelType level, FILE *stream);
     ~Logger();

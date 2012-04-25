@@ -130,7 +130,7 @@ bool StokesFlowStressHomogenization :: computeMacroStress(FloatArray &answer, co
         this->giveMixedDirichletBC()->setPrescribedDeviatoricGradientFromVoigt(input);
         this->solveYourselfAt(tStep);
 
-        double volume;
+        //double volume;
         int npeq = this->giveNumberOfPrescribedEquations(EID_MomentumBalance_ConservationEquation);
         FloatArray R_ext(npeq);
         answer.resize(npeq);

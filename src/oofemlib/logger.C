@@ -257,8 +257,22 @@ Logger :: setLogLevel(int level)
 void
 Logger :: printStatistics()
 {
-    // force output
-    fprintf(mylogStream, "Total %d error(s) and %d warning(s) reported\n", numberOfErr, numberOfWrn);
+    int rank = 0;
+
+#ifdef __PARALLEL_MODE
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+
+    int totalNumberOfErr = numberOfErr, totalNumberOfWrn = numberOfWrn;
+#ifdef __PARALLEL_MODE
+    MPI_Reduce(& numberOfErr, & totalNumberOfErr, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(& numberOfWrn, & totalNumberOfWrn, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+#endif
+    if ( rank == 0 )
+    {
+        // force output
+        fprintf(mylogStream, "Total %d error(s) and %d warning(s) reported\n", totalNumberOfErr, totalNumberOfWrn);
+    }
 }
 
 
@@ -328,7 +342,6 @@ void OOFEM_LOG_DEBUG(const char *format, ...)
     __PROCESS_LOG;
     oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, buff);
 }
-
 
 #endif
 } // end namespace oofem

@@ -135,9 +135,11 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
     // print iteration header
-    OOFEM_LOG_INFO("CALMLS :: solve - Initial step length: %-15e\n", deltaL);
+
+    OOFEM_LOG_INFO("CALMLS:       Initial step length: %-15e\n", deltaL);
     if ( nccdg == 0 ) {
-        OOFEM_LOG_INFO("Iter  LoadLevel       ForceError      DisplError\n__________________________________________________________\n");
+        OOFEM_LOG_INFO("CALMLS:       Iteration       LoadLevel       ForceError      DisplError    \n");
+        OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
     } else {
         OOFEM_LOG_INFO("Iter  LoadLevel       ");
         for ( i = 1; i <= nccdg; i++ ) {
@@ -341,7 +343,7 @@ restart:
                 // restore initial stiffness
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
 
-                OOFEM_LOG_INFO("CALMLS :: solve - Iteration Reset ...\n");
+                OOFEM_LOG_INFO("CALMLS:       Iteration Reset ...\n");
 
                 calm_NR_OldMode  = calm_NR_Mode;
                 calm_NR_Mode     = calm_fullNRM;
@@ -424,7 +426,7 @@ restart:
                 // restore initial stiffness
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
 
-                OOFEM_LOG_INFO("CALMLS :: solve - Iteration Reset ...\n");
+                OOFEM_LOG_INFO("CALMLS:       Iteration Reset ...\n");
 
                 calm_NR_OldMode  = calm_NR_Mode;
                 calm_NR_Mode     = calm_fullNRM;
@@ -487,7 +489,7 @@ restart:
         deltaL = minStepLength;
     }
 
-    OOFEM_LOG_INFO("CALMLS :: solve - Adjusted step length: %-15e\n", deltaL);
+    OOFEM_LOG_INFO("CALMLS:       Adjusted step length: %-15e\n", deltaL);
 
     status = NM_Success;
     solved = 1;
@@ -653,7 +655,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dg_totalDisp = collectiveErr;
 #endif
 
-        OOFEM_LOG_INFO("%-5d %-15e ", nite, Lambda);
+        OOFEM_LOG_INFO("CALMLS:       %-15d %-15e ", nite, Lambda);
         // loop over dof groups
         for ( _dg = 1; _dg <= _ng; _dg++ ) {
             //  compute a relative error norm
@@ -682,7 +684,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             }
 
 
-            OOFEM_LOG_INFO( "%-15e %-15e ", dg_forceErr.at(_dg), dg_dispErr.at(_dg) );
+            OOFEM_LOG_INFO("%-15e %-15e ", dg_forceErr.at(_dg), dg_dispErr.at(_dg) );
         }
 
         OOFEM_LOG_INFO("\n");
@@ -733,7 +735,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             answer = false;
         }
 
-        OOFEM_LOG_INFO("%-5d %-15e %-15e %-15e\n", nite, Lambda, forceErr, dispErr);
+        OOFEM_LOG_INFO("CALMLS:       %-15d %-15e %-15e %-15e\n", nite, Lambda, forceErr, dispErr);
     } // end default case (all dofs conributing)
 
     return answer;
@@ -1526,9 +1528,9 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         DeltaLambda = DeltaLambdam1 + deltaLambda;
         Lambda = ReachedLambda + DeltaLambda;
 
-        OOFEM_LOG_INFO("CALMLS :: do_lineSearch - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, 1.0, deltaLambda);
+        OOFEM_LOG_INFO("CALMLS:       Line search - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, 1.0, deltaLambda);
     } else {
-        OOFEM_LOG_INFO("CALMLS :: do_lineSearch - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
+        OOFEM_LOG_INFO("CALMLS:       Line search - err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
     }
 }
 } // end namespace oofem

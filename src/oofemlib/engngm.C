@@ -618,7 +618,7 @@ EngngModel :: forceEquationNumbering(int id)
         //clock_t time_0 = this->getClock(), time_1;
         oofem_timeval tstart;
         getUtime(tstart);
-        OOFEM_LOG_INFO("Renumbering ... ");
+        OOFEM_LOG_INFO("\nRenumbering ... \n");
 
         SloanGraph graph(domain);
         graph.initialize();
@@ -636,8 +636,8 @@ EngngModel :: forceEquationNumbering(int id)
         oofem_timeval ut;
         getRelativeUtime(ut, tstart);
 
-        OOFEM_LOG_INFO( "done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-        OOFEM_LOG_INFO("Nominal profile %d (old) %d (new)\n", initialProfile, optimalProfile);
+        OOFEM_LOG_DEBUG( "done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+        OOFEM_LOG_DEBUG("Nominal profile %d (old) %d (new)\n", initialProfile, optimalProfile);
 
         // undefine all dofs equation numbers
         for ( i = 1; i <= nnodes; i++ ) {

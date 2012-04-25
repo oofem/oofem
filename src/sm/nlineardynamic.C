@@ -251,13 +251,12 @@ TimeStep *NonLinearDynamic :: giveNextStep()
     int mstepNum = 1;
     StateCounterType counter = 1;
     double deltaTtmp = deltaT;
+    double totalTime = deltaT;
 
     //do not increase deltaT on microproblem
     if ( pScale == microScale ) {
         deltaTtmp = 0.;
     }
-
-    double totalTime = 0.0 + deltaTtmp;
 
     delete previousStep;
     if ( currentStep != NULL ) {
@@ -426,8 +425,10 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
     }
 
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    OOFEM_LOG_RELEVANT( "\n\nSolving       [Step number %8d, Time %15e]\n\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
+
+    deltaT = tStep->giveTimeIncrement();
 
     proceedStep(1, tStep);
 }
@@ -445,7 +446,6 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // creates system of governing eq's and solves them at given time step
     // first assemble problem at current time step
 
-    deltaT = tStep->giveTimeIncrement();
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
 
     // Newmark constants

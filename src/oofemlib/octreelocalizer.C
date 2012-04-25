@@ -339,6 +339,7 @@ OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const Flo
 bool
 OctreeSpatialLocalizer :: buildOctreeDataStructure()
 {
+    OOFEM_LOG_INFO("Initializing Octree structure\n");
     int i, j, init = 1, nnode = this->domain->giveNumberOfDofManagers();
     double rootSize, resolutionLimit;
     FloatArray minc(3), maxc(3), * coords;
@@ -421,7 +422,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     this->giveMaxTreeDepthFrom(this->rootCell, treeDepth);
     // compute processor time used by the program
     double nsec = ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM );
-    OOFEM_LOG_INFO("Octree init [depth %d in %.2fs]\n", treeDepth, nsec);
+    OOFEM_LOG_DEBUG("Octree init [depth %d in %.2fs]\n", treeDepth, nsec);
 
     return true;
 }

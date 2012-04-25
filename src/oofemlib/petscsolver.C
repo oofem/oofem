@@ -182,22 +182,22 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
     err = KSPSolve(Lhs->ksp, b, x);
     if (err != 0) {
-	    OOFEM_ERROR2("PetscSolver::petsc_solve - Error when solving: %d\n", err);
+	    OOFEM_ERROR2("PetscSolver:  Error when solving: %d\n", err);
     }
     KSPGetConvergedReason(Lhs->ksp, & reason);
     KSPGetIterationNumber(Lhs->ksp, & nite);
 
     if (reason >= 0) {
-        OOFEM_LOG_INFO("PetscSolver::petsc_solve - Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+        OOFEM_LOG_INFO("PetscSolver:  Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     } else {
-        OOFEM_WARNING3("PetscSolver::petsc_solve - Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+        OOFEM_WARNING3("PetscSolver:  Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     }
 
 
  #ifdef TIME_REPORT
     oofem_timeval ut;
     getRelativeUtime(ut, tstart);
-    OOFEM_LOG_INFO( "PetscSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
  #endif
     if ( reason < 0 ) {
         return NM_NoSuccess;

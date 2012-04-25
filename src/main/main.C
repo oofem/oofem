@@ -117,7 +117,6 @@ int main(int argc, char *argv[])
     if ( rank == 0 ) {
         // print prg header on stdout
         printf("%s\n", PRG_HEADER_SM);
-        int rank = 0;
     }
 
 #ifdef __PETSC_MODULE
