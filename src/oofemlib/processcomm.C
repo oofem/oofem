@@ -74,7 +74,7 @@ ProcessCommunicator :: initSend(int tag)
 {
     int result = 1;
     if ( !toSend.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
-        //  fprintf (stderr, "\nPNlDEIDynamicDomainComunicator :: initExchange: sending to %d",rank);
+        //  fprintf (stderr, "\nNlDEIDynamicDomainComunicator :: initExchange: sending to %d",rank);
         result = giveProcessCommunicatorBuff()->initSend(this->rank, tag);
     } else {
         giveProcessCommunicatorBuff()->initSendBuff();
@@ -89,7 +89,7 @@ ProcessCommunicator :: initReceive(int tag)
 {
     int result = 1;
     if ( !toReceive.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
-        //  fprintf (stderr, "\nPNlDEIDynamicDomainComunicator :: initExchange: recv from %d",rank);
+        //  fprintf (stderr, "\nNlDEIDynamicDomainComunicator :: initExchange: recv from %d",rank);
         result &= giveProcessCommunicatorBuff()->initReceive(this->rank, tag);
     } else {
         giveProcessCommunicatorBuff()->initRecvBuff();

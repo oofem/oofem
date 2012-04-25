@@ -34,8 +34,8 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "pnldeidynamiccomm.h"
-#include "pnldeidynamic.h"
+#include "nldeidynamiccomm.h"
+#include "nldeidynamic.h"
 #include "intarray.h"
 
 #ifdef __USE_MPI
@@ -45,26 +45,26 @@
 #endif
 
 namespace oofem {
-PNlDEIDynamicComunicator :: PNlDEIDynamicComunicator(PNlDEIDynamic *emodel, int rank, int size,
-                                                     PNlDEIDynamicComunicatorMode mode) :
-    Communicator< PNlDEIDynamic >(emodel, rank, size)
+NlDEIDynamicComunicator :: NlDEIDynamicComunicator(NlDEIDynamic *emodel, int rank, int size,
+                                                     NlDEIDynamicComunicatorMode mode) :
+    Communicator< NlDEIDynamic >(emodel, rank, size)
 {
     this->mode = mode;
 }
 
 
-PNlDEIDynamicComunicator :: ~PNlDEIDynamicComunicator()
+NlDEIDynamicComunicator :: ~NlDEIDynamicComunicator()
 { }
 
 
 void
-PNlDEIDynamicComunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm)
+NlDEIDynamicComunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm)
 {
     Domain *domain = pm->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
     int i, j, partition;
 
-    if ( this->mode != PNlDEIDynamicComunicator__NODE_CUT ) {
+    if ( this->mode != NlDEIDynamicComunicator__NODE_CUT ) {
         _error("setUpCommunicationMapsForNodeCut: invalid mode");
     }
 
@@ -122,13 +122,13 @@ PNlDEIDynamicComunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm)
 
 
 void
-PNlDEIDynamicComunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm)
+NlDEIDynamicComunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm)
 {
     Domain *domain = pm->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
     int i, j, partition;
 
-    if ( this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT ) {
+    if ( this->mode == NlDEIDynamicComunicator__ELEMENT_CUT ) {
         /*
          * Initaially, each partition knows for which nodes a receive
          * is needed (and can therefore compute easily the recv map),
@@ -209,7 +209,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm)
         // and we must also broadcast our send list.
 
 #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Element-cut broadcasting started", rank);
+        VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Element-cut broadcasting started", rank);
 #endif
 
 
@@ -237,7 +237,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 #endif
 
 #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
+        VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
 #endif
 
 
@@ -254,7 +254,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 // broadcast domainRecvList
 
 #ifdef __VERBOSE_PARALLEL
-                VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
+                VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
 #endif
 
                 commBuff.packIntArray(domainRecvList);
@@ -264,12 +264,12 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 }
 
 #ifdef __VERBOSE_PARALLEL
-                VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
+                VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
 #endif
             } else {
 #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_INFO("[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d\n",
-                               rank, "PNlDEIDynamicComunicator :: unpackAllData", i);
+                               rank, "NlDEIDynamicComunicator :: unpackAllData", i);
 #endif
                 // receive broadcasted lists
                 result = commBuff.bcast(i);
@@ -279,13 +279,13 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
 #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_INFO("[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d finished\n",
-                               rank, "PNlDEIDynamicComunicator :: unpackAllData", i);
+                               rank, "NlDEIDynamicComunicator :: unpackAllData", i);
 #endif
 
 
                 // unpack remote receive list
                 if ( !commBuff.unpackIntArray(remoteDomainRecvList) ) {
-                    _error("PNlDEIDynamicComunicator::setUpCommunicationMaps: unpack remote receive list failed");
+                    _error("NlDEIDynamicComunicator::setUpCommunicationMaps: unpack remote receive list failed");
                 }
 
                 // find if remote nodes are in local partition
@@ -320,7 +320,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
             } // end receiving broadcasted lists
 
 #ifdef __VERBOSE_PARALLEL
-            VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
+            VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
 #endif
         } // end loop over domains
 
@@ -331,13 +331,13 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
 
 void
-PNlDEIDynamicComunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm)
+NlDEIDynamicComunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm)
 {
     //int nnodes = domain->giveNumberOfDofManagers();
     Domain *domain = pm->giveDomain(1);
     int i, j, partition;
 
-    if ( this->mode == PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) {
+    if ( this->mode == NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) {
         /*
          * Initaially, each partition knows for which nodes a receive
          * is needed (and can therefore compute easily the recv map),
@@ -429,7 +429,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMapsForRemoteElementMode(EngngMode
         // and we must also broadcast our send list.
 
 #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Remote Element-cut broadcasting started", rank);
+        VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Remote Element-cut broadcasting started", rank);
 #endif
 
 
@@ -458,7 +458,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 #endif
 
 #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
+        VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
 #endif
 
 
@@ -475,7 +475,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 // broadcast domainRecvList
 
 #ifdef __VERBOSE_PARALLEL
-                VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
+                VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
 #endif
 
                 commBuff.packIntArray(domainRecvList);
@@ -485,12 +485,12 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 }
 
 #ifdef __VERBOSE_PARALLEL
-                VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
+                VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
 #endif
             } else {
 #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_INFO("[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d\n",
-                               rank, "PNlDEIDynamicComunicator :: unpackAllData", i);
+                               rank, "NlDEIDynamicComunicator :: unpackAllData", i);
 #endif
                 // receive broadcasted lists
                 result = commBuff.bcast(i);
@@ -500,13 +500,13 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
 #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_INFO("[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d finished\n",
-                               rank, "PNlDEIDynamicComunicator :: unpackAllData", i);
+                               rank, "NlDEIDynamicComunicator :: unpackAllData", i);
 #endif
 
 
                 // unpack remote receive list
                 if ( !commBuff.unpackIntArray(remoteDomainRecvList) ) {
-                    _error("PNlDEIDynamicComunicator::setUpCommunicationMaps: unpack remote receive list failed");
+                    _error("NlDEIDynamicComunicator::setUpCommunicationMaps: unpack remote receive list failed");
                 }
 
                 // find if remote elements are in local partition
@@ -555,7 +555,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
             } // end receiving broadcasted lists
 
 #ifdef __VERBOSE_PARALLEL
-            VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
+            VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
 #endif
         } // end loop over domains
 
@@ -565,18 +565,18 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 }
 
 void
-PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
+NlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
 {
 #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator :: setUpCommunicationMaps", "Setting up communication maps", rank);
+    VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator :: setUpCommunicationMaps", "Setting up communication maps", rank);
 #endif
 
 
-    if ( this->mode == PNlDEIDynamicComunicator__NODE_CUT ) {
+    if ( this->mode == NlDEIDynamicComunicator__NODE_CUT ) {
         setUpCommunicationMapsForNodeCut(pm);
-    } else if ( this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT ) {
+    } else if ( this->mode == NlDEIDynamicComunicator__ELEMENT_CUT ) {
         setUpCommunicationMapsForElementCut(pm);
-    } else if ( this->mode == PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) {
+    } else if ( this->mode == NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) {
         setUpCommunicationMapsForRemoteElementMode(pm);
     } else {
         _error("setUpCommunicationMaps: unknown mode");
@@ -589,17 +589,17 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * // Old compact version
  * //
  * void
- * PNlDEIDynamicComunicator :: setUpCommunicationMaps (Domain* domain)
+ * NlDEIDynamicComunicator :: setUpCommunicationMaps (Domain* domain)
  * {
  * int nnodes = domain->giveNumberOfDofManagers();
  * int i, j, partition;
  *
  *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator :: setUpCommunicationMaps", "Setting up communication maps", rank);
+ * VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator :: setUpCommunicationMaps", "Setting up communication maps", rank);
  *#endif
  *
  *
- * if (this->mode == PNlDEIDynamicComunicator__NODE_CUT) {
+ * if (this->mode == NlDEIDynamicComunicator__NODE_CUT) {
  *
  * //
  * // receive and send maps are same and are assembled locally
@@ -646,8 +646,8 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * for (i=0; i<size; i++) delete maps[i];
  * delete maps;
  *
- * } else if ((this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT) ||
- *     (this->mode == PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE)) {
+ * } else if ((this->mode == NlDEIDynamicComunicator__ELEMENT_CUT) ||
+ *     (this->mode == NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE)) {
  *
  *
  * //    Initaially, each partition knows for which nodes a receive
@@ -673,7 +673,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * int nelems;
  * int result = 1;
  *
- * if (this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT) {
+ * if (this->mode == NlDEIDynamicComunicator__ELEMENT_CUT) {
  * for (i=1; i<= nnodes; i++) {
  *  partitionList = domain->giveDofManager (i) -> givePartitionList();
  *  if (domain->giveDofManager (i)->giveParallelMode () == DofManager_remote) {
@@ -684,7 +684,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *   }
  *  }
  * }
- * } else {            // PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE
+ * } else {            // NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE
  * nelems = domain->giveNumberOfElements();
  * for (i=1; i<= nelems; i++) {
  *  partitionList = domain->giveElement (i) -> givePartitionList();
@@ -708,7 +708,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *
  * if (domainRecvListSize) {
  *
- * if (this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT) {
+ * if (this->mode == NlDEIDynamicComunicator__ELEMENT_CUT) {
  *  for (i=1; i<= nnodes; i++) {
  *   // test if node is remote DofMan
  *   dofMan = domain->giveDofManager (i);
@@ -724,7 +724,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *    }
  *   }
  *  }
- * } else {          // PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE
+ * } else {          // NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE
  *  for (i=1; i<= nelems; i++) {
  *   // test if element is remote one
  *   element = domain->giveElement (i);
@@ -757,7 +757,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * // and we must also broadcast our send list.
  *
  *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Element-cut broadcasting started", rank);
+ * VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Element-cut broadcasting started", rank);
  *#endif
  *
  *
@@ -778,7 +778,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *#endif
  *
  *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
+ * VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
  *#endif
  *
  *
@@ -795,7 +795,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *  // broadcast domainRecvList
  *
  *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
+ * VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
  *#endif
  *
  *  commBuff.packIntArray (domainRecvList);
@@ -803,14 +803,14 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *  if (result!= MPI_SUCCESS) _error ("setUpCommunicationMaps: commBuff broadcast failed");
  *
  *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
+ * VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
  *#endif
  *
  * } else {
  *
  *#ifdef __VERBOSE_PARALLEL
  *  fprintf(stderr, "\n[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d",
- *      rank,"PNlDEIDynamicComunicator :: unpackAllData", i);
+ *      rank,"NlDEIDynamicComunicator :: unpackAllData", i);
  *#endif
  *  // receive broadcasted lists
  *  result = commBuff.bcast (i);
@@ -818,15 +818,15 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *
  *#ifdef __VERBOSE_PARALLEL
  *  fprintf(stderr, "\n[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d finished",
- *      rank,"PNlDEIDynamicComunicator :: unpackAllData", i);
+ *      rank,"NlDEIDynamicComunicator :: unpackAllData", i);
  *#endif
  *
  *
  *  // unpack remote receive list
  *  if (!commBuff.unpackIntArray(remoteDomainRecvList))
- *   _error ("PNlDEIDynamicComunicator::setUpCommunicationMaps: unpack remote receive list failed");
+ *   _error ("NlDEIDynamicComunicator::setUpCommunicationMaps: unpack remote receive list failed");
  *
- *  if (this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT) {
+ *  if (this->mode == NlDEIDynamicComunicator__ELEMENT_CUT) {
  *   // find if remote nodes are in local partition
  *   // if yes add them into send map for correcponding i-th partition
  *   sendMapPos = 0;
@@ -849,7 +849,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *     toSendMap.at(++sendMapPos) = j;
  *    }
  *   } // end loop over local DofManagers
- *  } else {       // PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE
+ *  } else {       // NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE
  *   // find if remote elements are in local partition
  *   // if yes add them into send map for correcponding i-th partition
  *   sendMapPos = 0;
@@ -879,7 +879,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *  //this->giveDomainComunicator(i)->setToSendArry (this->engngModel, toSendMap);
  * } // end receiving broadcasted lists
  *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
+ * VERBOSEPARALLEL_PRINT("NlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
  *#endif
  *
  * } // end loop over domains
@@ -889,13 +889,13 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
 
 
 int
-PNlDEIDynamicComunicator :: setProblemComunicatorToSendArry(ProblemComunicator< PNlDEIDynamic > *problemComm, IntArray &map)
+NlDEIDynamicComunicator :: setProblemComunicatorToSendArry(ProblemComunicator< NlDEIDynamic > *problemComm, IntArray &map)
 {
-    if ( ( this->mode == PNlDEIDynamicComunicator__NODE_CUT ) ) {
-        sortCommMap(map, & PNlDEIDynamicComunicator :: DofManCmp);
-    } else if ( ( this->mode == PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) ||
-               ( this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT ) ) {
-        sortCommMap(map, & PNlDEIDynamicComunicator :: ElemCmp);
+    if ( ( this->mode == NlDEIDynamicComunicator__NODE_CUT ) ) {
+        sortCommMap(map, & NlDEIDynamicComunicator :: DofManCmp);
+    } else if ( ( this->mode == NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) ||
+               ( this->mode == NlDEIDynamicComunicator__ELEMENT_CUT ) ) {
+        sortCommMap(map, & NlDEIDynamicComunicator :: ElemCmp);
     } else {
         _error("setDomainComunicatorToSendArry: unknown mode");
     }
@@ -905,13 +905,13 @@ PNlDEIDynamicComunicator :: setProblemComunicatorToSendArry(ProblemComunicator< 
 }
 
 int
-PNlDEIDynamicComunicator :: setProblemComunicatorToRecvArry(ProblemComunicator< PNlDEIDynamic > *problemComm, IntArray &map)
+NlDEIDynamicComunicator :: setProblemComunicatorToRecvArry(ProblemComunicator< NlDEIDynamic > *problemComm, IntArray &map)
 {
-    if ( ( this->mode == PNlDEIDynamicComunicator__NODE_CUT ) ) {
-        sortCommMap(map, & PNlDEIDynamicComunicator :: DofManCmp);
-    } else if ( ( this->mode == PNlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) ||
-               ( this->mode == PNlDEIDynamicComunicator__ELEMENT_CUT ) ) {
-        sortCommMap(map, & PNlDEIDynamicComunicator :: ElemCmp);
+    if ( ( this->mode == NlDEIDynamicComunicator__NODE_CUT ) ) {
+        sortCommMap(map, & NlDEIDynamicComunicator :: DofManCmp);
+    } else if ( ( this->mode == NlDEIDynamicComunicator__REMOTE_ELEMENT_MODE ) ||
+               ( this->mode == NlDEIDynamicComunicator__ELEMENT_CUT ) ) {
+        sortCommMap(map, & NlDEIDynamicComunicator :: ElemCmp);
     } else {
         _error("setDomainComunicatorToRecvArry: unknown mode");
     }
@@ -923,14 +923,14 @@ PNlDEIDynamicComunicator :: setProblemComunicatorToRecvArry(ProblemComunicator< 
 
 
 void
-PNlDEIDynamicComunicator :: sortCommMap( IntArray &map, int ( PNlDEIDynamicComunicator :: *cmp ) (int, int) )
+NlDEIDynamicComunicator :: sortCommMap( IntArray &map, int ( NlDEIDynamicComunicator :: *cmp ) (int, int) )
 {
     this->quickSortCommMap(map, 1, map.giveSize(), cmp);
 }
 
 
 void
-PNlDEIDynamicComunicator :: quickSortCommMap( IntArray &map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp ) (int, int) )
+NlDEIDynamicComunicator :: quickSortCommMap( IntArray &map, int l, int r, int ( NlDEIDynamicComunicator :: *cmp ) (int, int) )
 {
     if ( r <= l ) {
         return;
@@ -945,7 +945,7 @@ PNlDEIDynamicComunicator :: quickSortCommMap( IntArray &map, int l, int r, int (
 
 
 int
-PNlDEIDynamicComunicator :: quickSortPartition( IntArray &map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp ) (int, int) )
+NlDEIDynamicComunicator :: quickSortPartition( IntArray &map, int l, int r, int ( NlDEIDynamicComunicator :: *cmp ) (int, int) )
 {
     int i = l - 1, j = r;
     int v = map.at(r);
@@ -980,13 +980,13 @@ PNlDEIDynamicComunicator :: quickSortPartition( IntArray &map, int l, int r, int
 #undef GLOBNUM
 
 int
-PNlDEIDynamicComunicator :: DofManCmp(int i, int j)
+NlDEIDynamicComunicator :: DofManCmp(int i, int j)
 {
     return ( engngModel->giveDomain(1)->giveDofManager(i)->giveGlobalNumber() -
             engngModel->giveDomain(1)->giveDofManager(j)->giveGlobalNumber() );
 }
 int
-PNlDEIDynamicComunicator :: ElemCmp(int i, int j)
+NlDEIDynamicComunicator :: ElemCmp(int i, int j)
 {
     return ( engngModel->giveDomain(1)->giveElement(i)->giveGlobalNumber() -
             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );

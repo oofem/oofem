@@ -4,7 +4,7 @@
 bar02.oofem.out.0
 Parallel test of explicit oofem computation
 #
-PNlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all

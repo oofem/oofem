@@ -191,7 +191,6 @@ enum classType {
     StationaryFlowClass,
     LinearStabilityClass,
     StructuralEngngModelClass,
-    PNlDEIDynamicClass,
     AdaptiveLinearStaticClass,
     AdaptiveNonLinearStaticClass,
     StationaryTransportProblemClass,

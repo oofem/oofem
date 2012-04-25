@@ -439,19 +439,19 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: giveInternalForces", "Packing internal forces", this->giveRank() );
+        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: giveInternalForces", "Packing internal forces", this->giveRank() );
  #endif
 
         communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packInternalForces );
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: giveInternalForces", "Exchange of internal forces started", this->giveRank() );
+        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: giveInternalForces", "Exchange of internal forces started", this->giveRank() );
  #endif
 
         communicator->initExchange(InternalForcesExchangeTag);
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: giveInternalForces", "Receiving and unpacking internal forces started", this->giveRank() );
+        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: giveInternalForces", "Receiving and unpacking internal forces started", this->giveRank() );
  #endif
 
         communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );

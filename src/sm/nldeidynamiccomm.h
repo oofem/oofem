@@ -33,27 +33,27 @@
  */
 
 
-#ifndef pnldeidynamiccomm_h
-#define pnldeidynamiccomm_h
+#ifndef nldeidynamiccomm_h
+#define nldeidynamiccomm_h
 
 #ifdef __PARALLEL_MODE
 
 #include "communicator.h"
-#include "pnldeidynamic.h"
+#include "nldeidynamic.h"
 #include "error.h"
 
 namespace oofem {
 /**
- * Class representing communicator for PNlDEIDynamic engng model.
+ * Class representing communicator for NlDEIDynamic engng model.
  * It is attribute of pnlDeiDynamic Engng model.
  * Domain comunicator provides all services for communication with
  * associated remote domains. It manages several problem comunicators.
  */
-class PNlDEIDynamicComunicator : public Communicator< PNlDEIDynamic >
+class NlDEIDynamicComunicator : public Communicator< NlDEIDynamic >
 {
 protected:
     // setup mode
-    PNlDEIDynamicComunicatorMode mode;
+    NlDEIDynamicComunicatorMode mode;
 
 public:
     /**
@@ -63,9 +63,9 @@ public:
      * @param size #number of colaborating processes
      * @param mode comunicator mode.
      */
-    PNlDEIDynamicComunicator(PNlDEIDynamic *emodel, int rank, int size, PNlDEIDynamicComunicatorMode mode);
+    NlDEIDynamicComunicator(NlDEIDynamic *emodel, int rank, int size, NlDEIDynamicComunicatorMode mode);
     /// Destructor
-    virtual ~PNlDEIDynamicComunicator();
+    virtual ~NlDEIDynamicComunicator();
 
     /**
      * Service for setting up the communication patterns with other remote problems.
@@ -81,7 +81,7 @@ public:
      * @param problemComm domain comm which send map will be set
      * @param map send map
      */
-    int setProblemComunicatorToSendArry(ProblemComunicator< PNlDEIDynamic > *problemComm, IntArray &map);
+    int setProblemComunicatorToSendArry(ProblemComunicator< NlDEIDynamic > *problemComm, IntArray &map);
     /**
      * Assigns  given ToRecvMap  to given problem communicator.
      * Sorts map according to global entity (dofmanagers or element) numbers to ensure, that local and
@@ -91,7 +91,7 @@ public:
      * @param domainComm problem comm which Recv map will be set
      * @param map recv map
      */
-    int setProblemComunicatorToRecvArry(ProblemComunicator< PNlDEIDynamic > *problemComm, IntArray &map);
+    int setProblemComunicatorToRecvArry(ProblemComunicator< NlDEIDynamic > *problemComm, IntArray &map);
 
 private:
     /**
@@ -101,11 +101,11 @@ private:
      * @param cmp comparison function must return a negative value if first argument is less than the second,
      * zero if the arguments are equal, and a positive number otherwise.
      */
-    void sortCommMap( IntArray & map, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
+    void sortCommMap( IntArray & map, int ( NlDEIDynamicComunicator :: *cmp )( int, int ) );
     /// Implementation of Quiksort algorithm
-    void quickSortCommMap( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
+    void quickSortCommMap( IntArray & map, int l, int r, int ( NlDEIDynamicComunicator :: *cmp )( int, int ) );
     /// Partitioning used in quiksort
-    int quickSortPartition( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
+    int quickSortPartition( IntArray & map, int l, int r, int ( NlDEIDynamicComunicator :: *cmp )( int, int ) );
 
     /// Global dofManager number comparison function
     int DofManCmp(int, int);
@@ -130,4 +130,4 @@ private:
 };
 } // end namespace oofem
 #endif
-#endif // pnldeidynamiccomm_h
+#endif // nldeidynamiccomm_h

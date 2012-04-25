@@ -177,7 +177,6 @@
  #include "eigenvaluedynamic.h"
  #include "deidynamic.h"
  #include "nldeidynamic.h"
- #include "pnldeidynamic.h"
  #include "diidynamic.h"
  #include "incrementallinearstatic.h"
  #include "linearstability.h"
@@ -497,7 +496,6 @@ EngngModel *CreateUsrDefEngngModelOfType(const char *aClass, int number, EngngMo
         engngList["nonlinearstatic"]    = engngCreator< NonLinearStatic >;
         engngList["nonlineardynamic"]   = engngCreator< NonLinearDynamic >;
         engngList["nldeidynamic"]       = engngCreator< NlDEIDynamic >;
-        engngList["pnldeidynamic"]      = engngCreator< PNlDEIDynamic >;
         engngList["deidynamic"]         = engngCreator< DEIDynamic >;
         engngList["diidynamic"]         = engngCreator< DIIDynamic >;
         engngList["incrlinearstatic"]   = engngCreator< IncrementalLinearStatic >;
