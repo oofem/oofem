@@ -502,7 +502,7 @@ SparseMtrx *Skyline :: factorized()
     n = this->giveNumberOfRows();
 
     // report skyline statistics
-    OOFEM_LOG_INFO("Skyline info: neq is %d, nwk is %d\n", n, this->nwk);
+    OOFEM_LOG_DEBUG("Skyline info: neq is %d, nwk is %d\n", n, this->nwk);
 
     for ( k = 2; k <= n; k++ ) {
         /*  smycka pres sloupce matice  */
@@ -551,7 +551,7 @@ SparseMtrx *Skyline :: factorized()
     //printf ("Skyline info: user time consumed by factorization: %.2lfs\n", (clock()-tstart)/(double)CLOCKS_PER_SEC);
     oofem_timeval ut;
     getRelativeUtime(ut, tstart);
-    OOFEM_LOG_INFO( "Skyline info: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    OOFEM_LOG_DEBUG( "Skyline info: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
     // increment version

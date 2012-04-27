@@ -361,6 +361,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             previousIncrementOfDisplacementVector.at(j) =  velocityVector.at(j) * ( deltaT );
             displacementVector.at(j) -= previousIncrementOfDisplacementVector.at(j);
         }
+#ifdef VERBOSE
+        OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+#endif
         return;
     } // end of init step
 
@@ -513,7 +516,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     // call numerical model to solve arised problem - done localy here
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
+    OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
     for ( i = 1; i <= neq; i++ ) {

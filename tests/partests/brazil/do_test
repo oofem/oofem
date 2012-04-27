@@ -34,14 +34,40 @@ fi
 ln -s $1/bin/oofem  ./oofem
 ln -s $1/bin/poofem ./poofem
 
-./oofem -f brazil_2d_nl.oofem.in
-python ../../../tools/extractor.py -c -f brazil_2d_nl.oofem.in >> ${RESULT}
-mpirun -np 2 ./poofem -f brazil_2d_nl2.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_2d_nl2.oofem.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
-mpirun -np 4 ./poofem -f brazil_2d_nl4.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_2d_nl4.oofem.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
-mpirun -np 7 ./poofem -f brazil_2d_nl7.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_2d_nl7.oofem.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+FILENAME="brazil_2d_nl.oofem.in"
+INPUT="-f $FILENAME -ksp_rtol 1.e-15"
+echo ""
+echo "Running: ./oofem $INPUT"
+echo ""
+./oofem $INPUT
+python ../../../tools/extractor.py -c -f $FILENAME >> ${RESULT}
+
+FILENAME="brazil_2d_nl2.oofem.in"
+INPUT="-f $FILENAME -ksp_rtol 1.e-15 -ksp_type cg"
+NP="2"
+echo ""
+echo "Running: mpirun -np $NP ./poofem $INPUT"
+echo ""
+mpirun -np $NP ./poofem $INPUT
+for i in $FILENAME??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+
+FILENAME="brazil_2d_nl4.oofem.in"
+INPUT="-f $FILENAME -ksp_rtol 1.e-15 -ksp_type cg"
+NP="4"
+echo ""
+echo "Running: mpirun -np $NP ./poofem $INPUT"
+echo ""
+mpirun -np $NP ./poofem $INPUT
+for i in $FILENAME??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+
+FILENAME="brazil_2d_nl7.oofem.in"
+INPUT="-f $FILENAME -ksp_rtol 1.e-15 -ksp_type cg"
+NP="7"
+echo ""
+echo "Running: mpirun -np $NP ./poofem $INPUT"
+echo ""
+mpirun -np $NP ./poofem $INPUT
+for i in $FILENAME??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 
 rm *.oofem.out
 rm *.oofem.out.*

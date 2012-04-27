@@ -72,6 +72,9 @@
  #include <stdio.h>
  #include <string.h>
  #include <new>
+// For reading .petsc and .slepc
+ #include <fstream>
+ #include <iterator>
 #endif
 
 using namespace oofem;
@@ -83,7 +86,7 @@ void oofem_print_help();
 void oofem_print_version();
 void oofem_print_epilog();
 
-// Finalize PETSc SLEPc and MPI
+// Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
 
 /* Default oofem loggers */
@@ -98,10 +101,12 @@ int main(int argc, char *argv[])
 #endif
 
     int i;
-    int contextFlag = 0, inputFileFlag = 0, restartFlag = 0, adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
+    int contextFlag = 0, inputFileFlag = 0, restartFlag = 0,
+        adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
     int renumberFlag = 0;
     bool debugFlag = false;
     char inputFileName [ MAX_FILENAME_LENGTH + 10 ], buff [ MAX_FILENAME_LENGTH ];
+    std::vector<const char*> modulesArgs;
     EngngModel *problem = 0;
 
     int rank = 0;
@@ -119,55 +124,64 @@ int main(int argc, char *argv[])
         printf("%s\n", PRG_HEADER_SM);
     }
 
-#ifdef __PETSC_MODULE
-    PetscInitialize(& argc, & argv, PETSC_NULL, PETSC_NULL);
-#endif
-
-#ifdef __SLEPC_MODULE
-    SlepcInitialize(& argc, & argv, PETSC_NULL, PETSC_NULL);
-#endif
-
     //
     // check for options
     //
     if ( argc != 1 ) {
+        // Keep track of input read by OOFEM
+        int nRead = 0;
+        // argv[0] is not read by PETSc and SLEPc.
+        modulesArgs.push_back(argv[ 0 ]);
         for ( i = 1; i < argc; i++ ) {
             if ( ( strcmp(argv [ i ], "-context") == 0 ) || ( strcmp(argv [ i ], "-c") == 0 ) ) {
                 contextFlag = 1;
+                nRead++;
             } else if ( strcmp(argv [ i ], "-v") == 0 ) {
                 if ( rank == 0 ) {
                     oofem_print_version();
                 }
                 if ( argc == 2 ) {
-                    oofem_finalize_modules();
+#ifdef __USE_MPI
+                    MPI_Finalize();
+#endif
                     exit(EXIT_SUCCESS);     // exit if only "-v" option
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(inputFileName, argv [ i + 1 ]);
                     inputFileFlag = 1;
+                    nRead++;
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-r") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
                     restartFlag = 1;
                     restartStepInfo [ 0 ] = strtol(buff, ( char ** ) NULL, 10);
                     restartStepInfo [ 1 ] = 0;
+                    nRead++;
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
                 renumberFlag = 1;
+                nRead++;
             } else if ( strcmp(argv [ i ], "-ar") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
                     adaptiveRestartFlag = strtol(buff, ( char ** ) NULL, 10);
+                    nRead++;
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-l") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
                     int level = strtol(buff, ( char ** ) NULL, 10);
                     oofem_logger.setLogLevel(level);
                     oofem_errLogger.setLogLevel(level);
+                    nRead++;
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
@@ -178,7 +192,9 @@ int main(int argc, char *argv[])
 #ifndef __PARALLEL_MODE
                     oofem_errLogger.appendlogTo(buff);
 #endif
+                    nRead++;
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-qo") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
@@ -191,17 +207,27 @@ int main(int argc, char *argv[])
 #endif
                     // print header to redirected output
                     LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
+                    nRead++;
                 }
+                nRead++;
             } else if ( strcmp(argv [ i ], "-d") == 0 ) {
                 debugFlag = true;
+                nRead++;
+            }
+
+            if ( nRead == 0 ){
+                modulesArgs.push_back(argv[ i ]);
+            } else {
+                nRead--;
             }
         }
     } else {
         if ( rank == 0 ) {
             oofem_print_help();
         }
-
-        oofem_finalize_modules();
+#ifdef __USE_MPI
+        MPI_Finalize();
+#endif
         exit(EXIT_SUCCESS);
     }
 
@@ -214,10 +240,22 @@ int main(int argc, char *argv[])
         {
             fprintf(stderr, "\nInput file not specified\a\n\n");
         }
-
-        oofem_finalize_modules();
+#ifdef __USE_MPI
+        MPI_Finalize();
+#endif
         exit(EXIT_SUCCESS);
     }
+
+    int modulesArgc = modulesArgs.size();
+    char **modulesArgv = const_cast<char**>(&modulesArgs[0]);
+
+#ifdef __PETSC_MODULE
+    PetscInitialize(&modulesArgc, &modulesArgv, PETSC_NULL, PETSC_NULL);
+#endif
+
+#ifdef __SLEPC_MODULE
+    SlepcInitialize(&modulesArgc, &modulesArgv, PETSC_NULL, PETSC_NULL);
+#endif
 
 #ifdef __PARALLEL_MODE
     strcpy(fileName, inputFileName);
@@ -301,15 +339,13 @@ void oofem_print_version() {
     oofem_print_epilog();
 }
 
-void
-oofem_print_epilog() {
+void oofem_print_epilog() {
     printf("\n%s\n", OOFEM_COPYRIGHT);
     printf("This is free software; see the source for copying conditions.  There is NO\n");
     printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
 }
 
-void
-oofem_finalize_modules() {
+void oofem_finalize_modules() {
 #ifdef __PETSC_MODULE
     PetscFinalize();
 #endif

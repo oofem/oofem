@@ -268,7 +268,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     // call numerical model to solve arose problem
     //
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Solving ...\n");
+    OOFEM_LOG_INFO("\n\nSolving ...\n\n");
 #endif
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
     if ( !(s & NM_Success) ) {

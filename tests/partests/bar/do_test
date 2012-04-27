@@ -34,9 +34,20 @@ fi
 ln -s $1/bin/oofem  ./oofem
 ln -s $1/bin/poofem ./poofem
 
-./oofem -f bar.oofem.in -ksp_rtol 1.e-15
-python ../../../tools/extractor.py -c -f bar.oofem.in >> ${RESULT}
-mpirun -np 4 ./poofem -f bar.oofem.in -ksp_rtol 1.e-15
+FILENAME="bar.oofem.in"
+INPUT="-f $FILENAME"
+echo ""
+echo "Running: ./oofem $INPUT"
+echo ""
+./oofem $INPUT
+python ../../../tools/extractor.py -c -f $FILENAME >> ${RESULT}
+
+INPUT="$INPUT -ksp_rtol 1.e-15"
+NP="4"
+echo ""
+echo "Running: mpirun -np $NP ./poofem $INPUT" 
+echo ""
+mpirun -np $NP ./poofem $INPUT
 for i in *.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 
 rm *.oofem.out
