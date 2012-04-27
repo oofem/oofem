@@ -2,7 +2,7 @@ bar03.oofem.out
 dynamic relaxation of a spring
 #nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0
 #nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667
-pnldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667
+nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1

@@ -212,7 +212,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     if ( initFlag ) {
 #ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling stiffness matrix\n");
+        OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
 
         //
@@ -232,7 +232,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     }
 
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Assembling load\n");
+    OOFEM_LOG_DEBUG("Assembling load\n");
 #endif
 
     //

@@ -243,7 +243,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
     if ( initFlag ) {
 #ifdef VERBOSE
-        OOFEM_LOG_INFO("Assembling mass matrix\n");
+        OOFEM_LOG_DEBUG("Assembling mass matrix\n");
 #endif
 
         //
@@ -365,7 +365,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     } // end of init step
 
 #ifdef VERBOSE
-    OOFEM_LOG_INFO("Assembling right hand side\n");
+    OOFEM_LOG_DEBUG("Assembling right hand side\n");
 #endif
 
     for ( i = 1; i <= neq; i++ ) {
