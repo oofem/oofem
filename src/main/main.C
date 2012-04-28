@@ -246,8 +246,10 @@ int main(int argc, char *argv[])
         exit(EXIT_SUCCESS);
     }
 
+#if defined(__PETSC_MODULE) || defined(__SLEPC_MODULE)
     int modulesArgc = modulesArgs.size();
     char **modulesArgv = const_cast<char**>(&modulesArgs[0]);
+#endif
 
 #ifdef __PETSC_MODULE
     PetscInitialize(&modulesArgc, &modulesArgv, PETSC_NULL, PETSC_NULL);
