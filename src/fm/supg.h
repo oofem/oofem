@@ -86,9 +86,6 @@ protected:
     double lscale, uscale, dscale;
     /// Reynolds number.
     double Re;
-    /// Indicates if equation renumbering required.
-    bool renumberFlag;
-
 
     // material interface representation for multicomponent flows
     MaterialInterface *materialInterface;
@@ -142,7 +139,7 @@ public:
     virtual const char *giveClassName() const { return "SUPG"; }
     virtual classType giveClassID() const { return SUPGClass; }
 
-    fMode giveFormulation() { return TL; }
+    virtual fMode giveFormulation() { return TL; }
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
@@ -161,9 +158,6 @@ public:
     virtual bool requiresEquationRenumbering(TimeStep *tStep) { return renumberFlag; }
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
-
-    virtual int forceEquationNumbering(int i);
-    virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
 
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 

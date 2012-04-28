@@ -44,6 +44,8 @@
 #include "rigidarmnode.h"
 #include "elementside.h"
 #include "intarray.h"
+#include "generalbc.h"
+
 #ifndef __MAKEDEPEND
  #include <time.h>
  #include <set>
@@ -52,10 +54,7 @@
 namespace oofem {
 SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTable()
 {
-    //NumberOfNodes = 0;
     domain  = d;
-    //  Spine  = NULL;
-    //  BackSpine = NULL;
     WeightDistance = 1;
     WeightDegree = 2;
     SpineQuality  = Good;
@@ -68,39 +67,73 @@ SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTabl
 
 SloanGraph :: ~SloanGraph()
 {
-    //  delete Spine;
-    //  delete BackSpine;
+    dmans.clear(false); // Otherwise AList will delete the dof managers!
 }
 
 void SloanGraph :: initialize()
 {
-    int i, j, k, ielemnodes, ndofmans;
+    int i, j, k, ielemnodes, ielemintdmans, ndofmans;
     int nnodes = domain->giveNumberOfDofManagers();
     int nelems = domain->giveNumberOfElements();
+    int nbcs = domain->giveNumberOfBoundaryConditions();
     Element *ielem;
+    GeneralBoundaryCondition *ibc;
 
+    ///@todo Use dynaList for this first part instead (suboptimization?)
     this->nodes.growTo(nnodes);
+
+    // Add dof managers.
     for ( i = 1; i <= nnodes; i++ ) {
         SloanGraphNode *node = new SloanGraphNode(this, i);
         nodes.put(i, node);
+        dmans.put(i, domain->giveDofManager(i) );
     }
-
-    IntArray elemDofMans;
+    k = nnodes;
+    // Add element internal dof managers
     for ( i = 1; i <= nelems; i++ ) {
         ielem = domain->giveElement(i);
-        ndofmans = ielemnodes = ielem->giveNumberOfDofManagers();
-        elemDofMans.resize(ndofmans);
-        for ( j = 1; j <= ielemnodes; j++ ) {
-            elemDofMans.at(j) = ielem->giveDofManager(j)->giveNumber();
+        this->nodes.growTo(k+ielem->giveNumberOfInternalDofManagers());
+        for ( j = 1; j <= ielem->giveNumberOfInternalDofManagers(); ++j ) {
+            SloanGraphNode *node = new SloanGraphNode(this, i);
+            nodes.put(++k, node);
+            dmans.put(++k, ielem->giveInternalDofManager(i) );
         }
-
-        for ( j = 1; j <= ndofmans; j++ ) {
-            for ( k = j + 1; k <= ndofmans; k++ ) {
-                this->giveNode( elemDofMans.at(j) )->addNeighbor( elemDofMans.at(k) );
-                this->giveNode( elemDofMans.at(k) )->addNeighbor( elemDofMans.at(j) );
+    }
+    // Add boundary condition internal dof managers
+    for ( i = 1; i <= nbcs; i++ ) {
+        ibc = domain->giveBc(i);
+        if (ibc) {
+            this->nodes.growTo(k+ibc->giveNumberOfInternalDofManagers());
+            for ( j = 1; j <= ibc->giveNumberOfInternalDofManagers(); ++j ) {
+                SloanGraphNode *node = new SloanGraphNode(this, i);
+                nodes.put(++k, node);
+                dmans.put(++k, ibc->giveInternalDofManager(i) );
             }
         }
     }
+
+    IntArray connections;
+    for ( i = 1; i <= nelems; i++ ) {
+        ielem = domain->giveElement(i);
+        ielemnodes = ielem->giveNumberOfDofManagers();
+        ielemintdmans = ielem->giveNumberOfInternalDofManagers();
+        ndofmans = ielemnodes + ielemintdmans;
+        connections.resize(ndofmans);
+        for ( j = 1; j <= ielemnodes; j++ ) {
+            connections.at(j) = ielem->giveDofManager(j)->giveNumber();
+        }
+        for ( j = 1; j <= ielemintdmans; j++ ) {
+            connections.at(ielemnodes+j) = ielem->giveInternalDofManager(j)->giveNumber();
+        }
+        for ( j = 1; j <= ndofmans; j++ ) {
+            for ( k = j + 1; k <= ndofmans; k++ ) {
+                // Connect both ways
+                this->giveNode( connections.at(j) )->addNeighbor( connections.at(k) );
+                this->giveNode( connections.at(k) )->addNeighbor( connections.at(j) );
+            }
+        }
+    }
+    ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
     // loop over dof managers and test if there are some "slave" or rigidArm connection
     // if yes, such dependency is reflected in the graph by introducing additional
@@ -564,7 +597,6 @@ SloanGraph :: findTopPriorityInQueue()
 }
 
 
-
 int
 SloanGraph :: computeProfileSize()
 {
@@ -588,6 +620,24 @@ SloanGraph :: computeProfileSize()
 
     return ProfSize;
 }
+
+
+void
+SloanGraph :: askNewOptimalNumbering(TimeStep *tStep)
+{
+    DofManager *d;
+    int ndofs;
+    int ndmans = dmans.giveSize();
+
+    for ( int i = 1; i <= ndmans; ++i ) {
+        d = dmans.at( OptimalRenumberingTable.at(i) );
+        ndofs = d->giveNumberOfDofs();
+        for ( int j = 1; j <= ndofs; j++ ) {
+            d->giveDof(j)->askNewEquationNumber(tStep);
+        }
+    }
+}
+
 
 void
 SloanGraph :: writeRenumberingTable(FILE *file)

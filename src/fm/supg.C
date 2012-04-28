@@ -127,14 +127,6 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, alpha, IFT_SUPG_alpha, "alpha");
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_renumberflag, "renumberflag");
-    if ( val ) {
-        renumberFlag = true;
-    } else {
-        renumberFlag = false;
-    }
-
-    val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_scaleflag, "scaleflag");
     equationScalingFlag = val;
     if ( equationScalingFlag ) {
@@ -161,9 +153,9 @@ SUPG :: initializeFrom(InputRecord *ir)
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-	IntArray mask(3);
-	mask.at(1) = V_u; mask.at(2) = V_v; mask.at(3) = V_w;
-	MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask);
+        IntArray mask(3);
+        mask.at(1) = V_u; mask.at(2) = V_v; mask.at(3) = V_w;
+        MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask);
         fm->registerField(_velocityField, FT_Velocity, true);
 
         //fsflag = 0;
@@ -176,79 +168,6 @@ SUPG :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
-
-int
-SUPG :: forceEquationNumbering(int id)
-{
-    // forces equation renumbering for current time step
-    // intended mainly for problems with changes of static system
-    // during solution
-    // OUTPUT:
-    // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
-
-  int i, j, k, ndofs, nnodes, nelem;
-    DofManager *inode;
-    Element *elem;
-    Domain *domain = this->giveDomain(id);
-    TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
-    Dof *jDof;
-    DofIDItem type;
-
-    this->domainNeqs.at(id) = 0;
-    this->domainPrescribedNeqs.at(id) = 0;
-
-
-    nnodes = domain->giveNumberOfDofManagers();
-    nelem = domain->giveNumberOfElements();
-
-    // number first velocities
-    for ( i = 1; i <= nnodes; i++ ) {
-        inode = domain->giveDofManager(i);
-        ndofs = inode->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof  =  inode->giveDof(j);
-            type  =  jDof->giveDofID();
-            if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-    // and then pressures
-    for ( i = 1; i <= nnodes; i++ ) {
-        inode = domain->giveDofManager(i);
-        ndofs = inode->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jDof  =  inode->giveDof(j);
-            type  =  jDof->giveDofID();
-            if ( !( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) ) {
-                jDof->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-    for ( i = 1; i <= nelem; ++i ) {
-      elem = domain->giveElement(i);
-      for (k=1;k<=elem->giveNumberOfInternalDofManagers(); k++) {
-	ndofs = elem->giveInternalDofManager(k)->giveNumberOfDofs(); //define for element!!! overload for contact
-	for ( j = 1; j <= ndofs; j++ ) {
-	  elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
-	}
-      }
-    }
-
-
-
-    // invalidate element local copies of location arrays
-    for ( i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->invalidateLocationArray();
-    }
-
-    return domainNeqs.at(id);
-}
-
 
 
 double

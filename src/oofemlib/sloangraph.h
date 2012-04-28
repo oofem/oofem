@@ -42,6 +42,10 @@
 #include "dynalist.h"
 
 namespace oofem {
+
+class DofManager;
+class TimeStep;
+
 #define SLOAN_TIME_CHUNK 60
 /**
  * If defined, the support for Multiple subdomains is turned on.
@@ -81,6 +85,8 @@ private:
 
     /// List of graph nodes.
     AList< SloanGraphNode >nodes;
+    /// List of dof managers corresponding to nodes.
+    AList< DofManager >dmans;
     /// Start peripheral node.
     int startNode;
     /// End peripheral node.
@@ -141,6 +147,8 @@ public:
      * and returns the profile size.
      */
     int computeProfileSize();
+    /// Numbers all the DOFs according to the optimal renumbering found.
+    void askNewOptimalNumbering(TimeStep *tStep);
     /// Returns the optimal reverse renumbering table
     IntArray *giveOptimalRenumberingTable() { return & OptimalRenumberingTable; }
     void writeRenumberingTable(FILE *file);

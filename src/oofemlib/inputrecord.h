@@ -238,7 +238,6 @@ enum InputFieldType {
     IFT_SUPG_maxiter,
     IFT_SUPG_stopmaxiter,
     IFT_SUPG_fsflag,
-    IFT_SUPG_renumberflag,
 
     IFT_CylindricalALM_psi,
     IFT_CylindricalALM_maxiter,

@@ -153,7 +153,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 #endif
 
 #ifdef __PETSC_MODULE
-    petscContextList            = new AList< PetscContext >(0);
+    petscContextList = new AList< PetscContext >(0);
 #endif
 }
 
@@ -202,7 +202,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
 #endif
 
 #ifdef __PETSC_MODULE
-    petscContextList            = new AList< PetscContext >(0);
+    petscContextList = new AList< PetscContext >(0);
 #endif
 }
 
@@ -486,44 +486,9 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
 }
 
 
-
-/*
- * IntArray*  EngngModel :: GiveBanWidthVector () {
- * //
- * // Returns maximal column height for assembled characteristics matrix
- * // this method is implemented here, because some method may add some
- * // conditions in to system and this may results into increased number of
- * // equations.
- * //
- * int neq;
- *
- * neq = this -> giveNumberOfEquations ();
- * IntArray* mht = new IntArray (neq);
- * IntArray* loc;
- * int j,js,ieq,maxle ;
- *
- * for ( j =1 ; j<=neq; j++) mht->at(j)=INT_MAX ;          // initialize column height
- * int nelem = domain -> giveNumberOfElements() ;
- * for (int i = 1 ; i <= nelem ; i++ ) {
- *  loc = domain -> giveElement(i) -> giveLocationArray () ;
- *  js = loc -> giveSize() ;
- *  maxle = INT_MAX;
- *  for ( j = 1 ; j <= js ; j++ ) {
- *    ieq = loc->at(j);
- *    if(ieq != 0) maxle = min (maxle, ieq) ;
- *  }
- *  for ( j = 1 ; j <= js ; j++ ) {
- *    ieq = loc->at(j);
- *    if (ieq != 0) {
- *  mht->at(ieq) = min(maxle,mht->at(ieq));
- *    }
- *  }
- * }
- * return mht ;
- * }
- */
-
-int EngngModel :: giveNumberOfEquations(EquationID) {
+int
+EngngModel :: giveNumberOfEquations(EquationID)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -537,7 +502,9 @@ int EngngModel :: giveNumberOfEquations(EquationID) {
     return this->forceEquationNumbering();
 }
 
-int EngngModel :: giveNumberOfPrescribedEquations(EquationID) {
+int
+EngngModel :: giveNumberOfPrescribedEquations(EquationID)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -551,7 +518,9 @@ int EngngModel :: giveNumberOfPrescribedEquations(EquationID) {
     return numberOfPrescribedEquations;
 }
 
-int EngngModel :: giveNumberOfDomainEquations(int id, EquationID) {
+int
+EngngModel :: giveNumberOfDomainEquations(int id, EquationID)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -565,7 +534,10 @@ int EngngModel :: giveNumberOfDomainEquations(int id, EquationID) {
     return domainNeqs.at(id);
 }
 
-int EngngModel :: giveNumberOfPrescribedDomainEquations(int id, EquationID) {
+
+int
+EngngModel :: giveNumberOfPrescribedDomainEquations(int id, EquationID)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -599,7 +571,6 @@ EngngModel :: forceEquationNumbering(int id)
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
-
     nnodes = domain->giveNumberOfDofManagers();
     nelem  = domain->giveNumberOfElements();
     nbc    = domain->giveNumberOfBoundaryConditions();
@@ -612,13 +583,36 @@ EngngModel :: forceEquationNumbering(int id)
                 inode->giveDof(j)->askNewEquationNumber(currStep);
             }
         }
+        for ( i = 1; i <= nelem; ++i ) {
+            elem = domain->giveElement(i);
+            nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
+            for (k=1; k<=nnodes;k++) {
+                inode = elem->giveInternalDofManager(k);
+                ndofs = inode->giveNumberOfDofs();
+                for ( j = 1; j <= ndofs; j++ ) {
+                    inode->giveDof(j)->askNewEquationNumber(currStep);
+                }
+            }
+        }
+        // For special boundary conditions;
+        for ( i = 1; i <= nbc; ++i ) {
+            GeneralBoundaryCondition *bc = domain->giveBc(i);
+            nnodes = bc->giveNumberOfInternalDofManagers();
+            for (k=1; k<=nnodes; k++) {
+                inode = bc->giveInternalDofManager(k);
+                ndofs = inode->giveNumberOfDofs();
+                for ( j = 1; j <= ndofs; j++ ) {
+                    inode->giveDof(j)->askNewEquationNumber(currStep);
+                }
+            }
+        }
     } else {
         // invoke profile reduction
         int initialProfile, optimalProfile;
         //clock_t time_0 = this->getClock(), time_1;
         oofem_timeval tstart;
         getUtime(tstart);
-        OOFEM_LOG_INFO("\nRenumbering ... \n");
+        OOFEM_LOG_INFO("\nRenumbering DOFs with Sloan's algorithm...\n");
 
         SloanGraph graph(domain);
         graph.initialize();
@@ -629,49 +623,16 @@ EngngModel :: forceEquationNumbering(int id)
         graph.tryParameters(5, 1);
         graph.tryParameters(10, 1);
         optimalProfile = graph.giveOptimalProfileSize();
-        //FILE* renTableFile = fopen ("rentab.dat","w");
-        //graph.writeOptimalRenumberingTable (renTableFile);
-        IntArray *reverseRenTable = graph.giveOptimalRenumberingTable();
 
         oofem_timeval ut;
         getRelativeUtime(ut, tstart);
 
-        OOFEM_LOG_DEBUG( "done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+        OOFEM_LOG_DEBUG("done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
         OOFEM_LOG_DEBUG("Nominal profile %d (old) %d (new)\n", initialProfile, optimalProfile);
 
-        // undefine all dofs equation numbers
-        for ( i = 1; i <= nnodes; i++ ) {
-            inode = domain->giveDofManager( reverseRenTable->at(i) );
-            ndofs = inode->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                inode->giveDof(j)->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-    for ( i = 1; i <= nelem; ++i ) {
-        elem = domain->giveElement(i);
-        nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
-        for (k=1; k<=nnodes;k++) {
-            inode = elem->giveInternalDofManager(k);
-            ndofs = inode->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                inode->giveDof(j)->askNewEquationNumber(currStep);
-            }
-        }
-    }
-
-    // For special boundary conditions;
-    for ( i = 1; i <= nbc; ++i ) {
-        GeneralBoundaryCondition *bc = domain->giveBc(i);
-        nnodes = bc->giveNumberOfInternalDofManagers();
-        for (k=1; k<=nnodes; k++) {
-            inode = bc->giveInternalDofManager(k);
-            ndofs = inode->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                inode->giveDof(j)->askNewEquationNumber(currStep);
-            }
-        }
+        //FILE* renTableFile = fopen ("rentab.dat","w");
+        //graph.writeOptimalRenumberingTable (renTableFile);
+        graph.askNewOptimalNumbering(currStep);
     }
 
     // invalidate element local copies of location arrays
@@ -714,7 +675,6 @@ EngngModel :: forceEquationNumbering()
 
     return this->numberOfEquations;
 }
-
 
 
 void
