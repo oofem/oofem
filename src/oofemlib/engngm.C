@@ -561,7 +561,7 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int i, j, k, ndofs, nnodes, nelem, nbc;
+    int i, j, k, nnodes, nelem, nbc;
     DofManager *inode;
     Element *elem;
     Domain *domain = this->giveDomain(id);
@@ -577,33 +577,21 @@ EngngModel :: forceEquationNumbering(int id)
 
     if ( !this->renumberFlag ) {
         for ( i = 1; i <= nnodes; i++ ) {
-            inode = domain->giveDofManager(i);
-            ndofs = inode->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                inode->giveDof(j)->askNewEquationNumber(currStep);
-            }
+            domain->giveDofManager(i)->askNewEquationNumbers(currStep);
         }
         for ( i = 1; i <= nelem; ++i ) {
             elem = domain->giveElement(i);
             nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
-            for (k=1; k<=nnodes;k++) {
-                inode = elem->giveInternalDofManager(k);
-                ndofs = inode->giveNumberOfDofs();
-                for ( j = 1; j <= ndofs; j++ ) {
-                    inode->giveDof(j)->askNewEquationNumber(currStep);
-                }
+            for ( k = 1; k <= nnodes; k++ ) {
+                elem->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
         }
         // For special boundary conditions;
         for ( i = 1; i <= nbc; ++i ) {
             GeneralBoundaryCondition *bc = domain->giveBc(i);
             nnodes = bc->giveNumberOfInternalDofManagers();
-            for (k=1; k<=nnodes; k++) {
-                inode = bc->giveInternalDofManager(k);
-                ndofs = inode->giveNumberOfDofs();
-                for ( j = 1; j <= ndofs; j++ ) {
-                    inode->giveDof(j)->askNewEquationNumber(currStep);
-                }
+            for ( k = 1; k <= nnodes; k++ ) {
+                bc->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
         }
     } else {

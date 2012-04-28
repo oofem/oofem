@@ -166,6 +166,8 @@ public:
     /// @return Total number of dofs managed by receiver.
     int giveNumberOfDofs() const;
 
+    /// Renumbers all contained DOFs.
+    void askNewEquationNumbers(TimeStep *tStep);
     /**
      * Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
      * If receiver has only primary dofs, the answer is the size of dofArray.

@@ -355,6 +355,14 @@ void DofManager :: setNumberOfDofs(int _ndofs)
 }
 
 
+void DofManager :: askNewEquationNumbers(TimeStep *tStep)
+{
+    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
+        this->giveDof(i)->askNewEquationNumber(tStep);
+    }
+}
+
+
 int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
 {
     if ( !hasSlaveDofs ) {

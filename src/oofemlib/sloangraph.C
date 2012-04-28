@@ -625,16 +625,9 @@ SloanGraph :: computeProfileSize()
 void
 SloanGraph :: askNewOptimalNumbering(TimeStep *tStep)
 {
-    DofManager *d;
-    int ndofs;
     int ndmans = dmans.giveSize();
-
     for ( int i = 1; i <= ndmans; ++i ) {
-        d = dmans.at( OptimalRenumberingTable.at(i) );
-        ndofs = d->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            d->giveDof(j)->askNewEquationNumber(tStep);
-        }
+        dmans.at( OptimalRenumberingTable.at(i) )->askNewEquationNumbers(tStep);
     }
 }
 
