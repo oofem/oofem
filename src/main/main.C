@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/main/src/main.C,v 1.4.4.1 2004/04/05 15:19:41 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -128,14 +127,11 @@ int main(int argc, char *argv[])
     // check for options
     //
     if ( argc != 1 ) {
-        // Keep track of input read by OOFEM
-        int nRead = 0;
         // argv[0] is not read by PETSc and SLEPc.
         modulesArgs.push_back(argv[ 0 ]);
         for ( i = 1; i < argc; i++ ) {
             if ( ( strcmp(argv [ i ], "-context") == 0 ) || ( strcmp(argv [ i ], "-c") == 0 ) ) {
                 contextFlag = 1;
-                nRead++;
             } else if ( strcmp(argv [ i ], "-v") == 0 ) {
                 if ( rank == 0 ) {
                     oofem_print_version();
@@ -146,79 +142,64 @@ int main(int argc, char *argv[])
 #endif
                     exit(EXIT_SUCCESS);     // exit if only "-v" option
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(inputFileName, argv [ i + 1 ]);
                     inputFileFlag = 1;
-                    nRead++;
+                    i++;
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-r") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
                     restartFlag = 1;
                     restartStepInfo [ 0 ] = strtol(buff, ( char ** ) NULL, 10);
                     restartStepInfo [ 1 ] = 0;
-                    nRead++;
+                    i++;
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
                 renumberFlag = 1;
-                nRead++;
             } else if ( strcmp(argv [ i ], "-ar") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
                     adaptiveRestartFlag = strtol(buff, ( char ** ) NULL, 10);
-                    nRead++;
+                    i++;
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-l") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
                     int level = strtol(buff, ( char ** ) NULL, 10);
                     oofem_logger.setLogLevel(level);
                     oofem_errLogger.setLogLevel(level);
-                    nRead++;
+                    i++;
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
 #ifdef __PARALLEL_MODE
                     sprintf(fileName, "%s.%d", buff, rank);
                     oofem_errLogger.appendlogTo(fileName);
-#endif
-#ifndef __PARALLEL_MODE
+#else
                     oofem_errLogger.appendlogTo(buff);
 #endif
-                    nRead++;
+                    i++;
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-qo") == 0 ) {
                 if ( i + 1 < argc ) {
                     strcpy(buff, argv [ i + 1 ]);
 #ifdef __PARALLEL_MODE
                     sprintf(fileName, "%s.%d", buff, rank);
                     oofem_logger.appendlogTo(fileName);
-#endif
-#ifndef __PARALLEL_MODE
+#else
                     oofem_logger.appendlogTo(buff);
 #endif
                     // print header to redirected output
                     LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
-                    nRead++;
+                    i++;
                 }
-                nRead++;
             } else if ( strcmp(argv [ i ], "-d") == 0 ) {
                 debugFlag = true;
-                nRead++;
-            }
-
-            if ( nRead == 0 ){
+            } else { // Arguments not handled by OOFEM is to be passed to PETSc
                 modulesArgs.push_back(argv[ i ]);
-            } else {
-                nRead--;
             }
         }
     } else {
@@ -316,7 +297,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void oofem_print_help() {
+void oofem_print_help()
+{
     printf("\nOptions:\n\n");
     printf("  -v  prints oofem version\n");
     printf("  -f  (string) input file name\n");
@@ -336,12 +318,14 @@ void oofem_print_help() {
  #define HOST_TYPE "unknown"
 #endif
 
-void oofem_print_version() {
+void oofem_print_version()
+{
     printf("\n%s (%s, %s)\nof %s on %s\n", PRG_VERSION, HOST_TYPE, MODULE_LIST, __DATE__, HOST_NAME);
     oofem_print_epilog();
 }
 
-void oofem_print_epilog() {
+void oofem_print_epilog()
+{
     printf("\n%s\n", OOFEM_COPYRIGHT);
     printf("This is free software; see the source for copying conditions.  There is NO\n");
     printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
