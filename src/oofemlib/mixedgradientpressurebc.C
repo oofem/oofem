@@ -243,22 +243,24 @@ void MixedGradientPressureBC :: setPrescribedDeviatoricGradientFromVoigt(const F
 }
 
 
-void MixedGradientPressureBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+double MixedGradientPressureBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                     CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain)
 {
     if (type != ExternalForcesVector)
-        return;
+        return 0.0;
 
     if (eid == EID_MomentumBalance_ConservationEquation)
         eid = EID_MomentumBalance;
 
     if (eid != EID_MomentumBalance)
-        return;
+        return 0.0;
 
     int vol_loc = this->giveVolDof()->giveEquationNumber(s);
 
     double rve_size = this->domain->giveArea();
     answer.at(vol_loc) += rve_size*pressure;
+
+    return 0.0;
 }
 
 

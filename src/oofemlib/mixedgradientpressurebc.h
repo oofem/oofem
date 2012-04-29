@@ -144,9 +144,9 @@ public:
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain);
+    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, Domain *domain);
 
     virtual bool requiresActiveDofs() { return true; }
     virtual bool isPrimaryDof(ActiveDof *dof);

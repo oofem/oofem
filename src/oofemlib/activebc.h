@@ -134,10 +134,11 @@ public:
      * @param mode Mode of value.
      * @param s Numbering scheme.
      * @param domain Domain to assemble from.
+     * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain) {};
+    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, Domain *domain) { return 0.0; };
 
     /**
      * Gives a list of location arrays that will be assembled.

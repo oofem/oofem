@@ -799,6 +799,8 @@ protected:
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
+     * The return value is used to normalize the residual when checking for convergence in nonlinear problems.
+     * For parallel problems, the returned norm is also summed over all processes.
      * @param answer Assembled vector.
      * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
@@ -806,10 +808,11 @@ protected:
      * @param type Characteristic components of type type are requested.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @return Sum of element/node norm (squared) of assembled vector.
      */
-    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain);
+    double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                          CharType type, ValueModeType mode,
+                          const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
@@ -819,10 +822,11 @@ protected:
      * @param type Characteristic components of type type are requested.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @return Sum of element norm (squared) of assembled vector.
      */
-    virtual void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                        CharType type, ValueModeType mode,
-                        const UnknownNumberingScheme &s, Domain *domain);
+    virtual double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                                 CharType type, ValueModeType mode,
+                                                 const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -833,10 +837,11 @@ protected:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain);
+    double assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                      CharType type, ValueModeType mode,
+                                      const UnknownNumberingScheme &s, Domain *domain);
 
     /**
      * Assembles characteristic vector of required type from active boundary conditions.
@@ -848,10 +853,11 @@ protected:
      * from elements and assembled using prescribed eqn numbers.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain);
+    double assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                      CharType type, ValueModeType mode,
+                                      const UnknownNumberingScheme &s, Domain *domain);
 
 #ifdef __PARALLEL_MODE
     /**
