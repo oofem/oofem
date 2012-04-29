@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/plinearstatic.C,v 1.6.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -69,14 +68,11 @@ PLinearStatic :: initializeFrom(InputRecord *ir)
 }
 
 
-void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
+double PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                     CharType type, ValueModeType mode,
                                                     const UnknownNumberingScheme &s,
                                                     Domain *domain)
 {
-    if ( type != ExternalForcesVector ) {
-        return;
-    }
     /*
      * Assembles characteristic vector of required type into given vector.
      * Overloaded in order to properly handle nodal loading of shared DofManagers.
@@ -94,6 +90,7 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
 
     if ( type == ExternalForcesVector ) {
         DofManager *node;
+        double norm = 0.0;
         for ( i = 1; i <= nnode; i++ ) {
             node = domain->giveDofManager(i);
             node->giveCompleteLocationArray(loc, s);
@@ -105,10 +102,12 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
 
             if ( charVec.giveSize() ) {
                 answer.assemble(charVec, loc);
+                norm += charVec.computeSquaredNorm();
             }
         }
+        return norm;
     } else {
-        EngngModel :: assembleVectorFromDofManagers(answer, tStep, EID_MomentumBalance, type, mode, s, domain);
+        return EngngModel :: assembleVectorFromDofManagers(answer, tStep, EID_MomentumBalance, type, mode, s, domain);
     }
 }
 } // end namespace oofem

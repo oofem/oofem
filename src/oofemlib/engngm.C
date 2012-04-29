@@ -385,7 +385,9 @@ EngngModel :: initializeFrom(InputRecord *ir)
     }
 
     renumberFlag = false;
-    IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, IFT_EngngModel_renumberflag, "renumber");                // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, IFT_EngngModel_renumberFlag, "renumber");                // Macro
+    profileOpt = false;
+    IR_GIVE_OPTIONAL_FIELD(ir, profileOpt, IFT_EngngModel_profileOpt, "profileopt");                // Macro
     nMetaSteps   = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, IFT_EngngModel_nmsteps, "nmsteps");                // Macro
     nxfemman   = 0;
@@ -574,7 +576,7 @@ EngngModel :: forceEquationNumbering(int id)
     nelem  = domain->giveNumberOfElements();
     nbc    = domain->giveNumberOfBoundaryConditions();
 
-    if ( !this->renumberFlag ) {
+    if ( !this->profileOpt ) {
         for ( i = 1; i <= nnodes; i++ ) {
             domain->giveDofManager(i)->askNewEquationNumbers(currStep);
         }
@@ -640,6 +642,7 @@ EngngModel :: forceEquationNumbering()
     this->numberOfEquations = 0;
     this->numberOfPrescribedEquations = 0;
 
+    OOFEM_LOG_DEBUG("Renumbering dofs in all domains");
     for ( i = 1; i <= this->ndomains; i++ ) {
         domainNeqs.at(i) = 0;
         this->numberOfEquations += this->forceEquationNumbering(i);
@@ -1070,12 +1073,10 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
     localNorm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain);
     localNorm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain);
 #ifdef __PARALLEL_MODE
-    ebeNorm = this->givePetscContext(domain->giveNumber(), eid)->accumulate(localNorm);
-    return ebeNorm;
+    return this->givePetscContext(domain->giveNumber(), eid)->accumulate(localNorm);
 #else
     return localNorm;
 #endif
-    
 }
 
 

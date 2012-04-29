@@ -192,8 +192,10 @@ protected:
     IntArray domainNeqs;
     /// Number of prescribed equations per domain.
     IntArray domainPrescribedNeqs;
-    /// Renumbering flag.
+    /// Renumbering flag (renumbers equations after each step, necessary if Dirichlet BCs change).
     int renumberFlag;
+    /// Profile optimized numbering flag (using Sloan's algorithm).
+    int profileOpt;
     /// Equation numbering completed flag.
     int equationNumberingCompleted;
     /// Number of meta steps.
@@ -690,14 +692,14 @@ public:
      * value (dof will use its dictionary, does not asks back EngngModel) adds corresponding increment
      * and updates total value in dictionary.
      */
-    virtual int requiresUnknownsDictionaryUpdate() { return 0; }
+    virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
     /**
      * Returns true if equation renumbering is required for given solution step.
      * This may of course change the number of equation and in general there is no guarantee
      * that for a certain dof the same equation will be assigned. So the use of
      * DOF unknowns dictionaries is generally recommended.
      */
-    virtual bool requiresEquationRenumbering(TimeStep *) { return false; }
+    virtual bool requiresEquationRenumbering(TimeStep *tStep) { return renumberFlag; }
     //virtual int supportsBoundaryConditionChange () {return 0;}
     /**
      * Updates necessary values in Dofs unknown dictionaries.

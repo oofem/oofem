@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/plinearstatic.h,v 1.5.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -91,9 +90,9 @@ public:
      * @param type characterisctic components of type type are requsted
      * from dofManagers/elements and assembled.
      */
-    virtual void               assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
-                                                             CharType type, ValueModeType mode,
-                                                             const UnknownNumberingScheme &s, Domain *domain);
+    virtual double assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
+                                                 CharType type, ValueModeType mode,
+                                                 const UnknownNumberingScheme &s, Domain *domain);
 };
 } // end namespace oofem
 #endif

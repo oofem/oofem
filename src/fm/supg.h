@@ -106,7 +106,6 @@ public:
         consistentMassFlag = 0;
         equationScalingFlag = false;
         lscale = uscale = dscale = 1.0;
-        renumberFlag = false;
         materialInterface = NULL;
     }
     virtual ~SUPG() {
@@ -154,8 +153,6 @@ public:
     virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
     virtual double giveVariableScale(VarScaleType varId);
 
-    virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
-    virtual bool requiresEquationRenumbering(TimeStep *tStep) { return renumberFlag; }
     virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
 
