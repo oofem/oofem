@@ -561,8 +561,7 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int i, j, k, nnodes, nelem, nbc;
-    DofManager *inode;
+    int i, k, nnodes, nelem, nbc;
     Element *elem;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
@@ -1072,7 +1071,11 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
     localNorm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain);
 #ifdef __PARALLEL_MODE
     ebeNorm = this->givePetscContext(domain->giveNumber(), eid)->accumulate(localNorm);
+    return ebeNorm;
+#else
+    return localNorm;
 #endif
+    
 }
 
 
@@ -1252,6 +1255,8 @@ EngngModel :: updateDomainLinks()
 };
 
 
+
+
 contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // this procedure is used mainly for two reasons:
@@ -1272,11 +1277,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 //
 {
     contextIOResultType iores;
-    int i, serNum, closeFlag = 0;
-    Element *element;
-    Domain *domain;
-    GeneralBoundaryCondition* bc;
-    ErrorEstimator *ee;
+    int closeFlag = 0;
     FILE *file;
 
 
@@ -1321,57 +1322,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
-
-        // save domain serial number
-        serNum = domain->giveSerialNumber();
-        if ( !stream->write(& serNum, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        // nodes & sides and corresponding dofs
-        int nnodes = domain->giveNumberOfDofManagers();
-        for ( i = 1; i <= nnodes; i++ ) {
-            if ( ( iores = domain->giveDofManager(i)->saveContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
-
-        // elements and corresponding integration points
-        int nelem = domain->giveNumberOfElements();
-        for ( i = 1; i <= nelem; i++ ) {
-            element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
-            // skip remote elements (these are used as mirrors of remote elements on other domains
-            // when nonlocal constitutive models are used. They introduction is necessary to
-            // allow local averaging on domains without fine grain communication between domains).
-            if ( element->giveParallelMode() == Element_remote ) {
-                continue;
-            }
-
-#endif
-            if ( ( iores = element->saveContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
-
-	// store boundary conditions data
-	int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( i = 1; i <= nbc; i++ ) {
-            bc = domain->giveBc(i);
-            if ( ( iores = bc->saveContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
-
-
-        // store error estimator data
-        ee = this->giveDomainErrorEstimator(idomain);
-        if ( ee ) {
-            if ( ( iores = ee->saveContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
+        this->giveDomain(idomain)->saveContext(stream, mode, obj);
     }
 
 
@@ -1418,12 +1369,9 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 //
 {
     contextIOResultType iores;
-    int i, serNum, closeFlag = 0, istep, iversion;
+    int serNum, closeFlag = 0, istep, iversion;
     bool domainUpdated = false;
-    Element *element;
     Domain *domain;
-    GeneralBoundaryCondition* bc;
-    ErrorEstimator *ee;
     FILE *file;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
@@ -1460,7 +1408,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         delete previousStep;
     }
 
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime() - currentStep->giveTimeIncrement(),
+    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime ( ) - currentStep->giveTimeIncrement(),
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
@@ -1488,78 +1436,10 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
-
-        domainUpdated = false;
-        // restore domain serial number
-        if ( !stream->read(& serNum, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
+        serNum = domain->giveSerialNumber();
+        domain->restoreContext(stream, mode, obj);
         if ( serNum != domain->giveSerialNumber() ) {
-            OOFEM_LOG_INFO("deleting old domain\n");
-            domainList->remove(idomain);
-
-            // read corresponding domain
-            OOFEM_LOG_INFO("restoring domain %d.%d\n", idomain, serNum);
-            Domain *dNew = new Domain(idomain, serNum, this);
-            DataReader *domainDr = this->GiveDomainDataReader(1, serNum, contextMode_read);
-            if ( !dNew->instanciateYourself(domainDr) ) {
-                _error("initializeAdaptive: domain Instanciation failed");
-            }
-
-            delete domainDr;
-
-            domain = dNew;
-            domainList->put(idomain, dNew);
             domainUpdated = true;
-        }
-
-        //this->forceEquationNumbering (); - Equation numbers are stored too in dof contexts
-
-        // nodes & sides and corresponding dofs
-        int nnodes = domain->giveNumberOfDofManagers();
-        for ( i = 1; i <= nnodes; i++ ) {
-            if ( ( iores = domain->giveDofManager(i)->restoreContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
-
-        int nelem = domain->giveNumberOfElements();
-        for ( i = 1; i <= nelem; i++ ) {
-            element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
-            // skip remote elements (these are used as mirrors of remote elements on other domains
-            // when nonlocal constitutive models are used. They introduction is necessary to
-            // allow local averaging on domains without fine grain communication between domains).
-            if ( element->giveParallelMode() == Element_remote ) {
-                continue;
-            }
-
-#endif
-            if ( ( iores = element->restoreContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
-
-	// restore boundary conditions data
-	int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( i = 1; i <= nbc; i++ ) {
-            bc = domain->giveBc(i);
-            if ( ( iores = bc->restoreContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-        }
-
-        // restore error estimator data
-        ee = this->giveDomainErrorEstimator(idomain);
-        if ( domainUpdated ) {
-            ee->setDomain(domain);
-        }
-
-        if ( ee ) {
-            if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
         }
     }
 
@@ -1676,7 +1556,7 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 // returns nonzero on success
 //
 {
-    std::string fname = this->dataOutputFileName;
+    std::string fname = this->coreOutputFileName;
     char fext [ 100 ];
     sprintf(fext, ".domain.%d.%d.din", domainNum, domainSerNum);
     fname += fext;

@@ -45,6 +45,8 @@
 #include "engngm.h"
 #include "oofem_limits.h"
 #include "entityrenumberingscheme.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 #include "clock.h"
 #include "verbose.h"
@@ -63,6 +65,7 @@
 #include "xfemmanager.h"
 #include "topologydescription.h"
 #include "randomfieldgenerator.h"
+#include "errorestimator.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -82,7 +85,7 @@
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
-// Constructor. Creates a new domain.
+    // Constructor. Creates a new domain.
 {
     this->engineeringModel = e;
     this->number = n;
@@ -135,6 +138,7 @@ Domain :: ~Domain()
     if ( smoother ) {
         delete smoother;
     }
+
     if ( topology ) {
         delete topology;
     }
@@ -147,6 +151,51 @@ Domain :: ~Domain()
 #endif
 }
 
+void
+Domain :: clear()
+// Clear receiver
+{
+    elementList->clear();
+    dofManagerList->clear();
+    materialList->clear();
+    bcList->clear();
+    icList->clear();
+    loadTimeFunctionList->clear();
+    crossSectionList->clear();
+    nonlocalBarierList->clear();
+    randomFieldGeneratorList->clear();
+
+    if ( xfemManager ) {
+        xfemManager->clear();
+    }
+
+    if ( connectivityTable ) {
+        connectivityTable->reset();
+    }
+
+    if ( spatialLocalizer ) {
+        delete spatialLocalizer;
+        spatialLocalizer = NULL;
+    }
+
+    if ( smoother ) {
+        smoother->clear();
+    }
+
+    // bp: how to clear/reset topology data?
+    if ( topology ) {
+        delete topology;
+        topology = NULL;
+    }
+
+#ifdef __PARALLEL_MODE
+    if ( transactionManager ) {
+        delete transactionManager;
+        transactionManager = NULL;
+    }
+
+#endif
+}
 
 Element *
 Domain :: giveElement(int n)
@@ -255,8 +304,9 @@ Domain :: giveNode(int n)
     if ( !dofManagerList->includes(n) ) {
         _error2("giveNode: undefined dofManager (%d)", n);
     }
+
 #endif
-    node = dynamic_cast<Node*>(dofManagerList->at(n));
+    node = dynamic_cast< Node * >( dofManagerList->at(n) );
     if ( node == NULL ) {
         _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
     }
@@ -385,7 +435,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     int i, num;
-    std::string name, topologytype;
+    std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
     DofManager *node;
     Element *elem;
@@ -419,9 +469,9 @@ Domain :: instanciateYourself(DataReader *dr)
     VERBOSE_PRINT0("Instanciating domain ", this->number);
 #  endif
 
-    resolveDomainDofsDefaults(name.c_str());
+    resolveDomainDofsDefaults( name.c_str() );
     fprintf( outputStream, "Domain type: %s, default ndofs per node is %d\n\n\n",
-             name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
+            name.c_str(), giveDefaultNodeDofIDArry().giveSize() );
 
     // read output manager record
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
@@ -460,7 +510,7 @@ Domain :: instanciateYourself(DataReader *dr)
         // assign component number according to record order
         // component number (as given in input record) becomes label
         ( node = ( DofManager * )
-            ( DofManager(i + 1, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                 ( DofManager(i + 1, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
         if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
             // label does not exist yet
             dofManLabelMap [ num ] = i + 1;
@@ -473,7 +523,7 @@ Domain :: instanciateYourself(DataReader *dr)
 #else
         // component numbers as given in input record
         ( node = ( DofManager * )
-            ( DofManager(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                 ( DofManager(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nnode ) ) {
@@ -504,7 +554,7 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
 #ifdef __ENABLE_COMPONENT_LABELS
-        elem = Element(i + 1, this).ofType(name.c_str());
+        elem = Element(i + 1, this).ofType( name.c_str() );
         elem->initializeFrom(ir);
 
         if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
@@ -518,7 +568,7 @@ Domain :: instanciateYourself(DataReader *dr)
         elementList->put(i + 1, elem);
 #else
         ( elem = ( Element * )
-            ( Element(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                 ( Element(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nelem ) ) {
@@ -547,7 +597,7 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( crossSection  = ( CrossSection * )
-            ( CrossSection(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                          ( CrossSection(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > ncrossSections ) ) {
@@ -576,7 +626,7 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( mat  = ( Material * )
-            ( Material(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                 ( Material(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nmat ) ) {
@@ -668,7 +718,7 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( load = ( GeneralBoundaryCondition * )
-            ( GeneralBoundaryCondition(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                 ( GeneralBoundaryCondition(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nload ) ) {
@@ -730,7 +780,7 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         ( ltf  = ( LoadTimeFunction * )
-                 ( LoadTimeFunction(num, this).ofType(name.c_str()) ) )->initializeFrom(ir);
+                 ( LoadTimeFunction(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {
@@ -765,13 +815,15 @@ Domain :: instanciateYourself(DataReader *dr)
 
 #endif
     this->topology = NULL;
-    if (topologytype.length() > 0) {
+    if ( topologytype.length() > 0 ) {
         this->topology = CreateUsrDefTopologyOfType(topologytype.c_str(), this);
-        if (!this->topology) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype.c_str());
+        if ( !this->topology ) {
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype.c_str() );
         }
+
         return this->topology->instanciateYourself(dr);
     }
+
     return 1;
 }
 
@@ -862,11 +914,11 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_w;
         defaultNodeDofIDArry.at(3) = R_v;
-    } else if  (dType == _2dLatticeMode) {
-      defaultNodeDofIDArry.resize (3);
-      defaultNodeDofIDArry.at(1)=D_u;
-      defaultNodeDofIDArry.at(2)=D_v;
-      defaultNodeDofIDArry.at(3)=R_w;
+    } else if  ( dType == _2dLatticeMode ) {
+        defaultNodeDofIDArry.resize(3);
+        defaultNodeDofIDArry.at(1) = D_u;
+        defaultNodeDofIDArry.at(2) = D_v;
+        defaultNodeDofIDArry.at(3) = R_w;
     } else if  ( dType == _HeatTransferMode ) {
         defaultNodeDofIDArry.resize(1);
         defaultNodeDofIDArry.at(1) = T_f;
@@ -919,7 +971,6 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
 // and also resolves default dof mask according to domain type.
 //
 {
-
     if ( !strncasecmp(typeName, "2dplanestressrot", 16) ) {
         dType = _2dPlaneStressRotMode;
     } else if ( !strncasecmp(typeName, "2dplanestress", 12) ) {
@@ -939,9 +990,8 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
     } else if  ( !strncasecmp(typeName, "2dbeam", 6) ) {
         dType = _2dBeamMode;
     } else if  ( !strncasecmp(typeName, "2dlattice", 9) ) {
-      dType = _2dLatticeMode;
-    }
-    else if  ( !strncasecmp(typeName, "heattransfer", 11) ) {
+        dType = _2dLatticeMode;
+    } else if  ( !strncasecmp(typeName, "heattransfer", 11) )   {
         dType = _HeatTransferMode;
     } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
@@ -952,10 +1002,9 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
     } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
-      _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
-      return;
+        _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
+        return;
     }
-
 }
 
 
@@ -1017,6 +1066,7 @@ Domain :: setSmoother(NodalRecoveryModel *smoother, bool destroyOld)
     if ( destroyOld && this->smoother ) {
         delete this->smoother;
     }
+
     this->smoother = smoother;
 }
 
@@ -1027,6 +1077,7 @@ Domain :: setTopology(TopologyDescription *topo, bool destroyOld)
     if ( destroyOld && this->topology ) {
         delete this->topology;
     }
+
     this->topology = topo;
 }
 
@@ -1216,18 +1267,20 @@ Domain :: checkConsistency()
 double Domain :: giveArea()
 {
     double area = 0.0;
-    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
         area += this->giveElement(i)->computeArea();
     }
+
     return area;
 }
 
 double Domain :: giveVolume()
 {
     double volume = 0.0;
-    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
         volume += this->giveElement(i)->computeVolume();
     }
+
     return volume;
 }
 
@@ -1235,6 +1288,158 @@ ErrorEstimator *
 Domain :: giveErrorEstimator() {
     return engineeringModel->giveDomainErrorEstimator(this->number);
 }
+
+
+
+contextIOResultType
+Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    int i, serNum;
+    Element *element;
+    GeneralBoundaryCondition *bc;
+    ErrorEstimator *ee;
+
+    // save domain serial number
+    serNum = this->giveSerialNumber();
+    if ( !stream->write(& serNum, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    // nodes & sides and corresponding dofs
+    int nnodes = this->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
+        if ( ( iores = this->giveDofManager(i)->saveContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    // elements and corresponding integration points
+    int nelem = this->giveNumberOfElements();
+    for ( i = 1; i <= nelem; i++ ) {
+        element = this->giveElement(i);
+#ifdef __PARALLEL_MODE
+        // skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. They introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
+#endif
+        if ( ( iores = element->saveContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    // store boundary conditions data
+    int nbc = this->giveNumberOfBoundaryConditions();
+    for ( i = 1; i <= nbc; i++ ) {
+        bc = this->giveBc(i);
+        if ( ( iores = bc->saveContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    // store error estimator data
+    ee = this->giveErrorEstimator();
+    if ( ee ) {
+        if ( ( iores = ee->saveContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    int i, serNum;
+    bool domainUpdated = false;
+    Element *element;
+    GeneralBoundaryCondition *bc;
+    ErrorEstimator *ee;
+
+    domainUpdated = false;
+    serNum = this->giveSerialNumber();
+    // restore domain serial number
+    if ( !stream->read(& this->serialNumber, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( serNum != this->giveSerialNumber() ) {
+        // read corresponding domain
+        OOFEM_LOG_INFO( "restoring domain %d.%d\n", this->number, this->giveSerialNumber() );
+        DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
+        this->clear();
+
+        if ( !this->instanciateYourself(domainDr) ) {
+            _error("initializeAdaptive: domain Instanciation failed");
+        }
+
+        delete domainDr;
+        domainUpdated = true;
+    }
+
+    // nodes & sides and corresponding dofs
+    int nnodes = this->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
+        if ( ( iores = this->giveDofManager(i)->restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    int nelem = this->giveNumberOfElements();
+    for ( i = 1; i <= nelem; i++ ) {
+        element = this->giveElement(i);
+#ifdef __PARALLEL_MODE
+        // skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. They introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
+#endif
+        if ( ( iores = element->restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    // restore boundary conditions data
+    int nbc = this->giveNumberOfBoundaryConditions();
+    for ( i = 1; i <= nbc; i++ ) {
+        bc = this->giveBc(i);
+        if ( ( iores = bc->restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    // restore error estimator data
+    ee = this->giveErrorEstimator();
+    if ( domainUpdated ) {
+        ee->setDomain(this);
+    }
+
+    if ( ee ) {
+        if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    if ( domainUpdated ) {
+        if ( this->smoother ) {
+            this->smoother->init();
+        }
+    }
+
+    return CIO_OK;
+}
+
+
 
 
 #ifdef __PARALLEL_MODE
@@ -1444,8 +1649,8 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
     std :: map< int, DofManager * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
@@ -1465,8 +1670,8 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
 {
     std :: map< int, Element * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = elementMap.begin(); it != elementMap.end(); it++ ) {
@@ -1571,6 +1776,7 @@ Domain :: setXfemManager(XfemManager *xfemManager)
 {
     this->xfemManager = xfemManager;
 }
+
 
 
 #endif

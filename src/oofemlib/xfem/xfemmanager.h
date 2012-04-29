@@ -126,6 +126,8 @@ public:
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
     /// Geometry update; calls individual enrichment item updateGeometry method.
     void updateGeometry(TimeStep *tStep);
+    /// Clear the receiver
+    void clear();
 
 protected:
     // Changes dofIdPos to next index.

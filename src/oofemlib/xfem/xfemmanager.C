@@ -84,6 +84,29 @@ XfemManager :: ~XfemManager()
     delete fictPosition;
 }
 
+void
+XfemManager :: clear()
+{
+    delete enrichmentItemList;
+    enrichmentItemList = NULL;
+
+    delete geometryList;
+    geometryList = NULL;
+
+    delete enrichmentFunctionList;
+    enrichmentFunctionList = NULL;
+
+    delete fictPosition;
+    fictPosition = NULL;
+
+    numberOfEnrichmentItems = 0;
+    numberOfEnrichmentFunctions = 0;
+    numberOfGeometryItems = 0;
+    dofIdPos = 0;
+}
+
+
+
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
 void XfemManager :: getInteractedEI(IntArray &answer, Element *elem) {
@@ -229,7 +252,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int i;
-    std::string name;
+    std :: string name;
     EnrichmentItem *ei;
     EnrichmentFunction *ef;
     BasicGeometry *ge;
@@ -246,7 +269,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
         ef = CreateUsrDefEnrichmentFunction( name.c_str(), i + 1, emodel->giveDomain(1) );
         if ( ef == NULL ) {
-            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment function (%s)", name.c_str());
+            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
         }
 
         enrichmentFunctionList->put(i + 1, ef);
@@ -261,10 +284,10 @@ int XfemManager :: instanciateYourself(DataReader *dr)
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ge = CreateUsrDefGeometry(name.c_str());
+        ge = CreateUsrDefGeometry( name.c_str() );
 
         if ( ge == NULL ) {
-            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown geometry (%s)", name.c_str());
+            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown geometry (%s)", name.c_str() );
         }
 
         geometryList->put(i + 1, ge);
@@ -283,7 +306,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei = CreateUsrDefEnrichmentItem( name.c_str(), i + 1, this, emodel->giveDomain(1) );
 
         if ( ei == NULL ) {
-            OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str());
+            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
         }
 
 
@@ -312,7 +335,7 @@ DofIDItem XfemManager :: allocateNewDofID()
         dofIdPos++;
     }
 
-    return (DofIDItem)answer;
+    return ( DofIDItem ) answer;
 }
 
 void XfemManager :: updateIntegrationRule()

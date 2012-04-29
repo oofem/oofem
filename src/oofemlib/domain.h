@@ -375,7 +375,42 @@ public:
     void setTopology(TopologyDescription *topo, bool destroyOld = true);
     /// Clear all boundary conditions.
     void clearBoundaryConditions();
+    /// Clear receiver.
+    void clear();
     //@}
+    /**
+     * Stores the domain state to output stream. Stores recursively the state of all
+     * managed objects, like DofManagers and Elements.
+     * Stored context is associated with current time step. One time step can have only
+     * one associated context. Multiple call to saveContext within same time step
+     * override previously saved context for this step.
+     * By default the stream parameter is used to store data and is not closed.
+     * If stream is NULL, new file descriptor is created and this must be also closed at the end.
+     * @param stream Context stream. If NULL then new file descriptor will be opened and closed
+     * at the end else the stream given as parameter will be used and not closed at the end.
+     * @param mode Determines amount of info in stream.
+     * @param obj Void pointer to an int array containing two values:time step number and
+     * version of a context file to be restored.
+     * @return contextIOResultType.
+     * @exception ContextIOERR If error encountered.
+     */
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /**
+     * Restores the domain state from output stream. Restores recursively the state of all
+     * managed objects, like DofManagers and Elements.
+     * Each context is associated with unique time step. Only one context per time step is
+     * allowed. Restore context function will restore such context, which is related
+     * (through its step number) to time step number and version given in obj parameter.
+     * Restoring context will change current time step in order to correspond to newly restored
+     * context.
+     * @param stream Context file.
+     * @param mode Determines amount of info in stream.
+     * @param obj Void pointer to an int array containing two values:time step number and
+     * version of a context file to be restored.
+     * @return contextIOResultType.
+     * @exception ContextIOERR exception if error encountered.
+     */
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Returns default DofID array which defines physical meaning of particular DOFs.
      * of nodal dofs. Default values are determined using current domain type.

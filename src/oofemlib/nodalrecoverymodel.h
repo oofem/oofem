@@ -58,10 +58,10 @@ class TimeStep;
  * The base class for all recovery models, which perform nodal averaging or projection
  * processes for internal variables typically stored in integration points.
  *
- * The recovery can be performed independently on regions of the domain to account for potential discontinuity 
- * of recovered variable over region boundaries. To make this concept more general, the 
+ * The recovery can be performed independently on regions of the domain to account for potential discontinuity
+ * of recovered variable over region boundaries. To make this concept more general, the
  * virtual regions are introduced. The idea is that several real regions can map to a single virtual region.
- * The mapping is defined by so called virtualRegionMap. The whole domain recovery can be 
+ * The mapping is defined by so called virtualRegionMap. The whole domain recovery can be
  * obtained by a single virtual region to which all real regions map.
  *
  * The NodalRecoveryModel class provides common array of nodal dictionaries, where
@@ -70,10 +70,10 @@ class TimeStep;
 class NodalRecoveryModel
 {
 public:
-    enum NodalRecoveryModelType { NRM_NodalAveraging = 0, NRM_ZienkiewiczZhu = 1,  NRM_SPR = 2};
+    enum NodalRecoveryModelType { NRM_NodalAveraging = 0, NRM_ZienkiewiczZhu = 1,  NRM_SPR = 2 };
 
 protected:
-    typedef TDictionary< int, FloatArray >vectorDictType;
+    typedef TDictionary< int, FloatArray > vectorDictType;
     /**
      * Array of nodal dictionaries, containing nodal values for each region.
      * The region id is dictionary key to corresponding values.
@@ -102,9 +102,9 @@ protected:
      */
     // AList<IntArray> regionValueMaps;
     /**
-     * Number of virtual regions, if positive. 
+     * Number of virtual regions, if positive.
      * When equals to zero a single virtual region, to which all real regions map, is assumed (whole domain recovery)
-     * If negative, real regions are used instead. 
+     * If negative, real regions are used instead.
      */
     int numberOfVirtualRegions;
     /**
@@ -139,6 +139,13 @@ public:
      * @return nonzero if o.k.
      */
     virtual int clear();
+    /**
+     * Initializes the receiver. Called form constructor, but when domain changes,
+     * init call necessary to update data structucture.
+     * @return nonzero if o.k.
+     */
+    int init();
+
     /**
      * Returns vector of recovered values for given node and region.
      * @param ptr Pointer to recovered values at node, NULL if not present.
@@ -183,11 +190,11 @@ public:
      * when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over
      * real regions is used.
      * @param vrmap When nvr positive, it defines the mapping from real (true) regions to virtual regions. The size of this array
-     * should equal to number of true regions and values should be in range <1, nvr>. When nvr is zero or negative, this parameter 
+     * should equal to number of true regions and values should be in range <1, nvr>. When nvr is zero or negative, this parameter
      * is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative value causes
      * region to be ignored.
      */
-    void setRecoveryMode(int nvr, const IntArray& vrmap);
+    void setRecoveryMode(int nvr, const IntArray &vrmap);
     /**
      * Returns element region number. If virtual region mapping is active, the element virtual region
      * is returned (using map) instead of real element region number.
@@ -196,10 +203,9 @@ public:
     /**
      * Returns number of recovery regions.
      */
-    int giveNumberOfVirtualRegions() {return this->numberOfVirtualRegions;}
+    int giveNumberOfVirtualRegions() { return this->numberOfVirtualRegions; }
 
 protected:
-    int init();
     /**
      * Same as public giveNodalVector,but returns non-const pointer.
      */
@@ -222,7 +228,6 @@ protected:
      */
     int updateRegionRecoveredValues(const int ireg, const IntArray &regionNodalNumbers,
                                     int regionValSize, const FloatArray &rhs);
-
 };
 } // end namespace oofem
 #endif // nodalrecoverymodel_h
