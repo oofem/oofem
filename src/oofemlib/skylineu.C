@@ -704,6 +704,21 @@ SkylineUnsym :: printStatistics() const
 }
 
 
+void
+SkylineUnsym :: writeToFile(const char* fname) const
+{
+    FILE *file = fopen(fname,"w");
+    FloatMatrix copy;
+    this->toFloatMatrix(copy);
+    for ( int i = 1; i <= nRows; ++i ) {
+        for ( int j = 1; j <= nColumns; ++j ) {
+            fprintf(file, "%.16e ", copy.at(i, j) );
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
+}
+
 
 void
 SkylineUnsym :: printYourself() const

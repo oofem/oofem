@@ -182,6 +182,7 @@ public:
     void toFloatMatrix(FloatMatrix &answer) const;
     /// Prints receiver to stdout.
     void printYourself() const;
+    void writeToFile(const char* fname) const;
     int  giveAllocatedSize() { return nwk; }
 
     SparseMtrxType giveType() const { return SMT_Skyline; }

@@ -93,6 +93,7 @@ public:
     void toFloatMatrix(FloatMatrix &answer) const;
     virtual void printYourself() const;
     virtual void printStatistics() const;
+    virtual void writeToFile(const char* fname) const;
     SparseMtrxType giveType() const { return SMT_SkylineU; }
     bool isAsymmetric() const { return true; }
 

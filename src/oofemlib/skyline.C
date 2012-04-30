@@ -629,6 +629,21 @@ void Skyline :: printYourself() const
 }
 
 
+void Skyline :: writeToFile(const char* fname) const
+{
+    FILE *file = fopen(fname,"w");
+    FloatMatrix copy;
+    this->toFloatMatrix(copy);
+    for ( int i = 1; i <= nRows; ++i ) {
+        for ( int j = 1; j <= nColumns; ++j ) {
+            fprintf(file, "%10.3e  ", copy.at(i, j) );
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
+}
+
+
 void Skyline :: zero()
 {
     // Returns the receiver with all coefficients set to zero.
