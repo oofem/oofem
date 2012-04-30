@@ -147,6 +147,8 @@ public:
     virtual int giveNumberOfDomainEquations(int, EquationID);
     virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
 
+    virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
+
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
 

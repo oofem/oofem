@@ -692,7 +692,7 @@ public:
      * value (dof will use its dictionary, does not asks back EngngModel) adds corresponding increment
      * and updates total value in dictionary.
      */
-    virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
+    virtual int requiresUnknownsDictionaryUpdate() { return false; }
     /**
      * Returns true if equation renumbering is required for given solution step.
      * This may of course change the number of equation and in general there is no guarantee
