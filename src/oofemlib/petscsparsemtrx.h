@@ -71,7 +71,7 @@ public:
     PetscSparseMtrx() : SparseMtrx(),
         mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true)  {}
 
-    ~PetscSparseMtrx() {
+    virtual ~PetscSparseMtrx() {
         MatDestroy(&this->mtrx);
         if ( this->kspInit ) {
             KSPDestroy(&this->ksp);
@@ -103,6 +103,8 @@ public:
     virtual void printYourself() const;
     virtual SparseMtrxType  giveType() const { return SMT_PetscMtrx; }
     virtual bool isAsymmetric() const { return !symmFlag; }
+
+    virtual void writeToFile(const char* fname) const;
 
     // Internals (should be documented)
     Mat *giveMtrx() { return & this->mtrx; }

@@ -547,6 +547,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
     MatSetType(mtrx, MATSEQAIJ);
     //MatSetType(mtrx, MATSBAIJ);
+    //MatSetType(mtrx, MATDENSE);
     MatSetFromOptions(mtrx);
 
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
@@ -705,5 +706,15 @@ PetscSparseMtrx :: printYourself() const
     PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
 }
+
+void
+PetscSparseMtrx :: writeToFile(const char* fname) const
+{
+    PetscViewer viewer;
+    PetscViewerASCIIOpen(PETSC_COMM_WORLD, fname, &viewer);
+    MatView(this->mtrx, viewer);
+    PetscViewerDestroy(&viewer);
+}
+
 } // end namespace oofem
 #endif //ifdef __PETSC_MODULE
