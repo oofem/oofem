@@ -362,12 +362,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     // create PETSc mat
     MatCreate(PETSC_COMM_SELF, & mtrx);
-    // To allow the insertion of values using MatSetValues in column major order
-    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
-    MatSetType(mtrx, MATSEQAIJ);
-    //MatSetType(mtrx, MATSEQSBAIJ);
+    //MatSetType(mtrx, MATSEQAIJ);
+    MatSetType(mtrx, MATSEQSBAIJ);
     MatSetFromOptions(mtrx);
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
 	//The incompatible preallocations are ignored automatically.
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
@@ -474,6 +473,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         MatSetFromOptions(mtrx);
+        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
         MatMPIAIJSetPreallocation(mtrx, 0, d_nnz.givePointer(), 0, o_nnz.givePointer());
         //MatMPIBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer(), onz, onnz );
         //MatMPISBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer(), onz, onnz );
@@ -549,6 +549,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     //MatSetType(mtrx, MATSBAIJ);
     //MatSetType(mtrx, MATDENSE);
     MatSetFromOptions(mtrx);
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
     MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() );
