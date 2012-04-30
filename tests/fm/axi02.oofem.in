@@ -641,7 +641,7 @@ newtonianfluid 1 d 1.0 mu 1.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue -1.0
 #zero velocity (wall) condition
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0
-#pressure 
+#pressure
 BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.0
 

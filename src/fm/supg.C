@@ -421,8 +421,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-      this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-					EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // corrector
@@ -453,11 +453,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	    this->assemble( lhs, tStep, EID_MomentumBalance, BCLhsTerm_MB,
-	                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	    this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, BCLhsPressureTerm_MB,
-	                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	    // conservation eq part
+            this->assemble( lhs, tStep, EID_MomentumBalance, BCLhsTerm_MB,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, BCLhsPressureTerm_MB,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            // conservation eq part
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC,
@@ -554,29 +554,29 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
         this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // check convergence and repeat iteration if desired
-	rnorm_mb = rnorm_mc = 0.0;
-	for ( i = 1; i <= nnodes; i++ ) {
-	  inode = this->giveDomain(1)->giveDofManager(i);
-	  ndofs = inode->giveNumberOfDofs();
-	  for ( j = 1; j <= ndofs; j++ ) {
-            jDof  =  inode->giveDof(j);
-            type  =  jDof->giveDofID();
-	    if ((jj = jDof->__giveEquationNumber())) {
-	      val = rhs.at(jj);
-	      if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-		rnorm_mb+=val*val;
-	      } else {
-		rnorm_mc+=val*val;
-	      }
-	    }
-	  }
-	}
-	rnorm_mb=sqrt(rnorm_mb);
-	rnorm_mc=sqrt(rnorm_mc);
+        rnorm_mb = rnorm_mc = 0.0;
+        for ( i = 1; i <= nnodes; i++ ) {
+            inode = this->giveDomain(1)->giveDofManager(i);
+            ndofs = inode->giveNumberOfDofs();
+            for ( j = 1; j <= ndofs; j++ ) {
+                jDof  =  inode->giveDof(j);
+                type  =  jDof->giveDofID();
+                if ((jj = jDof->__giveEquationNumber())) {
+                    val = rhs.at(jj);
+                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+                        rnorm_mb+=val*val;
+                    } else {
+                        rnorm_mc+=val*val;
+                    }
+                }
+            }
+        }
+        rnorm_mb=sqrt(rnorm_mb);
+        rnorm_mc=sqrt(rnorm_mc);
 
         rnorm = rhs.computeNorm();
 
@@ -588,7 +588,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         if ( requiresUnknownsDictionaryUpdate() ) {
             OOFEM_LOG_INFO("%-10d       n/a       %-15e %-15e\n", nite, rnorm, _absErrResid);
         } else {
-	  OOFEM_LOG_INFO("%-10d %-15e %-15e (%-15e, %-15e) %-15e\n", nite, err, rnorm, rnorm_mb, rnorm_mc, _absErrResid);
+            OOFEM_LOG_INFO("%-10d %-15e %-15e (%-15e, %-15e) %-15e\n", nite, err, rnorm, rnorm_mb, rnorm_mc, _absErrResid);
         }
 
         if ( 0 ) {
@@ -1150,20 +1150,20 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.add(h);
-	eptr->giveCharacteristicMatrix(m1, BCLhsTerm_MB, tStep);
-	h.beProductOf(m1, v);
-	answer.add(h);
+        eptr->giveCharacteristicMatrix(m1, BCLhsTerm_MB, tStep);
+        h.beProductOf(m1, v);
+        answer.add(h);
         // add pressure term
         eptr->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
         eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
-	//h.beProductOf(m1,vp); // term due to prescribed pressure
+        //h.beProductOf(m1,vp); // term due to prescribed pressure
         answer.add(h);
         eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MB, tStep);
-	h.beProductOf(m1, v);
-	answer.add(h);
-	answer.times(-1.0);
+        h.beProductOf(m1, v);
+        answer.add(h);
+        answer.negated();
     } else if ( type == AlgorithmicRhsTerm_MC ) {
         Element *eptr = domain->giveElement(num);
         FloatMatrix m1, m2;
@@ -1198,8 +1198,8 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         h.beProductOf(m1, v);
         answer.add(h);
         //h.beProductOf(m1,vp); // term due to prescribed pressure
-	//answer.add(h);
-        answer.times(-1.0);
+        //answer.add(h);
+        answer.negated();
     } else {
         EngngModel :: giveElementCharacteristicVector(answer, num, type, mode, tStep, domain);
     }
@@ -1319,129 +1319,141 @@ SUPG :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *s
 void
 SUPG:: updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& accelerationVector, TimeStep* tStep)
 {
-  int j, k, jj,ji, nDofs, ndofman;
-  double deltaT = tStep->giveTimeIncrement();
-  DofManager *node, *dofman;
-  Dof *iDof;
-  DofIDItem type;
-  Domain *domain = this->giveDomain(1);
-  int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
-  Element *elem;
+    int j, k, jj,ji, nDofs, ndofman;
+    double deltaT = tStep->giveTimeIncrement();
+    DofManager *node, *dofman;
+    Dof *iDof;
+    DofIDItem type;
+    Domain *domain = this->giveDomain(1);
+    int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
+    Element *elem;
 
 
-  for ( j = 1; j <= nman; j++ ) {
-    node = domain->giveDofManager(j);
-    nDofs = node->giveNumberOfDofs();
+    for ( j = 1; j <= nman; j++ ) {
+        node = domain->giveDofManager(j);
+        nDofs = node->giveNumberOfDofs();
 
-    for ( k = 1; k <= nDofs; k++ ) {
-      iDof  =  node->giveDof(k);
-      if ( !iDof->isPrimaryDof() ) {
-	continue;
-      }
+        for ( k = 1; k <= nDofs; k++ ) {
+            iDof  =  node->giveDof(k);
+            if ( !iDof->isPrimaryDof() ) {
+                continue;
+            }
 
-      jj = iDof->__giveEquationNumber();
-      type = iDof->giveDofID();
+            jj = iDof->__giveEquationNumber();
+            type = iDof->giveDofID();
 
-      if ( jj ) {
-	if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT)*a
-	  solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
-	}
-      }
+            if ( jj ) {
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT)*a
+                    solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
+                }
+            }
+        }
     }
-  }
 
-  for (j=1; j<= domain->giveNumberOfElements(); j++) {
-    elem = domain->giveElement(j);
-    ndofman = elem->giveNumberOfInternalDofManagers();
-    for (ji=1; ji<=ndofman; ji++) {
-      dofman = elem->giveInternalDofManager(ji);
-      nDofs = dofman->giveNumberOfDofs();
-      for ( k = 1; k <= nDofs; k++ ) {
-	iDof  =  dofman->giveDof(k);
-	if ( !iDof->isPrimaryDof() ) {
-	  continue;
-	}
+    for (j=1; j<= domain->giveNumberOfElements(); j++) {
+        elem = domain->giveElement(j);
+        ndofman = elem->giveNumberOfInternalDofManagers();
+        for (ji=1; ji<=ndofman; ji++) {
+            dofman = elem->giveInternalDofManager(ji);
+            nDofs = dofman->giveNumberOfDofs();
+            for ( k = 1; k <= nDofs; k++ ) {
+                iDof  =  dofman->giveDof(k);
+                if ( !iDof->isPrimaryDof() ) {
+                    continue;
+                }
 
-	jj = iDof->__giveEquationNumber();
-	type = iDof->giveDofID();
+                jj = iDof->__giveEquationNumber();
+                type = iDof->giveDofID();
 
-	if ( jj ) {
-	  if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-	    solutionVector.at(jj) += deltaT * accelerationVector.at(jj);;
-	  }
-	}
-      }
-    } // end loop over elem internal dofmans
-  } // end loop over elems
+                if ( jj ) {
+                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
+                        solutionVector.at(jj) += deltaT * accelerationVector.at(jj);;
+                    }
+                }
+            }
+        } // end loop over elem internal dofmans
+    } // end loop over elems
 }
 
 
 void
 SUPG:: updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector, TimeStep* tStep)
 {
-  int j, k, jj,ji, nDofs, ndofman;
-  double deltaT = tStep->giveTimeIncrement();
-  DofManager *node, *dofman;
-  Dof *iDof;
-  DofIDItem type;
-  Domain *domain = this->giveDomain(1);
-  int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
-  Element *elem;
+    int j, k, jj,ji, nDofs, ndofman;
+    double deltaT = tStep->giveTimeIncrement();
+    DofManager *node, *dofman;
+    Dof *iDof;
+    DofIDItem type;
+    Domain *domain = this->giveDomain(1);
+    int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
+    Element *elem;
+
+    accelerationVector.add(incrementalSolutionVector);
+
+    for ( j = 1; j <= nman; j++ ) {
+        node = domain->giveDofManager(j);
+        nDofs = node->giveNumberOfDofs();
+
+        for ( k = 1; k <= nDofs; k++ ) {
+            iDof  =  node->giveDof(k);
+            if ( !iDof->isPrimaryDof() ) {
+                continue;
+            }
+
+            jj = iDof->__giveEquationNumber();
+            type = iDof->giveDofID();
+
+            if ( jj ) {
+                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
+                    solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
+                } else {
+                    solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
+                }
+            }
+        }
+    } // end loop over dnam
 
 
+    for (j=1; j<= domain->giveNumberOfElements(); j++) {
+        elem = domain->giveElement(j);
+        ndofman = elem->giveNumberOfInternalDofManagers();
+        for (ji=1; ji<=ndofman; ji++) {
+            dofman = elem->giveInternalDofManager(ji);
+            nDofs = dofman->giveNumberOfDofs();
+            for ( k = 1; k <= nDofs; k++ ) {
+                iDof  =  dofman->giveDof(k);
+                if ( !iDof->isPrimaryDof() ) {
+                    continue;
+                }
 
-  accelerationVector.add(incrementalSolutionVector);
+                jj = iDof->__giveEquationNumber();
+                type = iDof->giveDofID();
 
-  for ( j = 1; j <= nman; j++ ) {
-    node = domain->giveDofManager(j);
-    nDofs = node->giveNumberOfDofs();
-
-    for ( k = 1; k <= nDofs; k++ ) {
-      iDof  =  node->giveDof(k);
-      if ( !iDof->isPrimaryDof() ) {
-	continue;
-      }
-
-      jj = iDof->__giveEquationNumber();
-      type = iDof->giveDofID();
-
-      if ( jj ) {
-	if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-	  solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
-	} else {
-	  solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
-	}
-      }
-    }
-  } // end loop over dnam
-
-
-  for (j=1; j<= domain->giveNumberOfElements(); j++) {
-    elem = domain->giveElement(j);
-    ndofman = elem->giveNumberOfInternalDofManagers();
-    for (ji=1; ji<=ndofman; ji++) {
-      dofman = elem->giveInternalDofManager(ji);
-      nDofs = dofman->giveNumberOfDofs();
-      for ( k = 1; k <= nDofs; k++ ) {
-	iDof  =  dofman->giveDof(k);
-	if ( !iDof->isPrimaryDof() ) {
-	  continue;
-	}
-
-	jj = iDof->__giveEquationNumber();
-	type = iDof->giveDofID();
-
-	if ( jj ) {
-	  if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-	    solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
-	  } else {
-	    solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
-	  }
-	}
-      }
-    } // end loop over elem internal dofmans
-  } // end loop over elems
+                if ( jj ) {
+                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
+                        solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
+                    } else {
+                        solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
+                    }
+                }
+            }
+        } // end loop over elem internal dofmans
+    } // end loop over elems
 }
+
+
+#ifdef __PETSC_MODULE
+void
+SUPG :: initPetscContexts()
+{
+    PetscContext *petscContext;
+    petscContextList->growTo(ndomains);
+    for ( int i = 1; i <= this->ndomains; i++ ) {
+        petscContext =  new PetscContext(this, EID_MomentumBalance_ConservationEquation);
+        petscContextList->put(i, petscContext);
+    }
+}
+#endif
 
 
 #define __VOF_TRESHOLD 1.e-5

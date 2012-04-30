@@ -160,6 +160,11 @@ public:
 
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 
+#ifdef __PETSC_MODULE
+    virtual void initPetscContexts();
+#endif
+
+
 protected:
     void updateInternalState(TimeStep *tStep);
     void applyIC(TimeStep *tStep);
