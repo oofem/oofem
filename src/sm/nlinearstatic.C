@@ -66,7 +66,7 @@
 namespace oofem {
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed(), incrementalBCLoadVector()
+    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
     //
     // constructor
@@ -662,11 +662,11 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                      & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, NULL,
-                                      & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 

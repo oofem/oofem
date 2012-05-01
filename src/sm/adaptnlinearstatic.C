@@ -382,7 +382,6 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
         double deltaL = nMethod->giveCurrentStepLength();
-        FloatArray ibcLoadVector;
         this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
                                                       refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, this->giveCurrentStep() );
         //
@@ -397,11 +396,11 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                          & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                          & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
@@ -722,7 +721,6 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
         double deltaL = nMethod->giveCurrentStepLength();
-        FloatArray ibcLoadVector;
         //
         // call numerical model to solve arised problem
         //
@@ -735,11 +733,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                          & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                          & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 

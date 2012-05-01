@@ -69,7 +69,7 @@ using namespace std;
 namespace oofem {
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed(), incrementalBCLoadVector()
+    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
     //
     // constructor
@@ -567,11 +567,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     double loadLevel = 1.0;
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & rhs2, & initialLoadVector,
-                                      & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
         numMetStatus = nMethod->solve(stiffnessMatrix, & rhs2, NULL,
-                                      & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 

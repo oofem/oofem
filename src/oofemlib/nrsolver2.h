@@ -138,19 +138,19 @@ private:
 
 public:
     NRSolver2(int i, Domain *d, EngngModel *m, EquationID ut);
-    ~NRSolver2();
+    virtual ~NRSolver2();
 
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
+                            FloatArray *r, FloatArray *dr, FloatArray *F,
                             double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    const char *giveClassName() const { return "NRSolver2"; }
-    classType giveClassID() const { return NRSolverClass; }
-    virtual void         setDomain(Domain *d) {
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual const char *giveClassName() const { return "NRSolver2"; }
+    virtual classType giveClassID() const { return NRSolverClass; }
+    virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) { linSolver->setDomain(d); } }
     virtual void reinitialize() { if ( linSolver ) { linSolver->reinitialize(); } }

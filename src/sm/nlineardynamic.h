@@ -101,9 +101,6 @@ protected:
     /// incremental Load Vector for prescribed DOFs.
     FloatArray incrementalLoadVectorOfPrescribed;
 
-    /// For direct control.
-    FloatArray incrementalBCLoadVector;
-
     int currentIterations;
     int commInitFlag;
     int nonlocalStiffnessFlag;

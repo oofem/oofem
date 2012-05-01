@@ -96,7 +96,7 @@ public:
     NumericalMethod(int i, Domain *d, EngngModel *m) : FEMComponent(i, d)
     { engngModel = m; }
     /// Destructor
-    ~NumericalMethod() { }
+    virtual ~NumericalMethod() { }
 
     /// @return Engineering model receiver is connected to.
     EngngModel *giveEngngModel() { return engngModel; }
@@ -113,10 +113,8 @@ public:
     virtual void reinitialize() { }
 
     // Overloaded from FEMComponent:
-    const char *giveClassName() const { return "NumericalMethod"; }
-    classType giveClassID() const { return NumericalMethodClass; }
-
-public:
+    virtual const char *giveClassName() const { return "NumericalMethod"; }
+    virtual classType giveClassID() const { return NumericalMethodClass; }
 };
 } // end namespace oofem
 #endif // nummet_h

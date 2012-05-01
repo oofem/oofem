@@ -198,18 +198,18 @@ protected:
 
 public:
     CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
-    ~CylindricalALM();
+    virtual ~CylindricalALM();
 
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
-                            FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                            FloatArray *r, FloatArray *DeltaR, FloatArray *F,
                             double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }
     virtual void setStepLength(double s) { deltaL = s; }
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) {
@@ -254,12 +254,3 @@ protected:
 };
 } // end namespace oofem
 #endif // calmls_h
-
-
-
-
-
-
-
-
-

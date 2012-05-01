@@ -154,11 +154,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
     this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
-    FloatArray incrementalLoadVector(0); // Should be allowed to be null
     NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
                                             & ( this->externalForces ),
                                             NULL,
-                                            & incrementalLoadVector, //Can't be null?! I don't have it, yet a need to supply it.
                                             solutionVector,
                                             & ( this->incrementOfSolution ),
                                             & ( this->internalForces ),

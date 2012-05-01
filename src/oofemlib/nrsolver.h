@@ -81,7 +81,6 @@ class EngngModel;
 class NRSolver : public SparseNonLinearSystemNM
 {
 private:
-
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
     typedef std :: set< DofIDItem >__DofIDSet;
 
@@ -131,7 +130,6 @@ private:
     bool prescribedEgsIS_defined;
 #endif
 
-
     // Support for evaluation of error norms for user defined dof-groups.
     /// Number of convergence criteria dof groups
     int nccdg;
@@ -144,19 +142,19 @@ private:
 
 public:
     NRSolver(int i, Domain *d, EngngModel *m, EquationID ut);
-    ~NRSolver();
+    virtual ~NRSolver();
 
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
+                            FloatArray *r, FloatArray *dr, FloatArray *F,
                             double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    const char *giveClassName() const { return "NRSolver"; }
-    classType giveClassID() const { return NRSolverClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual const char *giveClassName() const { return "NRSolver"; }
+    virtual classType giveClassID() const { return NRSolverClass; }
     virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) {

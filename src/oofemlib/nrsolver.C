@@ -245,7 +245,7 @@ NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 NM_Status
 NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                  FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                  FloatArray *r, FloatArray *DeltaR, FloatArray *F,
                   double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tNow)
 //

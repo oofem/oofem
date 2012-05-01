@@ -90,7 +90,7 @@ NRSolver2 :: ~NRSolver2()
 
 NM_Status
 NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                   FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                   FloatArray *r, FloatArray *DeltaR, FloatArray *F,
                    double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                    int &nite, TimeStep *tNow)
 //

@@ -94,8 +94,6 @@ protected:
     FloatArray initialLoadVectorOfPrescribed;
     /// incremental Load Vector for prescribed DOFs.
     FloatArray incrementalLoadVectorOfPrescribed;
-    /// For direct control.
-    FloatArray incrementalBCLoadVector;
 
     double loadLevel, cumulatedLoadLevel;
     bool mstepCumulateLoadLevelFlag;

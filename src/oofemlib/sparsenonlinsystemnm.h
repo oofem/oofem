@@ -84,7 +84,7 @@ public:
     /// Constructor
     SparseNonLinearSystemNM(int i, Domain *d, EngngModel *m, EquationID ut) : NumericalMethod(i, d, m) { this->ut = ut; }
     /// Destructor
-    ~SparseNonLinearSystemNM() { }
+    virtual ~SparseNonLinearSystemNM() { }
 
     /**
      * Solves the given sparse linear system of equations @f$s  R + R_0 - F(r) = 0@f$; @f$ dr=K^{-1}(s R + R_0 - F({}^n r)) @f$.
@@ -93,7 +93,6 @@ public:
      * @param K  Coefficient matrix (@f$\displaystyle K = \frac{\partial F}{\partial r} @f$; stiffness matrix).
      * @param R  Reference incremental RHS (incremental load).
      * @param R0 Initial RHS (initial load).
-     * @param Rr Linearization of K*rri, where rri is increment of prescribed displacements.
      * @param r  Total solution (total displacement).
      * @param dr Increment of solution (incremental displacements).
      * @param s  RHS scale factor (load level).
@@ -105,7 +104,7 @@ public:
      * @return NM_Status value.
      */
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
-                            FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
+                            FloatArray *r, FloatArray *dr, FloatArray *F,
                             double &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *tStep) = 0;
 
@@ -129,8 +128,8 @@ public:
     virtual void printState(FILE *outputStream) { }
 
     // Overloaded methods:
-    const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
-    classType giveClassID() const { return SparseNonLinearSystemNMClass; }
+    virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
+    virtual classType giveClassID() const { return SparseNonLinearSystemNMClass; }
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h

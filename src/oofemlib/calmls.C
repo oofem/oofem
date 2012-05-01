@@ -118,7 +118,7 @@ CylindricalALM ::  ~CylindricalALM()
 
 NM_Status
 CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                        FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                        FloatArray *r, FloatArray *DeltaR, FloatArray *F,
                         double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tNow)
 {
