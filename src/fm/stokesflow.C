@@ -150,7 +150,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
 #if 1
     this->giveNumericalMethod(tStep);
-    double loadLevel, ebenorm;
+    double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
     this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
@@ -162,7 +162,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             solutionVector,
                                             & ( this->incrementOfSolution ),
                                             & ( this->internalForces ),
-                                            ebenorm,
+                                            eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType
                                             currentIterations,
@@ -200,7 +200,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
     if (cmpn == InternalRhs) {
         this->internalForces.zero();
-        this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+        eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
         return;
 

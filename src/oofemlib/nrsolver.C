@@ -888,7 +888,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
  #endif
 
         // we compute a relative error norm
-        if ( ( RRT ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+        if ( RRT > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RRT ) );
         } else if ( internalForcesEBENorm > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt(forceErr / internalForcesEBENorm);
