@@ -582,7 +582,7 @@ EngngModel :: forceEquationNumbering(int id)
         }
         for ( i = 1; i <= nelem; ++i ) {
             elem = domain->giveElement(i);
-            nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
+            nnodes = elem->giveNumberOfInternalDofManagers();
             for ( k = 1; k <= nnodes; k++ ) {
                 elem->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }

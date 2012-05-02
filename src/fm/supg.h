@@ -152,6 +152,9 @@ public:
     virtual int giveNewEquationNumber(int domain, DofIDItem);
     virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
 
+    virtual int forceEquationNumbering(int id);
+    virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
+
     virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
     virtual double giveVariableScale(VarScaleType varId);
 
@@ -175,8 +178,8 @@ protected:
     void updateDofUnknownsDictionary_predictor(TimeStep *tStep);
     void updateDofUnknownsDictionary_corrector(TimeStep *tStep);
 
-    void  updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector, TimeStep* tStep);
-    void  updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& accelerationVector, TimeStep* tStep);
+    void updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector, TimeStep* tStep);
+    void updateSolutionVectors_predictor(FloatArray& solutionVector, FloatArray& accelerationVector, TimeStep* tStep);
 
     //void initDofManActivityMap ();
     //void updateDofManActivityMap (TimeStep* tStep);

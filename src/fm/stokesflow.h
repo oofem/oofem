@@ -102,12 +102,6 @@ public:
     virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
     virtual double giveUnknownComponent(UnknownType ut, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
 
-    /**
-     * Numbers all equations.
-     * Numbers velocities first for each node in order, then pressures.
-     * @param id Domain id.
-     * @return Number of equations for domain id.
-     */
     virtual int forceEquationNumbering(int id);
 
     /**
