@@ -107,7 +107,7 @@ protected:
     int reinforcementDegree;
     ///create material status
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-};
+};  
 
 /**
  * HydratingConcreteMatStatus stores degree of hydration in each integration point
@@ -127,6 +127,8 @@ public:
 protected:
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
     double scaleTemperature(void);
+    ///return affinity scaled to 25C
+    double affinity25(double alpha);
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h
