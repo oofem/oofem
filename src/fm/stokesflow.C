@@ -55,6 +55,9 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : EngngModel(i, _master)
     this->hasAdvanced = false;
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
+#ifdef __PARALLEL_MODE
+    commMode = ProblemCommMode__NODE_CUT;
+#endif
 }
 
 StokesFlow :: ~StokesFlow()
@@ -99,7 +102,6 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 {
     FloatArray *solutionVector = NULL;
-    parallelFlag = false; // Hack until something nicer is found.
 
     if ( this->giveDomain(1)->giveNumberOfElements() == 0 && this->giveDomain(1)->giveTopology() ) {
         this->giveDomain(1)->giveTopology()->replaceFEMesh();

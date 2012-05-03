@@ -878,15 +878,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     } else { // nccdg == 0 -> all dofs included
         double drr, drdr;
  #ifdef __PARALLEL_MODE
-        forceErr  = parallel_context->localNorm(rhs); forceErr *= forceErr;
-        drr = parallel_context->localNorm(r); drr *= drr;
-        drdr = parallel_context->localNorm(deltaR); drdr *= drdr;
+        forceErr = parallel_context->norm(rhs); forceErr *= forceErr;
+        drr = parallel_context->norm(r); drr *= drr;
+        drdr = parallel_context->norm(deltaR); drdr *= drdr;
  #else
         forceErr = rhs.computeSquaredNorm();
         drr = r.computeSquaredNorm();
         drdr = deltaR.computeSquaredNorm();
  #endif
-
         // we compute a relative error norm
         if ( RRT > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RRT ) );
