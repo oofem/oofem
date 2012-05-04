@@ -47,6 +47,9 @@
 #include "activedof.h"
 #include "masterdof.h"
 
+#include "sparsemtrx.h"
+#include "sparselinsystemnm.h"
+
 namespace oofem {
 
 MixedGradientPressureBC :: MixedGradientPressureBC(int n, Domain *d) : ActiveBoundaryCondition(n,d)
@@ -216,6 +219,57 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
         default:
             return 0.0;
     }
+}
+
+
+void MixedGradientPressureBC :: computeTangents(SparseLinearSystemNM *solver, 
+    SparseMtrx *Kff, SparseMtrx *Kfp, SparseMtrx *Kpf, SparseMtrx *Kpp,
+    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp)
+{
+    // Setup up indices and locations
+    int neq = Kff->giveNumberOfRows();
+    int npeq = Kpf->giveNumberOfRows();
+    
+    // Indices and such of internal dofs
+    int dvol_eq = this->giveVolDof()->giveEqn();
+    int ndev = this->devGradient.giveSize();
+    
+    // Matrices and arrays for sensitivities
+    FloatMatrix ddev_pert(ndev,npeq); // In fact, npeq should most likely equal ndev
+    FloatMatrix rhs_d(neq,npeq); // RHS for d_dev
+    FloatMatrix s_d; // Sensitivity fields for d_dev
+    FloatArray rhs_p(neq); // RHS for pressure
+    FloatArray s_p; // Sensitivity fields for p
+
+    // Unit pertubations for d_dev
+    ddev_pert.zero();
+    for (int i = 1; i <= ndev; ++i) {
+        ddev_pert.at(-this->devdman->giveDof(i)->giveEqn(), i) = -1; // Minus sign for moving it to the RHS
+    }
+    Kfp->times(ddev_pert, rhs_d);
+
+    // Sensitivity analysis for p (already in rhs, just set value directly)
+    rhs_p.zero();
+    rhs_p.at(dvol_eq) = -1.0; // dp = -1.0 (unit size)
+   
+    // Solve all sensitivities
+    solver->solve(Kff,&rhs_p,&s_p);
+    solver->solve(Kff,rhs_d,s_d);
+    
+    // Sensitivities for d_vol is solved for directly;
+    Cp = rhs_p.at(dvol_eq);
+    Cd.resize(ndev);
+    for (int i = 1; i <= ndev; ++i) {
+        Cd.at(i) = s_d.at(dvol_eq, i); // Copy over relevant row from solution
+    }
+    
+    // Sensitivities for d_dev is obtained as reactions forces;
+    Kpf->times(s_p, Ep);
+    
+    FloatMatrix tmpMat;
+    Kpp->times(ddev_pert, tmpMat);
+    Kpf->times(s_d, Ed);
+    Ed.add(tmpMat);
 }
 
 

@@ -47,6 +47,8 @@
 namespace oofem {
 class MasterDof;
 class Node;
+class SparseMtrx;
+class SparseLinearSystemNM;
 
 /**
  * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) = (d_{\mathrm{dev},ij}+ \frac13 d_{\mathrm{vol}} I_{ij})(x_j+\bar{x}_j)} @f$
@@ -105,7 +107,7 @@ public:
     virtual DofManager *giveInternalDofManager(int i);
 
     /// Not relevant for this boundary condition.
-    bcType giveType() const { return UnknownBT; }
+    virtual bcType giveType() const { return UnknownBT; }
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -117,11 +119,27 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     virtual void scale(double s) { devGradient.times(s); pressure *= s; }
+    
+    /**
+     * Computes the macroscopic tangents through sensitivity analysis.
+     * @param solver Linear solver to use for sensitivity problems.
+     * @param Kff Free-free part of the tangent matrix.
+     * @param Kfp Free-prescribed part of the tangent matrix.
+     * @param Kpf Prescribed-free part of the tangent matrix (transpose of Kfp for symmetric problems).
+     * @param Kpp Prescribed-prescribed part of the tangent matrix.
+     * @param[out] Ed Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial d_{\mathrm{dev}}} @f$.
+     * @param[out] Ep Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial p} @f$.
+     * @param[out] Cd Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial d_{\mathrm{dev}}} @f$.
+     * @param[out] Cp Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial p} @f$.
+     */
+    void computeTangents(SparseLinearSystemNM *solver,
+                         SparseMtrx *Kff, SparseMtrx *Kfp, SparseMtrx *Kpf, SparseMtrx *Kpp,
+                         FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp);
 
     /**
      * Set prescribed pressure.
