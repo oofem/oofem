@@ -110,7 +110,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     int i, nite = 0;
     int elemFlag;
     // check if number of IP in patchList is sufficient
-    // some recursion controll would be appropriate
+    // some recursion control would be appropriate
     while ( ( actualNumberOfPoints < minNumberOfPoints ) && ( nite <= 2 ) ) {
         //if not,  construct the neighborhood
         dold->giveConnectivityTable()->giveElementNeighbourList(neighborList, patchList);

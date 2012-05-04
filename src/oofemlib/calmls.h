@@ -91,7 +91,7 @@ class CylindricalALM : public SparseNonLinearSystemNM
      * calm_NR_ModeTick - see calm_NR_OldMode.
      * calm_MANRMSteps - if calm_NR_Mode == calm_accelNRM, it specifies, that new updated
      *                 stiffness matrix is assembled after calm_MANRMSteps.
-     * calm_Controll - variable indicating the ALM control.
+     * calm_Control - variable indicating the ALM control.
      * calm_HPCIndirectDofMask - Mask, telling which dofs are used for HPC.
      * calm_HPCWeights - dofs weights in constrain.
      * TASKS :
@@ -128,7 +128,7 @@ class CylindricalALM : public SparseNonLinearSystemNM
      */
 protected:
     /// CALM mode type; determines the calm step length control.
-    enum calm_ControllType {
+    enum calm_ControlType {
         calm_hpc_off = 0, ///< Full ALM with quadratic constrain and all dofs.
         calm_hpc_on, ///< Full ALM with quadratic constrain, taking into account only selected dofs.
         calml_hpc, ///<  Linearized ALM (only displacements), taking into account only selected dofs with given weight.
@@ -154,9 +154,9 @@ protected:
     /// Minimum hard number of iteration.s
     int minIterations;
 
-    /// Variables for HyperPlaneControll.
+    /// Variables for HyperPlaneControl.
     int calm_hpc_init;
-    calm_ControllType calm_Controll;
+    calm_ControlType calm_Control;
     FloatArray calm_HPCWeights;
     /// Array containing equation numbers of dofs under indirect control.
     IntArray calm_HPCIndirectDofMask;

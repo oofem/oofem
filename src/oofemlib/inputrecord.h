@@ -131,7 +131,7 @@ enum InputFieldType {
     IFT_DIIDynamic_beta,
     IFT_DIIDynamic_psi,
 
-    IFT_NonLinearStatic_controllmode,
+    IFT_NonLinearStatic_controlmode,
     IFT_NonLinearStatic_deltat,
     IFT_NonLinearStatic_deltatltf,
     IFT_NonLinearStatic_rtolv,
@@ -182,7 +182,7 @@ enum InputFieldType {
 
     IFT_AdaptiveNonLinearStatic_meshpackage,
     IFT_AdaptiveNonLinearStatic_equilmc,
-    IFT_AdaptiveNonLinearStatic_controllmode,
+    IFT_AdaptiveNonLinearStatic_controlmode,
     IFT_AdaptiveNonLinearStatic_ddm,
     IFT_AdaptiveNonLinearStatic_refloadmode,
     IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag,

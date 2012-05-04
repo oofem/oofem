@@ -140,7 +140,7 @@ public:
 protected:
     double  computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);
     // two functions used to initialize and updating temporary variables in
-    // gp's status. These variables are used to controll process, when
+    // gp's status. These variables are used to control process, when
     // we try to find equlibrium state.
 
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,

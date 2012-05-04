@@ -52,10 +52,10 @@ enum NonLinearStatic_stifnessMode {
     nls_secantInitialStiffness = 3, ///< The secant stiffness is used and updated only at the beginning of new load step.
 };
 /// Type determining type of loading control. This type determines the solver to be used.
-enum NonLinearStatic_controllType {
-    nls_indirectControll = 0, ///< A generalized norm of displacement and loading vectors is controlled. In current implementation, the CALM solver is used, the reference load vector is FIXED.
-    nls_directControll = 1,   ///< Describes the direct control where load or displacement (or both) are controlled.
-    nls_directControll2 = 2,  ///<
+enum NonLinearStatic_controlType {
+    nls_indirectControl = 0, ///< A generalized norm of displacement and loading vectors is controlled. In current implementation, the CALM solver is used, the reference load vector is FIXED.
+    nls_directControl = 1,   ///< Describes the direct control where load or displacement (or both) are controlled.
+    nls_directControl2 = 2,  ///<
 };
 
 /**
@@ -105,7 +105,7 @@ protected:
     /// Numerical method used to solve the problem.
     SparseNonLinearSystemNM *nMethod;
     /// Characterizes the type of control used.
-    NonLinearStatic_controllType controllMode;
+    NonLinearStatic_controlType controlMode;
     /// Intrinsic time increment.
     double deltaT;
     /**

@@ -82,8 +82,8 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
     deltaL    = -1.0;
     // TangenStiffnessTreshold = 0.10;
 
-    // Variables for Hyper Plane Controll
-    calm_Controll = calm_hpc_off; // HPControll is not default
+    // Variables for Hyper Plane Control
+    calm_Control = calm_hpc_off; // HPControl is not default
     linSolver = NULL;
     // linesearch default off
     lsFlag = 0;
@@ -210,14 +210,14 @@ restart:
     engngModel->updateComponent(tNow, NonLinearLhs, domain);
     linSolver->solve(k, R, & deltaXt);
 
-    if ( calm_Controll == calm_hpc_off ) {
+    if ( calm_Control == calm_hpc_off ) {
 #ifdef __PARALLEL_MODE
         XX = parallel_context->localNorm(deltaXt); XX *= XX;
 #else
         XX = deltaXt.computeSquaredNorm();
 #endif
         p = sqrt(XX + Psi * Psi * RR);
-    } else if ( calm_Controll == calm_hpc_on ) {
+    } else if ( calm_Control == calm_hpc_on ) {
         HPsize = calm_HPCIndirectDofMask.giveSize();
         _XX = 0;
         _RR = 0;
@@ -239,7 +239,7 @@ restart:
 #endif
 
         p = sqrt(_XX + Psi * Psi * _RR);
-    } else if ( calm_Controll == calml_hpc ) {
+    } else if ( calm_Control == calml_hpc ) {
         HPsize = calm_HPCIndirectDofMask.giveSize();
         p = 0.;
         for ( i = 1; i <= HPsize; i++ ) {
@@ -838,15 +838,15 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     // calm_HPCIndirectDofMask must be converted to indirect map
     // -> because dof eqs. are not known now, we derefer this to
     // solveYourselfAt() subroutine. The need for converting is indicated by
-    // calm_HPControll = hpc_init
+    // calm_HPControl = hpc_init
     if ( calm_HPCDmanDofSrcArray.giveSize() != 0 ) {
         int i, nsize;
         if ( hpcMode == 1 ) {
-            calm_Controll = calm_hpc_on;
+            calm_Control = calm_hpc_on;
         } else if ( hpcMode == 2 ) {
-            calm_Controll = calml_hpc;
+            calm_Control = calml_hpc;
         } else {
-            calm_Controll = calm_hpc_on; // default is to use hpc_on
+            calm_Control = calm_hpc_on; // default is to use hpc_on
         }
 
         if ( ( calm_HPCDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
@@ -997,14 +997,14 @@ void CylindricalALM  :: convertHPCMap()
                 // HUHU hard wired domain no 1
                 if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
                     indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
-                    if ( calm_Controll == calml_hpc ) {
+                    if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }
                 }
 
  #else
                 indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
-                if ( calm_Controll == calml_hpc ) {
+                if ( calm_Control == calml_hpc ) {
                     weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
 
@@ -1023,7 +1023,7 @@ void CylindricalALM  :: convertHPCMap()
  #endif
 
     calm_HPCIndirectDofMask.resize(count);
-    if ( calm_Controll == calml_hpc ) {
+    if ( calm_Control == calml_hpc ) {
         calm_HPCWeights.resize(count);
     }
 
@@ -1035,7 +1035,7 @@ void CylindricalALM  :: convertHPCMap()
 #else
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     calm_HPCIndirectDofMask.resize(size);
-    if ( calm_Controll == calml_hpc ) {
+    if ( calm_Control == calml_hpc ) {
         calm_HPCWeights.resize(size);
     }
 
@@ -1044,7 +1044,7 @@ void CylindricalALM  :: convertHPCMap()
         idof  = calm_HPCDmanDofSrcArray.at(2 * i);
         calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber(dn);
 
-        if ( calm_Controll == calml_hpc ) {
+        if ( calm_Control == calml_hpc ) {
             calm_HPCWeights.at(i) = calm_HPCDmanWeightSrcArray.at(i);
         }
     }
@@ -1119,8 +1119,8 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
     //
     // B.3.
     //
-    if ( ( calm_Controll == calm_hpc_off ) || ( calm_Controll == calm_hpc_on ) ) {
-        if ( calm_Controll == calm_hpc_off ) {
+    if ( ( calm_Control == calm_hpc_off ) || ( calm_Control == calm_hpc_on ) ) {
+        if ( calm_Control == calm_hpc_off ) {
             // this two lines are necessary if NRM is used
             // (for MNRM they can be computed at startup A1).
 #ifdef __PARALLEL_MODE
@@ -1151,7 +1151,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
             a3 += eta * eta * deltaX_.computeSquaredNorm();
             a3 += DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
 #endif
-        } else if ( calm_Controll == calm_hpc_on ) {
+        } else if ( calm_Control == calm_hpc_on ) {
             HPsize = calm_HPCIndirectDofMask.giveSize();
             _rr = 0.;
             _RR = 0.;
@@ -1200,7 +1200,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         //
         // up to there rewritten
         //
-        if ( calm_Controll == calm_hpc_off ) {
+        if ( calm_Control == calm_hpc_off ) {
 #ifdef __PARALLEL_MODE
             double tmp = parallel_context->localNorm(dX); tmp *= tmp;
             a4 = eta*parallel_context->localDotProduct(dX, deltaX_) + tmp;
@@ -1238,8 +1238,8 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         }
 
         //printf ("eta=%e, lam1=%e, lam2=%e", eta, lam1, lam2);
-    } else if ( calm_Controll == calml_hpc ) {
-        // linearized controll
+    } else if ( calm_Control == calml_hpc ) {
+        // linearized control
         double nom = 0., denom = 0.;
 
         HPsize = calm_HPCIndirectDofMask.giveSize();
@@ -1259,7 +1259,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            _error("\ncalm: zero denominator in linearized controll");
+            _error("\ncalm: zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;

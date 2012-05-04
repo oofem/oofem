@@ -80,7 +80,7 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     stiffMode = nls_tangentStiffness; // default
     internalVarUpdateStamp = 0;
     initFlag = loadInitFlag = 1;
-    controllMode = nls_indirectControll;
+    controlMode = nls_indirectControl;
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
 
@@ -115,11 +115,11 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
 
     MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD( ( mstep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controllmode, "controllmode" ); // Macro
-    NonLinearStatic_controllType mode = ( NonLinearStatic_controllType ) _val;
+    IR_GIVE_OPTIONAL_FIELD( ( mstep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
+    NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
     SparseNonLinearSystemNM *nm = NULL;
-    if ( mode == nls_indirectControll ) {
+    if ( mode == nls_indirectControl ) {
         if ( nMethod ) {
             if ( nMethod->giveClassID() == CylindricalALMSolverClass ) {
                 return nMethod;
@@ -130,7 +130,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
 
         nm = ( SparseNonLinearSystemNM * ) new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
         nMethod = nm;
-    } else if ( mode == nls_directControll ) {
+    } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
             if ( nMethod->giveClassID() == NRSolverClass ) {
                 return nMethod;
@@ -141,7 +141,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
 
         nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
         nMethod = nm;
-    } else if ( mode == nls_directControll2 ) {
+    } else if ( mode == nls_directControl2 ) {
         if ( nMethod ) {
             if ( nMethod->giveClassID() == NRSolverClass ) {
                 return nMethod;
@@ -153,7 +153,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
         nm = ( SparseNonLinearSystemNM * ) new NRSolver2(1, this->giveDomain(1), this, EID_MomentumBalance);
         nMethod = nm;
     } else {
-        _error("giveNumericalMethod: unsupported controllMode");
+        _error("giveNumericalMethod: unsupported controlMode");
     }
 
     return nm;
@@ -177,7 +177,7 @@ NonLinearStatic :: updateAttributes(TimeStep *atTime)
      *
      * printf ("NonLinearStatic: fixed load level");
      * if (initialLoadVector.isEmpty()) initialLoadVector.resize(loadVector.giveSize());
-     * if ((controllMode == nls_directControll) || (controllMode == nls_directControll2)) factor = 1.0;
+     * if ((controlMode == nls_directControl) || (controlMode == nls_directControl2)) factor = 1.0;
      * else factor = loadLevel;
      * loadVector.times (factor);
      * initialLoadVector.add(loadVector);
@@ -187,8 +187,8 @@ NonLinearStatic :: updateAttributes(TimeStep *atTime)
      * }
      */
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controllmode, "controllmode"); // Macro
-    controllMode = ( NonLinearStatic_controllType ) _val;
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode"); // Macro
+    controlMode = ( NonLinearStatic_controlType ) _val;
 
     deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat"); // Macro
@@ -515,7 +515,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
     MetaStep *mstep = this->giveMetaStep( stepN->giveMetaStepNumber() );
     bool isLastMetaStep = ( stepN->giveNumber() == mstep->giveLastStepNumber() );
 
-    if ( controllMode == nls_indirectControll ) {
+    if ( controlMode == nls_indirectControl ) {
         //if ((stepN->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
         if ( isLastMetaStep ) {
             if ( !mstep->giveAttributesRecord()->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload") ) {
@@ -540,8 +540,8 @@ NonLinearStatic :: updateLoadVectors(TimeStep *stepN)
 
             //if (!mstep->giveAttributesRecord()->hasField("keepll")) this->loadLevelInitFlag = 1;
         }
-    } else { // direct controll
-        //update initialLoadVector after each step of direct controll
+    } else { // direct control
+        //update initialLoadVector after each step of direct control
         //(here the loading is not proportional)
         if ( initialLoadVector.isEmpty() ) {
             initialLoadVector.resize( incrementalLoadVector.giveSize() );
@@ -623,7 +623,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
      }
 #endif
 
-    if ( loadInitFlag || ( controllMode == nls_directControll ) || ( controllMode == nls_directControll2 ) ) {
+    if ( loadInitFlag || ( controlMode == nls_directControl ) || ( controlMode == nls_directControl2 ) ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling reference load\n");
 #endif
@@ -799,7 +799,7 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    int _cm = controllMode;
+    int _cm = controlMode;
     if ( !stream->write(& _cm, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -873,7 +873,7 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
-    controllMode = ( NonLinearStatic_controllType ) _cm;
+    controlMode = ( NonLinearStatic_controlType ) _cm;
     if ( !stream->read(& loadLevel, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }

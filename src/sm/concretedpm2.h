@@ -626,13 +626,13 @@ protected:
   /// elastic poisson's ration
   double nu;
 
-  /// controll parameter for the exponential softening law.
+  /// control parameter for the exponential softening law.
   double wf; 
 
-  /// controll parameter for the exponential softening law.
+  /// control parameter for the exponential softening law.
   double wfOne;
 
-  /// controll parameter for the exponential softening law.
+  /// control parameter for the exponential softening law.
   double ftOne; 
  
   /// yield tolerance for the plasticity model.

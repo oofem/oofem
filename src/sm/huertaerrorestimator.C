@@ -4174,7 +4174,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
         IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, IFT_NonLinearStatic_stiffmode, "stiffmode"); //macro
-        IR_GIVE_OPTIONAL_FIELD(ir, controlMode, IFT_NonLinearStatic_controllmode, "controllmode"); //macro
+        IR_GIVE_OPTIONAL_FIELD(ir, controlMode, IFT_NonLinearStatic_controlmode, "controlmode"); //macro
 
         switch ( controlMode ) {
         case 0:
@@ -4237,7 +4237,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 // do not specify context because that would result in recursive call to HEE
                 // because adaptnlinearstatic analysis type is used
 
-                sprintf(line, "adaptnlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controllmode 1 %s %s ",
+                sprintf(line, "adaptnlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controlmode 1 %s %s ",
                         tStep->giveNumber(), renumber, rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps,
                         skipUpdateString, parallelFlagString);
                 str = line;
@@ -4255,7 +4255,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 // do not specify context because that would result in recursive call to HEE
                 // because adaptnlinearstatic analysis type is used
 
-                sprintf(line, "adaptnlinearstatic nsteps 1 nmsteps %d renumber %d equilmc 1 controllmode 1 %s %s ",
+                sprintf(line, "adaptnlinearstatic nsteps 1 nmsteps %d renumber %d equilmc 1 controlmode 1 %s %s ",
                         nmstep, renumber, skipUpdateString, parallelFlagString);
                 str = line;
 
@@ -4279,7 +4279,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 }
 
                 // create active metastep
-                sprintf(line, "metastep %d nsteps %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controllmode 1 ",
+                sprintf(line, "metastep %d nsteps %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controlmode 1 ",
                         nmstep, tStep->giveNumber() - nsteps,
                         rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps);
                 str = line;
@@ -4343,7 +4343,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             // do not prescribe skipUpdate here !!!
 
             // HUHU dodelat metasteps, dodelat paralelni zpracovani
-            sprintf(line, "nonlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controllmode %d %s ",
+            sprintf(line, "nonlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controlmode %d %s ",
                     ( int ) ( problem->giveCurrentStep()->giveTargetTime() + 1.5 ), renumber,
                     rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps, controlMode, useContextString);
             str = line;

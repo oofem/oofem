@@ -52,7 +52,7 @@ MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n,
     // constructor
     //
 {
-    // force the loading / unloading controll according to max. reached damage level
+    // force the loading / unloading control according to max. reached damage level
     llcriteria = idm_damageLevelCR;
 }
 

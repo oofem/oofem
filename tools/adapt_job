@@ -21,7 +21,7 @@ OOFEMTOOLS_BIN_DIR="/home/bp/bin";
 #
 # requires: 
 #  t3d input file: $jobname.t3d.in 
-#  oofem controll file $jobmane.ctrl (used by t3d2oofem)
+#  oofem control file $jobmane.ctrl (used by t3d2oofem)
 #  oofem extractor record(s) $jobname.extractor (can be empty)
 #
 #

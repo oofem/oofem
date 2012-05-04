@@ -588,7 +588,7 @@ attributes and is explained in section \ref{dynamicloadbalancing}}.
 The metastep record has following general syntax:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{nsteps}{in}}
-\recentry{}{\optField{controllmode}{in}}
+\recentry{}{\optField{controlmode}{in}}
 \recentry{}{\optField{deltat}{rn}} \recentry{}{\optField{stiffmode}{in}}
 \recentry{}{\optField{refloadmode}{in}} \recentry{}{\field{solverParams}{}}
 \recentry{}{\optField{sparselinsolverparams}{string}} \recentry{}{\optField{donotfixload}{}}
@@ -596,7 +596,7 @@ The metastep record has following general syntax:\\
 
 where
 \begin{itemize}
-\item[-] \param{controllmode} - determines the type of solution
+\item[-] \param{controlmode} - determines the type of solution
 control used for corresponding meta step. if == 0 then indirect
 control will be used to control solution process (arc-length method, default). if == 1
 then direct displacement or load control will be used (Newton-Raphson solver). In the later
@@ -621,7 +621,7 @@ totalLoadVector assembled at given time.
 If refLoadInputMode is 1 (rlm\_inceremental) then the reference load vector is
 obtained as incremental load vector at given time.
 \item[-] \param{solverParams} - parameters of solver. The solver type
-is determined using \param{controllmode}.
+is determined using \param{controlmode}.
 \item The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section
 \ref{sparselinsolver}.
@@ -634,7 +634,7 @@ fixed, however, the new reference loading vector will be assembled for
 the new metastep.
 \end{itemize}
 
-The direct solver corresponds to \param{controllmode}=1 and the Newton-Raphson solver is used.
+The direct solver corresponds to \param{controlmode}=1 and the Newton-Raphson solver is used.
 Under the direct control, the total load
 vector assembled for specific solution step represents the load level,
 where equilibrium is searched. The implementation supports also
@@ -699,7 +699,7 @@ iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
 \end{itemize}
 
-The indirect solver corresponds to \param{controllmode}=0 and the CALM
+The indirect solver corresponds to \param{controlmode}=0 and the CALM
 solver is used. The value of reference load vector is determined by
 \param{refloadmode} parameter mentioned above at the first step of
 each metastep. {\em However, the user must ensure, that the same value of
@@ -785,7 +785,7 @@ then following\\
 \begin{record}
 \recentry{\entKeywordInst{NonLinearStatic}}{\field{nsteps}{in}}
 \recentry{}{\optField{nonlocstiff}{in}}
-\recentry{}{\optField{contextOutputStep}{in}} \recentry{}{\optField{controllmode}{in}}
+\recentry{}{\optField{contextOutputStep}{in}} \recentry{}{\optField{controlmode}{in}}
 \recentry{}{\optField{deltat}{rn}}
 \recentry{}{\field{rtolv}{rn}} \recentry{}{\optField{stiffmode}{in}} \recentry{}{\field{lstype}{in}}
 \recentry{}{\field{smtype}{in}} \recentry{}{\field{solverParams}{}}
