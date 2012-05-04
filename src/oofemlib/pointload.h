@@ -113,15 +113,13 @@ public:
      */
     //virtual PL_FormulationType giveFormulationType () {return BL_EntityFormulation;}
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    bcType giveType() const { return lType; }
-    bcGeomType giveBCGeoType() const { return PointLoadBGT; }
-    classType giveClassID() const { return PointLoadClass; }
-    const char *giveClassName() const { return "PointLoad"; }
-
-protected:
+    virtual bcType giveType() const { return lType; }
+    virtual bcGeomType giveBCGeoType() const { return PointLoadBGT; }
+    virtual classType giveClassID() const { return PointLoadClass; }
+    virtual const char *giveClassName() const { return "PointLoad"; }
 };
 } // end namespace oofem
 #endif // pointload_h

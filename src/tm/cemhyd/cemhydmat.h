@@ -47,10 +47,10 @@ public:
     /// Constructor
     CemhydMat(int n, Domain *d);
     /// Destructor
-    ~CemhydMat();
+    virtual ~CemhydMat();
     /// Returns input record name of the receiver.
-    const char *giveClassName() const { return "CemhydMat"; }
-    classType giveClassID() const { return CemhydMatClass; }
+    virtual const char *giveClassName() const { return "CemhydMat"; }
+    virtual classType giveClassID() const { return CemhydMatClass; }
 
     virtual int hasInternalSource() { return 1; }
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
@@ -85,7 +85,7 @@ public:
     ///perform averaging on a master CemhydMatStatus
     virtual void averageTemperature(void);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     ///use different methods to evaluate material parameters
     int conductivityType, capacityType, densityType;
     ///array containing warnings supression for density, conductivity, capacity, high temperature
@@ -111,19 +111,16 @@ public:
 class CemhydMatStatus : public TransportMaterialStatus
 {
 public:
-    /** Create status in an integration point.
-     * @param CemStat a pointer to existing microstructure, from which the 3D image is copied
-     * @param withMicrostructure creates also 3D microstructure representation at the integration point
+    /** 
+     * Create status in an integration point.
+     * @param CemStat A pointer to existing microstructure, from which the 3D image is copied.
+     * @param withMicrostructure Creates also 3D microstructure representation at the integration point.
      */
     CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatStatus *CemStat, CemhydMat *cemhydmat, bool withMicrostructure);
-    ~CemhydMatStatus();
+    virtual ~CemhydMatStatus();
     //virtual Interface *giveInterface(InterfaceType);
-    const char *giveClassName() const { return "CemhydMatStatus"; }
-    classType giveClassID()         const { return CemhydMatStatusClass; }
-    /**
-     * Update equilibrium history variables according to temp-variables.
-     * Invoked, after new equilibrium state has been reached.
-     */
+    virtual const char *giveClassName() const { return "CemhydMatStatus"; }
+    virtual classType giveClassID() onst { return CemhydMatStatusClass; }
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
 #endif

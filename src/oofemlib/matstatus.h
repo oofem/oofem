@@ -98,9 +98,9 @@ public:
      */
     MaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
-    ~MaterialStatus() { }
+    virtual ~MaterialStatus() { }
     /// Print receiver's output to given stream.
-    void printOutputAt(FILE *file, TimeStep *tStep) { }
+    virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
 
     /**
      * Initializes the temporary internal variables, describing the current state according to
@@ -143,9 +143,9 @@ public:
      */
     virtual void restoreConsistency() {}
 
-    const char *giveClassName() const { return "MaterialStatus"; }
-    classType giveClassID() const { return MaterialStatusClass; }
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual const char *giveClassName() const { return "MaterialStatus"; }
+    virtual classType giveClassID() const { return MaterialStatusClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // matstatus_h

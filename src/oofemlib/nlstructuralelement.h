@@ -90,7 +90,7 @@ public:
      */
     NLStructuralElement(int n, Domain *d);
     /// Destructor.
-    ~NLStructuralElement() { }
+    virtual ~NLStructuralElement() { }
 
     /**
      * Computes the stiffness matrix of receiver.
@@ -172,11 +172,11 @@ public:
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // data management
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // definition
-    const char *giveClassName() const { return "NLStructuralElement"; }
-    classType giveClassID() const { return NLStructuralElementClass; }
+    virtual const char *giveClassName() const { return "NLStructuralElement"; }
+    virtual classType giveClassID() const { return NLStructuralElementClass; }
 
 protected:
     /**

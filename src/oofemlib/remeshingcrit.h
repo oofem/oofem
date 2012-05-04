@@ -108,8 +108,8 @@ public:
      */
     virtual int estimateMeshDensities(TimeStep *tStep) = 0;
 
-    const char *giveClassName() const { return "ErrorEstimator"; }
-    classType giveClassID() const { return RemeshingCriteriaClass; }
+    virtual const char *giveClassName() const { return "ErrorEstimator"; }
+    virtual classType giveClassID() const { return RemeshingCriteriaClass; }
     virtual void reinitialize() {}
 };
 } // end namespace oofem

@@ -64,7 +64,7 @@ public:
      */
     DSSSolver(int i, Domain *d, EngngModel *m);
     /// Destructor.
-    ~DSSSolver();
+    virtual ~DSSSolver();
 
     /**
      * Solves the given linear system by @f$L\cdot D\cdot L^{\mathrm{T}}@f$ factorization.
@@ -75,13 +75,13 @@ public:
      * @param x Solution array.
      * @return NM_Status value.
      */
-    NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "LDLTFactorization"; }
-    classType giveClassID() const { return LDLTFactorizationClass; }
-    LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
+    virtual const char *giveClassName() const { return "LDLTFactorization"; }
+    virtual classType giveClassID() const { return LDLTFactorizationClass; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
 };
 } // end namespace oofem
 #endif // dsssolver_h

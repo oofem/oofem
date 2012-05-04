@@ -42,30 +42,18 @@ namespace oofem {
 /**
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
- * integration rule type (rule for integration in 1d, 2d, 3d) and required acurracy.
+ * integration rule type (rule for integration in 1d, 2d, 3d) and required accuracy.
+ * 
+ * Tasks:
+ * - Returning number of integration points used
+ * - Returning requested integration point
+ * - Updating itself
+ * - Saving and restoring context
+ * 
+ * @see GaussPoint
  */
 class GaussIntegrationRule : public IntegrationRule
 {
-    /*
-     * DESCRIPTION:
-     * Implements integration rule class.
-     * Stores integration points used for integration
-     * of necesary terms (for example computation of  stiffness matrix
-     * or computation of element nodal force vector )
-     * and it  corresponds to some local strains
-     * on finite element level. Finite element can have many
-     * integration rules corresponding to  different strains.
-     *
-     * TASKS:
-     * instanciating yourself
-     * returning number of integration points used
-     * returning requested integration point - method getIntegrationPoint
-     * returning inteval of components (i.e.of local strain vector), where apply
-     * printing yourself
-     * updating yourself
-     * initializing for new time step
-     * saving & restoring context
-     */
 public:
     /**
      * Constructor.
@@ -80,11 +68,9 @@ public:
     /// Destructor
     virtual ~GaussIntegrationRule();
 
-    /// Returns classType id of receiver.
-    classType giveClassID() const { return GaussIntegrationRuleClass; }
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "GaussIntegrationRule"; }
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual classType giveClassID() const { return GaussIntegrationRuleClass; }
+    virtual const char *giveClassName() const { return "GaussIntegrationRule"; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     /**
      * Returns requred number of integration points to exactly integrate
@@ -95,36 +81,12 @@ public:
     int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
 protected:
-    /**
-     * Sets up receiver's  integration points on unit line integration domain.
-     * @returns Number of integration points.
-     */
-    int SetUpPointsOnLine(int, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on triangular (area coords) integration domain.
-     * @returns Number of integration points.
-     */
-    virtual int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on unit square integration domain.
-     * @returns Number of integration points.
-     */
-    int SetUpPointsOnSquare(int, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on unit cube integration domain.
-     * @returns Number of integration points.
-     */
-    int SetUpPointsOnCube(int, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
-     * @returns Number of integration points.
-     */
-    int SetUpPointsOnTetrahedra(int, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
-     * should be provided).
-     */
-    int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
+    virtual int SetUpPointsOnLine(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnTriangle(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnSquare(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnCube(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnTetrahedra(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
                                     const FloatArray **coords);
 };
 } // end namespace oofem

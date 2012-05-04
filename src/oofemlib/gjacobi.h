@@ -68,7 +68,7 @@ private:
 
 public:
     GJacobi(int i, Domain *d, EngngModel *m);
-    ~GJacobi();
+    virtual ~GJacobi();
 
     void solveYourselfAt(TimeStep *tStep);
     void updateYourself();
@@ -84,9 +84,9 @@ public:
      */
     virtual NM_Status solve(FloatMatrix *K, FloatMatrix *M, FloatArray *w, FloatMatrix *x);
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
-    classType giveClassID() const { return GeneralizedJacobiSolverClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
+    virtual classType giveClassID() const { return GeneralizedJacobiSolverClass; }
 };
 } // end namespace oofem
 #endif // gjacobi_h

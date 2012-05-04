@@ -111,7 +111,7 @@ private:
 public:
     SubspaceIteration(int i, Domain *d, EngngModel *m);
     // constructor
-    ~SubspaceIteration();               // destructor
+    virtual ~SubspaceIteration();               // destructor
 
 
     /**
@@ -127,12 +127,11 @@ public:
     virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *r, double rtol, int nroot);
 
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "SubspaceIterationSolver"; }
-    classType giveClassID() const { return SubspaceIterationSolverClass; }
-protected:
+    virtual const char *giveClassName() const { return "SubspaceIterationSolver"; }
+    virtual classType giveClassID() const { return SubspaceIterationSolverClass; }
 };
 } // end namespace oofem
 #endif // subspaceit_h

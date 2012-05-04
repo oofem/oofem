@@ -55,13 +55,13 @@ protected:
 public:
     PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
     { numberOfPoints = 0; }
-    ~PiecewiseLinFunction() { }
+    virtual ~PiecewiseLinFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    classType giveClassID() const { return PiecewiceClass; }
-    const char *giveClassName() const { return "PiecewiceClass"; }
-    const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
+    virtual classType giveClassID() const { return PiecewiceClass; }
+    virtual const char *giveClassName() const { return "PiecewiceClass"; }
+    virtual const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
 
     virtual double __at(double);
     virtual double __derAt(double);

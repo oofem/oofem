@@ -70,11 +70,11 @@ public:
     PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
 
     /// Destructor
-    ~PrescribedGradient() { }
+    virtual ~PrescribedGradient() { }
 
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
-    bcType giveType() const { return DirichletBT; }
+    virtual bcType giveType() const { return DirichletBT; }
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -84,7 +84,7 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     /**
      * Constructs a coefficient matrix for all prescribed unknowns.
@@ -122,8 +122,8 @@ public:
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    const char *giveClassName() const { return "PrescribedGradient"; }
-    classType giveClassID() const { return PrescribedGradientClass; }
+    virtual const char *giveClassName() const { return "PrescribedGradient"; }
+    virtual classType giveClassID() const { return PrescribedGradientClass; }
 };
 } // end namespace oofem
 

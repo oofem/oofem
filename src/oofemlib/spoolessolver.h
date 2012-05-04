@@ -79,20 +79,20 @@ public:
     SpoolesSolver(int i, Domain *d, EngngModel *m);
 
     ///Destructor
-    ~SpoolesSolver();
+    virtual ~SpoolesSolver();
 
     /**
      * Solves the given linear system by LDL^T factorization.
      */
-    NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
     /// Initializes receiver from given record. Empty implementation.
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "SpoolesSolver"; }
-    classType giveClassID() const { return SpoolesSolverClass; }
-    LinSystSolverType giveLinSystSolverType() const { return ST_Spooles; }
+    virtual const char *giveClassName() const { return "SpoolesSolver"; }
+    virtual classType giveClassID() const { return SpoolesSolverClass; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_Spooles; }
 };
 } // end namespace oofem
 #endif // spoolessolver_h

@@ -80,9 +80,9 @@ public:
      * - dfdt(t) (optional)
      * - d2fdt2(t) (optional)
      */
-    IRResultType initializeFrom(InputRecord *ir);
-    classType giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
-    const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual classType giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
+    virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
 };
 } // end namespace oofem
 #endif // usrdeftimefunct_h

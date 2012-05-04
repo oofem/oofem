@@ -119,11 +119,11 @@ public:
     virtual double __accelAt(double t) { return 0.; }
 
     // Overloaded methods:
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    classType giveClassID() const { return LoadTimeFunctionClass; }
-    const char *giveClassName() const { return "LoadTimeFunction"; }
+    virtual classType giveClassID() const { return LoadTimeFunctionClass; }
+    virtual const char *giveClassName() const { return "LoadTimeFunction"; }
 };
 } // end namespace oofem
 #endif // loadtime_h

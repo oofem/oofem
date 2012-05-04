@@ -87,9 +87,9 @@ public:
      */
     IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
     /// Destructor.
-    ~IsotropicLinearElasticMaterial() { }
+    virtual ~IsotropicLinearElasticMaterial() { }
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                   MatResponseForm form,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
@@ -102,36 +102,22 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
-    classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
-    /// Returns input record name of the receiver.
-    const char *giveInputRecordName() const { return "IsoLE"; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "IsotropicLinearElasticMaterial"; }
+    virtual classType giveClassID() const { return IsotropicLinearElasticMaterialClass; }
+    virtual const char *giveInputRecordName() const { return "IsoLE"; }
     /**
      * Initializes receiver according to object description stored in input record.
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
      * alpha ("talpha") are read. The parent class instanciateFrom method is called.
      */
-    IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Setups the input record string of receiver
-     * @param str String to be filled by input record.
-     * @param keyword Print record keyword (default true).
-     */
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    // non-standard - returns time independent material constant
-    /**
-     * Returns the value of material property 'aProperty'. Property must be identified
-     * by unique int id.
-     * @param aProperty ID of property requested.
-     * @param gp Integration point.
-     * @return Property value.
-     */
-    double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp);
 
     /// Returns Young's modulus.
     double giveYoungsModulus() { return E; }
@@ -145,7 +131,7 @@ public:
     /// Returns the bulk elastic modulus K = E / (3*(1-2*nu)).
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                        MatResponseForm, MatResponseMode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
@@ -159,24 +145,24 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    void givePlaneStressStiffMtrx(FloatMatrix & answer,
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
                                   MatResponseForm, MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
 
-    void givePlaneStrainStiffMtrx(FloatMatrix & answer,
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,
                                   MatResponseForm, MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
 
-    void give1dStressStiffMtrx(FloatMatrix & answer,
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer,
                                MatResponseForm, MatResponseMode, GaussPoint * gp,
                                TimeStep * atTime);
 
-    void give2dBeamStiffMtrx(FloatMatrix &answer,
+    virtual void give2dBeamStiffMtrx(FloatMatrix &answer,
                              MatResponseForm form, MatResponseMode rMode,
                              GaussPoint *gp,
                              TimeStep *tStep);
 
-    void give3dBeamStiffMtrx(FloatMatrix &answer,
+    virtual void give3dBeamStiffMtrx(FloatMatrix &answer,
                              MatResponseForm form, MatResponseMode rMode,
                              GaussPoint *gp,
                              TimeStep *tStep);

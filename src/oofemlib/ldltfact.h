@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/ldltfact.h,v 1.10 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -56,7 +55,7 @@ class FloatMatrix;
 
 /**
  * Implements the solution of linear system of equation in the form Ax=b using direct factorization method.
- * Can work with any sparse matrix implementation. Hovewer, the sparse matrix implementation have to support
+ * Can work with any sparse matrix implementation. However, the sparse matrix implementation have to support
  * its factorization (canBeFactorized method).
  */
 class LDLTFactorization : public SparseLinearSystemNM
@@ -67,7 +66,7 @@ public:
     /// Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
     LDLTFactorization(int i, Domain *d, EngngModel *m);
     /// Destructor
-    ~LDLTFactorization();    // destructor
+    virtual ~LDLTFactorization();
 
     /**
      * Solves the given linear system by LDL^T factorization.
@@ -79,16 +78,14 @@ public:
      * @return NM_Status value
      * @param tNow time step
      */
-    NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
     /// Initializes receiver from given record. Empty implementation.
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    /// Returns "LDLTFactorization" - class name of the receiver.
-    const char *giveClassName() const { return "LDLTFactorization"; }
-    /// Returns LDLTFactorizationClass - classType id of receiver.
-    classType giveClassID() const { return LDLTFactorizationClass; }
-    LinSystSolverType giveLinSystSolverType() const { return ST_Direct; }
+    virtual const char *giveClassName() const { return "LDLTFactorization"; }
+    virtual classType giveClassID() const { return LDLTFactorizationClass; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_Direct; }
 };
 } // end namespace oofem
 #endif // ldltfact_h

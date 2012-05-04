@@ -70,14 +70,14 @@ private:
 
 public:
     SLEPcSolver(int i, Domain *d, EngngModel *m);
-    ~SLEPcSolver();
+    virtual ~SLEPcSolver();
 
     virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *v, FloatMatrix *x, double rtol, int nroot);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // Identification
-    const char *giveClassName() const { return "SLEPcSolver"; }
-    classType giveClassID() const { return SlepcSolverClass; }
+    virtual const char *giveClassName() const { return "SLEPcSolver"; }
+    virtual classType giveClassID() const { return SlepcSolverClass; }
 };
 } // end namespace oofem
 #endif // slepcsolver_h

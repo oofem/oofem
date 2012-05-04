@@ -62,16 +62,16 @@ public:
     LatticeMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
     virtual ~LatticeMaterialStatus() { }
-    /// Print receiver's output to given stream.
-    void printOutputAt(FILE *, TimeStep *) { }
+
+    virtual void printOutputAt(FILE *, TimeStep *) { }
 
     virtual void initTempStatus() { }
 
     virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
     
-    const char *giveClassName() const { return "LatticeMaterialStatus"; }
+    virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 
-    classType giveClassID() const { return LatticeMaterialStatusClass; }
+    virtual classType giveClassID() const { return LatticeMaterialStatusClass; }
 
     ///Sets the temp_crack_flag
     virtual void setTempCrackFlag(int val) = 0;
@@ -101,7 +101,7 @@ public:
      */
     virtual double giveDeltaDissipation() { return 0; }
 
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // matstatus_h

@@ -66,13 +66,13 @@ public:
         period = -1.0;
         addTF = 0;
     }
-    ~PeriodicPiecewiseLinFunction() { }
+    virtual ~PeriodicPiecewiseLinFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    classType    giveClassID() const { return PeriodicPiecewiseClass; }
-    const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
-    const char *giveInputRecordName() const { return "PeriodicPiecewiseLinFunction"; }
+    virtual classType giveClassID() const { return PeriodicPiecewiseClass; }
+    virtual const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
+    virtual const char *giveInputRecordName() const { return "PeriodicPiecewiseLinFunction"; }
 
     virtual double __at(double);
     virtual double __derAt(double);

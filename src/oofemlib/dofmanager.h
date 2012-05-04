@@ -142,7 +142,7 @@ public:
      */
     DofManager(int n, Domain *aDomain);
     /// Destructor.
-    ~DofManager();
+    virtual ~DofManager();
 
     /**@name Dof management methods */
     //@{
@@ -245,7 +245,6 @@ public:
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    PrimaryField &field, ValueModeType mode, TimeStep *stepN);
 
-    // TODO: Remove
     /**
      * Assembles the vector of prescribed unknowns in nodal c.s for given dofs of receiver.
      * This vector may have size different from number of dofs requested,
@@ -262,6 +261,7 @@ public:
      * and possibly for previous time step).
      * @see Dof::giveBcValue
      * @see Dof::hasBc
+     * @todo Remove all usage of this. Just ask for the unknown vector instead, they are the same.
      */
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                              ValueModeType mode, TimeStep *stepN);
@@ -380,12 +380,11 @@ public:
      */
     DofManager *ofType(const char *aClass);
 
-    const char *giveClassName() const { return "DofManager"; }
-    classType giveClassID() const { return DofManagerClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "DofManager"; }
+    virtual classType giveClassID() const { return DofManagerClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /// Prints receiver state on stdout. Useful for debugging.
-    void printYourself();
+    virtual void printYourself();
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 

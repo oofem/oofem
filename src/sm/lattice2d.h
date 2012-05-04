@@ -51,10 +51,10 @@ protected:
     FloatArray gpCoords;
 
 public:
-    Lattice2d(int, Domain *);  // constructor
-    virtual ~Lattice2d(); // destructor
+    Lattice2d(int n, Domain *d);
+    virtual ~Lattice2d();
 
-    int giveLocalCoordinateSystem(FloatMatrix &answer);
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     /**
      * This function is different from the standard computeGlobalCorrdinates
@@ -86,12 +86,11 @@ public:
     //
     // definition & identification
     //
-    const char *giveClassName() const { return "Lattice2d"; }
-    classType giveClassID() const { return Lattice2dClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "Lattice2d"; }
+    virtual classType giveClassID() const { return Lattice2dClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-
     void drawYourself(oofegGraphicContext &context);
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);

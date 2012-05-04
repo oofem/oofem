@@ -61,10 +61,10 @@ public:
     /// Constructor.
     SparseLinearSystemNM(int i, Domain *d, EngngModel *m);
     /// Destructor.
-    ~SparseLinearSystemNM();
+    virtual ~SparseLinearSystemNM();
 
-    const char *giveClassName() const { return "SparseLinearSystemNM"; }
-    classType giveClassID() const { return SparseLinearSystemNMClass; }
+    virtual const char *giveClassName() const { return "SparseLinearSystemNM"; }
+    virtual classType giveClassID() const { return SparseLinearSystemNMClass; }
 
     /**
      * @return LinSystSolverType value, corresponding to receiver.

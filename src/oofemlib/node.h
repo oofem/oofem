@@ -104,11 +104,11 @@ public:
      */
     Node(int n, Domain *aDomain);
     /// Destructor.
-    ~Node();
+    virtual ~Node();
 
-    bool hasCoordinates() { return true; }
-    double giveCoordinate(int i);
-    FloatArray *giveCoordinates() { return & coordinates; }
+    virtual bool hasCoordinates() { return true; }
+    virtual double giveCoordinate(int i);
+    virtual FloatArray *giveCoordinates() { return & coordinates; }
     /**
      * Sets node coordinates to given array.
      * @param coords New coordinates for node.
@@ -152,20 +152,18 @@ public:
      * @param tStep Time step for which to update.
      * @see EngngModel::giveFormulation
      */
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     // miscellaneous
-    const char *giveClassName() const { return "Node"; }
-    classType giveClassID() const { return NodeClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    /// Prints receiver state on stdout. Useful for debugging.
-    void printYourself();
+    virtual const char *giveClassName() const { return "Node"; }
+    virtual classType giveClassID() const { return NodeClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void printYourself();
     virtual int checkConsistency();
-    /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &);

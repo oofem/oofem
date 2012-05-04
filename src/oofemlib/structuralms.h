@@ -78,16 +78,15 @@ public:
     /// Constructor. Creates new StructuralMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     StructuralMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~StructuralMaterialStatus();
+    virtual ~StructuralMaterialStatus();
 
-    /// Print receiver's output to given stream.
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the const pointer to receiver's strain vector.
     const FloatArray &giveStrainVector() { return strainVector; }
@@ -106,8 +105,8 @@ public:
     /// Assigns tempStrainVector to given vector v
     void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
 
-    const char *giveClassName() const { return "StructuralMaterialStatus"; }
-    classType giveClassID() const { return StructuralMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
+    virtual classType giveClassID() const { return StructuralMaterialStatusClass; }
 };
 } // end namespace oofem
 #endif // structuralms_h

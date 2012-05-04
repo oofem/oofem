@@ -51,11 +51,11 @@ protected:
 
 public:
     DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
-    ~DoublePowerLawMaterial() { }
+    virtual ~DoublePowerLawMaterial() { }
 
-    const char *giveClassName() const { return "DoublePowerLawMaterial"; }
-    classType giveClassID() const { return DoublePowerLawMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "DoublePowerLawMaterial"; }
+    virtual classType giveClassID() const { return DoublePowerLawMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
     virtual double computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);

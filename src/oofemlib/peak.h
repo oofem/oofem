@@ -56,13 +56,13 @@ public:
         t = 0.0;
         value = 0.0;
     }
-    ~PeakFunction() { }
+    virtual ~PeakFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    classType   giveClassID() const { return PeakFunctionClass; }
-    const char *giveClassName()  const { return "PeakFunction"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual classType giveClassID() const { return PeakFunctionClass; }
+    virtual const char *giveClassName() const { return "PeakFunction"; }
 
-    double  __at(double);
+    virtual double  __at(double);
 };
 } // end namespace oofem
 #endif // peak_h

@@ -52,9 +52,9 @@ public:
     DummyMaterial (int n, Domain* d) : Material(n,d) {};
     virtual int hasMaterialModeCapability(MaterialMode mode) { return 0;}
 
-    const char *giveClassName() const { return "DummyMaterial"; }
-    classType giveClassID() const { return DummyMaterialClass; }
-    IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual const char *giveClassName() const { return "DummyMaterial"; }
+    virtual classType giveClassID() const { return DummyMaterialClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
 
 };
 } // end namespace oofem

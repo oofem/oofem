@@ -228,8 +228,8 @@ public:
     }
     //@}
 
-    classType giveClassID() const { return ActiveBoundaryConditionClass; }
-    const char *giveClassName() const { return "ActiveBoundaryCondition"; }
+    virtual classType giveClassID() const { return ActiveBoundaryConditionClass; }
+    virtual const char *giveClassName() const { return "ActiveBoundaryCondition"; }
 };
 } // end namespace oofem
 #endif // activebc_h

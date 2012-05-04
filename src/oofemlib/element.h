@@ -537,7 +537,7 @@ public:
     virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie, EquationID ut)
     { return 0; }
 
-    /// Returns number of sides (which have unknown dofs) of receiver
+    // Returns number of sides (which have unknown dofs) of receiver
     //int giveNumberOfSides () {return numberOfSides;}
 
     /// @return Corresponding element region. Currently corresponds to cross section model number.
@@ -977,12 +977,12 @@ public:
     IntArray *giveBoundaryLoadArray();
 
     // Overloaded methods:
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    void printOutputAt(FILE *file, TimeStep *tStep);
-    const char *giveClassName() const { return "Element"; }
-    classType giveClassID() const { return ElementClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual const char *giveClassName() const { return "Element"; }
+    virtual classType giveClassID() const { return ElementClass; }
 
 protected:
     /**

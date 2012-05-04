@@ -79,7 +79,6 @@ protected:
     IntArray defaultDofs;
 
 public:
-
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
      * @param n Boundary condition number.
@@ -144,9 +143,9 @@ public:
     virtual void scale(double s) { }
 
     // Overloaded methods:
-    IRResultType initializeFrom(InputRecord *ir);
-    classType giveClassID() const { return GeneralBoundaryConditionClass; }
-    const char *giveClassName() const { return "GeneralBoundaryCondition"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual classType giveClassID() const { return GeneralBoundaryConditionClass; }
+    virtual const char *giveClassName() const { return "GeneralBoundaryCondition"; }
 };
 } // end namespace oofem
 #endif // generalbc_h

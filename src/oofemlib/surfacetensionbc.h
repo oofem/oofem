@@ -72,7 +72,7 @@ public:
     void clearElements() { elements.clear(); }
     void clearElementSides() { sides.clear(); }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
@@ -84,8 +84,8 @@ public:
     virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
-    classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }
-    const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }
+    virtual classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }
+    virtual const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }
 
 protected:
     /**

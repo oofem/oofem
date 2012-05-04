@@ -70,13 +70,13 @@ public:
      */
     ElementSide(int n, Domain *aDomain);
     /// Destructor.
-    ~ElementSide();
+    virtual ~ElementSide();
 
     // miscellaneous
-    const char *giveClassName() const { return "ElementSide"; }
-    classType giveClassID() const { return ElementSideClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    void printYourself();
+    virtual const char *giveClassName() const { return "ElementSide"; }
+    virtual classType giveClassID() const { return ElementSideClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void printYourself();
 
     /**
      * Computes receiver transformation matrix from global cs. to dofManager specific

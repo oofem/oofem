@@ -62,10 +62,10 @@ public:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
     { this->computeComponentArrayAt(answer, tStep, mode); }
 
-    classType giveClassID() const { return StructuralEigenstrainLoadClass; }
-    const char *giveClassName() const { return "StructuralEigenstrainLoad"; }
-    bcValType giveBCValType() const { return EigenstrainBVT; }
-    bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    virtual classType giveClassID() const { return StructuralEigenstrainLoadClass; }
+    virtual const char *giveClassName() const { return "StructuralEigenstrainLoad"; }
+    virtual bcValType giveBCValType() const { return EigenstrainBVT; }
+    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 };
 } // end namespace oofem
 #endif // structeigenstrainload_h

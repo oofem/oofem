@@ -56,10 +56,10 @@ public:
      */
     EmptyCS(int n, Domain *d);
     /// Destructor.
-    ~EmptyCS();
+    virtual ~EmptyCS();
 
-    const char *giveClassName() const { return "EmptyCS"; }
-    classType giveClassID() const { return EmptyCrossSectionClass; }
+    virtual const char *giveClassName() const { return "EmptyCS"; }
+    virtual classType giveClassID() const { return EmptyCrossSectionClass; }
 };
 } // end namespace oofem
 #endif // emptycs_h

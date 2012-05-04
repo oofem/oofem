@@ -92,18 +92,18 @@ public:
      */
     RigidArmNode(int n, Domain *aDomain);
     /// Destructor.
-    ~RigidArmNode(void) { }
+    virtual ~RigidArmNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int checkConsistency();
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
     int computeMasterContribution();
 
-    const char *giveClassName() const { return "RigidArmNode"; }
-    classType giveClassID() const { return RigidArmNodeClass; }
-    bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
+    virtual const char *giveClassName() const { return "RigidArmNode"; }
+    virtual classType giveClassID() const { return RigidArmNodeClass; }
+    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 };
 } // end namespace oofem
 #endif // rigidarmnode_h

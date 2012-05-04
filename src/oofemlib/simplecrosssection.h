@@ -50,13 +50,13 @@ class GaussPoint;
  * elements.
  *
  * The simple cross section implementation does not perform any integration over cross-section volume,
- * it repsesents a cross section model, where the whole cross section model is represented by single integration point.
- * and therefore all requests for characteristic contibutions (stiffness) and for real stress computations are simply
+ * it represents a cross section model, where the whole cross section model is represented by single integration point.
+ * and therefore all requests for characteristic contributions (stiffness) and for real stress computations are simply
  * passed to parent StructuralCrossSection class, which invokes corresponding material mode services.
  * Please note, that it is assumed that material model will support these material modes and provide
  * corresponding services for characteristic components and stress evaluation.
  * For description, how to incorporate more elaborate models of cross section, please read
- * base CrossSection docomentation.
+ * base CrossSection documentation.
  *
  * The overloaded methods giveFullCharacteristicVector and giveFullCharacteristicVector add some additional support
  * for integrated cross section models - _3dShell, _3dBeam, _2dPlate and _2dBeam.
@@ -67,22 +67,6 @@ class GaussPoint;
  */
 class SimpleCrossSection : public StructuralCrossSection
 {
-    /*
-     * Simple cross section represent a cross section in which stress strain state is
-     * described by using only one material point (GaussPoint). It includes also
-     * methods for analysis plates, shels and beams (integral material point models).
-     * It does not include layered, fibred and others integral models.
-     *
-     * TASK
-     * - Returning standard material stiffness marices (like 3dstress-strain, 2d plane ,
-     *   plate, 3dbeam, 2d beam ..) according to current state determined by parametr
-     *   StressMode by calling gp->material->GiveMaterialStiffnessMatrix (....) and by
-     *   possible modifiing returned matrix. (for example in plate bending problems
-     *   by integrating over thickness ).
-     * - Returning RealStress state in gauss point and for given Stress mode.
-     * - Returning a properties of cross section like thickness or area.
-     */
-
 public:
     /** 
      * Constructor.
@@ -91,30 +75,12 @@ public:
      */
     SimpleCrossSection(int n, Domain *d) : StructuralCrossSection(n, d) { }
 
-    void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector);
-    void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
+    virtual void giveFullCharacteristicVector(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector);
+    virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                           const FloatArray &charVector3d);
-    /**
-     * Computes the real stress vector for given strain and integration point.
-     * Implementation tests if material mode is supported by corresponding material model
-     * and pass the request to StructuralCrossSection giveRealStresses method, otherwise
-     * error is generated.
-     * @see StructurealCrossSection::giveRealStresses
-     */
-    void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                           const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
-    // next function is intended to be used if we would like to obtain
-    // char matrix form different material which is not associated with gp and its element.
-    // (mainly for obtaining linear elastic matrix)
-    // stress-strain mode is taken from gp.
-    // NORMALLY - PLEASE USE GiveCharMaterialStiffnessMatrix function
-    //
-    /**
-     * Computes the stiffness matrix of receiver in given integration point, respecting its history.
-     * Current implementaion calls directly giveMaterialStiffnessMatrixOf service of receiver.
-     * @see StructuralCrossSection::giveRealStresses
-     */
     virtual void giveCharMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                                    MatResponseForm form, MatResponseMode mode,
                                                    GaussPoint *gp, StructuralMaterial *mat,
@@ -126,9 +92,9 @@ public:
     virtual double give(CrossSectionProperty a);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "SimpleCrossSection"; }
-    classType giveClassID() const { return SimpleCrossSectionClass; }
-    const char *giveInputRecordName() const { return "SimpleCS"; }
+    virtual const char *giveClassName() const { return "SimpleCrossSection"; }
+    virtual classType giveClassID() const { return SimpleCrossSectionClass; }
+    virtual const char *giveInputRecordName() const { return "SimpleCS"; }
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -142,11 +108,11 @@ public:
      * - 'beamshearcoeff' Beam shear coefficient
      * @param ir Record to read off.
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
 protected:
-    void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
+    virtual void giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
                                        MatResponseForm form,
                                        MatResponseMode rMode,
                                        GaussPoint *gp,

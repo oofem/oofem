@@ -93,7 +93,7 @@ public:
         regionSkipMap.resize(0);
     }
     /// Destructor
-    ~ErrorEstimator() { if ( rc ) { delete rc; } }
+    virtual ~ErrorEstimator() { if ( rc ) { delete rc; } }
     /// Sets Domain; should also re-initialize attributes if necessary.
     void setDomain(Domain *d);
     /**
@@ -147,8 +147,8 @@ public:
     virtual void reinitialize() { this->rc->reinitialize(); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "ErrorEstimator"; }
-    classType giveClassID() const { return ErrorEstimatorClass; }
+    virtual const char *giveClassName() const { return "ErrorEstimator"; }
+    virtual classType giveClassID() const { return ErrorEstimatorClass; }
 };
 } // end namespace oofem
 #endif // errorestimator_h

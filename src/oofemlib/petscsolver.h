@@ -64,9 +64,9 @@ public:
     PetscSolver(int i, Domain *d, EngngModel *m);
 
     /// Destructor.
-    ~PetscSolver();
+    virtual ~PetscSolver();
 
-    NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
 #ifdef __PETSC_MODULE
     /**
@@ -80,13 +80,13 @@ public:
 #endif
 
     /// Initializes receiver from given record. Empty implementation.
-    IRResultType initializeFrom(InputRecord *ir);
-    void reinitialize();
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void reinitialize();
 
     // Identification
-    const char *giveClassName() const { return "PetscSolver"; }
-    classType giveClassID() const { return PetscSolverClass; }
-    LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
+    virtual const char *giveClassName() const { return "PetscSolver"; }
+    virtual classType giveClassID() const { return PetscSolverClass; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
 };
 } // end namespace oofem
 #endif // petscsolver_h

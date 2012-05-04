@@ -101,7 +101,7 @@ public:
 
     InverseIteration(int i, Domain *d, EngngModel *m);
     // constructor
-    ~InverseIteration();               // destructor
+    virtual ~InverseIteration();               // destructor
 
     /**
      * Solves the given sparse generalized eigen value system of equations Ax = o^2 Bx.
@@ -114,12 +114,11 @@ public:
      * @return NM_Status value
      */
     virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *r, double rtol, int nroot);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    const char *giveClassName() const { return "InverseIteration"; }
-    classType giveClassID() const { return InverseIterationSolverClass; }
-protected:
+    virtual const char *giveClassName() const { return "InverseIteration"; }
+    virtual classType giveClassID() const { return InverseIterationSolverClass; }
 };
 } // end namespace oofem
 #endif // inverseit_h

@@ -546,11 +546,11 @@ GaussIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, GaussP
 }
 
 int
-GaussIntegrationRule :: SetUpPointsOnTriagle(int nPoints,
+GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints,
                                              MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Gauss Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
-//   store corrdinates and weights)
+//   store coordinates and weights)
 {
     FloatArray *coord1;
 

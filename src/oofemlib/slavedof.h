@@ -72,7 +72,7 @@ public:
      */
     SlaveDof(int n, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
-    ~SlaveDof(void) { }
+    virtual ~SlaveDof(void) { }
 
     void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
     virtual int giveNumberOfPrimaryMasterDofs();
@@ -150,8 +150,8 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const char *giveClassName() const { return "SlaveDof"; }
-    classType giveClassID() const { return SlaveDofClass; }
+    virtual const char *giveClassName() const { return "SlaveDof"; }
+    virtual classType giveClassID() const { return SlaveDofClass; }
 
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 

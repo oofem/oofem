@@ -76,7 +76,7 @@ public:
     /// Constructor
     MeshQualityErrorEstimator(int n, Domain *d) : ErrorEstimator(n, d) { this->eeType = EET_MeshQuality; }
     /// Destructor
-    ~MeshQualityErrorEstimator() { }
+    virtual ~MeshQualityErrorEstimator() { }
 
     virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
 
@@ -89,8 +89,8 @@ public:
     virtual RemeshingCriteria *giveRemeshingCrit() { return NULL; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "MeshQualityErrorEstimator"; }
-    classType giveClassID() const { return MeshQualityErrorEstimatorClass; }
+    virtual const char *giveClassName() const { return "MeshQualityErrorEstimator"; }
+    virtual classType giveClassID() const { return MeshQualityErrorEstimatorClass; }
 };
 } // end namespace oofem
 #endif // meshqualityerrorestimator_h

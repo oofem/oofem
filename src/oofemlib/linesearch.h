@@ -65,20 +65,15 @@ public:
     FloatArray eta;
     FloatArray prod;
 
-protected:
 public:
     /// Constructor
     LineSearchNM(int i, Domain *d, EngngModel *m);
     /// Destructor
-    ~LineSearchNM();
+    virtual ~LineSearchNM();
 
     // identification
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "LineSearchNM"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType giveClassID() const { return NumericalMethodClass; }
+    virtual const char *giveClassName() const { return "LineSearchNM"; }
+    virtual classType giveClassID() const { return NumericalMethodClass; }
 
     /**
      * Solves the line search optimization problem in the form of @f$ g(r)=0; r_{new}=r_{old}+\eta\delta r; 0 < \eta < 1 @f$,
@@ -99,9 +94,9 @@ public:
                             IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
     // Management  components
-    IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
 
 protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp, double maxeta, double mineta, int &status);

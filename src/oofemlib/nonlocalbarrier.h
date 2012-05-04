@@ -86,8 +86,8 @@ public:
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) = 0;
 
-    const char *giveClassName() const { return "NonlocalBarrier"; }
-    classType giveClassID() const { return NonlocalBarrierClass; }
+    virtual const char *giveClassName() const { return "NonlocalBarrier"; }
+    virtual classType giveClassID() const { return NonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // nonlocalbarrier_h

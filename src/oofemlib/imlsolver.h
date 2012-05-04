@@ -86,7 +86,7 @@ public:
     /// Constructor. Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
     IMLSolver(int i, Domain *d, EngngModel *m);
     /// Destructor
-    ~IMLSolver();
+    virtual ~IMLSolver();
 
     /**
      * Solves the given linear system iteratively by method described by IMLSolverType.
@@ -95,12 +95,12 @@ public:
      * @param x Solution array.
      * @return Status value.
      */
-    NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "IMLSolver"; }
-    classType giveClassID() const { return IMLSolverClass; }
-    LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "IMLSolver"; }
+    virtual classType giveClassID() const { return IMLSolverClass; }
+    virtual LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
 };
 } // end namespace oofem
 #endif // imlsolver_h

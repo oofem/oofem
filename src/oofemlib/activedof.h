@@ -84,8 +84,8 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const char *giveClassName() const { return "ActiveDof"; }
-    classType giveClassID() const { return ActiveDofClass; }
+    virtual const char *giveClassName() const { return "ActiveDof"; }
+    virtual classType giveClassID() const { return ActiveDofClass; }
 
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 

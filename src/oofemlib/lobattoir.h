@@ -56,20 +56,20 @@ public:
      */
     LobattoIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic);
     /// Destructor
-    ~LobattoIntegrationRule();
+    virtual ~LobattoIntegrationRule();
 
-    classType giveClassID() const { return LobattoIntegrationRuleClass; }
-    const char *giveClassName() const { return "LobattoIntegrationRule"; }
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual classType giveClassID() const { return LobattoIntegrationRuleClass; }
+    virtual const char *giveClassName() const { return "LobattoIntegrationRule"; }
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-    int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
+    virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
 protected:
-    int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnTriagle(int, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp);
-    int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp);
+    virtual int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp);
+    virtual int SetUpPointsOnTriangle(int, MaterialMode mode, GaussPoint ***gp);
+    virtual int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp);
+    virtual int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp);
+    virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp);
 };
 } // end namespace oofem
 #endif // lobattoir_h

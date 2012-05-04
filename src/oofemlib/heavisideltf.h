@@ -39,7 +39,7 @@
 #include "loadtime.h"
 
 namespace oofem {
-/*
+/**
  * This class implements a Heaviside step load time function.
  *
  * The function is defined by the origin of step and value.
@@ -57,14 +57,14 @@ private:
 public:
     HeavisideLTF(int i, Domain *d) : LoadTimeFunction(i, d)
     { origin = value = 0.; }
-    ~HeavisideLTF() { }
+    virtual ~HeavisideLTF() { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int giveInputRecordString(std :: string &str, bool keyword = true);
-    classType giveClassID() const { return HeavisideLTFClass; }
-    const char *giveClassName() const { return "HeavisideLTF"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual classType giveClassID() const { return HeavisideLTFClass; }
+    virtual const char *giveClassName() const { return "HeavisideLTF"; }
 
-    double __at(double);
+    virtual double __at(double);
 };
 } // end namespace oofem
 #endif // heavisideltf_h

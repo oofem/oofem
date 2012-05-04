@@ -109,7 +109,7 @@ public:
     /// Constructor
     LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor
-    ~LatticeDamage2dStatus() {}
+    virtual ~LatticeDamage2dStatus() {}
 
 
     /// Returns the last equilibrated scalar measure of the largest strain level
@@ -169,10 +169,10 @@ public:
     void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// Returns characteristic length stored in receiver
-    double giveLe()  { return le; }
+    double giveLe() { return le; }
 
     /// Sets characteristic length to given value
-    void   setLe(double ls) { le = ls; }
+    void setLe(double ls) { le = ls; }
 
     ///Sets the temp_crack_flag
     void setTempCrackFlag(int val);
@@ -186,8 +186,8 @@ public:
     double giveCrackWidth() { return this->crackWidth; }
 
     // definition
-    const char *giveClassName() const { return "LatticeDamage2dStatus"; }
-    classType giveClassID() const { return LatticeDamage2dStatusClass; }
+    virtual const char *giveClassName() const { return "LatticeDamage2dStatus"; }
+    virtual classType giveClassID() const { return LatticeDamage2dStatusClass; }
 
     virtual void initTempStatus();
 
@@ -362,7 +362,7 @@ protected:
 
 
     /**
-     *  Perfoms initialization, when damage first appear. The Le characteristic length is
+     *  Performs initialization, when damage first appear. The Le characteristic length is
      *  computed from the direction of largest positive principal strain and stored
      *  in corresponding status.
      *  @param kappa scalar measure of strain level
@@ -372,19 +372,19 @@ protected:
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 
     
-    int giveIPValue (FloatArray& answer, 
-		     GaussPoint* gp, 
-		     InternalStateType type, 
-		     TimeStep* atTime) ;
+    virtual int giveIPValue(FloatArray& answer, 
+                            GaussPoint* gp, 
+                            InternalStateType type, 
+                            TimeStep* atTime);
     
-    int giveIPValueSize (InternalStateType type, 
-			 GaussPoint* gp) ;
+    virtual int giveIPValueSize(InternalStateType type, 
+                        GaussPoint* gp);
     
-    int giveIntVarCompFullIndx (IntArray& answer, 
-				InternalStateType type, 
-				MaterialMode mmode) ;
+    virtual int giveIntVarCompFullIndx(IntArray& answer, 
+                                       InternalStateType type, 
+                                       MaterialMode mmode);
     
-    InternalStateValueType giveIPValueType (InternalStateType type) ;
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     
     
 };

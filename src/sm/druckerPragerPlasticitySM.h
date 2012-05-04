@@ -77,17 +77,17 @@ public:
     DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp);
 
     /// Destructor
-    ~DruckerPragerPlasticitySMStatus();
+    virtual ~DruckerPragerPlasticitySMStatus();
 
-    void initTempStatus();
-    void updateYourself(TimeStep *tStep);
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void initTempStatus();
+    virtual void updateYourself(TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    const char *giveClassName() const { return "DruckerPragerPlasticitySMStatus"; }
-    classType giveClassID() const { return DruckerPragerPlasticitySMStatusClass; }
+    virtual const char *giveClassName() const { return "DruckerPragerPlasticitySMStatus"; }
+    virtual classType giveClassID() const { return DruckerPragerPlasticitySMStatusClass; }
 
     /**
      * Get the full plastic strain vector from the material status.
@@ -229,21 +229,21 @@ public:
     /// Constructor
     DruckerPragerPlasticitySM(int n, Domain *d);
     /// Destructor
-    ~DruckerPragerPlasticitySM();
+    virtual ~DruckerPragerPlasticitySM();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int hasMaterialModeCapability(MaterialMode mMode);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasMaterialModeCapability(MaterialMode mMode);
 
-    const char *giveClassName() const { return "DruckerPragerPlasticitySM"; }
-    classType giveClassID() const { return DruckerPragerPlasticitySMClass; }
+    virtual const char *giveClassName() const { return "DruckerPragerPlasticitySM"; }
+    virtual classType giveClassID() const { return DruckerPragerPlasticitySMClass; }
 
-    void giveRealStressVector(FloatArray &answer,
+    virtual void giveRealStressVector(FloatArray &answer,
                               MatResponseForm form,
                               GaussPoint *gp,
                               const FloatArray &strainVector,
                               TimeStep *atTime);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
                                        MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
 
     /**
@@ -331,28 +331,28 @@ public:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    int giveIPValue(FloatArray &answer,
+    virtual int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *atTime);
 
-    int giveIPValueSize(InternalStateType type,
+    virtual int giveIPValueSize(InternalStateType type,
                         GaussPoint *gp);
 
-    int giveIntVarCompFullIndx(IntArray &answer,
+    virtual int giveIntVarCompFullIndx(IntArray &answer,
                                InternalStateType type,
                                MaterialMode mmode);
 
-    InternalStateValueType giveIPValueType(InternalStateType type);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *atTime)
     {
         LEMaterial->giveThermalDilatationVector(answer, gp, atTime);
     }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 #ifdef __PARALLEL_MODE
     virtual double predictRelativeComputationalCost(GaussPoint *gp);

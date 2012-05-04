@@ -65,21 +65,20 @@ protected:
     FloatArray startCoords, endCoords;
     BL_FormulationType formulation;
 
-
 public:
     LinearEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
 
-    int giveApproxOrder() { return 1; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual int giveApproxOrder() { return 1; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
-    BL_FormulationType giveFormulationType() { return formulation; }
+    virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
+    virtual BL_FormulationType giveFormulationType() { return formulation; }
 
-    classType giveClassID() const { return LinearEdgeLoadClass; }
-    const char *giveClassName() const { return "LinearEdgeLoad"; }
+    virtual classType giveClassID() const { return LinearEdgeLoadClass; }
+    virtual const char *giveClassName() const { return "LinearEdgeLoad"; }
 
 protected:
-    void computeNArray(FloatArray &answer, FloatArray &coords) const;
+    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const;
 };
 } // end namespace oofem
 #endif // linearedgeload_h

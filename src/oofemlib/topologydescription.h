@@ -107,11 +107,11 @@ public:
     /**
      * Gives the name of the class.
      */
-    const char *giveClassName() const { return "TopologyDescription"; }
+    virtual const char *giveClassName() const { return "TopologyDescription"; }
     /**
      * Gives the class ID.
      */
-    classType giveClassID() const { return TopologyDescriptionClass; }
+    virtual classType giveClassID() const { return TopologyDescriptionClass; }
 };
 
 } // end namespace oofem

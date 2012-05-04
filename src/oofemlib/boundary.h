@@ -87,7 +87,7 @@ public:
     BoundaryCondition(int i, Domain *d) : GeneralBoundaryCondition(i, d)
     { isImposedTimeFunction = 0; }
     /// Destructor
-    ~BoundaryCondition() { }
+    virtual ~BoundaryCondition() { }
 
     /**
      * Returns the value of a prescribed unknown, respecting requested mode for given time.
@@ -114,12 +114,12 @@ public:
     virtual void setPrescribedValue(double s) { prescribedValue = s; }
 
     // Overloaded methods:
-    bcType giveType() const { return DirichletBT; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual bcType giveType() const { return DirichletBT; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void scale(double s) { prescribedValue *= s; }
-    const char *giveClassName() const { return "BoundaryCondition"; }
-    classType giveClassID() const { return BoundaryConditionClass; }
+    virtual const char *giveClassName() const { return "BoundaryCondition"; }
+    virtual classType giveClassID() const { return BoundaryConditionClass; }
 };
 } // end namespace oofem
 #endif // boudary_h

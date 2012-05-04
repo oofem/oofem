@@ -219,7 +219,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, Gaus
 }
 
 int
-LobattoIntegrationRule :: SetUpPointsOnTriagle(int nPoints, MaterialMode mode, GaussPoint ***arry)
+LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode, GaussPoint ***arry)
 // creates array of nPoints Gauss Integration Points
 // ( don't confuse with GaussPoint - elem is only the container where to
 //   store corrdinates and weights)

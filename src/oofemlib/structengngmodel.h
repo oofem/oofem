@@ -122,11 +122,11 @@ public:
     StructuralEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
     { internalVarUpdateStamp = 0; }
     /// Destructor.
-    ~StructuralEngngModel();
+    virtual ~StructuralEngngModel();
 
     // identification
-    const char *giveClassName() const { return "StructuralEngngModel"; }
-    classType giveClassID() const { return StructuralEngngModelClass; }
+    virtual const char *giveClassName() const { return "StructuralEngngModel"; }
+    virtual classType giveClassID() const { return StructuralEngngModelClass; }
 
     /**
      * Computes reaction forces. The implementation assumes, that real

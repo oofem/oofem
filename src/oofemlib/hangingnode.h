@@ -70,14 +70,14 @@ public:
      */
     HangingNode(int n, Domain *aDomain);
     /// Destructor.
-    ~HangingNode(void) { }
+    virtual ~HangingNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int checkConsistency();
-    bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
+    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 
-    const char *giveClassName() const { return "HangingNode"; }
-    classType giveClassID() const { return HangingNodeClass; }
+    virtual const char *giveClassName() const { return "HangingNode"; }
+    virtual classType giveClassID() const { return HangingNodeClass; }
 };
 } // end namespace oofem
 #endif // hangingnode_h

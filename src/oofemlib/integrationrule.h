@@ -227,9 +227,7 @@ public:
     /// Returns receiver sub patch indices (if apply).
     virtual const IntArray *giveKnotSpan() { return NULL; }
 
-    /// Returns classType id of receiver.
     virtual classType giveClassID() const { return IntegrationRuleClass; }
-    /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "IntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
@@ -247,7 +245,7 @@ protected:
      * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
-    virtual int SetUpPointsOnTriagle(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
+    virtual int SetUpPointsOnTriangle(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on unit square integration domain.
      * Default implementation does not sets up any integration points and returns 0.

@@ -107,10 +107,10 @@ public:
      */
     int isDofExcluded(int index);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    classType giveClassID() const { return LoadClass; }
-    const char *giveClassName() const { return "Load"; }
+    virtual classType giveClassID() const { return LoadClass; }
+    virtual const char *giveClassName() const { return "Load"; }
 
 protected:
     /**

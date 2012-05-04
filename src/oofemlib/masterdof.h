@@ -121,10 +121,10 @@ public:
     MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id);
     MasterDof(int i, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
-    ~MasterDof()   { delete unknowns; }
+    virtual ~MasterDof()   { delete unknowns; }
 
-    const char *giveClassName() const { return "MasterDof"; }
-    classType giveClassID() const { return MasterDofClass; }
+    virtual const char *giveClassName() const { return "MasterDof"; }
+    virtual classType giveClassID() const { return MasterDofClass; }
 
     virtual int __giveEquationNumber() const ;
 
@@ -151,8 +151,8 @@ public:
 
     virtual void giveUnknownsDictionaryValue(TimeStep *tStep, EquationID type, ValueModeType mode, double &dofValue);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
     virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }

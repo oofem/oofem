@@ -55,9 +55,9 @@ PatchIntegrationRule :: ~PatchIntegrationRule()
 }
 
 int
-PatchIntegrationRule :: SetUpPointsOnTriagle(int nPoints, MaterialMode mode, GaussPoint ***arry)
+PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode, GaussPoint ***arry)
 {
-    numberOfIntegrationPoints = GaussIntegrationRule :: SetUpPointsOnTriagle(nPoints, mode, arry);
+    numberOfIntegrationPoints = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode, arry);
     firstLocalStrainIndx = 1;
     lastLocalStrainIndx = 3;
     // convert patch coordinates into element based, update weights accordingly

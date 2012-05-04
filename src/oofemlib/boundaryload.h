@@ -170,7 +170,7 @@ public:
      * specified on input by user.
      * See cltypes.h file for details.
      */
-    bcType giveType() const { return lType; }
+    virtual bcType giveType() const { return lType; }
     /**
      * Returns the value of a property 'aProperty'. Property must be identified
      * by unique integer id.
@@ -179,8 +179,8 @@ public:
      */
     virtual double giveProperty(int aProperty);
 
-    classType giveClassID() const { return BoundaryLoadClass; }
-    const char *giveClassName() const { return "BoundaryLoad"; }
+    virtual classType giveClassID() const { return BoundaryLoadClass; }
+    virtual const char *giveClassName() const { return "BoundaryLoad"; }
 
 protected:
     /**
@@ -197,7 +197,7 @@ protected:
      * @param tStep Time step.
      * @param mode Determines response mode.
      */
-    void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 };
 } // end namespace oofem
 #endif // boundaryload_h

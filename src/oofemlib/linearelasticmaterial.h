@@ -69,9 +69,9 @@ public:
     /// Constructor.
     LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
     /// Destructor.
-    ~LinearElasticMaterial() { }
+    virtual ~LinearElasticMaterial() { }
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                   MatResponseForm form,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
@@ -118,16 +118,16 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                               const FloatArray &reducedStrain,
                               TimeStep *tStep);
 
-    int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
-    void giveStressStrainMask(IntArray &, MatResponseForm form, MaterialMode mmode) const;
-    int hasNonLinearBehaviour() { return 0; }
-    int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "LinearElasticMaterial"; }
-    classType giveClassID() const { return LinearElasticMaterialClass; }
+    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
+    virtual void giveStressStrainMask(IntArray &, MatResponseForm form, MaterialMode mmode) const;
+    virtual int hasNonLinearBehaviour() { return 0; }
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual const char *giveClassName() const { return "LinearElasticMaterial"; }
+    virtual classType giveClassID() const { return LinearElasticMaterialClass; }
 };
 } // end namespace oofem
 #endif // linearelasticmaterial_h

@@ -61,34 +61,34 @@ protected:
 
 public:
     Quad1PlaneStrain(int n, Domain *d);
-    ~Quad1PlaneStrain();
+    virtual ~Quad1PlaneStrain();
 
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
-    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
-    double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)  { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)  { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    //virtual void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -110,9 +110,9 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
+    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
-    void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     { computeNmatrixAt(aGaussPoint, answer); }
 
     // HuertaRemeshingCriteriaInterface
@@ -128,31 +128,31 @@ public:
 #endif
 
     // definition & identification
-    const char *giveClassName() const { return "Quad1PlaneStrain"; }
-    classType giveClassID() const { return Quad1PlaneStrainClass; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "Quad1PlaneStrain"; }
+    virtual classType giveClassID() const { return Quad1PlaneStrainClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
-    integrationDomain giveIntegrationDomain() { return _Square; }
-    MaterialMode giveMaterialMode() { return _PlaneStrain; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    virtual integrationDomain giveIntegrationDomain() { return _Square; }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:
     // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    void computeGaussPoints();
+    virtual void computeGaussPoints();
 
     void giveDerivativeKsi(FloatArray &answer, double);
     void giveDerivativeEta(FloatArray &answer, double);
     virtual void computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *);
-    int giveApproxOrder() { return 1; }
-    int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    virtual int giveApproxOrder() { return 1; }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem
 #endif // quad1planestrain_h

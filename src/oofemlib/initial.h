@@ -82,7 +82,7 @@ public:
      */
     InitialCondition(int i, Domain *d) : FEMComponent(i, d), initialValueDictionary() { }
     /// Destructor.
-    ~InitialCondition() { }
+    virtual ~InitialCondition() { }
 
     /**
      * Returns value of initial condition for given unknown mode (determines whether total or velocity or acceleration
@@ -120,10 +120,10 @@ public:
     virtual void scale(ValueModeType type, double s);
 
     // Overloaded methods:
-    IRResultType initializeFrom(InputRecord *ir);
-    void printYourself();
-    classType giveClassID() const { return InitialConditionClass; }
-    const char *giveClassName() const { return "InitialCondition"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void printYourself();
+    virtual classType giveClassID() const { return InitialConditionClass; }
+    virtual const char *giveClassName() const { return "InitialCondition"; }
 };
 } // end namespace oofem
 #endif // initial_h

@@ -68,13 +68,12 @@ public:
      */
     ElementDofManager(int n, Domain *aDomain, Element* elem);
     /// Destructor.
-    ~ElementDofManager();
+    virtual ~ElementDofManager();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    void printYourself();
-
-    const char *giveClassName() const { return "ElementDofManager"; }
-    classType giveClassID() const { return ElementDofManagerClass; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void printYourself();
+    virtual const char *giveClassName() const { return "ElementDofManager"; }
+    virtual classType giveClassID() const { return ElementDofManagerClass; }
 
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
 };

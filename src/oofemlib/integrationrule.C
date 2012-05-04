@@ -321,7 +321,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, matMode, & gaussPointArray) );
 
     case _Triangle:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriagle(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriangle(nPoints, matMode, & gaussPointArray) );
 
     case _Square:
         return  ( numberOfIntegrationPoints = this->SetUpPointsOnSquare(nPoints, matMode, & gaussPointArray) );

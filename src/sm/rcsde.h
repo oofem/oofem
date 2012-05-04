@@ -64,9 +64,9 @@ protected:
 public:
 
     RCSDEMaterialStatus(int n, Domain *d, GaussPoint *g);
-    ~RCSDEMaterialStatus();
+    virtual ~RCSDEMaterialStatus();
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     double giveTempMaxEquivStrain() { return tempMaxEquivStrain; }
     void   setTempMaxEquivStrain(double val) { tempMaxEquivStrain = val; }
@@ -91,15 +91,15 @@ public:
 
     __rcsdModeType giveMode() { return rcsdMode; }
     // definition
-    const char *giveClassName() const { return "RCSDEMaterialStatus"; }
-    classType             giveClassID() const { return RCSDEMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "RCSDEMaterialStatus"; }
+    virtual classType giveClassID() const { return RCSDEMaterialStatusClass; }
 
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *tStep);
 
     // saves current context(state) into stream
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
 

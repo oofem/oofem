@@ -64,15 +64,15 @@ public:
      */
     SlaveNode(int n, Domain *aDomain) : Node(n, aDomain) { }
     /// Destructor.
-    ~SlaveNode(void) { }
+    virtual ~SlaveNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    int checkConsistency();
-    bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
-    void updateLocalNumbering(EntityRenumberingFunctor &f);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int checkConsistency();
+    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
-    const char *giveClassName() const { return "SlaveNode"; }
-    classType giveClassID() const { return SlaveNodeClass; }
+    virtual const char *giveClassName() const { return "SlaveNode"; }
+    virtual classType giveClassID() const { return SlaveNodeClass; }
 };
 } // end namespace oofem
 #endif // slavenode_h

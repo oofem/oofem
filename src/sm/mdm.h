@@ -92,7 +92,7 @@ protected:
 
 public:
     MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g);
-    ~MDMStatus();
+    virtual ~MDMStatus();
 
     void setTempDamageTensorEigenVals(const FloatArray &src) { tempDamageTensorEigenValues = src; }
     void setTempDamageTensorEigenVec(const FloatMatrix &src) { tempDamageTensorEigenVectors = src; }
@@ -249,8 +249,8 @@ public:
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     // identification and auxiliary functions
-    const char *giveClassName() const { return "MDM"; }
-    classType giveClassID() const { return MicroplaneDamageMaterialClass; }
+    virtual const char *giveClassName() const { return "MDM"; }
+    virtual classType giveClassID() const { return MicroplaneDamageMaterialClass; }
 
     virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
                                                 const FloatArray &strain, TimeStep *tStep) { };

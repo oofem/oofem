@@ -95,10 +95,10 @@ public:
     SimpleSlaveDof(int i, DofManager *aNode, int master, DofIDItem id);
     SimpleSlaveDof(int i, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
-    ~SimpleSlaveDof() { }
+    virtual ~SimpleSlaveDof() { }
 
-    const char *giveClassName() const { return "SimpleSlaveDof"; }
-    classType giveClassID() const { return SimpleSlaveDofClass; }
+    virtual const char *giveClassName() const { return "SimpleSlaveDof"; }
+    virtual classType giveClassID() const { return SimpleSlaveDofClass; }
     /**
      * Returns equation number corresponding to receiver.
      * Slave simply forwards this message to master.
@@ -124,8 +124,8 @@ public:
     virtual int giveIcId();
     virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns Master Dof Manager Number.
     int giveMasterDofManagerNum() const { return masterDofMngr; }
