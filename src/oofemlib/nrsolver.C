@@ -245,7 +245,7 @@ NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 NM_Status
 NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                  FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                  FloatArray *X, FloatArray *dX, FloatArray *F,
                   double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tNow)
 //
@@ -254,9 +254,9 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 //
 //
 {
-    FloatArray rhs, deltaR, RT, rInitial;
+    FloatArray rhs, ddX, RT, XInitial; // residual, iteration increment of solution, total external force, intial value of solution.
     double RRT;
-    int neq = r->giveSize();
+    int neq = X->giveSize();
     int irest = 0;
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
@@ -269,7 +269,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     OOFEM_LOG_INFO("NRSolver:     Iteration       ForceError      DisplError                    \n");
     OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
 
-    rInitial = * r; // Stored in case of divergence.
+    XInitial = * X; // Stored in case of divergence.
     l = 1.0;
 
     status = NM_None;
@@ -282,15 +282,15 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     }
 
 #ifdef __PARALLEL_MODE
-    RRT = parallel_context->localNorm(RT);
+    RRT = parallel_context->norm(RT);
     RRT *= RRT;
 #else
     RRT = RT.computeSquaredNorm();
 #endif
 
 restart:
-    DeltaR->zero();
-    deltaR.resize(neq);
+    dX->zero();
+    ddX.resize(neq);
 
     // Fetch the matrix before evaluating internal forces.
     // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.
@@ -314,7 +314,7 @@ restart:
         }
 
         // convergence check
-        converged = this->checkConvergence(RT, * F, rhs, deltaR, * r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
+        converged = this->checkConvergence(RT, * F, rhs, ddX, * X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
 
         if (converged && nite >= minIterations ) {
             break;
@@ -337,12 +337,12 @@ restart:
                  */
 
                 // restore previous total displacement vector
-                *r = rInitial;
+                *X = XInitial;
                 // reset all changes fro previous equilibrium state
                 engngModel->initStepIncrements();
-                #ifdef VERBOSE
+#ifdef VERBOSE
                 OOFEM_LOG_INFO("NRSolver:  Iteration Reset ...\n");
-                #endif
+#endif
                 NR_OldMode  = NR_Mode;
                 NR_Mode     = nrsolverFullNRM;
                 NR_ModeTick = NRSOLVER_DEFAULT_NRM_TICKS;
@@ -364,9 +364,9 @@ restart:
         if ( ( nite == 0 ) && ( deltaL < 1.0 ) ) { // deltaL < 1 means no increment applied, only equilibrate current state
             rhs.zero();
             R->zero();
-            deltaR = rhs;
+            ddX = rhs;
         } else {
-            linSolver->solve(k, & rhs, & deltaR);
+            linSolver->solve(k, & rhs, & ddX);
         }
 
         //
@@ -376,10 +376,10 @@ restart:
             // line search
             LineSearchNM :: LS_status status;
             double eta;
-            this->giveLineSearchSolver()->solve(r, & deltaR, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
+            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
         }
-        r->add(deltaR);
-        DeltaR->add(deltaR);
+        X->add(ddX);
+        dX->add(ddX);
         tNow->incrementStateCounter(); // update solution state counter
     }
     //
@@ -416,7 +416,7 @@ restart:
             }
             lastReactions.at(i) = reaction;
             OOFEM_LOG_INFO("NRSolver:     %-15d %-15d %-+15.5e %-+15.5e\n", prescribedDofs.at(2 * i - 1), prescribedDofs.at(2 * i),
-                           r->at( prescribedEqs.at(i) ), reaction);
+                           X->at( prescribedEqs.at(i) ), reaction);
         }
         OOFEM_LOG_INFO("\n");
     }
@@ -709,7 +709,7 @@ NRSolver :: printState(FILE *outputStream)
 
 #if 1
 bool
-NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &deltaR, FloatArray &r,
+NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &ddX, FloatArray &X,
                              double RRT, double internalForcesEBENorm,
                              int nite, bool &errorOutOfRange, TimeStep *tNow)
 {
@@ -725,8 +725,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     EModelDefaultEquationNumbering dn;
  #ifdef __PARALLEL_MODE
   #ifdef __PETSC_MODULE
-    // HUHU hard wired domain no 1
-    PetscContext *parallel_context = engngModel->givePetscContext(1, ut);
+    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); ///@todo Shouldn't be hardwired domain no 1.
     PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
   #endif
  #endif
@@ -773,12 +772,12 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                         if ( _eq ) {
                             _val = rhs.at(_eq);
                             dg_forceErr.at(_dg) += _val * _val;
-                            _val = deltaR.at(_eq);
+                            _val = ddX.at(_eq);
                             dg_dispErr.at(_dg)  += _val * _val;
                             // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
                             _val = RT.at(_eq);
                             dg_totalLoadLevel.at(_dg) += _val * _val;
-                            _val = r.at(_eq);
+                            _val = X.at(_eq);
                             dg_totalDisp.at(_dg) += _val * _val;
                         }
                     }
@@ -819,12 +818,12 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 
                                 _val = rhs.at(_eq);
                                 dg_forceErr.at(_dg) += _val * _val;
-                                _val = deltaR.at(_eq);
+                                _val = ddX.at(_eq);
                                 dg_dispErr.at(_dg)  += _val * _val;
                                 // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
                                 _val = RT.at(_eq);
                                 dg_totalLoadLevel.at(_dg) += _val * _val;
-                                _val = r.at(_eq);
+                                _val = X.at(_eq);
                                 dg_totalDisp.at(_dg) += _val * _val;
                             }
                         }
@@ -876,15 +875,15 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 
         OOFEM_LOG_INFO("\n");
     } else { // nccdg == 0 -> all dofs included
-        double drr, drdr;
+        double dXX, dXdX;
  #ifdef __PARALLEL_MODE
         forceErr = parallel_context->norm(rhs); forceErr *= forceErr;
-        drr = parallel_context->norm(r); drr *= drr;
-        drdr = parallel_context->norm(deltaR); drdr *= drdr;
+        dXX = parallel_context->localNorm(X); dXX *= dXX; // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
+        dXdX = parallel_context->norm(ddX); dXdX *= dXdX;
  #else
         forceErr = rhs.computeSquaredNorm();
-        drr = r.computeSquaredNorm();
-        drdr = deltaR.computeSquaredNorm();
+        dXX = X.computeSquaredNorm();
+        dXdX = ddX.computeSquaredNorm();
  #endif
         // we compute a relative error norm
         if ( RRT > nrsolver_ERROR_NORM_SMALL_NUM ) {
@@ -942,10 +941,10 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         // compute displacement error
         //
         // err is relative displacement change
-        if ( drr < nrsolver_ERROR_NORM_SMALL_NUM ) {
-            dispErr = sqrt(drdr);
+        if ( dXX < nrsolver_ERROR_NORM_SMALL_NUM ) {
+            dispErr = sqrt(dXdX);
         } else {
-            dispErr = sqrt(drdr / drr);
+            dispErr = sqrt(dXdX / dXX);
         }
 
         if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||

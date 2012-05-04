@@ -201,8 +201,8 @@ public:
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
-                            FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
+                            FloatArray *X, FloatArray *dX, FloatArray *F,
                             double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }
@@ -222,8 +222,8 @@ public:
             linSolver->reinitialize();
         }
     }
-    const char *giveClassName() const { return "CylindricalALM"; }
-    classType giveClassID() const { return CylindricalALMSolverClass; }
+    virtual const char *giveClassName() const { return "CylindricalALM"; }
+    virtual classType giveClassID() const { return CylindricalALMSolverClass; }
 
 protected:
     void convertHPCMap();
@@ -232,8 +232,8 @@ protected:
     /**
      * @return If 0 then ok, 1 then failure (restart).
      */
-    int computeDeltaLambda(double &deltaLambda, const FloatArray &DeltaR, const FloatArray &deltaRt,
-                           const FloatArray &deltaR_, const FloatArray &R, double RR, double eta,
+    int computeDeltaLambda(double &deltaLambda, const FloatArray &dX, const FloatArray &deltaXt,
+                           const FloatArray &deltaX_, const FloatArray &R, double RR, double eta,
                            double deltaL, double DeltaLambda0, int neq);
 
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp,
@@ -241,13 +241,13 @@ protected:
 
     /// Evaluates the convergence criteria.
     bool checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
-                          const FloatArray &r, const FloatArray &rIterIncr,
+                          const FloatArray &X, const FloatArray &ddX,
                           double Lambda, double RR0, double RR, double drProduct,
                           double internalForcesEBENorm, int nite, bool &errorOutOfRange);
 
     /// Perform line search optimization of step length
-    void do_lineSearch(FloatArray &r, const FloatArray &rInitial, const FloatArray &deltaR_, const FloatArray &deltaRt,
-                       const FloatArray &DeltaRm1, FloatArray &DeltaR, FloatArray &deltaR,
+    void do_lineSearch(FloatArray &X, const FloatArray &XInitial, const FloatArray &deltaX_, const FloatArray &deltaXt,
+                       const FloatArray &dXm1, FloatArray &dX, FloatArray &ddX,
                        const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                        double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
                        double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);

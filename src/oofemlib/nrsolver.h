@@ -146,7 +146,7 @@ public:
 
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *r, FloatArray *dr, FloatArray *F,
+                            FloatArray *X, FloatArray *dX, FloatArray *F,
                             double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
@@ -185,7 +185,7 @@ protected:
      * Determines whether or not the solution has reached convergence.
      * @return True if solution has converged, otherwise false.
      */
-    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &deltaR, FloatArray &r,
+    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
                           double RRT, double internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
 };
 } // end namespace oofem

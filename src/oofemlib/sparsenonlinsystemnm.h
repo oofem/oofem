@@ -87,24 +87,24 @@ public:
     virtual ~SparseNonLinearSystemNM() { }
 
     /**
-     * Solves the given sparse linear system of equations @f$s  R + R_0 - F(r) = 0@f$; @f$ dr=K^{-1}(s R + R_0 - F({}^n r)) @f$.
-     * Total load vector not passed, it is defined as @f$ s R + R_0 @f$, where s is scale factor.
-     * @see EngngModel::updateComponent Which is used to update the stiffness matrix and load vector.
-     * @param K  Coefficient matrix (@f$\displaystyle K = \frac{\partial F}{\partial r} @f$; stiffness matrix).
+     * Solves the given sparse linear system of equations @f$ s  R + R_0 - F(X) = 0 @f$.
+     * Total load vector is not passed, it is defined as @f$ s R + R_0 @f$, where s is scale factor.
+     * @see EngngModel::updateComponent Used to update the stiffness matrix and load vector.
+     * @param K  Coefficient matrix (@f$\displaystyle K = \frac{\partial F}{\partial X} @f$; stiffness matrix).
      * @param R  Reference incremental RHS (incremental load).
      * @param R0 Initial RHS (initial load).
-     * @param r  Total solution (total displacement).
-     * @param dr Increment of solution (incremental displacements).
-     * @param s  RHS scale factor (load level).
-     * @param F  InternalRhs (real internal forces).
-     * @param nite Number of iterations needed.
-     * @param rlm Reference load mode.
+     * @param X  Total solution (total displacement).
+     * @param dX Increment of solution (incremental displacements).
+     * @param F InternalRhs (real internal forces).
      * @param internalForcesEBENorm Norm of internal nodal forces (evaluated on element by element basis).
+     * @param s RHS scale factor (load level).
+     * @param rlm Reference load mode.
+     * @param nite Number of iterations needed.
      * @param tStep Time step to solve for.
      * @return NM_Status value.
      */
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
-                            FloatArray *r, FloatArray *dr, FloatArray *F,
+                            FloatArray *X, FloatArray *dX, FloatArray *F,
                             double &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *tStep) = 0;
 

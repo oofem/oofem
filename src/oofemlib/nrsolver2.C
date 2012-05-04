@@ -90,7 +90,7 @@ NRSolver2 :: ~NRSolver2()
 
 NM_Status
 NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                   FloatArray *r, FloatArray *DeltaR, FloatArray *F,
+                   FloatArray *X, FloatArray *dX, FloatArray *F,
                    double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                    int &nite, TimeStep *tNow)
 //
@@ -99,7 +99,7 @@ NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 //
 //
 {
-    FloatArray rhs, deltaR, RT, rInitial;
+    FloatArray rhs, ddX, RT, XInitial;
     double RRT, forceErr, dispErr = 0.;
     double drr;
     int neq = R->giveSize();
@@ -109,8 +109,7 @@ NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     OOFEM_LOG_INFO("Time       Iteration       ForceError      DisplError\n__________________________________________________________\n");
 
     l = 1.0;
-    rInitial = * r;
-
+    XInitial = * X;
 
     status = NM_None;
     this->giveLinearSolver();
@@ -122,12 +121,12 @@ NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     }
 
 restart:
-    DeltaR->zero();
+    dX->zero();
     engngModel->updateComponent(tNow, NonLinearLhs, domain);
 
     deltaL = tNow->giveTimeIncrement();
 
-    deltaR.resize(neq);
+    ddX.resize(neq);
     engngModel->updateComponent(tNow, InternalRhs, domain);
     rhs.beDifferenceOf(RT, *F);
 
@@ -144,7 +143,7 @@ restart:
             }
         }
 
-        linSolver->solve(k, & rhs, & deltaR);
+        linSolver->solve(k, & rhs, & ddX);
         //
         // update solution
         //
@@ -154,11 +153,11 @@ restart:
             IntArray prescribedEqs(0);
             double eta;
 
-            this->giveLineSearchSolver()->solve(r, & deltaR, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
-            DeltaR->add(deltaR);
+            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
+            dX->add(ddX);
         } else {
-            r->add(deltaR);
-            DeltaR->add(deltaR);
+            X->add(ddX);
+            dX->add(ddX);
             tNow->incrementStateCounter();     // update solution state counter
             //
             // Convergence check
@@ -184,11 +183,11 @@ restart:
         // compute displacement error
         //
         // err is relative displacement change
-        drr = r->computeSquaredNorm();
+        drr = X->computeSquaredNorm();
         if ( drr < nrsolver_SMALL_NUM ) {
             dispErr = 1.;
         } else {
-            dispErr = sqrt( deltaR.computeSquaredNorm() / drr );
+            dispErr = sqrt( ddX.computeSquaredNorm() / drr );
         }
 
         //
@@ -217,10 +216,10 @@ restart:
                  */
 
                 // restore previous total displacement vector
-                *r = rInitial;
+                *X = XInitial;
                 // reset all changes fro previous equilibrium state
                 engngModel->initStepIncrements();
-                DeltaR->zero();
+                dX->zero();
 #ifdef VERBOSE
                 OOFEM_LOG_INFO("NRSolver2 iteration Reset ...\n");
 #endif
