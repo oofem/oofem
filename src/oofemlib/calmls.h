@@ -58,74 +58,64 @@ class PetscContext;
 /**
  * Implementation of sparse nonlinear solver with indirect control.
  * It uses Cylindrical Arc-Length Method algorithm.
+ *
+ * DESCRIPTION :
+ * Perform solution of non-linear problem in the form
+ * Kt * deltaR = g
+ * where g is defined as g = g(Lambda,X) = Lambda* R - F(X).
+ * During iteration process, we want g became zero vector.
+ *
+ * This method uses Modified Newton Raphson iteration scheme
+ *
+ * If we solve non-linear static we can interpret symbols as follows:
+ *
+ * Kt     - tangential stiffness
+ * dX     - increment of displacements
+ * g      - vector of unbalanced forces (at the end should be zero one)
+ * Lambda - Load level
+ * Rt     - Quasi Total Load vector Rt = R0 + Lambda*R
+ * X      - total displacement vector
+ * F(X)   - Nodal representation of (real) internal forces.
+ * Psi    - control parameter (=0. means displacement control)
+ * Bergan_k0 - variable used to compute bergan's parameters of current stiffness.
+ * calm_NR_Mode - variable controlling the mode of NRM (ModifiedNR, Full NRM (stiffness update after each iteration),
+ *              Modified Accelerated NRM (we perform iteration with stiffness matrix updated only after calm_MANRMSteps)
+ * calm_NR_OldMode - variable containing the old mode of NRM, which will be restored after
+ *              calm_NR_ModeTick iterations.
+ * calm_NR_ModeTick - see calm_NR_OldMode.
+ * calm_MANRMSteps - if calm_NR_Mode == calm_accelNRM, it specifies, that new updated
+ *                 stiffness matrix is assembled after calm_MANRMSteps.
+ * calm_Control - variable indicating the ALM control.
+ * calm_HPCIndirectDofMask - Mask, telling which dofs are used for HPC.
+ * calm_HPCWeights - dofs weights in constrain.
+ *
+ * Tasks:
+ * - solving problem: solveYourselfAt.
+ * - returning results (increment of displacement, reached level of loading and so on)
+ *
+ * Variable description  :
+ * - K(N,N) = Stiffness matrix (assumed positive definite)
+ * - dX(N) = Iterative increment of displacement
+ * - Rt = "quasi" total load vector
+ * - R0 = Fixed (Initial) load vector
+ * - deltaL = Step length
+ * - deltaLambda = Increment of load level
+ * - Psi = Determines loading or displacement control
+ * - dX = Current total increment
+ * - F = Nodal representation of (real) internal forces
+ * - DeltaLambda = Current total increment of load level
+ * - Lambda = Total load level
+ * - RTOL= Convergence tolerance
+ * - NSMAX = Maximum number of sweeps allowed
+ *
+ * OUTPUT : (after call solveYourselfAt)
+ * - dX = Reached displacement increment
+ * - Lambda = Total load level
+ * - nite = Number of iterations required to fulfill balance
+ * - status = NM_status with flags set to reached state
  */
 class CylindricalALM : public SparseNonLinearSystemNM
 {
-    /*
-     * This class implements the class NumericalMethod instance Cylindrical Arc-Length Method
-     * for solving non-linear problems.
-     *
-     * DESCRIPTION :
-     * Perform solution of non-linear problem in the form
-     * Kt * deltaR = g
-     * where g is defined as g = g(Lambda,r) = Lambda* R - F(r).
-     * During iteration process, we want g became zero vector.
-     *
-     * =======>   This method uses Modified Newton Raphson iteration scheme  <======
-     *
-     * If we solve non-linear static we can interpret symbols as follows:
-     *
-     * Kt     - tangential stiffness
-     * deltaR - increment of displacements
-     * g      - vector of unbalanced forces (at the end should be zero one)
-     * Lambda - Load level
-     * Rt     - Quasi Total Load vector Rt = R0 + Lambda*R
-     * r      - total displacement vector
-     * F(r)   - Nodal representation of (real) internal forces.
-     * Psi    - control parameter (=0. means displacement control)
-     * Bergan_k0 - variable used to compute bergan's parameters of current stiffness.
-     * calm_NR_Mode - variable controlling the mode of NRM (ModifiedNR, Full NRM (stiffness update after each iteration),
-     *              Modified Accelerated NRM (we perform iteration with stiffness matrix updated only after calm_MANRMSteps)
-     * calm_NR_OldMode - variable containing the old mode of NRM, which will be restored after
-     *              calm_NR_ModeTick iterations.
-     * calm_NR_ModeTick - see calm_NR_OldMode.
-     * calm_MANRMSteps - if calm_NR_Mode == calm_accelNRM, it specifies, that new updated
-     *                 stiffness matrix is assembled after calm_MANRMSteps.
-     * calm_Control - variable indicating the ALM control.
-     * calm_HPCIndirectDofMask - Mask, telling which dofs are used for HPC.
-     * calm_HPCWeights - dofs weights in constrain.
-     * TASKS :
-     *
-     * - solving problem
-     *   solveYourselfAt.
-     * - returning results (increment of displacement,
-     *                      reached level of loading and so on)
-     *
-     * Variable description  :
-     *
-     *       K(N,N)    = STIFFNESS MATRIX (ASSUMED POZITIVE DEFINITE)        *
-     *       deltaR(N) = ITERATIVE INCREMENT OF DISPLACEMENT                 *
-     *       Rt        = "quasi" total LOAD VECTOR                           *
-     *   R0        = Fixed (Initial) load vector                         *
-     * deltaL    = STEP LENGTH                                         *
-     * deltaLambda= INCREMENT OF LOAD LEVEL                            *
-     * Psi       = DETERMINES LOADING OR DISPLACEMENT CONTROL          *
-     * DeltaR    = CURRENT TOTAL INCREMENT                             *
-     *       F         = NODAL REPRESENTATION OF (REAL) INTERNAL FORCES      *
-     * DeltaLambda= CURRENT TOTAL INCEREMENT OF LOAD LEVEL             *
-     * Lambda    = TOTAL LOAD LEVEL
-     *
-     *       RTOL      = CONVERGENCE TOLERANCE                               *
-     *       NSMAX     = MAXIMUM NUMBER OF SWEEPS ALLOVED                    *
-     *
-     * OUTPUT : (after call solveYourselfAt)
-     *       K(N,N)    = DIAGONALIZED STIFFNESS MATRIX                       *
-     *       DeltaR    = REACHED DISPLACEMENT INCREMENT                      *
-     * Lambda    = TOTAL LOAD LEVEL                                    *
-     * nite      = NUMBER OF ITERATIONS REQUIRED TO FULLFIL BALANCE    *
-     * status    = NM_status with flags set to reached state (see cltypes.h) *
-     *
-     */
 protected:
     /// CALM mode type; determines the calm step length control.
     enum calm_ControlType {
