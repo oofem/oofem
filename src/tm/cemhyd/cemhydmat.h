@@ -120,7 +120,7 @@ public:
     virtual ~CemhydMatStatus();
     //virtual Interface *giveInterface(InterfaceType);
     virtual const char *giveClassName() const { return "CemhydMatStatus"; }
-    virtual classType giveClassID() onst { return CemhydMatStatusClass; }
+    virtual classType giveClassID() const { return CemhydMatStatusClass; }
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
 #endif
