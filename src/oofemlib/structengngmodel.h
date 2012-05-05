@@ -69,6 +69,26 @@ protected:
     int nonlocalExt;
     /// NonLocal Communicator. Necessary when nonlocal constitutive models are used.
     ProblemCommunicator *nonlocCommunicator;
+    /// Message tags
+    enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
+    /**
+     * Packing function for vector values of DofManagers. Packs vector values of shared/remote DofManagers
+     * into send communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param src Source vector.
+     * @param prescribedEquations True if src uses prescribed equations numbering.
+     * @return Nonzero if successful.
+     */
+    int packDofManagers(FloatArray *src, ProcessCommunicator &processComm, bool prescribedEquations);
+    /**
+     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote DofManagers
+     * from  receive communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param dest Destination vector.
+     * @param prescribedEquations True if src uses prescribed equations numbering.
+     * @return Nonzero if successful.
+     */
+    int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations);
 #endif
 
     /**
@@ -138,56 +158,31 @@ public:
      * @param tStep Time step.
      * @param di Domain number.
      */
-    void computeReactions(FloatArray &answer, TimeStep *tStep, int di);
+    void computeReaction(FloatArray &answer, TimeStep *tStep, int di);
+    /**
+     * Exchanges necessary remote DofManagers data.
+     * @ExchangeTag Exchange tag used by communicator.
+     * @return Nonzero if successful.
+     */
+    int updateSharedDofManagers(FloatArray &answer, int ExchangeTag);
+    /**
+     * Exchanges necessary remote prescribed DofManagers data.
+     * @ExchangeTag Exchange tag used by communicator.
+     * @return Nonzero if successful.
+     */
+    int updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag);
+
+    void initializeCommMaps(bool forceInit = false);
+
 #ifdef __PARALLEL_MODE
     /**
-     * Packing function for internal forces of DofManagers. Packs internal forces of shared DofManagers
-     * into send communication buffer of given process communicator.
-     * @param processComm Task communicator for which to pack forces.
-     * @param src Source vector.
+     * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
+     * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
+     * receiver's services.
+     * @ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
      */
-    int packInternalForces(FloatArray *src, ProcessCommunicator &processComm);
-    /**
-     * Unpacking function for internal forces of DofManagers . Unpacks internal forces of shared DofManagers
-     * from receive communication buffer of given process communicator.
-     * @param processComm Task communicator for which to unpack forces.
-     * @param dest Destination vector.
-     * @return Nonzero if successful.
-     */
-    int unpackInternalForces(FloatArray *dest, ProcessCommunicator &processComm);
-    /**
-     * Packing function for reactions of DofManagers. Packs reactions of shared DofManagers
-     * into send communication buffer of given process communicator.
-     * @param processComm Task communicator for which to pack forces.
-     * @param src Source vector.
-     * @return Nonzero if successful.
-     */
-    int packReactions(FloatArray *src, ProcessCommunicator &processComm);
-    /**
-     * Unpacking function for reactions of DofManagers. Unpacks reactions of shared DofManagers
-     * from receive communication buffer of given process communicator.
-     * @param processComm Task communicator for which to unpack forces.
-     * @param dest Destination vector.
-     * @return Nonzero if successful.
-     */
-    int unpackReactions(FloatArray *dest, ProcessCommunicator &processComm);
-    /**
-     * Packing function for load vector. Packs load vector values of shared/remote DofManagers
-     * into send communication buffer of given process communicator.
-     * @param processComm Task communicator for which to pack load.
-     * @param src Source vector.
-     * @return Nonzero if successful.
-     */
-    int packLoad(FloatArray *src, ProcessCommunicator &processComm);
-    /**
-     * Unpacking function for load vector values of DofManagers . Unpacks load vector of shared/remote DofManagers
-     * from  receive communication buffer of given process communicator.
-     * @param processComm Task communicator for which to unpack load.
-     * @param dest Destination vector.
-     * @return Nonzero if successful.
-     */
-    int unpackLoad(FloatArray *dest, ProcessCommunicator &processComm);
+    int exchangeRemoteElementData(int ExchangeTag);
     /**
      * Packs data of local element to be received by their remote counterpart on remote partitions.
      * Remote elements are introduced when nonlocal constitutive models are used, in order to
@@ -212,6 +207,38 @@ public:
      * @return Nonzero if successful.
      */
     int unpackRemoteElementData(ProcessCommunicator &processComm);
+    /**
+     * Packing function for vector values of DofManagers. Packs vector values of shared/remote DofManagers
+     * into send communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param src Source vector.
+     * @return Nonzero if successful.
+     */
+    int packDofManagers(FloatArray *src, ProcessCommunicator &processComm);
+    /**
+     * Packing function for vector values of DofManagers. Packs vector values of shared/remote prescribed DofManagers
+     * into send communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param src Source vector.
+     * @return Nonzero if successful.
+     */
+    int packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm);
+    /**
+     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote DofManagers
+     * from  receive communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param dest Destination vector.
+     * @return Nonzero if successful.
+     */
+    int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
+    /**
+     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote prescribed DofManagers
+     * from  receive communication buffer of given process communicator.
+     * @param processComm Task communicator.
+     * @param dest Destination vector.
+     * @return Nonzero if successful.
+     */
+    int unpackPrescribedDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
 
     ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) {
         if ( t == PC_default ) { return communicator; } else if ( t == PC_nonlocal ) { return nonlocCommunicator; } else { return NULL; }

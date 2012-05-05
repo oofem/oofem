@@ -146,17 +146,15 @@ NonLinearDynamic :: updateAttributes(TimeStep *atTime)
         _error("updateAttributes: deltaT < 0");
     }
 
-    //----------------------------------------------------------------------
-    // Macro's are added in order to take into account for the Rayleigh damping coefficient and
-    // the stability coefficients arising the Non-Linear Newmark scheme.
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef"); // C = dumpingCoef * M
+    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef"); // Macro
     IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha"); // Macro
     IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta"); // Macro
-    //----------------------------------------------------------------------
+
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_refloadmode, "refloadmode"); // Macro
     refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 }
+
 
 IRResultType
 NonLinearDynamic :: initializeFrom(InputRecord *ir)
@@ -183,9 +181,6 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
     }
 
 #ifdef __PARALLEL_MODE
-    //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
-    //else if (ir->hasField ("elementcutmode")) commMode = ProblemCommunicator::ProblemCommMode__ELEMENT_CUT;
-    //else _error ("instanciateFrom: ProblemCommunicator comm mode not specified");
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
         communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
@@ -207,8 +202,6 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
 double NonLinearDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                                  TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
@@ -245,6 +238,7 @@ double NonLinearDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType m
     return 0.0;
 }
 
+
 TimeStep *NonLinearDynamic :: giveNextStep()
 {
     int istep = giveNumberOfFirstStep();
@@ -253,7 +247,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
     double deltaTtmp = deltaT;
     double totalTime = deltaT;
 
-    //do not increase deltaT on microproblem
+    //Do not increase deltaT on microproblem
     if ( pScale == microScale ) {
         deltaTtmp = 0.;
     }
@@ -280,32 +274,27 @@ TimeStep *NonLinearDynamic :: giveNextStep()
 }
 
 
-
 void
 NonLinearDynamic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const FloatArray &DeltaR, Domain *domain, TimeStep *stepN)
 {
-    // computes nodal representation of internal forces (real ones)
+    // Computes nodal representation of internal forces (real ones)
     // simply assembles contributions from each element in domain
-    // DeltaR is last increment of displacement vector during solution
-    // not the total increments of displacements summed from start of step
-    // Also Element by Element norm of internal forces is computed
     Element *element;
     IntArray loc;
     FloatArray charVec;
     int nelems;
     EModelDefaultEquationNumbering en;
 
-    //    answer.resize( DeltaR.giveSize() );
     answer.zero();
     ebeNorm = 0.0;
 
-    stepN->incrementStateCounter();               // update solution state counter
+    // Update solution state counter
+    stepN->incrementStateCounter();
 
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
-        exchangeRemoteElementData();
+        exchangeRemoteElementData( RemoteElementExchangeTag  );
     }
-
 #endif
 
     nelems = domain->giveNumberOfElements();
@@ -314,7 +303,7 @@ NonLinearDynamic :: giveInternalForces(FloatArray &answer, double &ebeNorm, cons
     for ( int i = 1; i <= nelems; i++ ) {
         element = ( NLStructuralElement * ) domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
+        // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -326,7 +315,8 @@ NonLinearDynamic :: giveInternalForces(FloatArray &answer, double &ebeNorm, cons
         element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
 
         answer.assemble(charVec, loc);
-        // compute element norm contribution
+
+        // Compute element norm contribution.
         ebeNorm += charVec.computeSquaredNorm();
 
         /*
@@ -346,40 +336,16 @@ NonLinearDynamic :: giveInternalForces(FloatArray &answer, double &ebeNorm, cons
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
-
 #ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: giveInternalForces", "Packing internal forces", this->giveRank() );
- #endif
+    this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
 
-        communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packInternalForces );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: giveInternalForces", "Exchange of internal forces started", this->giveRank() );
- #endif
-
-        communicator->initExchange(InternalForcesExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: giveInternalForces", "Receiving and unpacking internal forces started", this->giveRank() );
- #endif
-
-        communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
-        communicator->finishExchange();
-    }
-
-#endif
-
-#ifdef __PARALLEL_MODE
-    // exchange ebeNorm contributions
+    // Exchange ebeNorm contributions.
     double my_ebeNorm = ebeNorm;
     ebeNorm = 0.0;
     MPI_Allreduce(& my_ebeNorm, & ebeNorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 
-
-    // remember last internal vars update time stamp
+    // Remember last internal vars update time stamp.
     internalVarUpdateStamp = stepN->giveSolutionStateCounter();
 }
 
@@ -389,15 +355,13 @@ void NonLinearDynamic :: solveYourself()
     if ( commInitFlag ) {
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
-        // force equation numbering before setting up comm maps
+        // Force equation numbering before setting up comm maps.
         int neq = this->giveNumberOfEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-        // set up communication patterns
+        // Set up communication patterns.
         this->initializeCommMaps();
-        // init remote dofman list
-        // this->initRemoteDofManList ();
 #endif
         commInitFlag = 0;
     }
@@ -411,15 +375,13 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
     if ( commInitFlag ) {
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
-        // force equation numbering before setting up comm maps
+        // Force equation numbering before setting up comm maps.
         int neq = this->giveNumberOfEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-        // set up communication patterns
+        // Set up communication patterns.
         this->initializeCommMaps();
-        // init remote dofman list
-        // this->initRemoteDofManList ();
 #endif
         commInitFlag = 0;
     }
@@ -459,9 +421,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     a5 = deltaT / 2 * ( alpha / beta - 2 );
 
     if ( initFlag ) {
-        //----------------------------------------------------------------------
-        // first assemble problem at current time step
-        // Option to take into account initialconditions
+        // First assemble problem at current time step.
+        // Option to take into account initial conditions.
         if ( !stiffnessMatrix ) {
             stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         }
@@ -512,14 +473,14 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         DofManager *node;
         Dof *iDof;
 
-        // considering initial conditions
+        // Considering initial conditions.
         for ( j = 1; j <= nman; j++ ) {
             node = this->giveDomain(di)->giveDofManager(j);
             nDofs = node->giveNumberOfDofs();
 
             for ( k = 1; k <= nDofs; k++ ) {
-                // ask for initial values obtained from
-                // bc (boundary conditions) and ic (initial conditions)
+                // Ask for initial values obtained from
+                // bc (boundary conditions) and ic (initial conditions).
                 iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
@@ -539,11 +500,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_DEBUG("Assembling load\n");
 #endif
 
-    // assemble the incremental reference load vector
+    // Assemble the incremental reference load vector.
     this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
                                                   refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
 
-    // assembling the effective load vector; f* -> Task 5.
+    // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
         help.at(i) = ( a2 * velocityVector.at(i) +
                        a3 * accelerationVector.at(i) ) + dumpingCoef * ( a4 * velocityVector.at(i) + a5 * accelerationVector.at(i) );
@@ -557,13 +518,13 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     }
 
     //
-    // set-up numerical model
+    // Set-up numerical model.
     //
     this->giveNumericalMethod(tStep);
-    //
-    // call numerical model to solve arise problem
-    //
 
+    //
+    // Call numerical model to solve problem.
+    //
     double loadLevel = 1.0;
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & rhs2, & initialLoadVector,
@@ -582,9 +543,9 @@ void
 NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                     CharType type, TimeStep *tStep, Domain *domain)
 {
-    // we don't directly call element ->GiveCharacteristicMatrix() function, because some
+    // We don't directly call element ->GiveCharacteristicMatrix() function, because some
     // engngm classes may require special modification of base types supported on
-    // element class level
+    // element class level.
 
     if ( type == ModifiedStiffnessMatrix ) {
         Element *element;
@@ -632,7 +593,7 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
 
 void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
-// updates some component, which is used by numerical method
+// Updates some component, which is used by numerical method
 // to newly reached state. used mainly by numerical method
 // when new tanget stiffness is needed during finding
 // of new equlibrium stage.
@@ -712,12 +673,7 @@ NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 }
 
 contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
 {
-    //bool noSolveYourself = false;
-
     int closeFlag = 0;
     contextIOResultType iores;
     FILE *file;
@@ -765,7 +721,7 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -773,9 +729,6 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
 
 
 contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restore state variable - displacement vector
-//
 {
     int closeFlag = 0;
     int istep, iversion;
@@ -837,7 +790,7 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -881,13 +834,13 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
     EngngModel :: assemble(answer, tStep, ut, type, s, domain);
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
-        // add nonlocal contribution
+        // Add nonlocal contribution.
         int ielem, nelem = domain->giveNumberOfElements();
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             ( ( NLStructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
-        // print storage statistics
+        // Print storage statistics.
         answer->printStatistics();
     }
 
@@ -952,7 +905,7 @@ NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_increme
         this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
                              VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ut, ExternalForcesVector,
                              VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
         this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
@@ -962,25 +915,7 @@ NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_increme
     }
 
 #ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: computeLoadVector", "Packing load", this->giveRank() );
- #endif
-        communicator->packAllData( ( StructuralEngngModel * ) this, & _incrementalLoadVector, & StructuralEngngModel :: packLoad );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: computeLoadVector", "Exchange of load started", this->giveRank() );
- #endif
-        communicator->initExchange(LoadExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: computeLoadVector", "Receiving and unpacking of load started", this->giveRank() );
- #endif
-
-        communicator->unpackAllData( ( StructuralEngngModel * ) this, & _incrementalLoadVector, & StructuralEngngModel :: unpackLoad );
-        communicator->finishExchange();
-    }
-
+    this->updateSharedDofManagers(_incrementalLoadVector, LoadExchangeTag);
 #endif
 }
 
@@ -1000,7 +935,7 @@ NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *d
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
+        // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1038,65 +973,11 @@ NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *d
     }
 
 #ifdef __PARALLEL_MODE
-    // exchange data for  node and element cut mode
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: timesMassMtrx", "Packing data", this->giveRank() );
- #endif
-    communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packInternalForces );
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: timesMassMtrx", "Data exchange started", this->giveRank() );
- #endif
-
-    communicator->initExchange(InternalForcesExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: timesMassMtrx", "Receiving and unpacking data", this->giveRank() );
- #endif
-
-    communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
-    communicator->finishExchange();
+    this->updateSharedDofManagers(answer, MassExchangeTag);
 #endif
 }
 
 #ifdef __PARALLEL_MODE
-int NonLinearDynamic :: exchangeRemoteElementData()
-{
-    int result = 1;
-
-    if ( isParallel() && nonlocalExt ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->packAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: packRemoteElementData );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->initExchange(RemoteElementsExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearDynamic :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
- #endif
-
-        if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
-            _error("NonLinearDynamic :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
-        }
-
-        result &= nonlocCommunicator->finishExchange();
-
-        // }
-
-        return result;
-    } // if (nonlocalext)
-
-    return 1;
-}
-
-
-
 int
 NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {

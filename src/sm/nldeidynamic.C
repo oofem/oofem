@@ -80,18 +80,18 @@ NlDEIDynamic :: ~NlDEIDynamic()
 }
 
 NumericalMethod *NlDEIDynamic :: giveNumericalMethod(TimeStep *atTime)
-// only one has reason for DEIDynamic
+// Only one has reason for NlDEIDynamic
 //     - SolutionOfLinearEquations
 
 {
-    return NULL;  // not necessary here - diagonal matrix is used-simple inversion
+    return NULL;  // Not necessary here - Diagonal matrix and simple inversion is used.
 }
 
 IRResultType
 NlDEIDynamic :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
 
@@ -137,8 +137,8 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
 
 double NlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                               TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, velocity of equation eq
-// This function translates this request to numerical method language
+// Returns unknown quantity like displacement, velocity of equation eq.
+// This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
@@ -194,7 +194,6 @@ TimeStep *NlDEIDynamic :: giveNextStep()
 
     previousStep = currentStep;
     currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
 
     return currentStep;
 }
@@ -205,19 +204,16 @@ void NlDEIDynamic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
-    // force equation numbering before setting up comm maps
+    // Force equation numbering before setting up comm maps.
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-    // set up communication patterns
+    // Set up communication patterns,
     communicator->setUpCommunicationMaps(this, true);
     if ( nonlocalExt ) {
         nonlocCommunicator->setUpCommunicationMaps(this, true);
     }
-
-    // init remote dofman list
-    // this->initRemoteDofManList ();
 #endif
 
     StructuralEngngModel :: solveYourself();
@@ -226,7 +222,7 @@ void NlDEIDynamic :: solveYourself()
 void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 {
     //
-    // creates system of governing eq's and solves them at given time step
+    // Creates system of governing eq's and solves them at given time step.
     //
 
     Domain *domain = this->giveDomain(1);
@@ -259,7 +255,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             this->computeLoadVector(loadRefVector, VM_Total, tStep);
 
 #ifdef __PARALLEL_MODE
-            // compute the processor part of load vector norm pMp
+            // Compute the processor part of load vector norm pMp
             this->pMp = 0.0;
             double my_pMp = 0.0, coeff = 1.0;
             int eqNum, ndofs, ndofman = domain->giveNumberOfDofManagers();
@@ -271,7 +267,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 ndofs = dman->giveNumberOfDofs();
                 dofmanmode = dman->giveParallelMode();
 
-                // skip all remote and null dofmanagers
+                // Skip all remote and null dofmanagers
                 coeff = 1.0;
                 if ( ( dofmanmode == DofManager_remote ) || ( ( dofmanmode == DofManager_null ) ) ) {
                     continue;
@@ -279,7 +275,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                     coeff = 1. / dman->givePartitionsConnectivitySize();
                 }
 
-                // for shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution
+                // For shared nodes we add locally an average = 1/givePartitionsConnectivitySize()*contribution,
                 for ( j = 1; j <= ndofs; j++ ) {
                     jdof = dman->giveDof(j);
                     if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
@@ -288,7 +284,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 }
             }
 
-            // sum up the contributions from processors
+            // Sum up the contributions from processors.
             MPI_Allreduce(& my_pMp, & pMp, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #else
             this->pMp = 0.0;
@@ -296,7 +292,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 pMp += loadRefVector.at(i) * loadRefVector.at(i) / massMatrix.at(i);
             }
 #endif
-            // solve for rate of loading process (parameter "c") (undamped system assumed)
+            // Solve for rate of loading process (parameter "c") (undamped system assumed),
             if ( dumpingCoef < 1.e-3 ) {
                 c = 3.0 * this->pyEstimate / pMp / Tau / Tau;
             } else {
@@ -311,7 +307,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         //
-        // special init step - compute displacements at tstep 0
+        // Special init step - Compute displacements at tstep 0.
         //
         displacementVector.resize(neq);
         displacementVector.zero();
@@ -327,7 +323,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             nDofs = node->giveNumberOfDofs();
 
             for ( k = 1; k <= nDofs; k++ ) {
-                // ask for initial values obtained from
+                // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
                 // all dofs are expected to be  DisplacementVector type.
                 iDof  =  node->giveDof(k);
@@ -345,13 +341,13 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         }
 
         //
-        // set-up numerical model
+        // Set-up numerical model.
         //
 
-        // try to determine the best deltaT
+        // Try to determine the best deltaT,
         maxDt = 2.0 / sqrt(maxOm);
         if ( deltaT > maxDt ) {
-            // print reduced time step increment and minimum period Tmin
+            // Print reduced time step increment and minimum period Tmin
             OOFEM_LOG_RELEVANT("deltaT reduced to %e, Tmin is %e\n", maxDt, maxDt * M_PI);
             deltaT = maxDt;
             tStep->setTimeIncrement(deltaT);
@@ -372,38 +368,33 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     for ( i = 1; i <= neq; i++ ) {
-        //   previousIncrementOfDisplacementVector.at(i) = incrementOfDisplacementVector.at(i) ;
         displacementVector.at(i) += previousIncrementOfDisplacementVector.at(i);
     }
 
-#ifdef __PARALLEL_MODE
-    //
-    // init remote dofs if necessary
-    // this->updateRemoteDofDisplacement ();
-#endif
-
-    tStep->incrementStateCounter();            // update solution state counter
+    // Update solution state counter
+    tStep->incrementStateCounter();
 
 #ifdef __PARALLEL_MODE
-    this->exchangeRemoteElementData();         // exchange remote element data if necessary
+    // Exchange remote element data if necessary
+    this->exchangeRemoteElementData( RemoteElementExchangeTag );
 #endif
 
 
-    // compute internal forces
+    // Compute internal forces.
     this->giveInternalForces(internalForces, tStep);
     if ( !drFlag ) {
         //
-        // assembling the element part of load vector
+        // Assembling the element part of load vector.
         //
         this->computeLoadVector(loadVector, VM_Total, tStep);
         //
-        // assembling additional parts of right hand side
+        // Assembling additional parts of right hand side.
         //
         for ( k = 1; k <= neq; k++ ) {
             loadVector.at(k) -= internalForces.at(k);
         }
     } else {
-        // dynamic relaxation
+        // Dynamic relaxation
         // compute load factor
         pt = 0.0;
 
@@ -425,9 +416,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 coeff = 1. / dman->givePartitionsConnectivitySize();
             }
 
-            //coeff *= coeff;
-
-            // for shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution
+            // For shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution.
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
@@ -436,7 +425,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
         }
 
-        // sum up the contributions from processors
+        // Sum up the contributions from processors.
         MPI_Allreduce(& my_pt, & pt, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #else
         for ( k = 1; k <= neq; k++ ) {
@@ -457,7 +446,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         }
 
 
-        // compute relative error
+        // Compute relative error.
         double err = 0.0;
 #ifdef __PARALLEL_MODE
         double my_err = 0.0;
@@ -466,7 +455,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             dman = domain->giveDofManager(dm);
             ndofs = dman->giveNumberOfDofs();
             dofmanmode = dman->giveParallelMode();
-            // skip all remote and null dofmanagers
+            // Skip all remote and null dofmanagers.
             coeff = 1.0;
             if ( ( dofmanmode == DofManager_remote ) || ( ( dofmanmode == DofManager_null ) ) ) {
                 continue;
@@ -474,9 +463,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 coeff = 1. / dman->givePartitionsConnectivitySize();
             }
 
-            //coeff *= coeff;
-
-            // for shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution
+            // For shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution.
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
                 if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
@@ -485,7 +472,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
         }
 
-        // sum up the contributions from processors
+        // Sum up the contributions from processors.
         MPI_Allreduce(& my_err, & err, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
 #else
@@ -506,7 +493,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     }
 
     //
-    // set-up numerical model
+    // Set-up numerical model
     //
     /* it is not necesary to call numerical method
      * approach used here is not good, but effective enough
@@ -525,32 +512,14 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                              ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
         accelerationVector.at(i) = ( incrOfDisplacement - prevIncrOfDisplacement ) / ( deltaT * deltaT );
         velocityVector.at(i)     = ( incrOfDisplacement + prevIncrOfDisplacement ) / ( 2. * deltaT );
-        previousIncrementOfDisplacementVector.at(i) = incrOfDisplacement; // becomes previous
-        //  displacementVector.at(i) += incrOfDisplacement; // update total displacements
-        /*
-         * incrementOfDisplacementVector.at(i) = loadVector.at(i)/
-         *  (massMatrix.at(i)*(1./(deltaT*deltaT) + dumpingCoef/(2.*deltaT))) ;
-         * accelerationVector.at(i) = incrementOfDisplacementVector.at(i) -
-         *  previousIncrementOfDisplacementVector.at(i);
-         * velocityVector.at(i) = incrementOfDisplacementVector.at(i) +
-         *  previousIncrementOfDisplacementVector.at(i);
-         */
+        previousIncrementOfDisplacementVector.at(i) = incrOfDisplacement;
     }
-
-    //  accelerationVector.times(1./(deltaT*deltaT));
-    //  velocityVector.times(1./(2.*deltaT)) ;
-
-#ifdef __PARALLEL_MODE
-    //
-    // update remote dofs if necessary
-    // this->updateRemoteDofs ();
-#endif
 }
 
 
 void NlDEIDynamic :: updateYourself(TimeStep *stepN)
 {
-    // updates internal state to reached one
+    // Updates internal state to reached one
     // all internal variables are directly updated by
     // numerical method - void function here
 
@@ -558,45 +527,6 @@ void NlDEIDynamic :: updateYourself(TimeStep *stepN)
     StructuralEngngModel :: updateYourself(stepN);
 }
 
-
-
-/*
- * void NlDEIDynamic :: terminate (TimeStep* stepN)
- * {
- * FILE * File;
- * int j ;
- * File = this -> giveDomain() -> giveOutputStream() ;
- *
- * fprintf (File,"\nOutput for time % .3le \n\n",stepN->giveTime());
- * // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber()+1);
- *
- * int nman   = domain->giveNumberOfDofManagers ();
- *
- * if (requiresUnknownsDictionaryUpdate()) {
- * for( j=1;j<=nman;j++) {
- * this->updateDofUnknownsDictionary(domain->giveDofManager(j),stepN) ;
- * }
- * }
- *
- * for( j=1;j<=nman;j++) {
- * domain->giveDofManager(j) -> updateYourself(stepN) ;
- * //domain->giveDofManager(j)->printOutputAt(File, stepN);
- * }
- *
- * Element* elem;
- *
- * int nelem = domain->giveNumberOfElements ();
- * for (j=1 ; j<=nelem ; j++) {
- * elem = domain -> giveElement(j) ;
- * elem -> updateYourself(stepN) ;
- * //elem -> printOutputAt(File, stepN) ;
- * }
- *
- * domain->giveOutputManager()->doDofManOutput (File, stepN);
- * domain->giveOutputManager()->doElementOutput (File, stepN);
- *
- * }
- */
 
 void
 NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *stepN)
@@ -614,22 +544,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     // Exchange contributions.
     //
 #ifdef __PARALLEL_MODE
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeLoadVector", "Packing load", this->giveRank() );
- #endif
-    communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packLoad );
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeLoadVector", "Exchange of load started", this->giveRank() );
- #endif
-    communicator->initExchange(LoadExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeLoadVector", "Receiving and unpacking of load started", this->giveRank() );
- #endif
-
-    communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackLoad );
-    communicator->finishExchange();
+    this->updateSharedDofManagers( answer, LoadExchangeTag );
 #endif
 }
 
@@ -662,9 +577,6 @@ NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
         }
 
 #endif
-        // if (!element -> hasNLCapability ()) {
-        //   error ("giveInternalForces: element with no non-linear capability encountered\n");
-        // }
         element->giveLocationArray(loc, EID_MomentumBalance, en);
         element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
         if ( charVec.containsOnlyZeroes() ) {
@@ -675,27 +587,7 @@ NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     }
 
 #ifdef __PARALLEL_MODE
-    // if (commMode == NlDEIDynamicCommunicator__NODE_CUT) {
-    // exchange Internal forces for  node cut mode
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: giveInternalForces", "Packing internal forces", this->giveRank() );
- #endif
-
-    communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packInternalForces );
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: giveInternalForces", "Exchange of internal forces started", this->giveRank() );
- #endif
-
-    communicator->initExchange(InternalForcesExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: giveInternalForces", "Receiving and unpacking internal forces started", this->giveRank() );
- #endif
-
-    communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
-    communicator->finishExchange();
-    // }
+    this->updateSharedDofManagers( answer, InternalForcesExchangeTag );
 #endif
 
     internalVarUpdateStamp = stepN->giveSolutionStateCounter();
@@ -789,7 +681,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     }
 
 #ifndef LOCAL_ZERO_MASS_REPLACEMENT
-    // if init step - find minimun period of vibration in order to
+    // If init step - find minimun period of vibration in order to
     // determine maximal admisible time step
     // global variant
     for (i=1; i<=nelem; i++)
@@ -806,10 +698,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         }
     }
     
-    // find find minimun period of vibration
-    // - global variant
-    //
-    
+    // Find find global minimun period of vibration
     double maxElmass = -1.0;
     for (j=1 ; j<=n; j++) {
         maxElmass = max(maxElmass,charMtrx.at(j,j));
@@ -826,42 +715,18 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         }
     }
 
-    // set ZERO MASS members in massMatrix to value which corresponds to
-    // maxOm
-    // global variant
-
+    // Set ZERO MASS members in massMatrix to value which corresponds to global maxOm.
     for (i=1; i<= neq; i++) {
         if (massMatrix.at(i) <= maxElmass*ZERO_REL_MASS) {
             massMatrix.at(i) = diagonalStiffMtrx.at(i) / maxOm;
         }
     }
-    // end global variant
 #endif
 
 #ifdef __PARALLEL_MODE
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Packing masses", this->giveRank() );
- #endif
+    this->updateSharedDofManagers( massMatrix, MassExchangeTag );
 
-    communicator->packAllData(this, & NlDEIDynamic :: packMasses);
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Mass exchangePacking started", this->giveRank() );
- #endif
-
-    communicator->initExchange(MassExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-    VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Receiveng and Unpacking masses", this->giveRank() );
- #endif
-
-    if ( !communicator->unpackAllData(this, & NlDEIDynamic :: unpackMasses) ) {
-        _error("NlDEIDynamic :: computeMassMtrx: Receiveng and Unpacking masses failed");
-    }
-
-    communicator->finishExchange();
-
-    // determine maxOm over all processes
+    // Determine maxOm over all processes.
  #ifdef __USE_MPI
     double globalMaxOm;
 
@@ -887,183 +752,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 #endif
 }
 
-/*
- * #ifdef __PARALLEL_MODE
- * void
- * NlDEIDynamic :: updateRemoteDofs ()
- * {
- *#ifdef __PARALLEL_MODE
- * if (commMode == NlDEIDynamicCommunicator__ELEMENT_CUT) {
- * // exchange remote dof unknowns for element cut mode
- *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("NlDEIDynamic :: updateRemoteDofs","Packing remote dofs unknowns",domain->giveRank());
- *#endif
- *
- * communicator->packAllData (&NlDEIDynamic::packRemoteDofsUnknowns);
- *
- *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("NlDEIDynamic :: updateRemoteDofs","Remote dofs unknowns exchange started",domain->giveRank());
- *#endif
- *
- * communicator->initExchange (RemoteDofsUnknwnExchangeTag);
- *
- *#ifdef __VERBOSE_PARALLEL
- * VERBOSEPARALLEL_PRINT("NlDEIDynamic :: updateRemoteDofs","Receiveng and Unpacking remote dofs unknws",domain->giveRank());
- *#endif
- *
- * if (!communicator->unpackAllData (&NlDEIDynamic::unpackAndUpdateRemoteDofsUnknowns))
- * _error ("NlDEIDynamic :: updateRemoteDofs: Receiveng and Unpacking remote dofs unknws failed");
- *
- * }
- *#endif
- * }
- *#endif
- */
-
 #ifdef __PARALLEL_MODE
-
-int
-NlDEIDynamic :: packMasses(ProcessCommunicator &processComm)
-{
-    int result = 1;
-    int i, size;
-    int j, ndofs, eqNum;
-    Domain *domain = this->giveDomain(1);
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
-    DofManager *dman;
-    Dof *jdof;
-
-    size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        dman = domain->giveDofManager( toSendMap->at(i) );
-        ndofs = dman->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
-                result &= send_buff->packDouble( massMatrix.at(eqNum) );
-            }
-        }
-    }
-
-    return result;
-}
-
-int
-NlDEIDynamic :: unpackMasses(ProcessCommunicator &processComm)
-{
-    int result = 1;
-    int i, size;
-    int j, ndofs, eqNum;
-    Domain *domain = this->giveDomain(1);
-    dofManagerParallelMode dofmanmode;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
-    DofManager *dman;
-    Dof *jdof;
-    double value;
-
-
-    size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        dman = domain->giveDofManager( toRecvMap->at(i) );
-        ndofs = dman->giveNumberOfDofs();
-        dofmanmode = dman->giveParallelMode();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
-                result &= recv_buff->unpackDouble(value);
-                if ( dofmanmode == DofManager_shared ) {
-                    massMatrix.at(eqNum) += value;
-                } else if ( dofmanmode == DofManager_remote ) {
-                    massMatrix.at(eqNum)  = value;
-                } else {
-                    _error("unpackMasses: unknown dof namager parallel mode");
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-
-
-/*
- * int
- * NlDEIDynamic::packRemoteDofsUnknowns (NlDEIDynamicDomainCommunicator& domainComm)
- * {
- * int result = 1;
- * int i, size;
- * int j, ndofs;
- * int eqNum;
- * double value;
- * IntArray const* toSendMap = domainComm.giveToSendMap();
- * CommunicationBuffer* send_buff = domainComm.giveSendBuff();
- * TimeStep* tStep = this->giveCurrentStep ();
- * DofManager* dofman;
- *
- * size = toSendMap->giveSize();
- * for (i=1; i<= size; i++) {
- * dofman = domain->giveDofManager (toSendMap->at(i));
- * ndofs = dofman->giveNumberOfDofs ();
- * for (j=1; j<=ndofs; j++) {
- *
- *
- * //  eqNum = dofman->giveDof (j) ->giveEquationNumber ();
- * //  if (eqNum) value =  previousIncrementOfDisplacementVector.at(eqNum);
- * //  else value  = 0.;
- * //  send_buff->packDouble (value);
- *
- *
- * result &= dofman->giveDof (j)->packUnknowns (*send_buff, DisplacementVector, IncrementalMode, tStep);
- *
- * }
- * }
- * return result;
- * }
- *
- *
- * int
- * NlDEIDynamic::unpackAndUpdateRemoteDofsUnknowns (NlDEIDynamicDomainCommunicator& domainComm)
- * {
- * IntArray const* toRecvMap = domainComm.giveToRecvMap();
- * CommunicationBuffer* recv_buff = domainComm.giveRecvBuff();
- * TimeStep* tStep = this->giveCurrentStep ();
- * DofManager* dofman;
- * Dof* dof;
- * int result = 1;
- * int i, size;
- * int j, ndofs;
- * double prevIncrOfDisplacement, incrOfDisplacement, acceleration, velocity;
- *
- * size = toRecvMap->giveSize();
- * for (i=1; i<= size; i++) {
- * dofman = domain->giveDofManager (toRecvMap->at(i));
- * ndofs = dofman->giveNumberOfDofs ();
- * for (j=1; j<=ndofs; j++) {
- * dof = dofman->giveDof (j);
- * prevIncrOfDisplacement = dof->giveUnknown (DisplacementVector, IncrementalMode, tStep);
- * // receive displacement increment
- *
- * //recv_buff->unpackDouble (incrOfDisplacement);
- *
- * result &= dof->unpackAndUpdateUnknown (*recv_buff, DisplacementVector, IncrementalMode, tStep);
- * incrOfDisplacement = dof->giveUnknown (DisplacementVector, IncrementalMode, tStep);
- *
- * //prevDispl = dof->giveUnknown (DisplacementVector, TotalMode, tStep);
- * // compute velocities and accelerations
- * acceleration = (incrOfDisplacement - prevIncrOfDisplacement)/(deltaT*deltaT);
- * velocity     = (incrOfDisplacement + prevIncrOfDisplacement)/(2.*deltaT);
- * dof->updateUnknownsDictionary (tStep, DisplacementVector, IncrementalMode, incrOfDisplacement);
- * dof->updateUnknownsDictionary (tStep, DisplacementVector, VelocityMode, velocity);
- * dof->updateUnknownsDictionary (tStep, DisplacementVector, AccelerationMode, acceleration);
- * }
- * }
- * return result;
- * }
- */
-
 int
 NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
@@ -1093,7 +782,6 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
             }
         }
 
-        //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         for ( i = 1; i <= mapSize; i++ ) {
@@ -1106,123 +794,11 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
     return 0;
 }
 
-/*
- * int
- * NlDEIDynamic :: initRemoteDofManList ()
- * {
- * int i, pos = 0, size = 0, ndofman = domain->giveNumberOfDofManagers();
- *
- * if (commMode == NlDEIDynamicCommunicator__ELEMENT_CUT) {
- *
- * for (i=1; i<=ndofman; i++) if (domain->giveDofManager(i)->giveParallelMode () == DofManager_remote) size++;
- * this->remoteDofManList.resize (size);
- * for (i=1; i<=ndofman; i++)
- * if (domain->giveDofManager(i)->giveParallelMode () == DofManager_remote) {
- *  this->remoteDofManList.at(++pos) = i;
- * }
- * }
- * return 1;
- * }
- *
- *
- * void
- * NlDEIDynamic :: initializeRemoteDofs ()
- * {
- * TimeStep* tStep = this->giveCurrentStep ();
- * int i,j,ndofs, size = remoteDofManList.giveSize();
- * double displ, velocity;
- * DofManager* dofman;
- * Dof* dof;
- *
- * if (commMode == NlDEIDynamicCommunicator__ELEMENT_CUT) {
- *
- * for (i=1; i<=size; i++) {
- * dofman = domain->giveDofManager (remoteDofManList.at(i));
- * ndofs = dofman->giveNumberOfDofs ();
- * for (j=1; j<=ndofs; j++) {
- *  dof = dofman->giveDof (j);
- *  if (dof->hasIc ()) {
- *   displ    = dof->giveIc() -> give(TotalMode);
- *   velocity = dof->giveIc() -> give(VelocityMode);
- *  } else {
- *   displ = velocity = 0.;
- *  }
- *  dof->updateUnknownsDictionary (tStep, DisplacementVector, IncrementalMode, velocity*(deltaT));
- *  dof->updateUnknownsDictionary (tStep, DisplacementVector, TotalMode, displ-velocity*(deltaT));
- * }
- * }
- * }
- * }
- *
- *
- *
- * void
- * NlDEIDynamic :: updateRemoteDofDisplacement ()
- * {
- * TimeStep* tStep = this->giveCurrentStep ();
- * int i,j,ndofs, size = remoteDofManList.giveSize();
- * double prevDispl, prevIncrOfDisplacement;
- * DofManager* dofman;
- * Dof* dof;
- *
- * if (commMode == NlDEIDynamicCommunicator__ELEMENT_CUT) {
- * for (i=1; i<=size; i++) {
- * dofman = domain->giveDofManager (remoteDofManList.at(i));
- * ndofs = dofman->giveNumberOfDofs ();
- * for (j=1; j<=ndofs; j++) {
- *  dof = dofman->giveDof (j);
- *  prevDispl = dof->giveUnknown (DisplacementVector, TotalMode, tStep);
- *  prevIncrOfDisplacement = dof->giveUnknown (DisplacementVector, IncrementalMode, tStep);
- *  dof->updateUnknownsDictionary (tStep, DisplacementVector, TotalMode, prevDispl+prevIncrOfDisplacement);
- * }
- * }
- * }
- * }
- */
-
-int NlDEIDynamic :: exchangeRemoteElementData()
-{
-    int result = 1;
-
-    if ( nonlocalExt ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->packAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: packRemoteElementData );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->initExchange(RemoteElementsExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
- #endif
-
-        if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
-            _error("NlDEIDynamic :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
-        }
-
-        // }
-        result &= nonlocCommunicator->finishExchange();
-        return result;
-    } // if (nonlocalext)
-
-    return 1;
-}
-
-
-
 #endif
 
 
 
 contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves state variable - displacement vector
-//
 {
     contextIOResultType iores;
     int closeFlag = 0;
@@ -1266,7 +842,7 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
         fclose(file);
         delete stream;
         stream = NULL;
-    } // ensure consistent records
+    } // Ensure consistent records
 
     return CIO_OK;
 }
@@ -1274,9 +850,6 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
 
 
 contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restore state variable - displacement vector
-//
 {
     contextIOResultType iores;
     int closeFlag = 0;
@@ -1294,7 +867,7 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
         closeFlag = 1;
     }
 
-    // save element context
+    // Save element context.
     if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -1323,7 +896,7 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                        // ensure consistent records
+    } // ensure consistent records
 
     return CIO_OK;
 }
@@ -1352,8 +925,6 @@ NlDEIDynamic :: terminate(TimeStep *tStep)
 void
 NlDEIDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
 {
-    //FILE* File = this -> giveDomain() -> giveOutputStream() ;
-
     if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(stepN) ) {
         return;                                                                      // do not print even Solution step header
     }

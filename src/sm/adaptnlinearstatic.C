@@ -553,7 +553,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     if ( isParallel() ) {
         // set up communication patterns
         this->initializeCommMaps(true);
-        exchangeRemoteElementData();
+        this->exchangeRemoteElementData( RemoteElementExchangeTag );
     }
 
 #endif

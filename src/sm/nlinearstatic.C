@@ -243,8 +243,8 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
                                                          ProblemCommMode__REMOTE_ELEMENT_MODE);
         }
     }
-
 #endif
+
     return IRRT_OK;
 }
 
@@ -386,7 +386,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
 
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
-        exchangeRemoteElementData();
+        this->exchangeRemoteElementData( RemoteElementExchangeTag );
     }
 
 #endif
@@ -435,29 +435,8 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
-
 #ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: giveInternalForces", "Packing internal forces", this->giveRank() );
- #endif
-
-        communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packInternalForces );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: giveInternalForces", "Exchange of internal forces started", this->giveRank() );
- #endif
-
-        communicator->initExchange(InternalForcesExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: giveInternalForces", "Receiving and unpacking internal forces started", this->giveRank() );
- #endif
-
-        communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
-        communicator->finishExchange();
-    }
-
+    this->updateSharedDofManagers( answer, InternalForcesExchangeTag );
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -928,6 +907,7 @@ NonLinearStatic :: initPetscContexts()
 }
 #endif
 
+
 void
 NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
                             const UnknownNumberingScheme &s, Domain *domain)
@@ -1031,67 +1011,12 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
     }
 
 #ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: computeLoadVector", "Packing load", this->giveRank() );
- #endif
-        communicator->packAllData( ( StructuralEngngModel * ) this, & _incrementalLoadVector, & StructuralEngngModel :: packLoad );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: computeLoadVector", "Exchange of load started", this->giveRank() );
- #endif
-        communicator->initExchange(LoadExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: computeLoadVector", "Receiving and unpacking of load started", this->giveRank() );
- #endif
-
-        communicator->unpackAllData( ( StructuralEngngModel * ) this, & _incrementalLoadVector, & StructuralEngngModel :: unpackLoad );
-        communicator->finishExchange();
-    }
-
+    this->updateSharedDofManagers( _incrementalLoadVector, LoadExchangeTag  );
 #endif
 }
 
 
 #ifdef __PARALLEL_MODE
-int
-NonLinearStatic :: exchangeRemoteElementData()
-{
-    int result = 1;
-
-    if ( isParallel() && nonlocalExt ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->packAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: packRemoteElementData );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->initExchange(RemoteElementsExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "NonLinearStatic :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
- #endif
-
-        if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
-            _error("NonLinearStatic :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
-        }
-
-        result &= nonlocCommunicator->finishExchange();
-
-        // }
-
-        return result;
-    } // if (nonlocalext)
-
-    return 1;
-}
-
-
 int
 NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
@@ -1135,20 +1060,6 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
 }
 
 
-void
-NonLinearStatic :: initializeCommMaps(bool forceInit)
-{
-    // set up communication patterns
-    communicator->setUpCommunicationMaps(this, true, forceInit);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
-    }
-}
-
-#endif
-
-
-#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearStatic :: giveLoadBalancer()
 {

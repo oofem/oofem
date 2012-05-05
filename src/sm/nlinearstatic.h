@@ -38,11 +38,6 @@
 #include "linearstatic.h"
 #include "sparsenonlinsystemnm.h"
 
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
- #include "processcomm.h"
-#endif
-
 namespace oofem {
 /// Type determining the stiffness mode.
 enum NonLinearStatic_stifnessMode {
@@ -119,11 +114,6 @@ protected:
      */
     SparseNonLinearSystemNM :: referenceLoadInputModeType refLoadInputMode;
 
-#ifdef __PARALLEL_MODE
-    /// Message tags
-    enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, RemoteElementsExchangeTag };
-#endif
-
 public:
     NonLinearStatic(int i, EngngModel *_master = NULL);
     virtual ~NonLinearStatic();
@@ -164,19 +154,7 @@ public:
 #endif
 
 #ifdef __PARALLEL_MODE
-    /**
-     * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
-     * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
-     * receiver's services.
-     * @return Nonzero if successful.
-     */
-    int exchangeRemoteElementData();
-
     virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-    /**
-     * Initializes communication maps of the receiver.
-     */
-    void initializeCommMaps(bool forceInit = false);
 
     virtual LoadBalancer *giveLoadBalancer();
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor();

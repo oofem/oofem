@@ -39,11 +39,6 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
- #include "processcomm.h"
-#endif
-
 namespace oofem {
 /**
  * This class implements Direct Implicit Integration of Dynamic problem
@@ -67,7 +62,7 @@ namespace oofem {
 class DIIDynamic : public StructuralEngngModel
 {
 protected:
-    bool initFlag, commInitFlag;
+    bool initFlag;
     SparseMtrx *stiffnessMatrix;
     FloatArray loadVector, previousLoadVector, rhs;
     FloatArray displacementVector, velocityVector, accelerationVector;
@@ -112,10 +107,6 @@ public:
     virtual int checkConsistency();
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-#ifdef __PARALLEL_MODE
-    void initializeCommMaps();
-#endif
 };
 } // end namespace oofem
 #endif // diidynamic_h

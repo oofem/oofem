@@ -68,7 +68,7 @@ namespace oofem {
  * K. Subbaraj and M. A. Dokainish
  * Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989
  *
- * @author A. Feymark
+ * @author A. Feymark, A. Cesur
  */
 class NonLinearDynamic : public StructuralEngngModel
 {
@@ -109,24 +109,11 @@ protected:
     SparseNonLinearSystemNM *nMethod;
     /// Intrinsic time increment.
     double deltaT;
-    /**
-     * The following parameter allows to specify how the reference load vector
-     * is obtained from given totalLoadVector and initialLoadVector.
-     * The initialLoadVector desribes the part of loading which does not scale.
-     * If refLoadInputMode is rlm_total (default) then the reference incremental load vector is defined as
-     * totalLoadVector assembled at given time.
-     * If refLoadInputMode is rlm_inceremental then the reference load vector is
-     * obtained as incremental load vector at given time.
-     */
+
     SparseNonLinearSystemNM :: referenceLoadInputModeType refLoadInputMode;
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
-
-#ifdef __PARALLEL_MODE
-    /// Message tags
-    enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, RemoteElementsExchangeTag };
-#endif
 
 public:
     NonLinearDynamic(int i, EngngModel *_master = NULL);
@@ -155,7 +142,7 @@ public:
     virtual void updateDomainLinks();
     virtual int checkConsistency();
 
-    // identification
+    // Identification
     virtual const char *giveClassName() const { return "NonLinearDynamic"; }
     virtual classType giveClassID() const { return NonLinearDynamicClass; }
     virtual int isIncremental() { return 1; }
@@ -171,14 +158,6 @@ public:
 #endif
 
 #ifdef __PARALLEL_MODE
-    /**
-     * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
-     * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
-     * receiver's services.
-     * @return Nonzero if successful.
-     */
-    int exchangeRemoteElementData();
-
     int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
     /**
      * Initializes communication maps of the receiver.
@@ -197,15 +176,7 @@ public:
 protected:
     void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
-    /**
-     * Evaluates the nodal representation of internal forces by assembling
-     * contributions from individual elements.
-     * @param answer Vector of nodal internal forces.
-     * @param norm Element by element norm of internal forces.
-     * @param DeltaR Increment of displacement vector.
-     * @param d Solution domain.
-     * @param tStep Solution step.
-     */
+
     void giveInternalForces(FloatArray &answer, double &norm, const FloatArray &DeltaR, Domain *d, TimeStep *tStep);
     void proceedStep(int di, TimeStep *tStep);
     void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);

@@ -41,38 +41,14 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
-namespace oofem {
-#define LOCAL_ZERO_MASS_REPLACEMENT 1
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
-
-class NlDEIDynamic;
-class ProblemCommunicator;
-
-/*
- * Pointer to packing function type.  Functions of this type are used to pack
- * various nodal data into domainCommunicators send buffer. Only nodes in toSend
- * map are considered.
- */
-//typedef int (NlDEIDynamic::*NlDEIDynamic_Pack_func) (NlDEIDynamicDomainCommunicator&);
-/*
- * Pointer to unpacking function type.  Functions of this type are used to unpack
- * various nodal data from domainCommunicators receive buffer. Only nodes in toRecv
- * map are considered.
- */
-//typedef int (NlDEIDynamic::*NlDEIDynamic_Unpack_func) (NlDEIDynamicDomainCommunicator&);
-/*
- * NlDEIDynamicCommunicatorMode determines the valid mode.
- * The mode is used to set up communication pattern, which differ for
- * node and element cut algorithms.
- * Additional remote element mode hass been added to capture the case, when CommunicatorM is intended to
- * support remote element data exchange (for example when nonlocal material models are present).
- */
-
 #endif
 
+#define LOCAL_ZERO_MASS_REPLACEMENT 1
 
+namespace oofem {
 /**
  * This class implements NonLinear (- may be changed) solution of dynamic
  * problems using Direct Explicit Integration scheme - Central Difference
@@ -143,16 +119,9 @@ protected:
     /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
 
-#ifdef __PARALLEL_MODE
-    // public:
-    /// Message tags
-    enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, RemoteElementsExchangeTag };
-#endif
-
 public:
-    /// Constructor.
     NlDEIDynamic(int i, EngngModel *_master = NULL);
-    /// Destructor.
+
     virtual ~NlDEIDynamic();
 
     virtual void solveYourself();
@@ -210,54 +179,8 @@ protected:
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
 
 #ifdef __PARALLEL_MODE
-    /**
-     * Packing function for masses. Pascks mass of shared DofManagers
-     * into send communication buffer of given process communicator.
-     * @param processComm Task communicator for which to pack masses.
-     * @return Nonzero if successful.
-     */
-    int packMasses(ProcessCommunicator &processComm);
-    /**
-     * Unpacking function for masses. Unpacks mass of shared DofManagers
-     * from  receive communication buffer of given process communicator.
-     * @param processComm Task communicator for which to unpack masses.
-     * @return Nonzero if successful.
-     */
-    int unpackMasses(ProcessCommunicator &processComm);
-    /**
-     * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
-     * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
-     * receiver's services.
-     * @return Nonzero if success.
-     */
-    int exchangeRemoteElementData();
-
 public:
-    /**
-     * Determines the space necessary for send/receive buffer.
-     * It uses related communication map pattern to determine the maximum size needed.
-     * @param commMap Communication map used to send/receive messages.
-     * @param buff Communication buffer.
-     * @return Upper bound of space needed.
-     */
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-    /*
-     * Initializes remote dof managers and their dofs acording to initial and boundary conditions.
-     */
-    //void initializeRemoteDofs ();
-    /*
-     * Updates remote dofs velocity, accelaretaions and displacement incerents values.
-     */
-    //void updateRemoteDofs ();
-    /*
-     * Updates displacement of remote dof managers dofs.
-     */
-    //void updateRemoteDofDisplacement ();
-    /*
-     * Initailizes the list of remote dof managers in current partition.
-     * @return nonzero if success
-     */
-    //int initRemoteDofManList ();
+    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
 #endif
 };
 } // end namespace oofem

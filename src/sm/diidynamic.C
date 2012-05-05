@@ -42,11 +42,6 @@
 #include "dof.h"
 #include "contextioerr.h"
 #include "datastream.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 #include "verbose.h"
 #include "skyline.h"
 #include "structuralelement.h"
@@ -67,15 +62,11 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
     previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), help()
 {
     initFlag = true;
-    commInitFlag = true;
     stiffnessMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
-    nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
 #endif
 }
 
@@ -144,16 +135,6 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_smtype, "smtype"); // Macro
     sparseMtrxType = ( SparseMtrxType ) val;
 
-#ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
-        commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
-    }
-
-#endif
-
     IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat"); // Macro
     IR_GIVE_FIELD(ir, alpha, IFT_DIIDynamic_alpha, "alpha"); // Macro
     IR_GIVE_FIELD(ir, beta, IFT_DIIDynamic_beta, "beta"); // Macro
@@ -172,7 +153,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
 
 double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                            TimeStep *tStep, Domain *d, Dof *dof)
-// Returns unknown quantity like displaacement, velocity of equation eq.
+// Returns unknown quantity displacement, velocity or acceleration of equation eq.
 // This function translates this request to numerical method language.
 {
     int eq = dof->__giveEquationNumber();
@@ -229,27 +210,11 @@ TimeStep *DIIDynamic :: giveNextStep()
 
 void DIIDynamic :: solveYourself()
 {
-#ifdef __PARALLEL_MODE
-    if ( commInitFlag ) {
-        this->initializeCommMaps();
-        commInitFlag = false;
-    }
-
-#endif
-
     StructuralEngngModel :: solveYourself();
 }
 
 void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
-#ifdef __PARALLEL_MODE
-    if ( commInitFlag ) {
-        this->initializeCommMaps();
-        commInitFlag = false;
-    }
-
-#endif
-
-    // Determine the constants
+    // Determine the constants.
     deltaT = tStep->giveTimeIncrement();
     this->determineConstants();
 
@@ -260,7 +225,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
         //
-        // Determine initial displacements, velocities, accelerations
+        // Determine initial displacements, velocities and accelerations.
         //
         loadVector.resize(neq);
         loadVector.zero();
@@ -282,7 +247,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
             for ( k = 1; k <= nDofs; k++ ) {
                 //
-                // Ask for initial values obtained from boundary conditions and initial conditions
+                // Ask for initial values obtained from boundary conditions and initial conditions.
                 //
                 iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
@@ -383,9 +348,9 @@ void
 DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                               CharType type, TimeStep *tStep, Domain *domain)
 {
-    // we don't directlt call element ->GiveCharacteristicMatrix() function, because some
+    // We don't directly call element ->GiveCharacteristicMatrix() function, because some
     // engngm classes may require special modification of base types supported on
-    // element class level
+    // element class level.
 
     if ( type == ModifiedStiffnessMatrix ) {
         Element *element;
@@ -507,7 +472,7 @@ DIIDynamic :: determineConstants()
         a8  = deltaT / 2.;
         a9  = dt2 / 4.;
         a10 = a9;
-    } else {     // Wilson Method
+    } else { // Wilson Method
         if ( Psi < 1.37 ) {
             Psi = 1.37;
         }
@@ -530,8 +495,7 @@ DIIDynamic :: determineConstants()
 int
 DIIDynamic :: checkConsistency()
 {
-    // check internal consistency
-    // if success returns nonzero
+    // Check internal consistency
     int i, nelem;
     Element *ePtr;
     StructuralElement *sePtr;
@@ -539,8 +503,8 @@ DIIDynamic :: checkConsistency()
     Domain *domain = this->giveDomain(1);
 
     nelem = domain->giveNumberOfElements();
-    // check for proper element type
 
+    // check for proper element type
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< StructuralElement * >( ePtr );
@@ -566,7 +530,7 @@ contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mo
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
                                     this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
+            THROW_CIOERR(CIO_IOERR); // Override.
         }
 
         stream = new FileDataStream(file);
@@ -612,14 +576,13 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
+            THROW_CIOERR(CIO_IOERR); // Override.
         }
 
         stream = new FileDataStream(file);
         closeFlag = 1;
     }
 
-    // save element context
     if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -648,21 +611,4 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
 
     return CIO_OK;
 }
-
-#ifdef __PARALLEL_MODE
-void
-DIIDynamic :: initializeCommMaps()
-{
- #ifdef __VERBOSE_PARALLEL
-    // force equation numbering before setting up comm maps
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
- #endif
-    // set up communication patterns
-    communicator->setUpCommunicationMaps(this, true);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true);
-    }
-}
-#endif
 } // end namespace oofem

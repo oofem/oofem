@@ -270,7 +270,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 
 
         //reaction vector contains contributions from unknownNumberingScheme
-        microStructuralEngngModel->computeReactions(reactions, this->microEngngModel->giveCurrentStep(), 1);
+        microStructuralEngngModel->computeReaction(reactions, this->microEngngModel->giveCurrentStep(), 1);
         //reactions.printYourself();
         answer.resize(24);
         answer.zero();
