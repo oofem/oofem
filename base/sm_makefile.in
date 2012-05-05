@@ -47,7 +47,7 @@ srcs98 = planstrssxfem.C
 #OBSOLETE stuff
 srcs99= steel1.C plasticmaterial.C perfectlyplasticmaterial.C j2plasticmaterial.C mplasticmaterial.C j2mplasticmaterial.C rankinepm.C
 #parallel stuff
-psrc1=  feticommunicator.C fetiboundarydofman.C fetisolver.C plinearstatic.C
+psrc1=  feticommunicator.C fetiboundarydofman.C fetisolver.C
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs10) $(srcs98) $(srcs99) $(psrc1)
 

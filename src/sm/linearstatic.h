@@ -39,6 +39,10 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
+#ifdef __PARALLEL_MODE
+ #include "sparsemtrx.h"
+#endif
+
 namespace oofem {
 
 class SparseMtrx;

@@ -203,7 +203,6 @@ enum classType {
     EngngModelClass,
     EigenValueDynamicClass,
     LinearStaticClass,
-    PLinearStaticClass,
     NonLinearStaticClass,
     NonLinearDynamicClass,
     DEIDynamicClass,

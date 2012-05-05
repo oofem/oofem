@@ -49,6 +49,10 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+#ifdef __PARALLEL_MODE
+ #include "fetisolver.h"
+#endif
+
 namespace oofem {
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
@@ -83,7 +87,17 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(TimeStep *atTime)
         return nMethod;
     }
 
+#ifdef __PARALLEL_MODE
+    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+        if ( nMethod ) {
+            return nMethod;
+        }
+
+        nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    }
+#else
     nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+#endif
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }

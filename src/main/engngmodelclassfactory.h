@@ -40,7 +40,6 @@
  #include "diidynamic.h"
  #include "incrementallinearstatic.h"
  #include "linearstability.h"
- #include "plinearstatic.h"
  #include "linearstatic.h"
  #include "adaptnlinearstatic.h"
  #include "adaptlinearstatic.h"
@@ -72,10 +71,6 @@ REGISTER_CLASS(IncrementalLinearStatic, "incrlinearstatic", IncrementalLinearSta
 REGISTER_CLASS(LinearStability, "linearstability", LinearStabilityClass)
 REGISTER_CLASS(AdaptiveNonLinearStatic, "adaptnlinearstatic", AdaptiveNonLinearStaticClass)
 REGISTER_CLASS(AdaptiveLinearStatic, "adaptlinearstatic", AdaptiveLinearStaticClass)
- #ifdef __PARALLEL_MODE
-REGISTER_CLASS(PLinearStatic, "plinearstatic", PLinearStaticClass)
- #endif
-
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE

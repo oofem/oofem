@@ -76,8 +76,7 @@ protected:
     double prevStepLength, currentStepLength;
     FloatArray totalDisplacement,  incrementOfDisplacement;
     FloatArray internalForces;
-    /// Norm of nodal internal forces evaluated on element by element basis
-    double internalForcesEBENorm;
+
     /// A load vector already applied, which does not scales.
     FloatArray initialLoadVector;
     /**
