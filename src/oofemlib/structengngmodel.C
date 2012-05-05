@@ -241,7 +241,7 @@ StructuralEngngModel :: updateSharedDofManagers(FloatArray &answer, int Exchange
     int result = 1;
 
 
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
+    if ( isParallel() ) {
 #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
 #endif
@@ -270,7 +270,7 @@ StructuralEngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, in
 {
     int result = 1;
 
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
+    if ( isParallel() ) {
 #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedPrescribedDofManagers", "Packing data", this->giveRank() );
 #endif
@@ -386,14 +386,18 @@ StructuralEngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm
 int
 StructuralEngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm)
 {
-    this->packDofManagers(src, processComm, false);
+    int result = 1;
+    result &= this->packDofManagers(src, processComm, false);
+    return result;
 }
 
 
 int
 StructuralEngngModel :: packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
 {
-    this->packDofManagers(src, processComm, true);
+    int result = 1;
+    result &= this->packDofManagers(src, processComm, true);
+    return result;
 }
 
 
@@ -433,14 +437,18 @@ StructuralEngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &pr
 int
 StructuralEngngModel :: unpackDofManagers(FloatArray *src, ProcessCommunicator &processComm)
 {
-    this->unpackDofManagers(src, processComm, false);
+    int result = 1;
+    result &= this->unpackDofManagers(src, processComm, false);
+    return result;
 }
 
 
 int
 StructuralEngngModel :: unpackPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
 {
-    this->unpackDofManagers(src, processComm, true);
+    int result = 1;
+    result &= this->unpackDofManagers(src, processComm, true);
+    return result;
 }
 
 
