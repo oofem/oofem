@@ -274,82 +274,6 @@ TimeStep *NonLinearDynamic :: giveNextStep()
 }
 
 
-void
-NonLinearDynamic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const FloatArray &DeltaR, Domain *domain, TimeStep *stepN)
-{
-    // Computes nodal representation of internal forces (real ones)
-    // simply assembles contributions from each element in domain
-    Element *element;
-    IntArray loc;
-    FloatArray charVec;
-    int nelems;
-    EModelDefaultEquationNumbering en;
-
-    answer.zero();
-    ebeNorm = 0.0;
-
-    // Update solution state counter
-    stepN->incrementStateCounter();
-
-#ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
-        exchangeRemoteElementData( RemoteElementExchangeTag  );
-    }
-#endif
-
-    nelems = domain->giveNumberOfElements();
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    for ( int i = 1; i <= nelems; i++ ) {
-        element = ( NLStructuralElement * ) domain->giveElement(i);
-#ifdef __PARALLEL_MODE
-        // Skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. Their introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-#endif
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
-
-        answer.assemble(charVec, loc);
-
-        // Compute element norm contribution.
-        ebeNorm += charVec.computeSquaredNorm();
-
-        /*
-         * // debug loop
-         * for (int jj=1; jj<=loc.giveSize(); jj++) {
-         * int jl = loc.at(jj);
-         * if (jl==0) continue;
-         * if (finite(answer.at(jl)) == 0) {
-         * char buff[1024];
-         * sprintf (buff, "giveInternalForces: INF or NAN error detected, element %d", i);
-         * _error (buff);
-         * }
-         * }
-         * // end debug loop
-         */
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-#ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
-
-    // Exchange ebeNorm contributions.
-    double my_ebeNorm = ebeNorm;
-    ebeNorm = 0.0;
-    MPI_Allreduce(& my_ebeNorm, & ebeNorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-#endif
-
-    // Remember last internal vars update time stamp.
-    internalVarUpdateStamp = stepN->giveSolutionStateCounter();
-}
-
-
 void NonLinearDynamic :: solveYourself()
 {
     if ( commInitFlag ) {
@@ -585,7 +509,7 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
         velocityVector.at(i)            = a1 * incrementOfDisplacement.at(i) - a4 *rhs.at(i) - a5 *rhs2.at(i);
     }
 
-    this->giveInternalForces(previousInternalForces, internalForcesEBENorm, incrementOfDisplacement, this->giveDomain(1), stepN);
+    this->giveInternalForces(previousInternalForces, true, 1, stepN);
 
     this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
@@ -618,7 +542,7 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
         OOFEM_LOG_DEBUG("Updating internal RHS\n");
 #endif
         // Update internalForces and internalForcesEBENorm concurrently
-        this->giveInternalForces(internalForces, internalForcesEBENorm, incrementOfDisplacement, d, tStep);
+        this->giveInternalForces(internalForces, true, 1, tStep);
 
         // Updating the residual vector @ NR-solver by modifying Fint
         // so it takes into account for the acceleration and velocity

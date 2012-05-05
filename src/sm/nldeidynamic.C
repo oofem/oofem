@@ -379,9 +379,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     this->exchangeRemoteElementData( RemoteElementExchangeTag );
 #endif
 
-
     // Compute internal forces.
-    this->giveInternalForces(internalForces, tStep);
+    this->giveInternalForces( internalForces, false, 1, tStep );
+
     if ( !drFlag ) {
         //
         // Assembling the element part of load vector.
@@ -548,50 +548,6 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
 #endif
 }
 
-
-void
-NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
-{
-    // computes nodal representation of internal forces (real ones)
-    // simply assembles contributions from each element in domain
-    Domain *domain = this->giveDomain(1);
-    Element *element;
-    IntArray loc;
-    FloatArray charVec;
-    int nelems;
-    EModelDefaultEquationNumbering en;
-
-    answer.resize( displacementVector.giveSize() );
-    answer.zero();
-
-    nelems = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelems; i++ ) {
-        element = ( NLStructuralElement * ) domain->giveElement(i);
-
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. Their introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-#endif
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
-        if ( charVec.containsOnlyZeroes() ) {
-            continue;
-        }
-
-        answer.assemble(charVec, loc);
-    }
-
-#ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers( answer, InternalForcesExchangeTag );
-#endif
-
-    internalVarUpdateStamp = stepN->giveSolutionStateCounter();
-}
 
 void
 NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep *tStep)

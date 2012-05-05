@@ -168,16 +168,6 @@ public:
 protected:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
-    /**
-     * Evaluates the nodal representation of internal forces by assembling
-     * contributions from individual elements.
-     * @param answer Vector of nodal internal forces.
-     * @param norm Element by element norm of internal forces.
-     * @param DeltaR Increment of displacement vector.
-     * @param d Solution domain.
-     * @param tStep Solution step.
-     */
-    void giveInternalForces(FloatArray &answer, double &norm, const FloatArray &DeltaR, Domain *d, TimeStep *tStep);
     void proceedStep(int di, TimeStep *tStep);
     void updateLoadVectors(TimeStep *tStep);
     virtual void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);

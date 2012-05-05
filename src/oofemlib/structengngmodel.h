@@ -59,6 +59,9 @@ protected:
      */
     StateCounterType internalVarUpdateStamp;
 
+    // Norm of nodal internal forces evaluated on element by element basis
+    double internalForcesEBENorm;
+
 #ifdef __PARALLEL_MODE
     /// Common Communicator buffer.
     CommunicatorBuff *commBuff;
@@ -131,10 +134,19 @@ protected:
      */
     virtual void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     /**
+     * Evaluates the nodal representation of internal forces by assembling contributions from individual elements.
+     * @param answer Vector of nodal internal forces.
+     * @param normFlag True if element by element norm of internal forces (internalForcesEBENorm) is to be computed.
+     * @param di Domain number.
+     * @param tStep Solution step.
+     */
+    virtual void giveInternalForces(FloatArray &answer, bool normFlag, int di, TimeStep *tStep);
+    /**
      * Updates nodal values
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
      * if model supports changes of static system). The element internal state update is also forced using
      * updateInternalState service.
+     * @param tStep Solution step.
      */
     void updateInternalState(TimeStep *tStep);
 public:

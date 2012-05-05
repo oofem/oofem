@@ -362,95 +362,6 @@ TimeStep *NonLinearStatic :: giveNextStep()
 }
 
 
-void
-NonLinearStatic :: giveInternalForces(FloatArray &answer, double &ebeNorm, const FloatArray &DeltaR, Domain *domain, TimeStep *stepN)
-{
-    // computes nodal representation of internal forces (real ones)
-    // simply assembles contributions from each element in domain
-    // DeltaR is last increment of displacement vector during solution
-    // not the total increments of displacements summed from start of step
-    // Also Element by Element norm of internal forces is computed
-    Element *element;
-    IntArray loc;
-    FloatArray charVec;
-    int nelems;
-    FloatMatrix R;
-    EModelDefaultEquationNumbering en;
-
-    answer.resize( DeltaR.giveSize() );
-    answer.zero();
-    ebeNorm = 0.0;
-
-    // this -> updateInternalStepState (DeltaR, stepN) ; // force updating due to DeltaR
-    // stepN-> incrementStateCounter();              // update solution state counter
-
-#ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
-        this->exchangeRemoteElementData( RemoteElementExchangeTag );
-    }
-
-#endif
-
-    nelems = domain->giveNumberOfElements();
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    for ( int i = 1; i <= nelems; i++ ) {
-        element = ( NLStructuralElement * ) domain->giveElement(i);
-        // if (!element -> hasNLCapability ()) {
-        //   error ("giveInternalForces: element with no non-linear capability encountered\n");
-        // }
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. Their introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
-
-#endif
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicVector(charVec, InternalForcesVector, VM_Total, stepN);
-        // if (charVec->containsOnlyZeroes ()) continue;
-        if ( element->giveRotationMatrix(R, EID_MomentumBalance) ) {
-            charVec.rotatedWith(R, 't');
-        }
-        answer.assemble(charVec, loc);
-        // compute element norm contribution
-        ebeNorm += charVec.computeSquaredNorm();
-
-        /*
-         * // debug loop
-         * for (int jj=1; jj<=loc.giveSize(); jj++) {
-         * int jl = loc.at(jj);
-         * if (jl==0) continue;
-         * if (finite(answer.at(jl)) == 0) {
-         * char buff[1024];
-         * sprintf (buff, "giveInternalForces: INF or NAN error detected, element %d", i);
-         * _error (buff);
-         * }
-         * }
-         * // end debug loop
-         */
-    }
-
-    this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-#ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers( answer, InternalForcesExchangeTag );
-#endif
-
-#ifdef __PARALLEL_MODE
-    // exchange ebeNorm contributions
-    double my_ebeNorm = ebeNorm;
-    ebeNorm = 0.0;
-    MPI_Allreduce(& my_ebeNorm, & ebeNorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-#endif
-
-    // remember last internal vars update time stamp
-    internalVarUpdateStamp = stepN->giveSolutionStateCounter();
-}
-
-
 void NonLinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
@@ -713,7 +624,7 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
         break;
     case InternalRhs:
         // update internalForces and internalForcesEBENorm concurrently
-        this->giveInternalForces(internalForces, internalForcesEBENorm, incrementOfDisplacement, d, tStep);
+        this->giveInternalForces(internalForces, true, 1, tStep);
         break;
     case NonLinearRhs_Incremental:
         this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,

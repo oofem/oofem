@@ -141,13 +141,6 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    /**
-     * Assembles the nodal internal forces vector. It assembles the contribution from all elements in
-     * particular domain. If runs in parallel mode, the nodal forces for shared nodes are exchanged and
-     * updated accordingly.
-     */
-    void giveInternalForces(FloatArray &answer, TimeStep *stepN);
-
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     // identification

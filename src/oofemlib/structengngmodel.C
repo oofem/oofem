@@ -39,6 +39,7 @@
 #include "dof.h"
 #include "slavedof.h"
 #include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "timestep.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -165,6 +166,80 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
+
+void
+StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, int di, TimeStep *stepN)
+{
+    // Simply assembles contributions from each element in domain
+    Element *element;
+    IntArray loc;
+    FloatArray charVec;
+    int nelems;
+    EModelDefaultEquationNumbering dn;
+
+    answer.resize( this->giveNumberOfEquations( EID_MomentumBalance ) );
+    answer.zero();
+    if ( normFlag ) internalForcesEBENorm = 0.0;
+
+    // Update solution state counter
+    stepN->incrementStateCounter();
+
+#ifdef __PARALLEL_MODE
+    if ( isParallel() ) {
+        exchangeRemoteElementData( RemoteElementExchangeTag  );
+    }
+#endif
+
+    nelems = this->giveDomain(di)->giveNumberOfElements();
+    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+
+    for ( int i = 1; i <= nelems; i++ ) {
+        element = ( NLStructuralElement * ) this->giveDomain(di)->giveElement(i);
+#ifdef __PARALLEL_MODE
+        // Skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. Their introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote ) continue;
+
+#endif
+        element->giveLocationArray( loc, EID_MomentumBalance, dn );
+        element->giveCharacteristicVector( charVec, InternalForcesVector, VM_Total, stepN );
+
+        answer.assemble(charVec, loc);
+
+        // Compute element norm contribution.
+        if ( normFlag ) internalForcesEBENorm += charVec.computeSquaredNorm();
+
+#ifdef DEBUG
+        for ( int jj=1; jj <= loc.giveSize(); jj++ ) {
+            int jl = loc.at(jj);
+            if ( jl==0 ) continue;
+            if ( finite( answer.at(jl) ) == 0 ) {
+                char buff [1024];
+                sprintf( buff, "giveInternalForces: INF or NAN error detected, element %d", i );
+                _error( buff );
+            }
+        }
+#endif
+
+    }
+
+    this->timer.pauseTimer( EngngModelTimer :: EMTT_NetComputationalStepTimer );
+
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
+
+    if ( normFlag ) {
+        // Exchange norm contributions.
+        double localEBENorm = internalForcesEBENorm;
+        internalForcesEBENorm = 0.0;
+        MPI_Allreduce(& localEBENorm, & internalForcesEBENorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    }
+#endif
+
+    // Remember last internal vars update time stamp.
+    internalVarUpdateStamp = stepN->giveSolutionStateCounter();
+}
 
 void
 StructuralEngngModel :: updateInternalState(TimeStep *stepN)

@@ -88,9 +88,6 @@ protected:
     FloatArray previousAccelerationVector, previousVelocityVector;
     FloatArray internalForces;
 
-    /// Norm of nodal internal forces evaluated on element by element basis
-    double internalForcesEBENorm;
-
     /// A load vector already applied, which does not scales.
     FloatArray initialLoadVector;
     FloatArray incrementalLoadVector;
@@ -177,7 +174,6 @@ protected:
     void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
 
-    void giveInternalForces(FloatArray &answer, double &norm, const FloatArray &DeltaR, Domain *d, TimeStep *tStep);
     void proceedStep(int di, TimeStep *tStep);
     void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
