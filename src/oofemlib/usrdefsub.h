@@ -255,6 +255,14 @@ DofManager *CreateUsrDefDofManagerOfType(classType type, int num, Domain *d);
  */
 Dof *CreateUsrDefDofOfType(classType type, int num, DofManager *d);
 /**
+ * Creates new instance of user defined boundary condition  corresponding to given id.
+ * @param type Id determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(classType type, int num, Domain *d);
+/**
  * Creates new instance of material mapping algorithm, corresponding to given MaterialMappingAlgorithmType.
  * @param type Id determining the type of new instance.
  * @return Newly allocated object of requested type, null if keyword not supported.

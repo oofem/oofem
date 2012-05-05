@@ -119,7 +119,7 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDNLMaterial"; }
-    virtual classType giveClassID() const { return IsotropicDamageMaterial1Class; }
+    virtual classType giveClassID() const { return IDNLMaterialClass;}
     virtual const char *giveInputRecordName() const { return "idmnl1"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -95,8 +95,8 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     // definition & identification
-    virtual const char *giveClassName() const { return "LIBeam3d"; }
-    virtual classType giveClassID() const { return LIBeam3dClass; }
+    virtual const char *giveClassName() const { return "LIBeam3d2"; }
+    virtual classType giveClassID() const { return LIBeam3d2Class; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);

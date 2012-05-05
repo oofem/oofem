@@ -76,6 +76,8 @@
  #include <iterator>
 #endif
 
+#include "classfactory.h"
+
 using namespace oofem;
 
 // debug
@@ -92,6 +94,8 @@ void oofem_finalize_modules();
 Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
+/* Global class factory */
+ClassFactory oofem :: classFactory;
 
 int main(int argc, char *argv[])
 {
@@ -105,7 +109,7 @@ int main(int argc, char *argv[])
     int renumberFlag = 0;
     bool debugFlag = false;
     char inputFileName [ MAX_FILENAME_LENGTH + 10 ], buff [ MAX_FILENAME_LENGTH ];
-    std::vector<const char*> modulesArgs;
+    std :: vector< const char * >modulesArgs;
     EngngModel *problem = 0;
 
     int rank = 0;
@@ -128,7 +132,7 @@ int main(int argc, char *argv[])
     //
     if ( argc != 1 ) {
         // argv[0] is not read by PETSc and SLEPc.
-        modulesArgs.push_back(argv[ 0 ]);
+        modulesArgs.push_back(argv [ 0 ]);
         for ( i = 1; i < argc; i++ ) {
             if ( ( strcmp(argv [ i ], "-context") == 0 ) || ( strcmp(argv [ i ], "-c") == 0 ) ) {
                 contextFlag = 1;
@@ -136,6 +140,7 @@ int main(int argc, char *argv[])
                 if ( rank == 0 ) {
                     oofem_print_version();
                 }
+
                 if ( argc == 2 ) {
 #ifdef __USE_MPI
                     MPI_Finalize();
@@ -199,13 +204,14 @@ int main(int argc, char *argv[])
             } else if ( strcmp(argv [ i ], "-d") == 0 ) {
                 debugFlag = true;
             } else { // Arguments not handled by OOFEM is to be passed to PETSc
-                modulesArgs.push_back(argv[ i ]);
+                modulesArgs.push_back(argv [ i ]);
             }
         }
     } else {
         if ( rank == 0 ) {
             oofem_print_help();
         }
+
 #ifdef __USE_MPI
         MPI_Finalize();
 #endif
@@ -217,27 +223,27 @@ int main(int argc, char *argv[])
         /*
          * ::giveInputDataFileName(inputFileName, MAX_FILENAME_LENGTH);
          */
-        if ( rank == 0 )
-        {
+        if ( rank == 0 ) {
             fprintf(stderr, "\nInput file not specified\a\n\n");
         }
+
 #ifdef __USE_MPI
         MPI_Finalize();
 #endif
         exit(EXIT_SUCCESS);
     }
 
-#if defined(__PETSC_MODULE) || defined(__SLEPC_MODULE)
+#if defined ( __PETSC_MODULE ) || defined ( __SLEPC_MODULE )
     int modulesArgc = modulesArgs.size();
-    char **modulesArgv = const_cast<char**>(&modulesArgs[0]);
+    char **modulesArgv = const_cast< char ** >(& modulesArgs [ 0 ]);
 #endif
 
 #ifdef __PETSC_MODULE
-    PetscInitialize(&modulesArgc, &modulesArgv, PETSC_NULL, PETSC_NULL);
+    PetscInitialize(& modulesArgc, & modulesArgv, PETSC_NULL, PETSC_NULL);
 #endif
 
 #ifdef __SLEPC_MODULE
-    SlepcInitialize(&modulesArgc, &modulesArgv, PETSC_NULL, PETSC_NULL);
+    SlepcInitialize(& modulesArgc, & modulesArgv, PETSC_NULL, PETSC_NULL);
 #endif
 
 #ifdef __PARALLEL_MODE

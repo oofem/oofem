@@ -73,7 +73,7 @@ public:
 
     // definition & identification
     virtual const char *giveClassName() const { return "LIBeam2dNL"; }
-    virtual classType giveClassID() const { return LIBeam2dClass; }
+    virtual classType giveClassID() const { return LIBeam2dNLClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG

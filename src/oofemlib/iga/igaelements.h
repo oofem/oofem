@@ -71,6 +71,10 @@ public:
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
     void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    // definition & identification
+    virtual const char *giveClassName() const { return "BsplinePlaneStressElement"; }
+    virtual classType giveClassID() const { return BsplinePlaneStressElementClass; }
+
 #ifdef __OOFEG
     //
     // Graphics output
@@ -109,6 +113,9 @@ public:
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
     void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    // definition & identification
+    virtual const char *giveClassName() const { return "NURBSPlaneStressElement"; }
+    virtual classType giveClassID() const { return NURBSPlaneStressElementClass; }
 #ifdef __OOFEG
     //
     // Graphics output
@@ -153,6 +160,9 @@ public:
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
     void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
+    // definition & identification
+    virtual const char *giveClassName() const { return "TSplinePlaneStressElement"; }
+    virtual classType giveClassID() const { return TSplinePlaneStressElementClass; }
 #ifdef __OOFEG
     // Graphics output
     virtual void  drawScalar(oofegGraphicContext &context);
@@ -186,6 +196,9 @@ public:
     }
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 3; }
     void updateInternalState(TimeStep *stepN) { Space3dStructuralElementEvaluator :: updateInternalState(stepN); }
+    // definition & identification
+    virtual const char *giveClassName() const { return "NURBSSpace3dElement"; }
+    virtual classType giveClassID() const { return NURBSSpace3dElementClass; }
 #ifdef __OOFEG
     // Graphics output
     virtual void drawScalar(oofegGraphicContext &context);

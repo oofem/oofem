@@ -59,6 +59,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void scale(double s) { }
+    const char *giveClassName() const { return "TractionPressureBC"; }
+    classType giveClassID() const { return TractionPressureBCClass; }
+    
 };
 } // end namespace oofem
 #endif // tractionpressurebc_h

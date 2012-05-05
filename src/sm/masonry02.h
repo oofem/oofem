@@ -85,7 +85,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveClassName() const { return "Masonry02"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual classType giveClassID() const { return Masonry02Class; }
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,

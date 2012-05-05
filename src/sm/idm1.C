@@ -126,7 +126,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
       IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0");
     }
     //applies only in this class
-    if ( giveClassID() == IsotropicDamageMaterial1 :: giveClassID() ) {
+    if ( (giveClassID() == IsotropicDamageMaterial1Class) ||   (giveClassID() == IDNLMaterialClass) ) {
         switch ( damageLaw ) {
         case 0:     // exponential softening - default
             if ( ir->hasField(IFT_IsotropicDamageMaterial1_wf, "wf") ) {

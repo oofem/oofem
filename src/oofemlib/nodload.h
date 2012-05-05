@@ -96,6 +96,8 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    const char *giveClassName() const { return "NodalLoad"; }
+    classType giveClassID() const { return NodalLoadClass; }
 };
 } // end namespace oofem
 #endif // nodload_h

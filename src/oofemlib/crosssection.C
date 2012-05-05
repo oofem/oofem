@@ -34,9 +34,7 @@
 
 #include "crosssection.h"
 #include "dictionr.h"
-#include "simplecrosssection.h"
 #include "structuralelement.h"
-#include "emptycs.h"
 #include "gausspnt.h"
 #include "material.h"
 #include "flotarry.h"
@@ -123,21 +121,11 @@ CrossSection :: ofType(const char *aClass)
 // Returns a new cross section, which has the same number than the receiver,
 // but belongs to aClass (simpleCrossSection, LayeredCrossSection, FibredCS, ...).
 {
-    CrossSection *newCrossSection;
-
-    if ( !strncasecmp(aClass, "simplecs", 8) ) {
-        newCrossSection = new SimpleCrossSection(this->giveNumber(), domain);
-    } else if ( !strncasecmp(aClass, "emptycs", 7) ) {
-        newCrossSection = new EmptyCS(number, domain);
-    } else {
-        // last resort - call additional user defined subroutine
-        newCrossSection = CreateUsrDefCrossSectionOfType(aClass, number, domain);
-        if ( newCrossSection == NULL ) {
-            _error2("ofType:  unknown cross section type (%s)\n", aClass);
-            exit(0);
-        }
+    CrossSection *newCrossSection = CreateUsrDefCrossSectionOfType(aClass, number, domain);
+    if ( newCrossSection == NULL ) {
+      _error2("ofType:  unknown cross section type (%s)\n", aClass);
+      exit(0);
     }
-
     return newCrossSection;
 }
 

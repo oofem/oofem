@@ -69,7 +69,7 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
-    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual classType giveClassID() const { return TR21_2D_SUPGClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 

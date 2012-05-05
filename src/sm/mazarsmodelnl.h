@@ -106,7 +106,7 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "MazarsNLMaterial"; }
-    virtual classType giveClassID() const { return MazarsMaterialClass; }
+    virtual classType giveClassID() const { return MazarsNLMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Interface *giveInterface(InterfaceType it);

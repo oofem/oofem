@@ -79,8 +79,8 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
-    virtual const char *giveClassName() const { return "LIBeam3dNL"; }
-    virtual classType giveClassID() const { return LIBeam3dNLClass; }
+    virtual const char *giveClassName() const { return "LIBeam3dNL2"; }
+    virtual classType giveClassID() const { return LIBeam3dNL2Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG

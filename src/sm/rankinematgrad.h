@@ -92,7 +92,7 @@ public:
     virtual ~RankineMatGrad() {; }
 
     virtual const char *giveClassName() const { return "RankineMatGrad"; }
-    virtual classType giveClassID() const { return RankineMatClass; }
+    virtual classType giveClassID() const { return RankineMatGradClass; }
     virtual const char *giveInputRecordName() const { return "RankineMatGrad"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

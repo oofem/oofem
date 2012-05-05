@@ -129,7 +129,7 @@ public:
     virtual ~CompoDamageMat();
 
     virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
-    virtual classType giveClassID() const { return CompositeDamageMaterialClass; }
+    virtual classType giveClassID() const { return CompoDamageMatClass; }
     virtual const char *giveInputRecordName() const { return "compodamagemat"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

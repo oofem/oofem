@@ -766,25 +766,10 @@ DofManager *DofManager :: ofType(const char *aClass)
 // Returns a new DofManager, which has the same number than the receiver,
 // but belongs to aClass (Node, ElementSide,..).
 {
-    DofManager *newDofManager;
-
-    if ( !strncasecmp(aClass, "node", 4) ) {
-        newDofManager = new Node(number, domain);
-    } else if ( !strncasecmp(aClass, "elementside", 11) ) {
-        newDofManager = new ElementSide(number, domain);
-    } else if ( !strncasecmp(aClass, "rigidarmnode", 12) ) {
-        newDofManager = new RigidArmNode(number, domain);
-    } else if ( !strncasecmp(aClass, "hangingnode", 11) ) {
-        newDofManager = new HangingNode(number, domain);
-    } else if ( !strncasecmp(aClass, "slavenode", 9) ) {
-        newDofManager = new SlaveNode(number, domain);
-    } else { // last resort - call additional user defined subroutine
-        newDofManager = CreateUsrDefDofManagerOfType(aClass, number, domain);
-        if ( newDofManager == NULL ) {
-            _error2("ofType: unknown DofManager type (%s)", aClass);
-        }
+    DofManager *newDofManager = CreateUsrDefDofManagerOfType(aClass, number, domain);
+    if ( newDofManager == NULL ) {
+      _error2("ofType: unknown DofManager type (%s)", aClass);
     }
-
     return newDofManager;
 }
 

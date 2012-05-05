@@ -72,29 +72,11 @@ GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(const char *aClass)
 // Returns a new load, which has the same number than the receiver,
 // but belongs to aClass (NodalLoad, DeadWeight,..).
 {
-    GeneralBoundaryCondition *newBC;
-
-    if ( !strncasecmp(aClass, "boundarycondition", 17) ) {
-        newBC = new BoundaryCondition(number, domain);
-    } else if ( !strncasecmp(aClass, "deadweight", 10) ) {
-        newBC = new DeadWeight(number, domain);
+    GeneralBoundaryCondition *newBC = CreateUsrDefBoundaryConditionOfType(aClass, number, domain);
+    if ( newBC == NULL ) {
+      _error2("ofType:  unknown bc type (%s)", aClass);
+      exit(0);
     }
-    //else if (! strncasecmp(aClass,"initialcondition",5))
-    //   newBC = new InitialCondition(number,domain) ;
-    else if ( !strncasecmp(aClass, "nodalload", 9) ) {
-        newBC = new NodalLoad(number, domain);
-    }
-    // else if (!strncasecmp(aClass,"temperatureload",12))
-    //  newBC = new TemperatureLoad(number,domain) ;
-    else {
-        // last resort - call aditional user defined subroutine
-        newBC = CreateUsrDefBoundaryConditionOfType(aClass, number, domain);
-        if ( newBC == NULL ) {
-            _error2("ofType:  unknown bc type (%s)", aClass);
-            exit(0);
-        }
-    }
-
     return newBC;
 }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,40 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef tf1_h
-#define tf1_h
+#include "classtype.h"
+#include "peak.h"
+#include "piecewis.h"
+#include "piecewisper.h"
+#include "heavisideltf.h"
+#include "usrdeftimefunct.h"
 
-#include "structtemperatureload.h"
-#include "domain.h"
+REGISTER_CLASS(PeakFunction, "peakfunction", PeakFunctionClass)
+REGISTER_CLASS(PiecewiseLinFunction, "piecewiselinfunction", PiecewiseLinFunctionClass)
+REGISTER_CLASS(PeriodicPiecewiseLinFunction, "periodicpiecewiselinfunction", PeriodicPiecewiseLinFunctionClass)
+REGISTER_CLASS(HeavisideLTF, "heavisideltf", HeavisideLTFClass)
+REGISTER_CLASS(UserDefinedLoadTimeFunction, "usrdefltf", UserDefinedLoadTimeFunctionClass)
 
-namespace oofem {
-/**
- * Class representing user defined temperature field.
- * No user input. The expression is hard - coded in the class body
- * as a function of global x,y and z coordinates and time t.
- *
- * The load time function is not used here, the function provided is
- * supposed to be function of time and coordinates.
- */
-class TF1 : public StructuralTemperatureLoad
-{
-public:
-    /**
-     * Constructor. Creates temperature load function with given number, belonging to given domain.
-     * @param n Load time function number.
-     * @param d Domain to which new object will belongs.
-     */
-    TF1(int n, Domain *d) : StructuralTemperatureLoad(n, d) { }
-    /// Destructor
-    virtual ~TF1()  { }
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
-
-    virtual classType giveClassID() const { return TF1Class; }
-    virtual const char *giveClassName() const { return "TF1"; }
-
-};
-} // end namespace oofem
-#endif // tf1_h

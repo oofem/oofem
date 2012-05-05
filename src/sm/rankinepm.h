@@ -57,7 +57,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual const char *giveClassName() const { return "RankinePlasticMaterial"; }
-    virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
+    virtual classType giveClassID() const { return RankinePlasticMaterialClass; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

@@ -105,8 +105,8 @@ public:
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     // definition
-    virtual const char *giveClassName() const { return "SUPGElement"; }
-    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual const char *giveClassName() const { return "TR1_2D_SUPG"; }
+    virtual classType giveClassID() const { return TR1_2D_SUPGClass; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 

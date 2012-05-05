@@ -128,7 +128,7 @@ public:
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "IsoInterfaceDamageMaterial"; }
-    virtual classType giveClassID() const { return StructuralMaterialClass; }
+    virtual classType giveClassID() const { return IsoInterfaceDamageMaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm, MatResponseMode mode,

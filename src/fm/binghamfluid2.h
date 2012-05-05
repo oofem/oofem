@@ -135,7 +135,7 @@ public:
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
-    virtual classType giveClassID() const { return BinghamFluidMaterialClass; }
+    virtual classType giveClassID() const { return BinghamFluidMaterial2Class; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

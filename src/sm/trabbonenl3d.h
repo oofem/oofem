@@ -34,6 +34,7 @@
 
 
 #ifndef trabbonenl3d_h
+#define trabbonenl3d_h
 
 #include "trabbone3d.h"
 #include "structuralnonlocalmaterialext.h"
@@ -95,7 +96,7 @@ public:
     virtual ~TrabBoneNL3D();
 
     virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
-    virtual classType giveClassID() const { return TrabBone3DClass; }
+    virtual classType giveClassID() const { return TrabBoneNL3DClass; }
     virtual const char *giveInputRecordName() const { return "trabbonenl3d"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -174,5 +175,4 @@ protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNL3DStatus(1, TrabBone3D :: domain, gp); }
 };
 } // end namespace oofem
-#define trabonenl3d_h
 #endif

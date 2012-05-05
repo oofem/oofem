@@ -103,7 +103,7 @@ public:
     virtual ~RankineMatNl() {; }
 
     virtual const char *giveClassName() const { return "RankineMatNl"; }
-    virtual classType giveClassID() const { return RankineMatClass; }
+    virtual classType giveClassID() const { return RankineMatNlClass; }
     virtual const char *giveInputRecordName() const { return "RankineMatNl"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -78,6 +78,10 @@ public:
     NumericalMethod *giveNumericalMethod(TimeStep *);
     IRResultType initializeFrom(InputRecord *ir);
 
+    // identification
+    virtual const char *giveClassName() const { return "PLinearStatic"; }
+    virtual classType giveClassID() const { return PLinearStaticClass; }
+
     /**
      * Assembles characteristic vector of required type into given vector.
      * Overloaded in order to properly handle nodal loading of shared DofManagers.

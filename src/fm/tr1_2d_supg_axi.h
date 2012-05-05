@@ -87,7 +87,7 @@ public:
 
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
-    virtual classType giveClassID() const { return SUPGElementClass; }
+    virtual classType giveClassID() const { return TR1_2D_SUPG_AXIClass; }
     virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
 
 protected:

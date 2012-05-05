@@ -115,7 +115,7 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
-    virtual classType giveClassID() const { return StructuralMaterialClass; }
+    virtual classType giveClassID() const { return CebFipSlip90MaterialClass; }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode,
