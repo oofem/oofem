@@ -78,12 +78,6 @@
 
 #ifdef __SM_MODULE
 
- #include "scalarerrorindicator.h"
- #include "zzerrorestimator.h"
- #include "combinedzzsiee.h"
- #include "huertaerrorestimator.h"
- #include "simpleinterfacemat.h"
-
 // export modules
  #include "poiexportmodule.h"
  #include "homexportmodule.h"
@@ -145,13 +139,16 @@
  * where _baseclassname_ is the name of corresponding base class name.
  * Following factories are supported:
  *   Elements            - elementclassfactory.h
- *   Dof managers        -  dofmanclassfactory.h
+ *   Dof managers        - dofmanclassfactory.h
+ *   DOFs                - dofclassfactory.h
  *   Boundary conditions - boundaryconditionclassfactory.h
  *   Materials           - materialclassfactory.h
  *   Cross sections      - crosssectionclassfactory.h
  *   Engng models        - engngmodelclassfactory.h
  *   Load time functions - ltfclassfactory.h
  *   Sparse matrices     - sparsemtrxclassfactory.h
+ *   Sparse linear system solvers - sparselinearsystemsolverclassfactory.h
+ *   Error estimators    - errorestimatorclassfactory.h
  *
  * Refer to these files when registering new classes.
  * ===========================================================================
@@ -270,6 +267,13 @@ SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, D
   return classFactory.createSparseLinSolver(st,i,d,m);
 }
 
+// ================ ErrorEstimator CLASS FACTORY==================
+ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
+{
+  return classFactory.createErrorEstimator(type,number,d);
+}
+
+
 
 //------------------OLD Style CreateUsrDef Functions-------------------------------------------
 
@@ -320,31 +324,6 @@ SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, int num
 
     return ( nonlinList.count(aClass) == 1 ) ? nonlinList [ aClass ](number, d, emodel, eid) : NULL;
 }
-
-ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
-{
-    ErrorEstimator *answer = NULL;
-
-#ifdef __SM_MODULE
-    if ( type == EET_SEI ) {
-        answer = new ScalarErrorIndicator(number, d);
-    } else if ( type == EET_ZZEE ) {
-        answer = new ZZErrorEstimator(number, d);
-    } else if ( type == EET_CZZSI ) {
-        answer = new CombinedZZSIErrorEstimator(number, d);
-    } else if ( type == EET_HEE ) {
-        answer = new HuertaErrorEstimator(number, d);
-    }
-
-#endif //__SM_MODULE
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR("CreateUsrDefErrorEstimator: Unknown error estimator type\n");
-    }
-
-    return answer;
-}
-
 
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;

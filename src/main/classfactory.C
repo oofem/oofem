@@ -55,6 +55,7 @@
 #include "sparsemtrxclassfactory.h"
 #include "dofclassfactory.h"
 #include "sparselinearsystemsolverclassfactory.h"
+#include "errorestimatorclassfactory.h"
 
 namespace oofem {
 ClassFactory :: ClassFactory() {
@@ -196,6 +197,29 @@ case id: \
 
     return answer;
   }
+  
+  ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
+  {
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+case id: \
+  answer = new _class(num, d);	\
+    break;
+
+    ErrorEstimator *answer = NULL;
+    switch ( type ) {
+#include "errorestimatorclassfactory.h"
+    default:
+        OOFEM_ERROR("ClassFactory::createErrorEstimator: Unknown type\n");
+        answer = NULL;
+    }
+
+    return answer;
+  }
+
+
+
+
 
 
 } // End namespace oofem

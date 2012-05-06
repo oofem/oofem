@@ -281,7 +281,7 @@ public:
     Dof *createDof(classType type, int num, DofManager *dman);
     /**
      * Creates new instance of SparseLinearSystemNM corresponding 
-     * to given keyword.
+     * to given type.
      * @param type LinSystSolverType id determining the type of new instance.
      * @param num  object's number.
      * @param d Domain assigned to new object.
@@ -289,6 +289,16 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     SparseLinearSystemNM *createSparseLinSolver(LinSystSolverType st, int num, Domain *d, EngngModel *m);
+    /**
+     * Creates new instance of ErrorEstimator corresponding 
+     * to given type.
+     * @param type ErrorEstimatorType id determining the type of new instance.
+     * @param number  object's number.
+     * @param d Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    ErrorEstimator *createErrorEstimator(ErrorEstimatorType type, int num, Domain *d);
+
 
   };
 extern ClassFactory classFactory;
