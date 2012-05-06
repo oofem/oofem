@@ -33,6 +33,7 @@
  */
 
 #include "dummymaterial.h"
+#include "isolinearelasticmaterial.h"
 
 #ifdef __SM_MODULE
  #include "ortholinearelasticmaterial.h"
@@ -103,6 +104,7 @@
 
 #ifdef __SM_MODULE
 REGISTER_CLASS(DummyMaterial, "dummymat", DummyMaterialClass)
+REGISTER_CLASS(IsotropicLinearElasticMaterial, "isole", IsotropicLinearElasticMaterialClass)
 REGISTER_CLASS(OrthotropicLinearElasticMaterial, "orthole", OrthotropicLinearElasticMaterialClass)
 REGISTER_CLASS(Steel1, "steel1", Steel1MaterialClass)
 REGISTER_CLASS(Concrete2, "concrete2", Concrete2Class)

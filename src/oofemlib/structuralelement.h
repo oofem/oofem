@@ -73,19 +73,14 @@ class IDNLMaterial;
  * stored in 'nodeArray', of its 'material', of its body loads (eg, the dead
  * weight) stored in 'loadArray'. These data are obtained from the domain.
  * The element contains logical reference to Volume object (
- * which stores material,geometrical characteristics, gaussPoints, state of
+ * which stores material,geometrical characteristics, integration points, state of
  * material and so on)
- * The calculated data of an element are its 'massMatrix', its 'stiffnessMatrix
+ * The calculated data of an element are its 'massMatrix', its 'stiffnessMatrix'
  * its 'locationArray'. Since the load vector is recalculated at every
  * time step, it is not given the status of attribute.
  *
  * Tasks:
- * - Defining itself;
- *   typing itself (methods 'typed' and 'ofType'). When the domain creates
- *   an element, it actually creates a temporary instance of Element, then
- *   asks this element to transform itself into an element of the right type
- *   (PlaneStrain, Truss2D, etc).
- *   Obtaining its basic data, the element reads in the data file the number
+ * - Obtaining its basic data, the element reads in the data file the number
  *   of these objects, then obtains the data from the domain (methods
  *   'giveNode', 'giveMaterial',etc).
  * - Calculating its contribution to the problem :

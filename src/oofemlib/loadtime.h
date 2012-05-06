@@ -89,17 +89,6 @@ public:
     double evaluate(TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Returns a newly allocated load time function, with type depending on parameter.
-     * Creates new object for following classes ConstantFunction
-     * otherwise calls directly CreateUsrDefLoadTimeFunctionOfType global function to allocate
-     * new instance of load time function of given type.
-     * @param aClass String with load time function ID  name
-     * @return Newly allocated load time function of required type.
-     * @see CreateUsrDefLoadTimeFunctionOfType
-     */
-    LoadTimeFunction *ofType(const char *aClass);
-
-    /**
      * Returns the value of load time function at given time.
      * @param t Time.
      * @return @f$ f(t) @f$.

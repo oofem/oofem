@@ -295,11 +295,10 @@ public:
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
      * specific entity in domain. The record line is converted to lower case letters.
-     * Corresponding component is created using ofType member function of
+     * Corresponding component is created using CreateUsrDef* function of
      * corresponding base class, sending component name (extracted from corresponding record)
      * as parameter. After new object is created, its initializeFrom member function is
-     * called with its record as parameter. The ofType member functions are using global
-     * user modifiable functions to allow simple extension of library. See base classes documentation for details.
+     * called with its record as parameter.
      * @param dr Input stream with domain description.
      * @return Nonzero if o.k.
      * @see FemComponent::initializeFrom

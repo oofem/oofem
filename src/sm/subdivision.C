@@ -3845,8 +3845,8 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString.c_str() );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        ( crossSection  = ( CrossSection * )
-                          ( CrossSection(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
+        crossSection = CreateUsrDefCrossSectionOfType(name.c_str(), i, * dNew);
+        crossSection->initializeFrom(irPtr);
         ( * dNew )->setCrossSection(i, crossSection);
     }
 
@@ -3858,8 +3858,8 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString.c_str() );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        ( mat  = ( Material * )
-            ( Material(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
+        mat = CreateUsrDefMaterialOfType(name.c_str(), i, * dNew);
+        mat->initializeFrom(irPtr);
         ( * dNew )->setMaterial(i, mat);
     }
 
@@ -3884,8 +3884,8 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString.c_str() );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        ( bc = ( GeneralBoundaryCondition * )
-            ( GeneralBoundaryCondition(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
+        bc = CreateUsrDefBoundaryConditionOfType(name.c_str(), i, * dNew);
+        bc->initializeFrom(irPtr);
         ( * dNew )->setBoundaryCondition(i, bc);
     }
 
@@ -3910,8 +3910,8 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         irPtr->setRecordString( irString.c_str() );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
-        ( ltf  = ( LoadTimeFunction * )
-            ( LoadTimeFunction(i, * dNew).ofType(name.c_str()) ) )->initializeFrom(irPtr);
+        ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), i, * dNew);
+        ltf->initializeFrom(irPtr);
         ( * dNew )->setLoadTimeFunction(i, ltf);
     }
 

@@ -608,18 +608,6 @@ public:
      * @see IntegrationRule::initForNewStep.
      */
     virtual void initForNewStep();
-
-    /**
-     * Returns a newly allocated element, with type depending on parameter.
-     * Calls directly CreateUsrDefElementOfType global function to allocate
-     * new instance of element of given type.
-     * Calls global function CreateUsrDefElementOfType for creating appropriate
-     * element instance. This function must be implemented by user.
-     * @param aClass string with element name
-     * @return newly allocated element with required type.
-     * @see CreateUsrDefElementOfType
-     */
-    Element *ofType(const char *aClass);
     /**
      * Returns the element geometry type.
      * This information is assumed to be of general interest, but

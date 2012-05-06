@@ -762,18 +762,6 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-DofManager *DofManager :: ofType(const char *aClass)
-// Returns a new DofManager, which has the same number than the receiver,
-// but belongs to aClass (Node, ElementSide,..).
-{
-    DofManager *newDofManager = CreateUsrDefDofManagerOfType(aClass, number, domain);
-    if ( newDofManager == NULL ) {
-      _error2("ofType: unknown DofManager type (%s)", aClass);
-    }
-    return newDofManager;
-}
-
-
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                 EquationID type, ValueModeType mode, TimeStep *stepN)
 {

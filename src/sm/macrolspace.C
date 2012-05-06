@@ -197,7 +197,9 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 
     sprintf(str, "ConstantFunction 1 f(t) 1.0");
     ir->setRecordString(str);
-    LoadTimeFunct = ( LoadTimeFunction * ) ( LoadTimeFunction(1, microDomain).ofType( ( char * ) "constantfunction" ) );
+    if ( ( LoadTimeFunct = CreateUsrDefLoadTimeFunctionOfType("constantfunction", 1, microDomain) ) == NULL ) {
+        OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
+    }
     LoadTimeFunct->initializeFrom(ir);
     microDomain->setLoadTimeFunction(1, LoadTimeFunct);
 
@@ -222,7 +224,9 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %e", counter, displ);
                 //OOFEM_LOG_INFO("%s\n", str);
                 ir->setRecordString(str);
-                GeneralBoundaryCond = ( GeneralBoundaryCondition * ) ( GeneralBoundaryCondition(counter, microDomain).ofType( ( char * ) "boundarycondition" ) );
+                if ( ( GeneralBoundaryCond = CreateUsrDefBoundaryConditionOfType("boundarycondition", counter, microDomain) ) == NULL ) {
+                    OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
+                }
                 GeneralBoundaryCond->initializeFrom(ir);
                 microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
                 counter++;

@@ -68,19 +68,6 @@ LoadTimeFunction *GeneralBoundaryCondition :: giveLoadTimeFunction()
 }
 
 
-GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(const char *aClass)
-// Returns a new load, which has the same number than the receiver,
-// but belongs to aClass (NodalLoad, DeadWeight,..).
-{
-    GeneralBoundaryCondition *newBC = CreateUsrDefBoundaryConditionOfType(aClass, number, domain);
-    if ( newBC == NULL ) {
-      _error2("ofType:  unknown bc type (%s)", aClass);
-      exit(0);
-    }
-    return newBC;
-}
-
-
 IRResultType
 GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 {

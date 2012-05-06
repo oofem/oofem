@@ -131,17 +131,6 @@ public:
     virtual void printYourself();
 
     /**
-     * Returns a newly allocated cross section, with type depending on parameter.
-     * Creates new object for following classes SimpleCrossSection and HeatCrossSection
-     * otherwise calls directly CreateUsrDefCrossSectionOfType global function to allocate
-     * new instance of cross section of given type.
-     * @param aClass String with cross section model name.
-     * @return newly Allocated cross section model with required type.
-     * @see CreateUsrDefCrossSectionOfType
-     */
-    CrossSection *ofType(const char *aClass);
-
-    /**
      * Returns nonzero, if receiver implements required extension.
      * @param ext Required extension.
      * @return Nonzero, if supported, zero otherwise.

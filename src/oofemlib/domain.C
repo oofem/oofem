@@ -509,8 +509,10 @@ Domain :: instanciateYourself(DataReader *dr)
 #ifdef __ENABLE_COMPONENT_LABELS
         // assign component number according to record order
         // component number (as given in input record) becomes label
-        ( node = ( DofManager * )
-                 ( DofManager(i + 1, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), i+1, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str());
+        }
+        node->initializeFrom(ir);
         if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
             // label does not exist yet
             dofManLabelMap [ num ] = i + 1;
@@ -522,8 +524,10 @@ Domain :: instanciateYourself(DataReader *dr)
         dofManagerList->put(i + 1, node);
 #else
         // component numbers as given in input record
-        ( node = ( DofManager * )
-                 ( DofManager(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str());
+        }
+        node->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nnode ) ) {
@@ -554,7 +558,9 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
 #ifdef __ENABLE_COMPONENT_LABELS
-        elem = Element(i + 1, this).ofType( name.c_str() );
+        if ( ( elem = CreateUsrDefElementOfType(name.c_str(), i + 1, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create element: %s", name.c_str());
+        }
         elem->initializeFrom(ir);
 
         if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
@@ -567,8 +573,10 @@ Domain :: instanciateYourself(DataReader *dr)
         elem->setGlobalNumber(num);
         elementList->put(i + 1, elem);
 #else
-        ( elem = ( Element * )
-                 ( Element(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( elem = CreateUsrDefElementOfType(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create element: %s", name.c_str());
+        }
+        elem->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nelem ) ) {
@@ -596,8 +604,10 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i + 1);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        ( crossSection  = ( CrossSection * )
-                          ( CrossSection(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( crossSection = CreateUsrDefCrossSectionOfType(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create crosssection: %s", name.c_str());
+        }
+        crossSection->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > ncrossSections ) ) {
@@ -625,8 +635,10 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        ( mat  = ( Material * )
-                 ( Material(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( mat = CreateUsrDefMaterialOfType(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create material: %s", name.c_str());
+        }
+        mat->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nmat ) ) {
@@ -717,8 +729,10 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        ( load = ( GeneralBoundaryCondition * )
-                 ( GeneralBoundaryCondition(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( load = CreateUsrDefBoundaryConditionOfType(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create boundary condition: %s", name.c_str());
+        }
+        load->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nload ) ) {
@@ -778,9 +792,10 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_ltfRec, i + 1);
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-
-        ( ltf  = ( LoadTimeFunction * )
-                 ( LoadTimeFunction(num, this).ofType( name.c_str() ) ) )->initializeFrom(ir);
+        if ( ( ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), num, this) ) == NULL ) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str());
+        }
+        ltf->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {
@@ -1329,7 +1344,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     for ( i = 1; i <= nnodes; i++ ) {
       dman = this->giveDofManager(i);
       if ( ( mode & CM_Definition ) ) {
-	// store component class id 
+	// store component class id
 	ct =  (int) dman->giveClassID();
 	if ( !stream->write(& ct, 1) ) {
 	  THROW_CIOERR(CIO_IOERR);
@@ -1354,13 +1369,13 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 #endif
 	if ( ( mode & CM_Definition ) ) {
-	  // store component class id 
+	  // store component class id
 	  ct =  (int) element->giveClassID();
 	  if ( !stream->write(& ct, 1) ) {
 	    THROW_CIOERR(CIO_IOERR);
 	  }
 	}
- 	
+
         if ( ( iores = element->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -1371,7 +1386,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     for ( i = 1; i <= nbc; i++ ) {
         bc = this->giveBc(i);
 	if ( ( mode & CM_Definition ) ) {
-	  // store component class id 
+	  // store component class id
 	  ct =  (int) element->giveClassID();
 	  if ( !stream->write(& ct, 1) ) {
 	    THROW_CIOERR(CIO_IOERR);
@@ -1420,7 +1435,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
       if ( !stream->read(ncomp, 7) ) {
         THROW_CIOERR(CIO_IOERR);
       }
-      
+
       int nnodes = ncomp[0];
       int nelem = ncomp[1];
       int nmat  = ncomp[2];
@@ -1433,9 +1448,9 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
       bcList->clear();
       //this->clear();
 
-      
+
       domainUpdated = true;
-      
+
       // nodes & sides and corresponding dofs
       this->resizeDofManagers(nnodes);
       for ( i = 1; i <= nnodes; i++ ) {
@@ -1450,7 +1465,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         }
 	this->setDofManager (i, dofman);
       }
-      
+
       this->resizeElements(nelem);
       for ( i = 1; i <= nelem; i++ ) {
 	// read component class id
@@ -1464,7 +1479,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         }
 	this->setElement(i, element);
       }
-      
+
       // restore boundary conditions data
       this->resizeBoundaryConditions(nbc);
       for ( i = 1; i <= nbc; i++ ) {
@@ -1479,13 +1494,13 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         }
 	this->setBoundaryCondition(i, bc);
       }
-      
+
       // restore error estimator data
       ee = this->giveErrorEstimator();
       if ( domainUpdated ) {
         ee->setDomain(this);
       }
-      
+
       if ( ee ) {
         if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
 	  THROW_CIOERR(iores);
@@ -1494,21 +1509,21 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
     } else { // if ( ( mode & CM_Definition ) )
-    
+
       if ( serNum != this->giveSerialNumber() ) {
         // read corresponding domain
         OOFEM_LOG_INFO( "restoring domain %d.%d\n", this->number, this->giveSerialNumber() );
         DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
         this->clear();
-	
+
         if ( !this->instanciateYourself(domainDr) ) {
 	  _error("initializeAdaptive: domain Instanciation failed");
         }
-	
+
         delete domainDr;
         domainUpdated = true;
       }
-      
+
       // nodes & sides and corresponding dofs
       int nnodes = this->giveNumberOfDofManagers();
       for ( i = 1; i <= nnodes; i++ ) {
@@ -1516,7 +1531,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 	  THROW_CIOERR(iores);
         }
       }
-      
+
       int nelem = this->giveNumberOfElements();
       for ( i = 1; i <= nelem; i++ ) {
         element = this->giveElement(i);
@@ -1527,13 +1542,13 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         if ( element->giveParallelMode() == Element_remote ) {
 	  continue;
         }
-	
+
 #endif
         if ( ( iores = element->restoreContext(stream, mode) ) != CIO_OK ) {
 	  THROW_CIOERR(iores);
         }
       }
-      
+
       // restore boundary conditions data
       int nbc = this->giveNumberOfBoundaryConditions();
       for ( i = 1; i <= nbc; i++ ) {
@@ -1542,13 +1557,13 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 	  THROW_CIOERR(iores);
         }
       }
-      
+
       // restore error estimator data
       ee = this->giveErrorEstimator();
       if ( domainUpdated ) {
         ee->setDomain(this);
       }
-      
+
       if ( ee ) {
         if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
 	  THROW_CIOERR(iores);
@@ -1561,7 +1576,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 	this->smoother->init();
       }
     }
-    
+
     return CIO_OK;
 }
 

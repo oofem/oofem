@@ -116,20 +116,6 @@ CrossSection :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 
-CrossSection *
-CrossSection :: ofType(const char *aClass)
-// Returns a new cross section, which has the same number than the receiver,
-// but belongs to aClass (simpleCrossSection, LayeredCrossSection, FibredCS, ...).
-{
-    CrossSection *newCrossSection = CreateUsrDefCrossSectionOfType(aClass, number, domain);
-    if ( newCrossSection == NULL ) {
-      _error2("ofType:  unknown cross section type (%s)\n", aClass);
-      exit(0);
-    }
-    return newCrossSection;
-}
-
-
 double
 CrossSection :: give(CrossSectionProperty aProperty)
 // Returns the value of the property aProperty of the receiver.

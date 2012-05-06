@@ -370,16 +370,6 @@ public:
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
-    /**
-     * Returns a newly allocated DofManager, with type depending on parameter.
-     * Creates new object for following classes Node, ElementSide, RigidArmNode otherwise
-     * calls global function CreateUsrDefDofManagerOfType for creating appropriate
-     * instance. This function must be implemented by user.
-     * @param aClass String with DofManager name.
-     * @return Newly allocated DofManager with required type.
-     */
-    DofManager *ofType(const char *aClass);
-
     virtual const char *giveClassName() const { return "DofManager"; }
     virtual classType giveClassID() const { return DofManagerClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);

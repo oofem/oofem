@@ -79,7 +79,6 @@ public:
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
      * It scans input file, each line is assumed to be single record describing particular module.
      * The record line is converted to lowercase letters.
-     * Corresponding component is created using ofType function.
      * After new output module object is created, its initializeForm member function is
      * called with its record as parameter.
      * @param dr Data reader for input records.

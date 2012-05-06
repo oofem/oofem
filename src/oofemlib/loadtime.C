@@ -81,35 +81,6 @@ LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 }
 
 
-
-LoadTimeFunction *LoadTimeFunction :: ofType(const char *aClass)
-// Returns a new function, which has the same number than the receiver,
-// but which also is typed (ConstantFunction, PeakFunction,...).
-{
-    LoadTimeFunction *newLTF;
-
-    if ( !strncasecmp(aClass, "constantfunction", 5) ) {
-        newLTF = new ConstantFunction(number, domain);
-    }
-    /*   else if (! strncasecmp(aClass,"peakfunction",5))
-    *    newLTF = new PeakFunction(number,domain) ;
-    * else if (! strncasecmp(aClass,"piecewiselinfunction",5))
-    *    newLTF = new PiecewiseLinFunction(number,domain) ;
-    * else if (! strncasecmp(aClass,"heavisideltf",12))
-    *    newLTF = new HeavisideLTF(number,domain) ;    */
-    else {
-        // last resort - call aditional user defined subroutine
-        newLTF = CreateUsrDefLoadTimeFunctionOfType(aClass, number, domain);
-        if ( newLTF == NULL ) {
-            _error2("ofType: unknown type of load-time function (%s)", aClass);
-            exit(0);
-        }
-    }
-
-    return newLTF;
-}
-
-
 IRResultType
 LoadTimeFunction :: initializeFrom(InputRecord *ir)
 {

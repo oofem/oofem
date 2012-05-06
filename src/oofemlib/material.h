@@ -257,17 +257,6 @@ public:
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void printYourself();
 
-    /**
-     * Returns a newly allocated material, with type depending on parameter.
-     * Creates new object for following classes: IsotropicLinearElasticMaterial and IsotropicLinearHeatMaterial
-     * otherwise calls directly CreateUsrDefMaterialOfType global function to allocate
-     * new instance of material of given type.
-     * @param aClass String with material model name.
-     * @return Newly allocated material model with required type.
-     * @see CreateUsrDefMaterialOfType
-     */
-    Material *ofType(const char *aClass);
-
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 

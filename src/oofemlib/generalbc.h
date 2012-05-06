@@ -97,16 +97,6 @@ public:
      * @return Associated load time function of receiver.
      */
     LoadTimeFunction *giveLoadTimeFunction();
-    /**
-     * Returns a newly allocated boundary condition, with type depending on parameter.
-     * Creates new object for following classes BoundaryCondition, DeadWeight, InitialCondition and NodalLoad
-     * otherwise calls directly CreateUsrDefLoadOfType global function to allocate
-     * new instance of boundary condition of given type.
-     * @param aClass String with boundary condition name.
-     * @return Newly allocated boundary condition with required type.
-     * @see CreateUsrDefLoadOfType
-     */
-    GeneralBoundaryCondition *ofType(const char *aClass);
 
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to

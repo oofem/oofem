@@ -182,7 +182,6 @@ Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mat
 }
 
 
-
 void
 Material :: printYourself()
 // Prints the receiver on screen.
@@ -190,31 +189,6 @@ Material :: printYourself()
     printf("Material with properties : \n");
     propertyDictionary->printYourself();
 }
-
-
-
-Material *
-Material :: ofType(const char *aClass)
-// Returns a new material, which has the same number than the receiver,
-// but belongs to aClass (Hook, Microplane, ...).
-{
-    Material *newMaterial;
-
-    if ( !strncasecmp(aClass, "isole", 5) ) {
-        newMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(), domain);
-    } else {
-        // last resort - call additional user defined subroutine
-        newMaterial = CreateUsrDefMaterialOfType(aClass, number, domain);
-        if ( newMaterial == NULL ) {
-            _error2("ofType:  unknown material (%s)\n", aClass);
-            exit(0);
-        }
-    }
-
-    return newMaterial;
-}
-
-
 
 
 //

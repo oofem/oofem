@@ -589,57 +589,6 @@ Element :: postInitialize()
 }
 
 
-Element *
-Element :: ofType(const char *aClass)
-// Returns a new element, which has the same number than the receiver,
-// but belongs to aClass (PlaneStrain, or Truss2D,..).
-{
-    Element *newElement;
-
-    /*   if (! strncasecmp(aClass,"planestress2d",12))
-     *   newElement = new PlaneStress2d(number,domain) ;
-     * else if (! strncasecmp(aClass,"qplanestress2d",12))
-     *   newElement = new QPlaneStress2d(number,domain) ;
-     * else if (! strncasecmp(aClass,"trplanestress2d",12))
-     *   newElement = new TrPlaneStress2d(number,domain) ;
-     * else if (! strncasecmp(aClass,"qtrplstr",8))
-     *   newElement = new QTrPlaneStress2d(number,domain) ;
-     * else if (! strncasecmp(aClass,"trplanestrrot",12))
-     *   newElement = new TrPlaneStrRot(number,domain) ;
-     * else if (! strncasecmp(aClass,"axisymm3d",9))
-     *   newElement = new Axisymm3d (number,domain) ;
-     * else if (! strncasecmp(aClass,"q4axisymm",9))
-     *   newElement = new Q4Axisymm (number,domain) ;
-     * else if (! strncasecmp(aClass,"l4axisymm",9))
-     *   newElement = new L4Axisymm (number,domain) ;
-     * else if (! strncasecmp(aClass,"lspace",6))
-     *   newElement = new LSpace(number,domain) ;
-     * else if (! strncasecmp(aClass,"qspace",6))
-     *   newElement = new QSpace(number,domain) ;
-     * else if (! strncasecmp(aClass,"cctplate",8))
-     *   newElement = new CCTPlate(number,domain) ;
-     * else if (! strncasecmp(aClass,"ltrspace",8))
-     *   newElement = new LTRSpace(number,domain) ;
-     * else if (! strncasecmp(aClass,"truss2d",7))
-     *   newElement = new Truss2d(number,domain) ;
-     * else if (! strncasecmp(aClass,"libeam2d",8))
-     *   newElement = new LIBeam2d(number,domain) ;
-     * else if (! strncasecmp(aClass,"rershell",8))
-     *   newElement = new RerShell(number,domain) ;
-     * else if (! strncasecmp(aClass,"ltrelemppde",11))
-     *   newElement = new LTrElementPPDE(number,domain) ;
-     */if ( 0 ) { } else {
-        // last resort - call aditional user defined subroutine
-        newElement = CreateUsrDefElementOfType(aClass, number, domain);
-        if ( newElement == NULL ) {
-            _error2("ofType : unknown element type (%s)", aClass);
-        }
-    }
-
-    return newElement;
-}
-
-
 void Element :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
@@ -656,20 +605,6 @@ void Element :: printOutputAt(FILE *file, TimeStep *stepN)
     }
 }
 
-/*
- * Element*  Element :: typed ()
- * // Returns a new element, which has the same number than the receiver,
- * // but is typed (PlaneStrain, or Truss2D,..).
- * {
- * Element* newElement ;
- * char     type[32] ;
- *
- * this -> readString("class",type) ;
- * newElement = this -> ofType(type) ;
- *
- * return newElement ;
- * }
- */
 
 void
 Element :: updateYourself(TimeStep *tStep)
