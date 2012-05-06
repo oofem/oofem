@@ -44,7 +44,6 @@
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
-
 #include "verbose.h"
 #include "conTable.h"
 #include "outputmanager.h"
@@ -209,19 +208,6 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
         // Compute element norm contribution.
         if ( normFlag ) internalForcesEBENorm += charVec.computeSquaredNorm();
-
-#ifdef DEBUG
-        for ( int jj=1; jj <= loc.giveSize(); jj++ ) {
-            int jl = loc.at(jj);
-            if ( jl==0 ) continue;
-            if ( finite( answer.at(jl) ) == 0 ) {
-                char buff [1024];
-                sprintf( buff, "giveInternalForces: INF or NAN error detected, element %d", i );
-                _error( buff );
-            }
-        }
-#endif
-
     }
 
     this->timer.pauseTimer( EngngModelTimer :: EMTT_NetComputationalStepTimer );
