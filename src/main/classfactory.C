@@ -48,10 +48,12 @@
 #include "materialclassfactory.h"
 #include "engngmodelclassfactory.h"
 #include "ltfclassfactory.h"
+
 #undef  REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)
 #define REGISTER_CLASS_1(_class, id, type)
 #include "sparsemtrxclassfactory.h"
+#include "dofclassfactory.h"
 
 namespace oofem {
 ClassFactory :: ClassFactory() {
@@ -155,4 +157,25 @@ case id: \
 
     return answer;
 }
+
+  Dof *ClassFactory :: createDof(classType type, int num, DofManager* dman)
+  {
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+case id: \
+  answer = new _class(num, dman); \
+    break;
+
+    Dof *answer = NULL;
+    switch ( type ) {
+#include "dofclassfactory.h"
+    default:
+        OOFEM_ERROR("ClassFactory::createDof: Unknown DOF type\n");
+        answer = NULL;
+    }
+
+    return answer;
+  }
+
+
 } // End namespace oofem

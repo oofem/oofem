@@ -270,8 +270,15 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     SparseMtrx *createSparseMtrx(SparseMtrxType type);
-};
-
+    /**
+     * Creates new instance of DOF corresponding to given keyword.
+     * @param type classType id determining the type of new instance.
+     * @param num  object's number.
+     * @param dman Dof manager assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    Dof *createDof(classType type, int num, DofManager *dman);
+  };
 extern ClassFactory classFactory;
 } // end namespace oofem
 #endif // clasfactort_h

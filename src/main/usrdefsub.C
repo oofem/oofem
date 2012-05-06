@@ -267,6 +267,12 @@ SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type)
     return classFactory.createSparseMtrx(type);
 }
 
+// ================ DOF CLASS FACTORY==================
+Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
+{
+  return classFactory.createDof (type, number, dman);
+}
+
 //------------------OLD Style CreateUsrDef Functions-------------------------------------------
 
 // ================ Topology CLASS FACTORY==================
@@ -460,25 +466,6 @@ IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 
 
 
-Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
-{
-    Dof *answer = NULL;
-    if  ( type == MasterDofClass ) {
-        answer = new MasterDof(number, dman);
-    } else if ( type == SimpleSlaveDofClass ) {
-        answer = new SimpleSlaveDof(number, dman);
-    } else if ( type == SlaveDofClass ) {
-        answer = new SlaveDof(number, dman);
-    } else if ( type == ActiveDofClass ) {
-        answer = new ActiveDof(number, dman);
-    }
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefDofOfType: Unknown dof type [%d]", type);
-    }
-
-    return answer;
-}
 
 MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
