@@ -33,12 +33,14 @@
  */
 
 #include "classtype.h"
+#include "constant.h"
 #include "peak.h"
 #include "piecewis.h"
 #include "piecewisper.h"
 #include "heavisideltf.h"
 #include "usrdeftimefunct.h"
 
+REGISTER_CLASS(ConstantFunction, "constantfunction", ConstantFunctionClass)
 REGISTER_CLASS(PeakFunction, "peakfunction", PeakFunctionClass)
 REGISTER_CLASS(PiecewiseLinFunction, "piecewiselinfunction", PiecewiseLinFunctionClass)
 REGISTER_CLASS(PeriodicPiecewiseLinFunction, "periodicpiecewiselinfunction", PeriodicPiecewiseLinFunctionClass)
