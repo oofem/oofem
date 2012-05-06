@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// Recasted by L. Svoboda
+// Recasted by Ladislav Svoboda
 
 #ifndef fei3dhexaquad_h
 #define fei3dhexaquad_h

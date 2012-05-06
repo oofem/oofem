@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -57,7 +57,8 @@ class DataStream;
 /**
  * This class manages the xfem part as well as takes over some functions which would appear
  * in the Domain and Node class.
- * @author chamrova
+ *
+ * @author Ruzena Chamrova
  */
 class XfemManager
 {

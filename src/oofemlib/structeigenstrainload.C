@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 2011   Vit Smilauer
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *

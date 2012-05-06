@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -31,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
- */
 
 using System;
 using System.Collections;
@@ -44,10 +41,12 @@ using Golem;
 
 namespace MathKer
 {
-/// <summary>
-/// This is a fixed sparse matrix format
-/// There is full set of rows but in each row are stored only nonzeros
-/// </summary>
+/**
+ * This is a fixed sparse matrix format
+ * There is full set of rows but in each row are stored only nonzeros
+ *
+ * @author Richard Vondracek
+ */
 public class SparseConectivityMtxFixed : IConectMatrix
 {
 public:

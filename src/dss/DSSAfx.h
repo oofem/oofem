@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -31,14 +31,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+
+/**
+ * DSSAfx.h : include file for standard system include files,
+ * or project specific include files that are used frequently, but
+ * are changed infrequently
+ *
+ * @author Richard Vondracek
  */
 
-// DSSAfx.h : include file for standard system include files,
-//  or project specific include files that are used frequently, but
-//      are changed infrequently
-//
 #ifndef _DSSAFX_H__
 #define _DSSAFX_H__
 

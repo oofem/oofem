@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -45,8 +45,8 @@ namespace oofem {
 
 /**
  * Class for maintaining Gauss point values for CompoDamageMat model.
- *
  * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is a temporal damage array
+ *
  * @author Vit Smilauer
  */
 class CompoDamageMatStatus : public StructuralMaterialStatus

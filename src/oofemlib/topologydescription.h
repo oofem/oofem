@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -55,6 +55,7 @@ enum TopologyState {
 /**
  * Abstract class for topology description.
  * The topology is coupled to a given domain. The main workload for a topology description is to be able to reproduce a finite element mesh from the results.
+ *
  * @author Mikael Öhman
  */
 class TopologyDescription

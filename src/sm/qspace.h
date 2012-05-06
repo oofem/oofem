@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -53,7 +53,7 @@ namespace oofem {
  * - calculating its Gauss points
  * - calculating its B,D,N matrices and dV
  *
- * @author L. Svoboda
+ * @author Ladislav Svoboda
  */
 class QSpace : public StructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {

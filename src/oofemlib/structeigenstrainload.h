@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 2011   Vit Smilauer
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -45,6 +45,8 @@ class TimeStep;
 /**
  * This class implements prescribed eigenstrain (stress-free strain). It reads six
  * strain components (xx, yy, zz, yz, zx, xy) in the global coordinate system. 2D, 1D?
+ *
+ * @author Vit Smilauer
  */
 class StructuralEigenstrainLoad : public Load
 {

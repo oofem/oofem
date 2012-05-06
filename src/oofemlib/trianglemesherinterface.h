@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -55,6 +55,7 @@ struct Triangle_PSLG
 
 /**
  * Interface to Triangle (Delaunay mesher).
+ *
  * @todo{Possible reform slightly and merge this with the other meshing interfaces.}
  * @see http://www.cs.cmu.edu/~quake/triangle.html
  * @author Mikael Öhman

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -47,7 +47,8 @@ namespace oofem {
 
 /**
  * Quadratic 3d  20 - node element with quadratic approximation of displacements and linear approximation of gradient
- * @author L. Svoboda
+ *
+ * @author Ladislav Svoboda
  */
 class QSpaceGrad : public QSpace, public GradDpElement
 {

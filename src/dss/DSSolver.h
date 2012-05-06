@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -31,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
- */
-
-// DSSolver.h
 
 #ifndef _DSSOLVER_H__
 #define _DSSOLVER_H__
@@ -63,10 +58,11 @@ enum eDSSolverType {
     eDSSFastCG = 6
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-// ISolver is the user interface for the DirectSparseSolver
-//
+/**
+ * ISolver is the user interface for the DirectSparseSolver
+ *
+ * @author Richard Vondracek
+ */
 
 struct ISolver
 {

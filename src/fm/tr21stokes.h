@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -50,6 +50,7 @@ class FEI2dTrQuad;
 /**
  * Triangular Taylor-Hood element for Stokes flow.
  * Quadratic interpolation of geometry and velocity, and linear interpolation of pressures.
+ *
  * @author Carl Sandström
  * @author Mikael Öhman
  */

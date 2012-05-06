@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -31,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
- */
-
-// MathTracer.h
 
 #ifndef _MATH_TRACER_H__
 #define _MATH_TRACER_H__
@@ -43,8 +38,11 @@
 #include "DSSAfx.h"
 
 DSS_NAMESPASE_BEGIN
-////////////////// ////////////////////////////////////////////////////////////////////////////////////
-// You can modify this class, or inherit a new one . If you want to redirect the output somewhere else.
+
+/**
+ * @author Richard Vondracek
+ */
+
 class MathTracer
 {
 private:

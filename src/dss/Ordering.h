@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -31,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
- */
-
-//#include "Ordering.h"
 
 #ifndef _ORDERING_H__
 #define _ORDERING_H__
@@ -47,9 +42,10 @@ DSS_NAMESPASE_BEGIN
 
 struct IConectMatrix;
 
-/// <summary>
-/// Summary description for Ordering.
-/// </summary>
+/**
+ * @author Richard Vondracek
+ */
+
 class Ordering
 {
 public:

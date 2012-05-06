@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -48,6 +48,7 @@ class MeshQualityErrorEstimator;
 /**
  * Implements the engineering model to solve incompressible Stokes flow.
  * Stokes flow means acceleration is ignored.
+ *
  * @author Carl Sandström
  * @author Mikael Öhman
  */

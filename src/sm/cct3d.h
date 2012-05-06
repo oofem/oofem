@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -63,7 +63,7 @@ enum CharTensor {
  * This class implements a triangular three-node plate CCT finite element.
  * Each node has 3 degrees of freedom.
  *
- * @author L. Svoboda
+ * @author Ladislav Svoboda
  * @date 2010-5-25
  */
 class CCTPlate3d : public CCTPlate

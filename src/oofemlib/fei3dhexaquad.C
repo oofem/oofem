@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -32,11 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file fei3dhexaquad.C
+//   recasted by Ladislav Svoboda
 
-//
-//   recasted by L. Svoboda
-//
 #include "fei3dhexaquad.h"
 #include "flotarry.h"
 #include "flotmtrx.h"

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -46,7 +46,8 @@ namespace oofem {
  * This class implements an triangular three-node shell finite element, composed of
  * cct3d and trplanrot3d elements.
  * Each node has 6 degrees of freedom.
- * @author L. Svoboda
+ *
+ * @author Ladislav Svoboda
  */
 class TR_SHELL01 : public StructuralElement
 {

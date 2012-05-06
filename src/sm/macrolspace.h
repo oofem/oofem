@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2012   Borek Patzak
  *
  *
  *
@@ -51,6 +51,8 @@ class MicroMaterial;
 /**
  * This class implements a macroelement. It is derived from eight-node brick element.
  * The stiffness matrix is computed from underlying RVE and is condensed to 24 DoFs to corner nodes.
+ *
+ * @author Vit Smilauer
  */
 class MacroLSpace : public LSpace
 {
