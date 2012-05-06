@@ -54,6 +54,7 @@
 #define REGISTER_CLASS_1(_class, id, type)
 #include "sparsemtrxclassfactory.h"
 #include "dofclassfactory.h"
+#include "sparselinearsystemsolverclassfactory.h"
 
 namespace oofem {
 ClassFactory :: ClassFactory() {
@@ -171,6 +172,25 @@ case id: \
 #include "dofclassfactory.h"
     default:
         OOFEM_ERROR("ClassFactory::createDof: Unknown DOF type\n");
+        answer = NULL;
+    }
+
+    return answer;
+  }
+
+  SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, int num, Domain *d, EngngModel *m)
+  {
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, id) \
+case id: \
+  answer = new _class(num, d, m);			\
+    break;
+
+    SparseLinearSystemNM *answer = NULL;
+    switch ( type ) {
+#include "sparselinearsystemsolverclassfactory.h"
+    default:
+        OOFEM_ERROR("ClassFactory::createSparseLinSolver: Unknown type\n");
         answer = NULL;
     }
 

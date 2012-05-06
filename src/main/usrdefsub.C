@@ -53,15 +53,6 @@
 #include "material.h"
 #include "gaussintegrationrule.h"
 
-#include "ldltfact.h"
-#include "imlsolver.h"
-#include "spoolessolver.h"
-#include "petscsolver.h"
-#include "dsssolver.h"
-#ifdef __PARALLEL_MODE
- #include "fetisolver.h"
-#endif
-
 #include "subspaceit.h"
 #include "inverseit.h"
 #include "slepcsolver.h"
@@ -273,6 +264,13 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
   return classFactory.createDof (type, number, dman);
 }
 
+// ================ SparseLinearSystemNM CLASS FACTORY==================
+SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m)
+{
+  return classFactory.createSparseLinSolver(st,i,d,m);
+}
+
+
 //------------------OLD Style CreateUsrDef Functions-------------------------------------------
 
 // ================ Topology CLASS FACTORY==================
@@ -287,41 +285,6 @@ TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *doma
     return ( topologyNameList.count(aClass) == 1 ) ? topologyNameList [ aClass ](domain) : NULL;
 }
 
-
-SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m)
-{
-    SparseLinearSystemNM *nm = NULL;
-    if ( st == ST_Direct ) {
-        nm = ( SparseLinearSystemNM * ) new LDLTFactorization(i, d, m);
-        return nm;
-    } else if ( st == ST_IML ) {
-        nm = ( SparseLinearSystemNM * ) new IMLSolver(i, d, m);
-        return nm;
-    } else if ( st == ST_Spooles ) {
-        nm = ( SparseLinearSystemNM * ) new SpoolesSolver(i, d, m);
-        return nm;
-    } else if ( st == ST_Petsc ) {
-        nm = ( SparseLinearSystemNM * ) new PetscSolver(i, d, m);
-        return nm;
-
-#ifdef __PARALLEL_MODE
-    } else if ( st == ST_Feti ) {
-        nm = ( SparseLinearSystemNM * ) new FETISolver(i, d, m);
-        return nm;
-
-#endif
-#ifdef __DSS_MODULE
-    } else if ( st == ST_DSS ) {
-        nm = ( SparseLinearSystemNM * ) new DSSSolver(i, d, m);
-        return nm;
-
-#endif
-    } else {
-        OOFEM_ERROR("CreateUsrDefSparseLinSolver: Unknown solver type\n");
-    }
-
-    return nm;
-}
 
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m)
 {
