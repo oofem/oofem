@@ -38,6 +38,7 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
+#include "fei2dtrlin.h"
 
 namespace oofem {
 /**
@@ -48,7 +49,7 @@ class Tr1_ht : public TransportElement, public SpatialLocalizerInterface, public
 {
 protected:
     int numberOfGaussPoints;
-    double area;
+    static FEI2dTrLin interp;
 
 public:
     Tr1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
@@ -78,6 +79,10 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
+    virtual double computeArea() const;
+    virtual FEInterpolation *giveInterpolation() { return &this->interp; }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+
 #ifdef __OOFEG
     // Graphics output
     //void drawYourself(oofegGraphicContext&);
@@ -91,8 +96,6 @@ protected:
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
     virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
-
-    double giveArea();
 
     virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

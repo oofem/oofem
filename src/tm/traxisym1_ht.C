@@ -58,7 +58,7 @@
 namespace oofem {
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
     Tr1_ht(n, aDomain, em)
-    // Constructor.
+// Constructor.
 { }
 
 TrAxisym1_ht :: ~TrAxisym1_ht()
@@ -66,61 +66,31 @@ TrAxisym1_ht :: ~TrAxisym1_ht()
 { }
 
 double
-TrAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+TrAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
 {
-    double area, weight;
-
-    weight  = aGaussPoint->giveWeight();
-    area    = this->giveArea();
-
-    return 2.0 * area * weight * this->computeRadiusAt(aGaussPoint);
+    double determinant, weight;
+    determinant = fabs( this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    weight = gp->giveWeight();
+    return determinant * weight * this->computeRadiusAt(gp); ///@todo What about 2*pi ?
 }
 
 double
 TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double dx, dy, length, radius;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-    FloatMatrix n;
+    FloatArray gcoords;
+    double determinant, radius;
 
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-    this->computeEgdeNMatrixAt(n, gp);
-    radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
-    return 0.5 * length * radius * gp->giveWeight();
+    determinant = fabs( this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    this->interp.edgeLocal2global(gcoords, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    radius = gcoords.at(1);
+    return determinant * radius * gp->giveWeight();
 }
 
 double
 TrAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 {
-    double r = 0.0;
-    int i;
-    FloatMatrix n;
-
-    this->computeNmatrixAt( n, gp->giveCoordinates() );
-    for ( i = 1; i <= 3; i++ ) {
-        r += n.at(1, i) * this->giveNode(i)->giveCoordinate(1);
-    }
-
-    return r;
+    FloatArray gcoords;
+    this->computeGlobalCoordinates(gcoords, *gp->giveCoordinates());
+    return gcoords.at(1);
 }
 } // end namespace oofem

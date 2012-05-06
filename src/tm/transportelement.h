@@ -46,7 +46,7 @@ namespace oofem {
  * This abstract class represent a general base element class for transport problems.
  * In actual implementation, the same approximation order of all unknowns is assumed,
  * but this can be easily implemented.
- * @todo Alot of missing documentation.
+ * @todo A lot of missing documentation.
  * @todo Nonlinear problems.
  */
 class TransportElement : public Element, public EIPrimaryFieldInterface
