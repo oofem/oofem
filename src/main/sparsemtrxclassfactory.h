@@ -41,7 +41,7 @@
 #include "dyncomprow.h"
 #include "spoolessparsemtrx.h"
 #include "petscsparsemtrx.h"
-
+#include "dss.h"
 
 REGISTER_CLASS(Skyline, SMT_Skyline)
 REGISTER_CLASS(SkylineUnsym, SMT_SkylineU)
