@@ -232,6 +232,8 @@ public:
     //friend class Material;
     //friend class LayeredMaterial;
 };
+
+typedef GaussPoint IntegrationPoint;
 } // end namespace oofem
 #endif // gausspnt_h
 
