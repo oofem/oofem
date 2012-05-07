@@ -130,9 +130,6 @@ public:
     virtual const char *giveClassName() const { return "PlasticMaterial"; }
     virtual classType giveClassID() const { return PerfectlyPlasticMaterialClass; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

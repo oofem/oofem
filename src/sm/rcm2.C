@@ -832,49 +832,6 @@ RCM2Material :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-contextIOResultType
-RCM2Material :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves full status for this material, also invokes saving
-// for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
-// which can have their own statuses stored in gp.
-{
-    contextIOResultType iores;
-    if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
-    }
-
-    if ( ( iores = StructuralMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // return result back
-    return CIO_OK;
-}
-
-
-contextIOResultType
-RCM2Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-//
-// resaves full status for this material, also invokes saving
-// for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
-// which can have their own statuses stored in gp.
-
-//
-{
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // return result back
-    return CIO_OK;
-}
-
-
 double
 RCM2Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus

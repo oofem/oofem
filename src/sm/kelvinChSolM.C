@@ -242,31 +242,6 @@ KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-contextIOResultType
-KelvinChainSolidMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
-contextIOResultType
-KelvinChainSolidMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
 // useless here
 double
 KelvinChainSolidMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double ofAge)

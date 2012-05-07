@@ -196,7 +196,7 @@ Material :: printYourself()
 //
 
 contextIOResultType
-Material :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+Material :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
@@ -210,12 +210,6 @@ Material :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // corresponding gp is passed in obj
-    GaussPoint *gp = ( GaussPoint * ) obj;
     if ( gp == NULL ) {
         THROW_CIOERR(CIO_BADOBJ);
     }
@@ -224,7 +218,7 @@ Material :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     MaterialStatus *status =  this->giveStatus(gp);
 
     if ( status ) {
-        if ( ( iores = status->saveContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = status->saveContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -233,7 +227,7 @@ Material :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 contextIOResultType
-Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+Material :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
@@ -246,13 +240,6 @@ Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 {
     contextIOResultType iores;
-    // invoke base class service
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // corresponding gp is passed in obj
-    GaussPoint *gp = ( GaussPoint * ) obj;
     if ( gp == NULL ) {
         THROW_CIOERR(CIO_BADOBJ);
     }
@@ -260,7 +247,7 @@ Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     // read raw data - context
     MaterialStatus *status =  this->giveStatus(gp);
     if ( status ) {
-        if ( ( iores = status->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = status->restoreContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

@@ -63,8 +63,8 @@ public:
                                            TimeStep *atTime);
 
     // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "HydratingHeMoMaterial"; }

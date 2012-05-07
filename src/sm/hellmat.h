@@ -671,8 +671,8 @@ public:
     HeMoTKMaterial *giveHeMoMaterial();
 
     // saves current context(state) into stream
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
     // stress return visualization output
     void   plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep *atTime);

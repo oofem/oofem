@@ -257,8 +257,24 @@ public:
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual void printYourself();
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /**
+     * Stores integration point state to output stream.
+     * @param stream Output stream.
+     * @param mode Determines amount of info required in stream (state, definition, ...).
+     * @param gp integration point.
+     * @return contextIOResultType.
+     * @exception throws an ContextIOERR exception if error encountered.
+     */
+    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    /**
+     * Reads integration point state to output stream.
+     * @param stream Output stream.
+     * @param mode Determines amount of info required in stream (state, definition, ...).
+     * @param gp integration point.
+     * @return contextIOResultType.
+     * @exception throws an ContextIOERR exception if error encountered.
+     */
+    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
     /**
      * Initialize integration point (must be inside  material region associated to receiver)

@@ -71,21 +71,16 @@ CrossSection :: printYourself()
 
 
 contextIOResultType
-CrossSection :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    GaussPoint *gp = ( GaussPoint * ) obj;
     Material *mat = gp->giveMaterial();
 
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = mat->saveContext(stream, mode, ( void * ) gp) ) != CIO_OK ) {
+    if ( ( iores = mat->saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -94,21 +89,16 @@ CrossSection :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-CrossSection :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+CrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    GaussPoint *gp = ( GaussPoint * ) obj;
     Material *mat = gp->giveMaterial();
 
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = mat->restoreContext(stream, mode, ( void * ) gp) ) != CIO_OK ) {
+    if ( ( iores = mat->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

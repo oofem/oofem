@@ -227,47 +227,6 @@ double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp)
 }
 
 
-contextIOResultType
-HydratingConcreteMat :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-// saves full status for this material, also invokes saving
-// for sub-objects of this.
-{
-    contextIOResultType iores;
-
-    // write parent data
-    if ( ( iores = TransportMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // save hydration model data - maybe should check hydration option?
-    //     if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-    //         THROW_CIOERR(iores);
-    //     }
-
-    return CIO_OK;
-}
-
-
-contextIOResultType
-HydratingConcreteMat :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-// restores full status for this material, also invokes restoring for sub-objects of this.
-{
-    contextIOResultType iores;
-
-    // read parent data
-    if ( ( iores = TransportMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read hydration model data - maybe should check hydration option?
-    //     if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-    //         THROW_CIOERR(iores);
-    //     }
-
-    return CIO_OK;
-}
-
-
 int
 HydratingConcreteMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {

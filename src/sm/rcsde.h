@@ -124,8 +124,6 @@ public:
     virtual classType giveClassID() const { return RCSDEMaterialClass; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual double give(int aProperty, GaussPoint *gp);
 

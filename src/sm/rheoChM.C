@@ -658,7 +658,7 @@ RheoChainMaterial :: giveEndOfTimeOfInterest()
 }
 
 contextIOResultType
-RheoChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint* gp)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this
@@ -669,11 +669,11 @@ RheoChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj
         _error("saveContext : can't write into NULL stream");
     }
 
-    if ( ( iores = Material :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = Material :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = giveLinearElasticMaterial()->saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = giveLinearElasticMaterial()->saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -682,7 +682,7 @@ RheoChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj
 
 
 contextIOResultType
-RheoChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RheoChainMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // reads full status for this material, also invokes reading
 // of sub-objects of this
@@ -690,12 +690,12 @@ RheoChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *
 {
     contextIOResultType iores;
 
-    if ( ( iores = Material :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = Material :: restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // invoke possible restoring of statuses for submaterials
-    if ( ( iores = giveLinearElasticMaterial()->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = giveLinearElasticMaterial()->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

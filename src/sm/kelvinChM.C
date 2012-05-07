@@ -334,33 +334,6 @@ KelvinChainMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-contextIOResultType
-KelvinChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
-contextIOResultType
-KelvinChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
-
 /****************************************************************************************/
 
 KelvinChainMaterialStatus :: KelvinChainMaterialStatus(int n, Domain *d,

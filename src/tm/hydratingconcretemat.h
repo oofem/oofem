@@ -60,9 +60,6 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "HydratingConcreteMat"; }
     virtual classType giveClassID() const { return HydratingConcreteMatClass; }

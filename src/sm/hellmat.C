@@ -2486,7 +2486,7 @@ HellmichMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     answer.resize(0);
 }
 
-contextIOResultType HellmichMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType HellmichMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 // saves full status for this material, also invokes saving
 // for sub-objects of this.
 {
@@ -2496,32 +2496,32 @@ contextIOResultType HellmichMaterial :: saveContext(DataStream *stream, ContextM
     }
 
     // save material gp status if necessary
-    if ( obj && options & moIsothermal ) {
-        StateCounterType c = ( ( GaussPoint * ) obj )->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
+    if ( gp && options & moIsothermal ) {
+        StateCounterType c = gp ->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
         if ( materialGpSaveAt != c ) {
             materialGpSaveAt = c;
-            if ( ( iores = saveContext( stream, mode, giveMaterialGp() ) ) != CIO_OK ) {
+            if ( ( iores = saveIPContext( stream, mode, giveMaterialGp() ) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
     }
 
     // write parent data
-    if ( ( iores = StructuralMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralMaterial :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // save hydration model data - maybe should check moHydration?
     // needs to save only in case nonisodata is present = moIsothermal option is not set in gp options
-    if ( obj && !( ( ( HellmichMaterialStatus * ) giveStatus( ( GaussPoint * ) obj ) )->giveMaterialOptions() & moIsothermal ) ) {
-        if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus( gp ) )->giveMaterialOptions() & moIsothermal ) ) {
+      if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, (void*) gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
     return CIO_OK;
 }
-contextIOResultType HellmichMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType HellmichMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 // restores full status for this material, also invokes restoring for sub-objects of this.
 // !!! gp is passed in obj
 {
@@ -2531,24 +2531,24 @@ contextIOResultType HellmichMaterial :: restoreContext(DataStream *stream, Conte
     }
 
     // read material gp status if necessary
-    if ( options & moIsothermal ) {
-        StateCounterType c = ( ( GaussPoint * ) obj )->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
+    if ( gp && options & moIsothermal ) {
+        StateCounterType c = gp ->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
         if ( materialGpRestoreAt != c ) {
             materialGpRestoreAt = c;
-            if ( ( iores = restoreContext( stream, mode, giveMaterialGp() ) ) != CIO_OK ) {
+            if ( ( iores = restoreIPContext( stream, mode, giveMaterialGp() ) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
     }
 
     // read parent data
-    if ( ( iores = StructuralMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralMaterial :: restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // read hydration model data - maybe should check moHydration?
-    if ( obj && !( ( ( HellmichMaterialStatus * ) giveStatus( ( GaussPoint * ) obj ) )->giveMaterialOptions() & moIsothermal ) ) {
-        if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( gp && !( ( ( HellmichMaterialStatus * ) giveStatus( gp ) )->giveMaterialOptions() & moIsothermal ) ) {
+      if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

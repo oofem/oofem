@@ -79,10 +79,6 @@ public:
     virtual classType giveClassID() const { return KelvinChainSolidMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    // store & restore context functions
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
                                             MatResponseForm form,
                                             GaussPoint *gp,

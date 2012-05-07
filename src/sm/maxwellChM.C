@@ -281,33 +281,6 @@ MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-contextIOResultType
-MaxwellChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
-contextIOResultType
-MaxwellChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
-
 /****************************************************************************************/
 
 MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(int n, Domain *d,

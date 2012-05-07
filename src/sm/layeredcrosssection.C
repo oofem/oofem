@@ -909,17 +909,16 @@ LayeredCrossSection :: printYourself()
 
 
 contextIOResultType
-LayeredCrossSection :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LayeredCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
 // stores also slaves records of master gp
 //
 {
-    GaussPoint *masterGp = ( GaussPoint * ) obj;
     contextIOResultType iores;
 
-    if ( ( iores = CrossSection :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = CrossSection :: saveIPContext(stream, mode, masterGp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -931,7 +930,7 @@ LayeredCrossSection :: saveContext(DataStream *stream, ContextMode mode, void *o
     for ( int i = 1; i <= numberOfLayers; i++ ) {
         slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
         mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
-        if ( ( iores = mat->saveContext(stream, mode, ( void * ) slaveGP) ) != CIO_OK ) {
+        if ( ( iores = mat->saveIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -941,7 +940,7 @@ LayeredCrossSection :: saveContext(DataStream *stream, ContextMode mode, void *o
 
 
 contextIOResultType
-LayeredCrossSection :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LayeredCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -949,10 +948,9 @@ LayeredCrossSection :: restoreContext(DataStream *stream, ContextMode mode, void
 // restores also slaves of master gp
 //
 {
-    GaussPoint *masterGp = ( GaussPoint * ) obj;
     contextIOResultType iores;
 
-    if ( ( iores = CrossSection :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = CrossSection :: restoreIPContext(stream, mode, masterGp) ) != CIO_OK ) {
         THROW_CIOERR(iores);                                                                    // saved masterGp
     }
 
@@ -963,7 +961,7 @@ LayeredCrossSection :: restoreContext(DataStream *stream, ContextMode mode, void
         // creates also slaves if they don't exists
         slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
         mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
-        if ( ( iores = mat->restoreContext(stream, mode, ( void * ) slaveGP) ) != CIO_OK ) {
+        if ( ( iores = mat->restoreIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

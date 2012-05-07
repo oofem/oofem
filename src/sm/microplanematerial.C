@@ -134,7 +134,7 @@ MicroplaneMaterial :: initTempStatus(GaussPoint *gp)
 }
 
 contextIOResultType
-MicroplaneMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MicroplaneMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint* gp)
 {
     contextIOResultType iores;
     int mPlaneIndex;
@@ -145,13 +145,12 @@ MicroplaneMaterial :: saveContext(DataStream *stream, ContextMode mode, void *ob
         _error("saveContex : can't write into NULL stream");
     }
 
-    GaussPoint *gp = ( GaussPoint * ) obj;
     if ( gp == NULL ) {
         THROW_CIOERR(CIO_BADOBJ);
     }
 
     // save master
-    if ( ( iores = StructuralMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralMaterial :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -160,7 +159,7 @@ MicroplaneMaterial :: saveContext(DataStream *stream, ContextMode mode, void *ob
         mPlane = this->giveMicroplane(mPlaneIndex, gp);
         status =  this->giveMicroplaneStatus(mPlane);
         if ( status ) {
-            if ( ( iores = status->saveContext(stream, mode, obj) ) != CIO_OK ) {
+            if ( ( iores = status->saveContext(stream, mode, gp) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
@@ -170,7 +169,7 @@ MicroplaneMaterial :: saveContext(DataStream *stream, ContextMode mode, void *ob
 }
 
 contextIOResultType
-MicroplaneMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MicroplaneMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 {
     contextIOResultType iores;
     int mPlaneIndex;
@@ -178,13 +177,12 @@ MicroplaneMaterial :: restoreContext(DataStream *stream, ContextMode mode, void 
     MaterialStatus *status;
 
     // corresponding gp is passed in obj
-    GaussPoint *gp = ( GaussPoint * ) obj;
     if ( gp == NULL ) {
         THROW_CIOERR(CIO_BADOBJ);
     }
 
     // save master
-    if ( ( iores = StructuralMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = StructuralMaterial :: restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -193,7 +191,7 @@ MicroplaneMaterial :: restoreContext(DataStream *stream, ContextMode mode, void 
         mPlane = this->giveMicroplane(mPlaneIndex, gp);
         status =  this->giveMicroplaneStatus(mPlane);
         if ( status ) {
-            if ( ( iores = status->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+            if ( ( iores = status->restoreContext(stream, mode, gp) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }

@@ -104,46 +104,6 @@ PlasticMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-contextIOResultType
-PlasticMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// saves full status for this material, also invokes saving
-// for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
-// which can have their own statuses stored in gp.
-{
-    contextIOResultType iores;
-    if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
-    }
-
-    if ( ( iores = StructuralMaterial :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
-contextIOResultType
-PlasticMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-//
-// resaves full status for this material, also invokes saving
-// for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
-// which can have their own statuses stored in gp.
-
-//
-{
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralMaterial :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
-}
-
-
 void
 PlasticMaterial :: giveRealStressVector(FloatArray &answer,
                                         MatResponseForm form,
