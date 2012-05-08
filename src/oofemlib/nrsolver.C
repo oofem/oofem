@@ -341,11 +341,12 @@ restart:
                 // reset all changes fro previous equilibrium state
                 engngModel->initStepIncrements();
 #ifdef VERBOSE
-                OOFEM_LOG_INFO("NRSolver:  Iteration Reset ...\n");
+                OOFEM_LOG_INFO("NRSolver:  Iteration Reset: %d\n",irest);
 #endif
                 NR_OldMode  = NR_Mode;
                 NR_Mode     = nrsolverFullNRM;
                 NR_ModeTick = NRSOLVER_DEFAULT_NRM_TICKS;
+                irest++;
                 goto restart;
             } else {
                 status = NM_NoSuccess;
