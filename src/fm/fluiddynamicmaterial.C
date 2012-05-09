@@ -66,6 +66,7 @@ FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatR
 {
     int size = ((FluidDynamicMaterialStatus*)gp->giveMaterialStatus())->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
+    answer.zero();
 }
 
 
@@ -74,6 +75,7 @@ FluidDynamicMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, Ma
 {
     int size = ((FluidDynamicMaterialStatus*)gp->giveMaterialStatus())->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
+    answer.zero();
 }
 
 
@@ -198,7 +200,7 @@ FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGau
 {
   /*
     MaterialMode mmode = aGaussPoint->giveMaterialMode();
-    if ( ( type == IST_DeviatoricStrain ) ) { 
+    if ( ( type == IST_DeviatoricStrain ) ) {
       if ( mmode == _2dFlow ) {
 	return 3;
       } else if (mmode == _2dAxiFlow ) {
@@ -206,7 +208,7 @@ FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGau
       } else if (mmode == _3dFlow ) {
 	return 6;
       } else {
-	OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValueSize: material mode not supported"); 
+	OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValueSize: material mode not supported");
 	return 0;
       }
    }

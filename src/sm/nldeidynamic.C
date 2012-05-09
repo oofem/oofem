@@ -228,10 +228,10 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
     int nman  = domain->giveNumberOfDofManagers();
-    
+
     DofManager *node;
     Dof *iDof;
-    
+
     int nDofs;
     int i, k, j, jj;
     double coeff, maxDt, maxOm = 0.;
@@ -374,11 +374,6 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     // Update solution state counter
     tStep->incrementStateCounter();
 
-#ifdef __PARALLEL_MODE
-    // Exchange remote element data if necessary
-    this->exchangeRemoteElementData( RemoteElementExchangeTag );
-#endif
-
     // Compute internal forces.
     this->giveInternalForces( internalForces, false, 1, tStep );
 
@@ -410,7 +405,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             dofmanmode = dman->giveParallelMode();
             // skip all remote and null dofmanagers
             coeff = 1.0;
-            if ( ( dofmanmode == DofManager_remote ) || ( ( dofmanmode == DofManager_null ) ) ) {
+            if ( ( dofmanmode == DofManager_remote ) || ( dofmanmode == DofManager_null ) ) {
                 continue;
             } else if ( dofmanmode == DofManager_shared ) {
                 coeff = 1. / dman->givePartitionsConnectivitySize();
@@ -457,7 +452,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             dofmanmode = dman->giveParallelMode();
             // Skip all remote and null dofmanagers.
             coeff = 1.0;
-            if ( ( dofmanmode == DofManager_remote ) || ( ( dofmanmode == DofManager_null ) ) ) {
+            if ( ( dofmanmode == DofManager_remote ) || ( dofmanmode == DofManager_null ) ) {
                 continue;
             } else if ( dofmanmode == DofManager_shared ) {
                 coeff = 1. / dman->givePartitionsConnectivitySize();
@@ -653,7 +648,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
             }
         }
     }
-    
+
     // Find find global minimun period of vibration
     double maxElmass = -1.0;
     for (j=1 ; j<=n; j++) {

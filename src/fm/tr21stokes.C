@@ -167,7 +167,8 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dNv(12);
+    FloatArray a_pressure, a_velocity, devStress, epsp_dev, BTs, Nh, dNv(12);
+    double tmp_vol, d_vol, pressure;
     FloatMatrix dN, B(3, 12);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
@@ -186,18 +187,23 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         double dA = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
-            dNv(k)   = B(0, k)   = B(2, k + 1) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(2, k)   = dN(j, 1);
+            dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
+            dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
         }
 
-        epsp.beProductOf(B, a_velocity);
-        mat->computeDeviatoricStressVector(devStress, gp, epsp, tStep);
-        double pressure = Nh.dotProduct(a_pressure);
-        double w = dNv.dotProduct(a_velocity);
+        pressure = Nh.dotProduct(a_pressure);
+        epsp_dev.beProductOf(B, a_velocity);
+        tmp_vol = dNv.dotProduct(a_velocity);
+        //epsp_dev.at(1) -= tmp_vol/2;
+        //epsp_dev.at(2) -= tmp_vol/2;
+
+        mat->computeDeviatoricStressVector(devStress, d_vol, gp, epsp_dev, pressure, tStep);
+        pressure = Nh.dotProduct(a_pressure);
         BTs.beTProductOf(B, devStress);
 
-        momentum += ( BTs - dNv * pressure ) * dA;
-        conservation -= Nh * ( w * dA );
+        momentum.add(dA, BTs);
+        momentum.add(-pressure*dA, dNv);
+        conservation.add((-tmp_vol+d_vol)*dA, Nh);
     }
 
     FloatArray temp(15);
@@ -242,6 +248,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     }
 }
 
+
 void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
@@ -261,7 +268,7 @@ void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeS
             dA = detJ * gp->giveWeight();
 
             this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-            for ( int j = 0; j < 3; j++ ) {
+            for ( int j = 0; j < 6; j++ ) {
                 temparray(2 * j)     += N(j) * rho * gVector(0) * dA;
                 temparray(2 * j + 1) += N(j) * rho * gVector(1) * dA;
             }
@@ -308,7 +315,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             }
 
             // Reshape the vector
-            for ( int j = 0; j < 3; j++ ) {
+            for ( int j = 0; j < 6; j++ ) {
                 f(2 * j)     += N(j) * t(0) * dS;
                 f(2 * j + 1) += N(j) * t(1) * dS;
             }
@@ -322,13 +329,15 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
 
 void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
+    // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatMatrix B(3, 12), BTCB(12, 12), G(12, 3), C, dN, GT, Ia, Ia2, Ib;
-    FloatArray *lcoords, dN_V(12), Nlin;
+    FloatMatrix B(3, 12), EdB, K(12,12), G, Dp, DvT, C, Ed, dN, GT;
+    FloatArray *lcoords, dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
+    double Cp;
 
-    BTCB.zero();
+    K.zero();
     G.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
@@ -342,30 +351,41 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
         this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this), 0.0);
         for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
-            dN_V(k)   = B(0, k)   = B(2, k + 1) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(2, k)   = dN(j, 1);
+            dN_V(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
+            dN_V(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
         }
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(C, TangentStiffness, gp, tStep);
-        // Build B^T*C*B in elemental stiffness matrix
-        Ia.beTProductOf(B, C);
-        Ia2.beProductOf(Ia, B);
-        Ia2.times(dA);
-        BTCB.add(Ia2);
+        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
+        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
+        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
+        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
-        // Build G in elemental stiffness matrix
-        Ib.beDyadicProductOf(dN_V, Nlin);
-        Ib.times(-dA);
-        G.add(Ib);
+        EdB.beProductOf(Ed,B);
+        K.plusProductSymmUpper(B, EdB, dA);
+        G.plusDyadUnsym(dN_V, Nlin, -dA);
+        C.plusDyadSymmUpper(Nlin, Nlin, Cp*dA);
+
+        tmpA.beTProductOf(B, Ep);
+        Dp.plusDyadUnsym(tmpA, Nlin, dA);
+
+        tmpB.beTProductOf(B, Cd);
+        DvT.plusDyadUnsym(Nlin, tmpB, dA);
     }
+
+    K.symmetrized();
+    C.symmetrized();
 
     GT.beTranspositionOf(G);
 
     FloatMatrix temp(15, 15);
-    temp.addSubMatrix(BTCB, 1, 1);
+    temp.zero();
+    temp.addSubMatrix(K, 1, 1);
     temp.addSubMatrix(GT, 13, 1);
+    temp.addSubMatrix(DvT, 13, 1);
     temp.addSubMatrix(G, 1, 13);
+    temp.addSubMatrix(Dp, 1, 13);
+    temp.addSubMatrix(C, 13, 13);
 
     answer.resize(15, 15);
     answer.zero();
