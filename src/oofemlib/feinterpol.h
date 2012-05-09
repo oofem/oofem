@@ -131,27 +131,24 @@ public:
      * @param answer Contains resulting array of evaluated interpolation functions.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of second derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
-    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) {
+    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
         OOFEM_ERROR("FEInterpolation::evald2Ndx2: not implemented");
     }
     /**
@@ -159,26 +156,23 @@ public:
      * @param answer Contains resulting global coordinates.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates local coordinates from given global ones.
      * @param answer Contains evaluated local coordinates.
      * @param gcoords Array containing global coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      * @return Nonzero is returned if point is within the element geometry, zero otherwise.
      */
-    virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+    virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the determinant of the transformation.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      * @return Determinant of the transformation.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
 
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

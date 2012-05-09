@@ -216,7 +216,7 @@ Quad10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
     int i;
     FloatArray n;
 
-    this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2, 8);
     answer.zero();
 
@@ -233,7 +233,7 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
     int i;
     FloatMatrix n, dn;
     FloatArray u, un;
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), atTime->giveIntrinsicTime() );
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
@@ -252,7 +252,7 @@ Quad10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 2);
-    this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 8);
     answer.zero();
@@ -270,7 +270,7 @@ Quad10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 2);
-    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 8);
     answer.zero();
@@ -285,7 +285,7 @@ void
 Quad10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(1);
-    pressureInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    pressureInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 1);
     answer.zero();
@@ -306,7 +306,7 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     for ( i = 1; i <= 4; i++ ) {
         dnx.at(i) = dn.at(i, 1);
         dny.at(i) = dn.at(i, 2);
@@ -326,7 +326,7 @@ void
 Quad10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(1, 2);
-    pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.beTranspositionOf(dn);
 }
@@ -823,7 +823,7 @@ Quad10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
 
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
 
     weight      = aGaussPoint->giveWeight();

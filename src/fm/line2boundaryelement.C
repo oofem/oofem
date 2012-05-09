@@ -62,18 +62,18 @@ IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
 
 void Line2BoundaryElement :: computeN(FloatArray &answer, const FloatArray &lcoords) const
 {
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 }
 
 int Line2BoundaryElement :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords)
 {
-    this->fei.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->fei.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this));
     return true;
 }
 
 int Line2BoundaryElement :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->fei.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->fei.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return true;
 }
 

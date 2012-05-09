@@ -109,7 +109,7 @@ LTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 {
     int i;
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dn, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(6, 12);
     answer.zero();
@@ -141,7 +141,7 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     int i;
     FloatArray n(4);
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 12);
     answer.zero();
@@ -162,7 +162,7 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
     int j, k, l;
     FloatMatrix dnx;
 
-    interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(12, 12);
     answer.zero();
@@ -207,7 +207,7 @@ double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0) );
+                                                                       FEIElementGeometryWrapper(this)) );
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight;
     return volume;
@@ -288,7 +288,7 @@ LTRSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToC
 int
 LTRSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return 1;
 }
 
@@ -312,7 +312,7 @@ LTRSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     ////if (type == StressVector) answer.resize(6,48) ;
     if ( this->giveIPValueSize(type, aGaussPoint) ) {
@@ -730,7 +730,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
 int
 LTRSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
 }
 
 
@@ -772,7 +772,7 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 double
 LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
     FloatArray lc(4);
-    double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this), 0.0);
+    double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this));
     return __OOFEM_POW(volume * 6.0, 1. / 3.);
 }
 
@@ -863,7 +863,7 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 6);
     answer.zero();
@@ -937,7 +937,7 @@ double
 LTRSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0);
+                                                                       FEIElementGeometryWrapper(this));
     return result * aGaussPoint->giveWeight();
 }
 
@@ -945,7 +945,7 @@ LTRSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 LTRSpace ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -967,7 +967,7 @@ void
 LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
 {
     FloatArray n(3);
-    interpolation.surfaceEvalN(n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.surfaceEvalN(n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 9);
     answer.zero();
@@ -1057,7 +1057,7 @@ double
 LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
     weight      = gp->giveWeight();
     volume      = 2.0 * determinant * weight;
@@ -1072,7 +1072,7 @@ LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 

@@ -39,7 +39,7 @@
 #include "mathfem.h"
 
 namespace oofem {
-void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);
     answer.resize(2);
@@ -47,16 +47,16 @@ void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const 
     answer.at(2) = ( 1. + xi ) * 0.5;
 }
 
-void FEI2dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Not meaningful to return anything.
     answer.resize(0,0);
 }
 
-void FEI2dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;
-    this->evalN(n, lcoords, cellgeo, time);
+    this->evalN(n, lcoords, cellgeo);
     answer.resize(max(xind,yind));
     answer.zero();
     answer.at(xind) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
@@ -65,7 +65,7 @@ void FEI2dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords,
                         n(1) * cellgeo.giveVertexCoordinates(2)->at(yind) );
 }
 
-int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
+int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
     double xi;
     double x2_x1, y2_y1;
@@ -84,7 +84,7 @@ int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, 
 }
 
 void FEI2dLineLin :: edgeEvaldNds(FloatArray &answer, int iedge,
-    const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);
     answer.resize(2);
@@ -115,7 +115,7 @@ void FEI2dLineLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatAr
     normal.at(2) = -dx/L;
 }
 
-double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x2_x1, y2_y1;
     x2_x1 = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);

@@ -41,7 +41,7 @@
 
 namespace oofem {
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
-{ 
+{
 #ifdef __OOFEG
 	consistencyChecked = false;
 #endif
@@ -102,7 +102,7 @@ int HangingNode :: checkConsistency()
         }
     }
 
-    fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e), 0.0);
+    fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e));
 
     // Initialize slave dofs (inside check of consistency of receiver and master dof)
     const IntArray &masterNodes = e->giveDofManArray();
@@ -134,7 +134,7 @@ int HangingNode :: checkConsistency()
             // FEI classes are based on that the first nodes correspond to the simpler/linear interpolation.
             // If this assumption is changed in FEIElementGeometryWrapper + friends,
             // masterNode will also need to be modified for each dof accordingly.
-            fei->evalN(masterContribution, lcoords, FEIElementGeometryWrapper(e), 0.0);
+            fei->evalN(masterContribution, lcoords, FEIElementGeometryWrapper(e));
             sdof->initialize(masterContribution.giveSize(), masterNodes, NULL, masterContribution);
 #endif
         }

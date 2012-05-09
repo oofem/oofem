@@ -62,12 +62,12 @@ Line2SurfaceTension :: ~Line2SurfaceTension()
 
 void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
 {
-    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 }
 
 int Line2SurfaceTension :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords)
 {
-    this->fei.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->fei.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this));
     return true;
 }
 

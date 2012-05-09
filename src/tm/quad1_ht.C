@@ -82,7 +82,7 @@ Quad1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 // evaluated at aGaussPoint.
 {
     FloatArray n(4);
-    this->interpolation.evalN(n, *coords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, *coords, FEIElementGeometryWrapper(this));
 
     answer.resize(1, 4);
     answer.at(1, 1) = n.at(1);
@@ -115,7 +115,7 @@ Quad1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
 {
     int i;
     FloatMatrix dnx;
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 4);
     answer.zero();
@@ -193,7 +193,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0) );
+                                                                       FEIElementGeometryWrapper(this)) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness); // 't'
     volume      = determinant * weight * thickness;
@@ -219,7 +219,7 @@ Quad1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 2);
     answer.zero();
@@ -233,7 +233,7 @@ double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0);
+                                                                       FEIElementGeometryWrapper(this));
     double thick = this->giveCrossSection()->give(CS_Thickness); // 't'
     return result*thick *gp->giveWeight();
 }
@@ -268,7 +268,7 @@ Quad1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 void
 Quad1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 void
@@ -299,7 +299,7 @@ Quad1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTim
 int
 Quad1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return 1;
 }
 
@@ -388,7 +388,7 @@ Quad1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 int
 Quad1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
 }
 
 

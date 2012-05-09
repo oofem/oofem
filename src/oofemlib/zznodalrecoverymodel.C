@@ -344,7 +344,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolation
     if (interpol) {
 
         FloatArray n;
-        interpol->evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(elem), 0.0);
+        interpol->evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(elem));
 
         size = n.giveSize();
         answer.resize (1,size);

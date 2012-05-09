@@ -41,7 +41,7 @@
 
 namespace oofem {
 void
-FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /* Local Node Numbering
      *
@@ -76,7 +76,7 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 }
 
 void
-FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(8, 2);
     int i;
@@ -96,14 +96,14 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 }
 
 void
-FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {
     int i;
     FloatArray n(8);
     answer.resize(2);
     answer.zero();
 
-    this->evalN(n, lcoords, cellgeo, time);
+    this->evalN(n, lcoords, cellgeo);
 
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
@@ -121,7 +121,7 @@ double FEI2dQuadQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo)
 #define POINT_TOL 1.e-3
 
 int
-FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray res, delta, guess;
     FloatMatrix jac;
@@ -137,7 +137,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     // apply Newton-Raphson to solve the problem
     for (int nite = 0; nite < 10; nite++) {
         // compute the residual
-        this->local2global(guess, answer, cellgeo, time);
+        this->local2global(guess, answer, cellgeo);
         res.beDifferenceOf(gcoords, guess);
 
         // check for convergence
@@ -170,7 +170,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 
 
 double
-FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix(2, 2);
 
@@ -180,7 +180,7 @@ FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 
 
 void
-FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /*
      *   1-------3-------2
@@ -197,19 +197,19 @@ FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const 
 
 void
 FEI2dQuadQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2dQuadQuad :: edgeEvaldNds: not implemented");
 }
 
 void
 FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     FloatArray n;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(n, lcoords, cellgeo, time);
+    this->edgeEvalN(n, lcoords, cellgeo);
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
@@ -253,7 +253,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 double
-FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2dQuadQuad :: edgeGiveTransformationJacobian: not implemented");
     return 0.0;

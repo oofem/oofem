@@ -159,7 +159,7 @@ void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 int Tr21Stokes :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    interpolation_quad.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    interpolation_quad.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return true;
 }
 
@@ -181,9 +181,9 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0));
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
+        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dA = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
@@ -264,10 +264,10 @@ void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeS
             lcoords = gp->giveCoordinates();
 
             rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
+            detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this));
             dA = detJ * gp->giveWeight();
 
-            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
             for ( int j = 0; j < 6; j++ ) {
                 temparray(2 * j)     += N(j) * rho * gVector(0) * dA;
                 temparray(2 * j + 1) += N(j) * rho * gVector(1) * dA;
@@ -302,15 +302,15 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interpolation_quad.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-            double detJ = fabs(this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this), 0.0));
+            this->interpolation_quad.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            double detJ = fabs(this->interpolation_quad.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // Edge load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else   { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+                this->interpolation_quad.edgeLocal2global(gcoords, iEdge, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -345,11 +345,11 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
-        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0));
+        double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
         double dA = detJ * gp->giveWeight();
 
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
         for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
             dN_V(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
             dN_V(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
@@ -414,7 +414,7 @@ void Tr21Stokes :: updateYourself(TimeStep *tStep)
 
 int Tr21Stokes :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords)
 {
-    return this->interpolation_quad.global2local(lcoords,coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation_quad.global2local(lcoords,coords, FEIElementGeometryWrapper(this));
 }
 
 // Some extension Interfaces to follow:
@@ -443,8 +443,8 @@ void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
-    this->interpolation_quad.evalN(n, lcoords, FEIElementGeometryWrapper(this), 0.0);
-    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation_quad.evalN(n, lcoords, FEIElementGeometryWrapper(this));
+    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this));
     answer.resize(3);
     answer.zero();
     for (int i = 1; i <= n.giveSize(); i++) {
@@ -508,7 +508,7 @@ double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Fl
     FloatArray center;
     FloatArray lcoords;
     lcoords.setValues(3, 0.333333, 0.333333, 0.333333);
-    interpolation_quad.local2global(center, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    interpolation_quad.local2global(center, lcoords, FEIElementGeometryWrapper(this));
     return center.distance(coords);
 }
 

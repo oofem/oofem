@@ -130,7 +130,8 @@ Patch :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 FEI2dTrLin TrianglePatch :: interpolation(1, 2);
 
-void TrianglePatch :: convertGPIntoParental(GaussPoint *gp) {
+void TrianglePatch :: convertGPIntoParental(GaussPoint *gp)
+{
     FloatArray global;
     const FloatArray **coords = new const FloatArray * [ this->giveNrVertices() ];
     // this we should put into the function before
@@ -139,7 +140,7 @@ void TrianglePatch :: convertGPIntoParental(GaussPoint *gp) {
     }
 
     this->interpolation.local2global(global, * gp->giveCoordinates(),
-                                     FEIVertexListGeometryWrapper(this->giveNrVertices(), coords), 1.0);
+                                     FEIVertexListGeometryWrapper(this->giveNrVertices(), coords));
     for ( int i = 1; i <= this->giveNrVertices(); i++ ) {
         delete coords [ i - 1 ];
     }

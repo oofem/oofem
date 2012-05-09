@@ -199,7 +199,7 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
     int i;
     FloatArray n;
 
-    this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2, 12);
     answer.zero();
 
@@ -215,7 +215,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     int i;
     FloatMatrix n, dn;
     FloatArray u, un;
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), atTime->giveTargetTime() );
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
@@ -234,7 +234,7 @@ TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(6, 2);
-    this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 12);
     answer.zero();
@@ -252,7 +252,7 @@ TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(6, 2);
-    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 12);
     answer.zero();
@@ -267,7 +267,7 @@ void
 TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(3);
-    this->pressureInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->pressureInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 3);
     answer.zero();
@@ -285,7 +285,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
     FloatMatrix dn, um(2, 6);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     for ( int i = 1; i <= 6; i++ ) {
         um.at(1, i) = u.at(2 * i - 1);
         um.at(2, i) = u.at(2 * i);
@@ -298,7 +298,7 @@ void
 TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(3, 2);
-    pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    pressureInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.beTranspositionOf(dn);
 }
@@ -316,7 +316,7 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
     answer.zero();
 
 
-    this->velocityInterpolation.evald2Ndx2(d2n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->velocityInterpolation.evald2Ndx2(d2n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
 
@@ -533,7 +533,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+        velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
@@ -561,7 +561,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
 
-        velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+        velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
         answer.add(dn);
     }
@@ -585,7 +585,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
         double determinant, weight, volume;
         FloatArray dxi(6), deta(6), lcoords;
 
-        determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+        determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
         weight      = gp->giveWeight();
         volume      = determinant * weight;
@@ -628,7 +628,7 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        velocityInterpolation.evalN(n,  * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+        velocityInterpolation.evalN(n,  * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
         vol += dV;
         _fi = n.dotProduct(fi);
         S +=  _fi / ( _fi * _fi + eps * eps ) * dV;
@@ -811,11 +811,11 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             _X1.at(2) = y1;
 
-            this->velocityInterpolation.global2local(loc_Mid, _Mid, FEIElementGeometryWrapper(this), 0.0);
-            this->velocityInterpolation.global2local(loc_X1, _X1, FEIElementGeometryWrapper(this), 0.0);
+            this->velocityInterpolation.global2local(loc_Mid, _Mid, FEIElementGeometryWrapper(this));
+            this->velocityInterpolation.global2local(loc_X1, _X1, FEIElementGeometryWrapper(this));
 
-            this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this), 0.0);
-            this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this), 0.0);
+            this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this));
+            this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this));
 
             fi_Mid = N_Mid.dotProduct(fi);
             fi_X1 = N_X1.dotProduct(fi);
@@ -952,11 +952,11 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             _X1.at(1) = x1;
             _X1.at(2) = y1;
 
-            this->velocityInterpolation.global2local(loc_Mid, _Mid, FEIElementGeometryWrapper(this), 0.0);
-            this->velocityInterpolation.global2local(loc_X1, _X1, FEIElementGeometryWrapper(this), 0.0);
+            this->velocityInterpolation.global2local(loc_Mid, _Mid, FEIElementGeometryWrapper(this));
+            this->velocityInterpolation.global2local(loc_X1, _X1, FEIElementGeometryWrapper(this));
 
-            this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this), 0.0);
-            this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this), 0.0);
+            this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this));
+            this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this));
 
             fi_Mid = N_Mid.dotProduct(fi);
             fi_X1 = N_X1.dotProduct(fi);
@@ -1135,11 +1135,11 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             _X1.at(1) = x1;
             _X1.at(2) = y1;
 
-            this->velocityInterpolation.global2local(loc_Mid, _Mid, FEIElementGeometryWrapper(this), 0.0);
-            this->velocityInterpolation.global2local(loc_X1, _X1, FEIElementGeometryWrapper(this), 0.0);
+            this->velocityInterpolation.global2local(loc_Mid, _Mid, FEIElementGeometryWrapper(this));
+            this->velocityInterpolation.global2local(loc_X1, _X1, FEIElementGeometryWrapper(this));
 
-            this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this), 0.0);
-            this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this), 0.0);
+            this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this));
+            this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this));
 
             fi_Mid = N_Mid.dotProduct(fi);
             fi_X1 = N_X1.dotProduct(fi);
@@ -1238,7 +1238,7 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
     helplcoords.zero();
     helplcoords.at(1) = r1;
 
-    this->velocityInterpolation.edgeLocal2global(intcoords, 3, helplcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->velocityInterpolation.edgeLocal2global(intcoords, 3, helplcoords, FEIElementGeometryWrapper(this));
 
     //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveCoordinates(),atTime->giveTime());
 }
@@ -1664,7 +1664,7 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
 
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
 
     weight      = aGaussPoint->giveWeight();

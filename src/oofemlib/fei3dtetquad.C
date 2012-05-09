@@ -41,7 +41,7 @@
 
 namespace oofem {
 void
-FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x1 = lcoords(0);
     double x2 = lcoords(1);
@@ -63,7 +63,7 @@ FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
 }
 
 void
-FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix;
     FloatMatrix dNdxi;
@@ -128,7 +128,7 @@ FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
 
 
 void
-FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray N;
     this->evalN(N,lcoords, cellgeo, time);
@@ -141,7 +141,7 @@ FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 #define POINT_TOL 1e-6
 
 int
-FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac;
@@ -204,7 +204,7 @@ FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 
 
 double
-FEI3dTetQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix;
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
@@ -231,7 +231,7 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 
 
 void
-FEI3dTetQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords.at(1);
     answer.resize(3);
@@ -242,7 +242,7 @@ FEI3dTetQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const F
 
 void // TODO
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
@@ -251,7 +251,7 @@ FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 
 void
 FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     FloatArray N;
@@ -266,7 +266,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
 
 double // TODO
-FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
@@ -317,7 +317,7 @@ FEI3dTetQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
 }
 
 void
-FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -335,7 +335,7 @@ FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, cons
 
 void
 FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray nodes;
     FloatArray N;
@@ -349,7 +349,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 }
 
 void
-FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
     double a, b, c;
@@ -418,7 +418,7 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
 
 double
 FEI3dTetQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                const FEICellGeometry &cellgeo, double time)
+                                                const FEICellGeometry &cellgeo)
 {
     FloatArray normal;
     return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);

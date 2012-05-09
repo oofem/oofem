@@ -1676,8 +1676,8 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
         // remap ip coords into area coords of receiver
         for ( ip = 0; ip < integrationRulesArray [ i ]->getNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(ip);
-            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]), 0.0);
-            triaApprox.global2local(lc, gc, FEIElementGeometryWrapper(this), 0.0);
+            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]));
+            triaApprox.global2local(lc, gc, FEIElementGeometryWrapper(this));
             // modify original ip coords to target ones
             gp->setLocalCoordinates( * gp->giveCoordinates() );
             gp->setCoordinates(lc);
@@ -1743,10 +1743,10 @@ TR1_2D_SUPG2_AXI :: computeVolumeAround(GaussPoint *gp, integrationDomain id, co
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r * weight * fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly), 0.0) );
+        return _r * weight * fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly)) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly), 0.0) );
+        double det = fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly)) );
         return _r * det * weight;
     }
 }

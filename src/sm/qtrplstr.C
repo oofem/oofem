@@ -168,7 +168,7 @@ QTrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
     answer.resize(2, 12);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     for ( i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -220,7 +220,7 @@ QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 12);
     answer.zero();
@@ -241,7 +241,7 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0) );
+                                                                       FEIElementGeometryWrapper(this)) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
@@ -253,7 +253,7 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 int
 QTrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return 1;
 }
 
@@ -261,7 +261,7 @@ QTrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
 int
 QTrPlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
 }
 
 void QTrPlaneStress2d :: computeGaussPoints()
@@ -683,7 +683,7 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interpolation.evalN(nn, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(nn, lcoords, FEIElementGeometryWrapper(this));
 
     for ( i = 1; i <= 6; i++ ) {
         n.at(1, 2 * i - 1) = nn.at(i);

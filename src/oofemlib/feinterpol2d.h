@@ -64,9 +64,8 @@ public:
      * @param answer Contains resulting array of evaluated interpolation functions.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the normal on the given edge.
      * @param answer Contains the evaluated normal.
@@ -83,11 +82,10 @@ public:
      * @param iedge Determines the edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords,
-                              const FEICellGeometry &cellgeo, double time) = 0;
+                              const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates edge global coordinates from given local ones.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).
@@ -95,20 +93,18 @@ public:
      * @param iedge Determines edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      * @param iedge Determines edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
-     * @param time Time.
      * @return Determinant of the mapping on the given edge.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo, double time=0.0) = 0;
+                                                  const FEICellGeometry &cellgeo) = 0;
     //@}
 };
 } // end namespace oofem

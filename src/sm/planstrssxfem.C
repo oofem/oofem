@@ -66,8 +66,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     // evaluation of N,dNdx
     FloatMatrix dNdx;
     FloatArray N;
-    interpolation.evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    interpolation.evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     FloatMatrix *simple = new FloatMatrix(3, 8);
     simple->zero();

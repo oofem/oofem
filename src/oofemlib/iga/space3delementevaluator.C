@@ -54,7 +54,7 @@ void Space3dStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, 
     FloatArray N;
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
 
-    interp->evalN(N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ), 0.0);
+    interp->evalN(N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ));
 
     if ( ( nDofMan = interp->giveNumberOfKnotSpanBasisFunctions( * ( gp->giveIntegrationRule()->giveKnotSpan() ) ) ) == 0 ) { // HUHU
         nDofMan = gp->giveElement()->giveNumberOfDofManagers();
@@ -79,7 +79,7 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
     // this uses FEIInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
     interp->evaldNdx(d, * gp->giveCoordinates(),
-                     FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ), 0.0);
+                     FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ));
 
     if ( ( nDofMan = interp->giveNumberOfKnotSpanBasisFunctions( * ( gp->giveIntegrationRule()->giveKnotSpan() ) ) ) == 0 ) { // HUHU
         nDofMan = gp->giveElement()->giveNumberOfDofManagers();
@@ -110,8 +110,7 @@ double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
     determinant = fabs( this->giveElement()->giveInterpolation()
                        ->giveTransformationJacobian(* gp->giveCoordinates(),
                                                     FEIIGAElementGeometryWrapper( this->giveElement(),
-                                                                                 gp->giveIntegrationRule()->giveKnotSpan() ),
-                                                    0.0) );
+                                                                                 gp->giveIntegrationRule()->giveKnotSpan() )) );
     weight      = gp->giveWeight();
     volume      = determinant * weight;
 

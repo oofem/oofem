@@ -41,21 +41,21 @@
 
 namespace oofem {
 void
-FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1);
     answer.at(1) = 1;
 }
 
 void
-FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1, 2);
     answer.zero();
 }
 
 void
-FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
     answer.resize(2);
@@ -75,7 +75,7 @@ FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 #define POINT_TOL 1.e-3
 
 int
-FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
     double area, x1, x2, x3, y1, y2, y3;
     answer.resize(3);
@@ -112,7 +112,7 @@ FEI2dTrConst :: global2local(FloatArray &answer, const FloatArray &coords, const
 
 
 double
-FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double area, x1, x2, x3, y1, y2, y3;
 
@@ -130,7 +130,7 @@ FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 
 
 void
-FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1);
     answer.at(1) = 1.0;
@@ -138,7 +138,7 @@ FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const F
 
 void
 FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
-                           const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                           const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(2);
     answer.zero();
@@ -146,7 +146,7 @@ FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
 
 void
 FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     FloatArray n(2);
@@ -162,7 +162,7 @@ FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
 }
 
 double
-FEI2dTrConst :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrConst :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);

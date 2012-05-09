@@ -40,7 +40,7 @@
 
 namespace oofem {
 void
-FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
     answer.resize(3);
@@ -52,9 +52,9 @@ FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellG
 }
 
 void
-FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double J = this->giveTransformationJacobian(lcoords,cellgeo,time);
+    double J = this->giveTransformationJacobian(lcoords,cellgeo);
     double ksi = lcoords.at(1);
     answer.resize(1, 3);
     answer.zero();
@@ -65,18 +65,18 @@ FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIC
 }
 
 void
-FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n(3);
     answer.resize(1);
 
-    this->evalN(n, lcoords, cellgeo, time);
+    this->evalN(n, lcoords, cellgeo);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
             n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
 }
 
 int
-FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo, double time)
+FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
     double  x1, x2, x3;
     answer.resize(1);
@@ -125,7 +125,7 @@ FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FE
 }
 
 double
-FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
 
     double x1, x2, x3, J, ksi;

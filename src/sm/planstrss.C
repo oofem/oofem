@@ -90,7 +90,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 8);
     answer.zero();
@@ -103,7 +103,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 #ifdef  PlaneStress2d_reducedShearIntegration
     coord.resize(2);
     coord.zero();
-    this->interpolation.evaldNdx(dnx, coord, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx(dnx, coord, FEIElementGeometryWrapper(this));
 #endif
 
     for ( i = 1; i <= 4; i++ ) {
@@ -125,7 +125,7 @@ PlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint
 #endif
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     b1 = dnx.at(1, 1);
     b2 = dnx.at(2, 1);
@@ -266,7 +266,7 @@ PlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(2, 8);
     answer.zero();
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -294,7 +294,7 @@ PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoi
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 4);
     answer.zero();
@@ -344,14 +344,14 @@ double
 PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0);
+                                                                       FEIElementGeometryWrapper(this));
     return result * aGaussPoint->giveWeight();
 }
 
 void
 PlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -398,7 +398,7 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0) );
+                                                                       FEIElementGeometryWrapper(this)) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -511,7 +511,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
         // gradient of function phi at the current GP
         FloatMatrix dnx;
-        this->interpolation.evaldNdx(dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+        this->interpolation.evaldNdx(dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
         FloatArray gradPhi(2);
         gradPhi.zero();
         for ( i = 1; i <= 4; i++ ) {
@@ -594,7 +594,7 @@ PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 int
 PlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return 1;
 }
 
@@ -1322,7 +1322,7 @@ PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 int
 PlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
 }
 
 int
@@ -1392,7 +1392,7 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interpolation.evalN(ni, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(ni, lcoords, FEIElementGeometryWrapper(this));
 
     n.resize(2, 8);
     n.zero();

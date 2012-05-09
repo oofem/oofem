@@ -66,7 +66,7 @@ public:
     // definition & identification
     virtual const char* giveClassName () const { return "QSpaceGrad"; }
     virtual classType giveClassID () const { return QSpaceGradClass; }
-    virtual int computeNumberOfDofs (EquationID ut) {return 68;}
+    virtual int computeNumberOfDofs (EquationID ut) { return 68; }
 
 protected:
     virtual void computeGaussPoints ();

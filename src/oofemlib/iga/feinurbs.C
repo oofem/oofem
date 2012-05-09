@@ -45,7 +45,7 @@ namespace oofem {
 NURBSInterpolation :: ~NURBSInterpolation() { }
 
 
-void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     IntArray span(nsd);
     double sum = 0.0, val;
@@ -123,7 +123,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
 
 
 
-void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
@@ -565,7 +565,7 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 }
 
 
-void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
     /* Based on SurfacePoint A4.3 implementation*/
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
@@ -671,7 +671,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
 }
 
 
-double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
     //
     // Based on Algorithm A4.4 (p. 137) for d=1
     //

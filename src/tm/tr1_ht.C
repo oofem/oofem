@@ -192,7 +192,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     weight = gp->giveWeight();
     volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness);
 
@@ -235,7 +235,7 @@ double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double determinant, thick;
-    determinant = fabs( this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     thick = this->giveCrossSection()->give(CS_Thickness);
     return determinant *thick *gp->giveWeight();
 }
@@ -267,7 +267,7 @@ Tr1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 void
 Tr1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interp.edgeLocal2global(answer, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 void
@@ -279,7 +279,7 @@ Tr1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime,
 int
 Tr1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interp.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interp.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
     return 1;
 }
 
@@ -366,7 +366,7 @@ Tr1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
 int
 Tr1_ht :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords)
 {
-    return this->interp.global2local(lcoords, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interp.global2local(lcoords, coords, FEIElementGeometryWrapper(this));
 }
 
 } // end namespace oofem

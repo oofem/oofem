@@ -89,23 +89,15 @@ QSpaceGrad :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) c
 // describing physical meaning of particular DOFs.
 {
     if ( inode<=nSecNodes ) {
-        answer.resize (4);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
-        answer.at(4) = G_0;
-        }
-    else {
-        answer.resize (3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
+        answer.setValues(4, D_u, D_v, D_w, G_0);
+    } else {
+        answer.setValues(3, D_u, D_v, D_w);
     }
 }
 
 void
 QSpaceGrad :: computeGaussPoints ()
-  // Sets up the array containing the four Gauss points of the receiver.
+// Sets up the array containing the four Gauss points of the receiver.
 {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
@@ -116,16 +108,16 @@ QSpaceGrad :: computeGaussPoints ()
 
 void
 QSpaceGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answer)
-  // Returns the displacement interpolation matrix {N} of the receiver, eva-
-  // luated at aGaussPoint.
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at aGaussPoint.
 {
     FloatArray n(8);
-    this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
     answer.resize(1,8);
     answer.zero();
 
     for ( int i = 1; i <= 8; i++ ) {
-            answer.at(1, i) = n.at(i);
+        answer.at(1, i) = n.at(i);
     }
 }
 
@@ -134,13 +126,13 @@ QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix& answer
 {
     FloatMatrix dnx;
     IntArray a(8);
-    for(int i =1; i<9;i++){
+    for( int i = 1; i < 9; i++ ) {
         a.at(i) = dofManArray.at(i);
     }
     answer.resize(3,8);
     answer.zero();
 
-    this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
     for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, i) = dnx.at(i,1);
         answer.at(2, i) = dnx.at(i,2);

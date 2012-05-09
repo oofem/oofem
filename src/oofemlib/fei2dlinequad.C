@@ -40,7 +40,7 @@
 #include "mathfem.h"
 
 namespace oofem {
-void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);
     answer.resize(3);
@@ -49,16 +49,16 @@ void FEI2dLineQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const
     answer(2) = 1.0-xi*xi;
 }
 
-void FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Not meaningful to return anything.
     answer.resize(0,0);
 }
 
-void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;
-    this->evalN(n, lcoords, cellgeo, time);
+    this->evalN(n, lcoords, cellgeo);
     answer.resize(2);
     answer.at(1) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
                      n(1) * cellgeo.giveVertexCoordinates(2)->at(xind) +
@@ -68,7 +68,7 @@ void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords
                      n(2) * cellgeo.giveVertexCoordinates(3)->at(yind) );
 }
 
-int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
+int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
     double x1_x2, y1_y2, px_x3, py_y3, x3_x2_x1, y3_y2_y1;
     double b0, b1, b2, b3;
@@ -109,7 +109,7 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
 
     for (int i = 0; i < points; i++) {
         answer(0) = p[i];
-        this->local2global(f, answer, cellgeo, 0.0);
+        this->local2global(f, answer, cellgeo);
         distance2 = f.distance_square(gcoords);
         if ( i == 0 || distance2 < min_distance2 ) {
             min_distance2 = distance2;
@@ -126,13 +126,13 @@ void FEI2dLineQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     edgeNodes.resize(3); edgeNodes.at(1) = 1; edgeNodes.at(2) = 2; edgeNodes.at(2) = 3;
 }
 
-void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    this->evalN(answer, lcoords, cellgeo, time);
+    this->evalN(answer, lcoords, cellgeo);
 }
 
 void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
-    const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);
     answer.resize(3);
@@ -174,18 +174,18 @@ void FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatA
 }
 
 void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-    const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    this->local2global(answer, lcoords, cellgeo, time);
+    this->local2global(answer, lcoords, cellgeo);
 }
 
 double FEI2dLineQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-    const FEICellGeometry &cellgeo, double time)
+    const FEICellGeometry &cellgeo)
 {
-    return this->giveTransformationJacobian(lcoords, cellgeo, time);
+    return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
-double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);
     double a1 = -0.5 + xi;

@@ -189,7 +189,7 @@ Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatArray n(4);
-    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 12);
     answer.zero();
@@ -207,7 +207,7 @@ Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     int i;
     FloatMatrix n, dn(4, 3);
     FloatArray u, un;
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
@@ -238,7 +238,7 @@ Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     for ( int i = 1; i <= 4; i++ ) {
         um.at(1, i) = u.at(3 * i - 2);
         um.at(2, i) = u.at(3 * i - 1);
@@ -255,7 +255,7 @@ Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(6, 12);
     answer.zero();
@@ -281,7 +281,7 @@ Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 12);
     answer.zero();
@@ -297,7 +297,7 @@ void
 Tet1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(4);
-    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 4);
     answer.zero();
@@ -313,7 +313,7 @@ void
 Tet1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.beTranspositionOf(dn);
 }
@@ -483,7 +483,7 @@ Tet1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this), 0.0) );
+                                                                       FEIElementGeometryWrapper(this)) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -512,7 +512,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-        interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+        interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
@@ -530,7 +530,7 @@ Tet1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-    interpolation.evaldNdx(answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.evaldNdx(answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
