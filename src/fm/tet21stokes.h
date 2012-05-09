@@ -84,7 +84,7 @@ protected:
         }
         conservation_ordering.setValues(4, 4, 8, 12, 16);
 
-        surf_ordering [ 0 ].setValues(18, 1,  2,  3, // node 1
+        surf_ordering [ 0 ].setValues(18, 1,  2,  3,  // node 1
                                           9, 10, 11,  // node 3
                                           5,  6,  7,  // node 2
                                          23, 24, 25,  // node 7

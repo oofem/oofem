@@ -474,10 +474,7 @@ double Tr21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, Flo
     bool ok = this->computeLocalCoordinates(lcoords, gcoords);
     if (!ok) {
         if (lcoords.giveSize() == 0) { // To far away to even give a meaningful answer, just take the center.
-            lcoords.resize(3);
-            lcoords(0) = 0.3333;
-            lcoords(1) = 0.3333;
-            lcoords(2) = 0.3333;
+            lcoords.setValues(3, 0.333333, 0.333333, 0.333333);
         } else {
             // This is not very accurate, only for points pretty close to the surface.
             // I should be using normals to project it to the surface, but this is OK for points very close to the surface.2
@@ -494,9 +491,7 @@ double Tr21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, Flo
                 x1 = 0.5*(1 + x1 - x2);
                 x2 = 1.0 - x1;
             }
-            lcoords(0) = x1;
-            lcoords(1) = x2;
-            lcoords(2) = 1 - x1 - x2;
+            lcoords.setValues(3, x1, x2, 1.0 - x1 - x2);
         }
     }
     this->computeGlobalCoordinates(closest, lcoords);
@@ -511,10 +506,8 @@ void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &an
 double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords(3);
-    lcoords(0) = 0.33333;
-    lcoords(1) = 0.33333;
-    lcoords(2) = 0.33333;
+    FloatArray lcoords;
+    lcoords.setValues(3, 0.333333, 0.333333, 0.333333);
     interpolation_quad.local2global(center, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return center.distance(coords);
 }

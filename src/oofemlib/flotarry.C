@@ -48,6 +48,7 @@
 #ifndef __MAKEDEPEND
  #include <math.h>
  #include <string.h>
+ #include <cstdarg>
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -108,6 +109,19 @@ FloatArray :: operator = ( const FloatArray & src )
     }
 
     return * this;
+}
+
+
+void
+FloatArray :: setValues(int n, ...)
+{
+    va_list vl;
+    va_start(vl,n);
+    this->resize(n);
+    for (int i = 0; i < n; i++ ) {
+        this->values [ i ] = va_arg(vl, double);
+    }
+    va_end(vl);
 }
 
 

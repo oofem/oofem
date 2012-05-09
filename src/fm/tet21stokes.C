@@ -108,36 +108,20 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
     // in six nodes and pressure in three nodes the answer depends on which node is requested.
 
     if ( inode <= 4 ) {
-        if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-            answer.resize(3);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
-            answer.at(3) = V_w;
+        if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance ) {
+            answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
-            answer.resize(1);
-            answer.at(1) = P_f;
+            answer.setValues(1, P_f);
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.resize(4);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
-            answer.at(3) = V_w;
-            answer.at(4) = P_f;
+            answer.resize(4, V_u, V_v, V_w, P_f);
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
     } else if ( inode <= 10 ) {
-        if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-            answer.resize(3);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
-            answer.at(3) = V_w;
+        if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
+            answer.setValues(3, V_u, V_v, V_w);
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.resize(3);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
-            answer.at(3) = V_w;
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
@@ -462,11 +446,7 @@ double Tet21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, Fl
     bool ok = this->computeLocalCoordinates(lcoords, gcoords);
     if (!ok) {
         // To far away to even give a meaningful answer, just take the center.
-        lcoords.resize(4);
-        lcoords(0) = 0.3333;
-        lcoords(1) = 0.3333;
-        lcoords(2) = 0.3333;
-        lcoords(3) = 0.3333;
+        lcoords.setValues(4, 0.3333333, 0.3333333, 0.3333333, 0.3333333);
     }
     this->computeGlobalCoordinates(closest, lcoords);
     return closest.distance(gcoords);
@@ -474,21 +454,13 @@ double Tet21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, Fl
 
 void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer.resize(4);
-    answer(0) = V_u;
-    answer(1) = V_v;
-    answer(2) = V_w;
-    answer(3) = P_f;
+    answer.setValues(4, V_u, V_v, V_w, P_f);
 }
 
 double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords(3);
-    lcoords(0) = 0.33333;
-    lcoords(1) = 0.33333;
-    lcoords(2) = 0.33333;
-    lcoords(3) = 0.33333;
+    FloatArray lcoords(4, 0.3333333, 0.3333333, 0.3333333, 0.3333333);
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
 }

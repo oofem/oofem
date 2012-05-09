@@ -123,6 +123,9 @@ public:
     /// Assignment operator
     FloatArray &operator=(const FloatArray &);   // assignment: cleanup and copy
 
+    /// Sets values in array. Convenient for writing small specific vectors.
+    void setValues(int n, ...);
+
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 1-based indexing access.
