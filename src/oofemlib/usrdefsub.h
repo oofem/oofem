@@ -106,6 +106,14 @@ DofManager *CreateUsrDefDofManagerOfType(const char *name, int num, Domain *d);
  */
 CrossSection *CreateUsrDefCrossSectionOfType(const char *name, int num, Domain *d);
 /**
+ * Creates new instance of user defined cross section model corresponding to given type.
+ * @param type classType id  determining the type of new instance
+ * @param num  Component number
+ * @param d    Domain assigned to new object
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+CrossSection *CreateUsrDefCrossSectionOfType(classType type, int num, Domain *d);
+/**
  * Creates new instance of user defined engineering model corresponding to given keyword.
  * @param name Keyword string determining the type of new instance.
  * @param num  Component number.
@@ -130,6 +138,14 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *name, 
  */
 LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(const char *name, int num, Domain *d);
 /**
+ * Creates new instance of user defined load time function corresponding to given type.
+ * @param type classType id determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(classType type, int num, Domain *d);
+/**
  * Creates new instance of user defined material model corresponding to given keyword.
  * @param name Keyword string determining the type of new instance.
  * @param num  Component number.
@@ -137,6 +153,14 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(const char *name, int num, 
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
+/**
+ * Creates new instance of user defined material model corresponding to given type.
+ * @param type classType id determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+Material *CreateUsrDefMaterialOfType(classType type, int num, Domain *d);
 /**
  * Creates new instance of user defined engineering model corresponding to given keyword.
  * @param name Keyword string determining the type of new instance.

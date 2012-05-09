@@ -1306,14 +1306,53 @@ Domain :: giveErrorEstimator() {
 
 
 
+#define SAVE_COMPONENTS(size,type,giveMethod)				\
+  {									\
+    type* obj;								\
+    for ( i = 1; i <= size; i++ ) {					\
+      obj = giveMethod(i);						\
+      if ( ( mode & CM_Definition ) ) {					\
+        ct =  (int) obj->giveClassID();					\
+        if ( !stream->write(& ct, 1) ) {				\
+	  THROW_CIOERR(CIO_IOERR);					\
+        }								\
+      }									\
+      if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {	\
+	THROW_CIOERR(iores);						\
+      }									\
+    }									\
+  }
+
+#define RESTORE_COMPONENTS(size,type,resizeMethod,creator,giveMethod,setMethod)	\
+  {									\
+  type *obj;								\
+  if ( mode & CM_Definition ) {						\
+    resizeMethod(size);							\
+  }									\
+  for ( i = 1; i <= size; i++ ) {					\
+    if ( mode & CM_Definition ) {					\
+      if ( !stream->read(& ct, 1) ) {					\
+	THROW_CIOERR(CIO_IOERR);					\
+      }									\
+      compId = ( classType ) ct;					\
+      obj = creator(compId, 0, this);					\
+    } else {								\
+      obj = giveMethod(i);						\
+    }									\
+    if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {	\
+      THROW_CIOERR(iores);						\
+    }									\
+    if ( mode & CM_Definition ) {					\
+      setMethod(i, obj);						\
+    }									\
+  }									\
+}
+
 contextIOResultType
 Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     int i, serNum;
-    Element *element;
-    DofManager *dman;
-    GeneralBoundaryCondition *bc;
     ErrorEstimator *ee;
     int ct;
 
@@ -1338,64 +1377,24 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
       }
     }
 
-
-    // nodes & sides and corresponding dofs
-    int nnodes = this->giveNumberOfDofManagers();
-    for ( i = 1; i <= nnodes; i++ ) {
-      dman = this->giveDofManager(i);
-      if ( ( mode & CM_Definition ) ) {
-	// store component class id
-	ct =  (int) dman->giveClassID();
-	if ( !stream->write(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}
-      }
-      if ( ( iores = dman->saveContext(stream, mode) ) != CIO_OK ) {
-	THROW_CIOERR(iores);
-      }
-    }
-
+    // save dof managers
+    SAVE_COMPONENTS(this->giveNumberOfDofManagers(),DofManager,this->giveDofManager);
     // elements and corresponding integration points
-    int nelem = this->giveNumberOfElements();
-    for ( i = 1; i <= nelem; i++ ) {
-        element = this->giveElement(i);
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-            continue;
-        }
+    SAVE_COMPONENTS(this->giveNumberOfElements(),Element,this->giveElement);
+    // boundary conditions 
+    SAVE_COMPONENTS(this->giveNumberOfBoundaryConditions(),GeneralBoundaryCondition,this->giveBc);
 
-#endif
-	if ( ( mode & CM_Definition ) ) {
-	  // store component class id
-	  ct =  (int) element->giveClassID();
-	  if ( !stream->write(& ct, 1) ) {
-	    THROW_CIOERR(CIO_IOERR);
-	  }
-	}
-
-        if ( ( iores = element->saveContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-    }
-
-    // store boundary conditions data
-    int nbc = this->giveNumberOfBoundaryConditions();
-    for ( i = 1; i <= nbc; i++ ) {
-        bc = this->giveBc(i);
-	if ( ( mode & CM_Definition ) ) {
-	  // store component class id
-	  ct =  (int) element->giveClassID();
-	  if ( !stream->write(& ct, 1) ) {
-	    THROW_CIOERR(CIO_IOERR);
-	  }
-	}
-        if ( ( iores = bc->saveContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-    }
+    if ( ( mode & CM_Definition ) ) {
+      // store material models
+      SAVE_COMPONENTS(this->giveNumberOfMaterialModels(),Material,this->giveMaterial);
+      // store cross sections
+      SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(),CrossSection,this->giveCrossSection);
+      // store initial conditions
+      //SAVE_COMPONENTS(this->giveNumberOfInitialConditions(),InitialCondition,this->giveIc);
+      // store load time functions
+      SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(),LoadTimeFunction,this->giveLoadTimeFunction);
+    } // end if ( ( mode & CM_Definition ) ) {
+    
 
     // store error estimator data
     ee = this->giveErrorEstimator();
@@ -1415,13 +1414,13 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
     int i, serNum;
     bool domainUpdated = false;
-    DofManager* dofman;
-    Element *element;
-    GeneralBoundaryCondition *bc;
     ErrorEstimator *ee;
     int ct;
     classType compId;
     long ncomp[7];
+
+    int nnodes, nelem, nmat, ncs, nbc, nic, nltf;
+
 
     domainUpdated = false;
     serNum = this->giveSerialNumber();
@@ -1436,11 +1435,14 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
       }
 
-      int nnodes = ncomp[0];
-      int nelem = ncomp[1];
-      int nmat  = ncomp[2];
-      int nbc   = ncomp[4];
-
+      nnodes = ncomp[0];
+      nelem = ncomp[1];
+      nmat  = ncomp[2];
+      ncs   = ncomp[3];
+      nbc   = ncomp[4];
+      nic   = ncomp[5];
+      nltf  = ncomp[6];
+      
       // clear receiver data
       dofManagerList->clear();
       elementList->clear();
@@ -1450,133 +1452,60 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
       domainUpdated = true;
-
-      // nodes & sides and corresponding dofs
-      this->resizeDofManagers(nnodes);
-      for ( i = 1; i <= nnodes; i++ ) {
-	// read component class id
-	if ( !stream->read(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}
-	compId = ( classType ) ct;
-	dofman = CreateUsrDefDofManagerOfType(compId, 0, this);
-        if ( ( iores = this->giveDofManager(i)->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-	this->setDofManager (i, dofman);
-      }
-
-      this->resizeElements(nelem);
-      for ( i = 1; i <= nelem; i++ ) {
-	// read component class id
-	if ( !stream->read(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}
-	compId = ( classType ) ct;
-	element = CreateUsrDefElementOfType(compId, 0, this);
-        if ( ( iores = element->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-	this->setElement(i, element);
-      }
-
-      // restore boundary conditions data
-      this->resizeBoundaryConditions(nbc);
-      for ( i = 1; i <= nbc; i++ ) {
-	// read component class id
-	if ( !stream->read(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}
-	compId = ( classType ) ct;
-	bc = CreateUsrDefBoundaryConditionOfType(compId, 0, this);
-        if ( ( iores = bc->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-	this->setBoundaryCondition(i, bc);
-      }
-
-      // restore error estimator data
-      ee = this->giveErrorEstimator();
-      if ( domainUpdated ) {
-        ee->setDomain(this);
-      }
-
-      if ( ee ) {
-        if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-      }
-
-
-    } else { // if ( ( mode & CM_Definition ) )
-
+    } else {
       if ( serNum != this->giveSerialNumber() ) {
         // read corresponding domain
         OOFEM_LOG_INFO( "restoring domain %d.%d\n", this->number, this->giveSerialNumber() );
         DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
         this->clear();
-
+	
         if ( !this->instanciateYourself(domainDr) ) {
 	  _error("initializeAdaptive: domain Instanciation failed");
         }
-
+	
         delete domainDr;
         domainUpdated = true;
       }
 
-      // nodes & sides and corresponding dofs
-      int nnodes = this->giveNumberOfDofManagers();
-      for ( i = 1; i <= nnodes; i++ ) {
-        if ( ( iores = this->giveDofManager(i)->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
+      nnodes=this->giveNumberOfDofManagers();
+      nelem=this->giveNumberOfElements();
+      nmat=this->giveNumberOfMaterialModels();
+      ncs=this->giveNumberOfCrossSectionModels();
+      nbc=this->giveNumberOfBoundaryConditions();
+      nic=this->giveNumberOfInitialConditions();
+      nltf=this->giveNumberOfLoadTimeFunctions();
+    }
+
+    RESTORE_COMPONENTS(nnodes,DofManager,this->resizeDofManagers,CreateUsrDefDofManagerOfType,this->giveDofManager,this->setDofManager);
+    RESTORE_COMPONENTS(nelem,Element,this->resizeElements,CreateUsrDefElementOfType,this->giveElement,this->setElement);
+    RESTORE_COMPONENTS(nbc,GeneralBoundaryCondition,this->resizeBoundaryConditions,CreateUsrDefBoundaryConditionOfType,this->giveBc,this->setBoundaryCondition);
+
+    if ( ( mode & CM_Definition ) ) {
+      
+      RESTORE_COMPONENTS(nmat,Material,this->resizeMaterials,CreateUsrDefMaterialOfType,this->giveMaterial,this->setMaterial);
+      RESTORE_COMPONENTS(ncs,CrossSection,this->resizeCrossSectionModels,CreateUsrDefCrossSectionOfType,this->giveCrossSection,this->setCrossSection);
+      //RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
+      RESTORE_COMPONENTS(nltf,LoadTimeFunction,resizeLoadTimeFunctions,CreateUsrDefLoadTimeFunctionOfType,giveLoadTimeFunction,setLoadTimeFunction);
+    }
+
+    // restore error estimator data
+    ee = this->giveErrorEstimator();
+    if ( domainUpdated ) {
+      ee->setDomain(this);
+    }
+    
+    if ( ee ) {
+      if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
+	THROW_CIOERR(iores);
       }
-
-      int nelem = this->giveNumberOfElements();
-      for ( i = 1; i <= nelem; i++ ) {
-        element = this->giveElement(i);
-#ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. They introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
-	  continue;
-        }
-
-#endif
-        if ( ( iores = element->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-      }
-
-      // restore boundary conditions data
-      int nbc = this->giveNumberOfBoundaryConditions();
-      for ( i = 1; i <= nbc; i++ ) {
-        bc = this->giveBc(i);
-        if ( ( iores = bc->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-      }
-
-      // restore error estimator data
-      ee = this->giveErrorEstimator();
-      if ( domainUpdated ) {
-        ee->setDomain(this);
-      }
-
-      if ( ee ) {
-        if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
-	  THROW_CIOERR(iores);
-        }
-      }
-    } // end else
-
+    }
+    
     if ( domainUpdated ) {
       if ( this->smoother ) {
 	this->smoother->init();
       }
     }
-
+    
     return CIO_OK;
 }
 
