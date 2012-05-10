@@ -70,9 +70,9 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray 
         FEInterpolation* interp = elem->giveInterpolation();
         if (interp) {
             // map target point to element local coordinates
-            if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem), atTime->giveTargetTime())) {
+            if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem))) {
                 // evaluate interpolation functions at target point
-                interp->evalN(n, lc, FEIElementGeometryWrapper(elem), atTime->giveTargetTime());
+                interp->evalN(n, lc, FEIElementGeometryWrapper(elem));
                 // loop over element nodes
                 for (i=1; i<=n.giveSize(); i++) {
                     // request nodal value

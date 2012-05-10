@@ -61,9 +61,9 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
         FEInterpolation* interp = elem->giveInterpolation();
         if (interp) {
             // map target point to element local coordinates
-            if (interp->global2local(lc, coords, FEIElementGeometryWrapper(elem), atTime->giveTargetTime())) {
+            if ( interp->global2local( lc, coords, FEIElementGeometryWrapper(elem) ) ) {
                 // evaluate interpolation functions at target point
-                interp->evalN(n, lc, FEIElementGeometryWrapper(elem), atTime->giveTargetTime());
+                interp->evalN( n, lc, FEIElementGeometryWrapper(elem) );
                 // loop over element nodes
                 for (i=1; i<=n.giveSize(); i++) {
                     // multiply nodal value by value of corresponding shape function and add this to answer
