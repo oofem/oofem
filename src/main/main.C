@@ -71,7 +71,8 @@
  #include <stdio.h>
  #include <string.h>
  #include <new>
-// For reading .petsc and .slepc
+ #include <sstream>
+// For passing PETSc/SLEPc arguments. 
  #include <fstream>
  #include <iterator>
 #endif
@@ -108,14 +109,13 @@ int main(int argc, char *argv[])
         adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
     int renumberFlag = 0;
     bool debugFlag = false;
-    char inputFileName [ MAX_FILENAME_LENGTH + 10 ], buff [ MAX_FILENAME_LENGTH ];
+    std :: stringstream inputFileName;
     std :: vector< const char * >modulesArgs;
     EngngModel *problem = 0;
 
     int rank = 0;
 
 #ifdef __PARALLEL_MODE
-    char fileName [ MAX_FILENAME_LENGTH ];
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
@@ -149,62 +149,60 @@ int main(int argc, char *argv[])
                 }
             } else if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
-                    strcpy(inputFileName, argv [ i + 1 ]);
-                    inputFileFlag = 1;
                     i++;
+                    inputFileName << argv [ i ];
+                    inputFileFlag = 1;
                 }
             } else if ( strcmp(argv [ i ], "-r") == 0 ) {
                 if ( i + 1 < argc ) {
-                    strcpy(buff, argv [ i + 1 ]);
-                    restartFlag = 1;
-                    restartStepInfo [ 0 ] = strtol(buff, ( char ** ) NULL, 10);
-                    restartStepInfo [ 1 ] = 0;
                     i++;
+                    restartFlag = 1;
+                    restartStepInfo [ 0 ] = strtol(argv [ i ] , NULL, 10);
+                    restartStepInfo [ 1 ] = 0;
                 }
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
                 renumberFlag = 1;
             } else if ( strcmp(argv [ i ], "-ar") == 0 ) {
                 if ( i + 1 < argc ) {
-                    strcpy(buff, argv [ i + 1 ]);
-                    adaptiveRestartFlag = strtol(buff, ( char ** ) NULL, 10);
                     i++;
+                    adaptiveRestartFlag = strtol( argv [ i ], NULL, 10);
                 }
             } else if ( strcmp(argv [ i ], "-l") == 0 ) {
-                if ( i + 1 < argc ) {
-                    strcpy(buff, argv [ i + 1 ]);
-                    int level = strtol(buff, ( char ** ) NULL, 10);
+                if ( i + 1 < argc) {
+                    i++;
+                    int level = strtol( argv [ i ] , NULL, 10);
                     oofem_logger.setLogLevel(level);
                     oofem_errLogger.setLogLevel(level);
-                    i++;
                 }
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
-                    strcpy(buff, argv [ i + 1 ]);
+                    i++;
 #ifdef __PARALLEL_MODE
-                    sprintf(fileName, "%s.%d", buff, rank);
-                    oofem_errLogger.appendlogTo(fileName);
+                    std :: stringstream fileName;
+                    fileName << argv [ i ] << "." << rank;
+                    oofem_errLogger.appendlogTo( const_cast < char * > ( fileName.str().c_str() ) );
 #else
-                    oofem_errLogger.appendlogTo(buff);
+                    oofem_errLogger.appendlogTo( argv [ i ] );
 #endif
                     i++;
                 }
             } else if ( strcmp(argv [ i ], "-qo") == 0 ) {
                 if ( i + 1 < argc ) {
-                    strcpy(buff, argv [ i + 1 ]);
+                    i++;
 #ifdef __PARALLEL_MODE
-                    sprintf(fileName, "%s.%d", buff, rank);
-                    oofem_logger.appendlogTo(fileName);
+                    std :: stringstream fileName;
+                    fileName << argv [ i ] << "." << rank;
+                    oofem_logger.appendlogTo( const_cast < char * > ( fileName.str().c_str() ) );
 #else
-                    oofem_logger.appendlogTo(buff);
+                    oofem_logger.appendlogTo( argv [ i ] );
 #endif
                     // print header to redirected output
                     LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
-                    i++;
                 }
             } else if ( strcmp(argv [ i ], "-d") == 0 ) {
                 debugFlag = true;
             } else { // Arguments not handled by OOFEM is to be passed to PETSc
-                modulesArgs.push_back(argv [ i ]);
+                modulesArgs.push_back( argv [ i ] );
             }
         }
     } else {
@@ -247,11 +245,10 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef __PARALLEL_MODE
-    strcpy(fileName, inputFileName);
-    sprintf(inputFileName, "%s.%d", fileName, rank);
+    inputFileName << "." << rank;
 #endif
 
-    OOFEMTXTDataReader dr(inputFileName);
+    OOFEMTXTDataReader dr( inputFileName.str().c_str() );
     problem = :: InstanciateProblem(& dr, _processor, contextFlag);
     dr.finish();
 
