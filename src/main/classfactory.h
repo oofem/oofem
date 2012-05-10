@@ -58,10 +58,10 @@ template< typename T > LoadTimeFunction *ltfCreator(int n, Domain *d) { return n
 //template < typename T > SparseMatrix* sparseMtrxCreator() { return new T(); }
 //template < typename T > SparseMatrix* sparseMtrxCreator(DSSMatrix::dssType t) { return new T(t); }
 
-/*
+/**
  * Class Factory allows to register terminal oofem classes, based on their membership
  * (classes representing elements, dof managers, material models, etc)
- * and create them on demand accorging to their name or id.
+ * and create them on demand according to their name or id.
  * Global instance of ClassFactory named classFactory is created on startup.
  */
 class ClassFactory
@@ -77,33 +77,33 @@ class ClassFactory
 
 
 protected:
-    // associative container containing element creators with element name as key
+    /// Associative container containing element creators with element name as key.
     std :: map < std :: string, Element * ( * )(int, Domain *), CaseComp > elemNameList;
-    // associative container containing element creators with element id as key
+    /// Associative container containing element creators with element id as key.
     std :: map < classType, Element * ( * )(int, Domain *), CaseCompId > elemIdList;
-    // associative container containing dofmanager creators with dofmanager  name as key
+    /// Associative container containing dofmanager creators with dofmanager  name as key.
     std :: map < std :: string, DofManager * ( * )(int, Domain *), CaseComp > dofmanNameList;
-    // associative container containing dofmanager creators with dofmanager id as key
+    /// Associative container containing dofmanager creators with dofmanager id as key.
     std :: map < classType, DofManager * ( * )(int, Domain *), CaseCompId > dofmanIdList;
-    // associative container containing boundary condition creators with bc  name as key
+    /// Associative container containing boundary condition creators with bc  name as key.
     std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *), CaseComp > bcNameList;
-    // associative container containing boundary condition creators with bc id as key
+    /// Associative container containing boundary condition creators with bc id as key.
     std :: map < classType, GeneralBoundaryCondition * ( * )(int, Domain *), CaseCompId > bcIdList;
-    // associative container containing cross section creators with cross section name as key
+    /// Associative container containing cross section creators with cross section name as key.
     std :: map < std :: string, CrossSection * ( * )(int, Domain *), CaseComp > csNameList;
-    // associative container containing cross section creators with cross section id as key
+    /// Associative container containing cross section creators with cross section id as key.
     std :: map < classType, CrossSection * ( * )(int, Domain *), CaseCompId > csIdList;
-    // associative container containing material creators with material name as key
+    /// Associative container containing material creators with material name as key.
     std :: map < std :: string, Material * ( * )(int, Domain *), CaseComp > matNameList;
-    // associative container containing material creators with material id as key
+    /// Associative container containing material creators with material id as key.
     std :: map < classType, Material * ( * )(int, Domain *), CaseCompId > matIdList;
-    // associative container containing engng model creators with engng model name as key
+    /// Associative container containing engng model creators with engng model name as key.
     std :: map < std :: string, EngngModel * ( * )(int, EngngModel *), CaseComp > engngNameList;
-    // associative container containing engng model creators with engng model id as key
+    /// Associative container containing engng model creators with engng model id as key.
     std :: map < classType, EngngModel * ( * )(int, EngngModel *), CaseCompId > engngIdList;
-    // associative container containing load time function creators with ltf name as key
+    /// Associative container containing load time function creators with ltf name as key.
     std :: map < std :: string, LoadTimeFunction * ( * )(int, Domain *), CaseComp > ltfNameList;
-    // associative container containing load time function creators with ltf id as key
+    /// Associative container containing load time function creators with ltf id as key.
     std :: map < classType, LoadTimeFunction * ( * )(int, Domain *), CaseCompId > ltfIdList;
 
 public:
@@ -280,7 +280,7 @@ public:
      */
     Dof *createDof(classType type, int num, DofManager *dman);
     /**
-     * Creates new instance of SparseLinearSystemNM corresponding 
+     * Creates new instance of SparseLinearSystemNM corresponding
      * to given type.
      * @param type LinSystSolverType id determining the type of new instance.
      * @param num  object's number.
@@ -290,7 +290,7 @@ public:
      */
     SparseLinearSystemNM *createSparseLinSolver(LinSystSolverType st, int num, Domain *d, EngngModel *m);
     /**
-     * Creates new instance of ErrorEstimator corresponding 
+     * Creates new instance of ErrorEstimator corresponding
      * to given type.
      * @param type ErrorEstimatorType id determining the type of new instance.
      * @param number  object's number.

@@ -72,19 +72,12 @@ TransportElement :: ~TransportElement()
 
 
 void
-TransportElement ::   giveElementDofIDMask(EquationID, IntArray &answer) const
+TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     if ( emode == HeatTransferEM ) {
-        answer.resize(1);
-        answer.at(1) = T_f;
+        answer.setValues(1, T_f);
     } else if ( emode == HeatMass1TransferEM ) {
-        answer.resize(2);
-        answer.at(1) = T_f;
-        answer.at(2) = C_1;
+        answer.setValues(2, T_f, C_1);
     } else {
         _error("Unknown ElementMode");
     }
@@ -92,8 +85,8 @@ TransportElement ::   giveElementDofIDMask(EquationID, IntArray &answer) const
 
 
 void
-TransportElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
-                                              CharType mtrx, TimeStep *tStep)
+TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
+                                             CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
@@ -220,11 +213,11 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
     answer.resize(0, 0);
     answer.zero();
     for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp      = iRule->getIntegrationPoint(i);
+        gp = iRule->getIntegrationPoint(i);
         this->computeNSubMatrixAt( n, gp->giveCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
         c = ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicValue(rmode, gp, tStep);
-        dV      = this->computeVolumeAround(gp);
+        dV = this->computeVolumeAround(gp);
         answer.plusProductSymmUpper(n, n, dV * c);
     }
 
@@ -395,33 +388,6 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 {
     ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicMatrix(answer, FullForm, rMode, gp, tStep);
 }
-
-/*
- * void
- * TransportElement :: computeDirichletBcRhsVectorAt (FloatArray& answer, TimeStep* stepN, CharTypeMode mode)
- * // Computes the load vector due to the Dirichlet boundary conditions acting on the
- * // receiver's nodes, at stepN.
- * {
- * FloatArray  d, dp;
- * FloatMatrix s;
- * UnknownTypeMode umode;
- *
- * if (mode == TotalMode) umode = UnknownMode_Total;
- * else if (mode == IncrementalMode) umode = UnknownMode_Incremental;
- * else _error ("computeBcRhsVectorAt: unknown mode encountered");
- *
- * this -> computeVectorOfPrescribed(umode,stepN, d) ;
- *
- * if (d.containsOnlyZeroes())
- * answer.resize (0);
- * else {
- * this -> computeConductivityMatrix(s, Conductivity, stepN);
- * answer.beProductOf (s, d); answer.negated() ;
- * }
- *
- * return  ;
- * }
- */
 
 
 void

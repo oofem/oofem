@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: classtype.h
-//
-
 #ifndef classtype_h
 #define classtype_h
 
@@ -196,7 +192,7 @@ enum classType {
     NURBSPlaneStressElementClass,
     TSplinePlaneStressElementClass,
     NURBSSpace3dElementClass,
-    
+
 
     DomainClass,
 
@@ -432,8 +428,8 @@ enum classType {
 
     WallClockLoadBalancerMonitorClass,
     ParmetisLoadBalancerClass
-    
-    
+
+
 };
 } // end namespace oofem
 #endif // classtype_h

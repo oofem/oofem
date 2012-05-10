@@ -546,48 +546,6 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 
-
-/*
- * int
- * RerShell :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,j,k,flag=0,ii1,ii2;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0;}
- *
- * answer.resize(18,18); answer.zero();
- *
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii1 = (i-1)*6 ;
- * ii2 = ii1+3;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * for (j=1; j<=3; j++)
- *  for (k=1; k<=3; k++) {
- *   answer.at(ii1+j,ii1+k) = triplet->at(j,k);
- *   answer.at(ii2+j,ii2+k) = triplet->at(j,k);
- *  }
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * for (j=1; j<=3; j++) {
- *  answer.at(ii1+j,ii1+j)     = 1.0;
- *  answer.at(ii2+j,ii2+j)     = 1.0;
- * }
- * }
- * }
- * return 1;
- * }
- */
-
-
 void
 RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 //
@@ -596,7 +554,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 // receiver
 //
 {
-    // test the parametr
+    // test the parameter
     if ( global.giveSize() != 3 ) {
         _error("GiveLocalCoordinate : cannot transform coordinates- size mismatch");
         exit(1);
@@ -742,20 +700,9 @@ RerShell :: printOutputAt(FILE *file, TimeStep *stepN)
 
 
 void
-RerShell ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(6);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
-    answer.at(4) = R_u;
-    answer.at(5) = R_v;
-    answer.at(6) = R_w;
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 

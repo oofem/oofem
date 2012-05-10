@@ -122,7 +122,7 @@ public:
      * @param nHist Number of old time steps to store.
      */
     PrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
-    ~PrimaryField();
+    virtual ~PrimaryField();
 
     /**
      * Copy unknowns from previous solution or DOF's dictionary to the solution vector

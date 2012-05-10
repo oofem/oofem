@@ -39,7 +39,7 @@
 #include "fiberedcs.h"
 
 namespace oofem {
-/*
+/**
  * This class implements a 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration.
  */

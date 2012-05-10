@@ -167,16 +167,9 @@ InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 
 
 void
-InterfaceElem2dQuad ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElem2dQuad :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(2);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
+    answer.setValues(2, D_u, D_v);
 }
 
 

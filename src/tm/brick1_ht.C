@@ -138,18 +138,12 @@ Brick1_ht :: computeGaussPoints()
 }
 
 void
-Brick1_ht ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
+Brick1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     if ( emode == HeatTransferEM ) {
-        answer.resize(1);
-        answer.at(1) = T_f;
+        answer.setValues(1, T_f);
     } else if ( emode == HeatMass1TransferEM ) {
-        answer.resize(2);
-        answer.at(1) = T_f;
-        answer.at(2) = C_1;
+        answer.setValues(2, T_f, C_1);
     } else {
         _error("Unknown ElementMode");
     }
@@ -183,8 +177,8 @@ Brick1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this)) );
 
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
     return volume;
 }
 

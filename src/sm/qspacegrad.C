@@ -83,10 +83,6 @@ QSpaceGrad :: initializeFrom (InputRecord* ir)
 
 void
 QSpaceGrad :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
 {
     if ( inode<=nSecNodes ) {
         answer.setValues(4, D_u, D_v, D_w, G_0);

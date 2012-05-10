@@ -63,12 +63,12 @@ public:
 class PetscNatural2GlobalOrdering : public PetscOrdering_Base
 {
 protected:
-    // Old to new mapping; uses 0-based global eq ordering; 1-based local ordering.
+    /// Old to new mapping; uses 0-based global eq ordering; 1-based local ordering.
     IntArray locGlobMap;
-    // New to old mapping.
+    /// New to old mapping.
     std :: map< int, int >globLocMap;
 
-    // Number of local and global eqs.
+    /// Number of local and global eqs.
     int l_neqs, g_neqs;
 
 public:
@@ -96,7 +96,7 @@ public:
 class PetscNatural2LocalOrdering : public PetscOrdering_Base
 {
 protected:
-    // Natural to local
+    /// Natural to local
     IntArray n2l;
 
 public:

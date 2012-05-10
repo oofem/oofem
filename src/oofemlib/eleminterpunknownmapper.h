@@ -58,14 +58,12 @@ public:
     /// Constructor
     EIPrimaryUnknownMapper();
     /// Destructor
-    ~EIPrimaryUnknownMapper() { }
+    virtual ~EIPrimaryUnknownMapper() { }
 
     virtual int mapAndUpdate(FloatArray &answer, ValueModeType mode, EquationID ut,
                              Domain *oldd, Domain *newd,  TimeStep *tStep);
     virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, EquationID ut, ValueModeType mode,
                            Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep);
-
-protected:
 };
 } // end namespace oofem
 #endif // eleminterpunknownmapper_h

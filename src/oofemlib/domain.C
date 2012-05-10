@@ -880,78 +880,36 @@ Domain :: giveDefaultNodeDofIDArry()
         return defaultNodeDofIDArry;
     }
 
-
     if ( dType == _2dPlaneStressRotMode ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
-        defaultNodeDofIDArry.at(3) = R_w;
+        defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
     } else if ( dType == _2dPlaneStressMode ) {
-        defaultNodeDofIDArry.resize(2);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
+        defaultNodeDofIDArry.setValues(2, D_u, D_v);
     } else if ( dType == _PlaneStrainMode ) {
-        defaultNodeDofIDArry.resize(2);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
+        defaultNodeDofIDArry.setValues(2, D_u, D_v);
     } else if  ( dType == _3dMode ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
-        defaultNodeDofIDArry.at(3) = D_w;
+        defaultNodeDofIDArry.setValues(3, D_u, D_v, D_w);
     } else if ( dType == _3dAxisymmMode ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
-        defaultNodeDofIDArry.at(3) = R_w;
+        defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
     } else if  ( dType == _2dMindlinPlateMode ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = D_w;
-        defaultNodeDofIDArry.at(2) = R_u;
-        defaultNodeDofIDArry.at(3) = R_v;
+        defaultNodeDofIDArry.setValues(3, D_w, R_u, R_v);
     } else if ( dType == _3dShellMode ) {
-        defaultNodeDofIDArry.resize(6);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
-        defaultNodeDofIDArry.at(3) = D_w;
-        defaultNodeDofIDArry.at(4) = R_u;
-        defaultNodeDofIDArry.at(5) = R_v;
-        defaultNodeDofIDArry.at(6) = R_w;
+        defaultNodeDofIDArry.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
     } else if  ( dType == _2dTrussMode ) {
-        defaultNodeDofIDArry.resize(2);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_w;
+        defaultNodeDofIDArry.setValues(2, D_u, D_w);
     } else if  ( dType == _1dTrussMode ) {
-        defaultNodeDofIDArry.resize(1);
-        defaultNodeDofIDArry.at(1) = D_u;
+        defaultNodeDofIDArry.setValues(1, D_u);
     } else if  ( dType == _2dBeamMode ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_w;
-        defaultNodeDofIDArry.at(3) = R_v;
+        defaultNodeDofIDArry.setValues(3, D_u, D_w, R_v);
     } else if  ( dType == _2dLatticeMode ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = D_u;
-        defaultNodeDofIDArry.at(2) = D_v;
-        defaultNodeDofIDArry.at(3) = R_w;
+        defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
     } else if  ( dType == _HeatTransferMode ) {
-        defaultNodeDofIDArry.resize(1);
-        defaultNodeDofIDArry.at(1) = T_f;
+        defaultNodeDofIDArry.setValues(1, T_f);
     } else if  ( dType == _HeatMass1Mode ) {
-        defaultNodeDofIDArry.resize(2);
-        defaultNodeDofIDArry.at(1) = T_f;
-        defaultNodeDofIDArry.at(2) = C_1;
+        defaultNodeDofIDArry.setValues(2, T_f, C_1);
     }  else if ( dType == _2dIncompressibleFlow ) {
-        defaultNodeDofIDArry.resize(3);
-        defaultNodeDofIDArry.at(1) = V_u;
-        defaultNodeDofIDArry.at(2) = V_v;
-        defaultNodeDofIDArry.at(3) = P_f;
+        defaultNodeDofIDArry.setValues(3, V_u, V_v, P_f);
     }  else if ( dType == _3dIncompressibleFlow ) {
-        defaultNodeDofIDArry.resize(4);
-        defaultNodeDofIDArry.at(1) = V_u;
-        defaultNodeDofIDArry.at(2) = V_v;
-        defaultNodeDofIDArry.at(3) = V_w;
-        defaultNodeDofIDArry.at(4) = P_f;
+        defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
     }
@@ -1381,7 +1339,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     SAVE_COMPONENTS(this->giveNumberOfDofManagers(),DofManager,this->giveDofManager);
     // elements and corresponding integration points
     SAVE_COMPONENTS(this->giveNumberOfElements(),Element,this->giveElement);
-    // boundary conditions 
+    // boundary conditions
     SAVE_COMPONENTS(this->giveNumberOfBoundaryConditions(),GeneralBoundaryCondition,this->giveBc);
 
     if ( ( mode & CM_Definition ) ) {
@@ -1394,7 +1352,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
       // store load time functions
       SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(),LoadTimeFunction,this->giveLoadTimeFunction);
     } // end if ( ( mode & CM_Definition ) ) {
-    
+
 
     // store error estimator data
     ee = this->giveErrorEstimator();
@@ -1442,7 +1400,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
       nbc   = ncomp[4];
       nic   = ncomp[5];
       nltf  = ncomp[6];
-      
+
       // clear receiver data
       dofManagerList->clear();
       elementList->clear();
@@ -1458,11 +1416,11 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         OOFEM_LOG_INFO( "restoring domain %d.%d\n", this->number, this->giveSerialNumber() );
         DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
         this->clear();
-	
+
         if ( !this->instanciateYourself(domainDr) ) {
 	  _error("initializeAdaptive: domain Instanciation failed");
         }
-	
+
         delete domainDr;
         domainUpdated = true;
       }
@@ -1481,7 +1439,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     RESTORE_COMPONENTS(nbc,GeneralBoundaryCondition,this->resizeBoundaryConditions,CreateUsrDefBoundaryConditionOfType,this->giveBc,this->setBoundaryCondition);
 
     if ( ( mode & CM_Definition ) ) {
-      
+
       RESTORE_COMPONENTS(nmat,Material,this->resizeMaterials,CreateUsrDefMaterialOfType,this->giveMaterial,this->setMaterial);
       RESTORE_COMPONENTS(ncs,CrossSection,this->resizeCrossSectionModels,CreateUsrDefCrossSectionOfType,this->giveCrossSection,this->setCrossSection);
       //RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
@@ -1493,19 +1451,19 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     if ( domainUpdated ) {
       ee->setDomain(this);
     }
-    
+
     if ( ee ) {
       if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
 	THROW_CIOERR(iores);
       }
     }
-    
+
     if ( domainUpdated ) {
       if ( this->smoother ) {
 	this->smoother->init();
       }
     }
-    
+
     return CIO_OK;
 }
 

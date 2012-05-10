@@ -79,9 +79,9 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     double l, ksi, n1, n2, n1x, n2x;
 
     if ( this->nlGeometry ) {
-        l     = this->giveCurrentLength( domain->giveEngngModel()->giveCurrentStep() );
+        l = this->giveCurrentLength( domain->giveEngngModel()->giveCurrentStep() );
     } else {
-        l     = this->giveLength();
+        l = this->giveLength();
     }
 
     ksi   = aGaussPoint->giveCoordinate(1);
@@ -236,20 +236,9 @@ LIBeam3d2 :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-LIBeam3d2 ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3d2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(6);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
-    answer.at(4) = R_u;
-    answer.at(5) = R_v;
-    answer.at(6) = R_w;
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 
@@ -373,7 +362,7 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LIBeam3d2 ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         _error("computeEdgeVolumeAround: wrong egde number");
@@ -503,7 +492,7 @@ LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
 
 
 void
-LIBeam3d2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
+LIBeam3d2 :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
 {
     FloatMatrix S(3, 3), SS(3, 3);
     double psiSize;
@@ -552,7 +541,8 @@ LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 
 
 void
-LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) {
+LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
     FloatArray ui, PrevEpsilon;
     FloatMatrix b;
 

@@ -62,7 +62,6 @@ namespace oofem {
  */
 class CommunicatorBuff
 {
-public:
 protected:
     /// Number of processes.
     int size;

@@ -69,9 +69,9 @@ public:
     /// Constructor.
     ZZNodalRecoveryModel(Domain *d);
     /// Destructor.
-    ~ZZNodalRecoveryModel();
+    virtual ~ZZNodalRecoveryModel();
 
-    int recoverValues(InternalStateType type, TimeStep *tStep);
+    virtual int recoverValues(InternalStateType type, TimeStep *tStep);
 
 private:
     /**

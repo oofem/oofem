@@ -306,16 +306,8 @@ CCTPlate :: initializeFrom(InputRecord *ir)
 
 void
 CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
 {
-    answer.resize(3);
-
-    answer.at(1) = D_w;
-    answer.at(2) = R_u;
-    answer.at(3) = R_v;
+    answer.setValues(3, D_w, R_u, R_v);
 }
 
 

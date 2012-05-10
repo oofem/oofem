@@ -89,8 +89,8 @@ public:
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID eid, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    int assembleBegin();
-    int assembleEnd();
+    virtual int assembleBegin();
+    virtual int assembleEnd();
     virtual bool canBeFactorized() const { return false; }
     virtual SparseMtrx *factorized() { return NULL; }
     virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }

@@ -70,7 +70,7 @@ FEI2dQuadConst Quad10_2D_SUPG :: pressureInterpolation(1, 2);
 Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain), pressureNode(1, aDomain, this)
 {
-    numberOfDofMans  = 4;
+    numberOfDofMans = 4;
 }
 
 Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
@@ -149,16 +149,10 @@ Quad10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 
 
 void
-Quad10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) || ( ut == EID_MomentumBalance_ConservationEquation ) ) {
-        answer.resize(2);
-        answer.at(1) = V_u;
-        answer.at(2) = V_v;
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.resize(0);
     } else  {
@@ -173,8 +167,7 @@ Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &
     if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
         answer.resize(0);
     } else if ( ( ut == EID_ConservationEquation ) || ( ut == EID_MomentumBalance_ConservationEquation ) ) {
-        answer.resize(1);
-        answer.at(1) = P_f;
+        answer.setValues(1, P_f);
     } else  {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
@@ -672,8 +665,6 @@ Quad10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
         return;
     }
 
-    //answer.resize(6);
-
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
@@ -696,9 +687,6 @@ Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, 
 {
     answer.resize(0);
 }
-
-
-#define POINT_TOL 1.e-3
 
 
 int

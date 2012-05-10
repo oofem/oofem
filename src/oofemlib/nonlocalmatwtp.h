@@ -80,7 +80,7 @@ public:
      * of contributing global element numbers. This is extracted from IP nonlocal tables;
      */
     void init(Domain *d);
-    /*
+    /**
      * Migrates necessary local elements to remote processors, where they
      * become remote elements needed to efficiently handle nonlocal dependencies.
      *
@@ -91,7 +91,7 @@ public:
      * - transfer of local elements and nodes to remote partitions (remote elements and null dofmans)
      */
     void migrate();
-    /*
+    /**
      * Called after all wtps migrated their data. Intended to update local data structure.
      * Current implementations rebuilds the nonlocal integration point tables.
      */

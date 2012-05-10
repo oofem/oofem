@@ -127,7 +127,6 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 // current state)
 //
 {
-    // FloatArray *s;
     contextIOResultType iores;
     if ( stream == NULL ) {
         _error("saveContex : can't write into NULL stream");
@@ -181,14 +180,10 @@ int
 TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature  || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
-        answer.resize(1);
-        answer.at(1) = 1;
+        answer.setValues(1, 1);
         return 1;
     } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow  ) {
-        answer.resize(3);
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
+        answer.setValues(3, 1, 2, 3);
         return 1;
     } else {
         return Material :: giveIntVarCompFullIndx(answer, type, mmode);

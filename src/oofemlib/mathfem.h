@@ -217,7 +217,7 @@ template< class T >double gss(double ax, double bx, double cx, const T &f,
     f1 = f(x1);
     f2 = f(x2);
 
-    // iteraton loop
+    // iteration loop
     while ( fabs(x3 - x0) > tol * ( fabs(x1) + fabs(x2) ) ) {
         if ( f2 < f1 ) {
             // minimum bracketed by (x1,x2,x3) triplet

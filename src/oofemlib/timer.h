@@ -43,13 +43,13 @@ namespace oofem {
  */
 class Timer
 {
-    // Wall clock time structures.
+    /// Wall clock time structures.
     oofem_timeval start_wtime, end_wtime;
-    // User time struct.
+    /// User time struct.
     oofem_timeval start_utime, end_utime;
-    // Accumulated wtime and utime (in seconds) from start.
+    /// Accumulated wtime and utime (in seconds) from start.
     oofem_timeval elapsedWTime, elapsedUTime;
-    // Flag indicating whether timer is running.
+    /// Flag indicating whether timer is running.
     bool running;
 
 public:

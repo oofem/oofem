@@ -262,17 +262,9 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LTRSpace ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LTRSpace :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(3);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
+    answer.setValues(3, D_u, D_v, D_w);
 }
 
 
@@ -281,8 +273,6 @@ LTRSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToC
 {
     return this->giveLenghtInDir(normalToCrackPlane);
 }
-
-
 
 
 int

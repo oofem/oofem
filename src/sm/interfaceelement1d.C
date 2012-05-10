@@ -302,17 +302,13 @@ InterfaceElem1d :: computeNumberOfDofs(EquationID)
             _error("giveDofManDofIDMask: unsupported mode");
     }
 
-    return 0; // to supress compiler warning
+    return 0; // to suppress compiler warning
 }
 
 
 void
-InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requested from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     /*
      * cmode mode = giveCoordMode();
      * if ( mode == ie1d_1d ) {
@@ -331,39 +327,19 @@ InterfaceElem1d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer
      */
     switch ( domain->giveDomainType() ) {
     case _2dPlaneStressMode:
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        break;
     case _PlaneStrainMode:
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+    case _3dAxisymmMode:
+        answer.setValues(2, D_u, D_v);
         break;
     case _3dMode:
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
-        break;
-    case _3dAxisymmMode:
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+        answer.setValues(3, D_u, D_v, D_w);
         break;
     case _2dTrussMode:
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_w;
+    case _2dBeamMode:
+        answer.setValues(2, D_u, D_w);
         break;
     case _1dTrussMode:
-        answer.resize(1);
-        answer.at(1) = D_u;
-        break;
-    case _2dBeamMode:
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_w;
+        answer.setValues(1, D_u);
         break;
     default:
         _error("giveDofManDofIDMask: unsupported mode");

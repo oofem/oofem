@@ -122,12 +122,8 @@ LumpedMassElement :: computeNumberOfDofs(EquationID ut)
 
 
 void
-LumpedMassElement ::   giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+LumpedMassElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     answer.resize(0, 6);
     DofManager *dman = this->giveDofManager(inode);
     int _i, _ndof = dman->giveNumberOfDofs();

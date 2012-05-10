@@ -65,7 +65,7 @@ FEI3dTrLin Tet1_3D_SUPG :: interpolation;
 
 Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain)
-    // Constructor.
+// Constructor.
 {
     numberOfDofMans  = 4;
 }
@@ -76,7 +76,6 @@ Tet1_3D_SUPG :: ~Tet1_3D_SUPG()
 
 
 int
-
 Tet1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {
     if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) ||
@@ -96,8 +95,6 @@ Tet1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 }
 
 
-
-
 int
 Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
@@ -113,26 +110,14 @@ Tet1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 }
 
 void
-Tet1_3D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-        answer.resize(3);
-        answer.at(1) = V_u;
-        answer.at(2) = V_v;
-        answer.at(3) = V_w;
+        answer.setValues(3, V_u, V_v, V_w);
     } else if ( ut == EID_ConservationEquation ) {
-        answer.resize(1);
-        answer.at(1) = P_f;
+        answer.setValues(1, P_f);
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.resize(4);
-        answer.at(1) = V_u;
-        answer.at(2) = V_v;
-        answer.at(3) = V_w;
-        answer.at(4) = P_f;
+        answer.setValues(4, V_u, V_v, V_w, P_f);
     } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }

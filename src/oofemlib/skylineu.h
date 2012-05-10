@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***********************************
-//   *** CLASS SKYLINE (UNSYMMETRIC) ***
-//   ***********************************
-
 #ifndef skylineu_h
 #define skylineu_h
 
@@ -63,64 +59,47 @@ protected:
     int isFactorized;
 
 public:
-    /** Constructor. Before any operation an internal profile must be built.
+    /**
+     * Constructor. Before any operation an internal profile must be built.
      * @param n Size of matrix
      * @see buildInternalStructure
      */
     SkylineUnsym(int n);
-    /** Constructor. Before any operation an internal profile must be built.
+    /**
+     * Constructor. Before any operation an internal profile must be built.
      * @see buildInternalStructure
      */
     SkylineUnsym();
     /// Destructor
-    ~SkylineUnsym();
+    virtual ~SkylineUnsym();
 
     // Overloaded methods:
-    SparseMtrx *GiveCopy() const;
-    void times(const FloatArray &x, FloatArray &answer) const;
-    void timesT(const FloatArray &x, FloatArray &answer) const;
+    virtual SparseMtrx *GiveCopy() const;
+    virtual void times(const FloatArray &x, FloatArray &answer) const;
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
+    virtual int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
     int setInternalStructure(IntArray *a);
-    int assemble(const IntArray &loc, const FloatMatrix &mat);
-    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    bool canBeFactorized() const { return true; }
-    SparseMtrx *factorized();
-    FloatArray *backSubstitutionWith(FloatArray &) const;
-    void zero();
-    double &at(int i, int j);
-    double at(int i, int j) const;
-    void toFloatMatrix(FloatMatrix &answer) const;
+    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
+    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
+    virtual bool canBeFactorized() const { return true; }
+    virtual SparseMtrx *factorized();
+    virtual FloatArray *backSubstitutionWith(FloatArray &) const;
+    virtual void zero();
+    virtual double &at(int i, int j);
+    virtual double at(int i, int j) const;
+    virtual void toFloatMatrix(FloatMatrix &answer) const;
     virtual void printYourself() const;
     virtual void printStatistics() const;
     virtual void writeToFile(const char* fname) const;
-    SparseMtrxType giveType() const { return SMT_SkylineU; }
-    bool isAsymmetric() const { return true; }
+    virtual SparseMtrxType giveType() const { return SMT_SkylineU; }
+    virtual bool isAsymmetric() const { return true; }
 
 protected:
-    /*
-     *    FloatMatrix*  AsFloatMatrix () ;
-     *    double&       at (int i,int j) ;
-     *    void          assemble (FloatMatrix*,IntArray*) ;
-     *    void          assemble (FloatMatrix*,IntArray*,IntArray*) ;
-     *    FloatArray*   backSubstitutionWith (FloatArray*) ;
-     *    void          carveYourselfFor (Domain*) ;
-     *    int           computeNumberNegativeEigenvalue();
-     *    void          checkSizeTowards (IntArray*) ;
-     *    Skyline*      diagonalScalingWith (FloatArray*) ;
-     *    Skyline*      factorized () ;
-     *    Skyline*      forwardReductionWith (FloatArray*) ;
-     */
     void checkSizeTowards(const IntArray &);
     void checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
     RowColumn *giveRowColumn(int j) const;
     void growTo(int);
-    /*
-     * void          printYourself () ;
-     * Skyline*      reinitialized () ;
-     * SkylineSym*   giveSymmetricPart();
-     * int       computeNumberNegativePivotsOfSymPart();
-     */
 
     SkylineUnsym(RowColumn **, int, int);
 };

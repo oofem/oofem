@@ -106,9 +106,7 @@ double Line2BoundaryElement :: computeNXIntegral() const
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
 {
     if (eid == EID_MomentumBalance) {
-        nodeDofIDMask.resize(2);
-        nodeDofIDMask.at(1) = V_u;
-        nodeDofIDMask.at(2) = V_v;
+        nodeDofIDMask.setValues(2, V_u, V_v);
     }
     else {
         nodeDofIDMask.resize(0);
@@ -164,9 +162,7 @@ int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Val
 void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     // TODO: Generalize this
-    answer.resize(2);
-    answer(0) = V_u;
-    answer(1) = V_v;
+    answer.setValues(2, V_u, V_v);
 }
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,

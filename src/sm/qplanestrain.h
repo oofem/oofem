@@ -50,6 +50,7 @@ class QPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterf
 protected:
     int numberOfGaussPoints;
     static FEI2dQuadQuad interpolation;
+
 public:
     QPlaneStrain(int N, Domain *d);
     virtual ~QPlaneStrain() { }

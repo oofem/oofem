@@ -41,7 +41,7 @@ namespace oofem {
 
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral -
- * elasticity finite element for axisimmetric 3d continuum.
+ * elasticity finite element for axisymmetric 3d continuum.
  * Each node has 2 degrees of freedom.
  * @todo Use FEI classes.
  */

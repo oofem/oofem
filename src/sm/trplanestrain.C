@@ -512,46 +512,6 @@ TrPlaneStrain :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-/*
- * FloatArray*   TrPlaneStress2d :: ComputeBodyLoadVectorAt (TimeStep* stepN)
- * // Computes numerically the load vector of the receiver due to the body
- * // loads, at stepN.
- * {
- * double      dV, load;
- * GaussPoint* gp = NULL;
- * FloatArray  *answer,*f,*coord1 ;
- *
- * if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
- *    return NULL ;
- *
- * else {
- *    f = this -> ComputeResultingBodyForceAt(stepN) ;
- *    if (! f)                                           // nil resultant
- * return NULL ;
- *    else {
- * coord1             = new FloatArray(2) ;
- * coord1 -> at(1)    = 0 ;
- * coord1 -> at(2)    = 0 ;
- * gp                 = new GaussPoint(this,1,coord1,0.5) ;
- *
- * dV = this->computeVolumeAround(gp);             // 2.0*Area
- * answer = new FloatArray(6) ;
- *
- * load=f->at(1) * dV / 3.0;
- * answer->at(1)=load ;
- * answer->at(3)=load ;
- * answer->at(5)=load ;
- *
- * load=f->at(2) * dV / 3.0;
- * answer->at(2)=load ;
- * answer->at(4)=load ;
- * answer->at(6)=load ;
- *
- * delete f ;
- * delete gp;
- * return answer ;}}
- * }
- */
 
 double
 TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
@@ -565,57 +525,11 @@ TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 
 
 void
-TrPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-
-    answer.resize(2);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
+    answer.setValues(2, D_u, D_v);
 }
 
-
-
-/*
- * int
- * TrPlaneStress2d :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0;}
- *
- * answer.resize(this->computeNumberOfDofs(),this->computeNumberOfDofs());
- * answer.zero();
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*2+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * }
- * }
- *
- * return 1;
- * }
- */
 
 int
 TrPlaneStrain :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

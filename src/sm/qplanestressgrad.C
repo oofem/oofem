@@ -52,7 +52,7 @@ namespace oofem {
 FEI2dQuadLin QPlaneStressGrad :: interpolation(1, 2);
 
 QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradDpElement()
-    // Constructor.
+// Constructor.
 {
     nPrimNodes = 8;
     nPrimVars = 2;
@@ -65,18 +65,12 @@ QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n,
 
 
 void
-QPlaneStressGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-
+QPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = G_0;
-    } else     {
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+        answer.setValues(3, D_u, D_v, G_0);
+    } else {
+        answer.setValues(2, D_u, D_v);
     }
 }
 
@@ -147,4 +141,3 @@ QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &
     }
 }
 }
-

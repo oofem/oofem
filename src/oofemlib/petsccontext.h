@@ -63,7 +63,7 @@ protected:
     EquationID ut;
     VecScatter n2gvecscat;
     VecScatter l2gvecscat;
-    // True if vectors are assumed to be natural distribution.
+    /// True if vectors are assumed to be natural distribution.
     bool naturalVectors;
 
     /// Communicator used for parallel objects.

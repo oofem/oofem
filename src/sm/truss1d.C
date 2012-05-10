@@ -187,12 +187,7 @@ Truss1d :: initializeFrom(InputRecord *ir)
 void
 Truss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(1);
-    answer.at(1) = D_u;
+    answer.setValues(1, D_u);
 }
 
 

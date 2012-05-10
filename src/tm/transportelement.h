@@ -187,11 +187,7 @@ protected:
      */
     void computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf,
                                      TimeStep *tStep, ValueModeType mode, int indx);
-    /*
-     * Computes the load vector due to the Dirichlet boundary conditions acting on the
-     * receiver's nodes, at stepN.
-     */
-    //void  computeDirichletBcRhsVectorAt (FloatArray& answer, TimeStep* stepN, CharTypeMode mode);
+
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)  = 0;
     /**
      * Computes the sub-matrix of interpolation matrix corresponding to single unknown.

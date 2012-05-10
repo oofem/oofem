@@ -96,17 +96,10 @@ TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
 void
 TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-        answer.resize(2);
-        answer.at(1) = V_u;
-        answer.at(2) = V_v;
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
-        answer.resize(1);
-        answer.at(1) = P_f;
+        answer.setValues(1, P_f);
     } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }

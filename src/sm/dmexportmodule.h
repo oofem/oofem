@@ -59,10 +59,10 @@ public:
     DofManExportModule(int n, EngngModel *e);
 
     /// Destructor
-    ~DofManExportModule();
+    virtual ~DofManExportModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    void doOutput(TimeStep *tStep);
+    virtual void doOutput(TimeStep *tStep);
     virtual const char *giveClassName() const { return "DofManExportModuleClass"; }
 
 protected:

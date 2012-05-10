@@ -61,15 +61,15 @@ class ParmetisLoadBalancer : public LoadBalancer
 protected:
 
  #ifdef __PARMETIS_MODULE
-    // Element numbering maps.
+    /// Element numbering maps.
     IntArray gToLMap, lToGMap;
     idxtype *elmdist;
     int myGlobNumOffset;
-    // Partition weights (user input).
+    /// Partition weights (user input).
     float *tpwgts;
-    // Array of DofManMode(s).
+    /// Array of DofManMode(s).
     IntArray dofManState;
-    // Array of dof man partitions.
+    /// Array of dof man partitions.
     std :: vector< IntArray >dofManPartitions;
     /// Partition vector of the locally-stored elements.
     IntArray elementPart;
@@ -77,7 +77,7 @@ protected:
 
 public:
     ParmetisLoadBalancer(Domain *d);
-    ~ParmetisLoadBalancer();
+    virtual ~ParmetisLoadBalancer();
 
     virtual void calculateLoadTransfer();
 

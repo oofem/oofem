@@ -58,7 +58,6 @@ namespace oofem {
 class QTruss1d : public StructuralElement
 {
 protected:
-    double length;
     static FEI1dQuad interpolation;
     int numberOfGaussPoints;
 

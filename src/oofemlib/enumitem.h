@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: enumitem.h
-//
-
 #ifndef enumitem_h
 #define enumitem_h
 

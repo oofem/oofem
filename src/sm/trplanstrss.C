@@ -519,21 +519,6 @@ TrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
 double TrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    /*   FloatMatrix* jacob ;
-     * FloatArray*  coord ;
-     * double       determinant,weight,thickness,volume ;
-     *
-     * coord       = aGaussPoint -> giveCoordinates() ;
-     * jacob       = this -> giveJacobianMatrixAt(coord) ;
-     * determinant = fabs (jacob->giveDeterminant()) ;
-     * weight      = aGaussPoint -> giveWeight() ;
-     * thickness   = this -> giveMaterial() -> give('t') ;
-     *
-     * volume      = determinant * weight * thickness ;
-     *
-     *
-     * return volume ; */
-
     double area, weight;
 
     weight  = aGaussPoint->giveWeight();
@@ -542,57 +527,6 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
     return 2.0 *area *weight *this->giveCrossSection()->give(CS_Thickness);
 }
 
-
-/*
- * FloatMatrix*  PlaneStress2d :: giveJacobianMatrixAt (FloatArray* coord)
- * // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver. Com-
- * // putes it if it does not exist yet.
- * {
- * Node         *node1,*node2,*node3,*node4 ;
- * double       x1,x2,x3,x4,y1,y2,y3,y4,ksi,eta ;
- *
- * if(jacobianMatrix)  jacobianMatrix->times(0.0);  // if exist zero it
- * else
- *   jacobianMatrix = new FloatMatrix(2,2);         // else create new one
- *
- * node1 = this -> giveNode(1) ;
- * node2 = this -> giveNode(2) ;
- * node3 = this -> giveNode(3) ;
- * node4 = this -> giveNode(4) ;
- * x1 = node1 -> giveCoordinate(1) ;
- * x2 = node2 -> giveCoordinate(1) ;
- * x3 = node3 -> giveCoordinate(1) ;
- * x4 = node4 -> giveCoordinate(1) ;
- * y1 = node1 -> giveCoordinate(2) ;
- * y2 = node2 -> giveCoordinate(2) ;
- * y3 = node3 -> giveCoordinate(2) ;
- * y4 = node4 -> giveCoordinate(2) ;
- * ksi= coord->at(1);
- * eta = coord->at(2);
- *
- * FloatArray derivx(numberOfNodes) , derivy(numberOfNodes);
- * derivx.at(1)= -0.25*(1-eta) ;
- * derivx.at(2)=  0.25*(1-eta) ;
- * derivx.at(3)=  0.25*(1+eta) ;
- * derivx.at(4)= -0.25*(1+eta) ;
- *
- * derivy.at(1)= -0.25*(1-ksi);
- * derivy.at(2)= -0.25*(1+ksi);
- * derivy.at(3)=  0.25*(1+ksi);
- * derivy.at(4)=  0.25*(1-ksi);
- *
- * jacobianMatrix->at(1,1) = derivx.at(1)*x1 + derivx.at(2)*x2 +
- *                           derivx.at(3)*x3 + derivx.at(4)*x4 ;
- * jacobianMatrix->at(1,2) = derivx.at(1)*y1 + derivx.at(2)*y2 +
- *                           derivx.at(3)*y3 + derivx.at(4)*y4 ;
- * jacobianMatrix->at(2,1) = derivy.at(1)*x1 + derivy.at(2)*x2 +
- *                           derivy.at(3)*x3 + derivy.at(4)*x4 ;
- * jacobianMatrix->at(2,2) = derivy.at(1)*y1 + derivy.at(2)*y2 +
- *                           derivy.at(3)*y3 + derivy.at(4)*y4 ;
- *
- * return jacobianMatrix ;
- * }
- */
 
 IRResultType
 TrPlaneStress2d :: initializeFrom(InputRecord *ir)
@@ -614,46 +548,6 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-/*
- * FloatArray*   TrPlaneStress2d :: ComputeBodyLoadVectorAt (TimeStep* stepN)
- * // Computes numerically the load vector of the receiver due to the body
- * // loads, at stepN.
- * {
- * double      dV, load;
- * GaussPoint* gp = NULL;
- * FloatArray  *answer,*f,*coord1 ;
- *
- * if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
- *    return NULL ;
- *
- * else {
- *    f = this -> ComputeResultingBodyForceAt(stepN) ;
- *    if (! f)                                           // nil resultant
- * return NULL ;
- *    else {
- * coord1             = new FloatArray(2) ;
- * coord1 -> at(1)    = 0 ;
- * coord1 -> at(2)    = 0 ;
- * gp                 = new GaussPoint(this,1,coord1,0.5) ;
- *
- * dV = this->computeVolumeAround(gp);             // 2.0*Area
- * answer = new FloatArray(6) ;
- *
- * load=f->at(1) * dV / 3.0;
- * answer->at(1)=load ;
- * answer->at(3)=load ;
- * answer->at(5)=load ;
- *
- * load=f->at(2) * dV / 3.0;
- * answer->at(2)=load ;
- * answer->at(4)=load ;
- * answer->at(6)=load ;
- *
- * delete f ;
- * delete gp;
- * return answer ;}}
- * }
- */
 
 double
 TrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
@@ -754,54 +648,9 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
 void
 TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(2);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
+    answer.setValues(2, D_u, D_v);
 }
 
-
-
-/*
- * int
- * TrPlaneStress2d :: computeGtoNRotationMatrix (FloatMatrix& answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * // return NULL if no trasformation necessary
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0;}
- *
- * answer.resize(this->computeNumberOfDofs(),this->computeNumberOfDofs());
- * answer.zero();
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*2+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * }
- * }
- *
- * return 1;
- * }
- */
 
 int
 TrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

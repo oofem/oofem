@@ -61,8 +61,7 @@ FEI1dQuad QTruss1d :: interpolation(1);
 QTruss1d :: QTruss1d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 // Constructor.
 {
-    numberOfDofMans     = 3;
-    length              = 0.;
+    numberOfDofMans = 3;
 }
 
 
@@ -80,13 +79,8 @@ QTruss1d :: initializeFrom(InputRecord *ir)
 
 void
 QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
 {
-    answer.resize(1);
-    answer.at(1) = D_u;
+    answer.setValues(1, D_u);
 }
 
 
@@ -134,6 +128,7 @@ QTruss1d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(1,3) = n.at(3);
 }
 
+
 void
 QTruss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 //
@@ -148,17 +143,12 @@ QTruss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 }
 
 
-
-
 double
 QTruss1d :: giveLength()
 // Returns the length of the receiver.
 {
-    length = interpolation.computeLength(FEIElementGeometryWrapper(this));
-    return length;
+    return interpolation.computeLength(FEIElementGeometryWrapper(this));
 }
-
-
 
 
 int

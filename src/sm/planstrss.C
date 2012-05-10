@@ -543,53 +543,9 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 void
 PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(2);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
+    answer.setValues(2, D_u, D_v);
 }
 
-
-/*
- * int
- * PlaneStress2d :: computeGtoNRotationMatrix (FloatMatrix &answer)
- * // returns transformation matrix from global coordinate set to
- * // nodal coordinate set
- * {
- * FloatMatrix *triplet;
- * int i,flag=0,ii;
- *
- * for (i=1; i<= numberOfNodes; i++)
- * flag += this->giveNode(i)->hasLocalCS ();
- * if (flag == 0) {answer.beEmptyMtrx(); return 0 ;}
- *
- * answer.resize (this->computeNumberOfDofs(),this->computeNumberOfDofs());
- * answer.zero();
- *
- * // loop over nodes
- * for (i=1; i<= numberOfNodes; i++) {
- * ii = (i-1)*2+1 ;
- * if (this->giveNode(i)->hasLocalCS ()) {
- * triplet = this->giveNode(i)->giveLocalCoordinateTriplet();
- * answer.at(ii,ii)     = triplet->at(1,1);
- * answer.at(ii,ii+1)   = triplet->at(1,2);
- * answer.at(ii+1,ii)   = triplet->at(2,1);
- * answer.at(ii+1,ii+1) = triplet->at(2,2);
- * } else {
- * // no transformation - unit matrix as
- * // transformation submatrix for node i
- * answer.at(ii,ii)     = 1.0;
- * answer.at(ii+1,ii+1) = 1.0;
- * }
- * }
- *
- * return 1;
- * }
- */
 
 int
 PlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

@@ -100,19 +100,8 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 
 void
 CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
 {
-    answer.resize(6);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
-    answer.at(4) = R_u;
-    answer.at(5) = R_v;
-    answer.at(6) = R_w;
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 

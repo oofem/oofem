@@ -287,15 +287,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
 void
 Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(3);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_w;
-    answer.at(3) = R_v;
+    answer.setValues(3, D_u, D_w, R_v);
 }
 
 

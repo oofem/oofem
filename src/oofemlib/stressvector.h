@@ -47,7 +47,6 @@ class FloatMatrix;
  */
 class StressVector : public StressStrainBaseVector
 {
-protected:
 public:
     /// Constructor. Creates zero value stress/strain vector for given material mode.
     StressVector(MaterialMode);

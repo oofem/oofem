@@ -73,14 +73,9 @@ QTrPlaneStressGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &
 
 {
     if ( inode <= nSecNodes ) {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = G_0;
+        answer.setValues(3, D_u, D_v, G_0);
     } else {
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+        answer.setValues(2, D_u, D_v);
     }
 }
 
@@ -151,4 +146,3 @@ QTrPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
     }
 }
 }
-

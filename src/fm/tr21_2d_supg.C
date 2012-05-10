@@ -116,33 +116,21 @@ TR21_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 }
 
 void
-TR21_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requsted from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
     if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
-        answer.resize(2);
-        answer.at(1) = V_u;
-        answer.at(2) = V_v;
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer.resize(1);
-            answer.at(1) = P_f;
+            answer.setValues(1, P_f);
         } else {
             answer.resize(0);
         }
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer.resize(3);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
-            answer.at(3) = P_f;
+            answer.setValues(3, V_u, V_v, P_f);
         } else {
-            answer.resize(2);
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
+            answer.setValues(2, V_u, V_v);
         }
     } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
@@ -1563,12 +1551,6 @@ TR21_2D_SUPG :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &l
 
     return 1;
 }
-
-
-
-
-#define POINT_TOL 1.e-3
-
 
 
 void

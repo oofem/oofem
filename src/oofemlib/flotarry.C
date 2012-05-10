@@ -225,7 +225,7 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
 
     this->resize(n);
     for ( int i = 0; i < n; i++ ) {
-        values [ i ] = max( a(i), b(i) );
+        this->values [ i ] = max( a(i), b(i) );
     }
 }
 
@@ -243,7 +243,7 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 
     this->resize(n);
     for ( int i = 0; i < n; i++ ) {
-        values [ i ] = min( a(i), b(i) );
+        this->values [ i ] = min( a(i), b(i) );
     }
 }
 
@@ -857,21 +857,6 @@ FloatArray :: givePackSize(CommunicationBuffer &buff) const
 }
 
 #endif
-
-double dotProduct(double *p1, double *p2, int i)
-// A non-member function. Returns the dot product of the first 'i' coef-
-// ficienst of the two arrays P1 and p2. This method applies to many
-// situations, eg row*column products with matrices.
-{
-    double answer;
-
-    answer = 0.;
-    while ( i-- ) {
-        answer += ( * p1++ ) * ( * p2++ );
-    }
-
-    return answer;
-}
 
 #ifdef IML_COMPAT
 

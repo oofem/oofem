@@ -39,12 +39,12 @@
 
 namespace oofem {
 /**
- * This class implements the base of a special lattice element following 
- * the concepts orginally developed by John Bolander. In this lattice 
- * framework, elements consists of rigid bodies connected by a set of axial 
- * tranversal and rotational springs at the position of the GP. 
- * In the case of an irregular arrangement of lattice elements, 
- * the position of the GP is not 
+ * This class implements the base of a special lattice element following
+ * the concepts orginally developed by John Bolander. In this lattice
+ * framework, elements consists of rigid bodies connected by a set of axial
+ * tranversal and rotational springs at the position of the GP.
+ * In the case of an irregular arrangement of lattice elements,
+ * the position of the GP is not
  * placed at the midpoint of the element, but the midpoint of the element's midcross-section.
  * There is no way to relate the element geometry to the position of the GP. Instead, this information
  * is part of the input.
@@ -54,51 +54,51 @@ namespace oofem {
 class LatticeStructuralElement : public StructuralElement
 {
 public:
-    LatticeStructuralElement(int, Domain *);                     // constructor
-    ~LatticeStructuralElement();                                 // destructor
+    LatticeStructuralElement(int n, Domain *d);
+    virtual ~LatticeStructuralElement();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     /**
      * Returns the cross-sectional area of the lattice element.
-     * @return cross-section area
+     * @return Cross-section area.
      */
     virtual double giveArea() { return 0; }
 
     /**
      * Returns the element length
-     * @return element length
+     * @return Element length.
      */
     virtual double giveLength() { return 0; }
 
-    /** 
+    /**
      * Returns the crack flag
-     * @return crack flag
+     * @return Crack flag.
      */
     virtual int giveCrackFlag() { return 0; }
 
     /**
      * Returns the number of crossSection nodes
-     * @return number of crosssection nodes 
+     * @return Number of crosssection nodes.
      */
     virtual int giveNumberOfCrossSectionNodes() { return 0; }
 
     /**
-     * @return crack width
+     * @return Crack width
      */
     virtual double giveCrackWidth() { return 0; }
 
     /**
-     * Returns the energy dissipation computed at the GaussPoint of the element. 
+     * Returns the energy dissipation computed at the GaussPoint of the element.
      * This function is used for the lattice specific vtk export.
      * @return dissipation
      */
     virtual double giveDissipation() { return 0; }
 
-    
-    /** 
+
+    /**
      * Usually computes interpolation function, which is not needed for the lattice elements.
-     * However, structural element requires implementation. 
+     * However, structural element requires implementation.
      */
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer){return ;}
 

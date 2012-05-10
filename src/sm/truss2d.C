@@ -259,8 +259,8 @@ Truss2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
-    cosine         = cos(pitch);
+    sine = sin( this->givePitch() );
+    cosine = cos(pitch);
 
     answer.at(1, 1) = cosine;
     answer.at(1, 2) = sine;
@@ -314,20 +314,12 @@ Truss2d :: initializeFrom(InputRecord *ir)
 void
 Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    // returns DofId mask array for inode element node.
-    // DofId mask array determines the dof ordering requested from node.
-    // DofId mask array contains the DofID constants (defined in cltypes.h)
-    // describing physical meaning of particular DOFs.
-    answer.resize(2);
     if ( cs_mode == 0 ) {
-        answer.at(1) = D_u;
-        answer.at(2) = D_w;
+        answer.setValues(2, D_u, D_w);
     } else if ( cs_mode == 1 ) {
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+        answer.setValues(2, D_u, D_v);
     } else if ( cs_mode == 2 ) {
-        answer.at(1) = D_v;
-        answer.at(2) = D_w;
+        answer.setValues(2, D_v, D_w);
     }
 }
 
