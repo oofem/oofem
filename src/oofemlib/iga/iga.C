@@ -341,7 +341,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
                 c [ 1 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * i;
 
                 for ( k = 0; k < 2; k++ ) {
-                    interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                    interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                     p [ k ].x = ( FPNum ) cg [ k ].at(1);
                     p [ k ].y = 0.;
                     p [ k ].z = 0.;
@@ -382,7 +382,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
                     c [ 3 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
 
                     for ( k = 0; k < 4; k++ ) {
-                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                         p [ k ].x = ( FPNum ) cg [ k ].at(1);
                         p [ k ].y = ( FPNum ) cg [ k ].at(2);
                         p [ k ].z = 0.;
@@ -505,7 +505,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
                         c [ 7 ].at(3) = knotVector [ 2 ] [ span->at(3) ] + dt * k;
 
                         for ( m = 0; m < 8; m++ ) {
-                            interp->local2global(cg [ m ], c [ m ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                            interp->local2global(cg [ m ], c [ m ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                             p [ m ].x = ( FPNum ) cg [ m ].at(1);
                             p [ m ].y = ( FPNum ) cg [ m ].at(2);
                             p [ m ].z = ( FPNum ) cg [ m ].at(3);
@@ -1079,7 +1079,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                     // interpolate displacements
                     d.beProductOf(N, ur);
 
-                    interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( elem, iRule->giveKnotSpan() ), 0.0);
+                    interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( elem, iRule->giveKnotSpan() ));
                     p [ k ].x = ( FPNum ) ( cg [ k ].at(1) + d.at(1) * defScale );
                     p [ k ].y = 0.;
                     p [ k ].z = 0.;
@@ -1137,7 +1137,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                         // interpolate displacements
                         d.beProductOf(N, ur);
 
-                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( elem, iRule->giveKnotSpan() ), 0.0);
+                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( elem, iRule->giveKnotSpan() ));
                         p [ k ].x = ( FPNum ) ( cg [ k ].at(1) + d.at(1) * defScale );
                         p [ k ].y = ( FPNum ) ( cg [ k ].at(2) + d.at(2) * defScale );
                         p [ k ].z = 0.;
@@ -1214,7 +1214,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                             // interpolate displacements
                             d.beProductOf(N, ur);
 
-                            interp->local2global(cg [ m ], c [ m ], FEIIGAElementGeometryWrapper( elem, iRule->giveKnotSpan() ), 0.0);
+                            interp->local2global(cg [ m ], c [ m ], FEIIGAElementGeometryWrapper( elem, iRule->giveKnotSpan() ));
                             p [ m ].x = ( FPNum ) ( cg [ m ].at(1) + d.at(1) * defScale );
                             p [ m ].y = ( FPNum ) ( cg [ m ].at(2) + d.at(2) * defScale );
                             p [ m ].z = ( FPNum ) ( cg [ m ].at(3) + d.at(3) * defScale );

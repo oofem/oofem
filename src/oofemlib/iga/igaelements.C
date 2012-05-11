@@ -188,7 +188,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
                     c [ 3 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
 
                     for ( k = 0; k < 4; k++ ) {
-                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                         p [ k ].x = ( FPNum ) cg [ k ].at(1);
                         p [ k ].y = ( FPNum ) cg [ k ].at(2);
                         p [ k ].z = 0.;
@@ -307,7 +307,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
                     c [ 3 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
 
                     for ( k = 0; k < 4; k++ ) {
-                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                         p [ k ].x = ( FPNum ) cg [ k ].at(1);
                         p [ k ].y = ( FPNum ) cg [ k ].at(2);
                         p [ k ].z = 0.;
@@ -499,7 +499,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
                     c [ 3 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
 
                     for ( k = 0; k < 4; k++ ) {
-                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                        interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                         p [ k ].x = ( FPNum ) cg [ k ].at(1);
                         p [ k ].y = ( FPNum ) cg [ k ].at(2);
                         p [ k ].z = 0.;
@@ -672,7 +672,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
                         c [ 7 ].at(3) = knotVector [ 2 ] [ span->at(3) ] + dw * m;
 
                         for ( k = 0; k < 8; k++ ) {
-                            interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ), 0.0);
+                            interp->local2global(cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ));
                             p [ k ].x = ( FPNum ) cg [ k ].at(1);
                             p [ k ].y = ( FPNum ) cg [ k ].at(2);
                             p [ k ].z = ( FPNum ) cg [ k ].at(3);
