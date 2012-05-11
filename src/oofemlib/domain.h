@@ -324,6 +324,9 @@ public:
     int giveNumberOfRegions() { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
     int giveNumberOfNonlocalBarriers() { return nonlocalBarierList->giveSize(); }
+    /// Returns number of random field generators
+    int giveNumberOfRandomFieldGenerators() { return randomFieldGeneratorList->giveSize(); }
+    
     int giveCorrespondingCoordinateIndex(int);
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -347,6 +350,8 @@ public:
     void resizeInitialConditions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize load time functions.
     void resizeLoadTimeFunctions(int _newSize);
+    /// Resizes the internal data structure to accommodate space for _newSize random field generators.
+    void resizeRandomFieldGenerators(int _newSize);
 
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setDofManager(int i, DofManager *obj);
@@ -364,6 +369,9 @@ public:
     void setInitialCondition(int i, InitialCondition *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setLoadTimeFunction(int i, LoadTimeFunction *obj);
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
+    void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
+    
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);
     /**

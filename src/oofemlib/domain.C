@@ -415,6 +415,7 @@ void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarierList->growTo
 void Domain :: resizeBoundaryConditions(int _newSize) { bcList->growTo(_newSize); }
 void Domain :: resizeInitialConditions(int _newSize) { icList->growTo(_newSize); }
 void Domain :: resizeLoadTimeFunctions(int _newSize) { loadTimeFunctionList->growTo(_newSize); }
+void Domain :: resizeRandomFieldGenerators(int _newSize) { randomFieldGeneratorList->growTo(_newSize); }
 
 void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
 void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); }
@@ -424,6 +425,7 @@ void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarierL
 void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList->put(i, obj); }
 void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList->put(i, obj); }
 void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunctionList->put(i, obj); }
+void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { randomFieldGeneratorList->put(i, obj); }
 
 void Domain :: clearBoundaryConditions() { bcList->clear(true); };
 
@@ -1306,6 +1308,8 @@ Domain :: giveErrorEstimator() {
   }									\
 }
 
+#define DOMAIN_NCOMP 9
+
 contextIOResultType
 Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -1321,7 +1325,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     if ( ( mode & CM_Definition ) ) {
-      long ncomp[7];
+      long ncomp[DOMAIN_NCOMP];
       ncomp[0]=this->giveNumberOfDofManagers();
       ncomp[1]=this->giveNumberOfElements();
       ncomp[2]=this->giveNumberOfMaterialModels();
@@ -1329,8 +1333,11 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
       ncomp[4]=this->giveNumberOfBoundaryConditions();
       ncomp[5]=this->giveNumberOfInitialConditions();
       ncomp[6]=this->giveNumberOfLoadTimeFunctions();
+      ncomp[7]=this->giveNumberOfNonlocalBarriers();
+      ncomp[8]=this->giveNumberOfRandomFieldGenerators();
+      
       // store number of components
-      if ( !stream->write (ncomp, 7) ) {
+      if ( !stream->write (ncomp, DOMAIN_NCOMP) ) {
         THROW_CIOERR(CIO_IOERR);
       }
     }
@@ -1348,9 +1355,13 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
       // store cross sections
       SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(),CrossSection,this->giveCrossSection);
       // store initial conditions
-      //SAVE_COMPONENTS(this->giveNumberOfInitialConditions(),InitialCondition,this->giveIc);
+      SAVE_COMPONENTS(this->giveNumberOfInitialConditions(),InitialCondition,this->giveIc);
       // store load time functions
       SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(),LoadTimeFunction,this->giveLoadTimeFunction);
+      // store nonlocal barriers
+      SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(),NonlocalBarrier,this->giveNonlocalBarrier);
+      // store random field generators
+      SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(),RandomFieldGenerator,this->giveRandomFieldGenerator);
     } // end if ( ( mode & CM_Definition ) ) {
 
 
@@ -1375,9 +1386,9 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     ErrorEstimator *ee;
     int ct;
     classType compId;
-    long ncomp[7];
+    long ncomp[DOMAIN_NCOMP];
 
-    int nnodes, nelem, nmat, ncs, nbc, nic, nltf;
+    int nnodes, nelem, nmat, ncs, nbc, nic, nltf, nnlb, nrfg;
 
 
     domainUpdated = false;
@@ -1389,7 +1400,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( ( mode & CM_Definition ) ) {
       // read number of components
-      if ( !stream->read(ncomp, 7) ) {
+      if ( !stream->read(ncomp, DOMAIN_NCOMP) ) {
         THROW_CIOERR(CIO_IOERR);
       }
 
@@ -1400,12 +1411,18 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
       nbc   = ncomp[4];
       nic   = ncomp[5];
       nltf  = ncomp[6];
+      nnlb  = ncomp[7];
+      nrfg  = ncomp[8];
 
       // clear receiver data
       dofManagerList->clear();
       elementList->clear();
       materialList->clear();
       bcList->clear();
+      icList->clear();
+      loadTimeFunctionList->clear();
+      nonlocalBarierList->clear();
+      randomFieldGeneratorList->clear();
       //this->clear();
 
 
@@ -1432,6 +1449,8 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
       nbc=this->giveNumberOfBoundaryConditions();
       nic=this->giveNumberOfInitialConditions();
       nltf=this->giveNumberOfLoadTimeFunctions();
+      nnlb=this->giveNumberOfNonlocalBarriers();
+      nrfg=this->giveNumberOfRandomFieldGenerators();
     }
 
     RESTORE_COMPONENTS(nnodes,DofManager,this->resizeDofManagers,CreateUsrDefDofManagerOfType,this->giveDofManager,this->setDofManager);
@@ -1442,8 +1461,10 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
       RESTORE_COMPONENTS(nmat,Material,this->resizeMaterials,CreateUsrDefMaterialOfType,this->giveMaterial,this->setMaterial);
       RESTORE_COMPONENTS(ncs,CrossSection,this->resizeCrossSectionModels,CreateUsrDefCrossSectionOfType,this->giveCrossSection,this->setCrossSection);
-      //RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
+      RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
       RESTORE_COMPONENTS(nltf,LoadTimeFunction,resizeLoadTimeFunctions,CreateUsrDefLoadTimeFunctionOfType,giveLoadTimeFunction,setLoadTimeFunction);
+      RESTORE_COMPONENTS(nnlb,NonlocalBarrier,resizeNonlocalBarriers,CreateUsrDefNonlocalBarrierOfType, giveNonlocalBarrier,setNonlocalBarrier);
+      RESTORE_COMPONENTS(nrfg,RandomFieldGenerator,resizeRandomFieldGenerators,CreateUsrDefRandomFieldGenerator,giveRandomFieldGenerator,setRandomFieldGenerator);
     }
 
     // restore error estimator data
