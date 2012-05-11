@@ -293,7 +293,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         beta = nlStatus->giveBeta();
 
         prodTensor.beTProductOf(SSaTensor, plasFlowDirec);
-        remoteNu = 1 / beta * prodTensor;
+        remoteNu.beScaled( 1.0 / beta, prodTensor);
         nsize = remoteNu.giveSize();
 
         for ( i = 1; i <= ncols; i++ ) {
@@ -327,7 +327,7 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     tempDam = computeDamage(gp, atTime);
     effStress = * nlStatus->giveTempEffectiveStress();
 
-    totalStress = ( 1 - tempDam ) * effStress;
+    totalStress.beScaled( 1.0 - tempDam, effStress);
 
     for ( i = 1; i <= 6; i++ ) {
         if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < pow(10.0, -8.0) ) {

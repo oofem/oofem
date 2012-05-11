@@ -105,7 +105,7 @@ MisesMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
     performPlasticityReturn(gp, totalStrain, mode);
     tempDam = this->computeDamage(gp, atTime);
     nlStatus->giveTempEffectiveStress(tempEffStress);
-    answer = ( 1 - tempDam ) * tempEffStress;
+    answer.beScaled( 1.0 - tempDam, tempEffStress);
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);

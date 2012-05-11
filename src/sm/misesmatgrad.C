@@ -493,7 +493,7 @@ MisesMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
     tempDam = computeDamage(gp, atTime);
     status->giveTempEffectiveStress(tempEffStress);
-    answer = ( 1 - tempDam ) * tempEffStress;
+    answer.beScaled( 1.0 - tempDam, tempEffStress);
     size = tempEffStress.giveSize();
     answer.resize(size + 1);
     answer.at(size + 1) = localCumPlastStrain;

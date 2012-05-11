@@ -125,6 +125,16 @@ FloatArray :: setValues(int n, ...)
 }
 
 
+void
+FloatArray :: beScaled(double s, const FloatArray &b)
+{
+    this->resize(b.size);
+    for ( int i = 0; i < this->size; ++i ) {
+        this->values [ i ] = s * b.values [ i ];
+    }
+}
+
+
 void FloatArray :: add(const FloatArray &b)
 // Performs the operation a=a+b, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of b. Returns the
@@ -162,11 +172,7 @@ void FloatArray :: add(const double factor, const FloatArray &b)
 // receiver's size is 0, adjusts its size to that of b.
 {
     if ( this->size == 0 ) {
-        this->resize(b.size);
-        for ( int i = 0; i < this->size; ++i ) {
-            this->values [ i ] = factor * b.values [ i ];
-        }
-
+        this->beScaled(factor, b);
         return;
     }
 

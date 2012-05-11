@@ -94,7 +94,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         nip = iRule->getNumberOfIntegrationPoints();
         for ( j = 0; j < nip; j++ ) {
             sourceElement->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
-            if ( norm(dam) > 1.e-3 ) {
+            if ( dam.computeNorm() > 1.e-3 ) {
                 state = 1; // damaged
             }
         }
@@ -130,10 +130,10 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                 elemFlag = 0;
                 for ( j = 0; j < nip; j++ ) {
                     element->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
-                    if ( state && ( norm(dam) > 1.e-3 ) ) {
+                    if ( state && ( dam.computeNorm() > 1.e-3 ) ) {
                         actualNumberOfPoints++;
                         elemFlag = 1;
-                    } else if ( ( state == 0 ) && ( norm(dam) < 1.e-3 ) ) {
+                    } else if ( ( state == 0 ) && ( dam.computeNorm() < 1.e-3 ) ) {
                         actualNumberOfPoints++;
                         elemFlag = 1;
                     }

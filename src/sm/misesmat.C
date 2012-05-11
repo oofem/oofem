@@ -251,7 +251,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
         FloatArray n = trialStressDev;
         n.times(2 * mi * dKappa / trialS);
         ////return map
-        s = trialStressDev - n;
+        s.beDifferenceOf(trialStressDev, n);
         kappa += sqrt(2. / 3.) * dKappa;
 
 

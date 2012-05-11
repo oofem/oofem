@@ -84,7 +84,7 @@ RankineMatNl :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     // in the iteration
     tempDam = this->computeDamage(gp, atTime);
     nlStatus->giveTempEffectiveStress(tempEffStress);
-    answer = ( 1. - tempDam ) * tempEffStress;
+    answer.beScaled( 1.0 - tempDam, tempEffStress);
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);

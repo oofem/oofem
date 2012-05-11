@@ -86,8 +86,7 @@ double Line :: computeDistanceTo(FloatArray *point) {
 }
 
 void Line :: computeProjection(FloatArray &answer) {
-    answer.resize(2);
-    answer = * vertices->at(2) - * vertices->at(1);
+    answer.beDifferenceOf(*vertices->at(2), *vertices->at(1));
 }
 
 double Line :: computeTangentialDistanceToEnd(FloatArray *point) {

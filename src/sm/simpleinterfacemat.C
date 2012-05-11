@@ -122,26 +122,30 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     case _2dInterface:
         answer.resize(2);
         shearStrain.at(1) = strainVector.at(2);
-        shearStress = shearStrain * this->kn - tempShearStressShift;
+        shearStress.beScaled(this->kn, shearStrain);
+        shearStress.subtract(tempShearStressShift);
         dp = shearStress.dotProduct(shearStress, 1);
         if ( dp > maxShearStress * maxShearStress ) {
             shearStress.times( maxShearStress / sqrt(dp) );
         }
 
-        tempShearStressShift = shearStrain * kn - shearStress;
+        tempShearStressShift.beScaled(this->kn, shearStrain);
+        tempShearStressShift.subtract(shearStress);
         answer.at(2) = shearStress.at(1);
         break;
     case _3dInterface:
         answer.resize(3);
         shearStrain.at(1) = strainVector.at(2);
         shearStrain.at(2) = strainVector.at(3);
-        shearStress = shearStrain * this->kn - tempShearStressShift;
+        shearStress.beScaled(this->kn, shearStrain);
+        shearStress.subtract(tempShearStressShift);
         dp = shearStress.dotProduct(shearStress, 2);
         if ( dp > maxShearStress * maxShearStress ) {
             shearStress.times( maxShearStress / sqrt(dp) );
         }
 
-        tempShearStressShift = shearStrain * kn - shearStress;
+        tempShearStressShift.beScaled(this->kn, shearStrain);
+        tempShearStressShift.subtract(shearStress);
         answer.at(2) = shearStress.at(1);
         answer.at(3) = shearStress.at(2);
         break;

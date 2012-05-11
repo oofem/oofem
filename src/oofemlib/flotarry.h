@@ -246,8 +246,14 @@ public:
      */
     void beVectorProductOf(const FloatArray &v1, const FloatArray &v2);
     /**
+     * Sets receiver to be @f$ a = s b @f$.
+     * @param s Scaling factor.
+     * @param b Vector to be scaled.
+     */
+    void beScaled(double s, const FloatArray &b);
+    /**
      * Adds array src to receiver. If the receiver's size is zero, it adjusts its size
-     * to size of src array. If recever's size is nonzero and different from src
+     * to size of src array. If receiver's size is nonzero and different from src
      * array size an error is generated.
      * @param src Array to add to receiver.
      */
