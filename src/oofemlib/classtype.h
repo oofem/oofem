@@ -418,6 +418,7 @@ enum classType {
 
     NonlocalBarrierClass,
     PolylineNonlocalBarrierClass,
+    SymmetryBarrierClass,
 
     PrimaryFieldClass,
     InternalVariableFieldClass,

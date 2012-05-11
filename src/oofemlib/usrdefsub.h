@@ -237,6 +237,14 @@ InitModule *CreateUsrDefInitModuleOfType(const char *name, int number, EngngMode
  */
 NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *name, int num, Domain *d);
 /**
+ * Creates new Instance of Nonlocal Barrier class corresponding to given name.
+ * @param type classType id.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(classType type, int num, Domain *d);
+/**
  * Creates new Instance of Random generator class corresponding to given name.
  * @param name Random generator keyword.
  * @param num  Component number.
@@ -286,6 +294,14 @@ Dof *CreateUsrDefDofOfType(classType type, int num, DofManager *d);
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(classType type, int num, Domain *d);
+/**
+ * Creates new instance of user defined initial condition  corresponding to given id.
+ * @param type Id determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+InitialCondition *CreateUsrDefInitialConditionOfType(classType type, int num, Domain *d);
 /**
  * Creates new instance of material mapping algorithm, corresponding to given MaterialMappingAlgorithmType.
  * @param type Id determining the type of new instance.

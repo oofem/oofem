@@ -55,6 +55,7 @@ template< typename T > CrossSection *csCreator(int n, Domain *d) { return new T(
 template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
 template< typename T > LoadTimeFunction *ltfCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
 //template < typename T > SparseMatrix* sparseMtrxCreator() { return new T(); }
 //template < typename T > SparseMatrix* sparseMtrxCreator(DSSMatrix::dssType t) { return new T(t); }
 
@@ -105,6 +106,11 @@ protected:
     std :: map < std :: string, LoadTimeFunction * ( * )(int, Domain *), CaseComp > ltfNameList;
     /// Associative container containing load time function creators with ltf id as key.
     std :: map < classType, LoadTimeFunction * ( * )(int, Domain *), CaseCompId > ltfIdList;
+    /// Associative container containing nonlocal barriers creators with barrier name as key.
+    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbNameList;
+
+    /// Associative container containing nonlocal barriers creators with ltf id as key.
+    std :: map < classType, NonlocalBarrier * ( * )(int, Domain *), CaseCompId > nlbIdList;
 
 public:
     // constructor, registers all classes
@@ -264,6 +270,29 @@ public:
         return ( ltfIdList.count(type) == 1 ) ? ltfIdList [ type ](number, domain) : NULL;
     }
     /**
+     * Creates new instance of nonlocal barrier corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  object's number.
+     * @param d    Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    NonlocalBarrier *createNonlocalBarrier(const char *aClass, int number, Domain *domain)
+    {
+        return ( nlbNameList.count(aClass) == 1 ) ? nlbNameList [ aClass ](number, domain) : NULL;
+    }
+    /**
+     * Creates new instance of nonlocal barrier corresponding to given id.
+     * @param type ClassId determining the type of new instance.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  object's number.
+     * @param d    Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    NonlocalBarrier *createNonlocalBarrier(classType type, int number, Domain *domain)
+    {
+        return ( nlbIdList.count(type) == 1 ) ? nlbIdList [ type ](number, domain) : NULL;
+    }
+    /**
      * Creates new instance of sparse mtrx corresponding to given keyword.
      * @param type SparseMtrxType id determining the type of new instance.
      * @param num  object's number.
@@ -298,6 +327,15 @@ public:
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
     ErrorEstimator *createErrorEstimator(ErrorEstimatorType type, int num, Domain *d);
+    /**
+     * Creates new instance of Initial Condition corresponding
+     * to given type.
+     * @param type classType id determining the type of new instance.
+     * @param number  object's number.
+     * @param d Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    InitialCondition *createInitialCondition(classType type, int num, Domain *d) ;
 
 
   };

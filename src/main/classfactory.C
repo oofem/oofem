@@ -48,6 +48,7 @@
 #include "materialclassfactory.h"
 #include "engngmodelclassfactory.h"
 #include "ltfclassfactory.h"
+#include "nonlocalbarrierclassfactory.h"
 
 #undef  REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)
@@ -56,6 +57,8 @@
 #include "dofclassfactory.h"
 #include "sparselinearsystemsolverclassfactory.h"
 #include "errorestimatorclassfactory.h"
+
+#include "initial.h"
 
 namespace oofem {
 ClassFactory :: ClassFactory() {
@@ -135,6 +138,16 @@ ClassFactory :: ClassFactory() {
 #define REGISTER_CLASS(_class, name, id) \
     ltfIdList [ id ] = ltfCreator< _class >;
 #include "ltfclassfactory.h"
+    // register nonlocal barriers
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, name, id) \
+    nlbNameList [ name ]  = nlbCreator< _class >;
+#include "nonlocalbarrierclassfactory.h"
+
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, name, id) \
+    nlbIdList [ id ] = nlbCreator< _class >;
+#include "nonlocalbarrierclassfactory.h"
 }
 
 SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)
@@ -217,9 +230,15 @@ case id: \
     return answer;
   }
 
-
-
-
+  InitialCondition * ClassFactory::createInitialCondition(classType type, int num, Domain *d)
+  {
+    if (type == InitialConditionClass) {
+      return new InitialCondition(num, d);
+    } else {
+      OOFEM_ERROR("ClassFactory::createInitialCondition: Unknown type\n");
+      return NULL;
+    }
+  }
 
 
 } // End namespace oofem

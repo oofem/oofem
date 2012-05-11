@@ -202,6 +202,11 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(classType type, in
 {
     return classFactory.createBoundaryCondition(type, number, domain);
 }
+// ================ IC CLASS FACTORY==================
+InitialCondition *CreateUsrDefInitialConditionOfType(classType type, int number, Domain *domain)
+{
+    return classFactory.createInitialCondition(type, number, domain);
+}
 
 // ================ CROSSSECTION CLASS FACTORY==================
 
@@ -273,7 +278,16 @@ ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, 
   return classFactory.createErrorEstimator(type,number,d);
 }
 
+// ================ Nonlocal Berrier CLASS FACTORY==================
+NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int number, Domain *domain)
+{
+  return classFactory.createNonlocalBarrier(aClass,number,domain);
+}
 
+NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(classType type, int number, Domain *domain)
+{
+  return classFactory.createNonlocalBarrier(type,number,domain);
+}
 
 //------------------OLD Style CreateUsrDef Functions-------------------------------------------
 
@@ -357,22 +371,6 @@ InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngMo
     }
 
     return ( initList.count(aClass) == 1 ) ? initList [ aClass ](number, emodel) : NULL;
-}
-
-
-template< typename T > NonlocalBarrier *barrierCreator(int n, Domain *d) { return ( new T(n, d) ); }
-std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > barrierList;
-
-NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int number, Domain *domain)
-{
-    if ( barrierList.size() == 0 ) {
-#ifdef __SM_MODULE
-        barrierList [ "polylinebarrier" ] = barrierCreator< PolylineNonlocalBarrier >;
-        barrierList [ "symmetrybarrier" ] = barrierCreator< SymmetryBarrier >;
-#endif //__SM_MODULE
-    }
-
-    return ( barrierList.count(aClass) == 1 ) ? barrierList [ aClass ](number, domain) : NULL;
 }
 
 

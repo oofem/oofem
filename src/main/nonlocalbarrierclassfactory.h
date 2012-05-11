@@ -32,47 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef symmetrybarrier_h
-#define symmetrybarrier_h
 
-#include "nonlocalbarrier.h"
-#include "domain.h"
 
-#include "flotarry.h"
-#include "flotmtrx.h"
+#ifdef __SM_MODULE
+ #include "polylinenonlocalbarrier.h"
+ #include "symmetrybarrier.h"
+#endif //__SM_MODULE
 
-namespace oofem {
-/**
- * Implementation of symmetry nonlocal barrier.
- * It allows to specify up to three planes (orthogonal ones) of symmetry
- * It then modifies the integration weights of source points to take into account
- * symmetry of the averaged field.
- */
-class SymmetryBarrier : public NonlocalBarrier
-{
-protected:
-    FloatArray origin;
-    FloatArray normals;
-    IntArray mask;
-    FloatMatrix lcs;
 
-public:
-    /**
-     * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param n Element's number
-     * @param d Pointer to the domain to which element belongs.
-     */
-    SymmetryBarrier(int n, Domain *d);
-    /// Destructor.
-    virtual ~SymmetryBarrier();
+#ifdef __SM_MODULE
+REGISTER_CLASS(PolylineNonlocalBarrier, "polylinebarrier", PolylineNonlocalBarrierClass)
+REGISTER_CLASS(SymmetryBarrier, "symmetrybarrier", SymmetryBarrierClass)
+#endif //__SM_MODULE
 
-    virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                                 bool &shieldFlag, NonlocalMaterialExtensionInterface *nei);
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual const char *giveClassName() const { return "SymmetryBarrier"; }
-    virtual classType giveClassID() const { return SymmetryBarrierClass; }
-};
-} // end namespace oofem
-#endif // symmetrybarrier_h
