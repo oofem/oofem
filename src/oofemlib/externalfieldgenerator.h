@@ -61,6 +61,7 @@ public:
     virtual void generateRandomValue(double &value, FloatArray *position);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual classType giveClassID() const { return ExternalFieldGeneratorClass; }
 };
 } // end namespace oofem
 

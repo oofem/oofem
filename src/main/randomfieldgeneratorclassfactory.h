@@ -32,41 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef randomfieldgenerator_h
-#define randomfieldgenerator_h
 
-#include "flotarry.h"
-#include "gausspnt.h"
 
-namespace oofem {
+#ifdef __SM_MODULE
+ #include "localgaussianrandomgenerator.h"
+ #include "externalfieldgenerator.h"
+#endif //__SM_MODULE
 
-class RandomFieldGenerator : public FEMComponent
-{
-public:
-    /// Constructor. Creates empty RandomFieldGenerator.
-    RandomFieldGenerator(int n, Domain *d) : FEMComponent (n, d) {}
-    /// Destructor.
-    virtual ~RandomFieldGenerator() {}
-    /**
-     * Generates random value.
-     */
-    virtual void generateRandomValue(double &value, FloatArray *position) {; }
-    virtual void generateRandomValueAt(double &value, GaussPoint *gp) {
-        FloatArray globalCoordinates;
-        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveLocalCoordinates() ) ) ) {
-            this->generateRandomValue(value, & globalCoordinates);
-        } else {
-            OOFEM_ERROR("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
-        }
-    }
-    /**
-     * Initializes the receiver.
-     * @see{FEMComponent::initializeFrom}
-     */
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "RandomFieldGenerator"; }
-    virtual classType giveClassID() const { return RandomFieldGeneratorClass; }
-};
-} // end namespace oofem
-#endif
+
+#ifdef __SM_MODULE
+REGISTER_CLASS(LocalGaussianRandomGenerator, "localgaussrandomgenerator", LocalGaussianRandomGeneratorClass)
+REGISTER_CLASS(ExternalFieldGenerator, "externalfieldgenerator", ExternalFieldGeneratorClass)
+#endif //__SM_MODULE
+

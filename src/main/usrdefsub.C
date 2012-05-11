@@ -87,14 +87,6 @@
 // init modules
  #include "gpinitmodule.h"
 
-// nonlocal barriers
- #include "polylinenonlocalbarrier.h"
- #include "symmetrybarrier.h"
-
-// random generators
- #include "localgaussianrandomgenerator.h"
- #include "externalfieldgenerator.h"
-
 // mesher interfaces
  #include "t3dinterface.h"
  #include "targe2interface.h"
@@ -278,7 +270,7 @@ ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, 
   return classFactory.createErrorEstimator(type,number,d);
 }
 
-// ================ Nonlocal Berrier CLASS FACTORY==================
+// ================ Nonlocal Barrier CLASS FACTORY==================
 NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int number, Domain *domain)
 {
   return classFactory.createNonlocalBarrier(aClass,number,domain);
@@ -288,6 +280,18 @@ NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(classType type, int number, D
 {
   return classFactory.createNonlocalBarrier(type,number,domain);
 }
+
+// ================ Random Field Generator CLASS FACTORY==================
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int number, Domain *domain)
+{
+  return classFactory.createRandomFieldGenerator(aClass,number,domain);
+}
+
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(classType type, int number, Domain *domain)
+{
+  return classFactory.createRandomFieldGenerator(type,number,domain);
+}
+
 
 //------------------OLD Style CreateUsrDef Functions-------------------------------------------
 
@@ -371,22 +375,6 @@ InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngMo
     }
 
     return ( initList.count(aClass) == 1 ) ? initList [ aClass ](number, emodel) : NULL;
-}
-
-
-template< typename T > RandomFieldGenerator *randomFieldCreator(int n, Domain *d) { return ( new T(n, d) ); }
-std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > randomFieldList;
-
-RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int number, Domain *domain)
-{
-    if ( randomFieldList.size() == 0 ) {
-#ifdef __SM_MODULE
-        randomFieldList [ "localgaussrandomgenerator" ] = randomFieldCreator< LocalGaussianRandomGenerator >;
-        randomFieldList [ "externalfieldgenerator" ] = randomFieldCreator< ExternalFieldGenerator >;
-#endif
-    }
-
-    return ( randomFieldList.count(aClass) == 1 ) ? randomFieldList [ aClass ](number, domain) : NULL;
 }
 
 

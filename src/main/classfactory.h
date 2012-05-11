@@ -56,6 +56,7 @@ template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, 
 template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
 template< typename T > LoadTimeFunction *ltfCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
 //template < typename T > SparseMatrix* sparseMtrxCreator() { return new T(); }
 //template < typename T > SparseMatrix* sparseMtrxCreator(DSSMatrix::dssType t) { return new T(t); }
 
@@ -108,9 +109,12 @@ protected:
     std :: map < classType, LoadTimeFunction * ( * )(int, Domain *), CaseCompId > ltfIdList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbNameList;
-
-    /// Associative container containing nonlocal barriers creators with ltf id as key.
+    /// Associative container containing nonlocal barriers creators with barrier id as key.
     std :: map < classType, NonlocalBarrier * ( * )(int, Domain *), CaseCompId > nlbIdList;
+    /// Associative container containing random field generator creators with names as key.
+    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgNameList;
+    /// Associative container containing random field generator creators with class id as key.
+    std :: map < classType, RandomFieldGenerator * ( * )(int, Domain *), CaseCompId > rfgIdList;
 
 public:
     // constructor, registers all classes
@@ -291,6 +295,29 @@ public:
     NonlocalBarrier *createNonlocalBarrier(classType type, int number, Domain *domain)
     {
         return ( nlbIdList.count(type) == 1 ) ? nlbIdList [ type ](number, domain) : NULL;
+    }
+    /**
+     * Creates new instance of random field generator corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  object's number.
+     * @param d    Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    RandomFieldGenerator *createRandomFieldGenerator(const char *aClass, int number, Domain *domain)
+    {
+        return ( rfgNameList.count(aClass) == 1 ) ? rfgNameList [ aClass ](number, domain) : NULL;
+    }
+    /**
+     * Creates new instance of random field generator corresponding to given id.
+     * @param type ClassId determining the type of new instance.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  object's number.
+     * @param d    Domain assigned to new object.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    RandomFieldGenerator *createRandomFieldGenerator(classType type, int number, Domain *domain)
+    {
+        return ( rfgIdList.count(type) == 1 ) ? rfgIdList [ type ](number, domain) : NULL;
     }
     /**
      * Creates new instance of sparse mtrx corresponding to given keyword.

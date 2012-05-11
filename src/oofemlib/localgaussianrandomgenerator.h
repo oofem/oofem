@@ -64,7 +64,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "LocalGaussianRandomGenerator"; }
-
+    virtual classType giveClassID() const { return LocalGaussianRandomGeneratorClass; }
 protected:
     /**
      * Computes pseudo-random numbers.

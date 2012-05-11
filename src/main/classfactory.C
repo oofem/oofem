@@ -49,6 +49,7 @@
 #include "engngmodelclassfactory.h"
 #include "ltfclassfactory.h"
 #include "nonlocalbarrierclassfactory.h"
+#include "randomfieldgeneratorclassfactory.h"
 
 #undef  REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)
@@ -148,6 +149,16 @@ ClassFactory :: ClassFactory() {
 #define REGISTER_CLASS(_class, name, id) \
     nlbIdList [ id ] = nlbCreator< _class >;
 #include "nonlocalbarrierclassfactory.h"
+    // register random field generators
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, name, id) \
+    rfgNameList [ name ]  = rfgCreator< _class >;
+#include "randomfieldgeneratorclassfactory.h"
+
+#undef REGISTER_CLASS
+#define REGISTER_CLASS(_class, name, id) \
+    rfgIdList [ id ] = rfgCreator< _class >;
+#include "randomfieldgeneratorclassfactory.h"
 }
 
 SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)

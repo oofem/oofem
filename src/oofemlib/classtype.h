@@ -420,6 +420,10 @@ enum classType {
     PolylineNonlocalBarrierClass,
     SymmetryBarrierClass,
 
+    RandomFieldGeneratorClass,
+    LocalGaussianRandomGeneratorClass,
+    ExternalFieldGeneratorClass,
+
     PrimaryFieldClass,
     InternalVariableFieldClass,
 

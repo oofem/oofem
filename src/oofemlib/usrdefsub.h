@@ -252,6 +252,14 @@ NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(classType type, int num, Doma
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *name, int num, Domain *d);
+/**
+ * Creates new Instance of Random generator class corresponding to given name.
+ * @param type classType id of generator.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(classType type, int num, Domain *d);
 
 /**
  * Creates new instance of user defined integration rule corresponding to given keyword.
