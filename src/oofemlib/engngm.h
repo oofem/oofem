@@ -797,7 +797,6 @@ public:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
             CharType type, const UnknownNumberingScheme &s, Domain *domain);
 
-protected:
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
      * This routine is simple a convenient call to all three subroutines, since this is most likely what any engineering model will want to do.
@@ -826,9 +825,9 @@ protected:
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    virtual double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                                 CharType type, ValueModeType mode,
-                                                 const UnknownNumberingScheme &s, Domain *domain);
+    double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                         CharType type, ValueModeType mode,
+                                         const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -861,6 +860,7 @@ protected:
                                       CharType type, ValueModeType mode,
                                       const UnknownNumberingScheme &s, Domain *domain);
 
+protected:
 #ifdef __PARALLEL_MODE
     /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.

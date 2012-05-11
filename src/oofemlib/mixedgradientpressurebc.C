@@ -222,6 +222,14 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
 }
 
 
+void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
+{
+    vol = this->giveVolDof()->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+    this->domain->giveEngngModel()->assembleVector(sigmaDev, tStep, eid,
+        InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+}
+
+
 void MixedGradientPressureBC :: computeTangents(SparseLinearSystemNM *solver, 
     SparseMtrx *Kff, SparseMtrx *Kfp, SparseMtrx *Kpf, SparseMtrx *Kpp,
     FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp)

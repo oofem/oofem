@@ -74,6 +74,10 @@ void FE2SinteringMaterial::giveRealStressVector(FloatArray &answer, MatResponseF
 
     bool success = ms->giveRVE()->computeMacroStress(answer, strainRate, tStep);
 
+    //ms->giveBC()->setPrescribedDeviatoricGradientFromVoigt(strainRate);
+    //bool success = ms->rve()->solveYourselfAt(tStep);
+    //ms->giveBC()->
+
     if (success) {
         ms->letTempStressVectorBe(answer);
         ms->letTempStrainVectorBe(strain);
@@ -100,7 +104,8 @@ void FE2SinteringMaterial::givePlaneStressStiffMtrx(FloatMatrix &answer, MatResp
         rve->computeMacroTangent(answer, tStep);
         answer.times(1 / tStep->giveTimeIncrement());
 
-#if 0 // Numerical ATS for debugging
+#if 0
+        // Numerical ATS for debugging
         FloatArray tempStrain = ms->giveTempStrainVector();
         FloatArray stress, strain, sig11, sig22, sig12, sig;
         giveRealStressVector (stress, form, gp, tempStrain, tStep);

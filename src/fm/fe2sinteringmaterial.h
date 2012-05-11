@@ -54,7 +54,7 @@ class FE2SinteringMaterialStatus : public StructuralMaterialStatus
 protected:
     StokesFlowStressHomogenization *rve;
 
-	double voffraction;
+    double voffraction;
 
 public:
     /**
@@ -109,10 +109,10 @@ public:
      */
     FE2SinteringMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
     /// Destructor.
-    ~FE2SinteringMaterial() { }
+    virtual ~FE2SinteringMaterial() { }
 
-    virtual void giveRealStressVector (FloatArray &answer, MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
-    virtual void givePlaneStressStiffMtrx (FloatMatrix &answer, MatResponseForm, MatResponseMode, GaussPoint *gp, TimeStep *atTime);
+    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &, TimeStep *tStep);
+    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

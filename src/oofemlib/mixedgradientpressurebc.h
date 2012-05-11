@@ -124,7 +124,16 @@ public:
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     virtual void scale(double s) { devGradient.times(s); pressure *= s; }
-    
+
+    /**
+     * Computes the homogenized fields through sensitivity analysis.
+     * @param[out] stressDev Computes the homogenized deviatoric stress.
+     * @param[out] vol Computes the homogenized volumetric gradient.
+     * @param eid Equation ID that fields belong to.
+     * @param tStep Time step for which field to obtain.
+     */
+    void computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep);
+
     /**
      * Computes the macroscopic tangents through sensitivity analysis.
      * @param solver Linear solver to use for sensitivity problems.
