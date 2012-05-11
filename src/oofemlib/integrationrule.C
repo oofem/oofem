@@ -203,7 +203,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         }
 
         // write gp data
-        if ( ( iores = gp->giveCrossSection()->saveContext(stream, mode, gp) ) != CIO_OK ) {
+        if ( ( iores = gp->giveCrossSection()->saveIPContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -301,7 +301,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
         // read gp data
         gp = gaussPointArray [ i ];
-        if ( ( iores = gp->giveCrossSection()->restoreContext(stream, mode, gp) ) != CIO_OK ) {
+        if ( ( iores = gp->giveCrossSection()->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
