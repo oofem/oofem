@@ -39,7 +39,6 @@
  #include <stdio.h>
 #endif
 #include "nummet.h"
-#include "skyline.h"
 #include "flotarry.h"
 
 #include "nmstatus.h"

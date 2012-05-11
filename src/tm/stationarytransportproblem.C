@@ -34,8 +34,6 @@
 
 #include "stationarytransportproblem.h"
 #include "nummet.h"
-#include "ldltfact.h"
-#include "imlsolver.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
@@ -62,15 +60,9 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(TimeStep *atT
         return nMethod;
     }
 
-    SparseLinearSystemNM *nm;
-    if ( solverType == ST_Direct ) {
-        nm = ( SparseLinearSystemNM * ) new LDLTFactorization(1, this->giveDomain(1), this);
-        nMethod = nm;
-        return nm;
-    } else {
-        nm = ( SparseLinearSystemNM * ) new IMLSolver(1, this->giveDomain(1), this);
-        nMethod = nm;
-        return nm;
+    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    if ( nMethod == NULL ) {
+        _error("giveNumericalMethod: linear solver creation failed");
     }
 }
 

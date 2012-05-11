@@ -32,26 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "ldltfact.h"
-#include "iml/imlsolver.h"
-#include "spoolessolver.h"
-#include "petscsolver.h"
-#include "dsssolver.h"
-#ifdef __PARALLEL_MODE
- #include "fetisolver.h"
-#endif
+#ifndef iml_h
+#define iml_h
 
-
-REGISTER_CLASS(LDLTFactorization, ST_Direct)
-REGISTER_CLASS(IMLSolver, ST_IML)
-REGISTER_CLASS(SpoolesSolver, ST_Spooles)
-REGISTER_CLASS(PetscSolver, ST_Petsc)
-
-#ifdef __PARALLEL_MODE
-REGISTER_CLASS(FETISolver, ST_Feti)
-#endif
-
-#ifdef __DSS_MODULE
-REGISTER_CLASS(DSSSolver, ST_DSS)
-#endif
-
+namespace oofem {
+/// Turns on IML++ compilation support.
+#define IML_COMPAT
+} // end namespace oofem
+#endif // iml_h

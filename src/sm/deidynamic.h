@@ -39,7 +39,6 @@
  #include <stdio.h>
 #endif
 #include "structengngmodel.h"
-#include "skyline.h"
 
 namespace oofem {
 

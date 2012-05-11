@@ -34,8 +34,6 @@
 
 #include "supg.h"
 #include "nummet.h"
-#include "ldltfact.h"
-#include "imlsolver.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"

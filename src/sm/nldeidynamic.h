@@ -36,7 +36,6 @@
 #define nldeidynamic_h
 
 #include "structengngmodel.h"
-#include "skyline.h"
 
 #include "flotarry.h"
 #include "flotmtrx.h"

@@ -39,8 +39,6 @@
 #endif
 
 #include "verbose.h"
-#include "ldltfact.h"
-#include "imlsolver.h"
 #include "timestep.h"
 #include "flotmtrx.h"
 #include "mathfem.h"

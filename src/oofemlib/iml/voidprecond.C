@@ -32,26 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "ldltfact.h"
-#include "iml/imlsolver.h"
-#include "spoolessolver.h"
-#include "petscsolver.h"
-#include "dsssolver.h"
-#ifdef __PARALLEL_MODE
- #include "fetisolver.h"
-#endif
 
 
-REGISTER_CLASS(LDLTFactorization, ST_Direct)
-REGISTER_CLASS(IMLSolver, ST_IML)
-REGISTER_CLASS(SpoolesSolver, ST_Spooles)
-REGISTER_CLASS(PetscSolver, ST_Petsc)
+#include "voidprecond.h"
 
-#ifdef __PARALLEL_MODE
-REGISTER_CLASS(FETISolver, ST_Feti)
-#endif
+namespace oofem {
+VoidPreconditioner :: VoidPreconditioner(const SparseMtrx &a, InputRecord &attributes) : Preconditioner(a, attributes)
+{ }
 
-#ifdef __DSS_MODULE
-REGISTER_CLASS(DSSSolver, ST_DSS)
-#endif
-
+VoidPreconditioner :: VoidPreconditioner() : Preconditioner()
+{ }
+} // end namespace oofem

@@ -32,26 +32,34 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "ldltfact.h"
-#include "iml/imlsolver.h"
-#include "spoolessolver.h"
-#include "petscsolver.h"
-#include "dsssolver.h"
-#ifdef __PARALLEL_MODE
- #include "fetisolver.h"
-#endif
+#ifndef voidprecond_h
+#define voidprecond_h
 
+#include "flotarry.h"
+#include "sparsemtrx.h"
+#include "precond.h"
 
-REGISTER_CLASS(LDLTFactorization, ST_Direct)
-REGISTER_CLASS(IMLSolver, ST_IML)
-REGISTER_CLASS(SpoolesSolver, ST_Spooles)
-REGISTER_CLASS(PetscSolver, ST_Petsc)
+namespace oofem {
+/**
+ * Class implementing void preconditioner.
+ */
+class VoidPreconditioner : public Preconditioner
+{
+private:
 
-#ifdef __PARALLEL_MODE
-REGISTER_CLASS(FETISolver, ST_Feti)
-#endif
+public:
+    /// Constructor. Creates the empty preconditioner.
+    VoidPreconditioner(const SparseMtrx &a, InputRecord &attributes);
+    /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
+    VoidPreconditioner();
+    /// Destructor
+    ~VoidPreconditioner(void) { };
 
-#ifdef __DSS_MODULE
-REGISTER_CLASS(DSSSolver, ST_DSS)
-#endif
+    void init(const SparseMtrx &a) { };
+    void solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; }
+    void trans_solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; };
 
+    virtual const char *giveClassName() const { return "VoidPreconditioner"; }
+};
+} // end namespace oofem
+#endif // voidprecond_h

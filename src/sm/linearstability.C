@@ -37,9 +37,6 @@
 
 #include "linearstability.h"
 #include "nummet.h"
-#include "subspaceit.h"
-#include "inverseit.h"
-#include "ldltfact.h"
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
@@ -54,7 +51,6 @@
 
 #include "verbose.h"
 #include "flotarry.h"
-#include "skyline.h"
 #include "usrdefsub.h"
 #include "datastream.h"
 
@@ -83,10 +79,12 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
         return nMethodLS;
     }
 
-    SparseLinearSystemNM *nm;
-    nm = ( SparseLinearSystemNM * ) new LDLTFactorization(1, this->giveDomain(1), this);
-    nMethodLS = nm;
-    return nm;
+    nMethodLS = CreateUsrDefSparseLinSolver(ST_Direct, 1, this->giveDomain(1), this); ///@todo Support other solvers
+    if ( nMethodLS == NULL ) {
+        _error("giveNumericalMethodForLinStaticProblem:  solver creation failed");
+    }
+
+    return nMethodLS;
 }
 
 IRResultType
@@ -237,7 +235,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // first step - solve linear static problem
         //
-        stiffnessMatrix = new Skyline();
+        stiffnessMatrix = CreateUsrDefSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //

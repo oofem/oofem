@@ -44,7 +44,6 @@
  #include <stdio.h>
 #endif
 #include "sparsegeneigenvalsystemnm.h"
-#include "skyline.h"
 #include "flotarry.h"
 
 namespace oofem {

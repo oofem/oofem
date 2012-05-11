@@ -35,13 +35,15 @@
 #include "sparsemtrx.h"
 #include "skyline.h"
 #include "skylineu.h"
-#include "compcol.h"
-#include "dyncompcol.h"
-#include "symcompcol.h"
-#include "dyncomprow.h"
 #include "spoolessparsemtrx.h"
 #include "petscsparsemtrx.h"
 #include "dss.h"
+#ifdef __IML_MODULE
+ #include "iml/compcol.h"
+ #include "iml/dyncompcol.h"
+ #include "iml/symcompcol.h"
+ #include "iml/dyncomprow.h"
+#endif
 
 REGISTER_CLASS(Skyline, SMT_Skyline)
 REGISTER_CLASS(SkylineUnsym, SMT_SkylineU)

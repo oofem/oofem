@@ -574,8 +574,8 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 void
 Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-  answer.times(this->giveCrossSection()->give(CS_Area));
+    StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times(this->giveCrossSection()->give(CS_Area));
 }
 
 

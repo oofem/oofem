@@ -34,7 +34,6 @@
 
 #include "deidynamic.h"
 #include "nummet.h"
-#include "ldltfact.h"
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
@@ -50,18 +49,13 @@
 namespace oofem {
 #define ZERO_MASS  1.E-10   // unit dependent !!!!
 
-DEIDynamic :: ~DEIDynamic()  { }
+DEIDynamic :: ~DEIDynamic() { }
 
 NumericalMethod *DEIDynamic :: giveNumericalMethod(TimeStep *)
 // only one has reason for DEIDynamic
 //     - SolutionOfLinearEquations
 
 {
-    /*  if (nMethod) return nMethod ;
-     * NumericalMethod* nm;
-     * nm = (NumericalMethod*) new LDLTFactorization (1,domain,this);
-     * nMethod = nm;
-     * return nm; */
     return NULL;  // not necessary here - diagonal matrix is used-simple inversion
 }
 

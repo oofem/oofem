@@ -91,16 +91,6 @@ LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     }
 
     // solving
-    // depends on method used (direct or iterative ), on used matrix storage type ...
-    /*
-     * #if defined(skyline_h)
-     * x = A -> factorized()
-     *
-     * -> forwardReductionWith(x)
-     * -> diagonalScalingWith (x)
-     * -> backSubstitutionWith(x) ;
-     */
-    // skyline2.h version
     A->factorized()->backSubstitutionWith(* x);
 
     return NM_Success;

@@ -44,10 +44,10 @@
 #include "freestor.h"
 #include "compiler.h"
 
-#include "iml.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "error.h"
+#include "iml/iml.h"
 
 #ifndef __MAKEDEPEND
  #include <stdlib.h>

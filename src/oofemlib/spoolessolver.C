@@ -436,65 +436,6 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     /*--------------------------------------------------------------------*/
     return ( 1 );
 }
-/*--------------------------------------------------------------------*/
 
-
-
-/*
- * // check preconditioner
- * if (M) {
- * if ((Lhs != A) || (this->lhsVersion != A->giveVersion())) M->init(*Lhs);
- * } else {
- * if (precondType==IML_DiagPrec)
- * M = new DiagPreconditioner (*A, precondAttributes);
- * else if ( precondType==IML_VoidPrec)
- * M = new VoidPreconditioner (*A, precondAttributes);
- * else if ( precondType==IML_ILUPrec)
- * if (A->giveType() == SMT_DynCompRow) {
- *  M = new CompRow_ILUPreconditioner (*A, precondAttributes);
- * } else {
- *  M = new CompCol_ILUPreconditioner (*A, precondAttributes);
- * }
- * else if ( precondType==IML_ICPrec)
- * M = new CompCol_ICPreconditioner (*A, precondAttributes);
- * else _error ("setSparseMtrxAsComponent: unknown preconditioner type");
- * }
- *
- * Lhs = A;
- * this->lhsVersion = A->giveVersion();
- *
- *#ifdef TIME_REPORT
- * //clock_t tstart = clock();
- * oofem_timeval tstart;
- * ::getUtime(tstart);
- *#endif
- *
- *
- * if (solverType == ST_CG) {
- * int mi = this->maxite;
- * double t = this->tol;
- * result = CG (*Lhs, *x, *b, *M, mi, t);
- * printf ("\nCG(%s): flag=%d, nite %d, achieved tol. %g",M->giveClassName(), result, mi,t);
- * } else if (solverType == ST_GMRES) {
- * int mi = this->maxite, restart = 100;
- * double t = this->tol;
- * FloatMatrix H (restart+1, restart);   // storage for upper Hesenberg
- * result = GMRES (*Lhs, *x, *b, *M, H, restart, mi, t);
- * printf ("\nGMRES(%s): flag=%d, nite %d, achieved tol. %g",M->giveClassName(), result, mi,t);
- * } else {
- * _error("solveYourselfAt: unknown lsover type");
- * }
- *
- *#ifdef TIME_REPORT
- * oofem_timeval ut;
- * ::getRelativeUtime (ut, tstart);
- * printf ("\nIMLSolver info: user time consumed by solution: %.2fs\n", (double)(ut.tv_sec+ut.tv_usec/(double)OOFEM_USEC_LIM));
- *#endif
- *
- *
- * //solved = 1;
- * return NM_Success;
- * }
- */
 } // end namespace oofem
 #endif //ifdef __SPOOLES_MODULE

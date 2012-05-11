@@ -34,7 +34,6 @@
 
 #include "diidynamic.h"
 #include "nummet.h"
-#include "ldltfact.h"
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
@@ -43,7 +42,6 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "verbose.h"
-#include "skyline.h"
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
 #include "usrdefsub.h"

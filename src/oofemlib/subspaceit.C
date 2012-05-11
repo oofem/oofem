@@ -33,10 +33,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file subspaceit.cc
-//
-
 //#define DETAILED_REPORT
 
 #include "subspaceit.h"
@@ -48,10 +44,9 @@
 
 #include "verbose.h"
 #include "flotmtrx.h"
-#include "skyline.h"
 #include "flotarry.h"
-#include "gjacobi.h"
 #include "mathfem.h"
+#include "gjacobi.h"
 
 namespace oofem {
 SubspaceIteration ::  SubspaceIteration(int i, Domain *d, EngngModel *m) :

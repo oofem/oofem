@@ -33,10 +33,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file subspaceit.cc
-//
-
 #include "inverseit.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
@@ -46,9 +42,8 @@
 
 #include "verbose.h"
 #include "flotmtrx.h"
-#include "skyline.h"
 #include "flotarry.h"
-#include "gjacobi.h"
+#include "sparsemtrx.h"
 #include "mathfem.h"
 
 namespace oofem {
@@ -68,7 +63,6 @@ InverseIteration ::  ~InverseIteration() { }
 
 NM_Status
 InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
-//void  SubspaceIteration :: solveYourselfAt (TimeStep* tNow)
 //
 //
 //

@@ -80,7 +80,6 @@ DSSSolver :: initializeFrom(InputRecord *ir)
 //
 //
 {
-    //IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_IMLSolver_lstype, "lstype"); // Macro
     return IRRT_OK;
 }
 } // end namespace oofem

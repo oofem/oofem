@@ -43,10 +43,10 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
-#include "iml.h"
 #include "equationid.h"
 #include "sparsemtrxtype.h"
 #include "unknownnumberingscheme.h"
+#include "iml/iml.h"
 
 namespace oofem {
 class EngngModel;
@@ -65,6 +65,7 @@ class SparseMtrx : public Matrix
 {
 public:
     typedef long SparseMtrxVersionType;
+
 protected:
     /**
      * Allows to track if receiver changes.
@@ -85,10 +86,6 @@ public:
     SparseMtrx(int n, int m) : Matrix(n, m) { version = 0; }
     /// Constructor
     SparseMtrx() : Matrix() { version = 0; }
-
-    // plus copy and assignment operators defined by derived classes
-    //SparseMtrx& SparseMtrx::operator=(const SparseMtrx &C)  ;
-    //SparseMtrx::SparseMtrx(const SparseMtrx &S) ;
 
     /// Return receiver version.
     SparseMtrxVersionType giveVersion() { return this->version; }
