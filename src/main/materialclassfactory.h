@@ -96,7 +96,7 @@
 
 #ifdef __FM_MODULE
  #include "newtonianfluid.h"
- #include "fe2sinteringmaterial.h"
+ #include "fe2fluidmaterial.h"
  #include "surfacetensionmaterial.h"
  #include "twofluidmaterial.h"
  #include "binghamfluid2.h"
@@ -171,7 +171,7 @@ REGISTER_CLASS(NewtonianFluidMaterial, "newtonianfluid", NewtonianFluidMaterialC
 REGISTER_CLASS(TwoFluidMaterial, "twofluidmat", TwoFluidMaterialClass)
 REGISTER_CLASS(BinghamFluidMaterial2, "binghamfluid2", BinghamFluidMaterial2Class)
 REGISTER_CLASS(BinghamFluidMaterial2, "binghamfluid", BinghamFluidMaterial2Class)
-REGISTER_CLASS(FE2SinteringMaterial, "fe2sinteringmaterial", FE2SinteringMaterialClass)
+REGISTER_CLASS(FE2FluidMaterial, "fe2fluidmaterial", FE2FluidMaterialClass)
 REGISTER_CLASS(SurfaceTensionMaterial, "surfacetension", SurfaceTensionMaterialClass)
 #endif // __FM_MODULE
 

@@ -296,7 +296,7 @@ enum classType {
     TrabBoneNLEmbedClass,
     TrabBoneNLClass,
     ConcreteDPMClass,
-    FE2SinteringMaterialClass,
+    FE2FluidMaterialClass,
     AbaqusUserMaterialClass,
     AbaqusUserMaterialStatusClass,
     ConcreteDPM2Class,
@@ -352,7 +352,7 @@ enum classType {
     TrabBone3DStatusClass,
     TrabBoneEmbedStatusClass,
     ConcreteDPMStatusClass,
-    FE2SinteringMaterialStatusClass,
+    FE2FluidMaterialStatusClass,
     ConcreteDPM2StatusClass,
     LatticeDamage2dStatusClass,
 

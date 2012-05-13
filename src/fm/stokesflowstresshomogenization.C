@@ -105,8 +105,8 @@ void StokesFlowStressHomogenization :: solveYourselfAt(TimeStep *tStep)
     R_int.zero();
     R_ext.zero();
 
-    this->assembleVectorFromElements( R_int, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( R_ext, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( R_int, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( R_ext, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
 
     R_int.subtract(R_ext);
     R_int.times(1/total_area);

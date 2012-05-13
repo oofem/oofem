@@ -35,24 +35,30 @@
 #ifndef fe2sinteringmaterial_h
 #define fe2sinteringmaterial_h
 
-#include "structuralmaterial.h"
-#include "structuralms.h"
-#include "structuralelement.h"
+#include "fluiddynamicmaterial.h"
 #include "matstatus.h"
-#include "stokesflowstresshomogenization.h"
+#include "mixedgradientpressurebc.h"
 
 namespace oofem {
 
-class GaussPoint;
+class StokesFlow;
 
 /**
- * Class representing material status for the mesoscale sintering material.
+ * Class representing material status for the subscale fluid, i.e an Representative Volume Element (RVE).
  * @author Mikael Öhman
  */
-class FE2SinteringMaterialStatus : public StructuralMaterialStatus
+class FE2FluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-    StokesFlowStressHomogenization *rve;
+    /// The subscale flow
+    StokesFlow *rve;
+    /// Boundary condition in RVE that performs the computational homogenization.
+    MixedGradientPressureBC *bc;
+
+    FloatMatrix Ed;
+    FloatArray Cd;
+    FloatArray Ep;
+    double Cp;
 
     double voffraction;
 
@@ -65,11 +71,12 @@ public:
      * @param inputfile The input file describing the micro problem.
      * @param porosity Initial porosity.
      */
-    FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile);
+    FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile);
     /// Destructor
-    virtual ~FE2SinteringMaterialStatus() { delete this->rve; }
+    virtual ~FE2FluidMaterialStatus();
 
-    StokesFlowStressHomogenization *giveRVE() { return this->rve; }
+    StokesFlow *giveRVE() { return this->rve; }
+    MixedGradientPressureBC *giveBC() { return this->bc; }
 
     double giveVOFFraction() { return this->voffraction; }
 
@@ -79,6 +86,13 @@ public:
     /// Copies time step data to RVE.
     virtual void setTimeStep(TimeStep *tStep);
 
+    double computeSize();
+
+    FloatMatrix &giveDeviatoricTangent() { return Ed; }
+    FloatArray &giveDeviatoricPressureTangent() { return Cd; };
+    FloatArray &giveVolumetricDeviatoricTangent() { return Ep; };
+    double giveVolumetricPressureTangent() { return Cp; };
+
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
@@ -87,19 +101,26 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    virtual const char *giveClassName() const { return "FE2SinteringMaterialStatus"; }
-    virtual classType giveClassID() const { return FE2SinteringMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "FE2FluidMaterialStatus"; }
+    virtual classType giveClassID() const { return FE2FluidMaterialStatusClass; }
 };
 
 
 /**
- * Multiscale constitutive model of free surface tension driven fluids (at mesoscale)
+ * Multiscale constitutive model for subscale flow problems, typically sintering.
+ *
+ * The material uses the MixedGradientPressureBC to perform computational homogenization.
+ * The requirement for the supplied subscale flow problem is:
+ * - It must have a MixedGradientPressureBC. It should be the only Dirichlet boundary condition.
+ * - It must have boundary elements along the outer boundary such that the total volume (including internal pores) can be computed.
+ *
  * @author Mikael Öhman
  */
-class FE2SinteringMaterial : public StructuralMaterial
+class FE2FluidMaterial : public FluidDynamicMaterial
 {
 private:
     std::string inputfile;
+    static int n;
 
 public:
     /**
@@ -107,24 +128,32 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    FE2SinteringMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
+    FE2FluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
-    virtual ~FE2SinteringMaterial() { }
-
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &, TimeStep *tStep);
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual ~FE2FluidMaterial() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "FE2SinteringMaterial"; }
-    virtual classType giveClassID() const { return FE2SinteringMaterialClass; }
+
     virtual int checkConsistency();
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-private:
-    static int n;
+    virtual void computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps_dev, double pressure, TimeStep *tStep);
+    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps_dev, TimeStep *tStep);
+
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveVolumetricPressureStiffness(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
+
+    virtual const char *giveClassName() const { return "FE2FluidMaterial"; }
+    virtual classType giveClassID() const { return FE2FluidMaterialClass; }
 };
 
 } // end namespace oofem

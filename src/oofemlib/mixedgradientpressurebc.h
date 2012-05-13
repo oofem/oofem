@@ -152,16 +152,16 @@ public:
 
     /**
      * Set prescribed pressure.
-     * @param t New prescribed value.
+     * @param p New prescribed pressure.
      */
     void setPrescribedPressure(double p) { pressure = p; }
 
     /**
      * Sets the prescribed tensor from the matrix from given Voigt notation.
      * Assumes use of double values (gamma) for off-diagonal, usually the way for strain in Voigt form.
-     * @param t Vector in Voigt format.
+     * @param ddev Vector in Voigt format.
      */
-    void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &t);
+    void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
     /**
      * Set the center coordinate.
