@@ -38,6 +38,9 @@
 #include "domain.h"
 #include "flotarry.h"
 #include "node.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
+
 
 namespace oofem {
 /**
@@ -73,10 +76,36 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
+    /**
+     * Returns classType id of receiver. Intended for run time
+     * type checking. Every derived class have to overload this method.
+     * @see classType.
+     * @return Class type of receiver.
+     */
+    virtual classType giveClassID() const { return BasicGeometryClass; }
     /// Returns number of Geometry vertices.
     int giveNrVertices() { return this->vertices->giveSize(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual void printYourself() { }
+    /**
+     * Stores the state of receiver to output stream. 
+     * @param stream Context stream. 
+     * @param mode Determines amount of info in stream.
+     * @param obj Special parameter, used to pass optional parameters.
+     * @return contextIOResultType.
+     * @exception ContextIOERR If error encountered.
+     */
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+    /**
+     * Restores the state of receiver from output stream. 
+     * @param stream Context file.
+     * @param mode Determines amount of info in stream.
+     * @param obj Special parameter for sending extra information.
+     * @return contextIOResultType.
+     * @exception ContextIOERR exception if error encountered.
+     */
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+    
 #ifdef __OOFEG
     virtual void draw(oofegGraphicContext &gc) { }
 #endif

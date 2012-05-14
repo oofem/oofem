@@ -332,6 +332,7 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d);
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 EnrichmentItem *CreateUsrDefEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *d);
+EnrichmentItem *CreateUsrDefEnrichmentItem(classType type, int num, XfemManager *xm, Domain *d);
 /**
  * Creates new instance of enrichment function.
  * @param name Enrichment function keyword.
@@ -340,12 +341,15 @@ EnrichmentItem *CreateUsrDefEnrichmentItem(const char *name, int num, XfemManage
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *name, int num, Domain *d);
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(classType type, int num, Domain *d);
 /**
  * Creates new instance of geometry.
  * @param name Geometry keyword.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 BasicGeometry *CreateUsrDefGeometry(const char *name);
+BasicGeometry *CreateUsrDefGeometry(classType type);
+ 
 /**
  * Creates new instance of patch.
  * @param ptype Id determining the type of new instance.

@@ -453,6 +453,12 @@ EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemM
     return ( enrichItemList.count(aClass) == 1 ) ? enrichItemList [ aClass ](number, xm, domain) : NULL;
 }
 
+EnrichmentItem *CreateUsrDefEnrichmentItem(classType type, int number, XfemManager *xm, Domain *domain)
+{
+  OOFEM_ERROR("CreateUsrDefEnrichmentItem: Unknown type\n");
+  return NULL;
+}
+
 
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
 std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *), CaseComp > enrichFuncList;
@@ -468,6 +474,11 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int numbe
     return ( enrichFuncList.count(aClass) == 1 ) ? enrichFuncList [ aClass ](number, domain) : NULL;
 }
 
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(classType type, int number, Domain *domain)
+{
+  OOFEM_ERROR("CreateUsrDefEnrichmentFunction: Unknown type\n");
+  return NULL;
+}
 
 template< typename T > BasicGeometry *geometryCreator() { return new T(); }
 std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
@@ -480,6 +491,11 @@ BasicGeometry *CreateUsrDefGeometry(const char *aClass)
     }
 
     return ( geometryList.count(aClass) == 1 ) ? geometryList [ aClass ]() : NULL;
+}
+BasicGeometry *CreateUsrDefGeometry(classType type)
+{
+  OOFEM_ERROR("CreateUsrDefGeometry: Unknown type\n");
+  return NULL;
 }
 
 Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e)

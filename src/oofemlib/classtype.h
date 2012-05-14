@@ -432,7 +432,9 @@ enum classType {
     FastMarchingMethodClass,
 
     WallClockLoadBalancerMonitorClass,
-    ParmetisLoadBalancerClass
+    ParmetisLoadBalancerClass,
+
+    BasicGeometryClass
 
 
 };
