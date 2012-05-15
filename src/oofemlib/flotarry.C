@@ -258,7 +258,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
 {
 #ifdef DEBUG
     if ( a.size != b.size ) {
-        OOFEM_ERROR3("FloatArray :: beDifferenceOf - size mismatch", a.size, b.size);
+        OOFEM_ERROR3("FloatArray :: beDifferenceOf - size mismatch (%d : %d)", a.size, b.size);
     }
 
 #endif

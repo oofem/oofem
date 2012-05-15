@@ -327,8 +327,7 @@ void LOG_DEBUG(Logger &logger, const char *format, ...)
 void OOFEM_LOG_RELEVANT(const char *format, ...)
 {
     __PROCESS_LOG;
-    
-oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
 }
 
 
