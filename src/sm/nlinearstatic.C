@@ -116,6 +116,7 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
     MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD( ( mstep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
+    IR_GIVE_OPTIONAL_FIELD( ( mstep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
     SparseNonLinearSystemNM *nm = NULL;
@@ -188,6 +189,7 @@ NonLinearStatic :: updateAttributes(TimeStep *atTime)
      */
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controllmode"); // for backward compatibility
     controlMode = ( NonLinearStatic_controlType ) _val;
 
     deltaT = 1.0;
