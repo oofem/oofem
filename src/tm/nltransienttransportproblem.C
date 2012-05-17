@@ -193,7 +193,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         // subtract the rhs part depending on previous solution
         assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep, nite);
         // set-up numerical model
-        this->giveNumericalMethod(tStep);
+        this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
         // call numerical model to solve arised problem
 #ifdef VERBOSE

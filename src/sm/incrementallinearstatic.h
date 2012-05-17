@@ -100,7 +100,7 @@ public:
     double giveDiscreteTime(int iStep);
     virtual double giveEndOfTimeOfInterest() { return endOfTimeOfInterest; }
 
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 

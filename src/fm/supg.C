@@ -69,7 +69,7 @@ namespace oofem {
 //#define SUPG_IMPLICIT_INTERFACE
 
 
-NumericalMethod *SUPG :: giveNumericalMethod(TimeStep *atTime)
+NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
@@ -952,7 +952,7 @@ void
 SUPG :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
 void

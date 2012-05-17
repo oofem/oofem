@@ -685,18 +685,16 @@ EngngModel :: solveYourself()
 
     for ( imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) { //loop over meta steps
         activeMStep = this->giveMetaStep(imstep);
-        nTimeSteps = activeMStep->giveNumberOfSteps();
+        // update state according to new meta step
+        this->initMetaStepAttributes( activeMStep );
 
+        nTimeSteps = activeMStep->giveNumberOfSteps();
         for ( jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
             //#ifdef TIME_REPORT
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
             //#endif
             this->giveNextStep();
-            // update state according to new meta step
-            if ( jstep == sjstep ) {
-                this->initMetaStepAttributes( this->giveCurrentStep() );
-            }
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
             if ( this->requiresEquationRenumbering( this->giveCurrentStep() ) || this->giveClassID()== classType(StaggeredProblemClass) ) {
@@ -729,24 +727,21 @@ EngngModel :: solveYourself()
 }
 
 void
-EngngModel :: initMetaStepAttributes(TimeStep *tStep)
+EngngModel :: initMetaStepAttributes(MetaStep *mStep)
 {
-    MetaStep *mstep = this->giveMetaStep( tStep->giveMetaStepNumber() );
-
     // update attributes
-    this->updateAttributes(tStep); // virtual function
+    this->updateAttributes(mStep); // virtual function
     // finish data acquiring
-    mstep->giveAttributesRecord()->finish();
+    mStep->giveAttributesRecord()->finish();
 }
 
 void
-EngngModel :: updateAttributes(TimeStep *atTime)
+EngngModel :: updateAttributes(MetaStep *mStep)
 {
-    MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
-    InputRecord *ir = mstep->giveAttributesRecord();
+    InputRecord *ir = mStep->giveAttributesRecord();
 
-    if ( this->giveNumericalMethod(atTime) ) {
-        this->giveNumericalMethod(atTime)->initializeFrom(ir);
+    if ( this->giveNumericalMethod(mStep) ) {
+        this->giveNumericalMethod(mStep)->initializeFrom(ir);
     }
 
 #ifdef __PARALLEL_MODE
@@ -1328,7 +1323,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     // store nMethod
-    NumericalMethod *nmethod = this->giveNumericalMethod( giveCurrentStep() );
+    NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
     if ( nmethod ) {
         if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -1445,7 +1440,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore nMethod
-    NumericalMethod *nmethod = this->giveNumericalMethod( giveCurrentStep() );
+    NumericalMethod *nmethod = this->giveNumericalMethod( this->giveCurrentMetaStep() );
     if ( nmethod ) {
         if ( ( iores = nmethod->restoreContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -1453,7 +1448,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     this->updateDomainLinks();
-    this->updateAttributes(currentStep);
+    this->updateAttributes( this->giveCurrentMetaStep() );
     this->initStepIncrements();
 
     if ( closeFlag ) {
@@ -1488,6 +1483,13 @@ EngngModel :: resolveCorrespondingStepNumber(int &istep, int &iversion, void *ob
     if ( istep <= 0 ) {
         istep = 1;
     }
+}
+
+
+MetaStep *
+EngngModel :: giveCurrentMetaStep()
+{
+    return this->giveMetaStep( this->giveCurrentStep()->giveMetaStepNumber() );
 }
 
 

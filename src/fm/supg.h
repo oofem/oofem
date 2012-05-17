@@ -129,7 +129,7 @@ public:
 
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply();
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

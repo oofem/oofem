@@ -81,6 +81,7 @@
  #include "cohint.h"
  #include "latticedamage2d.h"
  #include "simpleinterfacemat.h"
+ #include "abaqususermaterial.h"
 #endif // __SM_MODULE
 
 #ifdef __TM_MODULE
@@ -153,6 +154,7 @@ REGISTER_CLASS(CohesiveInterfaceMaterial, "cohint", CohesiveInterfaceMaterialCla
 REGISTER_CLASS(SimpleInterfaceMaterial, "simpleintermat", SimpleInterfaceMaterialClass)
 REGISTER_CLASS(ConcreteDPM2, "con2dpm", ConcreteDPM2Class)
 REGISTER_CLASS(LatticeDamage2d, "latticedamage2d", LatticeDamage2dClass)
+REGISTER_CLASS(AbaqusUserMaterial, "abaqususermaterial", AbaqusUserMaterialClass)
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)

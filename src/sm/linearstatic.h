@@ -91,7 +91,7 @@ public:
     virtual void updateDomainLinks();
 
     virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     virtual void terminate(TimeStep *tStep);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

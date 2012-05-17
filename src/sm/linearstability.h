@@ -112,7 +112,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
 
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);

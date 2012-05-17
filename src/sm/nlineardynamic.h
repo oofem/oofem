@@ -125,14 +125,14 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
     virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
-    virtual void updateAttributes(TimeStep *tStep);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
+    virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

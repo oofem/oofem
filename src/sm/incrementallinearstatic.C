@@ -74,7 +74,7 @@ IncrementalLinearStatic :: ~IncrementalLinearStatic()
 }
 
 
-NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(TimeStep *)
+NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 {
     if ( nMethod ) {
@@ -161,7 +161,6 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
 
 void IncrementalLinearStatic :: solveYourself()
 {
-    this->giveNumericalMethod( giveCurrentStep() );
     this->giveDiscreteTime(1); // ensures numberOfSteps defined
     StructuralEngngModel :: solveYourself();
 }
@@ -249,6 +248,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
     if ( !(s & NM_Success) ) {
         OOFEM_ERROR("IncrementalLinearStatic :: solverYourselfAt - No success in solving system.");

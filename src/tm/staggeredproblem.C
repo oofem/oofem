@@ -137,19 +137,18 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
 
 void
-StaggeredProblem :: updateAttributes(TimeStep *atTime)
+StaggeredProblem :: updateAttributes(MetaStep *mStep)
 {
     const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
 
-    MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
-    InputRecord *ir = mstep->giveAttributesRecord();
+    InputRecord *ir = mStep->giveAttributesRecord();
 
-    EngngModel :: updateAttributes(atTime);
+    EngngModel :: updateAttributes(mStep);
 
     // update attributes of slaves
     for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->updateAttributes(atTime);
+        this->giveSlaveProblem(i)->updateAttributes(mStep);
     }
 
     // update local variables

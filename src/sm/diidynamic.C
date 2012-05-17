@@ -79,7 +79,7 @@ DIIDynamic :: ~DIIDynamic()
     }
 }
 
-NumericalMethod *DIIDynamic :: giveNumericalMethod(TimeStep *)
+NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for DIIDynamic
 // - SolutionOfLinearEquations
 {

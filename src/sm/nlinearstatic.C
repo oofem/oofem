@@ -104,19 +104,18 @@ NonLinearStatic :: ~NonLinearStatic()
 }
 
 
-NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
+NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
     const char *__proc = "giveNumericalMethod"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                     // Required by IR_GIVE_FIELD macro
 
-    if ( atTime == NULL ) {
-        _error("giveNumericalMethod: undefined time step");
+    if ( mStep == NULL ) {
+        _error("giveNumericalMethod: undefined meta step");
     }
 
-    MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD( ( mstep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
-    IR_GIVE_OPTIONAL_FIELD( ( mstep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controlmode" ); // Macro
+    IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
     SparseNonLinearSystemNM *nm = NULL;
@@ -162,15 +161,14 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(TimeStep *atTime)
 
 
 void
-NonLinearStatic :: updateAttributes(TimeStep *atTime)
+NonLinearStatic :: updateAttributes(MetaStep *mStep)
 {
     const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
-    MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
-    InputRecord *ir = mstep->giveAttributesRecord();
 
+    InputRecord *ir = mStep->giveAttributesRecord();
 
-    LinearStatic :: updateAttributes(atTime);
+    LinearStatic :: updateAttributes(mStep);
 
     /*
      * if ((mstep->giveFirstStepNumber() == atTime->giveNumber()) && hasString(initString, "fixload")) {
@@ -544,7 +542,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
     //
     // call numerical model to solve arise problem
     //
@@ -799,7 +797,7 @@ NonLinearStatic :: updateDomainLinks()
 {
     LinearStatic :: updateDomainLinks();
 
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     if ( this->giveLoadBalancer() ) {
         this->giveLoadBalancer()->setDomain( this->giveDomain(1) );

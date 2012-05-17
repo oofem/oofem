@@ -398,28 +398,28 @@ public:
      * this->updateYourself function for updating solution state and then this->terminate
      * function (for updating nodal and element values) should be called.
      */
-    virtual void solveYourselfAt(TimeStep *) { }
+    virtual void solveYourselfAt(TimeStep *tStep) { }
     /**
      * Terminates the solution of time step. Default implementation calls prinOutput() service and if specified,
      * context of whole domain is stored and output for given time step is printed.
      */
-    virtual void terminate(TimeStep *);
+    virtual void terminate(TimeStep *tStep);
     /**
      * Prints the ouput of the solution step (using virtual this->printOutputAtservice)
      * to the stream detemined using this->giveOutputStream() method
      * and calls exportModuleManager to do output.
      */
-    virtual void doStepOutput(TimeStep *);
+    virtual void doStepOutput(TimeStep *tStep);
     /**
      * Saves context of given solution step, if required (determined using this->giveContextOutputMode() method).
      */
-    void saveStepContext(TimeStep *);
+    void saveStepContext(TimeStep *tStep);
     /**
      * Updates internal state after finishing time step. (for example total values may be
      * updated according to previously solved increments). Then element values are also updated
      * (together with related integration points and material statuses).
      */
-    virtual void updateYourself(TimeStep *stepN);
+    virtual void updateYourself(TimeStep *tStep);
     /**
      * Provides the opportunity to initialize state variables stored in element
      * integration points according to
@@ -429,7 +429,7 @@ public:
      * somewhere from solveYourselfAt function). Implementation must be provided.
      * Default implementation is empty.
      */
-    virtual void initializeYourself(TimeStep *) { }
+    virtual void initializeYourself(TimeStep *tStep) { }
     /**
      * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
@@ -442,25 +442,25 @@ public:
      * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
-    virtual int giveNumberOfEquations(EquationID);
+    virtual int giveNumberOfEquations(EquationID eid);
     /**
      * Returns total number of prescribed equations in active (current time step) time step.
      * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
-    virtual int giveNumberOfPrescribedEquations(EquationID);
+    virtual int giveNumberOfPrescribedEquations(EquationID eid);
     /**
      * Returns number of equations for given domain in active (current time step) time step.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
+     * The EquationID parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
-    virtual int giveNumberOfDomainEquations(int, EquationID);
+    virtual int giveNumberOfDomainEquations(int di, EquationID eid);
     /**
      * Returns number of prescribed equations for given domain in active (current time step) time step.
      * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
-    virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
+    virtual int giveNumberOfPrescribedDomainEquations(int di, EquationID eid);
     //virtual IntArray* GiveBanWidthVector ();
 
 
@@ -514,19 +514,18 @@ public:
      * Update receiver attributes according to step metaStep attributes.
      * Allows the certain parameters or attributes to be updated for particular metastep.
      * The metastep provides the attributes record, from which the corresponding attributes can
-     * be read. The service takes TimeStep as parameter, from which corresponding MetaStep is
-     * requested. It is recommended, to implement this service in such way, that multiple calls
+     * be read. The service takes a MetaStep parameter. It is recommended, to implement this service in such way, that multiple calls
      * for steps belonging to same MetaStep does not change response.
      * The default implementation updates the numerical method attributes.
-     * @param tStep TimeStep time step.
+     * @param mStep Meta step.
      */
-    virtual void updateAttributes(TimeStep *tStep);
+    virtual void updateAttributes(MetaStep *mStep);
     /**
      * Update e-model attributes attributes according to step metaStep attributes.
      * Calls updateAttributes. At the end the meta step input reader finish() service
      * is called in order to allow for unread attribute check.
      */
-    void initMetaStepAttributes(TimeStep *tStep);
+    void initMetaStepAttributes(MetaStep *mStep);
     /**
      * Stores the state of model to output stream. Stores not only the receiver state,
      * but also same function is invoked for all DofManagers and Elements in associated
@@ -572,6 +571,8 @@ public:
      */
     virtual void updateDomainLinks();
     void resolveCorrespondingStepNumber(int &, int &, void *obj);
+    /// Returns current meta step.
+    MetaStep *giveCurrentMetaStep();
     /// Returns current time step.
     TimeStep *giveCurrentStep() { if ( master ) { return master->giveCurrentStep(); } else { return currentStep; } }
     /// Returns previous time step.
@@ -594,7 +595,7 @@ public:
     virtual int giveNumberOfTimeStepWhenIcApply() {
         if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; } }
     /// Returns reference to receiver's numerical method.
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *) { return NULL; }
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep) { return NULL; }
     /// Returns receiver's export module manager.
     ExportModuleManager *giveExportModuleManager() { return exportModuleManager; }
     /// Returns reference to receiver timer (EngngModelTimer).

@@ -78,7 +78,7 @@ NlDEIDynamic :: ~NlDEIDynamic()
 {
 }
 
-NumericalMethod *NlDEIDynamic :: giveNumericalMethod(TimeStep *atTime)
+NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for NlDEIDynamic
 //     - SolutionOfLinearEquations
 

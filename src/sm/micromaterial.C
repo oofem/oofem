@@ -573,7 +573,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     }
 
     microEngngModel->giveNextStep(); //set the first time step
-    mstep = microEngngModel->giveMetaStep( microEngngModel->giveCurrentStep()->giveMetaStepNumber() );
+    mstep = microEngngModel->giveCurrentMetaStep();
     mstep->setNumberOfSteps(this->macroDomain->giveEngngModel()->giveMetaStep(1)->giveNumberOfSteps() + 1);
 
 

@@ -319,7 +319,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
      * this->updateAttributes (this->giveCurrentStep());
      * }
      */
-    this->updateAttributes( this->giveCurrentStep() );
+    this->updateAttributes( this->giveCurrentMetaStep() );
 
     // increment solution state counter - not needed, IPs are updated by adaptiveUpdate previously called
     // and there is no change in primary vars.
@@ -607,9 +607,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //cts->setTime(cts->giveTime()-cts->giveTimeIncrement());
     }
 
-    if ( this->giveCurrentStep()->giveNumber() ==
-        this->giveMetaStep( this->giveCurrentStep()->giveMetaStepNumber() )->giveFirstStepNumber() ) {
-        this->updateAttributes( this->giveCurrentStep() );
+    if ( this->giveCurrentStep()->giveNumber() == this->giveCurrentMetaStep()->giveFirstStepNumber() ) {
+        this->updateAttributes( this->giveCurrentMetaStep() );
     }
 
     // increment solution state counter - not needed, IPs are updated by adaptiveUpdate previously called

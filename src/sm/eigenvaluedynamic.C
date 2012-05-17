@@ -56,7 +56,8 @@
 #endif
 
 namespace oofem {
-NumericalMethod *EigenValueDynamic :: giveNumericalMethod(TimeStep *)
+
+NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
@@ -219,7 +220,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod(  this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
     //
     // call numerical model to solve arised problem

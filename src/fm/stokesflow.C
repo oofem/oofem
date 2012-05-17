@@ -151,7 +151,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
 
 #if 1
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
@@ -322,7 +322,7 @@ void StokesFlow :: doStepOutput(TimeStep *tStep)
     EngngModel :: doStepOutput(tStep);
 }
 
-NumericalMethod *StokesFlow :: giveNumericalMethod(TimeStep *tStep)
+NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( this->nMethod ) {
         return this->nMethod;

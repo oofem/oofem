@@ -59,7 +59,7 @@
 #endif
 
 namespace oofem {
-NumericalMethod *LinearStability :: giveNumericalMethod(TimeStep *stepN)
+NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
@@ -215,7 +215,7 @@ void LinearStability :: solveYourself()
 {
     // update state according to new meta step
     this->giveNextStep();
-    this->updateAttributes( this->giveCurrentStep() );
+    this->updateAttributes( this->giveCurrentMetaStep() );
     this->solveYourselfAt( this->giveCurrentStep() );
     this->terminate( this->giveCurrentStep() );
 }
@@ -226,7 +226,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     //
     // creates system of governing eq's and solves them at given time step
     //
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod(  this->giveMetaStep( tStep->giveMetaStepNumber() ) );
     this->giveNumericalMethodForLinStaticProblem(tStep);
 
     // first assemble problem at current time step

@@ -88,7 +88,7 @@ NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
 }
 
 
-NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)
+NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
 
@@ -356,7 +356,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     assembleAlgorithmicPartOfRhs( rhs, EID_ConservationEquation,
                                  EModelDefaultEquationNumbering(), tStep->givePreviousStep() );
     // set-up numerical model
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
     //
     // call numerical model to solve arised problem
@@ -520,7 +520,7 @@ void
 NonStationaryTransportProblem :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
 int

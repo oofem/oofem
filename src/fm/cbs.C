@@ -64,7 +64,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
-NumericalMethod *CBS :: giveNumericalMethod(TimeStep *atTime)
+
+NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
@@ -389,7 +390,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
     pressureVector->resize(presneq);
     nMethod->solve(lhs, & rhs, pressureVector);
     pressureVector->times(this->theta [ 1 ]);
@@ -633,7 +634,7 @@ void
 CBS :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
 

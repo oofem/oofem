@@ -123,7 +123,7 @@ public:
     virtual void doStepOutput(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     virtual TimeStep *giveNextStep();
 
     virtual const char *giveClassName() const { return "StokesFlow"; }

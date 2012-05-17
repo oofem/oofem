@@ -51,7 +51,7 @@ namespace oofem {
 
 DEIDynamic :: ~DEIDynamic() { }
 
-NumericalMethod *DEIDynamic :: giveNumericalMethod(TimeStep *)
+NumericalMethod *DEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // only one has reason for DEIDynamic
 //     - SolutionOfLinearEquations
 

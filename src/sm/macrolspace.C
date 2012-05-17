@@ -144,7 +144,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     this->microEngngModel->giveCurrentStep()->setTargetTime( tStep->giveTargetTime() ); //adjust total time
     this->microEngngModel->giveCurrentStep()->setIntrinsicTime( tStep->giveIntrinsicTime() ); //adjust intrinsic time
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
-    this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() ); //updates numerical method
+    this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentMetaStep() ); //updates numerical method
 
     OOFEM_LOG_INFO( "\n** Assembling %s stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", __MatResponseModeToString(rMode), this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTargetTime() );
 

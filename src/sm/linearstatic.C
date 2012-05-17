@@ -81,7 +81,7 @@ LinearStatic :: ~LinearStatic()
 }
 
 
-NumericalMethod *LinearStatic :: giveNumericalMethod(TimeStep *atTime)
+NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {
         return nMethod;
@@ -276,7 +276,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
     //
     // call numerical model to solve arose problem
@@ -419,7 +419,7 @@ void
 LinearStatic :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
 

@@ -101,16 +101,14 @@ NonLinearDynamic :: ~NonLinearDynamic()
 }
 
 
-NumericalMethod *NonLinearDynamic :: giveNumericalMethod(TimeStep *atTime)
+NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     //const char *__proc = "giveNumericalMethod"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                     // Required by IR_GIVE_FIELD macro
 
-    if ( atTime == NULL ) {
-        _error("giveNumericalMethod: undefined time step");
+    if ( mStep == NULL ) {
+        _error("giveNumericalMethod: undefined meta step");
     }
-
-    //MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
 
     SparseNonLinearSystemNM *nm = NULL;
 
@@ -131,14 +129,14 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(TimeStep *atTime)
 
 
 void
-NonLinearDynamic :: updateAttributes(TimeStep *atTime)
+NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 {
     const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
-    MetaStep *mstep = this->giveMetaStep( atTime->giveMetaStepNumber() );
-    InputRecord *ir = mstep->giveAttributesRecord();
 
-    StructuralEngngModel :: updateAttributes(atTime);
+    InputRecord *ir = mStep->giveAttributesRecord();
+
+    StructuralEngngModel :: updateAttributes(mStep);
 
     deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat"); // Macro
@@ -444,7 +442,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     //
     // Set-up numerical model.
     //
-    this->giveNumericalMethod(tStep);
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
     //
     // Call numerical model to solve problem.
@@ -725,7 +723,7 @@ NonLinearDynamic :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
 
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
+    this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     if ( this->giveLoadBalancer() ) {
         this->giveLoadBalancer()->setDomain( this->giveDomain(1) );

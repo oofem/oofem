@@ -87,7 +87,7 @@ public:
     virtual double giveUnknownComponent(EquationID eid, ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(TimeStep *tStep);
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
     // identification
     virtual const char *giveClassName() const { return "DIIDynamic"; }

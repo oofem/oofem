@@ -251,7 +251,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std::strin
     OOFEMTXTDataReader dr(inputfile.c_str());
     EngngModel *em = InstanciateProblem(&dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
-    em->initMetaStepAttributes(em->giveNextStep());
+    em->initMetaStepAttributes( em->giveMetaStep( em->giveNextStep()->giveMetaStepNumber() ) );
 
     this->rve = dynamic_cast<StokesFlow*> (em);
     if (!this->rve) {
