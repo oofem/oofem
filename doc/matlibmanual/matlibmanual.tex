@@ -600,12 +600,20 @@ and the yield function (\ref{VMvonMisesCondition}) is redefined as
 \begin{equation}\label{RankineCondition}
 f(\bar{\vsig},\kappa) = \max_{I}\bar{\sigma_I}-\sigma_Y(\kappa)
 \end{equation}
-where $\bar{\sigma_I}$ are the principal values of the effective stress tensor $\bar{\vsig}$. 
+where $\bar{\sigma_I}$ are the principal values of the effective stress tensor $\bar{\vsig}$.
+The hardening law can have either the linear form (\ref{VMlinearHardeningLaw}), or the exponential form
+\begin{equation}\label{VMexpHardeningLaw}
+\sigma_Y(\kappa) = \sigma_0 + \Delta\sigma_Y\left(1-\exp(-H\kappa/\Delta\sigma_Y)\right),
+\end{equation}
+where $H$ is now the initial plastic modulus and $\Delta\sigma_Y$ is the value of yield stress
+increment asymptotically approached as $\kappa\rightarrow\infty$.
 In damage law (\ref{damagelawmp}), parameter $\omega_c$ is always set to 1.
-The user can specify either the exponent $a$ from (\ref{damagelawmp}),
+If the plastic hardening is linear, the user can specify either the exponent $a$ from (\ref{damagelawmp}),
 or the dissipation per unit volume, $g_f$, which represents the area under the
 stress-strain diagram (and parameter $a$ is then determined automatically such that
 the area under the diagram has the prescribed value).
+For exponential plastic hardening, the evaluation of $a$ from $g_f$ is not properly
+implemented and it is better to specify $a$ directly.
 
 %\paragraph{}
 The model description and parameters are summarized in Tables~\ref{rankineMat_table}--\ref{rankineMatGrad_table}. Note that the default value of parameter $m$ is equal to 1 for the
@@ -636,13 +644,16 @@ but it is recommended to set it e.g.\ to 1.e-6.
 Description & Rankine plasticity with isotropic hardening and damage\\
 \hline
 Record Format & \descitem{RankMat}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn}) \\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{plasthardtype}{in} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{delSigY}{rn} \elemparam{yieldtol}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn}) \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
 &- \param{n} Poisson's ratio\\
+&- \param{plasthardtype} type of plastic hardening (0=linear=default, 1=exponential)\\
 &- \param{sig0} initial yield stress in uniaxial tension (compression)\\
-&- \param{H} hardening modulus (default value 0.)\\
+&- \param{H} initial hardening modulus (default value 0.)\\
+&- \param{delSigY} final increment of yield stress (default value 0., needed only if plasthardtype=1)\\
+&- \param{yieldtol} relative tolerance in the yield condition\\
 &- \param{gf} dissipation per unit volume\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 Supported modes& PlaneStress\\
@@ -660,13 +671,16 @@ Supported modes& PlaneStress\\
 Description & Nonlocal Rankine plasticity with isotropic hardening and damage\\
 \hline
 Record Format & \descitem{RankMatNl}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn} \\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{plasthardtype}{in} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{delSigY}{rn} \elemparam{yieldtol}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn} \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
 &- \param{n} Poisson's ratio\\
+&- \param{plasthardtype} type of plastic hardening (0=linear=default, 1=exponential)\\
 &- \param{sig0} initial yield stress in uniaxial tension (compression)\\
-&- \param{H} hardening modulus (default value 0.)\\
+&- \param{H} initial hardening modulus (default value 0.)\\
+&- \param{delSigY} final increment of yield stress (default value 0.)\\
+&- \param{yieldtol} relative tolerance in the yield condition\\
 &- \param{gf} dissipation per unit volume\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 &- \param{r} internal length scale parameter $l^2$ from eq.~(\ref{implicitGradient})\\
@@ -686,13 +700,16 @@ Supported modes& PlaneStress\\
 Description & Gradient-enhanced Rankine plasticity with isotropic hardening and damage\\
 \hline
 Record Format & \descitem{RankMatGrad}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn}\elemparam{negligible\_damage}{rn}\\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{plasthardtype}{in} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{delSigY}{rn} \elemparam{yieldtol}{rn} (\elemparam{gf}{rn} $\|$ \elemparam{a}{rn})\elemparam{r}{rn}\elemparam{m}{rn}\elemparam{negligible\_damage}{rn}\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
 &- \param{n} Poisson's ratio\\
+&- \param{plasthardtype} type of plastic hardening (0=linear=default, 1=exponential)\\
 &- \param{sig0} initial yield stress in uniaxial tension (compression)\\
 &- \param{H} hardening modulus (default value 0.)\\
+&- \param{delSigY} final increment of yield stress (default value 0.)\\
+&- \param{yieldtol} relative tolerance in the yield condition\\
 &- \param{gf} dissipation per unit volume\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 &- \param{r} internal length scale parameter $l$ from eq.~(\ref{implicitGradient})\\

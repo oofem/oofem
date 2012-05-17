@@ -53,8 +53,9 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     E = 0.;
     nu = 0.;
-    H = 0.;
+    H0 = 0.;
     sig0 = 0.;
+    delSigY = 0.;
 }
 
 
@@ -80,8 +81,19 @@ RankineMat :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, sig0, IFT_RankineMat_sig0, "sig0"); // uniaxial yield stress
 
-    H = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, H, IFT_RankineMat_h, "h"); // hardening modulus
+    H0 = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, H0, IFT_RankineMat_h, "h"); // hardening modulus
+
+    plasthardtype = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, plasthardtype, IFT_RankineMat_plasthardtype, "plasthardtype"); // type of plastic hardening (0=linear, 1=exponential)
+
+    delSigY = 0.;
+    if ( plasthardtype == 1 ){
+      IR_GIVE_FIELD(ir, delSigY, IFT_RankineMat_delsigy, "delsigy"); // final increment of yield stress (at infinite cumulative plastic strain)
+    }
+
+    yieldtol = 1.e-10; 
+    IR_GIVE_OPTIONAL_FIELD(ir, yieldtol, IFT_RankineMat_yieldtol, "yieldtol"); // relative tolerance in yield condition
 
     a = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_RankineMat_a, "a"); // coefficient in damage law
@@ -95,8 +107,8 @@ RankineMat :: initializeFrom(InputRecord *ir)
 
     if ( gf > 0. ) {
         // evaluate parameter "a" from given "gf"
-        double A = H * ( 1. + H / E );
-        double B = sig0 * ( 1. + H / E );
+        double A = H0 * ( 1. + H0 / E );
+        double B = sig0 * ( 1. + H0 / E );
         double C = 0.5 * sig0 * sig0 / E - gf;
         if ( C >= 0. ) {
             OOFEM_ERROR("RankineMat: parameter gf is too low");
@@ -168,7 +180,25 @@ RankineMat :: evalYieldFunction(const FloatArray &sigPrinc, const double kappa)
 double
 RankineMat :: evalYieldStress(const double kappa)
 {
-    return sig0 + H * kappa;
+  if ( plasthardtype == 0 ) { // linear hardening
+    return sig0 + H0 * kappa; 
+  } else { // exponential hardening
+    if ( delSigY == 0. ) {
+      return sig0;
+    } else {
+      return sig0 + delSigY * ( 1. - exp(-H0*kappa/delSigY) );
+    }
+  }
+}
+
+double
+RankineMat :: evalPlasticModulus(const double kappa)
+{
+  if ( plasthardtype == 0 ) { // linear hardening
+    return H0; 
+  } else { // exponential hardening
+    return H0 * exp(-H0*kappa/delSigY);
+  }
 }
 
 
@@ -177,7 +207,7 @@ RankineMat :: evalYieldStress(const double kappa)
 void
 RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode)
 {
-    double kappa, tempKappa;
+  double kappa, tempKappa, H;
     FloatArray reducedStress;
     FloatArray strain, tempPlasticStrain;
     RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
@@ -214,15 +244,18 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 OOFEM_ERROR("RankineMat::giveRealStressVector : no convergence of regular stress return algorithm");
             }
 
+	    H = evalPlasticModulus(tempKappa);
             double ddKappa = f / ( Enu + H );
             sigPrinc.at(1) -= Enu * ddKappa;
             sigPrinc.at(2) -= nu * Enu * ddKappa;
             tempKappa += ddKappa;
             f = evalYieldFunction(sigPrinc, tempKappa);
-        } while ( fabs(f) > 1.e-12 );
+        } while ( fabs(f) > yieldtol*sig0 );
 
         if ( sigPrinc.at(2) > sigPrinc.at(1) ) {
             // plastic corrector - vertex case
+            // ---------------------------------
+            vertex_case = true;
             // recompute trial principal stresses
             finalStress.computePrincipalValDir(sigPrinc, nPrinc);
             // calculate the increment of cumulative plastic strain
@@ -232,6 +265,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
             tempKappa = kappa;
             f = sigstar - evalYieldStress(tempKappa);
             double dkap1 = 0.;
+	    H = evalPlasticModulus(tempKappa);
             double C = alpha +  H * ( 1. + sqrt(2.) ) / 2.;
             i = 1;
             do {
@@ -246,12 +280,13 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 tempKappa = kappa + sqrt( dkap1 * dkap1 + ( dkap1 - dkap0 ) * ( dkap1 - dkap0 ) );
                 f = sigstar - evalYieldStress(tempKappa) - alpha * dkap1;
                 double aux = dkap1 * dkap1 + ( dkap1 - dkap0 ) * ( dkap1 - dkap0 );
+		H = evalPlasticModulus(tempKappa);
                 if ( aux > 0. ) {
                     C = alpha + H * ( 2. * dkap1 - dkap0 ) / sqrt(aux);
                 } else {
                     C = alpha + H *sqrt(2.);
                 }
-            } while ( fabs(f) > 1.e-12 );
+            } while ( fabs(f) > yieldtol*sig0 );
 
             sigPrinc.at(1) = sigPrinc.at(2) = sigstar - alpha * dkap1;
             status->setDKappa(dkap1, dkap1 - dkap0);
@@ -396,9 +431,9 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
     answer.resize(3, 3);
     answer.zero(); // just to be sure (components 13,23,31,32 must be zero)
 
-    double eta1, eta2;
-    double dkap1, dkap2;
-    dkap1 = status->giveDKappa(1);
+    double eta1, eta2, dkap2;
+    double dkap1 = status->giveDKappa(1);
+    double H = evalPlasticModulus(tempKappa);
 
     if ( dkap1 == 0. ) {
         // regular case
@@ -459,6 +494,8 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
 {
     FloatArray eta(3);
     double dkap1 = status->giveDKappa(1);
+    double kap = status->giveTempCumulativePlasticStrain();
+    double H = evalPlasticModulus(kap);
 
     // evaluate in principal coordinates
 

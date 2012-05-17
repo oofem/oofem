@@ -75,11 +75,20 @@ protected:
     /// Poisson's ratio.
     double nu;
 
-    /// Hardening modulus.
-    double H;
+    /// Initial hardening modulus.
+    double H0;
+
+    /// Type of plastic hardening (0=linear, 1=exponential)
+    int plasthardtype;
+
+    /// Final increment of yield stress (at infinite cumulative plastic strain)
+    double delSigY;
 
     /// Initial (uniaxial) yield stress.
     double sig0;
+
+    /// Relative tolerance in yield condition
+    double yieldtol;
 
     /// Parameter that controls damage evolution (a=0 turns damage off).
     double a;
@@ -90,6 +99,7 @@ public:
 
     double evalYieldFunction(const FloatArray &sigPrinc, const double kappa);
     double evalYieldStress(const double kappa);
+    double evalPlasticModulus(const double kappa);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
     double computeDamageParam(double tempKappa);

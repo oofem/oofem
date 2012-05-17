@@ -147,6 +147,7 @@ RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseFor
 
     FloatArray eta(3);
     double dkap1 = status->giveDKappa(1);
+    double H = evalPlasticModulus(tempKappa);
 
     // evaluate in principal coordinates
 

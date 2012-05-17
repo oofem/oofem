@@ -87,6 +87,10 @@ namespace oofem {
 #define wf_ID  804
 #define gft_ID 805
 
+/* strengths */
+#define ft_strength 806
+#define fc_strength 807
+
 /* nonlocal material parameters */
 #define AVERAGING_TYPE 901
 #define exponent_ID 902
