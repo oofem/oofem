@@ -61,6 +61,9 @@ ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
     equivStrain = tempEquivStrain = 0.;
     deltaLambda = 0.;
     state_flag = temp_state_flag = ConcreteDPMStatus :: ConcreteDPM_Elastic;
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    epsloc = -1.; // negative value means that it has not been set yet
+#endif
 }
 
 ConcreteDPMStatus :: ~ConcreteDPMStatus()
@@ -82,6 +85,26 @@ ConcreteDPMStatus :: initTempStatus()
 void
 ConcreteDPMStatus :: updateYourself(TimeStep *atTime)
 {
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    // check whether the second-order work is negative
+    // (must be done !!!before!!! the update of strain and stress)
+    if ( epsloc < 0. ) {
+        FloatArray strainIncrement = tempStrainVector;
+        strainIncrement.subtract(strainVector);
+        FloatArray stressIncrement = tempStressVector;
+        stressIncrement.subtract(stressVector);
+        int n = strainIncrement.giveSize();
+        double work = strainIncrement.dotProduct(stressIncrement, n);
+        printf(" work : %g\n", work);
+        if ( work < 0. ) {
+            double E = gp->giveMaterial()->give('E', gp);
+            double ft = gp->giveMaterial()->give(ft_strength, gp);
+            epsloc = kappaD + damage * ft / E;
+        }
+    }
+
+#endif
+
     // Call corresponding function of the parent class to update
     // variables defined there.
     StructuralMaterialStatus :: updateYourself(atTime);
@@ -329,8 +352,10 @@ ConcreteDPM :: ConcreteDPM(int n, Domain *d) :
     newtonIter = 0;
     matMode = _Unknown;
     helem = 0.;
-
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    href = 0.;
+#endif
 }
 
 ConcreteDPM :: ~ConcreteDPM()
@@ -366,16 +391,18 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     // instanciate the variables of the plasticity model
     IR_GIVE_FIELD(ir, fc, IFT_ConcreteDPM_fc, "fc");
     IR_GIVE_FIELD(ir, ft, IFT_ConcreteDPM_ft, "ft");
+    propertyDictionary->add(ft_strength, ft);
+    propertyDictionary->add(fc_strength, fc);
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
     if ( ir->hasField(IFT_ConcreteDPM_ef, "wf") ) {
-      IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_ef, "wf");
-      // fracture energy
+        IR_GIVE_FIELD(ir, ef, IFT_ConcreteDPM_ef, "wf");
+        // fracture energy
     } else {
-      double Gf;
-      IR_GIVE_FIELD(ir, Gf, IFT_ConcreteDPM_gf, "gf");
-      ef = Gf / ft; // convert fracture energy to crack opening
+        double Gf;
+        IR_GIVE_FIELD(ir, Gf, IFT_ConcreteDPM_gf, "gf");
+        ef = Gf / ft; // convert fracture energy to crack opening
     }
 
     // default parameters
@@ -395,6 +422,10 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, ASoft, IFT_ConcreteDPM_asoft, "asoft");
     helem = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, helem, IFT_ConcreteDPM_helem, "helem");
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    href = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, href, IFT_ConcreteDPM_href, "href");
+#endif
 
     //Compute m
     m = 3. * ( pow(fc, 2.) - pow(ft, 2.) ) / ( fc * ft ) * ecc / ( ecc + 1. );
@@ -429,7 +460,6 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
                                     TimeStep *atTime)
 {
     FloatArray reducedTotalStrainVector;
-
     if ( matMode == _Unknown ) {
         matMode = gp->giveMaterialMode();
     }
@@ -456,7 +486,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     // compute damage
     tempDamage = computeDamage(strain, gp, atTime);
 
-    // compute elastic strains and trial stress
+    // compute elastic strains and effective stress
     StrainVector elasticStrain = strain;
     StrainVector tempPlasticStrain(matMode);
     status->giveTempPlasticStrain(tempPlasticStrain);
@@ -489,17 +519,23 @@ double ConcreteDPM :: computeDamage(const StrainVector &strain, GaussPoint *gp, 
 {
     ConcreteDPMStatus *status = giveStatus(gp);
     double equivStrain;
-    //  const FloaArray StrainVector = strain;
     computeEquivalentStrain(equivStrain, strain, gp, atTime);
     double f = equivStrain - status->giveKappaD();
     if ( f <= 0.0 ) {
         // damage does not grow
         tempKappaD = status->giveKappaD();
         tempDamage = status->giveDamage();
-    } else   {
-        // damage grow
+    } else {
+        // damage grows
         tempKappaD = equivStrain;
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+        if ( status->giveEpsLoc() >= 0. ) {
+            this->initDamaged(tempKappaD, strain, gp);
+        }
+
+#else
         this->initDamaged(tempKappaD, strain, gp);
+#endif
         tempDamage = computeDamageParam(tempKappaD, gp);
     }
 
@@ -544,7 +580,7 @@ ConcreteDPM :: computeEquivalentStrain(double &tempEquivStrain, const StrainVect
             if ( tempEquivStrain < 0. ) {
                 tempEquivStrain = 0.;
             }
-        } else   {
+        } else {
             deltaEquivStrain =  ( tempVolumetricPlasticStrain - volumetricPlasticStrain );
             if ( deltaEquivStrain < 0. ) {
                 deltaEquivStrain = 0.;
@@ -589,26 +625,59 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
         // this is only valid for tension
         ConcreteDPMStatus *status = giveStatus(gp);
         int nite = 0;
-        double R, Lhs, help;
-	double h = status->giveLe(); // effective element size
-	double aux1 = (ft / eM) * h / ef;
-	if ( aux1 > 1 ) {
-	  printf("computeDamageParam: ft=%g, E=%g, wf=%g, hmax=E*wf/ft=%g, h=%g\n",ft,eM,ef,eM*ef/ft,h);
-	  _error("computeDamageParam: element too large");
-	}
+        double R, Lhs, aux, h;
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+        h = href; // reference element size
+#else
+        h = status->giveLe(); // effective element size
+#endif
+        double aux1 = ( ft / eM ) * h / ef;
+        if ( aux1 > 1 ) {
+            printf("computeDamageParam: ft=%g, E=%g, wf=%g, hmax=E*wf/ft=%g, h=%g\n", ft, eM, ef, eM * ef / ft, h);
+            _error("computeDamageParam: element too large");
+        }
+
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+        double epsloc = status->giveEpsLoc();
+        if ( epsloc < 0. ) { // before localization, the reference element size href is used
+#endif
         do {
             nite++;
-            help = h * ( omega * ft / eM + kappa ) / ef;
-            R = 1. - omega - exp(-help);
-            Lhs = -1. + aux1 * exp(-help);
+            aux = exp(-h * ( omega * ft / eM + kappa ) / ef);
+            R = 1. - omega - aux;
+            Lhs = -1. + aux1 * aux;
             omega -= R / Lhs;
             if ( nite > 40 ) {
                 _error("computeDamageParam: algorithm not converging");
             }
-        } while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
+        }
 
+        while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
+
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    } else   { // after localization, more complicated formula
+        if ( helem > 0. ) {
+            h = helem; // predefined element size
+        } else {
+            h = status->giveLe(); // effective element size
+        }
+
+        aux1 = ( ft / eM ) * h / ef;
+        do {
+            nite++;
+            aux = exp(-( ( href - h ) * epsloc + h * ( omega * ft / eM + kappa ) ) / ef);
+            R = 1. - omega - aux;
+            Lhs = -1. + aux1 * aux;
+            omega -= R / Lhs;
+            if ( nite > 40 ) {
+                printf("computeDamageParam: algorithm not converging (part 2)");
+            }
+        } while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
+    }
+
+#endif
         if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-	  _error("computeDamageParam: internal error");
+            _error("computeDamageParam: internal error");
         }
     }
 
@@ -630,36 +699,40 @@ ConcreteDPM :: initDamaged(double kappaD,
     FloatArray principalStrains, crackPlaneNormal(3);
     FloatMatrix principalDir(3, 3);
     ConcreteDPMStatus *status = giveStatus(gp);
+#ifndef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     if ( helem > 0. ) {
         status->setLe(helem);
-    } else if ( status->giveDamage() == 0. )  {
-        strain.computePrincipalValDir(principalStrains, principalDir);
-        // find index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
-            if ( principalStrains.at(i) > principalStrains.at(indx) ) {
-                indx = i;
-            }
+    } else if ( status->giveDamage() == 0. ) {
+#endif
+    strain.computePrincipalValDir(principalStrains, principalDir);
+    // find index of max positive principal strain
+    for ( i = 2; i <= 3; i++ ) {
+        if ( principalStrains.at(i) > principalStrains.at(indx) ) {
+            indx = i;
         }
-
-        for ( i = 1; i <= 3; i++ ) {
-            crackPlaneNormal.at(i) = principalDir.at(i, indx);
-        }
-
-        // Warning: This would give the element size divided by the number of Gauss points
-        // le = gp->giveElement()->giveCharacteristicLenght (gp, crackPlaneNormal);
-
-        // This gives the element size
-        le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
-        // remember le in corresponding status
-        status->setLe(le);
     }
-    // this happens if the status is initialized from a file
-    // with nonzero damage
-    else if ( status->giveLe() == 0. ) {
-        // le determined as square root of element area or cube root of el. volume
-        le = gp->giveElement()->computeMeanSize();
-        status->setLe(le);
+
+    for ( i = 1; i <= 3; i++ ) {
+        crackPlaneNormal.at(i) = principalDir.at(i, indx);
     }
+
+    // Warning: This would give the element size divided by the number of Gauss points
+    // le = gp->giveElement()->giveCharacteristicLenght (gp, crackPlaneNormal);
+
+    // this gives the projected element size
+    le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
+    // store le in the corresponding status
+    status->setLe(le);
+#ifndef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+}
+// this happens if the status is initialized from a file
+// with nonzero damage
+else if ( status->giveLe() == 0. ) {
+    // le determined as square root of element area or cube root of el. volume
+    le = gp->giveElement()->computeMeanSize();
+    status->setLe(le);
+}
+#endif
 }
 
 double
@@ -688,7 +761,7 @@ ConcreteDPM :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPo
     double Rs = -negativeVolStrain / volStrain;
     if ( Rs < 1.0 ) {
         ductilityMeasure = 1. + ASoft *pow(Rs, 2.);
-    } else   {
+    } else {
         ductilityMeasure = 1. - 3. * ASoft + 4. *ASoft *sqrt(Rs);
     }
 
@@ -784,7 +857,7 @@ ConcreteDPM :: checkForVertexCase(double answer,
 
         if ( l < 15 && sigZero < 0. ) {
             apexCompression = sigZero;
-        } else   {
+        } else {
             apexCompression = -15. * fc;
         }
     }
@@ -792,10 +865,10 @@ ConcreteDPM :: checkForVertexCase(double answer,
     if ( ( sig > 0. && tempKappa < 1. ) || ( sig > fc / m && tempKappa >= 1. ) ) {
         vertexType = VT_Tension;
         answer = 0.;
-    } else if ( sig < apexCompression )      {
+    } else if ( sig < apexCompression ) {
         vertexType = VT_Compression;
         answer = apexCompression;
-    } else   {
+    } else {
         vertexType = VT_Regular;
     }
 
@@ -955,7 +1028,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
                 tempKappaPTest = tempKappaP;
                 tempKappaP += answerIncrement(2);
                 deltaLambda += deltaLambdaIncrementNew;
-            } else   {
+            } else {
                 tempKappaPTest = tempKappaP;
                 tempKappaP += answerIncrement(2);
                 deltaKappaP = tempKappaP - status->giveKappaP();
@@ -973,6 +1046,10 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
             tempVolumetricPlasticStrain -= answerIncrement(0) / ( kM );
             tempDeviatoricPlasticStrainNorm -= answerIncrement(1) / ( 2. * gM );
         }
+
+        //if (gp->giveElement()->giveNumber() == 1301){
+        //  printf("%g %g %g\n",sig,rho,tempKappaP);
+        //}
     }
 
     status->letTempVolumetricPlasticStrainBe(tempVolumetricPlasticStrain / 3.);
@@ -998,7 +1075,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
         effectiveStress(1) = stressTemp(1);
         effectiveStress(2) = stressTemp(2);
         effectiveStress(3) = stressTemp(5);
-    } else   {
+    } else {
         effectiveStress = stressTemp;
     }
 }
@@ -1031,7 +1108,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
 
     if ( vertexType == VT_Tension ) {
         sig2 = -0.1 * ft;
-    } else if ( vertexType == VT_Compression )      {
+    } else if ( vertexType == VT_Compression ) {
         sig2 = apexStress;
     }
 
@@ -1055,7 +1132,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
     if ( yieldValue < 0.0 ) {
         dSig = sig2 - sigTrial;
         sigAnswer = sig2;
-    } else   {
+    } else {
         dSig = sigTrial - sig2;
         sigAnswer = sig2;
     }
@@ -1092,7 +1169,7 @@ ConcreteDPM :: performVertexReturn(StressVector &effectiveStress,
             if ( ( ( ( ratioPotential >= ratioTrial ) && vertexType == VT_Tension ) ) ||
                 ( ( ratioPotential <= ratioTrial ) && vertexType == VT_Compression ) ) {
                 return;
-            } else   {
+            } else {
                 vertexType = VT_Regular;
                 return;
             }
@@ -1340,7 +1417,7 @@ ConcreteDPM :: computeDuctilityMeasure(const double sig,
         double AHelp = fZero - CHelp;
         double BHelp = ( fZero - CHelp ) / fPrimeZero;
         ductilityMeasure = ( AHelp * exp(x / BHelp) + CHelp ) / thetaConst;
-    } else   {
+    } else {
         ductilityMeasure = ( AHard + ( BHard - AHard ) * exp( -x / ( CHard ) ) ) / thetaConst;
     }
 
@@ -1371,7 +1448,7 @@ ConcreteDPM :: computeDDuctilityMeasureDInv(FloatArray &answer,
         double dDuctilityMeasureDX = AHelp / BHelp *exp(x / BHelp) / thetaConst;
         answer(0) = dDuctilityMeasureDX * dXDSig;
         answer(1) = 0.;
-    } else   {
+    } else {
         double dXDSig = -1. / fc;
         double dDuctilityMeasureDX = -( BHard - AHard ) / ( CHard ) / thetaConst *exp( -x / ( CHard ) );
         answer(0) = dDuctilityMeasureDX * dXDSig;
@@ -1567,10 +1644,10 @@ ConcreteDPM :: computeHardeningOne(const double kappa) const
 {
     if ( kappa <= 0. ) {
         return yieldHardInitial;
-    } else if ( kappa > 0. && kappa < 1. )      {
+    } else if ( kappa > 0. && kappa < 1. ) {
         return yieldHardInitial + ( 1. - yieldHardInitial ) *
                kappa * ( pow(kappa, 2.) - 3. * kappa + 3. );
-    } else   {
+    } else {
         return 1.;
     }
 }
@@ -1581,9 +1658,9 @@ ConcreteDPM :: computeHardeningOnePrime(const double kappa) const
 {
     if ( kappa < 0. ) {
         return 3. * ( 1. - yieldHardInitial );
-    } else if ( kappa >= 0. && kappa < 1. )      {
+    } else if ( kappa >= 0. && kappa < 1. ) {
         return ( 1. - yieldHardInitial ) * ( 3. * pow(kappa, 2.) - 6. * kappa + 3. );
-    } else   {
+    } else {
         return 0.;
     }
 }
@@ -1600,7 +1677,7 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         ConcreteDPMStatus *status = giveStatus(gp);
         if ( mode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-        } else if ( mode == SecantStiffness || mode == TangentStiffness )      {
+        } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
             omega = status->giveTempDamage();
             if ( omega > 0.9999 ) {
                 omega = 0.9999;
@@ -1637,7 +1714,7 @@ ConcreteDPM :: assignStateFlag(GaussPoint *gp)
         if ( tempDamage > damage ) {
             status->
             letTempStateFlagBe(ConcreteDPMStatus :: ConcreteDPM_PlasticDamage);
-        } else   {
+        } else {
             status->letTempStateFlagBe(ConcreteDPMStatus :: ConcreteDPM_Plastic);
         }
     } else {
@@ -1646,7 +1723,7 @@ ConcreteDPM :: assignStateFlag(GaussPoint *gp)
             if ( tempDamage > damage ) {
                 status->
                 letTempStateFlagBe(ConcreteDPMStatus :: ConcreteDPM_Damage);
-            } else   {
+            } else {
                 status->
                 letTempStateFlagBe(ConcreteDPMStatus :: ConcreteDPM_Elastic);
             }
@@ -1654,7 +1731,7 @@ ConcreteDPM :: assignStateFlag(GaussPoint *gp)
             if ( tempDamage > damage ) {
                 status->
                 letTempStateFlagBe(ConcreteDPMStatus :: ConcreteDPM_Damage);
-            } else   {
+            } else {
                 status->
                 letTempStateFlagBe(ConcreteDPMStatus :: ConcreteDPM_Unloading);
             }
@@ -1847,13 +1924,13 @@ ConcreteDPM :: giveIPValue(FloatArray &answer,
         return 1;
     }
 
-    if ( type == IST_DamageTensor ) {
+    if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();
         return 1;
     }
 
-    if ( type == IST_DamageTensorTemp ) {
+    if ( ( type == IST_DamageTensorTemp ) || ( type == IST_PrincipalDamageTempTensor ) ) {
         answer.resize(1);
         answer.at(1) = status->giveTempDamage();
         return 1;
@@ -1862,13 +1939,13 @@ ConcreteDPM :: giveIPValue(FloatArray &answer,
     if ( type == IST_CumPlasticStrain ) {
         answer.resize(1);
         answer.at(1) = status->giveKappaP();
-	return 1;
+        return 1;
     }
 
     if ( type == IST_CumPlasticStrain_2 ) {
         answer.resize(1);
         answer.at(1) = status->giveKappaD();
-	return 1;
+        return 1;
     }
 
     if ( type == IST_VolumetricPlasticStrain ) {
@@ -1885,11 +1962,11 @@ ConcreteDPM :: giveIPValueSize(InternalStateType type,
                                GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
-      return 6;
-    } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
-      return 1;
+        return 6;
+    } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
+        return 1;
     } else {
-      return StructuralMaterial :: giveIPValueSize(type, gp);
+        return StructuralMaterial :: giveIPValueSize(type, gp);
     }
 }
 
@@ -1910,21 +1987,19 @@ ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
         answer.at(6) = 6;
         return 1;
 
-        break;
-
     case IST_DamageTensor:
-        answer.resize(9);
-        answer.zero();
-        answer.at(1) = 1;
-        return 1;
-
     case IST_DamageTensorTemp:
         answer.resize(9);
         answer.zero();
         answer.at(1) = 1;
         return 1;
 
-        break;
+    case IST_DamageScalar:
+    case IST_CumPlasticStrain:
+    case IST_CumPlasticStrain_2:
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
 
     default:
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
@@ -1937,11 +2012,11 @@ InternalStateValueType
 ConcreteDPM :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_PlasticStrainTensor ) {
-    return ISVT_TENSOR_S3E;
-  } else if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
-    return ISVT_TENSOR_S3;
-  } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) ) {
-    return ISVT_SCALAR;
+        return ISVT_TENSOR_S3E;
+    } else if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
+        return ISVT_TENSOR_S3;
+    } else if ( ( type == IST_DamageScalar ) || ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) ) {
+        return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
     }

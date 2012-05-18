@@ -50,6 +50,10 @@ namespace oofem {
  * This class implements the material status associated to ConcreteDPM.
  * @author Peter Grassl
  */
+// new approach to size-dependent adjustment of damage evolution
+// (can be deactivated by commenting out the following line)
+#define SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+
 class ConcreteDPMStatus : public StructuralMaterialStatus
 {
 public:
@@ -105,6 +109,12 @@ protected:
     int state_flag;
     int temp_state_flag;
     //@}
+
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    ///  @name History variable of the modified size-dependent adjustment
+    /// (indicating value of omega*ft/E+kappaD at the onset of localization)
+    double epsloc;
+#endif
 
 public:
     /// Constructor.
@@ -178,11 +188,20 @@ public:
     double giveKappaD() const { return kappaD; }
 
     /**
-     * Get the hardening variable of the damage model from the
+     * Get the equivalent strain from the
      * material status.
-     * @return Hardening variable kappaD.
+     * @return Equivalent strain.
      */
     double giveEquivStrain() const { return equivStrain; }
+
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    /**
+     * Get the value of omega*ft/E at the expected onset of localization
+     * (defined by negative second-order work).
+     * @returns Variable epsloc.
+     */
+    double giveEpsLoc() const { return epsloc; }
+#endif
 
     /**
      * Get the damage variable of the damage model from the
@@ -385,7 +404,7 @@ protected:
     double gM;
     /// Elastic bulk modulus.
     double kM;
-    /// Elastic poisson's ration.
+    /// Elastic Poisson's ration.
     double nu;
 
     /// Hardening variable of plasticity model.
@@ -412,8 +431,14 @@ protected:
     /// Material mode for convenient access.
     MaterialMode matMode;
 
-    ///  stress and deviatoric part of it.
+    /// Stress and its deviatoric part.
     StressVector effectiveStress;
+
+#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
+    /// Material parameter of the size-dependent adjustment
+    /// (reference element size)
+    double href;
+#endif
 
 public:
     /// Constructor
@@ -434,10 +459,10 @@ public:
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                              MatResponseForm form,
-                              GaussPoint *gp,
-                              const FloatArray &reducedStrain,
-                              TimeStep *tStep);
+                                      MatResponseForm form,
+                                      GaussPoint *gp,
+                                      const FloatArray &reducedStrain,
+                                      TimeStep *tStep);
 
 
     /**
@@ -685,7 +710,7 @@ public:
     double computeDRDCosTheta(const double theta, const double ecc) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
@@ -693,16 +718,16 @@ public:
     virtual int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type);
 
     virtual int giveIPValue(FloatArray &answer,
-                    GaussPoint *gp,
-                    InternalStateType type,
-                    TimeStep *tStep);
+                            GaussPoint *gp,
+                            InternalStateType type,
+                            TimeStep *tStep);
 
     virtual int giveIPValueSize(InternalStateType type,
-                        GaussPoint *gp);
+                                GaussPoint *gp);
 
     virtual int giveIntVarCompFullIndx(IntArray &answer,
-                               InternalStateType type,
-                               MaterialMode mmode);
+                                       InternalStateType type,
+                                       MaterialMode mmode);
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
