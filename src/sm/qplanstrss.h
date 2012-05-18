@@ -66,7 +66,7 @@ public:
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -86,6 +86,8 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
@@ -100,6 +102,14 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
+
+    // edge load support
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+
 };
 } // end namespace oofem
 #endif // qplanstrss_h

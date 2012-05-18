@@ -76,7 +76,7 @@ public:
 
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -123,6 +123,13 @@ protected:
     void computeDerivativeKsi(FloatArray &, double, double);
     void computeDerivativeEta(FloatArray &, double, double);
     void computeJacobianMatrixAt(FloatMatrix &, GaussPoint *);
+
+    // edge load support
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // qtrplstr_h
