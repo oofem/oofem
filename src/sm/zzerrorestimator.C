@@ -306,7 +306,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                  gp, tStep);
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= nDofMans; k++ ) {
-                    diff.at(j) += n.at(j, k) * nodalRecoveredStreses.at(k, j);
+                    diff.at(j) += n.at(1, k) * nodalRecoveredStreses.at(k, j);
                 }
             }
 
