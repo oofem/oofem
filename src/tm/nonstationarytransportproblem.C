@@ -101,6 +101,8 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
+
+    return nMethod;
 }
 
 IRResultType

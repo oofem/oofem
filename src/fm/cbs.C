@@ -75,6 +75,8 @@ NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
+
+    return nMethod;
 }
 
 IRResultType

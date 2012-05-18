@@ -65,6 +65,8 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
+
+    return nMethod;
 }
 
 IRResultType
