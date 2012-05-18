@@ -3119,7 +3119,7 @@ Description & Damage-plastic model for concrete\\
 Record Format & \descitem{ConcreteDPM}  \elemparam{d}{rn}
 \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn}
  \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} \elemparam{Gf}{rn} \elemparam{ecc}{rn}
- \elemparam{kinit}{rn} \elemparam{Ahard}{rn} \elemparam{Bhard}{rn} \elemparam{Chard}{rn} \elemparam{Dhard}{rn} \elemparam{Asoft}{rn} \elemparam{helem}{rn} \elemparam{dilation}{rn} \elemparam{yieldtol}{rn} \elemparam{newtoniter}{in} \\
+ \elemparam{kinit}{rn} \elemparam{Ahard}{rn} \elemparam{Bhard}{rn} \elemparam{Chard}{rn} \elemparam{Dhard}{rn} \elemparam{Asoft}{rn} \elemparam{helem}{rn} \elemparam{href}{rn} \elemparam{dilation}{rn} \elemparam{yieldtol}{rn} \elemparam{newtoniter}{in} \\
 Parameters &- \param{d} material density\\
 &- \param{E} Young modulus\\
 &- \param{n} Poisson ratio\\
@@ -3136,6 +3136,7 @@ Parameters &- \param{d} material density\\
 &- \param{Dhard} parameter $D_{\rm h}$ from (\ref{eq:hardeningMeasure}), optional, default value $10^{-6}$\\
 &- \param{Asoft} parameter $A_{\rm s}$ from (\ref{eq:damageDuctility}), optional, default value 15\\
 &- \param{helem} element size $h$, optional (if not specified, the actual element size is used)\\
+&- \param{href} reference element size $h_{ref}$, optional (if not specified, the standard adjustment of the damage law is used)\\
 &- \param{dilation} dilation factor (ratio between lateral and axial plastic strain rates in the softening regime under uniaxial compression), optional, default value -0.85\\
 &- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $10^{-10}$\\
 &- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
@@ -3201,6 +3202,27 @@ is exactly $G_f = w_f f_t$. The input parameter controling the damage law
 can be either the characteristic crack opening $w_f$, 
 or the fracture energy $G_f$. If both are specified, $w_f$ is used and
 $G_f$ is ignored. If only $G_f$ is specified, $w_f$ is set to $G_f/f_t$.
+
+The onset of damage corresponds to the peak of the stress-strain diagram
+under proportional loading, when the ratios of the stress components are fixed.
+This is the case e.g.\ for uniaxial tension, uniaxial compression, or shear
+under free expansion of the material (with zero normal stresses). However,
+for shear under confinement the shear stress can rise even after the onset
+of damage, due to increasing hydrostatic pressure, which increases the
+mobilized friction. It has been observed that the standard approach leads
+to strong sensitivity of the peak shear stress to the element size.
+To reduce this pathological effect, a modified approach has been implemented.
+The second-order work (product of stress increment and strain increment)
+is checked after each step and the element-size dependent adjustment
+of the damage law is applied only after the second-order work becomes negative.
+Up to this stage, the damage law corresponds to a fixed reference element
+size, which is independent of the actual size of the element.
+This size is set by the optional parameter \param{href}.
+If this parameter is not specified, the standard approach is used.
+For testing purposes, one can also specify the actual element size,
+\param{helem}, as a ``material property''. If this parameter is not
+specified, the element size is computed for each element separately
+and represents its actual size.  
 
 The damage-plastic model contains 15 parameters, but only 6 of them need to be actually calibrated for different concrete types, namely Young's modulus $E$, Poisson's ratio $\nu$, tensile strength $f_{\rm t}$, compressive strength $f_{\rm c}$, parameter $w_f$ (or fracture energy $G_f$), and parameter $A_{\rm s}$ in the ductility measure (\ref{eq:damageDuctility}) of the damage model. The remaining parameters can be set to their default values specified in \cite{GraJir}.
 
