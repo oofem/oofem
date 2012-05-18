@@ -442,7 +442,6 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
   contextIOResultType iores;
   int i, ct;
   classType compId;
-  EnrichmentItem *ei;
 
   if (mode & CM_Definition) {
     int _state[XFEMMAN_STATE_SIZE];
