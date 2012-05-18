@@ -57,7 +57,7 @@ public:
     AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { }
     virtual ~AdaptiveLinearStatic() { }
 
-    virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *stepN);
 
     /**
      * Initializes the newly generated discretization state according to previous solution.

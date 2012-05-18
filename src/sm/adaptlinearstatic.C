@@ -48,16 +48,16 @@
 #include "contextioerr.h"
 
 namespace oofem {
-void
-AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
+void 
+AdaptiveLinearStatic::updateYourself(TimeStep *stepN) 
 {
-    LinearStatic :: solveYourselfAt(tStep);
-
-    // perform error evaluation
-    // evaluate error of the reached solution
-    this->defaultErrEstimator->estimateError( temporaryEM, this->giveCurrentStep() );
-    // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
-    RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
+ 
+   LinearStatic :: updateYourself(stepN);
+   // perform error evaluation
+   // evaluate error of the reached solution
+   this->defaultErrEstimator->estimateError( temporaryEM, stepN );
+   // this->defaultErrEstimator->estimateError (equilibratedEM, this->giveCurrentStep());
+   RemeshingStrategy strategy = this->defaultErrEstimator->giveRemeshingCrit()->giveRemeshingStrategy( stepN );
 
     if ( strategy == NoRemeshing_RS ) {
         return;
@@ -67,16 +67,15 @@ AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
         Domain *newDomain;
 
         MesherInterface :: returnCode result =
-            mesher->createMesh(this->giveCurrentStep(), 1,
-                               this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
+	  mesher->createMesh(stepN, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
         if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
-            this->terminate( this->giveCurrentStep() );
+            this->terminate( stepN );
             this->terminateAnalysis();
             exit(1);
         } else {
-            _error("solveYourselfAt: MesherInterface::createMesh failed");
+	  _error("solveYourselfAt: MesherInterface::createMesh failed");
         }
     }
 }
