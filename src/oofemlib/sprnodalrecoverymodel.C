@@ -223,7 +223,7 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
     }
 
     if ( regionsSkipped ) {
-        OOFEM_LOG_RELEVANT("NodalRecoveryModel :: initRegionMap: skipping regions ");
+        OOFEM_LOG_RELEVANT("SPRNodalRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
         for ( i = 1; i <= nregions; i++ ) {
             if ( regionMap.at(i) ) {
                 OOFEM_LOG_RELEVANT("%d ", i);

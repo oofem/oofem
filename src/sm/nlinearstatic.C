@@ -166,9 +166,10 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
 
-    InputRecord *ir = mStep->giveAttributesRecord();
+    MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() );//this line ensures correct input file in staggered problem
+    InputRecord *ir = mStep1->giveAttributesRecord();
 
-    LinearStatic :: updateAttributes(mStep);
+    LinearStatic :: updateAttributes(mStep1);
 
     /*
      * if ((mstep->giveFirstStepNumber() == atTime->giveNumber()) && hasString(initString, "fixload")) {

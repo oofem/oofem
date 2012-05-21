@@ -713,7 +713,6 @@ void QPlaneStress2d::printOutputAt(FILE *file, TimeStep *tStep)
     gp->setCoordinates(gc);
     FloatArray s(3);
     this->computeStressVector (s, gp, tStep);
-    fprintf (stderr, "Huhu: %e\n", s.at(1));
 
   }
 }

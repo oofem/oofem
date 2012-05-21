@@ -220,7 +220,7 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
     }
 
     if ( regionsSkipped ) {
-        OOFEM_LOG_RELEVANT("NodalAveragingRecoveryModel :: initRegionMap: skipping regions ");
+        OOFEM_LOG_RELEVANT("NodalAveragingRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
         for ( i = 1; i <= nregions; i++ ) {
             if ( regionMap.at(i) ) {
                 OOFEM_LOG_RELEVANT("%d ", i);
