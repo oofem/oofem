@@ -642,7 +642,7 @@ EngngModel :: forceEquationNumbering()
     this->numberOfEquations = 0;
     this->numberOfPrescribedEquations = 0;
 
-    OOFEM_LOG_DEBUG("Renumbering dofs in all domains");
+    OOFEM_LOG_DEBUG("Renumbering dofs in all domains\n");
     for ( i = 1; i <= this->ndomains; i++ ) {
         domainNeqs.at(i) = 0;
         this->numberOfEquations += this->forceEquationNumbering(i);

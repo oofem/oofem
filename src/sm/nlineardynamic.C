@@ -74,6 +74,7 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     //
     // constructor
     //
+    stiffnessMatrix = NULL;
     internalForcesEBENorm = 0.0;
     numMetStatus = NM_None;
     internalVarUpdateStamp = 0;
