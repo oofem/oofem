@@ -343,38 +343,6 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     a4 = ( alpha / beta ) - 1;
     a5 = deltaT / 2 * ( alpha / beta - 2 );
 
-    if ( initFlag ) {
-        // First assemble problem at current time step.
-        // Option to take into account initial conditions.
-        if ( !stiffnessMatrix ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-        }
-
-        if ( stiffnessMatrix == NULL ) {
-            _error("proceedStep: sparse matrix creation failed");
-        }
-
-        if ( nonlocalStiffnessFlag ) {
-            if ( !stiffnessMatrix->isAsymmetric() ) {
-                _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
-            }
-        }
-
-        stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
-        // Initialize vectors
-        help.resize(neq);
-        rhs.resize(neq);
-        rhs2.resize(neq);
-        incrementOfDisplacement.resize(neq);
-        internalForces.resize(neq);
-        help.zero();
-        rhs.zero();
-        rhs2.zero();
-        initFlag = 0;
-    }
-
-    incrementOfDisplacement.zero();
-
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         // Initialization
         previousTotalDisplacement.resize(neq);
@@ -383,6 +351,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         totalDisplacement.zero();
         previousInternalForces.resize(neq);
         previousInternalForces.zero();
+        incrementOfDisplacement.resize(neq);
+        incrementOfDisplacement.zero();
         velocityVector.resize(neq);
         velocityVector.zero();
         accelerationVector.resize(neq);
@@ -417,6 +387,48 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                 }
             }
         }
+    } else {
+        incrementOfDisplacement.resize(neq);
+        incrementOfDisplacement.zero();
+    }
+
+    if ( initFlag ) {
+        // First assemble problem at current time step.
+        // Option to take into account initial conditions.
+        if ( !stiffnessMatrix ) {
+            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        }
+
+        if ( stiffnessMatrix == NULL ) {
+            _error("proceedStep: sparse matrix creation failed");
+        }
+
+        if ( nonlocalStiffnessFlag ) {
+            if ( !stiffnessMatrix->isAsymmetric() ) {
+                _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+            }
+        }
+
+        stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        // Initialize vectors
+        help.resize(neq);
+        rhs.resize(neq);
+        rhs2.resize(neq);
+        internalForces.resize(neq);
+        help.zero();
+        rhs.zero();
+        rhs2.zero();
+
+        previousTotalDisplacement.resize(neq);
+        previousVelocityVector.resize(neq);
+        previousAccelerationVector.resize(neq);
+
+        for ( int i = 1; i <= neq; i++ ) {
+            previousTotalDisplacement.at(i)  = totalDisplacement.at(i);
+            previousVelocityVector.at(i)     = velocityVector.at(i);
+            previousAccelerationVector.at(i) = accelerationVector.at(i);
+        }
+        initFlag = 0;
     }
 
 #ifdef VERBOSE
@@ -677,12 +689,6 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
         THROW_CIOERR(iores);
     }
 
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    previousTotalDisplacement.resize(neq);
-    for ( int i = 1; i <= neq; i++ ) {
-        previousTotalDisplacement.at(i) = totalDisplacement.at(i);
-    }
-
     if ( ( iores = previousInternalForces.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -693,11 +699,6 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
 
     if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
-    }
-
-    int _cm;
-    if ( !stream->read(& _cm, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
     }
 
     // store InitialLoadVector

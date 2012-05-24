@@ -84,7 +84,7 @@ protected:
     double a0, a1, a2, a3, a4, a5, a6, a7;
 
     FloatArray velocityVector, accelerationVector, previousLoadVector;
-    FloatArray effectiveLoadVector, help, rhs, rhs2, previousInternalForces;
+    FloatArray help, rhs, rhs2, previousInternalForces;
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
     FloatArray previousAccelerationVector, previousVelocityVector;
     FloatArray internalForces;
