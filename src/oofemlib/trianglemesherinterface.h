@@ -127,5 +127,5 @@ protected:
 };
 
 } // end namespace oofem
-#endif // particletopologydescription_h
+#endif // trianglemesherinterface_h
 

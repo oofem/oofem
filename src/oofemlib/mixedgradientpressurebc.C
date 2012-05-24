@@ -203,21 +203,15 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
     }
 
     double val;
-    switch ( id ) {
-        case D_u:
-        case V_u:
-            val = dx.at(1)/ndim*vol;
-            if (ndim == 2) val += dx.at(1)*dev11 + dx.at(2)/2.0*gam12;
-            if (ndim == 3) val += dx.at(3)/2.0*gam13;
-        case D_v:
-        case V_v:
-            val = dx.at(2)/ndim*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
-            if (ndim == 3) val += dx.at(3)/2.0*gam23;
-        case D_w:
-        case V_w:
-            val = dx.at(3)/ndim*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
-        default:
-            return 0.0;
+    if ( id == D_u || id == V_u ) {
+        val = dx.at(1)/ndim*vol;
+        if (ndim == 2) val += dx.at(1)*dev11 + dx.at(2)/2.0*gam12;
+        if (ndim == 3) val += dx.at(3)/2.0*gam13;
+    } else if ( id == D_v || id == V_v ) {
+        val = dx.at(2)/ndim*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
+        if (ndim == 3) val += dx.at(3)/2.0*gam23;
+    } else if ( id == D_w || id == V_w ) { // 3D only:
+        val = dx.at(3)/ndim*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
     }
 }
 

@@ -67,6 +67,7 @@
 namespace oofem {
 VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
+    primVarSmoother = NULL;
     smoother = NULL;
 }
 
