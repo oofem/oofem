@@ -292,13 +292,14 @@ main(int argc, char *argv[])
     //int rank=0;
     char inputFileName [ MAX_FILENAME_LENGTH ], buff [ 20 ];
     unsigned long mask = 0;
-
+    bool parallelFlag
 
 
     // print prg header on stdout
     printf("%s", PRG_HEADER_SM);
 
 #ifdef __PARALLEL_MODE
+    parallelFlag = true; ///@todo Read this from input arguments (eventually)
     char fileName [ MAX_FILENAME_LENGTH ];
     int rank = 0;
  #ifdef __USE_MPI
@@ -360,7 +361,7 @@ main(int argc, char *argv[])
     jobName [ MAX_FILENAME_LENGTH - 1 ] = '\0';
     sprintf(viewTitle, "OOFEG (%s)", jobName);
 
-    problem = InstanciateProblem(& dr, _postProcessor, 0);
+    problem = InstanciateProblem(& dr, _postProcessor, 0, parallelFlag);
     dr.finish();
     problem->checkProblemConsistency();
 

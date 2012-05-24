@@ -136,6 +136,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        if ( !this->stiffnessMatrix ) {
+            OOFEM_ERROR2("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
+        }
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
     }
 

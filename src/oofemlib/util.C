@@ -105,7 +105,7 @@ char *giveInputDataFileName(char *dataInputFileName, int maxlen)
 }
 
 
-EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master)
+EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
     const char *__keyword, *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                                 // Required by IR_GIVE_FIELD macro
@@ -141,6 +141,7 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
         OOFEM_ERROR("EngngModel::InstanciateProblem - Failed to construct engineering model.\n");
     }
     problem->setProblemMode(mode);
+    problem->setParallelMode(parallelFlag);
 
     if ( contextFlag ) {
         problem->setContextOutputMode(COM_Always);

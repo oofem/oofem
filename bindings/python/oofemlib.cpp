@@ -48,7 +48,7 @@ Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
 EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag) {
-  return InstanciateProblem (dr, mode, contextFlag, 0);
+  return InstanciateProblem (dr, mode, contextFlag);
 }
 
 /*****************************************************

@@ -71,7 +71,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
-//#include "particletopologydescription.h" // Soon
+#include "particletopologydescription.h" // Soon
 
 // end __OOFEMLIB_MODULE
 
@@ -302,7 +302,7 @@ std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > to
 
 TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
-    if ( topologyNameList.size() == 0 ) { }
+    if ( topologyNameList.size() == 0 ) { topologyNameList["particletopology"] = topologyCreator< ParticleTopologyDescription >; }
 
     return ( topologyNameList.count(aClass) == 1 ) ? topologyNameList [ aClass ](domain) : NULL;
 }

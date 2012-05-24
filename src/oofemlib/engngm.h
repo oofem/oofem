@@ -365,6 +365,11 @@ public:
      * @param pmode Problem mode.
      */
     void setProblemMode(problemMode pmode) { pMode = pmode; }
+    /**
+     * Sets the problem to run in parallel (or not).
+     * @param parallelFlag Determines parallel mode.
+     */
+    void setParallelMode(bool parallelFlag);
     /// Returns domain mode.
     problemMode giveProblemMode() { return pMode; }
     /**

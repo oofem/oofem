@@ -73,10 +73,11 @@ char *giveInputDataFileName(char *dataInputFileName, int maxlen);
  * Instanciates the new problem.
  * @param dr DataReader containing the problem data.
  * @param mode Mode determining macro or micro problem.
- * @param contextFlag ?
+ * @param contextFlag TODO document this.
  * @param master Master problem in case of multiscale computations.
+ * @param parallelFlag Determines if the problem should be run in parallel or not.
  */
-EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0);
+EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
 /** 
  * Static storage for temporary strings to solve compiler warnings about conversion from string constant to char*.

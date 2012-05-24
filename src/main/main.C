@@ -105,11 +105,10 @@ int main(int argc, char *argv[])
 #endif
 
     int i;
-    int contextFlag = 0, inputFileFlag = 0, restartFlag = 0,
-        adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
-    int renumberFlag = 0;
-    bool debugFlag = false;
-    std :: stringstream inputFileName;
+    int adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
+    bool parallelFlag = false, renumberFlag = false, debugFlag = false, contextFlag = false, restartFlag = false,
+         inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
+    std :: stringstream inputFileName, outputFileName, errOutputFileName;
     std :: vector< const char * >modulesArgs;
     EngngModel *problem = 0;
 
@@ -120,6 +119,7 @@ int main(int argc, char *argv[])
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
  #endif
+    parallelFlag = true; ///@todo The default should be false even for parallel builds, and turned on with -p 
 #endif
 
     if ( rank == 0 ) {
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         modulesArgs.push_back(argv [ 0 ]);
         for ( i = 1; i < argc; i++ ) {
             if ( ( strcmp(argv [ i ], "-context") == 0 ) || ( strcmp(argv [ i ], "-c") == 0 ) ) {
-                contextFlag = 1;
+                contextFlag = true;
             } else if ( strcmp(argv [ i ], "-v") == 0 ) {
                 if ( rank == 0 ) {
                     oofem_print_version();
@@ -151,17 +151,17 @@ int main(int argc, char *argv[])
                 if ( i + 1 < argc ) {
                     i++;
                     inputFileName << argv [ i ];
-                    inputFileFlag = 1;
+                    inputFileFlag = true;
                 }
             } else if ( strcmp(argv [ i ], "-r") == 0 ) {
                 if ( i + 1 < argc ) {
                     i++;
-                    restartFlag = 1;
+                    restartFlag = true;
                     restartStepInfo [ 0 ] = strtol(argv [ i ] , NULL, 10);
                     restartStepInfo [ 1 ] = 0;
                 }
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
-                renumberFlag = 1;
+                renumberFlag = true;
             } else if ( strcmp(argv [ i ], "-ar") == 0 ) {
                 if ( i + 1 < argc ) {
                     i++;
@@ -177,30 +177,25 @@ int main(int argc, char *argv[])
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
                     i++;
-#ifdef __PARALLEL_MODE
-                    std :: stringstream fileName;
-                    fileName << argv [ i ] << "." << rank;
-                    oofem_errLogger.appendlogTo( const_cast < char * > ( fileName.str().c_str() ) );
-#else
-                    oofem_errLogger.appendlogTo( argv [ i ] );
-#endif
+                    errOutputFileFlag = true;
+                    errOutputFileName << argv [ i ];
                     i++;
                 }
             } else if ( strcmp(argv [ i ], "-qo") == 0 ) {
                 if ( i + 1 < argc ) {
                     i++;
-#ifdef __PARALLEL_MODE
-                    std :: stringstream fileName;
-                    fileName << argv [ i ] << "." << rank;
-                    oofem_logger.appendlogTo( const_cast < char * > ( fileName.str().c_str() ) );
-#else
-                    oofem_logger.appendlogTo( argv [ i ] );
-#endif
-                    // print header to redirected output
-                    LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
+                    outputFileFlag = true;
+                    outputFileName << argv [ i ];
                 }
             } else if ( strcmp(argv [ i ], "-d") == 0 ) {
                 debugFlag = true;
+            } else if ( strcmp(argv [ i ], "-p") == 0 ) {
+#ifdef __PARALLEL_MODE
+                parallelFlag = true;
+#else
+                fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");
+                exit(EXIT_FAILURE);
+#endif
             } else { // Arguments not handled by OOFEM is to be passed to PETSc
                 modulesArgs.push_back( argv [ i ] );
             }
@@ -218,9 +213,6 @@ int main(int argc, char *argv[])
 
     // check if input file given
     if ( !inputFileFlag ) {
-        /*
-         * ::giveInputDataFileName(inputFileName, MAX_FILENAME_LENGTH);
-         */
         if ( rank == 0 ) {
             fprintf(stderr, "\nInput file not specified\a\n\n");
         }
@@ -228,7 +220,7 @@ int main(int argc, char *argv[])
 #ifdef __USE_MPI
         MPI_Finalize();
 #endif
-        exit(EXIT_SUCCESS);
+        exit(EXIT_FAILURE);
     }
 
 #if defined ( __PETSC_MODULE ) || defined ( __SLEPC_MODULE )
@@ -245,11 +237,23 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef __PARALLEL_MODE
-    inputFileName << "." << rank;
+    if ( parallelFlag ) {
+        inputFileName << "." << rank;
+        outputFileName << "." << rank;
+        errOutputFileName << "." << rank;
+    }
 #endif
+    if ( outputFileFlag ) {
+        oofem_logger.appendlogTo( const_cast < char * > ( outputFileName.str().c_str() ) );
+    }
+    if ( errOutputFileFlag ) {
+        oofem_errLogger.appendlogTo( const_cast < char * > ( errOutputFileName.str().c_str() ) );
+    }
+    // print header to redirected output
+    LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str().c_str() );
-    problem = :: InstanciateProblem(& dr, _processor, contextFlag);
+    problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
 
     problem->checkProblemConsistency();

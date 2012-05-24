@@ -101,7 +101,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 
     for ( i = 1; i <= nModels; i++ ) {
         OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ].c_str());
-        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
+        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this, this->isParallel());
         emodelList->put(i, slaveProb);
     }
 

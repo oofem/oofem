@@ -260,6 +260,12 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std::strin
     std::ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
     this->rve->letOutputBaseFileNameBe(name.str());
+    
+    this->bc = dynamic_cast< MixedGradientPressureBC* >(this->rve->giveDomain(1)->giveBc(1));
+    if (!this->bc) {
+        OOFEM_ERROR("FE2FluidMaterialStatus :: createRVE - RVE doesn't have necessary boundary condition; should have MixedGradientPressure as first b.c. (in first domain)");
+    }
+
     return true;
 }
 

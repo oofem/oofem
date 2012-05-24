@@ -141,15 +141,12 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
         context = new EngngModelContext();
     }
 
+    parallelFlag = 0;
 #ifdef __PARALLEL_MODE
-    initParallel();
-    parallelFlag = 1;
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;
     lb = NULL;
     lbm = NULL;
-#else
-    parallelFlag = 0;
 #endif
 
 #ifdef __PETSC_MODULE
@@ -190,11 +187,8 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
         context = new EngngModelContext();
     }
 
-#ifndef __PARALLEL_MODE
     parallelFlag = 0;
-#else
-    parallelFlag = 1;
-    initParallel();
+#ifdef __PARALLEL_MODE
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;
     lb = NULL;
@@ -267,8 +261,20 @@ EngngModel ::  ~EngngModel()
             delete lbm;
         }
     }
-
 #endif
+}
+
+
+void EngngModel :: setParallelMode(bool parallelFlag)
+{
+    this->parallelFlag = parallelFlag;
+if ( this->parallelFlag ) {
+#ifndef __PARALLEL_MODE
+        OOFEM_ERROR("EngngModel :: setParallelMode - Can't do it, only compiled for sequential runs");
+#else
+        initParallel();
+#endif
+    }
 }
 
 
@@ -282,7 +288,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     this->coreOutputFileName = std::string(dataOutputFileName);
     this->dataOutputFileName = std::string(dataOutputFileName);
 
-    if ( this->giveProblemMode() ==   _postProcessor ) {
+    if ( this->giveProblemMode() == _postProcessor ) {
         // modify output file name to prevent output to be lost
         this->dataOutputFileName.append(".oofeg");
     }
@@ -302,7 +308,8 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     OOFEM_LOG_DEBUG("Reading all data from input file \n");
 #  endif
 #ifdef __PARALLEL_MODE
-    fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
+    if ( this->isParallel() )
+        fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
 #endif
 
     // create domains
@@ -1811,21 +1818,20 @@ EngngModel :: init()
 
 
 #ifdef __PARALLEL_MODE
- #ifdef __USE_MPI
 void
 EngngModel :: initParallel()
 {
+ #ifdef __USE_MPI
     int len;
-
     MPI_Get_processor_name(processor_name, & len);
     MPI_Comm_rank(MPI_COMM_WORLD, & this->rank);
     MPI_Comm_size(MPI_COMM_WORLD, & numProcs);
-  #ifdef __VERBOSE_PARALLEL
+ #endif
+ #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_RELEVANT("[%d/%d] Running on %s\n", rank, numProcs, processor_name);
-  #endif
+ #endif
 }
 
- #endif
 #endif
 
 #ifdef __OOFEG
