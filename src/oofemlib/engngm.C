@@ -1378,7 +1378,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     FILE *file;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
-    OOFEM_LOG_RELEVANT("Restoring context for tStep %d.%d\n", istep, iversion);
+    OOFEM_LOG_RELEVANT("Restoring context for time step %d.%d\n", istep, iversion);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -1798,7 +1798,7 @@ EngngModel :: checkProblemConsistency()
 
 #  ifdef VERBOSE
     if ( result ) {
-        VERBOSE_PRINTS("Consistency check", "ok")
+        OOFEM_LOG_DEBUG("Consistency check", "ok");
     } else {
         VERBOSE_PRINTS("Consistency check", "failed")
         exit(1);
