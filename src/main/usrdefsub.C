@@ -71,8 +71,9 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
-#include "particletopologydescription.h" // Soon
-
+#if 0 // Soon
+ #include "particletopologydescription.h" // Soon
+#endif
 // end __OOFEMLIB_MODULE
 
 
@@ -302,11 +303,12 @@ std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > to
 
 TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
+#if 0
     if ( topologyNameList.size() == 0 ) { topologyNameList["particletopology"] = topologyCreator< ParticleTopologyDescription >; }
+#endif
 
     return ( topologyNameList.count(aClass) == 1 ) ? topologyNameList [ aClass ](domain) : NULL;
 }
-
 
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m)
 {
