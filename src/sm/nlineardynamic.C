@@ -282,9 +282,10 @@ void NonLinearDynamic :: solveYourself()
         int neq = this->giveNumberOfEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
-
-        // Set up communication patterns.
-        this->initializeCommMaps();
+        if ( isParallel() ) {
+            // Set up communication patterns.
+            this->initializeCommMaps();
+        }
 #endif
         commInitFlag = 0;
     }
@@ -302,9 +303,10 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
         int neq = this->giveNumberOfEquations(EID_MomentumBalance);
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
-
-        // Set up communication patterns.
-        this->initializeCommMaps();
+        if ( isParallel() ) {
+            // Set up communication patterns.
+            this->initializeCommMaps();
+        }
 #endif
         commInitFlag = 0;
     }

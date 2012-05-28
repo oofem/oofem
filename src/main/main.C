@@ -122,11 +122,6 @@ int main(int argc, char *argv[])
     parallelFlag = true; ///@todo The default should be false even for parallel builds, and turned on with -p 
 #endif
 
-    if ( rank == 0 ) {
-        // print prg header on stdout
-        printf("%s\n", PRG_HEADER_SM);
-    }
-
     //
     // check for options
     //
@@ -249,6 +244,7 @@ int main(int argc, char *argv[])
     if ( errOutputFileFlag ) {
         oofem_errLogger.appendlogTo( const_cast < char * > ( errOutputFileName.str().c_str() ) );
     }
+
     // print header to redirected output
     LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
 

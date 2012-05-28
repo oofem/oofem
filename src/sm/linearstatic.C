@@ -87,17 +87,14 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
 
-#ifdef __PARALLEL_MODE
-    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-        if ( nMethod ) {
-            return nMethod;
+    if ( isParallel() ) {
+        if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+            nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
         }
-
+    } else {
         nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
     }
-#else
-    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
-#endif
+
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
