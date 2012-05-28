@@ -79,15 +79,26 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
 
     ms->setTimeStep(tStep);
+    
+    MixedGradientPressureBC *bc = ms->giveBC();
+    StokesFlow *rve = ms->giveRVE();
 
     // Set input
-    ms->giveBC()->setPrescribedDeviatoricGradientFromVoigt(eps_dev);
-    ms->giveBC()->setPrescribedPressure(pressure);
+    bc->setPrescribedDeviatoricGradientFromVoigt(eps_dev);
+    bc->setPrescribedPressure(pressure);
     // Solve subscale problem
-    ms->giveRVE()->solveYourselfAt(tStep);
+    rve->solveYourselfAt(tStep);
 
-    ms->giveBC()->computeFields(stress_dev, epsp_vol, EID_MomentumBalance, tStep);
+    bc->computeFields(stress_dev, epsp_vol, EID_MomentumBalance_ConservationEquation, tStep);
     ms->letTempDeviatoricStressVectorBe(stress_dev);
+    
+    // Stores temporary tangents
+    // Take the solver that the RVE-problem used for linear systems (even in non-linear materials, tangent problem is still linear)
+    bc->computeTangents(ms->giveDeviatoricTangent(), 
+                        ms->giveDeviatoricPressureTangent(),
+                        ms->giveVolumetricDeviatoricTangent(),
+                        ms->giveVolumetricPressureTangent(),
+                        EID_MomentumBalance_ConservationEquation, tStep);
 }
 
 void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
@@ -251,7 +262,10 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std::strin
     OOFEMTXTDataReader dr(inputfile.c_str());
     EngngModel *em = InstanciateProblem(&dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
-    em->initMetaStepAttributes( em->giveMetaStep( em->giveNextStep()->giveMetaStepNumber() ) );
+    em->checkProblemConsistency();
+    em->initMetaStepAttributes( em->giveMetaStep( 1 ) );
+    em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
+    em->init();
 
     this->rve = dynamic_cast<StokesFlow*> (em);
     if (!this->rve) {

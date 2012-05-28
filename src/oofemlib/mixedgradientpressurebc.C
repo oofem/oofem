@@ -32,6 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "petscsparsemtrx.h"
+
 #include "mixedgradientpressurebc.h"
 #include "dofiditem.h"
 #include "dofmanager.h"
@@ -46,6 +48,7 @@
 #include "node.h"
 #include "activedof.h"
 #include "masterdof.h"
+#include "usrdefsub.h" // For sparse matrix creation.
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -218,16 +221,41 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
 
 void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
 {
-    vol = this->giveVolDof()->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+    vol = this->giveVolDof()->giveUnknown(eid, VM_Total, tStep);
     this->domain->giveEngngModel()->assembleVector(sigmaDev, tStep, eid,
         InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
 }
 
 
-void MixedGradientPressureBC :: computeTangents(SparseLinearSystemNM *solver, 
-    SparseMtrx *Kff, SparseMtrx *Kfp, SparseMtrx *Kpf, SparseMtrx *Kpp,
-    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp)
+void MixedGradientPressureBC :: computeTangents(
+    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
+    // Fetch some information from the engineering model
+    EngngModel *rve = this->giveDomain()->giveEngngModel();
+    ///@todo Get this from engineering model
+    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
+    SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
+    SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
+    EModelDefaultEquationNumbering fnum;
+    EModelDefaultPrescribedEquationNumbering pnum;
+
+    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    Kff = CreateUsrDefSparseMtrx(stype);
+    Kfp = CreateUsrDefSparseMtrx(stype);
+    Kpf = CreateUsrDefSparseMtrx(stype);
+    Kpp = CreateUsrDefSparseMtrx(stype);
+    if ( !Kff ) {
+        OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+    }
+    Kff->buildInternalStructure( rve, 1, eid, fnum, fnum );
+    Kfp->buildInternalStructure( rve, 1, eid, fnum, pnum );
+    Kpf->buildInternalStructure( rve, 1, eid, pnum, fnum );
+    Kpp->buildInternalStructure( rve, 1, eid, pnum, pnum );
+    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain );
+    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain );
+    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain );
+    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, pnum, this->domain );
+    
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();
     int npeq = Kpf->giveNumberOfRows();
@@ -235,31 +263,32 @@ void MixedGradientPressureBC :: computeTangents(SparseLinearSystemNM *solver,
     // Indices and such of internal dofs
     int dvol_eq = this->giveVolDof()->giveEqn();
     int ndev = this->devGradient.giveSize();
-    
     // Matrices and arrays for sensitivities
     FloatMatrix ddev_pert(ndev,npeq); // In fact, npeq should most likely equal ndev
-    FloatMatrix rhs_d(neq,npeq); // RHS for d_dev
-    FloatMatrix s_d; // Sensitivity fields for d_dev
+    FloatMatrix rhs_d(neq,npeq); // RHS for d_dev [d_dev11, d_dev22, d_dev12] in 2D
+    FloatMatrix s_d(neq,npeq); // Sensitivity fields for d_dev
     FloatArray rhs_p(neq); // RHS for pressure
-    FloatArray s_p; // Sensitivity fields for p
+    FloatArray s_p(neq); // Sensitivity fields for p
 
     // Unit pertubations for d_dev
     ddev_pert.zero();
     for (int i = 1; i <= ndev; ++i) {
-        ddev_pert.at(-this->devdman->giveDof(i)->giveEqn(), i) = -1; // Minus sign for moving it to the RHS
+        int eqn = this->devdman->giveDof(i)->__givePrescribedEquationNumber();
+        ddev_pert.at(eqn, i) = -1; // Minus sign for moving it to the RHS
     }
     Kfp->times(ddev_pert, rhs_d);
 
     // Sensitivity analysis for p (already in rhs, just set value directly)
     rhs_p.zero();
     rhs_p.at(dvol_eq) = -1.0; // dp = -1.0 (unit size)
-   
+
+    Kff->printStatistics();
     // Solve all sensitivities
     solver->solve(Kff,&rhs_p,&s_p);
     solver->solve(Kff,rhs_d,s_d);
     
     // Sensitivities for d_vol is solved for directly;
-    Cp = rhs_p.at(dvol_eq);
+    Cp = s_p.at(dvol_eq);
     Cd.resize(ndev);
     for (int i = 1; i <= ndev; ++i) {
         Cd.at(i) = s_d.at(dvol_eq, i); // Copy over relevant row from solution
@@ -271,7 +300,13 @@ void MixedGradientPressureBC :: computeTangents(SparseLinearSystemNM *solver,
     FloatMatrix tmpMat;
     Kpp->times(ddev_pert, tmpMat);
     Kpf->times(s_d, Ed);
+    
     Ed.add(tmpMat);
+    
+    delete Kff;
+    delete Kfp;
+    delete Kpf;
+    delete Kpp;
 }
 
 

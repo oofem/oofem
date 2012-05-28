@@ -89,9 +89,9 @@ public:
     double computeSize();
 
     FloatMatrix &giveDeviatoricTangent() { return Ed; }
-    FloatArray &giveDeviatoricPressureTangent() { return Cd; };
-    FloatArray &giveVolumetricDeviatoricTangent() { return Ep; };
-    double giveVolumetricPressureTangent() { return Cp; };
+    FloatArray &giveDeviatoricPressureTangent() { return Ep; };
+    FloatArray &giveVolumetricDeviatoricTangent() { return Cd; };
+    double &giveVolumetricPressureTangent() { return Cp; };
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

@@ -136,19 +136,14 @@ public:
 
     /**
      * Computes the macroscopic tangents through sensitivity analysis.
-     * @param solver Linear solver to use for sensitivity problems.
-     * @param Kff Free-free part of the tangent matrix.
-     * @param Kfp Free-prescribed part of the tangent matrix.
-     * @param Kpf Prescribed-free part of the tangent matrix (transpose of Kfp for symmetric problems).
-     * @param Kpp Prescribed-prescribed part of the tangent matrix.
      * @param[out] Ed Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial d_{\mathrm{dev}}} @f$.
      * @param[out] Ep Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial p} @f$.
      * @param[out] Cd Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial d_{\mathrm{dev}}} @f$.
      * @param[out] Cp Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial p} @f$.
+     * @param eid Equation ID for which the tangents belong.
+     * @param tStep Time step for the tangents.
      */
-    void computeTangents(SparseLinearSystemNM *solver,
-                         SparseMtrx *Kff, SparseMtrx *Kfp, SparseMtrx *Kpf, SparseMtrx *Kpp,
-                         FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp);
+    void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
 
     /**
      * Set prescribed pressure.
