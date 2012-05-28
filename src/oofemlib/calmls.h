@@ -215,9 +215,10 @@ public:
     virtual const char *giveClassName() const { return "CylindricalALM"; }
     virtual classType giveClassID() const { return CylindricalALMSolverClass; }
 
+    virtual SparseLinearSystemNM *giveLinearSolver();
+
 protected:
     void convertHPCMap();
-    SparseLinearSystemNM *giveLinearSolver();
 
     /**
      * @return If 0 then ok, 1 then failure (restart).

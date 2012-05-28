@@ -126,6 +126,12 @@ public:
      * @param outputStream Stream to print state to.
      */
     virtual void printState(FILE *outputStream) { }
+    
+    /**
+     * Constructs (if necessary) and returns a linear solver.
+     * Public method because some problems require it for sensitivity analysis, etc. even for nonlinear problems (e.g. tangent relations in multiscale simulations).
+     */
+    virtual SparseLinearSystemNM *giveLinearSolver() { return NULL; }
 
     // Overloaded methods:
     virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }

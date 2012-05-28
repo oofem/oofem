@@ -155,9 +155,9 @@ public:
         if ( linSolver ) { linSolver->setDomain(d); } }
     virtual void reinitialize() { if ( linSolver ) { linSolver->reinitialize(); } }
 
+    virtual SparseLinearSystemNM *giveLinearSolver();
+
 protected:
-    /// Constructs and returns a linear solver.
-    SparseLinearSystemNM *giveLinearSolver();
     /// Constructs and returns a line search solver.
     LineSearchNM *giveLineSearchSolver();
 };

@@ -169,10 +169,10 @@ public:
             linSolver->reinitialize();
         }
     }
+    
+    virtual SparseLinearSystemNM *giveLinearSolver();
 
 protected:
-    /// Constructs and returns a linear solver.
-    SparseLinearSystemNM *giveLinearSolver();
     /// Constructs and returns a line search solver.
     LineSearchNM *giveLineSearchSolver();
     /// Initiates prescribed equations
