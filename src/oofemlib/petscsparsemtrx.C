@@ -237,16 +237,11 @@ PetscSparseMtrx :: times(double x)
     MatScale(this->mtrx, x);
 }
 
-// NOTE! I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael
+///@todo I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael
 int
 PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-#ifdef __PARALLEL_MODE
-    if ( eModel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
-    }
-#endif
-    this->emodel = eModel;
+    IntArray loc;
     Domain *domain = eModel->giveDomain(di);
     int nelem;
 
@@ -260,6 +255,14 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     }
 
     this->ut = ut;
+    this->emodel = eModel;
+    this->di = di;
+    
+#ifdef __PARALLEL_MODE
+    if ( eModel->isParallel() ) {
+        OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
+    }
+#endif
     // This should be based on the numberingscheme. Also, geqs seems redundant.
 
     /*

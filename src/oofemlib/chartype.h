@@ -49,7 +49,6 @@ namespace oofem {
  * and returns result. If passed CharType value is of unsupported value, error is generated.
  * @see ValueModeType type.
  */
-// if modified , modify also isCharMtrxIncrementalValue function in cltypes.C
 #define CharType_DEF                            \
     ENUM_ITEM(UnknownCharType)                    \
     ENUM_ITEM(StiffnessMatrix)                    \
