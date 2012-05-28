@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/oofeggraphiccontext.C,v 1.19 2003/05/19 13:03:57 bp Exp $*/
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
