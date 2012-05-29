@@ -4,8 +4,13 @@
 //#include <boost/python/return_value_policy.hpp>
 using namespace boost::python;
 using namespace std;
-
 #include <memory> // for std::auto_ptr<>
+
+/*****************************************************
+*
+* O O F E M L I B   M O D U L E
+*
+*****************************************************/
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
@@ -31,6 +36,7 @@ using namespace std;
 #include "field.h"
 #include "datastream.h"
 #include "dofmanvalfield.h"
+#include "dofmantransftype.h"
 #include "fieldmanager.h"
 #include "generalbc.h"
 #include "boundary.h"
@@ -39,6 +45,11 @@ using namespace std;
 #include "internalstatetype.h"
 #include "matresponsemode.h"
 #include "matresponseform.h"
+#include "structuralmaterial.h"
+#include "matstatus.h"
+#include "structuralms.h"
+#include "exportmodulemanager.h"
+#include "classfactory.h"
 
 
 namespace oofem {
@@ -46,50 +57,70 @@ namespace oofem {
 /* DefaulT oofem loggers */
 Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
+ClassFactory classFactory;
 
 EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag) {
-  return InstanciateProblem (dr, mode, contextFlag);
+  return InstanciateProblem (dr, mode, contextFlag, 0);
 }
+
+
+/*****************************************************
+*
+* O O F E M L I B   C L A S S E S
+*
+*****************************************************/
+
 
 /*****************************************************
 * FloatArray
 *****************************************************/
-class PyFloatArray : public FloatArray , public wrapper<FloatArray>
-{
-public:
-   PyFloatArray () : FloatArray () {}
-   PyFloatArray (int i) : FloatArray(i) {}
-   void __setitem__(int i, double val) { this->operator()(i) = val; }
-   double __getitem__(int i) { return this->operator()(i); }
-};
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(flotarry_overloads_resize, resize, 1, 2)
-void (FloatArray::*add_1)(const FloatArray &src) = &FloatArray::add;
-void (FloatArray::*subtract_1)(const FloatArray &src) = &FloatArray::subtract;
+void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
+void (FloatArray::*floatarray_add_2)(double, const FloatArray&) = &FloatArray::add;
+void (FloatArray::*floatarray_add_3)(double) = &FloatArray::add;
+double (FloatArray::*dotProduct_1)(const FloatArray&) const = &FloatArray::dotProduct;
+double (FloatArray::*dotProduct_2)(const FloatArray&, int) const = &FloatArray::dotProduct;
+void (FloatArray::*beDifferenceOf_1)(const FloatArray&, const FloatArray&) = &FloatArray::beDifferenceOf;
+void (FloatArray::*beDifferenceOf_2)(const FloatArray&, const FloatArray&, int) = &FloatArray::beDifferenceOf;
 
 void pyclass_FloatArray()
 {
-  class_<PyFloatArray, boost::noncopyable>("FloatArray")
+  class_<FloatArray, boost::noncopyable>("FloatArray")
     .def(init< optional<int> >())
-    //.def("set", at2, return_internal_reference<>())
-    .def("__len__", &FloatArray::giveSize)
-    .def("__getitem__", &PyFloatArray::__getitem__)
-    .def("__setitem__", &PyFloatArray::__setitem__)
-    .def("resize", &FloatArray::resize, flotarry_overloads_resize())
-    .def("giveSize", &FloatArray::giveSize)
-    .def("isNotEmpty", &FloatArray::isNotEmpty)
-    .def("isEmpty", &FloatArray::isEmpty)
-    //.def("negated", &FloatArray::negated)
-    .def("printYourself", &FloatArray::printYourself)
-    .def("zero", &FloatArray::zero)
-    .def("add", add_1)
-    .def("subtract", subtract_1)
-    //.def("times", &FloatArray::times)
-    //.def("normalize", &FloatArray::normalize)
-    .def("computeNorm", &FloatArray::computeNorm)
-    .def("beProductOf", &FloatArray::beProductOf)
-    .def("beTProductOf", &FloatArray::beTProductOf)
-    //.def("beCopyOf", &FloatArray::beCopyOf)
-    .def("assemble", &FloatArray::assemble)
+    .def(init< FloatArray& >())
+    .def("resize", &FloatArray::resize, flotarry_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+    .def("containsOnlyZeroes", &FloatArray::containsOnlyZeroes, "Returns nonzero if all coefficients of the receiver are 0, else returns zero")
+    .def("giveSize", &FloatArray::giveSize, "Returns the size of receiver")
+    .def("isNotEmpty", &FloatArray::isNotEmpty, "Returns true if receiver is not empty")
+    .def("isEmpty", &FloatArray::isEmpty, "Returns true if receiver is empty")  
+    .def("negated", &FloatArray::negated, "Switches the sign of every coefficient of receiver")
+    .def("printYourself", &FloatArray::printYourself, "Print receiver on stdout")
+    .def("zero", &FloatArray::zero, "Zeroes all coefficients of receiver")
+    .def("beProductOf", &FloatArray::beProductOf, "Receiver becomes the result of the product of aMatrix and anArray. Adjusts the size of receiver if necessary")
+    .def("beTProductOf", &FloatArray::beTProductOf, "Receiver becomes the result of the product of aMatrix^T and anArray. Adjusts the size of receiver if necessary")
+    .def("beVectorProductOf", &FloatArray::beVectorProductOf, "Computes vector product (or cross product) of vectors given as parameters")
+    .def("add", floatarray_add_1, "Adds array src to receiver. If the receiver's size is zero, it adjusts its size to size of src array. If recever's size is nonzero and different from src array size an error is generated")
+    .def("add", floatarray_add_2, "Adds array times factor to receiver. If the receiver's size is zero, it adjusts its size to size of b array. If receiver's size is nonzero and different from b")
+    .def("add", floatarray_add_3, "Adds scalar to receiver")
+    .def("subtract", &FloatArray::subtract, "Subtracts array src to receiver. If the receiver's size is zero, it adjusts its size to size of src array. If recever's size is nonzero and different from src")
+    .def("times", &FloatArray::times, "Multiplies receiver with scalar")
+    .def("beMaxOf", &FloatArray::beMaxOf, "Sets receiver to maximum of a or b's respective elements")
+    .def("beMinOf", &FloatArray::beMinOf, "Sets receiver to be minimum of a or b's respective elements")
+    .def("beDifferenceOf", beDifferenceOf_1, "Sets receiver to be a - b")
+    .def("beDifferenceOf", beDifferenceOf_2, "Sets receiver to be a - b, using only the first n entries")
+    .def("assemble", &FloatArray::assemble, "Assembles the array fe (typically, the load vector of a finite element) into the receiver, using loc as location array")
+    .def("dotProduct", dotProduct_1, "Computes the dot product (or inner product) of receiver and argument")
+    .def("dotProduct", dotProduct_2, "Computes the dot product (or inner product) of receiver and argument using first 'size' elements")
+    .def("normalize", &FloatArray::normalize, "Normalizes receiver. Euclidean norm is used, after operation receiver will have this norm equal to 1.0")
+    .def("computeNorm", &FloatArray::computeNorm, "Computes the norm (or length) of the vector")
+    .def("computeSquaredNorm", &FloatArray::computeSquaredNorm, "Computes the square of the norm")
+    .def("sum", &FloatArray::sum, "Computes the sum of receiver values")
+
+    .def("__len__", &FloatArray::giveSize, "Returns the size of receiver")
+    .def("__getitem__", &FloatArray::__getitem__, "Coefficient access function. Provides 0-based indexing access") 
+    .def("__setitem__", &FloatArray::__setitem__, "Coefficient access function. Provides 0-based indexing access")
+    .def("beCopyOf", &FloatArray::beCopyOf, "Modifies receiver to become copy of given parameter")
+    .def("copy", &FloatArray::copy, return_value_policy<return_by_value>(), "returns deep copy or receiver")
     ;
 }
 
@@ -97,49 +128,52 @@ void pyclass_FloatArray()
 /*****************************************************
 * FloatMatrix
 *****************************************************/
-class PyFloatMatrix : public FloatMatrix, public wrapper<FloatMatrix>
- {
-public:
-   PyFloatMatrix () : FloatMatrix () {}
-   PyFloatMatrix (int a, int b) : FloatMatrix (a,b) {}
-   // 0-index access
-   void __setitem__ (object t, double val) {
-     this->operator()(extract<int>(t[0]), extract<int>(t[1]) ) = val;}
-   double __getitem__ (object t) {
-     return this->operator()(extract<int>(t[0]), extract<int>(t[1]) );}
-};
-
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(floatmatrix_overloads_resize, resize, 2, 3)
-
-void (PyFloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bool) = &PyFloatMatrix::solveForRhs;
-  void (PyFloatMatrix::*solveForRhs_2)(const FloatMatrix &b, FloatMatrix &answer, bool) = &PyFloatMatrix::solveForRhs;
-void (PyFloatMatrix::*assemble_1)(const FloatMatrix &src, const IntArray &loc) = &PyFloatMatrix::assemble;
-void (PyFloatMatrix::*assemble_2)(const FloatMatrix &src, const IntArray &row, const IntArray&col) = &PyFloatMatrix::assemble;
+void (FloatMatrix::*solveForRhs_1)(const FloatArray &b, FloatArray &answer, bool) = &FloatMatrix::solveForRhs;
+void (FloatMatrix::*solveForRhs_2)(const FloatMatrix &b, FloatMatrix &answer, bool) = &FloatMatrix::solveForRhs;
+void (FloatMatrix::*assemble_1)(const FloatMatrix&, const IntArray&) = &FloatMatrix::assemble;
+void (FloatMatrix::*assemble_2)(const FloatMatrix&, const IntArray&, const IntArray&) = &FloatMatrix::assemble;
+void (FloatMatrix::*assemble_3)(const FloatMatrix&, const int*, const int*) = &FloatMatrix::assemble;
+void (FloatMatrix::*floatmatrix_add_1)(const FloatMatrix&) = &FloatMatrix::add;
+void (FloatMatrix::*floatmatrix_add_2)(double, const FloatMatrix&) = &FloatMatrix::add;
 
 void pyclass_FloatMatrix()
 {
-  class_<PyFloatMatrix, boost::noncopyable>("FloatMatrix")
+  class_<FloatMatrix, boost::noncopyable>("FloatMatrix")
     .def(init<int, int>())
-    .def("zero", &PyFloatMatrix::zero)
-    .def("beUnitMatrix", &PyFloatMatrix::beUnitMatrix)
-    .def("printYourself", &PyFloatMatrix::printYourself)
-    .def("__setitem__", &PyFloatMatrix::__setitem__)
-    .def("__getitem__", &PyFloatMatrix::__getitem__)
-    .def("giveDeterminant", &PyFloatMatrix::giveDeterminant)
-    .def("beTranspositionOf", &PyFloatMatrix::beTranspositionOf)
-    .def("beProductOf", &PyFloatMatrix::beProductOf)
-    .def("beTProductOf", &PyFloatMatrix::beTProductOf)
-    .def("beProductTOf", &PyFloatMatrix::beProductTOf)
-    .def("beInverseOf", &PyFloatMatrix::beInverseOf)
-    .def("solveForRhs", solveForRhs_1)
-    .def("plusProductSymmUpper", &PyFloatMatrix::plusProductSymmUpper)
-    .def("plusProductUnsym", &PyFloatMatrix::plusProductUnsym)
-    .def("add", &PyFloatMatrix::add)
-    .def("symmetrized", &PyFloatMatrix::symmetrized)
-    .def("rotatedWith", &PyFloatMatrix::rotatedWith)
-    .def("resize", &PyFloatMatrix::resize, floatmatrix_overloads_resize())
-    .def("assemble", assemble_1)
-    .def("assembleu", assemble_2)
+    //.def(init< FloatMatrix& >())
+    .def("assemble", assemble_1, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
+    .def("assemble", assemble_2, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
+    .def("assemble", assemble_3, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
+    .def("assembleu", assemble_2, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
+    .def("giveDeterminant", &FloatMatrix::giveDeterminant, "Returns determinant of the receiver. Receiver should be square matrix")
+    .def("zero", &FloatMatrix::zero, "Zeroes all coefficient of receiver")
+    .def("beEmptyMtrx", &FloatMatrix::beEmptyMtrx, "Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size")
+    .def("beUnitMatrix", &FloatMatrix::beUnitMatrix, "Sets receiver to unity matrix")
+    .def("beTranspositionOf", &FloatMatrix::beTranspositionOf, "Assigns to the receiver the transposition of parameter")
+    .def("beProductOf", &FloatMatrix::beProductOf, "Assigns to the receiver product of a * b")
+    .def("beTProductOf", &FloatMatrix::beTProductOf, "Assigns to the receiver product of a^T * b$")
+    .def("beProductTOf", &FloatMatrix::beProductTOf, "Assigns to the receiver product of a * b^T$")
+    .def("beDyadicProductOf", &FloatMatrix::beDyadicProductOf, "Assigns to the receiver the dyadic product v_1 * v_2^T$")
+    .def("beInverseOf", &FloatMatrix::beInverseOf, "Modifies receiver to become inverse of given parameter. Size of receiver will be adjusted")
+    .def("solveForRhs", solveForRhs_1, "Solves the  system of linear equations K * a = b. Uses Gaussian elimination with pivoting directly on receiver")
+    .def("solveForRhs", solveForRhs_2, "Solves the  system of linear equations K * A = B. Uses Gaussian elimination with pivoting directly on receiver")
+    .def("plusProductSymmUpper", &FloatMatrix::plusProductSymmUpper, "Adds to the receiver the product a^T * b dV. If the receiver has zero size, it is expanded. Assumes that receiver and product  a^T * b dV are symmetric matrices. Computes only the upper half of receiver")
+    .def("plusProductUnsym", &FloatMatrix::plusProductUnsym, "Adds to the receiver the product a^T * b dV. If the receiver has zero size, it is expanded")
+    .def("add", floatmatrix_add_1, "Adds matrix to the receiver. If receiver has zero size, size is accordingly adjusted")
+    .def("add", floatmatrix_add_2, "Adds matrix to the receiver. If receiver has zero size, size is accordingly adjusted")
+    .def("subtract", &FloatMatrix::subtract, "Subtracts matrix from the receiver")
+    .def("times", &FloatMatrix::times, "Multiplies receiver by factor f")
+    .def("negated", &FloatMatrix::negated, "Changes sign of receiver values")
+    .def("symmetrized", &FloatMatrix::symmetrized, "Initializes the lower half of the receiver according to the upper half")
+    .def("rotatedWith", &FloatMatrix::rotatedWith, "Returns the receiver 'a' transformed using give transformation matrix r. The method performs the operation  a = r^T * a * r")
+    .def("resize", &FloatMatrix::resize, floatmatrix_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+    .def("printYourself", &FloatMatrix::printYourself, "Prints matrix to stdout")
+
+    .def("__setitem__", &FloatMatrix::__setitem__, "Coefficient access function. Implements 0-based indexing")
+    .def("__getitem__", &FloatMatrix::__getitem__, "Coefficient access function. Implements 0-based indexing")
+    .def("beCopyOf", &FloatMatrix::beCopyOf, "Modifies receiver to become copy of given parameter")
+    .def("copy", &FloatMatrix::copy, return_value_policy<return_by_value>(), "returns deep copy or receiver")
     ;
 }
 
@@ -147,28 +181,27 @@ void pyclass_FloatMatrix()
 /*****************************************************
 * IntArray
 *****************************************************/
-class PyIntArray : public IntArray , public wrapper<IntArray>
-{
-public:
-   PyIntArray () : IntArray () {}
-   PyIntArray (int i) : IntArray(i) {}
-   void __setitem__(int i, double val) { this->operator()(i) = val; }
-   int __getitem__(int i) { return this->operator()(i); }
-};
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(intarray_overloads_resize, resize, 1, 2)
 void pyclass_IntArray()
 {
-  class_<PyIntArray, boost::noncopyable>("IntArray")
+  class_<IntArray, boost::noncopyable>("IntArray")
     .def(init< optional<int> >())
-    .def("__len__", &IntArray::giveSize)
-    .def("__getitem__", &PyIntArray::__getitem__)
-    .def("__setitem__", &PyIntArray::__setitem__)
-    .def("resize", &IntArray::resize, intarray_overloads_resize())
-    .def("isEmpty", &IntArray::isEmpty)
-    .def("containsOnlyZeroes", &IntArray::containsOnlyZeroes)
-    .def("contains", &IntArray::contains)
-    .def("printYourself", &IntArray::printYourself)
-    .def("zero", &IntArray::printYourself)
+    .def(init< IntArray& >())
+    .def("resize", &IntArray::resize, intarray_overloads_resize("Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly"))
+    .def("giveSize", &IntArray::giveSize, "Returns size of receiver")
+    .def("isEmpty", &IntArray::isEmpty, "Checks if receiver is empty (i.e., zero sized)")
+    .def("containsOnlyZeroes", &IntArray::containsOnlyZeroes, "Checks if receiver is all zero")
+    .def("minimum", &IntArray::minimum, "Finds the minimum component in the array")
+    .def("contains", &IntArray::contains, "Retuns true if receiver contains given value")
+    .def("add", &IntArray::add, "Adds given scalar to all values of receiver")
+    .def("zero", &IntArray::printYourself, "Sets all component to zero")
+    .def("printYourself", &IntArray::printYourself, "Prints receiver on stdout")
+
+    .def("__len__", &IntArray::giveSize, "Returns size of receiver")
+    .def("__getitem__", &IntArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
+    .def("__setitem__", &IntArray::__setitem__, "Coefficient access function. Provides 0-based indexing access")
+    .def("beCopyOf", &IntArray::beCopyOf, "Modifies receiver to become copy of given parameter")
+    .def("copy", &IntArray::copy, return_value_policy<return_by_value>(), "returns deep copy or receiver")
     ;
 }
 
@@ -330,10 +363,16 @@ public:
     EngngModel::updateYourself(t);
   }
 
+  TimeStep* giveNextStep() {    
+    if (override f = this->get_override("giveNextStep")) {return f();}
+    return this->get_override("giveNextStep")();
+  }
+    
   void default_solveYourself() {return this->EngngModel::solveYourself();}
-  void default_solveYourselfAt(TimeStep*t) {return this->EngngModel::solveYourselfAt(t);}
+  void default_solveYourselfAt(TimeStep* t) {return this->EngngModel::solveYourselfAt(t);}
   void default_terminate(TimeStep* t) {return this->EngngModel::terminate(t);}
   void default_updateYourself(TimeStep* t) {return this->EngngModel::updateYourself(t);}
+  TimeStep* default_giveNextStep() {return this->EngngModel::giveNextStep();}
 };
 
 void pyclass_EngngModel()
@@ -355,7 +394,43 @@ void pyclass_EngngModel()
     .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
     .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
     .def("giveContext", &EngngModel::giveContext, return_internal_reference<>())
-    .def("giveNextStep",&EngngModel::giveNextStep, return_internal_reference<>())
+    .def("giveNextStep",&EngngModel::giveNextStep, &PyEngngModel::default_giveNextStep, return_internal_reference<>())
+	 .def("giveExportModuleManager",&EngngModel::giveExportModuleManager, return_internal_reference<>())
+    ;
+}
+
+
+/*****************************************************
+* ExportModuleManager
+*****************************************************/
+void pyclass_ExportModuleManager()
+{
+	class_<ExportModuleManager, boost::noncopyable >("ExportModuleManager", no_init)
+	.def("doOutput", &ExportModuleManager::doOutput)
+	.def("giveModule", &ExportModuleManager::giveModule, return_internal_reference<>())
+	 ;
+}
+
+
+/*****************************************************
+* ExportModule
+*****************************************************/
+class PyExportModule : public ExportModule, public wrapper<ExportModule>
+{
+public:
+  PyExportModule(int i, EngngModel * e) : ExportModule(i, e) {}
+
+  void doOutput(TimeStep *tStep) {
+    this->get_override("doOutput")();
+  }
+
+  void default_doOutput(TimeStep *tStep) {this->ExportModule::doOutput(tStep);}
+};
+
+void pyclass_ExportModule()
+{
+  class_<PyExportModule, boost::noncopyable>("ExportModule", no_init)
+    .def("doOutput", pure_virtual(&ExportModule::doOutput))
     ;
 }
 
@@ -365,7 +440,7 @@ void pyclass_EngngModel()
 *****************************************************/
 void pyclass_Domain()
 {
-  class_<Domain>("Domain", init<int, int, EngngModel* >())
+  class_<Domain, boost::noncopyable>("Domain", init<int, int, EngngModel* >())
   .def("giveNumber", &Domain::giveNumber)
   .def("giveElement", &Domain::giveElement, return_internal_reference<>())
   .def("giveEngngModel", &Domain::giveEngngModel, return_internal_reference<>())
@@ -660,6 +735,29 @@ void pyclass_BoundaryCondition()
 {
   class_<BoundaryCondition, bases<GeneralBoundaryCondition>, boost::noncopyable >("BoundaryCondition", init<int, Domain*>())
     .def("setPrescribedValue", &BoundaryCondition::setPrescribedValue)
+    .def("give", &BoundaryCondition::give)
+    .def("isImposed", &BoundaryCondition::isImposed)
+    ;
+}
+
+
+/*****************************************************
+* Load
+*****************************************************/
+struct PyLoad : Load , wrapper<Load>
+{
+   PyLoad(int i, Domain *d) : Load(i,d) {}
+   void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) {
+      if (override f = this->get_override("computeValueAt")) { f(answer,tStep,coords,mode);}
+      this->get_override("computeValueAt")(answer,tStep,coords,mode);
+  }
+};
+void pyclass_Load()
+{
+  class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", init<int, Domain*>())
+    .def("setComponentArray", &Load::setComponentArray)
+    .def("giveCopyOfComponentArray", &Load::giveCopyOfComponentArray)
+    .def("computeValueAt", pure_virtual( &Load::computeValueAt))
     ;
 }
 
@@ -682,6 +780,9 @@ void pyclass_IntegrationRule()
 void pyclass_GaussPoint()
 {
   class_<GaussPoint, boost::noncopyable >("GaussPoint", no_init)
+    .def("giveNumber", &GaussPoint::giveNumber)
+    .def("giveElement", &GaussPoint::giveElement, return_internal_reference<>())
+    .def("giveMaterial", &GaussPoint::giveMaterial, return_internal_reference<>())
     ;
 }
 
@@ -693,13 +794,64 @@ void pyclass_Material()
 {
   class_<Material, boost::noncopyable >("Material", init<int, Domain*>())
     .def("giveIPValue", &Material::giveIPValue)
+    .def("setIPValue", &Material::setIPValue)
     .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
+    .def("giveStatus", &Material::giveStatus, return_internal_reference<>())
+    .def("giveNumber", &Material::giveNumber)
+    ;
+}
+
+
+/*****************************************************
+* StructuralMaterial
+*****************************************************/
+struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
+{
+   PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
+   void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
+      if (override f = this->get_override("giveRealStressVector")) { f(answer,form,gp,reducedStrain,tStep);}
+      this->get_override("giveRealStressVector")(answer,form,gp,reducedStrain,tStep);
+  }
+};
+void pyclass_StructuralMaterial()
+{
+  class_<PyStructuralMaterial, bases<Material>, boost::noncopyable >("StructuralMaterial", init<int, Domain* >())
+    .def("giveRealStressVector", pure_virtual( &StructuralMaterial::giveRealStressVector))
+    ;
+}
+StructuralMaterial* material2structuralMaterial(Material *mat) { return (StructuralMaterial*)mat; }
+
+
+
+/*****************************************************
+* MaterialStatus
+*****************************************************/
+void pyclass_MaterialStatus()
+{
+  class_<MaterialStatus, boost::noncopyable >("MaterialStatus", no_init)
+    .def("updateYourself", &MaterialStatus::updateYourself)
+    ;
+}
+
+
+/*****************************************************
+* StructuralMaterialStatus
+*****************************************************/
+void pyclass_StructuralMaterialStatus()
+{
+  class_<StructuralMaterialStatus, bases<MaterialStatus>, boost::noncopyable >("StructuralMaterialStatus", no_init)
     ;
 }
 
 
 
 
+
+/*****************************************************
+*
+* O O F E M L I B   E N U M E R A T I O N S
+*
+*****************************************************/
 
 
 /*****************************************************
@@ -765,6 +917,18 @@ void pyenum_ValueModeType()
 
 
 /*****************************************************
+* DofManTransfType
+*****************************************************/
+void pyenum_DofManTransfType()
+{
+  enum_<DofManTransfType>("DofManTransfType")
+    .value("_toGlobalCS", _toGlobalCS)
+    .value("_toNodalCS", _toNodalCS)
+    ;
+}
+
+
+/*****************************************************
 * DofIDItem
 *****************************************************/
 void pyenum_DofIDItem()
@@ -811,6 +975,7 @@ void pyenum_InternalStateType()
 {
   enum_<InternalStateType>("InternalStateType")
     .value("IST_StressTensor", IST_StressTensor)
+    .value("IST_StrainTensor", IST_StrainTensor)
     ;
 }
 
@@ -842,6 +1007,11 @@ void pyenum_MatResponseForm()
 
 
 
+/*****************************************************
+*
+* O O F E M L I B   P Y T H O N   M O D U L E
+*
+*****************************************************/
 BOOST_PYTHON_MODULE (oofemlib)
 {
   pyclass_FloatArray();
@@ -851,10 +1021,16 @@ BOOST_PYTHON_MODULE (oofemlib)
   pyclass_SpatialLocalizer();
   pyclass_EngngModelContext();
   pyclass_EngngModel();
-  pyclass_Domain();
+  pyclass_ExportModuleManager();
+  pyclass_ExportModule();
   pyclass_DataReader();
   pyclass_OOFEMTXTDataReader();
   pyclass_Element();
+  pyclass_Material();
+  pyclass_StructuralMaterial();
+  pyclass_MaterialStatus();
+  pyclass_StructuralMaterialStatus();
+  pyclass_Domain();
   pyclass_DofManager();
   pyclass_TimeStep();
   pyclass_DataStream();
@@ -863,14 +1039,15 @@ BOOST_PYTHON_MODULE (oofemlib)
   pyclass_DofManValueField();
   pyclass_GeneralBoundaryCondition();
   pyclass_BoundaryCondition();
+  pyclass_Load();
   pyclass_IntegrationRule();
   pyclass_GaussPoint();
-  pyclass_Material();
 
   pyenum_problemMode();
   pyenum_Element_Geometry_Type();
   pyenum_EquationID();
   pyenum_ValueModeType();
+  pyenum_DofManTransfType();
   pyenum_DofIDItem();
   pyenum_FieldType();
   pyenum_InternalStateType();
@@ -884,5 +1061,7 @@ BOOST_PYTHON_MODULE (oofemlib)
 
   implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
   register_ptr_to_python< std::auto_ptr<Field> >();
+
+  def("material2structuralMaterial", &material2structuralMaterial, return_internal_reference<>());
 }
 } // end namespace oofem

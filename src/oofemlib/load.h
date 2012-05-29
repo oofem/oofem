@@ -117,6 +117,10 @@ protected:
      * @return Pointer to receiver component array, where component values of boundary condition are stored.
      */
     FloatArray &giveComponentArray();
+
+public:
+    void setComponentArray(FloatArray &arry) { componentArray = arry; }
+	 FloatArray giveCopyOfComponentArray() { FloatArray answer = componentArray; return answer; }
 };
 } // end namespace oofem
 #endif // load_h

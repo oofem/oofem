@@ -341,8 +341,10 @@ public:
 #endif
 
 #ifdef BOOST_PYTHON
-    double __getItem__(int i) { return this->operator()(i); }
-    void __setItem__(int i, double val) { this->operator()(i) = val; }
+    void __setitem__(int i, int val) { this->at(i+1) = val; }
+    int __getitem__(int i) { return this->at(i+1); }
+    IntArray copy() { IntArray result = *this; return result; }
+    void beCopyOf(IntArray &src) { this->operator=(src); }
 #endif
 };
 

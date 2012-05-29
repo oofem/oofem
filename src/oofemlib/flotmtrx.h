@@ -472,6 +472,15 @@ public:
     int givePackSize(CommunicationBuffer &buff);
 #endif
 
+#ifdef BOOST_PYTHON
+    void __setitem__ (object t, double val) {
+        this->at(extract<int>(t[0])+1, extract<int>(t[1])+1 ) = val;}
+    double __getitem__ (object t) {
+        return this->at(extract<int>(t[0])+1, extract<int>(t[1])+1 );}
+    FloatMatrix copy() { FloatMatrix result = *this; return result; }
+    void beCopyOf(FloatMatrix &src) { this->operator=(src); }
+#endif
+
 protected:
 };
 } // end namespace oofem

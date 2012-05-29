@@ -128,7 +128,6 @@ public:
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "ModuleManager"; }
 
-protected:
     /**
      * Returns the required module.
      * @param num Module number.
