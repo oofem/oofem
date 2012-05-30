@@ -216,14 +216,21 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
     } else if ( id == D_w || id == V_w ) { // 3D only:
         val = dx.at(3)/ndim*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
     }
+    return val;
 }
 
 
 void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
 {
     vol = this->giveVolDof()->giveUnknown(eid, VM_Total, tStep);
+    sigmaDev.zero();
     this->domain->giveEngngModel()->assembleVector(sigmaDev, tStep, eid,
         InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    // Above, full sigma = sigmaDev - p*I is assembled, so to obtain the deviatoric part we add p to the diagonal part.
+    int ndim = 2;
+    for (int i = 1; i <= ndim; ++i ) {
+        sigmaDev.at(i) += this->pressure;
+    }
 }
 
 
@@ -274,7 +281,7 @@ void MixedGradientPressureBC :: computeTangents(
     ddev_pert.zero();
     for (int i = 1; i <= ndev; ++i) {
         int eqn = this->devdman->giveDof(i)->__givePrescribedEquationNumber();
-        ddev_pert.at(eqn, i) = -1; // Minus sign for moving it to the RHS
+        ddev_pert.at(eqn, i) = -1.0; // Minus sign for moving it to the RHS
     }
     Kfp->times(ddev_pert, rhs_d);
 
@@ -282,11 +289,10 @@ void MixedGradientPressureBC :: computeTangents(
     rhs_p.zero();
     rhs_p.at(dvol_eq) = -1.0; // dp = -1.0 (unit size)
 
-    Kff->printStatistics();
     // Solve all sensitivities
     solver->solve(Kff,&rhs_p,&s_p);
     solver->solve(Kff,rhs_d,s_d);
-    
+
     // Sensitivities for d_vol is solved for directly;
     Cp = s_p.at(dvol_eq);
     Cd.resize(ndev);
@@ -301,8 +307,28 @@ void MixedGradientPressureBC :: computeTangents(
     Kpp->times(ddev_pert, tmpMat);
     Kpf->times(s_d, Ed);
     
-    Ed.add(tmpMat);
+    Ed.subtract(tmpMat);
     
+    // Not sure if i actually need to do this part, but the obtained tangents are to dsigma/dp, not dsigma_dev/dp, so they need to be corrected;
+    int ndim = 2; /// TODO Make this general for 2D and 3D
+    for (int i = 1; i <= ndim; ++i) {
+        Ep.at(i) += 1.0;
+        Cd.at(i) += 1.0;
+    }
+    // Makes Ed 4th order deviatoric, in Voigt form (!)
+    for (int i = 1; i <= Ed.giveNumberOfColumns(); ++i) {
+        // Take the mean of the "diagonal" part of each column
+        double mean = 0.0;
+        for (int j = 1; j <= ndim; ++j) {
+            mean += Ed.at(i,j);
+        }
+        mean /= (double)ndim;
+        // And subtract it from that column
+        for (int j = 1; j <= ndim; ++j) {
+            Ed.at(i,j) -= mean;
+        }        
+    }
+
     delete Kff;
     delete Kfp;
     delete Kpf;

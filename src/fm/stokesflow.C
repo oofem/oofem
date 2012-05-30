@@ -153,12 +153,11 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
 
-#if 1
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
+#if 1
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
-    this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
     NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
                                             & ( this->externalForces ),
                                             NULL,
@@ -171,13 +170,12 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 #else
-    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(this->solverType, 1, this->giveDomain(1), this);
     this->updateComponent(tStep, InternalRhs, this->giveDomain(1));
     this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
     this->internalForces.negated();
     this->internalForces.add(externalForces);
-    NM_Status status = linMethod->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
-    delete(linMethod);
+    NM_Status status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
+    this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
 #endif
 
     if ( !(status & NM_Success) ) {

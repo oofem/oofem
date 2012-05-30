@@ -108,30 +108,31 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         answer = ms->giveDeviatoricTangent();
 #if 0
         // Numerical ATS for debugging
-        FloatArray tempStrain = ms->giveTempStrainVector();
-        FloatArray stress, strain, sig11, sig22, sig12, sig;
-        giveRealStressVector (stress, form, gp, tempStrain, tStep);
-        double h = 0.001; // Linear problem, size of this doesn't matter.
+        FloatArray tempStrain(3); tempStrain.zero();
+        FloatArray sig, strain, sig11, sig22, sig12;
+        double epspvol;
+        computeDeviatoricStressVector (sig, epspvol, gp, tempStrain, 0.0, tStep);
+        double h = 1.0; // Linear problem, size of this doesn't matter.
         strain.resize(3);
         strain = tempStrain; strain.at(1) += h;
-        giveRealStressVector (sig11, ReducedForm, gp, strain, tStep);
+        computeDeviatoricStressVector (sig11, epspvol, gp, strain, 0.0, tStep);
         strain = tempStrain; strain.at(2) += h;
-        giveRealStressVector (sig22, ReducedForm, gp, strain, tStep);
+        computeDeviatoricStressVector (sig22, epspvol, gp, strain, 0.0, tStep);
         strain = tempStrain; strain.at(3) += h;
-        giveRealStressVector (sig12, ReducedForm, gp, strain, tStep);
+        computeDeviatoricStressVector (sig12, epspvol, gp, strain, 0.0, tStep);
 
-        FloatArray dsig11 = (sig11 - stress)*(1/h);
-        FloatArray dsig22 = (sig22 - stress)*(1/h);
-        FloatArray dsig12 = (sig12 - stress)*(1/h);
+        FloatArray dsig11; dsig11.beDifferenceOf(sig11,sig); dsig11.times(1/h);
+        FloatArray dsig22; dsig22.beDifferenceOf(sig22,sig); dsig22.times(1/h);
+        FloatArray dsig12; dsig12.beDifferenceOf(sig12,sig); dsig12.times(1/h);
 
         FloatMatrix numericalATS;
         numericalATS.resize(3,3);
         numericalATS.zero();
-        numericalATS.addSubVectorRow(dsig11,1,1);
-        numericalATS.addSubVectorRow(dsig22,2,1);
-        numericalATS.addSubVectorRow(dsig12,3,1);
-        answer.printYourself();
-        numericalATS.printYourself();
+        numericalATS.setColumn(dsig11,1);
+        numericalATS.setColumn(dsig22,2);
+        numericalATS.setColumn(dsig12,3);
+        printf("Analytical tangent = "); answer.printYourself();
+        printf("Numerical tangent = "); numericalATS.printYourself();
         OOFEM_ERROR("QUIT");
 #endif
     } else {
@@ -144,6 +145,21 @@ void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, Mat
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveDeviatoricPressureTangent();
+#if 0
+        // Numerical ATS for debugging
+        FloatArray strain(3); strain.zero();
+        FloatArray sig, sigh;
+        double epspvol, pressure = 0.0;
+        double h = 1.0; // Linear problem, size of this doesn't matter.
+        computeDeviatoricStressVector (sig, epspvol, gp, strain, pressure, tStep);
+        computeDeviatoricStressVector (sigh, epspvol, gp, strain, pressure+h, tStep);
+
+        FloatArray dsigh; dsigh.beDifferenceOf(sigh,sig); dsigh.times(1/h);
+
+        printf("Analytical tangent = "); answer.printYourself();
+        printf("Numerical tangent = "); dsigh.printYourself();
+        OOFEM_ERROR("QUIT");
+#endif
     } else {
         OOFEM_ERROR("Mode not implemented");
     }
@@ -154,6 +170,27 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveVolumetricDeviatoricTangent();
+#if 0
+        // Numerical ATS for debugging
+        FloatArray tempStrain(3); tempStrain.zero();
+        FloatArray sig, strain;
+        double epspvol, epspvol11, epspvol22, epspvol12, pressure = 0.0;
+        double h = 1.0; // Linear problem, size of this doesn't matter.
+
+        computeDeviatoricStressVector (sig, epspvol, gp, strain, pressure, tStep);
+        strain = tempStrain; strain.at(1) += h; computeDeviatoricStressVector(sig, epspvol11, gp, strain, pressure, tStep);
+        strain = tempStrain; strain.at(2) += h; computeDeviatoricStressVector(sig, epspvol22, gp, strain, pressure, tStep);
+        strain = tempStrain; strain.at(3) += h; computeDeviatoricStressVector(sig, epspvol12, gp, strain, pressure, tStep);
+
+        FloatArray dvol(3);
+        dvol.at(1) = (epspvol11 - epspvol)/h;
+        dvol.at(2) = (epspvol22 - epspvol)/h;
+        dvol.at(3) = (epspvol12 - epspvol)/h;
+
+        printf("Analytical tangent = "); answer.printYourself();
+        printf("Numerical tangent = "); dvol.printYourself();
+        OOFEM_ERROR("QUIT");
+#endif
     } else {
         OOFEM_ERROR("Mode not implemented");
     }
@@ -164,6 +201,22 @@ void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResp
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveVolumetricPressureTangent();
+#if 0
+        // Numerical ATS for debugging
+        FloatArray tempStrain(3); tempStrain.zero();
+        FloatArray sig, strain;
+        double epspvol, epspvolh, pressure = 0.0;
+        double h = 1.0; // Linear problem, size of this doesn't matter.
+
+        computeDeviatoricStressVector(sig, epspvol, gp, strain, pressure, tStep);
+        computeDeviatoricStressVector(sig, epspvolh, gp, strain, pressure+h, tStep);
+
+        double dvol = (epspvolh - epspvol)/h;
+
+        printf("Analytical tangent = %e", answer);
+        printf("Numerical tangent = %e", dvol);
+        OOFEM_ERROR("QUIT");
+#endif
     } else {
         OOFEM_ERROR("Mode not implemented");
     }
