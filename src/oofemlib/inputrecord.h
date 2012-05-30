@@ -153,6 +153,7 @@ enum InputFieldType {
     IFT_NonLinearDynamic_nonlocalext,
     IFT_NonLinearDynamic_loadBalancingFlag,
     IFT_NonLinearDynamic_forceloadBalancingFlag,
+    IFT_NonLinearDynamic_ddtScheme,
     IFT_NonLinearDynamic_alpha,
     IFT_NonLinearDynamic_beta,
     IFT_NonLinearDynamic_dumpcoef,

@@ -75,6 +75,7 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     // constructor
     //
     stiffnessMatrix = NULL;
+    ddtScheme = newmark; // default
     internalForcesEBENorm = 0.0;
     numMetStatus = NM_None;
     internalVarUpdateStamp = 0;
@@ -146,10 +147,21 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     }
 
     IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef"); // Macro
-    IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha"); // Macro
-    IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta"); // Macro
 
-    int _val = 0;
+    int _val = 0;    
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme"); // Macro
+
+    ddtScheme = ( NonLinearDynamic_ddtScheme ) _val;
+
+    if ( ddtScheme == newmark ) {
+        OOFEM_LOG_INFO("Selecting Newmark-beta metod\n");
+        IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha"); // Macro
+        IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta"); // Macro
+    } else {
+        OOFEM_LOG_INFO("Selecting Backward Euler metod\n");
+    }
+
+    _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_refloadmode, "refloadmode"); // Macro
     refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 }
@@ -335,15 +347,26 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
 
-    // Newmark constants
+    // Time-stepping constants
     double dt2 = deltaT * deltaT;
 
-    a0 = 1 / ( beta * dt2 );
-    a1 = alpha / ( beta * deltaT );
-    a2 = 1 / ( beta * deltaT );
-    a3 = 1 / ( 2 *  beta ) - 1;
-    a4 = ( alpha / beta ) - 1;
-    a5 = deltaT / 2 * ( alpha / beta - 2 );
+    if ( ddtScheme == newmark ) {
+        OOFEM_LOG_DEBUG("Solving using Newmark-beta method\n");
+        a0 = 1 / ( beta * dt2 );
+        a1 = alpha / ( beta * deltaT );
+        a2 = 1 / ( beta * deltaT );
+        a3 = 1 / ( 2 *  beta ) - 1;
+        a4 = ( alpha / beta ) - 1;
+        a5 = deltaT / 2 * ( alpha / beta - 2 );
+    } else {
+        OOFEM_LOG_DEBUG("Solving using Backward Euler method\n");
+        a0 = 1 / dt2;
+        a1 = 1 / deltaT;
+        a2 = 1 / deltaT;
+        a3 = 0;
+        a4 = 0;
+        a5 = 0;
+    }
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         // Initialization

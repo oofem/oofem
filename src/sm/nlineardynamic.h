@@ -63,7 +63,7 @@ namespace oofem {
  * - Interfacing Numerical method to Elements.
  * - Managing time steps.
  *
- * Using implicit Newmark scheme described in,
+ * Solution proceedure described in:
  * A SURVEY OF DIRECT TIME-INTEGRATION METHODS IN COMPUTATIONAL STRUCTURAL DYNAMICS - II. IMPLICIT METHODS
  * K. Subbaraj and M. A. Dokainish
  * Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989
@@ -71,6 +71,12 @@ namespace oofem {
  * @author Andreas Feymark
  * @author Alper Cesur
  */
+
+enum NonLinearDynamic_ddtScheme {
+    newmark = 0, ///< Newmark-beta method
+    euler = 1,   ///< Backward Euler method
+};
+
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
@@ -80,6 +86,7 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     int initFlag;
+    NonLinearDynamic_ddtScheme ddtScheme;
     double dumpingCoef, alpha, beta;
     double a0, a1, a2, a3, a4, a5, a6, a7;
 

@@ -1798,7 +1798,7 @@ EngngModel :: checkProblemConsistency()
 
 #  ifdef VERBOSE
     if ( result ) {
-        OOFEM_LOG_DEBUG("Consistency check", "ok");
+        OOFEM_LOG_DEBUG("Consistency check:  OK\n");
     } else {
         VERBOSE_PRINTS("Consistency check", "failed")
         exit(1);
