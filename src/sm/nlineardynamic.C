@@ -154,11 +154,15 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     ddtScheme = ( NonLinearDynamic_ddtScheme ) _val;
 
     if ( ddtScheme == newmark ) {
-        OOFEM_LOG_INFO("Selecting Newmark-beta metod\n");
+        OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
         IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha"); // Macro
         IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta"); // Macro
+    } else if ( ddtScheme == crank_nicolson) {
+        OOFEM_LOG_INFO( "Selecting Crank-Nicolson method\n" );
+    } else if ( ddtScheme == euler ) {
+        OOFEM_LOG_INFO( "Selecting Backward Euler metod\n" );
     } else {
-        OOFEM_LOG_INFO("Selecting Backward Euler metod\n");
+	  _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
     _val = 0;
@@ -358,7 +362,15 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         a3 = 1 / ( 2 *  beta ) - 1;
         a4 = ( alpha / beta ) - 1;
         a5 = deltaT / 2 * ( alpha / beta - 2 );
-    } else {
+    } else if ( ddtScheme == crank_nicolson ) {
+        OOFEM_LOG_DEBUG("Solving using Crank-Nicolson method\n");
+        a0 = 4 / dt2;
+        a1 = 2 / deltaT;
+        a2 = 4 / deltaT;
+        a3 = 1;
+        a4 = 1;
+        a5 = 0;
+    } else if ( ddtScheme == euler ) {
         OOFEM_LOG_DEBUG("Solving using Backward Euler method\n");
         a0 = 1 / dt2;
         a1 = 1 / deltaT;
@@ -366,6 +378,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         a3 = 0;
         a4 = 0;
         a5 = 0;
+    } else {
+        _error("NonLinearDynamic: Time-stepping scheme not found!\n")
     }
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
