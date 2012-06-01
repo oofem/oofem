@@ -5,8 +5,8 @@ Test of deadweight on quadratic QPlaneStress2d element
 #sigma(x)=10x
 #epsilon(x)=0.1x
 #displacement_x(x)=0.05x^2-0.8
-LinearStatic nsteps 1 nmodules 1
-vtkxml tstep_all domain_all primvars 1 1 vars 2 4 1 stype 1
+LinearStatic nsteps 1 nmodules 0
+#vtkxml tstep_all domain_all primvars 1 1 vars 2 4 1 stype 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 8 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

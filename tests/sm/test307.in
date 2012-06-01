@@ -1,6 +1,6 @@
 test307.out
 test of Brick elements with nlgeo 1(strain is the Green-Lagrangian strain) loaded by uniaxial tension 
-NonLinearStatic  nmsteps 1 nsteps 1 contextOutputStep 1
+NonLinearStatic  nmsteps 1 nsteps 1 
 nsteps 5 rtolv 1.e-6 stiffMode 1 controlmode 1 maxiter 100
 domain 3d
 OutputManager tstep_all dofman_all element_all
