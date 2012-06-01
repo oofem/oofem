@@ -56,8 +56,7 @@
 #endif
 
 namespace oofem {
-TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
-    Tr1_ht(n, aDomain, em)
+TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
 // Constructor.
 { }
 

@@ -60,12 +60,17 @@ namespace oofem {
 
 FEI2dTrLin Tr1_ht :: interp(1, 2);
 
-Tr1_ht :: Tr1_ht(int n, Domain *aDomain, ElementMode em) :
-    TransportElement(n, aDomain, em)
+Tr1_ht :: Tr1_ht(int n, Domain *aDomain) :
+    TransportElement(n, aDomain, HeatTransferEM)
     // Constructor.
 {
     numberOfDofMans  = 3;
     numberOfGaussPoints = 1;
+}
+
+Tr1_hmt :: Tr1_hmt(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
+{
+    emode = HeatMass1TransferEM;
 }
 
 Tr1_ht :: ~Tr1_ht()
@@ -110,7 +115,20 @@ Tr1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 void
 Tr1_ht :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
 {
-    this->computeNSubMatrixAt(answer, coords);
+    if ( emode == HeatTransferEM ) {
+        this->computeNSubMatrixAt(answer, coords);
+    } else {
+        FloatMatrix n;
+        int i, j;
+
+        this->computeNSubMatrixAt(n, coords);
+        answer.resize(2, 6);
+        for ( i = 1; i <= 2; i++ ) {
+            for ( j = 1; j <= 3; j++ ) {
+                answer.at(i, ( j - 1 ) * 2 + i) = n.at(1, j);
+            }
+        }
+    }
 }
 
 
@@ -153,11 +171,19 @@ void
 Tr1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+    MaterialMode mmode;
+
+    if ( emode == HeatTransferEM ) {
+        mmode = _2dHeat;
+    } else {
+        mmode = _2dHeMo;
+    }
+
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dHeat);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, mmode);
     }
 }
 
@@ -165,8 +191,13 @@ Tr1_ht :: computeGaussPoints()
 void
 Tr1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.resize(1);
-    answer.at(1) = T_f;
+    if ( emode == HeatTransferEM ) {
+        answer.setValues(1, T_f);
+    } else if ( emode == HeatMass1TransferEM ) {
+        answer.setValues(2, T_f, C_1);
+    } else {
+        _error("Unknown ElementMode");
+    }
 }
 
 
@@ -273,7 +304,26 @@ Tr1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdg
 void
 Tr1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
 {
-    this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
+    if ( emode == HeatTransferEM ) {
+        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
+    } else if ( emode == HeatMass1TransferEM ) {
+        FloatArray subAnswer;
+        int i;
+
+        for ( i = 1; i <= 2; i++ ) {
+            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
+            if ( subAnswer.isNotEmpty() ) {
+                if ( answer.isEmpty() ) {
+                    answer.resize(2);
+                    answer.zero();
+                }
+
+                this->assembleLocalContribution(answer, subAnswer, 2, i, 1.0);
+            }
+        }
+    } else {
+        _error("Unknown ElementMode");
+    }
 }
 
 int

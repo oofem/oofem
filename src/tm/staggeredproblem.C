@@ -101,7 +101,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 
     for ( i = 1; i <= nModels; i++ ) {
         OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ].c_str());
-        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this, this->isParallel());
+        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
         emodelList->put(i, slaveProb);
     }
 
@@ -199,7 +199,6 @@ StaggeredProblem :: giveNextStep()
     int istep = this->giveNumberOfFirstStep();
     double totalTime = 0;
     StateCounterType counter = 1;
-    double deltaT = giveDeltaT(istep);
 
     if ( previousStep != NULL ) {
         delete previousStep;
@@ -208,7 +207,7 @@ StaggeredProblem :: giveNextStep()
 
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
-        totalTime = currentStep->giveTargetTime() + deltaT;
+        totalTime = currentStep->giveTargetTime() + this->giveDeltaT(istep);
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         TimeStep *newStep;
@@ -218,7 +217,7 @@ StaggeredProblem :: giveNextStep()
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
 
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;

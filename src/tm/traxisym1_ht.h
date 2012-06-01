@@ -44,7 +44,7 @@ namespace oofem {
 class TrAxisym1_ht : public Tr1_ht
 {
 public:
-    TrAxisym1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
+    TrAxisym1_ht(int n, Domain *d);
     virtual ~TrAxisym1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);

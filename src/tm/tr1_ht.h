@@ -52,7 +52,7 @@ protected:
     static FEI2dTrLin interp;
 
 public:
-    Tr1_ht(int n, Domain *d, ElementMode em = HeatTransferEM);
+    Tr1_ht(int n, Domain *d);
     virtual ~Tr1_ht();
 
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
@@ -64,7 +64,7 @@ public:
     virtual const char *giveClassName() const { return "Tr1_htElement"; }
     virtual classType giveClassID() const { return Tr1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return 3; }
+    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 3 : 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
@@ -104,5 +104,17 @@ protected:
 
     virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
+
+/**
+ * Class for heat and mass transfer.
+ */
+class Tr1_hmt: public Tr1_ht
+{
+public:
+    Tr1_hmt(int n, Domain *d);
+    virtual const char *giveClassName() const { return "Tr1_hmt"; }
+    virtual classType giveClassID() const { return Tr1_hmtClass; }
+};
+
 } // end namespace oofem
 #endif // tr1_ht_h

@@ -198,5 +198,6 @@ REGISTER_CLASS(Brick1_hmt, "brick1hmt", Brick1_hmtClass)
 REGISTER_CLASS(Tetrah1_ht, "tetrah1ht", Tetrah1_htClass)
 REGISTER_CLASS(Tetrah1_hmt, "tetrah1hmt", Tetrah1_hmtClass)
 REGISTER_CLASS(Tr1_ht, "tr1ht", Tr1_htClass)
+REGISTER_CLASS(Tr1_hmt, "tr1hmt", Tr1_hmtClass)
 REGISTER_CLASS(TrAxisym1_ht, "traxisym1ht", TrAxisym1_htClass)
 #endif

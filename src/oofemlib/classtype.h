@@ -167,6 +167,7 @@ enum classType {
     Quad1_htClass,
     Quad1_hmtClass,
     Tr1_htClass,
+    Tr1_hmtClass,
     QuadAxisym1_htClass,
     QuadAxisym1_hmtClass,
     TrAxisym1_htClass,
