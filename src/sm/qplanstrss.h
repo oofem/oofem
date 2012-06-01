@@ -86,8 +86,6 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);

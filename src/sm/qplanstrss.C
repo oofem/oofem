@@ -701,20 +701,4 @@ QPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge,
     return 1;
 }
 
-void QPlaneStress2d::printOutputAt(FILE *file, TimeStep *tStep)
-{
-  StructuralElement::printOutputAt (file, tStep);
-  if (this->number == 1) {
-    GaussPoint* gp = (integrationRulesArray [ 0 ])->getIntegrationPoint(0);
-    
-    FloatArray gc(2);
-    gc.at(1) = 1.0; 
-    gc.at(2) = 1.0;
-    gp->setCoordinates(gc);
-    FloatArray s(3);
-    this->computeStressVector (s, gp, tStep);
-
-  }
-}
-
 } // end namespace oofem
