@@ -117,21 +117,21 @@ public:
      * Computes the deviatoric stress vector and volumetric strain rate from given deviatoric strain and pressure.
      * Defaults to incompressible function.
      * @param stress_dev Deviatoric stress.
-     * @param epsp_vol Volumetric strain-rate.
+     * @param epsp_vol Volumetric strain-rate (minus the volumetric part of the eps argument).
      * @param gp Integration point.
-     * @param eps_dev Deviatoric strain-rate.
+     * @param eps Strain-rate.
      * @param pressure Pressure.
      * @param tStep Time step.
      */
-    virtual void computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps_dev, double pressure, TimeStep *tStep);
+    virtual void computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep);
     /**
      * Computes the deviatoric stress vector from given strain.
      * @param answer Deviatoric stress.
      * @param gp Integration point.
-     * @param eps_dev Deviatoric strain-rate.
+     * @param eps Strain-rate.
      * @param tStep Time step.
      */
-    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps_dev, TimeStep *tStep) = 0;
+    virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) = 0;
 
 
     /**

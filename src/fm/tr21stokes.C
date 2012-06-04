@@ -167,8 +167,8 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
-    FloatArray a_pressure, a_velocity, devStress, epsp_dev, BTs, Nh, dNv(12);
-    double tmp_vol, d_vol, pressure;
+    FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dNv(12);
+    double r_vol, pressure;
     FloatMatrix dN, B(3, 12);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
@@ -192,21 +192,18 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         }
 
         pressure = Nh.dotProduct(a_pressure);
-        epsp_dev.beProductOf(B, a_velocity);
-        tmp_vol = dNv.dotProduct(a_velocity);
-        //epsp_dev.at(1) -= tmp_vol/2;
-        //epsp_dev.at(2) -= tmp_vol/2;
+        epsp.beProductOf(B, a_velocity);
 
-        mat->computeDeviatoricStressVector(devStress, d_vol, gp, epsp_dev, pressure, tStep);
-        pressure = Nh.dotProduct(a_pressure);
+        mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
         BTs.beTProductOf(B, devStress);
 
         momentum.add(dA, BTs);
         momentum.add(-pressure*dA, dNv);
-        conservation.add((-tmp_vol+d_vol)*dA, Nh);
+        conservation.add(r_vol*dA, Nh);
     }
 
     FloatArray temp(15);
+    temp.zero();
     temp.addSubVector(momentum, 1);
     temp.addSubVector(conservation, 13);
 

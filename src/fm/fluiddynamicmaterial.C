@@ -56,7 +56,11 @@ FluidDynamicMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *g
 void
 FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
-    epsp_vol = 0.0;
+    if ( gp->giveMaterialMode() == _2dFlow ) {
+        epsp_vol = -(eps.at(1) + eps.at(2));
+    } else {
+        epsp_vol = -(eps.at(1) + eps.at(2) + eps.at(3));
+    }
     this->computeDeviatoricStressVector(stress_dev, gp, eps, tStep);
 }
 
