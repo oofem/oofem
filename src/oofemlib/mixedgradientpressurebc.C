@@ -61,8 +61,8 @@ MixedGradientPressureBC :: MixedGradientPressureBC(int n, Domain *d) : ActiveBou
     voldman = new Node(100, d);
     voldman->appendDof(new MasterDof(1, voldman, X_1));
 
-    int ndim = d->giveNumberOfSpatialDimensions();
-    int components = (ndim+1)*ndim/2;
+    int nsd = d->giveNumberOfSpatialDimensions();
+    int components = (nsd+1)*nsd/2;
     // The prescribed strains.
     devdman = new Node(200, d);
     for (int i = 0; i < components; i++) {
@@ -131,17 +131,17 @@ void MixedGradientPressureBC :: computeDofTransformation(ActiveDof *dof, FloatAr
     FloatArray dx;
     dx.beDifferenceOf(*coords, this->centerCoord);
 
-    int ndim = dx.giveSize();
+    int nsd = dx.giveSize(); // Number of spatial dimensions
 
     masterContribs.resize(devdman->giveNumberOfDofs()+1);
 
     if ( id == D_u || id == V_u ) {
-        masterContribs.at(1) = dx.at(1)/ndim; // d_vol
-        if (ndim == 2) {
+        masterContribs.at(1) = dx.at(1)/3.0;      // d_vol
+        if (nsd == 2) {
             masterContribs.at(2) = dx.at(1);      // d_dev_11
             masterContribs.at(3) = 0.0;           // d_dev_22
             masterContribs.at(4) = dx.at(2)/2.0;  // gamma_12
-        } else if (ndim == 3) {
+        } else if (nsd == 3) {
             masterContribs.at(2) = dx.at(1);      // d_dev_11
             masterContribs.at(3) = 0.0;           // d_dev_22
             masterContribs.at(3) = 0.0;           // d_dev_33
@@ -150,12 +150,12 @@ void MixedGradientPressureBC :: computeDofTransformation(ActiveDof *dof, FloatAr
             masterContribs.at(6) = dx.at(2)/2.0;  // gamma_12
         }
     } else if ( id == D_v || id == V_v ) {
-        masterContribs.at(1) = dx.at(2)/ndim; // d_vol
-        if (ndim == 2) {
+        masterContribs.at(1) = dx.at(2)/3.0;      // d_vol
+        if (nsd == 2) {
             masterContribs.at(2) = 0.0;           // d_dev_11
             masterContribs.at(3) = dx.at(2);      // d_dev_22
             masterContribs.at(4) = dx.at(1)/2.0;  // gamma_12
-        } else if (ndim == 3) {
+        } else if (nsd == 3) {
             masterContribs.at(2) = 0.0;           // d_dev_11
             masterContribs.at(3) = dx.at(2);      // d_dev_22
             masterContribs.at(4) = 0.0;           // d_dev_33
@@ -164,7 +164,7 @@ void MixedGradientPressureBC :: computeDofTransformation(ActiveDof *dof, FloatAr
             masterContribs.at(7) = dx.at(1)/2.0;  // gamma_12
         }
     } else if ( id == D_w || id == V_w ) { // 3D only:
-        masterContribs.at(1) = dx.at(3)/ndim; // d_vol
+        masterContribs.at(1) = dx.at(3)/3.0;  // d_vol
         masterContribs.at(2) = 0.0;           // d_dev_11
         masterContribs.at(3) = 0.0;           // d_dev_22
         masterContribs.at(3) = dx.at(3);      // d_dev_33
@@ -189,14 +189,14 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
     FloatArray dx;
     dx.beDifferenceOf(*coords, this->centerCoord);
 
-    int ndim = dx.giveSize();
+    int nsd = dx.giveSize(); // Number of spatial dimensions
 
     double dev11, dev22, dev33, gam23, gam13, gam12;
-    if (ndim == 2) {
+    if (nsd == 2) {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
         gam12 = dev.at(3);
-    } else if (ndim == 3) {
+    } else if (nsd == 3) {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
         dev33 = dev.at(3);
@@ -207,16 +207,38 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
 
     double val;
     if ( id == D_u || id == V_u ) {
-        val = dx.at(1)/ndim*vol;
-        if (ndim == 2) val += dx.at(1)*dev11 + dx.at(2)/2.0*gam12;
-        if (ndim == 3) val += dx.at(3)/2.0*gam13;
+        val = dx.at(1)/3.0*vol;
+        if (nsd == 2) val += dx.at(1)*dev11 + dx.at(2)/2.0*gam12;
+        if (nsd == 3) val += dx.at(3)/2.0*gam13;
     } else if ( id == D_v || id == V_v ) {
-        val = dx.at(2)/ndim*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
-        if (ndim == 3) val += dx.at(3)/2.0*gam23;
+        val = dx.at(2)/3.0*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
+        if (nsd == 3) val += dx.at(3)/2.0*gam23;
     } else if ( id == D_w || id == V_w ) { // 3D only:
-        val = dx.at(3)/ndim*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
+        val = dx.at(3)/3.0*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
     }
     return val;
+}
+
+
+double MixedGradientPressureBC :: domainSize()
+{
+#if 1
+    return this->domain->giveArea();
+#else
+    ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    double domain_size = 0.0;
+    // This requires the boundary to be consistent and ordered correctly.
+    for (int i = 1; i <= this->domain->giveNumberOfElements(); ++i) {
+        //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
+        ///@todo Support more than 2D
+        Line2BoundaryElement *e = dynamic_cast< Line2BoundaryElement* >(this->domain->giveElement(i));
+        if (e) {
+            domain_size += e->computeNXIntegral();
+        }
+    }
+    return domain_size/nsd;
+#endif
 }
 
 
@@ -226,9 +248,11 @@ void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol,
     sigmaDev.zero();
     this->domain->giveEngngModel()->assembleVector(sigmaDev, tStep, eid,
         InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    // Divide by the RVE-volume
+    sigmaDev.times(1.0/this->domainSize());
     // Above, full sigma = sigmaDev - p*I is assembled, so to obtain the deviatoric part we add p to the diagonal part.
-    int ndim = 2;
-    for (int i = 1; i <= ndim; ++i ) {
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    for (int i = 1; i <= nsd; ++i ) {
         sigmaDev.at(i) += this->pressure;
     }
 }
@@ -237,6 +261,7 @@ void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol,
 void MixedGradientPressureBC :: computeTangents(
     FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
 {
+    double size = this->domainSize();
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
@@ -262,11 +287,11 @@ void MixedGradientPressureBC :: computeTangents(
     rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain );
     rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain );
     rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, pnum, this->domain );
-    
+
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();
     int npeq = Kpf->giveNumberOfRows();
-    
+
     // Indices and such of internal dofs
     int dvol_eq = this->giveVolDof()->giveEqn();
     int ndev = this->devGradient.giveSize();
@@ -299,35 +324,37 @@ void MixedGradientPressureBC :: computeTangents(
     for (int i = 1; i <= ndev; ++i) {
         Cd.at(i) = s_d.at(dvol_eq, i); // Copy over relevant row from solution
     }
-    
+
     // Sensitivities for d_dev is obtained as reactions forces;
     Kpf->times(s_p, Ep);
-    
+
     FloatMatrix tmpMat;
     Kpp->times(ddev_pert, tmpMat);
     Kpf->times(s_d, Ed);
-    
+
     Ed.subtract(tmpMat);
-    
+
+    Ed.times(1.0/size);
+
     // Not sure if i actually need to do this part, but the obtained tangents are to dsigma/dp, not dsigma_dev/dp, so they need to be corrected;
-    int ndim = 2; /// TODO Make this general for 2D and 3D
-    for (int i = 1; i <= ndim; ++i) {
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    for (int i = 1; i <= nsd; ++i) {
         Ep.at(i) += 1.0;
         Cd.at(i) += 1.0;
     }
     // Makes Ed 4th order deviatoric, in Voigt form (!)
-    for (int i = 1; i <= Ed.giveNumberOfColumns(); ++i) {
+    /*for (int i = 1; i <= Ed.giveNumberOfColumns(); ++i) {
         // Take the mean of the "diagonal" part of each column
         double mean = 0.0;
-        for (int j = 1; j <= ndim; ++j) {
+        for (int j = 1; j <= nsd; ++j) {
             mean += Ed.at(i,j);
         }
-        mean /= (double)ndim;
+        mean /= (double)nsd;
         // And subtract it from that column
-        for (int j = 1; j <= ndim; ++j) {
+        for (int j = 1; j <= nsd; ++j) {
             Ed.at(i,j) -= mean;
-        }        
-    }
+        }
+    }*/
 
     delete Kff;
     delete Kfp;
@@ -374,8 +401,8 @@ double MixedGradientPressureBC :: assembleVector(FloatArray &answer, TimeStep *t
 
     int vol_loc = this->giveVolDof()->giveEquationNumber(s);
 
-    double rve_size = this->domain->giveArea();
-    answer.at(vol_loc) += rve_size*pressure;
+    double rve_size = this->domainSize();
+    answer.at(vol_loc) -= rve_size*pressure; // Note the negative sign (pressure as opposed to mean stress)
 
     return 0.0;
 }

@@ -57,6 +57,8 @@ class SparseLinearSystemNM;
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
  *
+ * @note The 2D case assumes plane strain(rate), as is the case in _2dFlow.
+ * @note It is possible to use a non-deviatoric strain rate, in which case, @f$ d_{\mathrm{vol}} @f$ obtains the value of the actual volumetric strain rate minus the volumetric part of @f$ d_{\mathrm{dev} @f$.
  * @note This is only applicable to momentum balance equation. Both solid or fluids, incompressible or compressible, should work.
  * @note Can only be prescribed to active dofs, so they must be denoted as such in the in the input file.
  *
@@ -124,6 +126,11 @@ public:
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     virtual void scale(double s) { devGradient.times(s); pressure *= s; }
+
+    /**
+     * Computes the size (including pores) by surface integral over the domain
+     */
+    double domainSize();
 
     /**
      * Computes the homogenized fields through sensitivity analysis.
