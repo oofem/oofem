@@ -65,8 +65,8 @@ end_re   = re.compile(r"""
 
 timeStep_re = re.compile(r"""
         ^           # begining of line
-        Output\ for\ time\s*  # charcteristic string
-        (\d+\.\d+(e[+-]\d+)*) # time step
+        Output\ for\ time\s*  # characteristic string
+        ([-+ ]\d+\.\d+(e[+-]\d+)*) # time step
         """,re.X)
 
 dofMan_re = re.compile(r"""

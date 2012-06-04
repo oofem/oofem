@@ -70,6 +70,8 @@ protected:
     /// Numerical method used to solve the problem.
     SparseLinearSystemNM *nMethod;
 
+    /// Initial time from which the computation runs. Default is zero.
+    double initT;
     double deltaT;
     double alpha;
 

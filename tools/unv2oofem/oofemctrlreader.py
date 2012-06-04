@@ -69,8 +69,8 @@ class CTRLParser:
     oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Beam3D",oofem_elemProp[-1]))
-    #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
+    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
+    #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
     oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Traxisym1ht",oofem_elemProp[-1]))

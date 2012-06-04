@@ -566,8 +566,8 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
 
         // old approach (default projection method)
         // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-	// new approach, with choice of method
-	le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
+        // new approach, with choice of method
+        le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
         // remember le in corresponding status
         status->setLe(le);
 
@@ -580,11 +580,11 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         status->setCrackAngle(ca);
 
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            _error3("Fracturing strain %e is lower than the elastic strain e0=%f, possible snap-back.", wf / le, e0);
+            _error6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le );
         } else if ( wf == 0. && e0 >= ef ) {
-            _error4("Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f", ef, e0, e0);
+            _error5("Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel());
         } else if ( ef == 0. && e0 * le >= wf ) {
-            _error4("Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f", wf, e0 * le, e0 * le);
+            _error5("Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le,gp->giveElement()->giveLabel());
         }
     }
 }

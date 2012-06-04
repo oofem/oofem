@@ -914,6 +914,7 @@ and take them into account, if they support such feature.
 \begin{record}
 \recentry{\entKeywordInst{NonStationaryProblem}}{\field{nsteps}{in}}
 \recentry{}{\field{deltaT}{rn} or \field{deltaTfunction}{in}} \recentry{}{\field{alpha}{rn}}
+\recentry{}{\optField{initT}{rn}}
 \recentry{}{\optField{lumpedcapa}{}} \recentry{}{\optField{sparselinsolverparams}{}}
 \recentry{}{\optField{exportfields}{ia}} 
 \recentry{}{\optField{changingProblemSize}{}}
@@ -934,6 +935,7 @@ with a number referring to corresponding time function, see section~\ref{_TimeFu
 Variable time step is advantageous when calculating large time intervals. It is strongly suggested
 to use nonlinear transport solver due to stability reasons, see section~\ref{TransientTransport}.
 
+The \param{initT} sets the initial time for integration, 0 by default.
 If \param{lumpedcapa} is set, then the stabilization of numerical
 algorithm using lumped capacity matrix will be used, reducing the
 initial oscillations.
@@ -954,8 +956,13 @@ configuration.
 
 \begin{record}
 \recentry{\entKeywordInst{NlTransientTransportProblem}}{\field{nsteps}{in}}
-\recentry{}{\field{deltaT}{rn} or \field{deltaTfunction}{in}} \recentry{}{\field{alpha}{rn}} \recentry{}{\optField{lumpedcapa}{}}
-\recentry{}{\optField{nsmax}{in}} \recentry{}{\field{rtol}{rn}} \recentry{}{\optField{manrmsteps}{in}}
+\recentry{}{\field{deltaT}{rn} or \field{deltaTfunction}{in}} 
+\recentry{}{\field{alpha}{rn}} 
+\recentry{}{\optField{initT}{rn}}
+\recentry{}{\optField{lumpedcapa}{}}
+\recentry{}{\optField{nsmax}{in}}
+\recentry{}{\field{rtol}{rn}}
+\recentry{}{\optField{manrmsteps}{in}}
 \recentry{}{\optField{sparselinsolverparams}{}}
 \recentry{}{\optField{exportfields}{ia}}
 \recentry{}{\optField{changingProblemSize}{}}
@@ -971,7 +978,7 @@ which is unconditionally stable, and first-order accurate
 in $\Delta t$. See matlibmanual.pdf for solution algorithm.
 
 \param{deltaT} is time step length used for integration, \param{nsteps} parameter specifies
-number of time steps to be solved. For \param{deltaTfunction} see section~\ref{LinearTransientTransport}.
+number of time steps to be solved. For \param{deltaTfunction} and \param{initT} see section~\ref{LinearTransientTransport}.
 Parameter \param{maxiter} determines the maximum
 number of iterations allowed to reach equilibrium (default is 30). Norms of
 residual physical quantity (heat, mass) described by solution vector and 

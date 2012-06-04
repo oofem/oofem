@@ -65,6 +65,7 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     nMethod = NULL;
     ndomains = 1;
     lumpedCapacityStab = 0;
+    initT = 0.;
     deltaT = 0.;
     //exportFieldFlag = 0;
     dtTimeFunction = 0;
@@ -119,6 +120,10 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonStationaryTransportProblem_smtype, "smtype"); // Macro
     sparseMtrxType = ( SparseMtrxType ) val;
+
+    if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
+        IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt"); // Macro
+    }
 
     if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
         IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
@@ -202,7 +207,7 @@ TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
 {
     if ( stepWhenIcApply == NULL ) {
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -giveDeltaT(giveNumberOfFirstStep()), giveDeltaT(giveNumberOfFirstStep()), 0);
+        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT-giveDeltaT(giveNumberOfFirstStep()), giveDeltaT(giveNumberOfFirstStep()), 0);
         //stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0);
     }
     return stepWhenIcApply;
@@ -236,7 +241,7 @@ TimeStep *
 NonStationaryTransportProblem :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    double totalTime = 0;
+    double totalTime = this->initT;
     double intrinsicTime;
     StateCounterType counter = 1;
     delete previousStep;

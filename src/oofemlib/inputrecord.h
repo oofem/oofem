@@ -194,6 +194,7 @@ enum InputFieldType {
 
     IFT_NonStationaryTransportProblem_lstype,
     IFT_NonStationaryTransportProblem_smtype,
+    IFT_NonStationaryTransportProblem_initt,
     IFT_NonStationaryTransportProblem_deltat,
     IFT_NonStationaryTransportProblem_dtf,
     IFT_NonStationaryTransportProblem_alpha,
