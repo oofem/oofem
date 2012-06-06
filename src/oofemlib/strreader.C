@@ -276,7 +276,7 @@ Dictionary *StringReader :: ReadDictionary(const char *source, const char *idStr
     const char *str1 = source;
     double value;
     int size;
-    char key [ MAX_NAME_LENGTH + 1 ]; // 'key' is eventually of size 1, but some words that are
+    char key [ 100 + 1 ]; // 'key' is eventually of size 1, but some words that are
                                       // read in the meantime in the data file can be larger !
     Dictionary *dict;
 
@@ -292,7 +292,7 @@ Dictionary *StringReader :: ReadDictionary(const char *source, const char *idStr
     }
 
     for ( int i = 1; i <= size; i++ ) {
-        readSimpleString(str1, key, MAX_NAME_LENGTH + 1, & str1);
+        readSimpleString(str1, key, 100 + 1, & str1);
         str1 = scanDouble(str1, & value);
         dict->add(key [ 0 ], value);
     }

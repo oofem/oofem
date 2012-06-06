@@ -36,6 +36,7 @@
  #include <stdio.h>
  #include <string.h>
  #include <ctype.h>
+ #include <iostream>
 #endif
 
 #include "engngm.h"
@@ -79,29 +80,12 @@ char *giveRawLineFromInput(FILE *inputStream, char *line, int len)
 }
 
 
-char *giveInputDataFileName(char *dataInputFileName, int maxlen)
+void giveInputDataFileName(std::string &dataInputFileName)
 
 {
-    int len;
     // Returns the name of the file containing the data of the problem.
-    // char s[MAX_FILENAME_LENGTH] ;
-
-    printf("please enter the name of the input data file : \n");
-    //gets (s) ;
-    //strcpy (dataInputFileName,s) ;
-    char *_res = fgets(dataInputFileName, maxlen, stdin);
-    if ( _res == NULL ) {
-        OOFEM_ERROR("giveInputDataFileName: reading error or EOF encountered");
-    }
-
-    // test if last read character is newline
-    if ( ( len = strlen(dataInputFileName) ) ) {
-        if ( dataInputFileName [ len - 1 ] == '\n' ) { // if yes remove it
-            dataInputFileName [ len - 1 ] = '\0';
-        }
-    }
-
-    return dataInputFileName;
+    printf("Please enter the name of the input data file : \n");
+    std::getline(std::cin, dataInputFileName);
 }
 
 
@@ -157,7 +141,8 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 #define oofem_tmpstring_len 1024
 static char oofem_tmpstring [ oofem_tmpstring_len + 1 ];
 
-char *oofem_tmpstr(const char *src) {
+char *oofem_tmpstr(const char *src)
+{
     strncpy(oofem_tmpstring, src, oofem_tmpstring_len);
     oofem_tmpstring [ oofem_tmpstring_len ] = '\0';
     return oofem_tmpstring;

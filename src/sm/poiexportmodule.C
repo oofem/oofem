@@ -47,6 +47,8 @@
 #include "element.h"
 #include "oofem_limits.h"
 
+#include <string>
+
 namespace oofem {
 POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
@@ -79,20 +81,20 @@ POIExportModule :: initializeFrom(InputRecord *ir)
 
     std::string poiFileName;
     IR_GIVE_OPTIONAL_FIELD(ir, poiFileName, IFT_POIExportModule_poifilename, "poifilename"); // Macro
-    this->readPOIFile(poiFileName.c_str()); // parse poi file
+    this->readPOIFile(poiFileName); // parse poi file
 
     return IRRT_OK;
 }
 
 void
-POIExportModule :: readPOIFile(const char *poiFileName)
+POIExportModule :: readPOIFile(const std::string &poiFileName)
 {
     char line [ OOFEM_MAX_LINE_LENGTH ];
     int i, nPOI;
     POI_dataType poi;
-    FILE *in = fopen(poiFileName, "r");
+    FILE *in = fopen(poiFileName.c_str(), "r");
     if ( in == NULL ) {
-        OOFEM_ERROR2("POIExportModule::readPOIFile: failed to open input file %s", poiFileName);
+        OOFEM_ERROR2("POIExportModule::readPOIFile: failed to open input file %s", poiFileName.c_str());
     }
 
     giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
@@ -139,12 +141,11 @@ POIExportModule :: terminate()
 FILE *
 POIExportModule :: giveOutputStream(TimeStep *tStep)
 {
-    char fileName [ MAX_FILENAME_LENGTH ];
     FILE *answer;
+    std::string fileName = this->giveOutputBaseFileName(tStep) + ".poi";
 
-    sprintf( fileName, "job.%d.poi", tStep->giveNumber() );
-    if ( ( answer = fopen(fileName, "w") ) == NULL ) {
-        OOFEM_ERROR2("POIExportModule::giveOutputStream: failed to open file %s", fileName);
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR2("POIExportModule::giveOutputStream: failed to open file %s", fileName.c_str());
     }
 
     return answer;

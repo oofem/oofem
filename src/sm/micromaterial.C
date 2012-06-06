@@ -552,13 +552,13 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 }
 
 //should be called before the calculation of micromaterial
-void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes) {
+void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes)
+{
     Domain *microDomain = this->problemMicro->giveDomain(1);
     EngngModel *microEngngModel = microDomain->giveEngngModel();
     MetaStep *mstep;
     DofManager *DofMan;
 
-    //char str [ OOFEM_MAX_LINE_LENGTH ];
     int i, j;
     int numDofs, numDofMan;
     int counterDefault = 1, counterBoundary = 1, counterInternal = 1;

@@ -62,7 +62,7 @@ protected:
 public:
     /// Constructor.
     OOFEMTXTDataReader(const char *inputfilename);
-    ~OOFEMTXTDataReader();
+    virtual ~OOFEMTXTDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual void finish();

@@ -90,7 +90,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
-    //val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename", MAX_FILENAME_LENGTH); //Macro
+    //val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename"); //Macro
 
     //     if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename")){
     //       if (fopen(this->stiffMatrxFileName,"r") != NULL){//if the file exist
@@ -172,9 +172,9 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
     LoadTimeFunction *LoadTimeFunct;
+    ///@todo This part should use the DynamicInputRecord instead
     OOFEMTXTInputRecord *ir = new OOFEMTXTInputRecord();
     FloatArray n(8), answer, localCoords;
-    //intArray microDofManArray(8);
     char str [ OOFEM_MAX_LINE_LENGTH ];
     double displ;
     FloatArray displ_x(8), displ_y(8), displ_z(8);

@@ -72,7 +72,7 @@
  #include <string.h>
  #include <new>
  #include <sstream>
-// For passing PETSc/SLEPc arguments. 
+// For passing PETSc/SLEPc arguments.
  #include <fstream>
  #include <iterator>
 #endif
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
  #endif
-    parallelFlag = true; ///@todo The default should be false even for parallel builds, and turned on with -p 
+    parallelFlag = true; ///@todo The default should be false even for parallel builds, and turned on with -p
 #endif
 
     //

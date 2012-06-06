@@ -3842,7 +3842,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeCrossSectionModels(ncrosssect);
     for ( i = 1; i <= ncrosssect; i++ ) {
         domain->giveCrossSection(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString.c_str() );
+        irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         crossSection = CreateUsrDefCrossSectionOfType(name.c_str(), i, * dNew);
@@ -3855,7 +3855,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeMaterials(nmat);
     for ( i = 1; i <= nmat; i++ ) {
         domain->giveMaterial(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString.c_str() );
+        irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         mat = CreateUsrDefMaterialOfType(name.c_str(), i, * dNew);
@@ -3868,7 +3868,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeNonlocalBarriers(nbarriers);
     for ( i = 1; i <= nbarriers; i++ ) {
         domain->giveNonlocalBarrier(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString.c_str() );
+        irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         barrier = CreateUsrDefNonlocalBarrierOfType(name.c_str(), i, * dNew);
@@ -3881,7 +3881,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeBoundaryConditions(nbc);
     for ( i = 1; i <= nbc; i++ ) {
         domain->giveBc(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString.c_str() );
+        irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         bc = CreateUsrDefBoundaryConditionOfType(name.c_str(), i, * dNew);
@@ -3894,7 +3894,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeInitialConditions(nic);
     for ( i = 1; i <= nic; i++ ) {
         domain->giveIc(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString.c_str() );
+        irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ic = new InitialCondition(i, *dNew);
@@ -3907,7 +3907,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeLoadTimeFunctions(nltf);
     for ( i = 1; i <= nltf; i++ ) {
         domain->giveLoadTimeFunction(i)->giveInputRecordString(irString);
-        irPtr->setRecordString( irString.c_str() );
+        irPtr->setRecordString( irString );
         IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num);
 
         ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), i, * dNew);

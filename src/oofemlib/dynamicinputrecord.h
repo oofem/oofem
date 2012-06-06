@@ -39,7 +39,6 @@
 #include <map>
 
 namespace oofem {
-#define IR_MAX_ERROR_LENGTH 100
 
 /**
  * Class representing the a dynamic Input Record.

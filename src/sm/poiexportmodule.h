@@ -83,7 +83,7 @@ public:
     virtual const char *giveClassName() const { return "POIExportModule"; }
 
 protected:
-    void readPOIFile(const char *poiFileName);
+    void readPOIFile(const std::string &poiFileName);
     /// Returns the output stream for given solution step
     FILE *giveOutputStream(TimeStep *tStep);
     /**

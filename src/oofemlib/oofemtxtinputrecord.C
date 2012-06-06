@@ -41,23 +41,22 @@
 #include "range.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
- #include <ctype.h>
+ #include <cstdio>
+ #include <cstring>
+ #include <cctype>
  #include <iostream>
+ #include <sstream>
 #endif
 
 namespace oofem {
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer()
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), record()
 {
-    record [ 0 ] = '\0';
 }
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer()
 {
-    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH - 1);
-    this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
-    tokenizer.tokenizeLine(this->record);
+    this->record = src.record;
+    tokenizer.tokenizeLine(this->record.c_str());
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -67,9 +66,8 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer()
 {
-    strncpy(this->record, source, OOFEM_MAX_LINE_LENGTH - 1);
-    this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
-    tokenizer.tokenizeLine(this->record);
+    this->record = source;
+    tokenizer.tokenizeLine(this->record.c_str());
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -80,9 +78,8 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), 
 OOFEMTXTInputRecord &
 OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 {
-    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH - 1);
-    this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
-    tokenizer.tokenizeLine(this->record);
+    this->record = src.record;
+    tokenizer.tokenizeLine(this->record.c_str());
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -93,11 +90,10 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 }
 
 void
-OOFEMTXTInputRecord :: setRecordString(const char *newRec)
+OOFEMTXTInputRecord :: setRecordString(const std::string &newRec)
 {
-    strncpy(this->record, newRec, OOFEM_MAX_LINE_LENGTH - 1);
-    this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
-    tokenizer.tokenizeLine(this->record);
+    this->record = newRec;
+    tokenizer.tokenizeLine(this->record.c_str());
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -461,43 +457,36 @@ OOFEMTXTInputRecord :: finish(bool wrn)
         return;
     }
 
-    char buff [ MAX_ERROR_MSG_LENGTH ];
-    int pos = 0;
-    int j, pf = 1, wf = 0, ntokens = tokenizer.giveNumberOfTokens();
+    std::ostringstream buff;
+    bool pf = true, wf = false;
+    int ntokens = tokenizer.giveNumberOfTokens();
     for ( int i = 0; i < ntokens; i++ ) {
         //fprintf (stderr, "[%s] ", tokenizer.giveToken(i+1));
         if ( !readFlag [ i ] ) {
             if ( pf ) {
-                pos = sprintf(buff, "Unread token(s) detected in the following record\n\"");
-                for ( j = 0; j < 40; j++ ) {
-                    if ( record [ j ] == '\n' || record [ j ] == '\0' ) {
+                buff << "Unread token(s) detected in the following record\n\"";
+                for ( int j = 0; j < 40; j++ ) {
+                    if ( this->record [ j ] == '\n' || this->record [ j ] == '\0' ) {
                         break;
                     } else {
-                        buff [ pos++ ] = record [ j ];
+                        buff << this->record [ j ];
                     }
                 }
-
-                if ( j == 40 ) {
-                    pos += sprintf(buff + pos, " ...\":\n");
-                } else {
-                    pos += sprintf(buff + pos, "\":\n");
+                if ( this->record.size() > 41 ) {
+                    buff << "...";
                 }
+                buff << "\":\n";
 
                 pf = false;
-                wf = 1;
+                wf = true;
             }
 
-            pos += sprintf( buff + pos, "[%s] ", tokenizer.giveToken(i + 1) );
+            buff << "[" << tokenizer.giveToken(i + 1) << "]";
         }
     }
 
     if ( wf ) {
-        if ( pos >= MAX_ERROR_MSG_LENGTH ) {
-            OOFEM_ERROR3("OOFEMTXTInputRecord::finish : print buffer too small (%d,%d)",
-                         pos, MAX_ERROR_MSG_LENGTH);
-        }
-
-        OOFEM_WARNING(buff);
+        OOFEM_WARNING(buff.str().c_str());
     }
 }
 
@@ -560,8 +549,8 @@ OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *va
 const char *
 OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *idString)
 //
-// returns possition of substring idString in source
-// return value pointer at the end of occurence idString in source
+// returns position of substring idString in source
+// return value pointer at the end of occurrence idString in source
 // (idString must be separated from rest by blank or by tabulator
 // if string not found, returns NULL
 //

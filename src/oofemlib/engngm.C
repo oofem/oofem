@@ -1680,48 +1680,6 @@ EngngModel :: giveMetaStep(int i)
 
     return NULL;
 }
-/*
- * char*
- * EngngModel :: giveInputDataFileName ()
- *
- * {
- * // Returns the name of the file containing the data of the problem.
- * char s[MAX_FILENAME_LENGTH] ;
- *
- * if (! dataInputFileName) {
- * printf ("please enter the name of the input data file : \n") ;
- * gets (s) ;
- **#ifndef __PARALLEL_MODE
- * dataInputFileName = new char[strlen(s)+1] ;
- * strcpy (dataInputFileName,s) ;
- **#else
- * dataInputFileName = new char[strlen(s)+10] ;
- * sprintf (dataInputFileName, "%s.%d", s, rank);
- **#endif
- * }
- *
- * return dataInputFileName ;
- * }
- *
- *
- * FILE*
- * EngngModel :: giveInputStream ()
- * // Returns an input stream on the data file of the receiver.
- * {
- * if (inputStream)
- * return inputStream ;
- *
- * else {
- *   char *fname = this->giveInputDataFileName ();
- *   if ((inputStream = fopen(fname,"r")) == NULL)
- *     {
- *   fprintf (stderr,"\nEngngModel->giveInputStream:Can't open input stream %s\a\n",
- *       fname) ;
- *   exit (1);}
- *
- *   return inputStream ;}
- * }
- */
 
 FILE *
 EngngModel :: giveOutputStream()
@@ -1746,7 +1704,7 @@ EngngModel :: giveOutputStream()
                 close(fd);
             }
 
-            OOFEM_ERROR2("Failed to create tempopary file %s\n", sfn);
+            OOFEM_ERROR2("Failed to create temporary file %s\n", sfn);
             return ( NULL );
         }
 

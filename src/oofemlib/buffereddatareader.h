@@ -62,7 +62,7 @@ protected:
 public:
     /** Constructor. */
     BufferedDataReader();
-    ~BufferedDataReader();
+    virtual ~BufferedDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
 

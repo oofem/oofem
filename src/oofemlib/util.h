@@ -63,11 +63,9 @@ char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
 
 /**
  * Returns the name of the file containing the data of the problem.
- * @param dataInputFileName Char buffer at least the size maxlen.
- * @param maxlen Maximum length of file name.
- * @return Same as dataInputFileName.
+ * @param dataInputFileName Input file name read from stdin.
  */
-char *giveInputDataFileName(char *dataInputFileName, int maxlen);
+void giveInputDataFileName(std::string &sdataInputFileName);
 
 /**
  * Instanciates the new problem.

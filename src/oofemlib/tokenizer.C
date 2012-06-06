@@ -111,7 +111,7 @@ Tokenizer :: readToken(int &bpos, const char * &line, char * &token, char sep)
 int Tokenizer :: tokenizeLine(const char *currentLine)
 {
     /*
-     *       Parses input line, tokens are separated by seperator.
+     *       Parses input line, tokens are separated by separator.
      *       if separator == 0, tokens are separated by whitespaces.
      *       return code:
      * 0 - ok

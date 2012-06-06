@@ -3070,9 +3070,9 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
 #ifdef USE_INPUT_FILE
-    char fileName [ MAX_FILENAME_LENGTH ];
-    sprintf(fileName, "/home/dr/Huerta/element_%d.in", elemId);
-    refinedReader.writeToFile(fileName);
+    std::ostringstream fileName;
+    fileName << "/home/dr/Huerta/element_" << elemId << ".in";
+    refinedReader.writeToFile(fileName.str().c_str());
 #endif
 
 #ifdef TIME_INFO
@@ -3652,9 +3652,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
 #ifdef USE_INPUT_FILE
-    char fileName [ MAX_FILENAME_LENGTH ];
-    sprintf(fileName, "/home/dr/Huerta/patch_%d.in", nodeId);
-    refinedReader.writeToFile(fileName);
+    std::ostringstream fileName;
+    fileName << "/home/dr/Huerta/patch_" << nodeId << ".in";
+    refinedReader.writeToFile(fileName.str().c_str());
 #endif
 
 #ifdef TIME_INFO
@@ -3880,9 +3880,9 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     dofIdArray = domain->giveDefaultNodeDofIDArry();
 
  #ifdef USE_INPUT_FILE
-    char fileName [ MAX_FILENAME_LENGTH ];
-    sprintf(fileName, "/home/dr/Huerta/whole_0.in");
-    refinedReader.writeToFile(fileName);
+    std::ostringstream fileName;
+    fileName << "/home/dr/Huerta/whole_" << 0 << ".in";
+    refinedReader.writeToFile(fileName.str().c_str());
  #endif
 
  #ifdef TIME_INFO

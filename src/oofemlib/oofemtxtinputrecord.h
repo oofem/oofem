@@ -42,10 +42,10 @@
 #include <vector>
 
 namespace oofem {
-#define IR_MAX_ERROR_LENGTH 100
 
 /**
- * Class representing the Input Record for OOFEM txt input file format. The input record is represented as string consisting of several fields.
+ * Class representing the Input Record for OOFEM txt input file format.
+ * The input record is represented as string consisting of several fields.
  */
 class OOFEMTXTInputRecord : public InputRecord
 {
@@ -59,7 +59,7 @@ protected:
     std::vector< bool > readFlag;
 
     /// Record representation.
-    char record [ OOFEM_MAX_LINE_LENGTH ];
+    std::string record;
 
 public:
     /// Constructor. Creates an empty input record.
@@ -69,7 +69,7 @@ public:
     /// Copy constructor.
     OOFEMTXTInputRecord(const OOFEMTXTInputRecord &);
     /// Destructor.
-    ~OOFEMTXTInputRecord() { }
+    virtual ~OOFEMTXTInputRecord() { }
     /// Assignment operator.
     OOFEMTXTInputRecord & operator=(const OOFEMTXTInputRecord &);
 
@@ -77,9 +77,9 @@ public:
 
 public:
     /// Sets the record string.
-    void setRecordString(const char *);
+    void setRecordString(const std::string &newStr);
     /// Returns record string.
-    char *giveRecordAsString() { return this->record; }
+    std::string giveRecordAsString() { return this->record; }
 
     void finish(bool wrn = true);
 

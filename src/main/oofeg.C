@@ -271,8 +271,8 @@ static DrawMode oofeg_draw_modes[] = {
     densityField                // 22
 };
 
-char jobName [ MAX_FILENAME_LENGTH ] = "";
-char viewTitle [ MAX_FILENAME_LENGTH ] = "";
+std::string jobName = "";
+std::string viewTitle = "";
 
 oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 EView *myview;
@@ -290,7 +290,8 @@ main(int argc, char *argv[])
     int i;
     int inputFileFlag = 0;
     //int rank=0;
-    char inputFileName [ MAX_FILENAME_LENGTH ], buff [ 20 ];
+    std :: stringstream inputFileName;
+    char buff [ 20 ];
     unsigned long mask = 0;
     bool parallelFlag
 
@@ -300,7 +301,6 @@ main(int argc, char *argv[])
 
 #ifdef __PARALLEL_MODE
     parallelFlag = true; ///@todo Read this from input arguments (eventually)
-    char fileName [ MAX_FILENAME_LENGTH ];
     int rank = 0;
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
@@ -319,7 +319,7 @@ main(int argc, char *argv[])
         for ( i = 1; i < argc; i++ ) {
             if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
-                    strcpy(inputFileName, argv [ i + 1 ]);
+                    inputFileName << argv [ i + 1 ];
                     inputFileFlag = 1;
                 }
             } else if ( strcmp(argv [ i ], "-l") == 0 ) {
@@ -334,32 +334,31 @@ main(int argc, char *argv[])
     }
 
     if ( !inputFileFlag ) {
-        :: giveInputDataFileName(inputFileName, MAX_FILENAME_LENGTH);
+        std::string input;
+        :: giveInputDataFileName(input);
+        inputFileName << input;
     }
 
 #ifdef __PARALLEL_MODE
-    strcpy(fileName, inputFileName);
-    sprintf(inputFileName, "%s.%d", fileName, rank);
+    if ( parallelFlag ) {
+        inputFileName << "." << rank;
+    }
 #endif
 
-    OOFEMTXTDataReader dr(inputFileName);
+    OOFEMTXTDataReader dr(inputFileName.str().c_str());
 
     // extract job name
-    char *pos = inputFileName, *baseNamePos = pos;
-    int length = 0;
-    if ( inputFileName != NULL ) {
-        length = ( int ) strlen(inputFileName);
-    }
-
-    while ( length-- ) {
-        if ( * pos++ == '/' ) {
-            baseNamePos = pos;
+    std::string temp = inputFileName.str();
+    // extract job name
+    size_t k = temp.size();
+    while ( k-- ) {
+        if ( temp[k] == '/' ) {
+            k++;
+            break;
         }
     }
-
-    strncpy(jobName, baseNamePos, MAX_FILENAME_LENGTH);
-    jobName [ MAX_FILENAME_LENGTH - 1 ] = '\0';
-    sprintf(viewTitle, "OOFEG (%s)", jobName);
+    std::string jobName = temp.substr(k);
+    std::string viewTitle = "OOFEG ("+jobName+")";
 
     problem = InstanciateProblem(& dr, _postProcessor, 0, parallelFlag);
     dr.finish();
@@ -380,7 +379,7 @@ main(int argc, char *argv[])
 
 
     ESIBuildInterface(mask, argc, argv);
-    myview  =  ElixirNewView(viewTitle, const_cast< char * >("OOFEG"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+    myview  =  ElixirNewView(viewTitle.c_str(), const_cast< char * >("OOFEG"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                              const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
@@ -2536,7 +2535,7 @@ void
 oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
-    view = ElixirNewView(viewTitle, const_cast< char * >("SimpleXF"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+    view = ElixirNewView(viewTitle.c_str(), const_cast< char * >("SimpleXF"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                          const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
     EMAttachView(ESIModel(), view);
@@ -2728,7 +2727,7 @@ updateISA(oofegGraphicContext *context)
     }
 
     if ( GetISASize() > 2 ) {
-        sprintf(buff, "| %s | step: %4d.%d | time: %e |", jobName, context [ 0 ].getActiveStep(), context [ 0 ].getActiveStepVersion(),
+        sprintf(buff, "| %s | step: %4d.%d | time: %e |", jobName.c_str(), context [ 0 ].getActiveStep(), context [ 0 ].getActiveStepVersion(),
                 time);
         SetISAContent(1, buff);
     }
