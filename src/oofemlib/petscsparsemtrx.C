@@ -257,7 +257,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     this->ut = ut;
     this->emodel = eModel;
     this->di = di;
-    
+
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
         OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
@@ -323,7 +323,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
-            // TODO: Deal with the CharType here.
+            ///@todo Deal with the CharType here.
             activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s, domain);
             for (int k = 1; k < r_locs.giveSize(); k++) {
                 IntArray *krloc = r_locs.at(k);
@@ -373,7 +373,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     //The incompatible preallocations are ignored automatically.
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
-    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); // TODO: Not sure about PETSC_DECIDE here.
+    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); ///@todo Not sure about PETSC_DECIDE here.
     //MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() ); // Symmetry should practically never apply here.
 
     this->newValues = true;
@@ -450,7 +450,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                     for ( j = 1; j <= lloc.giveSize(); j++ ) {
                         if ( ( jj = lloc.at(j) ) ) {
                             //fprintf (stderr, "{[%d] %d-%d %d-%d} ", rank, loc.at(i),ii-1,loc.at(j),jj-1);
-                            // TODO: Split this. How do i find the appropriate columns indices?
+                            ///@todo Split this. How do i find the appropriate columns indices?
                             // This should be on the safe side for now;
                             d_rows [ ii - 1 ].insert(jj - 1);
                             o_rows [ ii - 1 ].insert(jj - 1);
@@ -518,7 +518,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
-            // TODO: Deal with the CharType here.
+            ///@todo Deal with the CharType here.
             activebc->giveLocationArrays(locs, temp, ut, TangentStiffnessMatrix, s, s, domain);
             for (int k = 1; k < locs.giveSize(); k++) {
                 IntArray *kloc = locs.at(k);

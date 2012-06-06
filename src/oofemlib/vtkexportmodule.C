@@ -605,7 +605,6 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 
             break;
         default:
-            // TODO: Mean value, or all gauss points?
             InternalStateValueType vt = giveInternalStateValueType(type);
             switch ( vt ) {
             case ISVT_TENSOR_S3: // These could be written as tensors as well, if one wants to.

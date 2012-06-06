@@ -93,10 +93,12 @@ double Line2SurfaceTension :: computeNXIntegral() const
 
 void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
-    //domainType dt = this->giveDomain()->giveDomainType(); // TODO, support axisymm
+    ///@todo Support axisymm.
+    //domainType dt = this->giveDomain()->giveDomainType();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     double t = 1, gamma_s;
-    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this? Not that meaningful for flow problems.
+    ///@todo Should i use this? Not used in FM module (but perhaps it should?) / Mikael.
+    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness);
     gamma_s = this->giveMaterial()->give('g', NULL);
 
     FloatMatrix xy(2, 3);
@@ -148,13 +150,15 @@ void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(6, 6);
     answer.zero();
 #else
-    domainType dt = this->giveDomain()->giveDomainType(); // TODO, support axisymm
+    ///@todo Support axisymm.
+    domainType dt = this->giveDomain()->giveDomainType();
     if (dt == _3dAxisymmMode) {
         OOFEM_ERROR("Line2SurfaceTension :: computeTangent - Axisymm not implemented");
     }
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     double t = 1, gamma_s;
-    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this? Not that meaningful for flow problems.
+    ///@todo Should i use this? Not that meaningful for flow problems.
+    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness);
     gamma_s = this->giveMaterial()->give('g', NULL);
 
     FloatMatrix xy(2,3);

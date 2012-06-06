@@ -103,7 +103,6 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     const double normalStrain = strainVector.at(1);
     double normalStress, maxShearStress, dp;
 
-    //MaterialMode mMode = gp->giveElement()->giveMaterialMode(); TODO
     MaterialMode mMode = el->giveMaterialMode();
     //answer.resize(giveSizeOfReducedStressStrainVector(mMode));
     answer.zero();

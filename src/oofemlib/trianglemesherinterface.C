@@ -135,7 +135,7 @@ int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, co
             ssymself(subsegloop);
             stpivot(subsegloop, neighbortri);
             if ( neighbortri.tri != m->dummytri ) {
-                area = 0.0; /* TODO: Possible set this as the minimum as well. */
+                area = 0.0; /// @todo Possible set this as the minimum as well.
                 attribute = outside[mark(subsegloop)-1];
                 triangle_attribute = elemattribute(neighbortri, m->eextras);
 
@@ -542,7 +542,8 @@ void TriangleMesherInterface :: fixNodeMarkers(const AList<FloatArray> &nodes, A
     n_markers.growTo(nodes.giveSize());
     for (int i = 1; i <= n_markers.giveSize(); ++i) {
         n_markers.put(i, new IntArray());
-        //n_markers.at(i)->preallocate(nregions); //TODO: Maybe just a suboptimization.
+        //n_markers.at(i)->preallocate(nregions);
+        ///@todo Maybe just a suboptimization.
     }
 
     for (int i = 1; i <= segments.giveSize(); ++i) {

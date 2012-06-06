@@ -95,8 +95,9 @@ public:
     /**
      * Generates the FE components from the bare mesh.
      * Does not map fields or internal variables.
+     * @todo Placing it in a new domain is probably preferable.
      */
-    virtual void replaceFEMesh() // (Domain *& newDomain) TODO: Placing it in a new domain is probably preferable.
+    virtual void replaceFEMesh() // (Domain *& newDomain)
     { OOFEM_ERROR2("%s::replaceFEMesh - Not implemented",this->giveClassName()); }
 
     /**

@@ -240,12 +240,13 @@ FEI3dTetQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const F
     answer(2) = 1.0-xi*xi;
 }
 
-void // TODO
+void
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
+    ///@todo Implement this
     OOFEM_ERROR("FEI3dTetQuad :: edgeEvaldNdx - Not supported");
 }
 
@@ -265,11 +266,12 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 }
 
 
-double // TODO
+double
 FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
+    ///@todo Implement this
     OOFEM_ERROR("FEI3dTetQuad :: edgeGiveTransformationJacobian - Not supported");
     return -1;
 }
@@ -309,9 +311,10 @@ FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     }
 }
 
-double // TODO
+double
 FEI3dTetQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
+    ///@todo Implement this
     OOFEM_ERROR("FEI3dTetQuad :: edgeComputeLength - Not supported");
     return -1;
 }

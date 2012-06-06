@@ -513,7 +513,7 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
         return;
     }
 
-    margin = 0.0; // TODO: Something smarter here is necessary.
+    margin = 0.0; ///@todo Something smarter here is necessary.
 
     for ( int i = 1; i <= this->domain->giveNumberOfElements(); i++ ) {
         ielem = this->giveDomain()->giveElement(i);

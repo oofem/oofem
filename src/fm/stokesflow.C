@@ -80,21 +80,21 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     int val;
 
     val = ( int ) SMT_PetscMtrx;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlow_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlow_smtype, "smtype");
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
     val = ( int ) ST_Petsc;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SUPG_lstype, "lstype");
     this->solverType = ( LinSystSolverType ) val;
 
     this->deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_StokesFlow_deltat, "deltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_StokesFlow_deltat, "deltat");
 
     this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
 
     this->ts = TS_OK;
 
-    this->maxdef = 25; // TODO
+    this->maxdef = 25; ///@todo Deal with this parameter (set to some reasonable value by default now)
 
     return EngngModel :: initializeFrom(ir);
 }

@@ -1275,10 +1275,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
 void
 StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime)
 {
-    /*
-     * TODO:
-     * take into account cross section model (slaves)
-     */
+    ///@todo Take into account cross section model (slaves)
     NonlocalMaterialStiffnessInterface *interface;
 
     if ( !this->isActivated(atTime) ) {

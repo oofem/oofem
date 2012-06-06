@@ -43,12 +43,11 @@ class IntArray;
 
 /**
  * Base class for ordering of equation for parallelization.
- * TODO: Document more
+ * @todo Document more
  */
 class ApplicationOrdering
 {
 public:
-    // TODO: Document this
     enum EquationType { et_standard, et_prescribed };
 
     ApplicationOrdering() { }
@@ -76,25 +75,19 @@ public:
     virtual int giveNumberOfGlobalEqs() { return 0; }
 
     /**
-     * Finds the global equation from a local equation. TODO: Document better
+     * Finds the global equation from a local equation.
      * @param leq Local equation number.
      * @return Global equation number.
      */
     virtual int giveNewEq(int leq) = 0;
     /**
-     * Finds the local equation number from a global equation. TODO: Document better
+     * Finds the local equation number from a global equation.
      * @param eq Global equation number.
      * @return Local equation number.
      */
     virtual int giveOldEq(int eq) = 0;
 
-    /*
-     *  TODO: Document this
-     */
     virtual void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0) = 0;
-    /*
-     *  TODO: Document this
-     */
     virtual void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0) = 0;
 };
 } // end namespace oofem

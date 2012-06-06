@@ -77,7 +77,7 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
     elStrain.beDifferenceOf(totalStrain, tempPlasDef);
     deltaStrain.beDifferenceOf(totalStrain, oldTotalDef);
 
-    // TODO: Is it really supposed to be totalStress + oldStress? That is what the old code did, but it doesn't seem logical.
+    ///@todo Is it really supposed to be totalStress + oldStress? That is what the old code did, but it doesn't seem logical.
     // deltaStress.beDifferenceOf(totalStress, oldStress); is what i would have expected.
     // I can't tell if it is correct, since tempTSED isn't documented at all. // Mikael
     tmpStress = totalStress;

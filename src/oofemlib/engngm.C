@@ -1007,12 +1007,12 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
             // Rotate it
             if (element->giveRotationMatrix(Rr, r_id)) {
                 FloatMatrix tmpMat;
-                tmpMat.beTProductOf(Rr, mat); // TODO: Check transpose here
+                tmpMat.beTProductOf(Rr, mat); ///@todo Check transpose here
                 mat = tmpMat;
             }
             if (element->giveRotationMatrix(Rc, c_id)) {
                 FloatMatrix tmpMat;
-                tmpMat.beProductOf(mat, Rc); // TODO: Check transpose here
+                tmpMat.beProductOf(mat, Rc); ///@todo Check transpose here
                 mat = tmpMat;
             }
             if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {

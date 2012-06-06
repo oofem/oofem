@@ -40,7 +40,7 @@
 namespace oofem {
 /**
  * Context IO exception class
- * TODO: Document more.
+ * @todo Document more.
  */
 class ContextIOERR
 {

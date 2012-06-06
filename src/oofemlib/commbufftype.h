@@ -36,7 +36,7 @@
 #define commbufftype_h
 
 namespace oofem {
-// TODO: Document this
+///@todo Document this
 enum CommBuffType { CBT_static, CBT_dynamic };
 } // end namespace oofem
 #endif // commbufftype_h

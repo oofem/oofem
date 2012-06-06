@@ -1225,7 +1225,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 // when solving for dlambda in projection algorithm, approximates df/dx with dx = NEWTON_DERIVATIVEDX
-//TODO check if approx. is faster/stable
+///@todo Check if approx. is faster/stable
 double HellmichMaterial :: approxnewtonfindroot()
 // derivative extrapolated from 'small' dx - useless in general case
 {

@@ -268,6 +268,6 @@ double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo)
     x3 = p->at(1);
     y3 = p->at(2);
 
-    return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); // TODO: Absolute value or not?
+    return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); ///@todo Absolute value or not?
 }
 } // end namespace oofem

@@ -84,7 +84,8 @@ FEInterpolation * Line2BoundaryElement :: giveInterpolation()
 
 double Line2BoundaryElement :: computeNXIntegral() const
 {
-    //return this->fei.evalNXIntegral(FEIElementGeometryWrapper(this)); // TODO
+    ///@todo Use the FEI classes for this
+    //return this->fei.evalNXIntegral(FEIElementGeometryWrapper(this));
     Node *node;
     double x1, x2, x3, y1, y2, y3;
 
@@ -161,7 +162,7 @@ int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Val
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    // TODO: Generalize this
+    ///@todo Generalize this
     answer.setValues(2, V_u, V_v);
 }
 

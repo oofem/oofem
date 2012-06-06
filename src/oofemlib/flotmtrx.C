@@ -1434,12 +1434,14 @@ double FloatMatrix :: computeNorm(char p) const
             }
         }
         return max_col;
-    } /*else if (p == '2') {
+    }
+    ///@todo Use this when obtaining eigen values is implemented.
+    /*else if (p == '2') {
         double lambda_max;
         FloatMatrix AtA;
         FloatArray eigs;
         AtA.beTProductOf(*this,this);
-        Ata.eigenValues(eigs, 1); // TODO
+        Ata.eigenValues(eigs, 1);
         return sqrt(eigs(0));
     } */else {
         OOFEM_ERROR2("FloatMatrix::computeNorm(p) : p == %d not implemented.\n",p);
@@ -1485,11 +1487,11 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     return 1.0/(inv.computeNorm(p)*anorm);
 }
 
-/*
+#if 0
 bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs) const
 {
 #ifdef __LAPACK_MODULE
-    double abstol = 1.0; // TODO
+    double abstol = 1.0; ///@todo Find suitable tolerance.
     int lda, n, ldz, info, found, lwork;
     n = this->nRows;
     lda = n;
@@ -1527,7 +1529,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
     return false;
 #endif
 }
-*/
+#endif
 
 contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
 // writes receiver's binary image into stream

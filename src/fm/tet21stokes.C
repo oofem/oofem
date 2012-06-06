@@ -279,7 +279,7 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
         BoundaryLoad *boundaryLoad = ( BoundaryLoad * ) load;
 
-        int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; // TODO: Check this.
+        int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         GaussPoint *gp;

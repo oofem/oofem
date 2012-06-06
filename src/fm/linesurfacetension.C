@@ -192,7 +192,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
         answer.at(3) = -v.at(1)*t - length;
         answer.at(4) = -v.at(2)*t;
     } else {
-        //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this?
+        //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness);
         t = 1.0;
         // In this case simple linear case, the boundary term would cancel out the edge term,
         // so it can be simplified to check when the boundary is not there.
@@ -208,7 +208,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
 void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
 #if 1
-    // TODO: Not sure if it's a good idea to use this tangent.
+    ///@todo Not sure if it's a good idea to use this tangent.
     answer.resize(4,4);
     answer.zero();
 #else

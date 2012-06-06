@@ -148,7 +148,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      * also serves as the preconditioning matrix.
      */
     if ( Lhs->newValues ) { // Optimization for successive solves
-        // TODO: I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
+        ///@todo I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
         if (this->engngModel->requiresUnknownsDictionaryUpdate()) {
             KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
         } else {
@@ -209,7 +209,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 
 //#ifndef __PARALLEL_MODE
 #if 0
-// TODO: Parallel mode of this.
+///@todo Parallel mode of this.
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 {
     if ( !A ) {

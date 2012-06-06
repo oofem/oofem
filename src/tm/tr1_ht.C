@@ -97,7 +97,8 @@ Tr1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    //this->interp.evalN(answer, coords, FEIElementGeometryWrapper(this), 0.0); // TODO: Deal with matrix and vector (I find that the row-wise matrices should be transposed).
+    ///@todo Deal with matrix and vector (I find that the row-wise matrices should be transposed).
+    //this->interp.evalN(answer, coords, FEIElementGeometryWrapper(this), 0.0);
     double l1, l2, l3;
 
     l1 = coords->at(1);
@@ -135,7 +136,8 @@ Tr1_ht :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
 void
 Tr1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {
-    //this->interp.evaldNdx(answer, gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0); // TODO
+    ///@todo Deal with matrix and vector (I find that the row-wise matrices should be transposed).
+    //this->interp.evaldNdx(answer, gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -247,7 +249,8 @@ Tr1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      * Using mapping technique will allow to assemble shape functions
      * without regarding particular side
      */
-    //this->interp.edgeEvalN(answer_vec, gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0); // TODO
+    ///@todo Use the interpolation class for this
+    //this->interp.edgeEvalN(answer_vec, gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     double ksi, n1, n2;
     answer.resize(1, 2);

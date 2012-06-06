@@ -260,12 +260,14 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     bool converged, errorOutOfRangeFlag;
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    PetscContext *parallel_context  = engngModel->givePetscContext(1, ut); // TODO hard wired domain no 1
+    PetscContext *parallel_context  = engngModel->givePetscContext(1, ut); ///@todo hard wired domain no 1
  #endif
 #endif
 
-    OOFEM_LOG_INFO("NRSolver:     Iteration       ForceError      DisplError                    \n");
-    OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
+    if ( engngModel->giveProblemScale() == macroScale ) {
+        OOFEM_LOG_INFO("NRSolver:     Iteration       ForceError      DisplError                    \n");
+        OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
+    }
 
     XInitial = * X; // Stored in case of divergence.
     l = 1.0;
@@ -302,7 +304,6 @@ restart:
     }
 
     for (nite = 0; true; ++nite) {
-
         // Compute the residual
         engngModel->updateComponent(tNow, InternalRhs, domain);
         rhs.beDifferenceOf(RT, *F);
@@ -338,9 +339,9 @@ restart:
                 *X = XInitial;
                 // reset all changes fro previous equilibrium state
                 engngModel->initStepIncrements();
-#ifdef VERBOSE
-                OOFEM_LOG_INFO("NRSolver:  Iteration Reset: %d\n",irest);
-#endif
+
+                OOFEM_WARNING2("NRSolver:  Iteration Reset: %d\n",irest);
+
                 NR_OldMode  = NR_Mode;
                 NR_Mode     = nrsolverFullNRM;
                 NR_ModeTick = NRSOLVER_DEFAULT_NRM_TICKS;
@@ -462,7 +463,7 @@ NRSolver :: initPrescribedEqs()
     EModelDefaultEquationNumbering dn;
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
  #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
-    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); // TODO hard wired domain no 1
+    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); ///@todo hard wired domain no 1
  #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
@@ -839,7 +840,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         parallel_context->accumulate(dg_totalLoadLevel, collectiveErr); dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp,      collectiveErr); dg_totalDisp      = collectiveErr;
  #endif
-
         OOFEM_LOG_INFO("NRSolver:     %-10d ", nite);
         // loop over dof groups
         for ( _dg = 1; _dg <= _ng; _dg++ ) {
@@ -868,10 +868,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 answer = false;
             }
 
-
             OOFEM_LOG_INFO( "%-15e %-15e ", dg_forceErr.at(_dg), dg_dispErr.at(_dg) );
         }
-
         OOFEM_LOG_INFO("\n");
     } else { // nccdg == 0 -> all dofs included
         double dXX, dXdX;
@@ -954,8 +952,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         if ( ( fabs(forceErr) > rtolf.at(1) ) || ( fabs(dispErr) > rtold.at(1) ) ) {
             answer = false;
         }
-
-        OOFEM_LOG_INFO("NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
+        if ( engngModel->giveProblemScale() == macroScale ) {
+            OOFEM_LOG_INFO("NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
+        }
     } // end default case (all dofs conributing)
 
     return answer;

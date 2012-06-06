@@ -490,7 +490,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
  #endif
 
             if ( this->isElementComposite(elem) ) {
-#ifndef __VTK_MODULE // TODO; Not sure how to deal with this.
+#ifndef __VTK_MODULE
+                ///@todo Not sure how to deal with this.
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
                 VTKXMLExportModuleElementInterface *interface =
@@ -536,7 +537,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     // First we check to see that there are more than 1 time steps, otherwise it is redundant;
 #ifdef __PARALLEL_MODE
     if ( (emodel->giveNumberOfSteps() > 1 || emodel->giveNumberOfProcesses() > 1 ) && emodel->giveRank() == 0 ) {
-        // TODO: Should use probably use PVTU-files instead. It is starting to get messy.
+        ///@todo Should use probably use PVTU-files instead. It is starting to get messy.
         // For this to work, all processes must have an identical output file name.
         for (int i = 0; i < this->emodel->giveNumberOfProcesses(); ++i) {
             std::ostringstream pvdEntry;
@@ -1186,7 +1187,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
 #else
                 fprintf( stream, "%d ", elem->giveNumber() );
 #endif
-            } else if (type == IST_Pressure) { // TODO: Why this special treatment for pressure? / Mikael
+            } else if (type == IST_Pressure) { ///@todo Why this special treatment for pressure? / Mikael
                 if (elem->giveNumberOfInternalDofManagers() == 1) {
                     IntArray pmask(1); pmask.at(1) = P_f;
                     elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
@@ -1226,7 +1227,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
         }
 
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            // TODO: Should no elements be skipped here? / Mikael
+            ///@todo Should no elements be skipped here? / Mikael
             if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
                 mtrx.resize(3, 3);
                 mtrx.zero();

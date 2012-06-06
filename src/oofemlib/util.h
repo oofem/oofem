@@ -63,7 +63,7 @@ char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
 
 /**
  * Returns the name of the file containing the data of the problem.
- * @param dataInputFileName Char buffer at least the size maxlen. 
+ * @param dataInputFileName Char buffer at least the size maxlen.
  * @param maxlen Maximum length of file name.
  * @return Same as dataInputFileName.
  */
@@ -73,13 +73,13 @@ char *giveInputDataFileName(char *dataInputFileName, int maxlen);
  * Instanciates the new problem.
  * @param dr DataReader containing the problem data.
  * @param mode Mode determining macro or micro problem.
- * @param contextFlag TODO document this.
  * @param master Master problem in case of multiscale computations.
  * @param parallelFlag Determines if the problem should be run in parallel or not.
+ * @todo Document the contextFlag input.
  */
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
-/** 
+/**
  * Static storage for temporary strings to solve compiler warnings about conversion from string constant to char*.
  * @param src Constant data to be copied over.
  * @return Pointer to static array of data, overwritten with src.

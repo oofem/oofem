@@ -191,7 +191,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         FEInterpolation2d *fei2d = static_cast<FEInterpolation2d*>(fei);
 
-        // TODO: More of this grunt work should be moved to the interpolation classes
+        ///@todo More of this grunt work should be moved to the interpolation classes
         FloatMatrix xy(2, nodes);
         Node *node;
         for ( int i = 1; i <= nodes; i++ ) {
@@ -239,7 +239,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             }
 
         } else {
-            double t = e->giveCrossSection()->give(CS_Thickness); // TODO: The thickness is not often relevant or used in FM.
+            double t = e->giveCrossSection()->give(CS_Thickness); ///@todo The thickness is not often relevant or used in FM.
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
@@ -289,7 +289,8 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
                 //tmp(3*i+1) = dNdx(i,1) - (dNdx(i,0)*n(0)* + dNdx(i,1)*n(1) + dNdx(i,2)*n(2))*n(1);
                 //tmp(3*i+2) = dNdx(i,2) - (dNdx(i,0)*n(0)* + dNdx(i,1)*n(1) + dNdx(i,2)*n(2))*n(2);
             }
-            //answer.plusProductSymmUpper(A,B, dV); // TODO: Derive expressions for this.
+            //answer.plusProductSymmUpper(A,B, dV);
+            ///@todo  Derive expressions for this.
         }
         OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D Completely untested!");
     }
@@ -314,7 +315,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
 
         FEInterpolation2d *fei2d = static_cast<FEInterpolation2d*>(fei);
 
-        // TODO: More of this grunt work should be moved to the interpolation classes
+        ///@todo More of this grunt work should be moved to the interpolation classes
         FloatMatrix xy(2, nodes);
         Node *node;
         for ( int i = 1; i <= nodes; i++ ) {

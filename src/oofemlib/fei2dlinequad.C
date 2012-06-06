@@ -96,7 +96,7 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
         if (r[i] > -1.0 && r[i] < 1.0) {
             // The cubic solver has pretty bad accuracy, performing a single newton iteration
             // which typically improves the solution by many many orders of magnitude.
-            // TODO: Move this to the cubic solver.
+            ///@todo Move this to the cubic solver.
             r[i] -= (b0 + b1*r[i] + b2*r[i]*r[i] + b3*r[i]*r[i]*r[i])/(b1 + 2*b2*r[i] + 3*b3*r[i]*r[i]);
             p[points] = r[i];
             points++;

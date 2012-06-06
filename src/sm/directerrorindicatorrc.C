@@ -307,8 +307,7 @@ DirectErrorIndicatorRC :: exchangeDofManDensities()
 
     if ( this->dofManDensityExchangeFlag ) {
         if ( commMode == ProblemCommMode__NODE_CUT ) {
-            //TODO:
-            // compute local shared dofman densities
+            ///@todo Compute local shared dofman densities
             sharedDofManDensities.clear();
             int i, size = domain->giveNumberOfDofManagers();
             for ( i = 1; i <= size; i++ ) {
@@ -376,8 +375,7 @@ DirectErrorIndicatorRC :: exchangeDofManIndicatorVals(TimeStep *tStep)
     ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( commMode == ProblemCommMode__NODE_CUT ) {
-        //TODO:
-        // compute local shared dofman indicator values
+        ///@todo Compute local shared dofman indicator values
         sharedDofManIndicatorVals.clear();
         int i, size = domain->giveNumberOfDofManagers();
         for ( i = 1; i <= size; i++ ) {
