@@ -101,7 +101,6 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
-// saving the data in  TDictionary is left to material (yield crit. level).
 {
     contextIOResultType iores;
     if ( stream == NULL ) {

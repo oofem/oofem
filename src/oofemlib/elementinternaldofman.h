@@ -36,18 +36,16 @@
 #define elementdofman_h
 
 #include "dofmanager.h"
-#include "domain.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
+
+class Domain;
 class Dof;
 class NodalLoad;
 class TimeStep;
 class FloatArray;
 class IntArray;
+class Element;
 
 /**
  * Class implementing internal element dof manager having some DOFs.

@@ -40,7 +40,6 @@
 #include "flotarry.h"
 #include "element.h"
 #include "matstatus.h"
-#include "tdictionary.h"
 
 namespace oofem {
 class Element;
@@ -64,8 +63,8 @@ class LayeredCrossSection;
  * are stored in material type related material status, which can be
  * managed by integration point.
  * Each material model class should introduce related material status class
- * (derived from material status class or from its children), where necesary
- * history variables are kept and can be accesed by material.
+ * (derived from material status class or from its children), where necessary
+ * history variables are kept and can be accessed by material.
  * Material class then creates unique copy of related status in all necessary
  * integration points. Because integration point is compulsory parameter of
  * all member functions of material class, particular material then can

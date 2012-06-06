@@ -34,18 +34,8 @@
 
 #include "elementinternaldofman.h"
 #include "dof.h"
-#include "nodload.h"
-#include "timestep.h"
-
-#include "flotarry.h"
-#include "flotmtrx.h"
 #include "intarray.h"
-#include "debug.h"
 #include "verbose.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 

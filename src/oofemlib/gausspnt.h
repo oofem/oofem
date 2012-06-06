@@ -43,7 +43,6 @@
 
 #include "integrationrule.h"
 #include "matstatus.h"
-#include "tdictionary.h"
 #include "element.h"
 #include "materialmode.h"
 

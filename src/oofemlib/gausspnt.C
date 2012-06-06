@@ -146,7 +146,6 @@ void GaussPoint :: updateYourself(TimeStep *tStep)
  * // current state)
  * // does not saves the slave - records
  * // this task is done at the layeredCrossSection level
- * // saving the data in  TDictionary is left to material (yield crit. level).
  * {
  *
  * contextIOResultType iores;
