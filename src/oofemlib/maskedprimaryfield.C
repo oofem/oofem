@@ -38,16 +38,16 @@ namespace oofem {
 
 int
 MaskedPrimaryField::evaluateAt(FloatArray &answer, FloatArray &coords,
-			       ValueModeType mode, TimeStep *atTime) 
+                    ValueModeType mode, TimeStep *atTime)
 {
-  return this->master->__evaluateAt(answer, coords, mode, atTime, &mask);
+    return this->master->__evaluateAt(answer, coords, mode, atTime, &mask);
 }
 
-int 
+int
 MaskedPrimaryField::evaluateAt(FloatArray &answer, DofManager* dman,
-			       ValueModeType mode, TimeStep *atTime) 
+                    ValueModeType mode, TimeStep *atTime)
 {
-  return this->master->__evaluateAt(answer, dman, mode, atTime, &mask);
+    return this->master->__evaluateAt(answer, dman, mode, atTime, &mask);
 }
 
 } // end namespace oofem

@@ -389,7 +389,7 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 EGWithMaskChangeAttributes(LAYER_MASK, tr);
                 EMAddGraphicsToModel(ESIModel(), tr);
             } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-	      //double landScale = context.getLandScale();
+                //double landScale = context.getLandScale();
 
                 for ( i = 0; i < 4; i++ ) {
                     /*
@@ -651,15 +651,15 @@ QPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
 
-  int i;
-  IntArray eNodes(3);
-  this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
+    int i;
+    IntArray eNodes(3);
+    this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
 
-  answer.resize(6);
-  for (i=1; i<=3; i++) {
-    answer.at(i*2-1) = eNodes.at(i)*2-1;
-    answer.at(i*2  ) = eNodes.at(i)*2;
-  }
+    answer.resize(6);
+    for (i=1; i<=3; i++) {
+        answer.at(i*2-1) = eNodes.at(i)*2-1;
+        answer.at(i*2  ) = eNodes.at(i)*2;
+    }
 }
 
 double

@@ -918,8 +918,7 @@ void HellmichMaterial :: projection(ActiveSurface &active, double &dlambda1, dou
  #ifdef DEBUG
     // check
     if ( ( dlambda1 < 0 ) || ( ( dlambda2 < 0 ) ) ) {
-        printf("HellmichMaterial::projection: negative yield increment!\n \
-  dl1=%f, dl2=%f, activeSurface=%d", dlambda1, dlambda2, active);
+        printf("HellmichMaterial::projection: negative yield increment!\n   dl1=%f, dl2=%f, activeSurface=%d", dlambda1, dlambda2, active);
         _error("");
     }
 

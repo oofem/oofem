@@ -115,8 +115,8 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             knotVal = knotValues [ n ].at(i + 1);
         }
 
-				// transform knot vector to interval <0;1>
-				double span = knotVal - knotValues [ n ].at(1);
+        // transform knot vector to interval <0;1>
+        double span = knotVal - knotValues [ n ].at(1);
         for ( i = 1; i <= size; i++ ) knotValues [ n ].at(i) = knotValues [ n ].at(i) / span;
 
         IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity [ n ], IFT_knotMultiplicityType [ n ], IFT_knotMultiplicityString [ n ]); // Macro
@@ -168,7 +168,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
                 knotVec [ pos++ ] = knotValues [ n ].at(i + 1);
             }
         }
-				
+
         numberOfKnotSpans [ n ] = size - 1;
         numberOfControlPoints [ n ] = sum - degree [ n ] - 1;
     }

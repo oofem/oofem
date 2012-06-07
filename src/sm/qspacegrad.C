@@ -51,7 +51,7 @@ namespace oofem {
 FEI3dHexaLin QSpaceGrad :: interpolation;
 
 QSpaceGrad :: QSpaceGrad (int n, Domain* aDomain) :  QSpace(n, aDomain), GradDpElement()
-  // Constructor.
+// Constructor.
 {
     nPrimNodes = 8;
     nPrimVars = 2;

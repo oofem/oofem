@@ -710,7 +710,7 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
             }
 
             for ( j = 1; j <= nelems; j++ ) {
-	      elem = d->giveElement(j);
+                elem = d->giveElement(j);
 #ifdef __PARALLEL_MODE
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
@@ -1079,14 +1079,14 @@ VTKExportModule :: giveSmoother()
     Domain *d = emodel->giveDomain(1);
 
     if ( this->smoother == NULL ) {
-      this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
-      IntArray vrmap;
+        this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
+        IntArray vrmap;
 
-      if (this->mode == wdmode) {
-	this->smoother-> setRecoveryMode (0, vrmap);
-      } else { // this->mode == rbrmode
-	this->smoother-> setRecoveryMode ((-1)*d->giveNumberOfRegions(), vrmap);
-      }
+        if (this->mode == wdmode) {
+            this->smoother-> setRecoveryMode (0, vrmap);
+        } else { // this->mode == rbrmode
+            this->smoother-> setRecoveryMode ((-1)*d->giveNumberOfRegions(), vrmap);
+        }
     }
 
     return this->smoother;

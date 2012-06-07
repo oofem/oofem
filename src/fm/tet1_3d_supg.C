@@ -636,11 +636,11 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
                 if ( pos > neg ) {
                     // negative vol computed
-		    answer.at(2) = min(fabs(__vol) / vol, 1.0);
+                    answer.at(2) = min(fabs(__vol) / vol, 1.0);
                     answer.at(1) = 1.0 - answer.at(2);
                 } else {
                     // postive vol computed
-		    answer.at(1) = min(fabs(__vol) / vol, 1.0);
+                    answer.at(1) = min(fabs(__vol) / vol, 1.0);
                     answer.at(2) = 1.0 - answer.at(1);
                 }
             } else {
@@ -720,7 +720,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 double __vol = fabs(__v1) + fabs(__v2) + fabs(__v3);
                 double vol = LS_PCS_computeVolume();
 
-		if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
+                if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
                     OOFEM_ERROR("Tet1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
                 }
 

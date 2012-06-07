@@ -169,55 +169,55 @@ SUPG :: initializeFrom(InputRecord *ir)
 
 
 double
-SUPG ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                              TimeStep *tStep, Domain *d, Dof *dof)
+SUPG :: giveUnknownComponent(EquationID chc, ValueModeType mode,
+                             TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
 
-  if ( this->requiresUnknownsDictionaryUpdate() ) {
-    int hash = this->giveUnknownDictHashIndx(chc, mode, tStep);
-    if ( dof->giveUnknowns()->includes(hash) ) {
-      return dof->giveUnknowns()->at(hash);
-    } else {
-      OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
-    }
-  } else {
-
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
-    }
-
-    if ( chc == EID_ConservationEquation ) { // pressures
-        return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
-    } else if ( chc == EID_MomentumBalance ) { // velocities & accelerations
-        if ( mode == VM_Acceleration ) {
-            return accelerationVector.at(eq);
-            /*
-             * if (tStep->isTheCurrentTimeStep()) {
-             * return accelerationVector.at(eq);
-             * } else if (tStep == givePreviousStep()) {
-             * return previousAccelerationVector.at(eq);
-             * } else _error ("giveUnknownComponent: VM_Acceleration history past previous step not supported");
-             */
-        } else if ( mode == VM_Velocity ) {
-            return VelocityPressureField->giveUnknownValue(dof, VM_Total, tStep);
+    if ( this->requiresUnknownsDictionaryUpdate() ) {
+        int hash = this->giveUnknownDictHashIndx(chc, mode, tStep);
+        if ( dof->giveUnknowns()->includes(hash) ) {
+            return dof->giveUnknowns()->at(hash);
         } else {
-            return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
-    } else {
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
+        } else {
+
+        int eq = dof->__giveEquationNumber();
+        if ( eq == 0 ) {
+            _error("giveUnknownComponent: invalid equation number");
+        }
+
+        if ( chc == EID_ConservationEquation ) { // pressures
+            return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
+        } else if ( chc == EID_MomentumBalance ) { // velocities & accelerations
+            if ( mode == VM_Acceleration ) {
+                return accelerationVector.at(eq);
+                /*
+                * if (tStep->isTheCurrentTimeStep()) {
+                * return accelerationVector.at(eq);
+                * } else if (tStep == givePreviousStep()) {
+                * return previousAccelerationVector.at(eq);
+                * } else _error ("giveUnknownComponent: VM_Acceleration history past previous step not supported");
+                */
+            } else if ( mode == VM_Velocity ) {
+                return VelocityPressureField->giveUnknownValue(dof, VM_Total, tStep);
+            } else {
+                return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
+            }
+        } else {
+            _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
+            return 0.;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 
 double
-SUPG ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
-                              TimeStep *tStep, Domain *d, Dof *dof)
+SUPG :: giveUnknownComponent(UnknownType chc, ValueModeType mode,
+                             TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
@@ -501,11 +501,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             this->updateDofUnknownsDictionary_corrector(tStep);
         } else {
 
-	  //update
-	  this->updateSolutionVectors(*solutionVector, accelerationVector, incrementalSolutionVector, tStep);
-	  avn = accelerationVector.computeSquaredNorm();
-	  aivn = incrementalSolutionVector.computeSquaredNorm();
- 	}   // end update
+        //update
+        this->updateSolutionVectors(*solutionVector, accelerationVector, incrementalSolutionVector, tStep);
+        avn = accelerationVector.computeSquaredNorm();
+        aivn = incrementalSolutionVector.computeSquaredNorm();
+    }   // end update
 
 #if 0
  #ifdef SUPG_IMPLICIT_INTERFACE
@@ -602,9 +602,9 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
             this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
@@ -1217,7 +1217,7 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         ( type == TangentDiffusionDerivativeTerm_MB ) ||
         ( type == SecantDiffusionDerivativeTerm_MB ) ||
         ( type == InitialDiffusionDerivativeTerm_MB ) ||
-	 (type == BCLhsTerm_MB )) {
+        (type == BCLhsTerm_MB )) {
         answer.times( alpha * tStep->giveTimeIncrement() );
     } else if ( type == LSICStabilizationTerm_MB ) {
         double coeff = lscale / ( dscale * uscale * uscale );

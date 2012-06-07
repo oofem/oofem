@@ -152,11 +152,13 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
    FloatArray u;
    StructuralElement* elem = this->giveStructuralElement();
 
-    /*if ( !this->isActivated(stepN) ) {
+#if 0
+    if ( !this->isActivated(stepN) ) {
         answer.resize( this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp) );
         answer.zero();
         return;
-	}*/
+    }
+#endif
 
     elem->computeBmatrixAt(gp, b);
     this->computeDisplacementDegreesOfFreedom(u, gp,stepN);

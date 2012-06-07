@@ -57,15 +57,13 @@ namespace oofem {
 QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrain( n,aDomain),GradDpElement()
 // Constructor.
 {
-  nPrimNodes = 6;
-  nPrimVars = 2;
-  nSecNodes = 3;
-  nSecVars = 1;
-  totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
-  locSize   = nPrimVars*nPrimNodes;
-  nlSize    = nSecVars*nSecNodes;
-
-
+    nPrimNodes = 6;
+    nPrimVars = 2;
+    nSecNodes = 3;
+    nSecVars = 1;
+    totalSize = nPrimVars*nPrimNodes+nSecVars*nSecNodes;
+    locSize   = nPrimVars*nPrimNodes;
+    nlSize    = nSecVars*nSecNodes;
 }
 
 
@@ -74,15 +72,10 @@ QTrPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &
 {
 
     if ( inode<=nSecNodes ) {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = G_0;
+        answer.setValues(3, D_u, D_v, G_0);
     }
     else {
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+        answer.setValues(2, D_u, D_v);
     }
 }
 IRResultType

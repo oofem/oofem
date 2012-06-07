@@ -182,7 +182,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
     err = KSPSolve(Lhs->ksp, b, x);
     if (err != 0) {
-	    OOFEM_ERROR2("PetscSolver:  Error when solving: %d\n", err);
+        OOFEM_ERROR2("PetscSolver:  Error when solving: %d\n", err);
     }
     KSPGetConvergedReason(Lhs->ksp, & reason);
     KSPGetIterationNumber(Lhs->ksp, & nite);

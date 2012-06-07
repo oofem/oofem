@@ -48,10 +48,10 @@
 #include "contextioerr.h"
 
 namespace oofem {
-void 
-AdaptiveLinearStatic::updateYourself(TimeStep *stepN) 
+void
+AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
 {
- 
+
    LinearStatic :: updateYourself(stepN);
    // perform error evaluation
    // evaluate error of the reached solution
@@ -67,7 +67,7 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
         Domain *newDomain;
 
         MesherInterface :: returnCode result =
-	  mesher->createMesh(stepN, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
+        mesher->createMesh(stepN, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
         if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
@@ -75,7 +75,7 @@ AdaptiveLinearStatic::updateYourself(TimeStep *stepN)
             this->terminateAnalysis();
             exit(1);
         } else {
-	  _error("solveYourselfAt: MesherInterface::createMesh failed");
+            _error("solveYourselfAt: MesherInterface::createMesh failed");
         }
     }
 }

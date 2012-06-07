@@ -133,14 +133,15 @@ IsotropicHeatTransferMaterial :: giveIPValueSize(InternalStateType type, GaussPo
 
 
 int
-IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime){
-  if (  type == IST_HydrationDegree ) {
-    answer.resize(1);
-    answer.at(1)=0.;
-    return 1;
-  }
-  
-  return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
+    if (  type == IST_HydrationDegree ) {
+        answer.resize(1);
+        answer.at(1)=0.;
+        return 1;
+    }
+
+    return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
 

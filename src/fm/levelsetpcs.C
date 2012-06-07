@@ -212,7 +212,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
         } // end loop over nodes
 
         if ( twostage ) {
-	    //this->pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetUpdate); // ?
+            //this->pcs_stage1(levelSetValues, fs, w, atTime, PCS_levelSetUpdate); // ?
 
             for ( inode = 1; inode <= ndofman; inode++ ) {
                 if ( w.at(inode) > 0.0 ) {
@@ -411,7 +411,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
 
             if ( fabs( w.at(inode) ) > 0.0 ) {
                 c = dt * fs.at(inode) / w.at(inode);
-		cm = max( cm, fabs(c / levelSetValues.at(inode)) );
+                cm = max( cm, fabs(c / levelSetValues.at(inode)) );
                 levelSetValues.at(inode) = levelSetValues.at(inode) - c;
             } else {
                 //printf ("(%d) ", inode);
@@ -419,21 +419,21 @@ LevelSetPCS :: redistance(TimeStep *atTime)
         }
 
         if ( twostage ) {
-	  // this->pcs_stage1(d, fs, w, atTime, PCS_levelSetRedistance); //?
-	  cm = 0.0;
-	  for ( inode = 1; inode <= ndofman; inode++ ) {
-	    if ( _boundary.at(inode) ) {
-	      continue;
-	    }
+            // this->pcs_stage1(d, fs, w, atTime, PCS_levelSetRedistance); //?
+            cm = 0.0;
+            for ( inode = 1; inode <= ndofman; inode++ ) {
+                if ( _boundary.at(inode) ) {
+                    continue;
+                }
 
-	    if ( fabs( w.at(inode) ) > 0.0 ) {
-	      //two stage integration
-	      // update
-	      d.at(inode) = 0.5 * ( d_old.at(inode) + d.at(inode) ) -
-		0.5 *dt *fs.at(inode) / w.at(inode);
-	      cm = max( cm, fabs( ( d.at(inode) - d_old.at(inode) ) / d_old.at(inode) ) );
-	    }
-	  }
+                if ( fabs( w.at(inode) ) > 0.0 ) {
+                    //two stage integration
+                    // update
+                    d.at(inode) = 0.5 * ( d_old.at(inode) + d.at(inode) ) -
+                        0.5 *dt *fs.at(inode) / w.at(inode);
+                    cm = max( cm, fabs( ( d.at(inode) - d_old.at(inode) ) / d_old.at(inode) ) );
+                }
+            }
         }
     } while ( ( cm > this->reinit_err ) && ( ++nite < 2000 ) );
 

@@ -54,7 +54,8 @@ ExportModuleManager :: ~ExportModuleManager()
 {}
 
 IRResultType
-ExportModuleManager :: initializeFrom(InputRecord *ir) {
+ExportModuleManager :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
@@ -66,7 +67,7 @@ ExportModuleManager :: initializeFrom(InputRecord *ir) {
 
 
 ExportModule *ExportModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel) {
-  return CreateUsrDefExportModuleOfType(name, n, emodel);
+    return CreateUsrDefExportModuleOfType(name, n, emodel);
 }
 
 void

@@ -528,7 +528,7 @@ StressVector :: applyDeviatoricElasticCompliance(StrainVector &strain,
         strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
         strain(2) = 1. / ( 2. * GModulus ) * values [ 2 ];
         strain(3) = 1. / GModulus * values [ 3 ];
-	strain(4) = values[4];
+        strain(4) = values[4];
     } else if ( myMode == _3dRotContinuum ) {
         // Order: r,  theta,  z,  zr
         strain(0) = 1. / ( 2. * GModulus ) * values [ 0 ];

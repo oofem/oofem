@@ -287,38 +287,37 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
                 } else if ( sum < principalStress.at(i) )   {
                     sum = principalStress.at(i);
                 }
-	      }
-	      else if ( sum < principalStress.at(i) ) {
-		sum = principalStress.at(i);
-	      }
+            } else if ( sum < principalStress.at(i) ) {
+                sum = principalStress.at(i);
+            }
         }
-	if ( this->equivStrainType == EST_Rankine_Smooth ) {
-	  sum = sqrt(sum);
-	}
-	kappa = sum / lmat->give('E', gp);
+        if ( this->equivStrainType == EST_Rankine_Smooth ) {
+            sum = sqrt(sum);
+        }
+        kappa = sum / lmat->give('E', gp);
 
     } else if ( ( this->equivStrainType == EST_ElasticEnergy ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStrain ) ){
-	// equivalent strain expressions based on elastic energy
+        // equivalent strain expressions based on elastic energy
         FloatMatrix de;
         FloatArray stress;
         double sum;
 
         lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
-	if ( this->equivStrainType == EST_ElasticEnergy ) {
-	  // standard elastic energy
-	  stress.beProductOf(de, strain);
-	  sum = strain.dotProduct(stress);
-	} else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
-	  // elastic energy corresponding to positive part of stress
-	  FloatArray fullStress, principalStress;
-	  crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
-	  this->computePrincipalValues(principalStress, fullStress, principal_stress);
-	  // TO BE FINISHED
+        if ( this->equivStrainType == EST_ElasticEnergy ) {
+            // standard elastic energy
+            stress.beProductOf(de, strain);
+            sum = strain.dotProduct(stress);
+        } else if ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) {
+            // elastic energy corresponding to positive part of stress
+            FloatArray fullStress, principalStress;
+            crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
+            this->computePrincipalValues(principalStress, fullStress, principal_stress);
+            // TO BE FINISHED
 
-	} else {
-	  // elastic energy corresponding to positive part of strain
-	  // TO BE DONE
-	}
+        } else {
+            // elastic energy corresponding to positive part of strain
+            // TO BE DONE
+        }
 
         kappa = sqrt( sum / lmat->give('E', gp) );
     } else if ( this->equivStrainType == EST_Mises ) {
@@ -405,7 +404,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
 
                 OOFEM_ERROR4("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
             }
-	    _error("\n");
+            _error("\n");
         }
 
         if ( this->softType == ST_Linear_Cohesive_Crack ) {

@@ -820,22 +820,21 @@ Quad10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
     return volume;
 }
 
-
-//double
-//Quad10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
+#if 0
+double
+Quad10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
-//{
-//  double determinant, weight, volume;
+{
+    double determinant, weight, volume;
 
-//  determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray,
-//						    * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray, * aGaussPoint->giveCoordinates(), 0.0) );
 
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
 
-//  weight      = aGaussPoint->giveWeight();
-//  volume      = determinant * weight;
-
-//  return volume;
-//}
+    return volume;
+}
+#endif
 
 Interface *
 Quad10_2D_SUPG :: giveInterface(InterfaceType interface)

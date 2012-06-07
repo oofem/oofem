@@ -61,13 +61,13 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
     answer.resize(2);
 
     answer.at(1) = 0.25*( cellgeo.giveVertexCoordinates(1)->at(xind) +
-			  cellgeo.giveVertexCoordinates(2)->at(xind) +
-			  cellgeo.giveVertexCoordinates(3)->at(xind) +
-			  cellgeo.giveVertexCoordinates(4)->at(xind) );
+                    cellgeo.giveVertexCoordinates(2)->at(xind) +
+                    cellgeo.giveVertexCoordinates(3)->at(xind) +
+                    cellgeo.giveVertexCoordinates(4)->at(xind) );
     answer.at(2) = 0.25*( cellgeo.giveVertexCoordinates(1)->at(yind) +
-			  cellgeo.giveVertexCoordinates(2)->at(yind) +
-			  cellgeo.giveVertexCoordinates(3)->at(yind) +
-			  cellgeo.giveVertexCoordinates(4)->at(yind) );
+                    cellgeo.giveVertexCoordinates(2)->at(yind) +
+                    cellgeo.giveVertexCoordinates(3)->at(yind) +
+                    cellgeo.giveVertexCoordinates(4)->at(yind) );
 }
 
 #define POINT_TOL 1.e-3

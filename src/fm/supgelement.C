@@ -133,8 +133,8 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
-	this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
-	this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
+        this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
+        this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
         //this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
@@ -303,7 +303,7 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
             } else {
                 helpMatrix.resize(undofs, pndofs);
                 helpMatrix.zero();
-		//_warning("computeForceLoadVector : unsupported load type class");
+                //_warning("computeForceLoadVector : unsupported load type class");
             }
 
             answer.add(helpMatrix);

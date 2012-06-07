@@ -148,7 +148,7 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 
     IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef"); // Macro
 
-    int _val = 0;    
+    int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme"); // Macro
 
     ddtScheme = ( NonLinearDynamic_ddtScheme ) _val;
@@ -162,7 +162,7 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     } else if ( ddtScheme == euler ) {
         OOFEM_LOG_INFO( "Selecting Backward Euler metod\n" );
     } else {
-	  _error("NonLinearDynamic: Time-stepping scheme not found!\n");
+        _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
     _val = 0;

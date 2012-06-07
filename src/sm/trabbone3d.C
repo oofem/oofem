@@ -188,12 +188,12 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
 
     if ( halfSpaceCriterion < 0.0 ) {
         this->constructAnisoFabricTensor(fabric, 0);
-	if (printflag)
-	  printf(" - ");
+        if (printflag)
+            printf(" - ");
     } else {
         this->constructAnisoFabricTensor(fabric, 1);
-	if (printflag)
-	  printf(" + ");
+        if (printflag)
+            printf(" + ");
     }
 
     // Evaluation of the yield function

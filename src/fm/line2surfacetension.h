@@ -46,7 +46,7 @@ class FEI2dLineQuad;
  * @author Mikael Öhman
  */
 class Line2SurfaceTension :
-	public LineSurfaceTension
+    public LineSurfaceTension
 {
 protected:
     static FEI2dLineQuad fei;

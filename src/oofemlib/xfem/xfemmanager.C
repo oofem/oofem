@@ -111,7 +111,8 @@ XfemManager :: clear()
 
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
-void XfemManager :: getInteractedEI(IntArray &answer, Element *elem) {
+void XfemManager :: getInteractedEI(IntArray &answer, Element *elem)
+{
     int count = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
         if ( this->giveEnrichmentItem(i)->interacts(elem) ) {
@@ -122,7 +123,8 @@ void XfemManager :: getInteractedEI(IntArray &answer, Element *elem) {
     }
 }
 
-bool XfemManager :: isInteracted(Element *elem) {
+bool XfemManager :: isInteracted(Element *elem)
+{
     IntArray interactedEnrItems;
     getInteractedEI(interactedEnrItems, elem);
     if ( interactedEnrItems.giveSize() > 0 ) {
@@ -358,194 +360,194 @@ void XfemManager :: updateGeometry(TimeStep *tStep)
 
 #define XFEMMAN_STATE_SIZE 5
 
-#define SAVE_COMPONENTS(size,type,giveMethod)				\
-  {									\
-    type* obj;								\
-    for ( i = 1; i <= size; i++ ) {					\
-      obj = giveMethod(i);						\
-      if ( ( mode & CM_Definition ) ) {					\
-        ct =  (int) obj->giveClassID();					\
-        if ( !stream->write(& ct, 1) ) {				\
-	  THROW_CIOERR(CIO_IOERR);					\
-        }								\
-      }									\
-      if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {	\
-	THROW_CIOERR(iores);						\
-      }									\
-    }									\
+#define SAVE_COMPONENTS(size,type,giveMethod)   \
+  {                                             \
+    type* obj;                                  \
+    for ( i = 1; i <= size; i++ ) {             \
+        obj = giveMethod(i);                    \
+        if ( ( mode & CM_Definition ) ) {       \
+            ct =  (int) obj->giveClassID();     \
+            if ( !stream->write(& ct, 1) ) {    \
+                THROW_CIOERR(CIO_IOERR);        \
+            }                                   \
+        }                                       \
+        if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
+            THROW_CIOERR(iores);                \
+        }                                       \
+    }                                           \
   }
 
-#define RESTORE_COMPONENTS(size,type,resizeMethod,creator,giveMethod,setMethod)	\
-  {									\
-  type *obj;								\
-  if ( mode & CM_Definition ) {						\
-    resizeMethod(size);							\
-  }									\
-  for ( i = 1; i <= size; i++ ) {					\
-    if ( mode & CM_Definition ) {					\
-      if ( !stream->read(& ct, 1) ) {					\
-	THROW_CIOERR(CIO_IOERR);					\
-      }									\
-      compId = ( classType ) ct;					\
-      obj = creator(compId, 0, this);					\
-    } else {								\
-      obj = giveMethod(i);						\
-    }									\
-    if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {	\
-      THROW_CIOERR(iores);						\
-    }									\
-    if ( mode & CM_Definition ) {					\
-      setMethod(i, obj);						\
-    }									\
-  }									\
-}
+#define RESTORE_COMPONENTS(size,type,resizeMethod,creator,giveMethod,setMethod) \
+  {                                         \
+    type *obj;                              \
+    if ( mode & CM_Definition ) {           \
+        resizeMethod(size);                 \
+    }                                       \
+    for ( i = 1; i <= size; i++ ) {         \
+        if ( mode & CM_Definition ) {       \
+            if ( !stream->read(& ct, 1) ) { \
+                THROW_CIOERR(CIO_IOERR);    \
+            }                               \
+            compId = ( classType ) ct;      \
+            obj = creator(compId, 0, this); \
+        } else {                            \
+            obj = giveMethod(i);            \
+        }                                   \
+        if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
+            THROW_CIOERR(iores);            \
+        }                                   \
+        if ( mode & CM_Definition ) {       \
+            setMethod(i, obj);              \
+        }                                   \
+    }                                       \
+  }
 
-contextIOResultType XfemManager:: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
-  contextIOResultType iores;
-  int i,ct;
+    contextIOResultType iores;
+    int i,ct;
 
-  if (mode & CM_Definition) {
-    int _state[XFEMMAN_STATE_SIZE];
-    _state[0]=this->domainIndex;
-    _state[1]=this->dofIdPos;
-    _state[2]=this->numberOfEnrichmentItems;
-    _state[3]=this->numberOfEnrichmentFunctions;
-    _state[4]=this->numberOfGeometryItems;
-    if ( !stream->write(_state, XFEMMAN_STATE_SIZE) ) {
-      THROW_CIOERR(CIO_IOERR);
+    if (mode & CM_Definition) {
+        int _state[XFEMMAN_STATE_SIZE];
+        _state[0]=this->domainIndex;
+        _state[1]=this->dofIdPos;
+        _state[2]=this->numberOfEnrichmentItems;
+        _state[3]=this->numberOfEnrichmentFunctions;
+        _state[4]=this->numberOfGeometryItems;
+        if ( !stream->write(_state, XFEMMAN_STATE_SIZE) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
-  }
-  // store enrichment items
-  SAVE_COMPONENTS(this->numberOfEnrichmentItems,EnrichmentItem,this->giveEnrichmentItem);
-  // store enrichment functions
-  SAVE_COMPONENTS(this->numberOfEnrichmentFunctions,EnrichmentFunction,this->giveEnrichmentFunction);
-  // store geometry items
-  SAVE_COMPONENTS(this->numberOfGeometryItems,BasicGeometry,this->giveGeometry);
-  // store fictPosition map
-  int _size = fictPosition->giveSize();
-  if ( !stream->write(& _size, 1) ) {
-    THROW_CIOERR(CIO_IOERR);
-  }
-  for (i=1; i<=_size; i++) {
-    if ((iores = this->fictPosition->at(i)->storeYourself(stream, mode)) != CIO_OK) {
-      THROW_CIOERR(iores);	
+    // store enrichment items
+    SAVE_COMPONENTS(this->numberOfEnrichmentItems,EnrichmentItem,this->giveEnrichmentItem);
+    // store enrichment functions
+    SAVE_COMPONENTS(this->numberOfEnrichmentFunctions,EnrichmentFunction,this->giveEnrichmentFunction);
+    // store geometry items
+    SAVE_COMPONENTS(this->numberOfGeometryItems,BasicGeometry,this->giveGeometry);
+    // store fictPosition map
+    int _size = fictPosition->giveSize();
+    if ( !stream->write(& _size, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
     }
-  }
-    
-  return CIO_OK;
+    for (i=1; i<=_size; i++) {
+        if ((iores = this->fictPosition->at(i)->storeYourself(stream, mode)) != CIO_OK) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    return CIO_OK;
 }
 
 
 contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-  contextIOResultType iores;
-  int i, ct;
-  classType compId;
+    contextIOResultType iores;
+    int i, ct;
+    classType compId;
 
-  if (mode & CM_Definition) {
-    int _state[XFEMMAN_STATE_SIZE];
-    if ( !stream->read(_state, XFEMMAN_STATE_SIZE) ) {
-      THROW_CIOERR(CIO_IOERR);
+    if (mode & CM_Definition) {
+        int _state[XFEMMAN_STATE_SIZE];
+        if ( !stream->read(_state, XFEMMAN_STATE_SIZE) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        this->domainIndex = _state[0];
+        this->dofIdPos = _state[1];
+        this->numberOfEnrichmentItems = _state[2];
+        this->numberOfEnrichmentFunctions = _state[3];
+        this->numberOfGeometryItems = _state[4];
     }
-    this->domainIndex = _state[0];
-    this->dofIdPos = _state[1];
-    this->numberOfEnrichmentItems = _state[2];
-    this->numberOfEnrichmentFunctions = _state[3];
-    this->numberOfGeometryItems = _state[4];
-  }
-  
-  {  // restore enrichment items
-    EnrichmentItem *obj;
-    if ( mode & CM_Definition ) {
-      enrichmentItemList->clear();
-      enrichmentItemList->growTo(this->numberOfEnrichmentItems);
-    }			
-    for ( i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
-      if ( mode & CM_Definition ) {
-	if ( !stream->read(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}				
-	compId = ( classType ) ct;
-	obj = CreateUsrDefEnrichmentItem(compId, i, this, emodel->giveDomain(domainIndex));
-      } else {
-	obj = this->giveEnrichmentItem(i);
-      }
-      if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
-	THROW_CIOERR(iores);
-      }
-      if ( mode & CM_Definition ) {
-	enrichmentItemList->put(i, obj);
-      }
-    }
-  }
-  
-  {  // restore enrichment functions
-    EnrichmentFunction *obj;
-    if ( mode & CM_Definition ) {
-      enrichmentFunctionList->clear();
-      enrichmentFunctionList->growTo(this->numberOfEnrichmentFunctions);
-    }			
-    for ( i = 1; i <= this->numberOfEnrichmentFunctions; i++ ) {
-      if ( mode & CM_Definition ) {
-	if ( !stream->read(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}				
-	compId = ( classType ) ct;
-	obj = CreateUsrDefEnrichmentFunction(compId, i, emodel->giveDomain(domainIndex));
-      } else {
-	obj = this->giveEnrichmentFunction(i);
-      }
-      if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
-	THROW_CIOERR(iores);
-      }
-      if ( mode & CM_Definition ) {
-	enrichmentFunctionList->put(i, obj);
-      }
-    }
-  }
- 
-  {  // restore geometry items
-    BasicGeometry *obj;
-    if ( mode & CM_Definition ) {
-      geometryList->clear();
-      geometryList->growTo(this->numberOfGeometryItems);
-    }			
-    for ( i = 1; i <= this->numberOfGeometryItems; i++ ) {
-      if ( mode & CM_Definition ) {
-	if ( !stream->read(& ct, 1) ) {
-	  THROW_CIOERR(CIO_IOERR);
-	}				
-	compId = ( classType ) ct;
-	obj = CreateUsrDefGeometry(compId);
-      } else {
-	obj = this->giveGeometry(i);
-      }
-      if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
-	THROW_CIOERR(iores);
-      }
-      if ( mode & CM_Definition ) {
-	geometryList->put(i, obj);
-      }
-    }
-  }
-  // restore fictPosition map
-  int _size;
-  IntArray *p;
-  if ( !stream->read(& _size, 1) ) {
-    THROW_CIOERR(CIO_IOERR);
-  }
-  this->fictPosition->clear();
-  this->fictPosition->growTo(_size);
-  for (i=1; i<=_size; i++) {
-    p = new IntArray();
-    if ((iores = p->restoreYourself(stream, mode)) != CIO_OK) {
-      THROW_CIOERR(iores);	
-    }
-    this->fictPosition->put(i, p);
-  }
 
-  return CIO_OK;
+    {  // restore enrichment items
+        EnrichmentItem *obj;
+        if ( mode & CM_Definition ) {
+            enrichmentItemList->clear();
+            enrichmentItemList->growTo(this->numberOfEnrichmentItems);
+        }
+        for ( i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
+            if ( mode & CM_Definition ) {
+                if ( !stream->read(& ct, 1) ) {
+                    THROW_CIOERR(CIO_IOERR);
+                }
+                compId = ( classType ) ct;
+                obj = CreateUsrDefEnrichmentItem(compId, i, this, emodel->giveDomain(domainIndex));
+            } else {
+                obj = this->giveEnrichmentItem(i);
+            }
+            if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+            if ( mode & CM_Definition ) {
+                enrichmentItemList->put(i, obj);
+            }
+        }
+    }
+
+    {  // restore enrichment functions
+        EnrichmentFunction *obj;
+        if ( mode & CM_Definition ) {
+            enrichmentFunctionList->clear();
+            enrichmentFunctionList->growTo(this->numberOfEnrichmentFunctions);
+        }
+        for ( i = 1; i <= this->numberOfEnrichmentFunctions; i++ ) {
+            if ( mode & CM_Definition ) {
+                if ( !stream->read(& ct, 1) ) {
+                    THROW_CIOERR(CIO_IOERR);
+                }
+                compId = ( classType ) ct;
+                obj = CreateUsrDefEnrichmentFunction(compId, i, emodel->giveDomain(domainIndex));
+            } else {
+                obj = this->giveEnrichmentFunction(i);
+            }
+            if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+            if ( mode & CM_Definition ) {
+                enrichmentFunctionList->put(i, obj);
+            }
+        }
+    }
+
+    {  // restore geometry items
+        BasicGeometry *obj;
+        if ( mode & CM_Definition ) {
+            geometryList->clear();
+            geometryList->growTo(this->numberOfGeometryItems);
+        }
+        for ( i = 1; i <= this->numberOfGeometryItems; i++ ) {
+            if ( mode & CM_Definition ) {
+                if ( !stream->read(& ct, 1) ) {
+                    THROW_CIOERR(CIO_IOERR);
+                }
+                compId = ( classType ) ct;
+                obj = CreateUsrDefGeometry(compId);
+            } else {
+                obj = this->giveGeometry(i);
+            }
+            if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+            if ( mode & CM_Definition ) {
+                geometryList->put(i, obj);
+            }
+        }
+    }
+    // restore fictPosition map
+    int _size;
+    IntArray *p;
+    if ( !stream->read(& _size, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    this->fictPosition->clear();
+    this->fictPosition->growTo(_size);
+    for (i=1; i<=_size; i++) {
+        p = new IntArray();
+        if ((iores = p->restoreYourself(stream, mode)) != CIO_OK) {
+            THROW_CIOERR(iores);
+        }
+        this->fictPosition->put(i, p);
+    }
+
+    return CIO_OK;
 }
 
 } // end namespace oofem

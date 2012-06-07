@@ -500,7 +500,7 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
 
 void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
 {
-	int nr = this->giveNumberOfRows();
+    int nr = this->giveNumberOfRows();
 #ifdef DEBUG
     if ( c < 1 || c > this->giveNumberOfColumns()) {
         OOFEM_ERROR2("FloatMatrix  :: copyColumn - Column outside range (%d)", c);

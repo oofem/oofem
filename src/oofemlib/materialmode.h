@@ -43,7 +43,7 @@ namespace oofem {
     ENUM_ITEM(_Unknown)   \
     ENUM_ITEM(_3dMat) \
     ENUM_ITEM(_3dMat_F)  /* 3d deformation gradient */ \
-    ENUM_ITEM(_3dMatGrad)  /* 3d model with gradient of internal variable */	\
+    ENUM_ITEM(_3dMatGrad)  /* 3d model with gradient of internal variable */ \
     ENUM_ITEM(_1dMatGrad)  /* 1d model with gradient of internal variable */ \
     ENUM_ITEM(_PlaneStressGrad)  /* plane stress with gradient of internal variable */ \
     ENUM_ITEM(_PlaneStrainGrad)  /* plane strain with gradient of internal variable */ \

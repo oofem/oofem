@@ -99,7 +99,7 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-						   InternalStateType type, TimeStep *tStep);
+                            InternalStateType type, TimeStep *tStep);
 
     /// @name Helping functions for computing VOFFractions.
     //@{

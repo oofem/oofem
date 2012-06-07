@@ -339,7 +339,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     FloatArray testStrainOld( status->giveStrainVector() );
 
-    // substract stress independent part
+    // subtract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, atTime, VM_Total);
 
     // compute equivalent strain
@@ -686,52 +686,50 @@ LatticeDamage2d :: giveFullCharacteristicVector(FloatArray &answer,
     }
 }
 
-
-
-int 
-LatticeDamage2d::giveIPValue (FloatArray& answer, 
-                         GaussPoint* gp, 
-                         InternalStateType type, 
+int
+LatticeDamage2d::giveIPValue(FloatArray& answer,
+                         GaussPoint* gp,
+                         InternalStateType type,
                          TimeStep* atTime)
-{ 
-  LatticeDamage2dStatus *status = (LatticeDamage2dStatus*) this -> giveStatus (gp);  
-  if (type == IST_CrackStatuses){
-    answer.resize(1);
-    answer(0) = status->giveCrackFlag();
-    return 1;
-  }
-  else return StructuralMaterial::giveIPValue (answer, gp, type, atTime);
-} 
+{
+    LatticeDamage2dStatus *status = (LatticeDamage2dStatus*) this -> giveStatus (gp);
+    if (type == IST_CrackStatuses){
+        answer.resize(1);
+        answer(0) = status->giveCrackFlag();
+        return 1;
+    }
+    else return StructuralMaterial::giveIPValue(answer, gp, type, atTime);
+}
 
-int 
-LatticeDamage2d::giveIPValueSize (InternalStateType type, 
+int
+LatticeDamage2d::giveIPValueSize(InternalStateType type,
                               GaussPoint* gp)
 {
- if (type == IST_CrackStatuses) return 1;
- else return StructuralMaterial::giveIPValueSize (type, gp);
+    if (type == IST_CrackStatuses) return 1;
+    else return StructuralMaterial::giveIPValueSize (type, gp);
 }
 
-int 
-LatticeDamage2d::giveIntVarCompFullIndx (IntArray& answer,
-                                    InternalStateType type,                                             MaterialMode mmode) 
+int
+LatticeDamage2d::giveIntVarCompFullIndx(IntArray& answer,
+                                    InternalStateType type, MaterialMode mmode)
 {
-  if(type == IST_CrackStatuses) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else 
-  return StructuralMaterial::giveIntVarCompFullIndx (answer, type, mmode);
+    if(type == IST_CrackStatuses) {
+        answer.resize (1);
+        answer.at(1) = 1;
+        return 1;
+    } else
+        return StructuralMaterial::giveIntVarCompFullIndx (answer, type, mmode);
 }
 
-InternalStateValueType 
+InternalStateValueType
 LatticeDamage2d::giveIPValueType (InternalStateType type)
 {
-  if(type==IST_CrackStatuses) {
-    return ISVT_SCALAR;
-  }
-  else{
-    return StructuralMaterial::giveIPValueType (type);
-  }
+    if(type==IST_CrackStatuses) {
+        return ISVT_SCALAR;
+    }
+    else{
+        return StructuralMaterial::giveIPValueType (type);
+    }
 }
 
 LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) :

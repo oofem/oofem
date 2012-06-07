@@ -40,10 +40,10 @@
 #include "qtrplanestrain.h"
 
 namespace oofem {
-class QTrPlaneStrainGrad : public QTrPlaneStrain,public GradDpElement
+class QTrPlaneStrainGrad : public QTrPlaneStrain, public GradDpElement
 {
 protected:
-  int numberOfGaussPoints;
+    int numberOfGaussPoints;
 
 public:
     QTrPlaneStrainGrad(int n, Domain *d);

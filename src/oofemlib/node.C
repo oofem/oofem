@@ -818,8 +818,8 @@ Node :: drawYourself(oofegGraphicContext &gc)
             IntArray dofIDArry(0);
             computeLoadVectorAt(load, tStep, VM_Total);
             if (computeL2GTransformation(t, dofIDArry)) {
-	      load.rotatedWith(t,'n');
-	    }
+                load.rotatedWith(t,'n');
+            }
 
             FloatArray force(3), momentum(3);
             for ( i = 1; i <= numberOfDofs; i++ ) {

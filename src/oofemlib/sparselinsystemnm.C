@@ -58,7 +58,7 @@ NM_Status SparseLinearSystemNM :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatr
         B.copyColumn(bi, i);
         status = this->solve(A, &bi, &xi);
         if (status == NM_NoSuccess) {
-        	return NM_NoSuccess;
+            return NM_NoSuccess;
         }
         X.setColumn(xi, i);
     }

@@ -1120,14 +1120,14 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
 
                 answer.at(i) = sum;
             } else {
-	        //_error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
-	      answer.at(i) = 0.0;
+                //_error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
+                answer.at(i) = 0.0;
             }
         }
-	return 0; // ok
+        return 0; // ok
     } else {
         _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
-	return 1; // fail
+        return 1; // fail
     }
 }
 
@@ -1187,7 +1187,7 @@ TR1_2D_CBS :: giveIPValueType(InternalStateType type)
 int
 TR1_2D_CBS :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-  return CBSElement::giveIPValueSize(type, gp);
+    return CBSElement::giveIPValueSize(type, gp);
 }
 
 

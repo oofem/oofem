@@ -121,7 +121,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
         if(stepWhenIcApply==NULL){
-	  stepWhenIcApply = new TimeStep(*tStep->givePreviousStep());
+            stepWhenIcApply = new TimeStep(*tStep->givePreviousStep());
         }
         this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
     }

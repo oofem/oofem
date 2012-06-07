@@ -1273,9 +1273,9 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
             y3 = y1 + t * ( this->giveNode(prev_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );
 
 
-	    // compute volume associated to traingle (x1,y1; x2,y2; x3,y3)
+            // compute volume associated to traingle (x1,y1; x2,y2; x3,y3)
             double __volume = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) * ((x1+x2+x3)/3.);
-	    double volume = this->area*((this->giveNode(1)->giveCoordinate(1)+this->giveNode(2)->giveCoordinate(1)+this->giveNode(3)->giveCoordinate(1))/3.);
+            double volume = this->area*((this->giveNode(1)->giveCoordinate(1)+this->giveNode(2)->giveCoordinate(1)+this->giveNode(3)->giveCoordinate(1))/3.);
             if ( fabs(__volume) / volume > 1.00001 ) {
                 OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }

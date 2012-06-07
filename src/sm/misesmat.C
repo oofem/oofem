@@ -939,16 +939,16 @@ MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mat
             answer.at(6) = 6;
             return 1;
         } else if ( mmode == _PlaneStrain ) {
-	    answer.resize(6);
+            answer.resize(6);
             answer.at(1) = 1;
             answer.at(2) = 2;
             answer.at(3) = 3;
             answer.at(6) = 4;
-	    return 1;
-	} else if ( mmode == _1dMat ) {
+            return 1;
+        } else if ( mmode == _1dMat ) {
             answer.resize(1);
             answer.at(1) = 1;
-	    return 1;
+            return 1;
         }
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
@@ -968,17 +968,17 @@ int
 MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
-      MaterialMode mode = gp->giveMaterialMode();
-      if (mode == _3dMat || mode == _3dMat_F)
-	return 6;
-      else if (mode == _PlaneStrain)
-	return 4;
-      else if (mode == _PlaneStress)
-	return 3;
-      else if (mode == _1dMat)
-	return 1;
-      else
-	return 0;
+        MaterialMode mode = gp->giveMaterialMode();
+        if (mode == _3dMat || mode == _3dMat_F)
+            return 6;
+        else if (mode == _PlaneStrain)
+            return 4;
+        else if (mode == _PlaneStress)
+            return 3;
+        else if (mode == _1dMat)
+            return 1;
+        else
+            return 0;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return 1;
     } else if ( type == IST_DamageScalar ) {

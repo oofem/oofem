@@ -42,7 +42,7 @@ namespace oofem {
 ElementDofManager :: ElementDofManager(int n, Domain *aDomain, Element* elem) :
     DofManager(n, aDomain)
 {
-  this->element = elem;
+    this->element = elem;
 }
 
 

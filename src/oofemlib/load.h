@@ -120,7 +120,7 @@ protected:
 
 public:
     void setComponentArray(FloatArray &arry) { componentArray = arry; }
-	 FloatArray giveCopyOfComponentArray() { FloatArray answer = componentArray; return answer; }
+    FloatArray giveCopyOfComponentArray() { FloatArray answer = componentArray; return answer; }
 };
 } // end namespace oofem
 #endif // load_h

@@ -55,9 +55,9 @@ namespace oofem {
  * @author Mikael Öhman
  */
 class LineSurfaceTension :
-	public FMElement,
-	public SpatialLocalizerInterface,
-	public EIPrimaryUnknownMapperInterface
+    public FMElement,
+    public SpatialLocalizerInterface,
+    public EIPrimaryUnknownMapperInterface
 {
 public:
     /**
@@ -65,33 +65,33 @@ public:
      * @param n Elements number.
      * @param d Pointer to the domain to which element belongs.
      */
-	LineSurfaceTension(int n, Domain *d);
+    LineSurfaceTension(int n, Domain *d);
     /// Destructor.
     virtual ~LineSurfaceTension();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-	virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-	virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
-	/**
-	 * Computes the load vector.
-	 */
-	virtual void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+    /**
+     * Computes the load vector.
+     */
+    virtual void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
-	/**
-	 * Computes tangent to load vector.
-	 * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
-	 */
-	virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
+    /**
+     * Computes tangent to load vector.
+     * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
+     */
+    virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 
-	virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
+    virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-	virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-	virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
     Interface *giveInterface(InterfaceType it);

@@ -305,8 +305,8 @@ PetscContext :: isLocal(DofManager *dman)
 {
 #ifdef __PARALLE_MODE
     if ( emodel->isParallel() ) {
-	    return this->giveN2GMap()->isLocal(dman); // Either map is fine.
-	}
+        return this->giveN2GMap()->isLocal(dman); // Either map is fine.
+    }
 #else
     return true;
 #endif

@@ -105,8 +105,8 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 
 int
 PrimaryField :: __evaluateAt(FloatArray &answer, DofManager* dman,
-			     ValueModeType mode, TimeStep *atTime,
-			     IntArray *dofId)
+                    ValueModeType mode, TimeStep *atTime,
+                    IntArray *dofId)
 {
     if (dman->giveDomain() == this->emodel->giveDomain(domainIndx)) {
         if (dofId) {
@@ -121,15 +121,15 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager* dman,
         }
     } else {
         return this->__evaluateAt(answer, *dman->giveCoordinates(),
-			      mode, atTime, dofId);
+                    mode, atTime, dofId);
     }
 }
 
 
 int
 PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
-			     ValueModeType mode, TimeStep *atTime,
-			     IntArray *dofId)
+                    ValueModeType mode, TimeStep *atTime,
+                    IntArray *dofId)
 {
     Element *bgelem;
     Domain *domain = emodel->giveDomain(domainIndx);
@@ -156,7 +156,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray& coords,
 }
 
 int PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
-			       ValueModeType mode, TimeStep *atTime)
+                    ValueModeType mode, TimeStep *atTime)
 {
     return this->__evaluateAt(answer, coords, mode, atTime, NULL);
 }
@@ -164,7 +164,7 @@ int PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords,
 
 int
 PrimaryField::evaluateAt(FloatArray &answer, DofManager* dman,
-			 ValueModeType mode, TimeStep *atTime)
+                ValueModeType mode, TimeStep *atTime)
 {
     return this->__evaluateAt(answer, dman, mode, atTime, NULL);
 }

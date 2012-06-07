@@ -62,15 +62,15 @@ InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, Valu
 
     return 0; // ok
 }
-  
+
 int
 InternalVariableField::evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
 {
-  if (dman->hasCoordinates()) {
-    return this->evaluateAt(answer, *(dman->giveCoordinates()), mode, atTime);
-  } else {
-    return 1; // failed -> dman without coordinates
-  }
+    if (dman->hasCoordinates()) {
+        return this->evaluateAt(answer, *(dman->giveCoordinates()), mode, atTime);
+    } else {
+        return 1; // failed -> dman without coordinates
+    }
 }
 
 contextIOResultType

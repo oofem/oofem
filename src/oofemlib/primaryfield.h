@@ -170,7 +170,7 @@ public:
      * @return Error code (0=ok, 1=point not found in domain).
      */
     virtual int __evaluateAt(FloatArray &answer, DofManager* dman,
-			     ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+                    ValueModeType mode, TimeStep *atTime, IntArray *dofId);
     /**
      * Evaluates the field at given point, allows to select specific
      * dofs using mask.
@@ -182,7 +182,7 @@ public:
      * @return Error code (0=ok, 1=point not found in domain)
      */
     virtual int __evaluateAt(FloatArray &answer, FloatArray& coords,
-			     ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+                    ValueModeType mode, TimeStep *atTime, IntArray *dofId);
     /**
      * @param atTime Time step to take solution for.
      * @return Solution vector for requested time step.

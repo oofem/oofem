@@ -141,7 +141,7 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
                 * r2 = - p * (cp + sp) - a;
                 * r3 = - p * (cp - sp) - a;
 
-				// I'm getting some pretty bad accuracy, a single iteration like this would help alot
+                // I'm getting some pretty bad accuracy, a single iteration like this would help alot
                 //* r1 -= (d + c*(*r1) + b*(*r1)*(*r1) + a*(*r1)*(*r1)*(*r1))/(c + 2*b*(*r1) + 3*a*(*r1)*(*r1));
                 //* r2 -= (d + c*(*r2) + b*(*r2)*(*r2) + a*(*r2)*(*r2)*(*r2))/(c + 2*b*(*r2) + 3*a*(*r2)*(*r2));
                 //* r3 -= (d + c*(*r3) + b*(*r3)*(*r3) + a*(*r3)*(*r3)*(*r3))/(c + 2*b*(*r3) + 3*a*(*r3)*(*r3));

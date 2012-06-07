@@ -99,7 +99,7 @@ class IGAElement : public Element
 protected:
     // FEInterpolation interpolation;
 #ifdef __PARALLEL_MODE
-  IntArray knotSpanParallelMode;
+    IntArray knotSpanParallelMode;
 #endif
 public:
     IGAElement(int n, Domain *aDomain) : Element(n, aDomain) { }

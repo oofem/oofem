@@ -92,7 +92,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
       IR_GIVE_FIELD(ir, delSigY, IFT_RankineMat_delsigy, "delsigy"); // final increment of yield stress (at infinite cumulative plastic strain)
     }
 
-    yieldtol = 1.e-10; 
+    yieldtol = 1.e-10;
     IR_GIVE_OPTIONAL_FIELD(ir, yieldtol, IFT_RankineMat_yieldtol, "yieldtol"); // relative tolerance in yield condition
 
     a = 0.;
@@ -180,25 +180,25 @@ RankineMat :: evalYieldFunction(const FloatArray &sigPrinc, const double kappa)
 double
 RankineMat :: evalYieldStress(const double kappa)
 {
-  if ( plasthardtype == 0 ) { // linear hardening
-    return sig0 + H0 * kappa; 
-  } else { // exponential hardening
-    if ( delSigY == 0. ) {
-      return sig0;
-    } else {
-      return sig0 + delSigY * ( 1. - exp(-H0*kappa/delSigY) );
+    if ( plasthardtype == 0 ) { // linear hardening
+        return sig0 + H0 * kappa;
+    } else { // exponential hardening
+        if ( delSigY == 0. ) {
+        return sig0;
+        } else {
+        return sig0 + delSigY * ( 1. - exp(-H0*kappa/delSigY) );
+        }
     }
-  }
 }
 
 double
 RankineMat :: evalPlasticModulus(const double kappa)
 {
-  if ( plasthardtype == 0 ) { // linear hardening
-    return H0; 
-  } else { // exponential hardening
-    return H0 * exp(-H0*kappa/delSigY);
-  }
+    if ( plasthardtype == 0 ) { // linear hardening
+        return H0;
+    } else { // exponential hardening
+        return H0 * exp(-H0*kappa/delSigY);
+    }
 }
 
 
@@ -244,7 +244,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 OOFEM_ERROR("RankineMat::giveRealStressVector : no convergence of regular stress return algorithm");
             }
 
-	    H = evalPlasticModulus(tempKappa);
+            H = evalPlasticModulus(tempKappa);
             double ddKappa = f / ( Enu + H );
             sigPrinc.at(1) -= Enu * ddKappa;
             sigPrinc.at(2) -= nu * Enu * ddKappa;
@@ -265,7 +265,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
             tempKappa = kappa;
             f = sigstar - evalYieldStress(tempKappa);
             double dkap1 = 0.;
-	    H = evalPlasticModulus(tempKappa);
+            H = evalPlasticModulus(tempKappa);
             double C = alpha +  H * ( 1. + sqrt(2.) ) / 2.;
             i = 1;
             do {
@@ -280,7 +280,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 tempKappa = kappa + sqrt( dkap1 * dkap1 + ( dkap1 - dkap0 ) * ( dkap1 - dkap0 ) );
                 f = sigstar - evalYieldStress(tempKappa) - alpha * dkap1;
                 double aux = dkap1 * dkap1 + ( dkap1 - dkap0 ) * ( dkap1 - dkap0 );
-		H = evalPlasticModulus(tempKappa);
+                H = evalPlasticModulus(tempKappa);
                 if ( aux > 0. ) {
                     C = alpha + H * ( 2. * dkap1 - dkap0 ) / sqrt(aux);
                 } else {

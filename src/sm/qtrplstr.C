@@ -743,15 +743,15 @@ QTrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
 
-  int i;
-  IntArray eNodes(3);
-  this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
+    int i;
+    IntArray eNodes(3);
+    this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
 
-  answer.resize(6);
-  for (i=1; i<=3; i++) {
-    answer.at(i*2-1) = eNodes.at(i)*2-1;
-    answer.at(i*2  ) = eNodes.at(i)*2;
-  }
+    answer.resize(6);
+    for (i=1; i<=3; i++) {
+        answer.at(i*2-1) = eNodes.at(i)*2-1;
+        answer.at(i*2  ) = eNodes.at(i)*2;
+    }
 }
 
 double

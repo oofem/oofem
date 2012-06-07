@@ -155,7 +155,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
         //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
-    	return false;
+        return false;
     }
 
     // check limits for each local coordinate [-1,1] for quadrilaterals. (different for other elements, typically [0,1]).
@@ -277,23 +277,23 @@ void FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatA
 double
 FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-	IntArray edgeNodes;
-	double xi = lcoords.at(1);
-	this->computeLocalEdgeMapping(edgeNodes, iedge);
-	FloatArray dNdxi(3);
-	dNdxi.at(1) = xi-0.5;
-	dNdxi.at(2) = xi+0.5;
-	dNdxi.at(3) = -2*xi;
+    IntArray edgeNodes;
+    double xi = lcoords.at(1);
+    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    FloatArray dNdxi(3);
+    dNdxi.at(1) = xi-0.5;
+    dNdxi.at(2) = xi+0.5;
+    dNdxi.at(3) = -2*xi;
 
-	FloatArray dxdxi(2);
-	dxdxi.at(1) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
+    FloatArray dxdxi(2);
+    dxdxi.at(1) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
                   dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
                   dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
-	dxdxi.at(2) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
-	              dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
-	              dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
+    dxdxi.at(2) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
+                  dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
+                  dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
 
-	return dxdxi.computeNorm();
+    return dxdxi.computeNorm();
 }
 
 

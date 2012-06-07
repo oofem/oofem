@@ -47,26 +47,26 @@ namespace oofem {
 
 /**
  * Abstract class representing subset of DOFs (identified by DofId mask) of primary field.
- * As the PrimaryField stores the state directly in solution vectors that are usually directly 
- * updated by EngngModel, it may contain a mix of different fields (this is especially true for 
+ * As the PrimaryField stores the state directly in solution vectors that are usually directly
+ * updated by EngngModel, it may contain a mix of different fields (this is especially true for
  * strongly coupled problems). Then masked primary field can be used to select only certain DOFs
  * (based on DofID) from its master PrimaryField.
  */
-class MaskedPrimaryField : public Field 
+class MaskedPrimaryField : public Field
 {
 protected:
-  PrimaryField* master;
-  IntArray mask;
+    PrimaryField* master;
+    IntArray mask;
 public:
-  MaskedPrimaryField (FieldType b, PrimaryField* m, IntArray& dofIdMask) : Field (b), mask(dofIdMask) {master = m;}
-  
-  virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
-			 ValueModeType mode, TimeStep *atTime) ;
-  virtual int evaluateAt(FloatArray &answer, DofManager* dman,
-			 ValueModeType mode, TimeStep *atTime) ;
-  
-  contextIOResultType restoreContext(DataStream *stream, ContextMode mode) {return CIO_OK;}
-  contextIOResultType saveContext(DataStream *stream, ContextMode mode) {return CIO_OK;}
+    MaskedPrimaryField (FieldType b, PrimaryField* m, IntArray& dofIdMask) : Field (b), mask(dofIdMask) { master = m; }
+
+    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
+                    ValueModeType mode, TimeStep *atTime) ;
+    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
+                    ValueModeType mode, TimeStep *atTime) ;
+
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
 };
 
 } // end namespace oofem

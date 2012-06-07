@@ -1594,7 +1594,7 @@ TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
 int
 TR21_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-  return SUPGElement2::giveIPValueSize(type, gp);
+    return SUPGElement2::giveIPValueSize(type, gp);
 }
 
 

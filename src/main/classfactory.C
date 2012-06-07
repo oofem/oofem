@@ -164,14 +164,14 @@ ClassFactory :: ClassFactory() {
 SparseMtrx *ClassFactory :: createSparseMtrx(SparseMtrxType type)
 {
 #undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-case id: \
-    answer = new _class(); \
+#define REGISTER_CLASS(_class, id)  \
+case id:                            \
+    answer = new _class();          \
     break;
 #undef  REGISTER_CLASS_1
-#define REGISTER_CLASS_1(_class, id, type)\
-case id: \
-    answer = new _class(type); \
+#define REGISTER_CLASS_1(_class, id, type)  \
+case id:                                    \
+    answer = new _class(type);              \
     break;
     SparseMtrx *answer = NULL;
     switch ( type ) {
@@ -187,9 +187,9 @@ case id: \
   Dof *ClassFactory :: createDof(classType type, int num, DofManager* dman)
   {
 #undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-case id: \
-  answer = new _class(num, dman); \
+#define REGISTER_CLASS(_class, id)  \
+case id:                            \
+  answer = new _class(num, dman);   \
     break;
 
     Dof *answer = NULL;
@@ -206,9 +206,9 @@ case id: \
   SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType type, int num, Domain *d, EngngModel *m)
   {
 #undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-case id: \
-  answer = new _class(num, d, m);			\
+#define REGISTER_CLASS(_class, id)  \
+case id:                            \
+  answer = new _class(num, d, m);   \
     break;
 
     SparseLinearSystemNM *answer = NULL;
@@ -221,13 +221,13 @@ case id: \
 
     return answer;
   }
-  
+
   ErrorEstimator * ClassFactory :: createErrorEstimator(ErrorEstimatorType type, int num, Domain *d)
   {
 #undef REGISTER_CLASS
-#define REGISTER_CLASS(_class, id) \
-case id: \
-  answer = new _class(num, d);	\
+#define REGISTER_CLASS(_class, id)  \
+case id:                            \
+  answer = new _class(num, d);      \
     break;
 
     ErrorEstimator *answer = NULL;

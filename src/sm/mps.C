@@ -159,7 +159,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, wc, IFT_MPSMaterial_wc, "w/c"); // ratio (by weight) of water to cementitious material
         IR_GIVE_FIELD(ir, ac, IFT_MPSMaterial_ac, "a/c"); // ratio (by weight) of aggregate to cement
 
-	stiffnessFactor = 1.;
+        stiffnessFactor = 1.;
         IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, IFT_MPSMaterial_stiffnessfactor, "stiffnessfactor"); // ratio (by weight) of aggregate to cement
 
         this->predictParametersFrom(fc, c, wc, ac, stiffnessFactor);
@@ -188,8 +188,8 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
         // muS = c0 * c1 * q4 [1/(Pa*s)]
         IR_GIVE_FIELD(ir, muS, IFT_MPSMaterial_mus, "mus");
         IR_GIVE_FIELD(ir, kappaT, IFT_MPSMaterial_kappat, "kappat"); //[-] replaces ln(h) in diff equation for MPS
-	this->ct = 0.;
-	IR_GIVE_OPTIONAL_FIELD(ir, ct, IFT_MPSMaterial_ct, "ct");
+        this->ct = 0.;
+        IR_GIVE_OPTIONAL_FIELD(ir, ct, IFT_MPSMaterial_ct, "ct");
 
         // age when drying or thermal changes begin [days] - necessary to determine initial viscosity
         IR_GIVE_FIELD(ir, t0, IFT_MPSMaterial_t0, "t0");
@@ -585,17 +585,17 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 
             PsiS = this->computePsiS(gp, atTime); // evaluated in the middle of the time step
 
-	    // original version
-	    //A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
+            // original version
+            //A = sqrt( muS * fabs( T_new * log(H_new) - T_old * log(H_old) ) / ( dt * this->roomTemperature ) );
 
-	    if ( this->ct == 0. ) {
-	      reductFactor = 1.;
-	    } else if ( ( status->giveTmax() - T_new < 0. ) || atTime->isTheFirstStep() ) {
-	      status->setTmax(T_new);
-	      reductFactor = 1.;
-	    } else {
-	      reductFactor = exp( - this->ct * fabs (T_new - status->giveTmax() ) );
-	    }
+            if ( this->ct == 0. ) {
+                reductFactor = 1.;
+            } else if ( ( status->giveTmax() - T_new < 0. ) || atTime->isTheFirstStep() ) {
+                status->setTmax(T_new);
+                reductFactor = 1.;
+            } else {
+                reductFactor = exp( - this->ct * fabs (T_new - status->giveTmax() ) );
+            }
 
             A = sqrt( muS * ( kappaT * reductFactor * fabs(T_new - T_old) + 0.5*(T_new + T_old) * fabs(log(H_new) - log(H_old)) ) / ( dt * this->roomTemperature ) );
             B = sqrt(PsiS / this->q4);
@@ -931,7 +931,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
         if ( option == 0 ) { // gives time in the middle of the timestep
             return relMatAge - atTime->giveTimeIncrement() + PsiE * ( 0.5 * atTime->giveTimeIncrement() );
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
-	    return relMatAge - atTime->giveTimeIncrement() + PsiE *atTime->giveTimeIncrement();
+            return relMatAge - atTime->giveTimeIncrement() + PsiE *atTime->giveTimeIncrement();
         } else {
             _error("computeEquivalentTime - mode is not supported")
         }

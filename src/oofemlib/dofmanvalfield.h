@@ -46,7 +46,7 @@ namespace oofem {
  * The implementation allows to set individual dofMan values;
  * However, in the current implementation doe not allow to specify values for different time steps.
  */
-  class DofManValueField : public Field
+class DofManValueField : public Field
 {
 protected:
     /// Associated domain (need its elements to interpolate)

@@ -1266,47 +1266,47 @@ Domain :: giveErrorEstimator() {
 
 
 
-#define SAVE_COMPONENTS(size,type,giveMethod)				\
-  {									\
-    type* obj;								\
-    for ( i = 1; i <= size; i++ ) {					\
-      obj = giveMethod(i);						\
-      if ( ( mode & CM_Definition ) ) {					\
-        ct =  (int) obj->giveClassID();					\
-        if ( !stream->write(& ct, 1) ) {				\
-	  THROW_CIOERR(CIO_IOERR);					\
-        }								\
-      }									\
-      if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) {	\
-	THROW_CIOERR(iores);						\
-      }									\
-    }									\
+#define SAVE_COMPONENTS(size,type,giveMethod)   \
+  {                                             \
+    type* obj;                                  \
+    for ( i = 1; i <= size; i++ ) {             \
+        obj = giveMethod(i);                    \
+        if ( ( mode & CM_Definition ) ) {       \
+            ct =  (int) obj->giveClassID();     \
+            if ( !stream->write(& ct, 1) ) {    \
+                THROW_CIOERR(CIO_IOERR);        \
+            }                                   \
+        }                                       \
+        if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
+            THROW_CIOERR(iores);                \
+        }                                       \
+    }                                           \
   }
 
-#define RESTORE_COMPONENTS(size,type,resizeMethod,creator,giveMethod,setMethod)	\
-  {									\
-  type *obj;								\
-  if ( mode & CM_Definition ) {						\
-    resizeMethod(size);							\
-  }									\
-  for ( i = 1; i <= size; i++ ) {					\
-    if ( mode & CM_Definition ) {					\
-      if ( !stream->read(& ct, 1) ) {					\
-	THROW_CIOERR(CIO_IOERR);					\
-      }									\
-      compId = ( classType ) ct;					\
-      obj = creator(compId, 0, this);					\
-    } else {								\
-      obj = giveMethod(i);						\
-    }									\
-    if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {	\
-      THROW_CIOERR(iores);						\
-    }									\
-    if ( mode & CM_Definition ) {					\
-      setMethod(i, obj);						\
-    }									\
-  }									\
-}
+#define RESTORE_COMPONENTS(size,type,resizeMethod,creator,giveMethod,setMethod) \
+  {                                         \
+    type *obj;                              \
+    if ( mode & CM_Definition ) {           \
+        resizeMethod(size);                 \
+    }                                       \
+    for ( i = 1; i <= size; i++ ) {         \
+        if ( mode & CM_Definition ) {       \
+            if ( !stream->read(& ct, 1) ) { \
+                THROW_CIOERR(CIO_IOERR);    \
+            }                               \
+            compId = ( classType ) ct;      \
+            obj = creator(compId, 0, this); \
+        } else {                            \
+            obj = giveMethod(i);            \
+        }                                   \
+        if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
+            THROW_CIOERR(iores);            \
+        }                                   \
+        if ( mode & CM_Definition ) {       \
+            setMethod(i, obj);              \
+        }                                   \
+    }                                       \
+  }
 
 #define DOMAIN_NCOMP 9
 
@@ -1335,7 +1335,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
       ncomp[6]=this->giveNumberOfLoadTimeFunctions();
       ncomp[7]=this->giveNumberOfNonlocalBarriers();
       ncomp[8]=this->giveNumberOfRandomFieldGenerators();
-      
+
       // store number of components
       if ( !stream->write (ncomp, DOMAIN_NCOMP) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -1399,58 +1399,58 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     if ( ( mode & CM_Definition ) ) {
-      // read number of components
-      if ( !stream->read(ncomp, DOMAIN_NCOMP) ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
-
-      nnodes = ncomp[0];
-      nelem = ncomp[1];
-      nmat  = ncomp[2];
-      ncs   = ncomp[3];
-      nbc   = ncomp[4];
-      nic   = ncomp[5];
-      nltf  = ncomp[6];
-      nnlb  = ncomp[7];
-      nrfg  = ncomp[8];
-
-      // clear receiver data
-      dofManagerList->clear();
-      elementList->clear();
-      materialList->clear();
-      bcList->clear();
-      icList->clear();
-      loadTimeFunctionList->clear();
-      nonlocalBarierList->clear();
-      randomFieldGeneratorList->clear();
-      //this->clear();
-
-
-      domainUpdated = true;
-    } else {
-      if ( serNum != this->giveSerialNumber() ) {
-        // read corresponding domain
-        OOFEM_LOG_INFO( "restoring domain %d.%d\n", this->number, this->giveSerialNumber() );
-        DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
-        this->clear();
-
-        if ( !this->instanciateYourself(domainDr) ) {
-	  _error("initializeAdaptive: domain Instanciation failed");
+        // read number of components
+        if ( !stream->read(ncomp, DOMAIN_NCOMP) ) {
+            THROW_CIOERR(CIO_IOERR);
         }
 
-        delete domainDr;
-        domainUpdated = true;
-      }
+        nnodes = ncomp[0];
+        nelem = ncomp[1];
+        nmat  = ncomp[2];
+        ncs   = ncomp[3];
+        nbc   = ncomp[4];
+        nic   = ncomp[5];
+        nltf  = ncomp[6];
+        nnlb  = ncomp[7];
+        nrfg  = ncomp[8];
 
-      nnodes=this->giveNumberOfDofManagers();
-      nelem=this->giveNumberOfElements();
-      nmat=this->giveNumberOfMaterialModels();
-      ncs=this->giveNumberOfCrossSectionModels();
-      nbc=this->giveNumberOfBoundaryConditions();
-      nic=this->giveNumberOfInitialConditions();
-      nltf=this->giveNumberOfLoadTimeFunctions();
-      nnlb=this->giveNumberOfNonlocalBarriers();
-      nrfg=this->giveNumberOfRandomFieldGenerators();
+        // clear receiver data
+        dofManagerList->clear();
+        elementList->clear();
+        materialList->clear();
+        bcList->clear();
+        icList->clear();
+        loadTimeFunctionList->clear();
+        nonlocalBarierList->clear();
+        randomFieldGeneratorList->clear();
+        //this->clear();
+
+
+        domainUpdated = true;
+    } else {
+        if ( serNum != this->giveSerialNumber() ) {
+            // read corresponding domain
+            OOFEM_LOG_INFO( "restoring domain %d.%d\n", this->number, this->giveSerialNumber() );
+            DataReader *domainDr = this->engineeringModel->GiveDomainDataReader(1, this->giveSerialNumber(), contextMode_read);
+            this->clear();
+
+            if ( !this->instanciateYourself(domainDr) ) {
+                _error("initializeAdaptive: domain Instanciation failed");
+            }
+
+            delete domainDr;
+            domainUpdated = true;
+        }
+
+        nnodes=this->giveNumberOfDofManagers();
+        nelem=this->giveNumberOfElements();
+        nmat=this->giveNumberOfMaterialModels();
+        ncs=this->giveNumberOfCrossSectionModels();
+        nbc=this->giveNumberOfBoundaryConditions();
+        nic=this->giveNumberOfInitialConditions();
+        nltf=this->giveNumberOfLoadTimeFunctions();
+        nnlb=this->giveNumberOfNonlocalBarriers();
+        nrfg=this->giveNumberOfRandomFieldGenerators();
     }
 
     RESTORE_COMPONENTS(nnodes,DofManager,this->resizeDofManagers,CreateUsrDefDofManagerOfType,this->giveDofManager,this->setDofManager);
@@ -1459,30 +1459,30 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( ( mode & CM_Definition ) ) {
 
-      RESTORE_COMPONENTS(nmat,Material,this->resizeMaterials,CreateUsrDefMaterialOfType,this->giveMaterial,this->setMaterial);
-      RESTORE_COMPONENTS(ncs,CrossSection,this->resizeCrossSectionModels,CreateUsrDefCrossSectionOfType,this->giveCrossSection,this->setCrossSection);
-      RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
-      RESTORE_COMPONENTS(nltf,LoadTimeFunction,resizeLoadTimeFunctions,CreateUsrDefLoadTimeFunctionOfType,giveLoadTimeFunction,setLoadTimeFunction);
-      RESTORE_COMPONENTS(nnlb,NonlocalBarrier,resizeNonlocalBarriers,CreateUsrDefNonlocalBarrierOfType, giveNonlocalBarrier,setNonlocalBarrier);
-      RESTORE_COMPONENTS(nrfg,RandomFieldGenerator,resizeRandomFieldGenerators,CreateUsrDefRandomFieldGenerator,giveRandomFieldGenerator,setRandomFieldGenerator);
+        RESTORE_COMPONENTS(nmat,Material,this->resizeMaterials,CreateUsrDefMaterialOfType,this->giveMaterial,this->setMaterial);
+        RESTORE_COMPONENTS(ncs,CrossSection,this->resizeCrossSectionModels,CreateUsrDefCrossSectionOfType,this->giveCrossSection,this->setCrossSection);
+        RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
+        RESTORE_COMPONENTS(nltf,LoadTimeFunction,resizeLoadTimeFunctions,CreateUsrDefLoadTimeFunctionOfType,giveLoadTimeFunction,setLoadTimeFunction);
+        RESTORE_COMPONENTS(nnlb,NonlocalBarrier,resizeNonlocalBarriers,CreateUsrDefNonlocalBarrierOfType, giveNonlocalBarrier,setNonlocalBarrier);
+        RESTORE_COMPONENTS(nrfg,RandomFieldGenerator,resizeRandomFieldGenerators,CreateUsrDefRandomFieldGenerator,giveRandomFieldGenerator,setRandomFieldGenerator);
     }
 
     // restore error estimator data
     ee = this->giveErrorEstimator();
     if ( domainUpdated ) {
-      ee->setDomain(this);
+        ee->setDomain(this);
     }
 
     if ( ee ) {
-      if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
-	THROW_CIOERR(iores);
-      }
+        if ( ( iores = ee->restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
     }
 
     if ( domainUpdated ) {
-      if ( this->smoother ) {
-	this->smoother->init();
-      }
+        if ( this->smoother ) {
+            this->smoother->init();
+        }
     }
 
     return CIO_OK;
