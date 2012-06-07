@@ -74,8 +74,8 @@ namespace oofem {
 
 enum NonLinearDynamic_ddtScheme {
     newmark = 0, ///< Newmark-beta method
-    crank_nicolson = 1, //< Crank-Nicolson method
-    euler = 2,   ///< Backward Euler method
+    euler2  = 1, ///< Two-point Backward method
+    euler3  = 2, ///< Three-point Backward Euler method
 };
 
 class NonLinearDynamic : public StructuralEngngModel
@@ -93,8 +93,8 @@ protected:
 
     FloatArray velocityVector, accelerationVector, previousLoadVector;
     FloatArray help, rhs, rhs2, previousInternalForces;
+    FloatArray previousIncrementOfDisplacement;
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
-    FloatArray previousAccelerationVector, previousVelocityVector;
     FloatArray internalForces;
 
     /// A load vector already applied, which does not scales.
