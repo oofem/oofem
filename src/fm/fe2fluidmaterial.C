@@ -62,18 +62,23 @@ void FE2FluidMaterialStatus :: setTimeStep(TimeStep *tStep)
     rveTStep->setTimeIncrement(tStep->giveTimeIncrement());
 }
 
-void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps_dev, TimeStep *tStep)
+void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
     // This assumes that the RVE doesn't have any pores.
-    double epsp_vol;
-    this->computeDeviatoricStressVector(answer, epsp_vol, gp, eps_dev, 0.0, tStep);
-    if ( epsp_vol > 1e-9 ) {
+    double r_vol;
+    this->computeDeviatoricStressVector(answer, r_vol, gp, eps, 0.0, tStep);
+    if ( gp->giveMaterialMode() == _2dFlow ) {
+        r_vol += eps.at(1) + eps.at(2);
+    } else {
+        r_vol += eps.at(1) + eps.at(2) + eps.at(3);
+    }
+    if ( r_vol > 1e-9 ) {
         OOFEM_ERROR("FE2FluidMaterialStatus :: computeDeviatoricStressVector - RVE seems to be compressible;"
             " extended macro-formulation which doesn't assume incompressibility is required");
     }
 }
 
-void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &epsp_vol, GaussPoint *gp, const FloatArray &eps_dev, double pressure, TimeStep *tStep)
+void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep)
 {
     FloatMatrix d, tangent;
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
@@ -84,12 +89,12 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     StokesFlow *rve = ms->giveRVE();
 
     // Set input
-    bc->setPrescribedDeviatoricGradientFromVoigt(eps_dev);
+    bc->setPrescribedDeviatoricGradientFromVoigt(eps);
     bc->setPrescribedPressure(pressure);
     // Solve subscale problem
     rve->solveYourselfAt(tStep);
 
-    bc->computeFields(stress_dev, epsp_vol, EID_MomentumBalance_ConservationEquation, tStep);
+    bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
     ms->letTempDeviatoricStressVectorBe(stress_dev);
 
     // Stores temporary tangents
@@ -112,17 +117,14 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         FloatArray sig, strain, sig11, sig22, sig12;
         double epspvol;
         computeDeviatoricStressVector (sig, epspvol, gp, tempStrain, 0.0, tStep);
-        printf("strain = "); tempStrain.printYourself(); printf("stress = "); sig.printYourself();
         double h = 0.001; // Linear problem, size of this doesn't matter.
         strain.resize(3);
-        strain = tempStrain; strain.at(1) += h*0.5; strain.at(2) -= h*0.5;
+        strain = tempStrain; strain.at(1) += h;
         computeDeviatoricStressVector (sig11, epspvol, gp, strain, 0.0, tStep);
-        printf("strain = "); strain.printYourself(); printf("stress = "); sig11.printYourself();
-        strain = tempStrain; strain.at(1) -= h*0.5; strain.at(2) += h*0.5;
+        strain = tempStrain; strain.at(2) += h;
         computeDeviatoricStressVector (sig22, epspvol, gp, strain, 0.0, tStep);
         strain = tempStrain; strain.at(3) += h;
         computeDeviatoricStressVector (sig12, epspvol, gp, strain, 0.0, tStep);
-        printf("strain = "); strain.printYourself(); printf("stress = "); sig12.printYourself();
 
         FloatArray dsig11; dsig11.beDifferenceOf(sig11,sig); dsig11.times(1/h);
         FloatArray dsig22; dsig22.beDifferenceOf(sig22,sig); dsig22.times(1/h);
@@ -181,9 +183,9 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
         double h = 1.0; // Linear problem, size of this doesn't matter.
 
         computeDeviatoricStressVector (sig, epspvol, gp, tempStrain, pressure, tStep);
-        strain = tempStrain; strain.at(1) += h*0.5; strain.at(2) -= h*0.5;
+        strain = tempStrain; strain.at(1) += h;
         computeDeviatoricStressVector(sig, epspvol11, gp, strain, pressure, tStep);
-        strain = tempStrain; strain.at(2) -= h*0.5; strain.at(2) += h*0.5;
+        strain = tempStrain; strain.at(2) += h;
         computeDeviatoricStressVector(sig, epspvol22, gp, strain, pressure, tStep);
         strain = tempStrain; strain.at(3) += h;
         computeDeviatoricStressVector(sig, epspvol12, gp, strain, pressure, tStep);
