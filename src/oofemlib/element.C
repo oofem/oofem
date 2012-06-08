@@ -47,10 +47,10 @@
 #include "datastream.h"
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
+#include "mathfem.h"
 
 #ifndef __MAKEDEPEND
  #include <cstdio>
- #include <cmath>
 #endif
 
 namespace oofem {

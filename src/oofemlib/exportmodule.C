@@ -38,10 +38,10 @@
 #include "logger.h"
 #include "oofem_limits.h"
 #include "range.h"
+#include "mathfem.h"
 
 #ifndef __MAKEDEPEND
  #include <stdarg.h>
- #include <cmath>
 #endif
 
 namespace oofem {

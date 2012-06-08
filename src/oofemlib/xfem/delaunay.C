@@ -38,11 +38,13 @@
 #include "alist.h"
 #include "geometry.h"
 #include "node.h"
-#include <cmath>
+#include "mathfem.h"
+
 #include <map>
 
 namespace oofem {
-bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3) {
+bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
+{
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
                   p3->at(1) * ( p1->at(2) - p2->at(2) );
     // the tolerance probably needs a setter
@@ -53,13 +55,15 @@ bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3) {
     }
 }
 
-void Delaunay :: printTriangles(AList< Triangle > *triangles) {
+void Delaunay :: printTriangles(AList< Triangle > *triangles)
+{
     for ( int i = 1; i <= triangles->giveSize(); i++ ) {
         triangles->at(i)->printYourself();
     }
 }
 
-bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  FloatArray *p3) {
+bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  FloatArray *p3)
+{
     FloatArray *nodesCopy1 = new FloatArray(*p1);
     FloatArray *nodesCopy2 = new FloatArray(*p2);
     FloatArray *nodesCopy3 = new FloatArray(*p3);

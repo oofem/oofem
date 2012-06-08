@@ -873,7 +873,7 @@ ConcreteDPM2 :: computeRateFactor(const double alpha,
     //For compression
     // Fip-Model code 1990 expressions modified to take into account that we have an equivalent strain!
     double alphaS = 1. / ( 5. + 9 * this->fc / this->fcZero );
-    double gammaS = exp( ( 6.156 * alphaS - 2. ) * log(10) );
+    double gammaS = exp( ( 6.156 * alphaS - 2. ) * log(10.0) );
 
     double strainRateRatioTension, strainRateRatioCompression;
 
