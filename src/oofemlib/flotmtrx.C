@@ -44,6 +44,9 @@
 #include "error.h"
 #include "datastream.h"
 #include "classtype.h"
+#include "freestor.h"
+
+#include <cassert>
 
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE

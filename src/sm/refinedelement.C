@@ -40,7 +40,9 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
- #include <stdarg.h>
+ #include <cstdarg>
+ #include <cstdlib> // For abort
+ ///@todo Replace abort() with OOFEM_ERROR
 #endif
 
 namespace oofem {

@@ -134,6 +134,7 @@ InitialCondition *MasterDof :: giveIc()
         return  ( dofManager->giveDomain()->giveIc(ic) );
     } else {
         OOFEM_ERROR("MasterDof :: giveIc() - does not know yet if has InitCond or not");
+        return NULL;
     }
 }
 

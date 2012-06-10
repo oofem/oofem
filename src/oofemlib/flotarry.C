@@ -45,6 +45,7 @@
 #include "datastream.h"
 #include "classtype.h"
 #include "mathfem.h"
+#include "freestor.h"
 
 #ifndef __MAKEDEPEND
  #include <cstdarg>
