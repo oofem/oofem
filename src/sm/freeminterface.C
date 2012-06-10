@@ -40,9 +40,6 @@
 #include "dynalist.h"
 #include "conTable.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 MesherInterface :: returnCode

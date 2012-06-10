@@ -35,7 +35,6 @@
 #include "eleminterpunknownmapper.h"
 #include "eleminterpmapperinterface.h"
 #include "element.h"
-#include "interface.h"
 #include "domain.h"
 #include "engngm.h"
 #include "spatiallocalizer.h"

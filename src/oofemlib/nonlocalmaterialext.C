@@ -33,23 +33,20 @@
  */
 
 #include "gausspnt.h"
-#include "flotmtrx.h"
 #include "flotarry.h"
 #include "element.h"
 #include "timestep.h"
 #include "integrationrule.h"
 #include "dynalist.h"
 #include "nonlocalmaterialext.h"
-#include "crosssection.h"
+#include "material.h"
 #include "spatiallocalizer.h"
 #include "domain.h"
 #include "nonlocalbarrier.h"
+#include "mathfem.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
-#endif
-#ifndef __MAKEDEPEND
- #include <math.h>
 #endif
 
 namespace oofem {
@@ -59,7 +56,7 @@ namespace oofem {
 // #define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
 
 
-/// constructor
+// constructor
 NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain *d)  : Interface()
 {
     domain = d;
@@ -86,7 +83,7 @@ NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *
     nelem = d->giveNumberOfElements();
 
     if ( d->giveNonlocalUpdateStateCounter() == atTime->giveSolutionStateCounter() ) {
-        return;                                                                         // already updated
+        return; // already updated
     }
 
     for ( i = 1; i <= nelem; i++ ) {

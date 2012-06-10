@@ -35,9 +35,6 @@
 #ifndef outputmanager_h
 #define outputmanager_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"

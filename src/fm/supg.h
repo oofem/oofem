@@ -40,9 +40,6 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "materialinterface.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 /**

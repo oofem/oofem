@@ -36,10 +36,8 @@
 #include "mathfem.h"
 #include "gausspnt.h"
 #include "element.h"
-#include "node.h"
 #include "domain.h"
 #include "spatiallocalizer.h"
-#include "timestep.h"
 #include "integrationrule.h"
 #include "conTable.h"
 

@@ -38,19 +38,14 @@
 #include "domain.h"
 #include "engngm.h"
 #include "element.h"
-#include "timestep.h"
 #include "mathfem.h"
 #include "verbose.h"
+
 #ifndef __MAKEDEPEND
- #include <math.h>
- #include <limits.h>
- #include <stdlib.h>
+ #include <climits>
 #endif
 
 #ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
  #include "clock.h"
 #endif
 

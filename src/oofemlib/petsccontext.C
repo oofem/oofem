@@ -35,7 +35,6 @@
 #ifdef __PETSC_MODULE
 #include "petsccontext.h"
 #include "engngm.h"
-#include "dofmanager.h"
 
 namespace oofem {
 //#define PetscContext_debug_print

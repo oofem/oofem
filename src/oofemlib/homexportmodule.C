@@ -34,17 +34,9 @@
 
 #include "homexportmodule.h"
 #include "timestep.h"
-#include "engngm.h"
-#include "node.h"
 #include "structuralelement.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "sprnodalrecoverymodel.h"
 #include "materialinterface.h"
-#include "mathfem.h"
-#include "oofem_limits.h"
 #include "gausspnt.h"
-#include "../tm/transportelement.h"
 #ifndef __MAKEDEPEND
  #include <vector>
 #endif

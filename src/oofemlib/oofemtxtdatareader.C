@@ -35,11 +35,6 @@
 #include "oofemtxtdatareader.h"
 #include "error.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <ctype.h>
-#endif
-
 namespace oofem {
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(), ir()
 {

@@ -33,10 +33,8 @@
  */
 
 #include "dofdistributedprimaryfield.h"
-#include "spatiallocalizer.h"
 #include "dofmanager.h"
 #include "dof.h"
-#include "element.h"
 #include "timestep.h"
 #include "flotarry.h"
 

@@ -54,7 +54,6 @@
 #include "node.h"
 #include "materialinterface.h"
 #include "mathfem.h"
-#include "oofem_limits.h"
 #include "cltypes.h"
 #include "element.h"
 #include "material.h"

@@ -33,15 +33,13 @@
  */
 
 #include "latticedamage2d.h"
-#include "isolinearelasticmaterial.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"
-#include "engngm.h"
-#include <math.h>
 #include "datastream.h"
 #include "contextioerr.h"
+#include "mathfem.h"
 
 namespace oofem {
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()

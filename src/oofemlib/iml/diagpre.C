@@ -28,9 +28,6 @@
 /*                                                                           */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "diagpre.h"
 #include "sparsemtrx.h"
 

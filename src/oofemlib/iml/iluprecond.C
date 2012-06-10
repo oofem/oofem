@@ -30,17 +30,11 @@
 
 // adapted & optimized by Borek Patzak
 
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "dyncompcol.h"
 #include "iluprecond.h"
 #include "verbose.h"
 
 #ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
  #include "clock.h"
 #endif
 

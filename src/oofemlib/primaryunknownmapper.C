@@ -35,12 +35,10 @@
 
 #include "primaryunknownmapper.h"
 #include "error.h"
-#include "logger.h"
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdarg.h>
+ #include <cstdarg>
 #endif
 
 namespace oofem {

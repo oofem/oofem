@@ -33,13 +33,8 @@
  */
 
 #include "hydratingisoheatmat.h"
-#include "domain.h"
-#include "flotmtrx.h"
 #include "gausspnt.h"
 #include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "contextioerr.h"
 
 namespace oofem {
@@ -126,8 +121,8 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
 // rate of internal source must be returned, it is multiplied by time increment in element integration.
 {
     if ( hydrationHeat ) {
-        if ( hydrationModel ) { //!!! better via HydrationModelInterface
-            hydrationModel->computeInternalSourceVector(val, gp, atTime, VM_Incremental); //!!! mode is VM_Total for nltransientstatic
+        if ( hydrationModel ) { ///@todo better via HydrationModelInterface
+            hydrationModel->computeInternalSourceVector(val, gp, atTime, VM_Incremental); ///@todo mode is VM_Total for nltransientstatic
             val.times( 1. / atTime->giveTimeIncrement() ); // /give('d');
         } else {
             val.zero();

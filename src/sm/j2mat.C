@@ -38,8 +38,6 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 
 namespace oofem {

@@ -32,23 +32,20 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "petscsparsemtrx.h"
 
 #include "mixedgradientpressurebc.h"
 #include "dofiditem.h"
 #include "dofmanager.h"
 #include "dof.h"
 #include "valuemodetype.h"
-#include "classtype.h"
-
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "loadtime.h"
 #include "engngm.h"
 #include "node.h"
 #include "activedof.h"
 #include "masterdof.h"
 #include "usrdefsub.h" // For sparse matrix creation.
+#include "sparsemtrxtype.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"

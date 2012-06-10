@@ -33,21 +33,17 @@
  */
 
 #include "fe2fluidmaterial.h"
-#include "structuralmaterial.h"
 #include "stokesflow.h"
 #include "oofemtxtdatareader.h"
 #include "domain.h"
 #include "gausspnt.h"
 #include "engngm.h"
-#include "mathfem.h"
-#include "datastream.h"
 #include "contextioerr.h"
 #include "util.h"
 
 // Used for computing
 #include "line2boundaryelement.h"
 
-#include <cstdlib>
 #include <sstream>
 
 namespace oofem {

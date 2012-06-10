@@ -47,40 +47,32 @@
 #include "entityrenumberingscheme.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#include "clock.h"
 #include "verbose.h"
-
 #include "conTable.h"
 #include "outputmanager.h"
-#include "dummylocalizer.h"
 #include "octreelocalizer.h"
 #include "datareader.h"
-#include "util.h"
 #include "nodalrecoverymodel.h"
 #include "nonlocalbarrier.h"
 #include "usrdefsub.h"
 #include "logger.h"
-#include "domaintransactionmanager.h"
 #include "xfemmanager.h"
 #include "topologydescription.h"
 #include "randomfieldgenerator.h"
 #include "errorestimator.h"
+#include "compiler.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "processcomm.h"
  #include "datastream.h"
  #include "communicator.h"
+ #include "domaintransactionmanager.h"
 #endif
 
 #ifndef __MAKEDEPEND
- #include <string.h>
- #include <stdarg.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
- #include <ctype.h>
+ #include <cstdarg>
+ #include <cstring>
 #endif
 
 namespace oofem {

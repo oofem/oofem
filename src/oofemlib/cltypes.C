@@ -51,9 +51,7 @@
 #include "equationid.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
- #include <stdlib.h>
+ #include <cstring>
 #endif
 
 namespace oofem {

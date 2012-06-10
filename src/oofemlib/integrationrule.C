@@ -38,8 +38,6 @@
 #include "gausspnt.h"
 #include "datastream.h"
 #include "contextioerr.h"
-#include "geometry.h"
-#include "feinterpol.h"
 
 namespace oofem {
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)

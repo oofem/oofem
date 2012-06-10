@@ -35,9 +35,6 @@
 #ifndef imlsolver_h
 #define imlsolver_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"

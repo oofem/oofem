@@ -34,11 +34,6 @@
 #ifndef tokenizer_h
 #define tokenizer_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
-
 #include "oofem_limits.h"
 
 namespace oofem {

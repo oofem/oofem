@@ -49,12 +49,6 @@
 #include "error.h"
 #include "iml/iml.h"
 
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
- #include <assert.h>
-#endif
-
 namespace oofem {
 class IntArray;
 class FloatMatrix;

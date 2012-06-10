@@ -38,10 +38,6 @@
 #include "dofmanager.h"
 #include "domain.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 class Dof;
 class NodalLoad;

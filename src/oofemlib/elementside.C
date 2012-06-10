@@ -34,17 +34,9 @@
 
 #include "elementside.h"
 #include "dof.h"
-#include "nodload.h"
-#include "timestep.h"
-
-#include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "verbose.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 ElementSide :: ElementSide(int n, Domain *aDomain) :

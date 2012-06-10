@@ -33,9 +33,7 @@
  */
 
 #include "piecewis.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12

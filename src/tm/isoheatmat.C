@@ -33,12 +33,8 @@
  */
 
 #include "isoheatmat.h"
-#include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 IRResultType

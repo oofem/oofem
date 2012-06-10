@@ -36,7 +36,6 @@
 #include "spatiallocalizer.h"
 #include "usrdefsub.h"
 #include "element.h"
-#include "timestep.h"
 
 namespace oofem {
 SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel::NodalRecoveryModelType st, Domain *d) : Field(ft)

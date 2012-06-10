@@ -38,9 +38,6 @@
 #include "flotmtrx.h"
 #include "gausspnt.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 int

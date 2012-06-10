@@ -40,17 +40,12 @@
 #include "gaussintegrationrule.h"
 #include "gausspnt.h"
 #include "bcgeomtype.h"
-#include "generalbc.h"
 #include "load.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 namespace oofem {
 // Set up interpolation coordinates

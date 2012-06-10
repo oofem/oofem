@@ -35,11 +35,6 @@
 #ifndef parser_h
 #define parser_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
 namespace oofem {
 #define Parser_CMD_LENGTH 1024
 #define Parser_TBLSZ 23

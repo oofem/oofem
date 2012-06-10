@@ -40,9 +40,6 @@
 #ifndef inverseit_h
 #define inverseit_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparsegeneigenvalsystemnm.h"
 #include "flotarry.h"
 

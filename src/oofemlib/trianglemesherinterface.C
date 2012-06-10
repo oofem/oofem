@@ -36,10 +36,9 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include <list>
-#include <set>
 
-#include <stdio.h>
+#include <set>
+#include <cstdio>
 
 #ifdef __TRIANGLE_MODULE
 extern "C" {

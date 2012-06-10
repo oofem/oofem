@@ -33,7 +33,6 @@
  */
 
 #include "truss1d.h"
-#include "domain.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"

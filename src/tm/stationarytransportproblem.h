@@ -39,9 +39,6 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 /**

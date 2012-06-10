@@ -33,18 +33,11 @@
  */
 
 #include "qspacegrad.h"
-#include "node.h"
-#include "material.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "domain.h"
-#include "cltypes.h"
-#include "structuralms.h"
-#include "mathfem.h"
-#include "structuralcrosssection.h"
 
 namespace oofem {
 

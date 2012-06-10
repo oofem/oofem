@@ -37,8 +37,6 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "valuemodetype.h"
-#include "classtype.h"
-
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "loadtime.h"

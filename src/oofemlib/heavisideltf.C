@@ -33,9 +33,6 @@
  */
 
 #include "heavisideltf.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 namespace oofem {
 double

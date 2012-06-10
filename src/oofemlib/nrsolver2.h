@@ -35,9 +35,6 @@
 #ifndef nrsolver2_h
 #define nrsolver2_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"

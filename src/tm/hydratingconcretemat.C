@@ -33,14 +33,9 @@
  */
 
 #include "hydratingconcretemat.h"
-#include "domain.h"
-#include "flotmtrx.h"
 #include "gausspnt.h"
 #include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
-#include "contextioerr.h"
+#include "mathfem.h"
 
 namespace oofem {
 HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)

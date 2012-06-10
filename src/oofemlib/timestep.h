@@ -47,10 +47,6 @@
 #include "contextmode.h"
 #include "statecountertype.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 /**
  * Class representing solution step. The timeStep instance may represent either
@@ -93,7 +89,7 @@ protected:
     StateCounterType solutionStateCounter;
     /// Receiver's number.
     int number;
-    /** 
+    /**
      * Receiver's version, used for special applications; default set to 0.
      * Typically, new version of same step is generated after adaptive restart, when
      * the restarted step is equilibrated on new domain.
@@ -177,7 +173,7 @@ public:
     void incrementVersion() { version++; }
 
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    /** 
+    /**
      * Stores receiver state to output stream.
      * Receiver should write class-id first in order to allow test
      * whether correct data are then restored.
@@ -189,7 +185,7 @@ public:
      * @exception ContextIOERR If error encountered.
      */
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /** 
+    /**
      * Restores the receiver state previously written in stream.
      * @see saveContext member function.
      */

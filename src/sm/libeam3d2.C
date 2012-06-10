@@ -38,20 +38,13 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "structuralcrosssection.h"
-#include "structuralmaterial.h"
 #include "structuralms.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-#include "dof.h"
 #include "timestep.h"
 #include "contextioerr.h"
-#include "util.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "engngm.h"

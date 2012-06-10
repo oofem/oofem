@@ -32,22 +32,17 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "mathfem.h"
-#include "verbose.h"
 #include "nlinearstatic.h"
+#include "structuralelement.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"
-#include "element.h"
-#include "node.h"
-#include "elementside.h"
 #include "error.h"
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
 #include "nrsolver.h"
 #include "nrsolver2.h"
 #include "calmls.h"
-#include "nlstructuralelement.h"
 #include "outputmanager.h"
 #include "datastream.h"
 #include "usrdefsub.h"
@@ -55,13 +50,7 @@
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #ifdef TIME_REPORT
-  #include <time.h>
- #endif
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),

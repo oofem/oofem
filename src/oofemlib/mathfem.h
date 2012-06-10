@@ -42,9 +42,9 @@
 
 #ifndef __MAKEDEPEND
  #include <cmath>
- #include "error.h"
 #endif
 #include "compiler.h"
+#include "error.h"
 
 namespace oofem {
 #ifndef HAVE_M_PI

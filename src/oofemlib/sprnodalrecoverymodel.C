@@ -36,12 +36,8 @@
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
-#include "elementside.h"
 #include "conTable.h"
 #include "integrationrule.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 SPRNodalRecoveryModel :: SPRNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)

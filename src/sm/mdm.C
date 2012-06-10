@@ -34,7 +34,6 @@
 
 #include "mdm.h"
 #include "gausspnt.h"
-#include "microplane.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"

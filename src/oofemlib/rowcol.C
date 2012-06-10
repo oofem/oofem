@@ -38,10 +38,6 @@
 #include "mathfem.h"
 #include "freestor.h"
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 RowColumn :: RowColumn(int n, int st)

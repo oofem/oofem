@@ -37,7 +37,6 @@
 #include "simplecrosssection.h"
 #include "material.h"
 #include "structuralms.h"
-#include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"
 

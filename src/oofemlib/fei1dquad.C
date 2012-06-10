@@ -35,8 +35,7 @@
 #include "fei1dquad.h"
 #include "mathfem.h"
 #include "flotmtrx.h"
-#include "dofmanager.h"
-#include "node.h"
+#include "flotarry.h"
 
 namespace oofem {
 void

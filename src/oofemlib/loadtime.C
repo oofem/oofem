@@ -39,21 +39,7 @@
  */
 
 #include "loadtime.h"
-#include "constant.h"
-#include "domain.h"
-#include "usrdefsub.h"
 #include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
-#endif
-
-#ifndef __MAKEDEPEND
- #include <string.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
-#endif
 
 namespace oofem {
 double

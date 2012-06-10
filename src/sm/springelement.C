@@ -33,20 +33,9 @@
  */
 
 #include "springelement.h"
-#include "node.h"
-#include "material.h"
-#include "crosssection.h"
-#include "gausspnt.h"
-#include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-#include "dof.h"
-#include "engngm.h"
-#include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

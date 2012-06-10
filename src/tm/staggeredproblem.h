@@ -39,9 +39,6 @@
 #include "alist.h"
 
 #include "inputrecord.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 /**

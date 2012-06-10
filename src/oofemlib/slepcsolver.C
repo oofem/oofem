@@ -45,9 +45,6 @@
  #include "verbose.h"
 
  #ifdef TIME_REPORT
-  #ifndef __MAKEDEPEND
-   #include <time.h>
-  #endif
   #include "clock.h"
  #endif
 

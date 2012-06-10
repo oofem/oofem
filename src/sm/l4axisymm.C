@@ -34,20 +34,14 @@
 
 #include "l4axisymm.h"
 #include "node.h"
-#include "material.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
-#include "structuralcrosssection.h"
-#include "structuralms.h"
 #include "engngm.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

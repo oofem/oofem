@@ -41,7 +41,6 @@
 #include "datastream.h"
 #include "spatiallocalizer.h"
 #include "contextioerr.h"
-#include "util.h"
 #include "element.h"
 
 namespace oofem {

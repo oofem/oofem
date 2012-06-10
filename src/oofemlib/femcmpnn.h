@@ -42,7 +42,6 @@
 #define femcmpnn_h
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <string>
 #endif
 

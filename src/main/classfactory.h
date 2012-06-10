@@ -39,9 +39,10 @@
 #include "domain.h"
 #include "classtype.h"
 #include "sparselinsystemnm.h"
+#include "compiler.h"
 #include <map>
 #include <string>
-#include <string.h>
+#include <cstring>
 
 #define REGISTER_CLASS(_class, name, id)
 #include "elementclassfactory.h"

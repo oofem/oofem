@@ -41,10 +41,6 @@
 #include "equationid.h"
 #include "valuemodetype.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 class Domain;
 class Element;

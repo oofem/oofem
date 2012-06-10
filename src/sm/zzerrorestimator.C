@@ -34,8 +34,7 @@
 
 #include "zzerrorestimator.h"
 #include "domain.h"
-#include "node.h"
-#include "elementside.h"
+#include "dofmanager.h"
 #include "element.h"
 #include "gausspnt.h"
 #include "flotarry.h"

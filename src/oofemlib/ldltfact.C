@@ -33,9 +33,6 @@
  */
 
 #include "ldltfact.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :

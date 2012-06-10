@@ -39,19 +39,13 @@
  */
 
 #include "femcmpnn.h"
-#include "domain.h"
-
-#include "engngm.h"
-#include "logger.h"
+#include "error.h"
 #include "datastream.h"
 #include "oofem_limits.h"
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
- #include <stdarg.h>
+ #include <cstdarg>
 #endif
 
 namespace oofem {

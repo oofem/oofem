@@ -38,6 +38,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "error.h"
+#include "mathfem.h"
 
 namespace oofem {
 StressVector :: StressVector(MaterialMode m) : StressStrainBaseVector(m)
@@ -554,7 +555,7 @@ StressVector :: computeStressNorm() const
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
-        return abs(values [ 0 ]);
+        return fabs(values [ 0 ]);
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ]);

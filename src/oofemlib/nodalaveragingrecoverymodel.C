@@ -35,8 +35,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "timestep.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
+#include "dofmanager.h"
 
 namespace oofem {
 NodalAveragingRecoveryModel :: NodalAveragingRecoveryModel(Domain *d) : NodalRecoveryModel(d)

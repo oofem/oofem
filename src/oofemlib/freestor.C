@@ -33,11 +33,10 @@
  */
 
 #include "freestor.h"
-#include "compiler.h"
 #include "error.h"
+
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
+ #include <cstdlib>
 #endif
 
 namespace oofem {

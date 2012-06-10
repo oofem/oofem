@@ -33,11 +33,9 @@
  */
 
 #include "diidynamic.h"
-#include "nummet.h"
 #include "timestep.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
+#include "dofmanager.h"
 #include "dof.h"
 #include "contextioerr.h"
 #include "datastream.h"
@@ -45,14 +43,6 @@
 #include "structuralelement.h"
 #include "structuralelementevaluator.h"
 #include "usrdefsub.h"
-
-#ifdef __PETSC_MODULE
- #include "petscsolver.h"
-#endif
-
-#ifdef __PARALLEL_MODE
- #include "fetisolver.h"
-#endif
 
 namespace oofem {
 DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),

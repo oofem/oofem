@@ -34,13 +34,8 @@
 
 #include "hydratinghemomat.h"
 #include "hydratingisoheatmat.h"
-#include "domain.h"
-#include "flotmtrx.h"
 #include "gausspnt.h"
 #include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "contextioerr.h"
 
 namespace oofem {

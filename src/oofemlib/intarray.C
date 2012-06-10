@@ -40,13 +40,11 @@
 
 #include "intarray.h"
 #include "freestor.h"
-
 #include "error.h"
 #include "datastream.h"
 #include "classtype.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <cstdarg>
 #endif
 

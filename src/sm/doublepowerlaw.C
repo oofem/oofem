@@ -34,8 +34,6 @@
 
 #include "doublepowerlaw.h"
 #include "mathfem.h"
-#include "gausspnt.h"
-#include "crosssection.h"
 
 namespace oofem {
 IRResultType

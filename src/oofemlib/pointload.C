@@ -35,11 +35,11 @@
 #include "pointload.h"
 #include "loadtime.h"
 #include "flotarry.h"
-#include "timestep.h"
 
 namespace oofem {
 void
-PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)  {
+PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+{
     double factor;
     // returns component array for elements which use direct formulae
     Load :: computeComponentArrayAt(answer, tStep, mode);

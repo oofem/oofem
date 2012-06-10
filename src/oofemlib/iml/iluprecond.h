@@ -36,9 +36,6 @@
 #include "compcol.h"
 #include "dyncompcol.h"
 #include "precond.h"
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 
 namespace oofem {
 /**
@@ -66,7 +63,7 @@ public:
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     CompCol_ILUPreconditioner() : Preconditioner() { }
     /// Destructor
-    ~CompCol_ILUPreconditioner(void) { };
+    virtual ~CompCol_ILUPreconditioner(void) { };
 
     virtual void init(const SparseMtrx &);
 

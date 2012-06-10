@@ -34,22 +34,14 @@
 
 #include "mazarsmodelnl.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
 #include "flotarry.h"
-#include "structuralcrosssection.h"
-#include "mathfem.h"
-#include "isolinearelasticmaterial.h"
 #include "nonlocalmaterialext.h"
-#include "datastream.h"
 #include "contextioerr.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 namespace oofem {
 MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)

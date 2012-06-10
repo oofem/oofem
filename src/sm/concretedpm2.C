@@ -35,19 +35,16 @@
 #include "concretedpm2.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "intarray.h"
-#include <math.h>
 #include "datastream.h"
 #include "contextioerr.h"
-
 #include "timestep.h"
-#include "integrationrule.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
+#include "mathfem.h"
 
 namespace oofem {
 ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :
@@ -412,12 +409,6 @@ ConcreteDPM2Status :: restoreContext(DataStream *stream, ContextMode mode, void 
 //   ********************************
 //   *** CLASS DYNAMIC CONCRETE   ***
 //   ********************************
-
-#include "timestep.h"
-#include "integrationrule.h"
-#include "structuralmaterial.h"
-#include "structuralcrosssection.h"
-#include <math.h>
 
 #define IDM_ITERATION_LIMIT 1.e-8
 
@@ -1066,8 +1057,7 @@ ConcreteDPM2 :: computeDamageParam(double equivStrain, double kappaOne, double k
         omega = 1.;
         return omega;
     } else if ( omega < 0. )       {
-        printf("Error: omega is smaller than zero. Not possible\n");
-        exit(1);
+        OOFEM_ERROR("ConcreteDPM2 :: computeDamageParam - omega is smaller than zero. Not possible\n");
     }
 
     return omega;
@@ -2291,7 +2281,7 @@ ConcreteDPM2 :: computeHardeningTwoPrime(const double kappa) const
 {
     if ( kappa <= 0. ) {
         return 0.;
-    } else if ( kappa >= 0. && kappa < 1. )      {
+    } else if ( kappa >= 0. && kappa < 1. ) {
         return 0.;
     } else   {
         return yieldHardPrimePeak;
@@ -2542,8 +2532,6 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
         answer = plasticStrainVector;
         return 1;
 
-        break;
-
     case IST_DamageTensor:
         answer.resize(2);
         answer.zero();
@@ -2551,12 +2539,9 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
         answer.at(2) = status->giveDamageCompression();
         return 1;
 
-        break;
-
     default:
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
 
-        break;
     }
     return 0;
 }
@@ -2569,16 +2554,12 @@ ConcreteDPM2 :: giveIPValueSize(InternalStateType type,
     case IST_PlasticStrainTensor:
         return 6;
 
-        break;
     case IST_DamageTensor:
         return 2;
-
-        break;
 
     default:
         return StructuralMaterial :: giveIPValueSize(type, gp);
 
-        break;
     }
 }
 
@@ -2599,20 +2580,15 @@ ConcreteDPM2 :: giveIntVarCompFullIndx(IntArray &answer,
         answer.at(6) = 6;
         return 1;
 
-        break;
-
     case IST_DamageTensor:
         answer.resize(9);
         answer.at(1) = 1;
         answer.at(2) = 2;
         return 1;
 
-        break;
-
     default:
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 
-        break;
     }
 }
 
@@ -2623,17 +2599,12 @@ ConcreteDPM2 :: giveIPValueType(InternalStateType type)
     case IST_PlasticStrainTensor: // plastic strain tensor
         return ISVT_TENSOR_S3E;
 
-        break;
-
     case IST_DamageTensor: // damage tensor used for internal variables
         return ISVT_TENSOR_S3;
-
-        break;
 
     default:
         return StructuralMaterial :: giveIPValueType(type);
 
-        break;
     }
 }
 

@@ -34,26 +34,18 @@
 
 #include "lspace.h"
 #include "node.h"
-#include "material.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
-
-#include "structuralms.h"
 #include "mathfem.h"
-#include "util.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "conTable.h"
  #include "rcm2.h"
 #endif
 

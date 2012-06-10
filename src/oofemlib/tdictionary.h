@@ -38,7 +38,7 @@
 #include "compiler.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
- #include <stdlib.h> // for NULL
+ #include <cstdlib> // for NULL
 #endif
 
 namespace oofem {

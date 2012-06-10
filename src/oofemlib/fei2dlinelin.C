@@ -33,10 +33,9 @@
  */
 
 #include "fei2dlinelin.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "intarray.h"
 #include "mathfem.h"
+#include "flotmtrx.h"
+#include "flotarry.h"
 
 namespace oofem {
 void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

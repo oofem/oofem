@@ -32,17 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "verbose.h"
 #include "adaptlinearstatic.h"
-#include "timestep.h"
-#include "nummet.h"
-
 #include "remeshingcrit.h"
-#include "t3dinterface.h"
-#include "targe2interface.h"
-#include "freeminterface.h"
-
-#include "eleminterpunknownmapper.h"
+#include "mesherinterface.h"
 #include "errorestimator.h"
 #include "usrdefsub.h"
 #include "contextioerr.h"

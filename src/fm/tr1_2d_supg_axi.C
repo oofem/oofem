@@ -46,11 +46,6 @@
 #include "load.h"
 #include "boundaryload.h"
 
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "conTable.h"

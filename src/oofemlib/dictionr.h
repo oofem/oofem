@@ -43,7 +43,6 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <string>
 #endif
 

@@ -32,19 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
- #include <ctype.h>
- #include <iostream>
-#endif
-
 #include "engngm.h"
 #include "usrdefsub.h"
 #include "util.h"
 #include "inputrecord.h"
 #include "datareader.h"
-#include "oofem_limits.h"
+
+#ifndef __MAKEDEPEND
+ #include <cstring>
+ #include <iostream>
+#endif
 
 namespace oofem {
 char *giveLineFromInput(FILE *inputStream, char *line, int len)

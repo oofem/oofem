@@ -33,9 +33,7 @@
  */
 
 #include "piecewisper.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 double PeriodicPiecewiseLinFunction :: __at(double time)

@@ -40,10 +40,6 @@
 #include "nmstatus.h"
 #include "flotarry.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 class EngngModel;
 class SparseMtrx;

@@ -34,11 +34,9 @@
 
 #include "refinedelement.h"
 #include "element.h"
-#include "huertaerrorestimator.h"
 #include "node.h"
 #include "dof.h"
 #include "mathfem.h"
-#include "logger.h"
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
@@ -47,7 +45,7 @@
 
 namespace oofem {
 RefinedElement :: RefinedElement(Domain *d, int elem, int level) : fineNodeList(0), boundaryFlag()
-    // Construktor
+    // Constructor
 {
     Element *element;
     int inode, nodes, sides, dim, len;

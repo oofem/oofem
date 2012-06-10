@@ -34,8 +34,9 @@
 
 #include "tokenizer.h"
 #include "error.h"
+
 #ifndef __MAKEDEPEND
- #include <ctype.h>
+ #include <cctype>
 #endif
 
 namespace oofem {

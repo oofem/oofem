@@ -57,26 +57,25 @@
 #include "xfemmanager.h"
 #include "unknownnumberingscheme.h"
 
-#ifndef __MAKEDEPEND
- #include <string>
- #include <stdio.h>
-
- #ifdef __PARALLEL_MODE
-  #include "parallel.h"
-  #include "problemcommunicatormode.h"
-  #include "loadbalancer.h"
- #endif
-
- #ifdef __PETSC_MODULE
-  #include "petsccontext.h"
-  #include "petscordering.h"
- #endif
+#ifdef __PARALLEL_MODE
+ #include "parallel.h"
+ #include "problemcommunicatormode.h"
+ #include "loadbalancer.h"
 #endif
 
+#ifdef __PETSC_MODULE
+ #include "petsccontext.h"
+ #include "petscordering.h"
+#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
+
+#ifndef __MAKEDEPEND
+ #include <string>
+#endif
+
 
 namespace oofem {
 

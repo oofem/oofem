@@ -35,10 +35,6 @@
 #include "initial.h"
 #include "cltypes.h"
 
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
-
 namespace oofem {
 
 double InitialCondition :: give(ValueModeType type)

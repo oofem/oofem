@@ -1919,8 +1919,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
 
 
     default:
-        printf("SetUpPointsOnLine: such order of integration is not suported\n");
-        exit(1);
+        OOFEM_ERROR2("GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine - order %d of integration is not suported\n",nPoints);
     }
 
     // Initialize the material status at each Gauss point

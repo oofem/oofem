@@ -33,11 +33,9 @@
  */
 
 #include "fei2dtrconst.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "intarray.h"
-#include "node.h"
 #include "mathfem.h"
+#include "flotmtrx.h"
+#include "flotarry.h"
 
 namespace oofem {
 void

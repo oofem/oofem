@@ -39,10 +39,6 @@
 
 #include "matrix.h"
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 void Matrix :: checkBounds(int i, int j) const

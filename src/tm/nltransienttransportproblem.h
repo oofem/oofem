@@ -38,9 +38,6 @@
 #include "nonstationarytransportproblem.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 /**

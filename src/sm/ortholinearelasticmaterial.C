@@ -37,14 +37,9 @@
 #include "structuralelement.h"
 #include "material.h"
 #include "structuralms.h"
-#include "domain.h"
 #include "flotmtrx.h"
-#include "timestep.h"
 #include "gausspnt.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 #define ZERO_LENGTH 1.e-6

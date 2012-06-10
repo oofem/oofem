@@ -33,13 +33,10 @@
  */
 
 #include "structuralcrosssection.h"
-#include "simplecrosssection.h"
-#include "structuralelement.h"
 #include "gausspnt.h"
 #include "element.h"
 #include "structuralmaterial.h"
 #include "flotarry.h"
-#include "verbose.h"
 
 namespace oofem {
 void

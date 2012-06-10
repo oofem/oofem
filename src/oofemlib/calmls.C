@@ -33,11 +33,6 @@
  */
 
 #include "calmls.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
 #include "verbose.h"
 #include "timestep.h"
 #include "flotmtrx.h"

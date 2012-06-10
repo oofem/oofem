@@ -40,13 +40,11 @@
 #include "node.h"
 #include "materialinterface.h"
 #include "mathfem.h"
-#include "oofem_limits.h"
 #include "cltypes.h"
 #include "material.h"
 #include "usrdefsub.h"
 
 #ifndef __MAKEDEPEND
- #include <vector>
  #include <string>
  #include <sstream>
  #include <fstream>

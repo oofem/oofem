@@ -33,9 +33,7 @@
  */
 
 #include "peak.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 double PeakFunction :: __at(double time)

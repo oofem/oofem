@@ -34,13 +34,11 @@
 
 #include "layeredcrosssection.h"
 #include "structuralelement.h"
-#include "engngm.h"
 #include "gausspnt.h"
 #include "material.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "flotarry.h"
-#include "verbose.h"
 #include "contextioerr.h"
 
 namespace oofem {

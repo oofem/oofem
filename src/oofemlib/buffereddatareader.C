@@ -36,8 +36,8 @@
 #include "error.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <ctype.h>
+ #include <cstdio>
+ #include <cctype>
 #endif
 
 namespace oofem {
@@ -81,7 +81,7 @@ BufferedDataReader :: seek(int position)
     pos = buffer.begin();
 
     while ( pos != buffer.end() ) {
-        if ( * ( * pos ).c_str() != '#' ) {
+        if ( (*pos)[0] != '#' ) {
             if ( ++i == position ) {
                 return;
             }

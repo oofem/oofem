@@ -8,13 +8,6 @@
 #ifndef hellmat_h
 #define hellmat_h
 
-// standard includes
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
-#endif
-
 // oofem includes
 #include "flotarry.h"
 #include "flotmtrx.h"

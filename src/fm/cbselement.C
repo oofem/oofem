@@ -33,28 +33,14 @@
  */
 
 #include "cbselement.h"
-#include "domain.h"
-#include "timestep.h"
 #include "node.h"
-#include "dof.h"
-#include "load.h"
-#include "boundaryload.h"
-#include "gausspnt.h"
-#include "gaussintegrationrule.h"
+#include "integrationrule.h"
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "verbose.h"
-
-#include "elementside.h"
-#include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
 #endif
 
 namespace oofem {

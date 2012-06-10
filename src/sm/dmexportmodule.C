@@ -33,17 +33,10 @@
  */
 
 #include "dmexportmodule.h"
-
-#include "cltypes.h"
 #include "timestep.h"
 #include "engngm.h"
 #include "dofmanager.h"
 #include "dof.h"
-#include "mathfem.h"
-#include "oofem_limits.h"
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
 
 namespace oofem {
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)

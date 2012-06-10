@@ -39,9 +39,6 @@
 #include "engngm.h"
 #include "materialinterface.h"
 //#include "leplic.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 int

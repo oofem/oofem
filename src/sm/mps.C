@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 #include "mps.h"
 #include "mathfem.h"
 #include "gausspnt.h"
@@ -43,8 +39,6 @@
 #include "timestep.h"
 #include "contextioerr.h"
 #include "datastream.h"
-
-#include "rankinemat.h"
 
 namespace oofem {
 /****************************************************************************************/

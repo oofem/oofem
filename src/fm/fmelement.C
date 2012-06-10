@@ -33,7 +33,6 @@
  */
 
 #include "fmelement.h"
-#include "intarray.h"
 
 namespace oofem {
 FMElement :: FMElement(int n, Domain *aDomain) :

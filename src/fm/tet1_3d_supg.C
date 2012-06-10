@@ -35,7 +35,6 @@
 #include "tet1_3d_supg.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
@@ -44,20 +43,10 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "fluiddynamicmaterial.h"
-#include "load.h"
 #include "timestep.h"
-#include "boundaryload.h"
-
-#include "materialinterface.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
 #endif
 
 namespace oofem {

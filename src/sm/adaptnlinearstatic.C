@@ -41,23 +41,10 @@
 #include "nummet.h"
 #include "element.h"
 #include "node.h"
-#include "elementside.h"
-#include "util.h"
 #include "domain.h"
 #include "datareader.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-#include "calmls.h"
-#include "nrsolver.h"
-
-#include "outputmanager.h"
-
 #include "remeshingcrit.h"
-#include "t3dinterface.h"
-#include "targe2interface.h"
-#include "freeminterface.h"
-
+#include "mesherinterface.h"
 #include "dof.h"
 #include "eleminterpunknownmapper.h"
 #include "errorestimator.h"

@@ -32,11 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include "homogenize.h"
-
+#include "mathfem.h"
 
 namespace oofem {
 Homogenize :: Homogenize()

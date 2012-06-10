@@ -39,17 +39,9 @@
 #include "boundary.h"
 #include "initial.h"
 #include "primaryfield.h"
-#include "flotarry.h"
 #include "dictionr.h"
 #include "datastream.h"
-
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <ctype.h>
- #include <string.h>
-#endif
 
 namespace oofem {
 MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(i, aNode, id)
@@ -141,8 +133,7 @@ InitialCondition *MasterDof :: giveIc()
     if ( ic ) {
         return  ( dofManager->giveDomain()->giveIc(ic) );
     } else {
-        _error("giveIc:  does not know yet if has InitCond or not \n");
-        exit(0);
+        OOFEM_ERROR("MasterDof :: giveIc() - does not know yet if has InitCond or not");
     }
 }
 
@@ -280,8 +271,7 @@ bool MasterDof :: hasBc(TimeStep *tStep)
 #endif
 
     if ( bc == -1 ) {
-        _error("hasBc:  does not know yet if has InitCond or not \n");
-        exit(0);
+        OOFEM_ERROR("MasterDof :: hasBc() - does not know yet if has InitCond or not");
     }
 
     if ( bc ) {
@@ -297,8 +287,7 @@ bool MasterDof :: hasIc()
 // else returns False.
 {
     if ( ic == -1 ) {
-        _error("hasIc:  does not know yet if has InitCond or not \n");
-        exit(0);
+        OOFEM_ERROR("MasterDof :: hasIc - does not know yet if has InitCond or not");
     }
 
     return ic > 0;

@@ -34,21 +34,9 @@
 
 #include "crosssection.h"
 #include "dictionr.h"
-#include "structuralelement.h"
 #include "gausspnt.h"
 #include "material.h"
-#include "flotarry.h"
-#include "verbose.h"
-#include "usrdefsub.h"
-#include "compiler.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <string.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
-#endif
 
 namespace oofem {
 IRResultType

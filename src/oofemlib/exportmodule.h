@@ -39,11 +39,6 @@
 #include "dynalist.h"
 #include "inputrecord.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
-
 namespace oofem {
 class EngngModel;
 class TimeStep;

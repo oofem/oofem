@@ -43,7 +43,6 @@
 #include "xfemelementinterface.h"
 #include "structuralcrosssection.h"
 #include "enrichmentitem.h"
-#include "mathfem.h"
 
 namespace oofem {
 Interface *

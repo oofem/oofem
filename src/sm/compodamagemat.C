@@ -35,12 +35,9 @@
 #include "compodamagemat.h"
 #include "structuralelement.h"
 #include "material.h"
-#include "linearelasticmaterial.h"
-#include "ortholinearelasticmaterial.h"
-#include "structuralcrosssection.h"
+#include "gausspnt.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "cltypes.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 

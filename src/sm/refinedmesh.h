@@ -37,6 +37,8 @@
 
 #include "alist.h"
 
+#include <stdlib.h>
+
 namespace oofem {
 #define SAVE                       /* memory savings */
 //#define COMPLETE_DATA_STRUCTURE    /* only for 2-manifolds */

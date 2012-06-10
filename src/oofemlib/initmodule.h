@@ -35,10 +35,6 @@
 #ifndef initmodule_h
 #define initmodule_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
 #include "inputrecord.h"
 
 namespace oofem {

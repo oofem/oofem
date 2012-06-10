@@ -33,13 +33,8 @@
  */
 
 #include "gausspnt.h"
-#include "element.h"
-#include "domain.h"
 #include "matstatus.h"
 #include "material.h"
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 
 namespace oofem {
 GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)

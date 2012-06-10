@@ -37,12 +37,7 @@
 #include "gaussintegrationrule.h"
 #include "gausspnt.h"
 #include "material.h"
-#include "timestep.h"
-#include "mathfem.h"
 #include "fei2dlinequad.h"
-
-#include <stdlib.h>
-#include <math.h>
 
 namespace oofem {
 FEI2dLineQuad Line2SurfaceTension :: fei(1, 2);

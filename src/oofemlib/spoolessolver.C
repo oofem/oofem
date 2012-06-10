@@ -64,9 +64,6 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_
  #include "spoolesinterface.h"
 
  #ifdef TIME_REPORT
-  #ifndef __MAKEDEPEND
-   #include <time.h>
-  #endif
   #include "clock.h"
  #endif
 

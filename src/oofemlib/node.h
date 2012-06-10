@@ -45,10 +45,6 @@
 #include "domain.h"
 #include "flotarry.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 class Dof;
 class NodalLoad;

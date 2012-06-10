@@ -33,20 +33,12 @@
  */
 
 #include "qplanestraingrad.h"
-#include "domain.h"
-#include "node.h"
-#include "material.h"
-#include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

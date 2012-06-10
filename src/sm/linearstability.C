@@ -36,19 +36,10 @@
 //#define LIN_STAB_COMPATIBILITY_MODE
 
 #include "linearstability.h"
-#include "nummet.h"
 #include "timestep.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
 #include "flotmtrx.h"
-
 #include "verbose.h"
 #include "flotarry.h"
 #include "usrdefsub.h"

@@ -38,11 +38,6 @@
 #include "dof.h"
 #include "compiler.h"
 #include "dictionr.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
-
 #include "error.h"
 
 namespace oofem {

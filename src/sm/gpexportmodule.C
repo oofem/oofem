@@ -37,18 +37,8 @@
 #include "material.h"
 #include "element.h"
 #include "integrationrule.h"
-
 #include "timestep.h"
 #include "engngm.h"
-#include "node.h"
-#include "mathfem.h"
-#include "oofem_limits.h"
-#include "structuralms.h"
-#ifndef __MAKEDEPEND
- #include <vector>
- #include <stdio.h>
-#endif
-
 
 namespace oofem {
 GPExportModule :: GPExportModule(int n, EngngModel *e) : ExportModule(n, e)

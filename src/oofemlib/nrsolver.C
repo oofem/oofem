@@ -33,15 +33,8 @@
  */
 
 #include "nrsolver.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
 #include "verbose.h"
 #include "timestep.h"
-#include "flotmtrx.h"
-#include "structengngmodel.h"
 #include "mathfem.h"
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"

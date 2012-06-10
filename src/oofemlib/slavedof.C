@@ -33,15 +33,10 @@
  */
 
 #include "slavedof.h"
-#include "node.h"
+#include "domain.h"
+#include "dofmanager.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <ctype.h>
-#endif
 
 namespace oofem {
 SlaveDof :: SlaveDof(int n, DofManager *aNode, DofIDItem id) : Dof(n, aNode, id), masterContribution()
@@ -272,7 +267,8 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
 
 
 inline Dof *
-SlaveDof :: giveMasterDof(int i) {
+SlaveDof :: giveMasterDof(int i)
+{
     return dofManager->giveDomain()->giveDofManager( masterDofMans.at(i) )->giveDofWithID( dofIDs.at(i) );
 }
 

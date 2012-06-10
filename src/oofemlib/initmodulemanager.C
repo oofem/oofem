@@ -34,17 +34,7 @@
 
 #include "initmodulemanager.h"
 #include "modulemanager.h"
-#include "engngm.h"
-#include "exportmodule.h"
-
 #include "usrdefsub.h"
-#include "util.h"
-#include "oofem_limits.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <time.h>
-#endif
 
 namespace oofem {
 InitModuleManager :: InitModuleManager(EngngModel *emodel) : ModuleManager< InitModule >(emodel)
@@ -63,7 +53,8 @@ InitModuleManager :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-InitModule *InitModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel) {
+InitModule *InitModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel)
+{
     return CreateUsrDefInitModuleOfType(name, n, emodel);
 }
 

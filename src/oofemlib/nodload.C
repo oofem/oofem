@@ -33,9 +33,6 @@
  */
 
 #include "nodload.h"
-#include "loadtime.h"
-#include "flotarry.h"
-#include "timestep.h"
 
 namespace oofem {
 IRResultType

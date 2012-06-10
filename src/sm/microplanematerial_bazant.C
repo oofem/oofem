@@ -33,14 +33,8 @@
  */
 
 #include "microplanematerial_bazant.h"
-#include "gausspnt.h"
 #include "microplane.h"
-#include "flotmtrx.h"
 #include "flotarry.h"
-#include "structuralcrosssection.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 namespace oofem {
 MicroplaneMaterial_Bazant :: MicroplaneMaterial_Bazant(int n, Domain *d) : MicroplaneMaterial(n, d)

@@ -33,8 +33,7 @@
  */
 
 #include "tractionpressurebc.h"
-#include "timestep.h"
-#include "loadtime.h"
+#include "engngm.h"
 
 namespace oofem {
 double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)

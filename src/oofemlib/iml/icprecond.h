@@ -35,9 +35,6 @@
 #include "intarray.h"
 #include "symcompcol.h"
 #include "precond.h"
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 
 namespace oofem {
 /**

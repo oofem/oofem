@@ -39,16 +39,12 @@
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "intarray.h"
-#include "timestep.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 #define PRINTFDP //if defined, printf debug info simultaneously on screen
 
@@ -837,20 +833,15 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
 
         return 1;
 
-        break;
-
     case IST_DamageTensor:
         answer.resize(1);
         answer.zero();
         answer.at(1) = status->giveKappa();
         return 1;
 
-        break;
-
     default:
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
 
-        break;
     }
 
     return 0;
@@ -864,16 +855,12 @@ DruckerPragerPlasticitySM :: giveIPValueSize(InternalStateType type,
     case IST_PlasticStrainTensor:
         return 6;
 
-        break;
     case IST_DamageTensor:
         return 1;
-
-        break;
 
     default:
         return StructuralMaterial :: giveIPValueSize(type, gp);
 
-        break;
     }
 }
 
@@ -894,19 +881,15 @@ DruckerPragerPlasticitySM :: giveIntVarCompFullIndx(IntArray &answer,
         answer.at(6) = 6;
         return 1;
 
-        break;
     case IST_DamageTensor:
         answer.resize(1);
         answer.zero();
         answer.at(1) = 1;
         return 1;
 
-        break;
-
     default:
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 
-        break;
     }
 }
 
@@ -917,17 +900,12 @@ DruckerPragerPlasticitySM :: giveIPValueType(InternalStateType type)
     case IST_PlasticStrainTensor:      // plastic strain tensor
         return ISVT_TENSOR_S3;
 
-        break;
-
     case IST_DamageTensor:     // damage tensor used for internal variables
         return ISVT_TENSOR_G;
-
-        break;
 
     default:
         return StructuralMaterial :: giveIPValueType(type);
 
-        break;
     }
 }
 

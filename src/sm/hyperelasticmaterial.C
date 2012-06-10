@@ -33,11 +33,8 @@
  */
 
 #include "hyperelasticmaterial.h"
-#include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "structuralcrosssection.h"
-#include "mathfem.h"
 
 namespace oofem {
 HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)

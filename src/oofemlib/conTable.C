@@ -41,8 +41,7 @@
 #include "freestor.h"
 #include "domain.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
+#include "dofmanager.h"
 #include "conTable.h"
 
 namespace oofem {

@@ -36,23 +36,12 @@
 #include "feinterpol.h"
 #include "structuralms.h"
 #include "domain.h"
-#include "timestep.h"
-#include "node.h"
-#include "dof.h"
 #include "material.h"
-#include "structuralcrosssection.h"
-#include "bodyload.h"
-#include "gausspnt.h"
+#include "crosssection.h"
 #include "integrationrule.h"
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "verbose.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
-#endif
 
 namespace oofem {
 NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :

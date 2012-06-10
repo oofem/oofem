@@ -37,9 +37,6 @@
 #ifdef __DSS_MODULE
 
  #include "dss.h"
- #ifndef __MAKEDEPEND
-  #include <stdio.h>
- #endif
 
 namespace oofem {
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :

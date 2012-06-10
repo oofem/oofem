@@ -37,20 +37,11 @@
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "structuralcrosssection.h"
-#include "mathfem.h"
-
 #include "sparsemtrx.h"
-#include "isolinearelasticmaterial.h"
 #include "dynalist.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"
-#include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -58,7 +49,6 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
 #endif
 
 namespace oofem {

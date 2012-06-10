@@ -32,24 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "dyncomprow.h"
 #include "ilucomprowprecond.h"
 #include "verbose.h"
 
 #ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
  #include "clock.h"
-#endif
-
-#ifdef DynCompRow_USE_STL_SETS
- #ifndef __MAKEDEPEND
-  #include <map>
- #endif
 #endif
 
 namespace oofem {

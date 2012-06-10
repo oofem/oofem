@@ -34,18 +34,11 @@
 
 #include "perfectlyplasticmaterial.h"
 #include "structuralcrosssection.h"
-#include "domain.h"
-#include "verbose.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-
 #include "mathfem.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
 #include "contextioerr.h"
 
 namespace oofem {
@@ -311,8 +304,7 @@ PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &an
     if ( lMat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
         lMat->giveCharacteristicMatrix(answer, FullForm, mode, gp, atTime);
     } else {
-        _error("giveEffectiveMaterialStiffnessMatrix: usupported material mode");
-        exit(1);
+        OOFEM_ERROR("PerfectlyPlasticMaterial :: giveEffectiveMaterialStiffnessMatrix - unsupported material mode");
     }
 }
 

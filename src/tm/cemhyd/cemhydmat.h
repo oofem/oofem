@@ -38,14 +38,10 @@
 /*CEMHYD3D v 3.0 has been developed at NIST, programmed by D.P.Bentz*/
 /*modified to an object-oriented version by smilauer@cml.fsv.cvut.cz*/
 
+#include "mathfem.h"
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include <tinyxml.h>
-
-#ifndef M_PI
- #define M_PI 3.1415926535897932384626433832795029L /* pi */
-#endif
 
 #define TINYXML //read CEMHYD3D input file through tinyXML library
 
@@ -147,7 +143,7 @@ public:
 class CemhydMatStatus : public TransportMaterialStatus
 {
 public:
-    /** 
+    /**
      * Create status in an integration point.
      * @param CemStat A pointer to existing microstructure, from which the 3D image is copied.
      * @param withMicrostructure Creates also 3D microstructure representation at the integration point.

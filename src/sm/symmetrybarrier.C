@@ -33,15 +33,9 @@
  */
 
 #include "symmetrybarrier.h"
-#include "domain.h"
-#include "node.h"
 #include "intarray.h"
 #include "flotarry.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
-#endif
 
 namespace oofem {
 SymmetryBarrier :: SymmetryBarrier(int n, Domain *aDomain) :

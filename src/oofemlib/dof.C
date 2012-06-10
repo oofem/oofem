@@ -34,25 +34,18 @@
 
 #include "dof.h"
 #include "dofmanager.h"
-#include "domain.h"
 #include "timestep.h"
 #include "boundary.h"
 #include "initial.h"
-
-#include "flotarry.h"
-#include "dictionr.h"
-
-#include "logger.h"
 #include "datastream.h"
 #include "oofem_limits.h"
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
- #include <string.h>
- #include <stdlib.h>
- #include <ctype.h>
- #include <stdarg.h>
+ #include <cstring>
+ #include <cstdlib>
+ #include <cstdarg>
 #endif
 
 namespace oofem {

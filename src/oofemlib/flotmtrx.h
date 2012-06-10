@@ -48,11 +48,6 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
-#endif
-
 namespace oofem {
 class FloatArray;
 class IntArray;

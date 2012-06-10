@@ -35,19 +35,15 @@
 // Initialization module reading data related to Gauss points from a specified file
 
 #include "gpinitmodule.h"
-#include "gausspnt.h"
 #include "element.h"
 #include "integrationrule.h"
 #include "material.h"
-
+#include "flotarry.h"
 #include "domain.h"
-#include "timestep.h"
 #include "engngm.h"
-#include "structuralms.h"
+
 #ifndef __MAKEDEPEND
- #include <vector>
- #include <assert.h>
- #include "flotarry.h"
+ #include <cassert>
 #endif
 
 

@@ -34,17 +34,8 @@
 
 #include "exportmodulemanager.h"
 #include "modulemanager.h"
-#include "engngm.h"
 #include "exportmodule.h"
-
 #include "usrdefsub.h"
-#include "util.h"
-#include "oofem_limits.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <time.h>
-#endif
 
 namespace oofem {
 ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< ExportModule >(emodel)
@@ -64,18 +55,15 @@ ExportModuleManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-
-ExportModule *ExportModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel) {
+ExportModule *ExportModuleManager :: CreateModuleOfType(const char *name, int n, EngngModel *emodel)
+{
     return CreateUsrDefExportModuleOfType(name, n, emodel);
 }
 
 void
 ExportModuleManager :: doOutput(TimeStep *tStep)
 {
-    int i;
-
-    for ( i = 1; i <= numberOfModules; i++ ) {
+    for ( int i = 1; i <= numberOfModules; i++ ) {
         ( ( ExportModule * ) this->giveModule(i) )->doOutput(tStep);
     }
 }
@@ -83,9 +71,7 @@ ExportModuleManager :: doOutput(TimeStep *tStep)
 void
 ExportModuleManager :: initialize()
 {
-    int i;
-
-    for ( i = 1; i <= numberOfModules; i++ ) {
+    for ( int i = 1; i <= numberOfModules; i++ ) {
         ( ( ExportModule * ) this->giveModule(i) )->initialize();
     }
 }
@@ -94,9 +80,7 @@ ExportModuleManager :: initialize()
 void
 ExportModuleManager :: terminate()
 {
-    int i;
-
-    for ( i = 1; i <= numberOfModules; i++ ) {
+    for ( int i = 1; i <= numberOfModules; i++ ) {
         ( ( ExportModule * ) this->giveModule(i) )->terminate();
     }
 }

@@ -44,10 +44,9 @@
 #include "error.h"
 #include "datastream.h"
 #include "classtype.h"
+#include "mathfem.h"
 
 #ifndef __MAKEDEPEND
- #include <math.h>
- #include <string.h>
  #include <cstdarg>
 #endif
 

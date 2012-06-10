@@ -35,14 +35,9 @@
 #include "microplanematerial.h"
 #include "microplane.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
 #include "flotarry.h"
-#include "structuralcrosssection.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 Microplane *

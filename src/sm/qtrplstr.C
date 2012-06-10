@@ -34,23 +34,15 @@
 
 #include "qtrplstr.h"
 #include "node.h"
-#include "material.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "domain.h"
-#include "verbose.h"
-#include "engngm.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
  #include "oofegutils.h"
  #include "rcm2.h"
 #endif

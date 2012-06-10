@@ -66,9 +66,6 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSu
  #include "ilucomprowprecond.h"
 
  #ifdef TIME_REPORT
-  #ifndef __MAKEDEPEND
-   #include <time.h>
-  #endif
   #include "clock.h"
  #endif
 

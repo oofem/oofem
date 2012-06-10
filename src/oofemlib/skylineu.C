@@ -32,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file SKYLINEU.C
-
 #include "skylineu.h"
 #include "rowcol.h"
 #include "flotmtrx.h"
@@ -41,21 +39,11 @@
 #include "domain.h"
 #include "engngm.h"
 #include "element.h"
-#include "timestep.h"
 #include "mathfem.h"
 #include "verbose.h"
-#include "structuralelement.h" // for nonloc stiff support
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <limits.h>
- #include <stdlib.h>
-#endif
 
 #ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
  #include "clock.h"
 #endif
 

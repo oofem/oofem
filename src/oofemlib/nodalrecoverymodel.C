@@ -33,11 +33,9 @@
  */
 
 #include "nodalrecoverymodel.h"
-#include "timestep.h"
+#include "domain.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
-#include "crosssection.h"
+#include "dofmanager.h"
 
 namespace oofem {
 NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0), virtualRegionMap(0)

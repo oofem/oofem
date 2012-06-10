@@ -34,7 +34,6 @@
 
 #include "planstrss.h"
 #include "node.h"
-#include "material.h"
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
@@ -43,13 +42,8 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
-#include "engngm.h"
 #include "structuralms.h"
 #include "strainvector.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

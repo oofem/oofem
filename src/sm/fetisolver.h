@@ -45,10 +45,6 @@
  #include "feticommunicator.h"
  #include "engngm.h"
 
- #ifndef __MAKEDEPEND
-  #include <stdio.h>
- #endif
-
 namespace oofem {
 class Domain;
 class EngngModel;

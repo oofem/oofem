@@ -38,7 +38,10 @@
 #include "node.h"
 #include "element.h"
 #include "conTable.h"
-#include "error.h"
+
+#ifndef __MAKEDEPEND
+ #include <cstdlib>
+#endif
 
 namespace oofem {
 void

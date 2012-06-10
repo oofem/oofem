@@ -34,12 +34,7 @@
 
 #include "combinedzzsiee.h"
 #include "domain.h"
-#include "node.h"
-#include "elementside.h"
 #include "element.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "timestep.h"
 #include "conTable.h"
 #include "mathfem.h"
 

@@ -5,13 +5,6 @@
 //  ?? standalone thermochemical analysis - temperature history as input / both ksi & T input ... thermochemo a few steps ahead - temperature interpolation for given time / coordinates
 // file hellmat.C
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
- #include <math.h>
- #include <string.h>
-#endif
-
 #include "gausspnt.h"
 #include "timestep.h"
 #include "loadtime.h"

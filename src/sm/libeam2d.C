@@ -38,12 +38,9 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "structuralcrosssection.h"
-#include "structuralmaterial.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-#include "dof.h"
 #include "mathfem.h"
 
 namespace oofem {

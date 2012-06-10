@@ -34,14 +34,13 @@
 
 #include "simplecrosssection.h"
 #include "gausspnt.h"
-#include "material.h"
 #include "structuralmaterial.h"
 #include "flotarry.h"
 
 namespace oofem {
 void
-SimpleCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                        const FloatArray &totalStrain, TimeStep *tStep)
+SimpleCrossSection :: giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                       const FloatArray &totalStrain, TimeStep *tStep)
 //
 // this function returns a real stresses corresponding to
 // given totalStrain according to stressStrain mode stored
@@ -170,8 +169,7 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
 
     if ( ( mode == _3dShell ) || ( mode == _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) ) {
         if ( size != 12 ) {
-            _error("giveReducedCharacteristicVector - charVector3d size mismatch");
-            exit(0);
+            OOFEM_ERROR("SimpleCrossSection :: giveReducedCharacteristicVector - charVector3d size mismatch");
         }
 
         mat->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );
@@ -187,16 +185,14 @@ SimpleCrossSection :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
         return;
     } else if ( mode == _3dBeam ) {
         if ( size != 6 ) {
-            _error("giveReducedCharacteristicVector - charVector3d size mismatch");
-            exit(0);
+            OOFEM_ERROR("SimpleCrossSection :: giveReducedCharacteristicVector - charVector3d size mismatch");
         }
 
         answer =  charVector3d;
         return;
     } else if ( mode == _PlaneStressRot ) {
         if ( size != 7 ) {
-            _error("giveReducedCharacteristicVector - charVector3d size mismatch");
-            exit(0);
+            OOFEM_ERROR("SimpleCrossSection :: giveReducedCharacteristicVector - charVector3d size mismatch");
         }
 
         mat->giveStressStrainMask( indx, ReducedForm, gp->giveMaterialMode() );

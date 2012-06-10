@@ -34,22 +34,16 @@
 
 #include "trplanstrss.h"
 #include "node.h"
-#include "structuralmaterial.h"
-#include "structuralms.h"
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "domain.h"
-#include "verbose.h"
-#include "engngm.h"
 #include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
  #include "oofegutils.h"
  #include "rcm2.h"
 #endif

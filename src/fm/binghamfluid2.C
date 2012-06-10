@@ -40,9 +40,6 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "contextioerr.h"
 
 

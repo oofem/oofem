@@ -32,11 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "dss.h"
-#include "error.h"
-
 #ifdef __DSS_MODULE
 
+ #include "dss.h"
+ #include "error.h"
  #include "flotarry.h"
  #include "engngm.h"
  #include "domain.h"

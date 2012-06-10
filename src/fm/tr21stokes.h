@@ -102,7 +102,6 @@ public:
     virtual classType giveClassID() const { return Tr21StokesElementClass; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    /// @see Element::computeNumberOfDofs
     virtual int computeNumberOfDofs(EquationID ut);
 
     virtual FEInterpolation *giveInterpolation();

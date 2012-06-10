@@ -53,7 +53,7 @@
 #ifdef __USE_MPI
 // if MPI used, include headers
  #ifndef __MAKEDEPEND
-  #include "mpi.h"
+  #include <mpi.h>
  #endif
 #endif
 

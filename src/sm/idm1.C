@@ -38,13 +38,9 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"
-#include "mmaclosestiptransfer.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 #ifdef IDM_USE_MMAClosestIPTransfer

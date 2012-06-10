@@ -34,14 +34,9 @@
 
 #include "cct3d.h"
 #include "node.h"
-#include "domain.h"
 #include "load.h"
 #include "structuralms.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
-
+#include "mathfem.h"
 
 namespace oofem {
 CCTPlate3d :: CCTPlate3d(int n, Domain *aDomain) : CCTPlate(n, aDomain)

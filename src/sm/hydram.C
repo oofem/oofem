@@ -28,12 +28,12 @@
 #include "hydram.h"
 #include "gausspnt.h"
 #include "datastream.h"
+#include "mathfem.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
- #include <stdlib.h>
- #include <math.h>
 #endif
-#include "contextioerr.h"
 
 namespace oofem {
 // ======= class HydrationModelStatus implementation =======
@@ -44,7 +44,8 @@ HydrationModelStatus :: HydrationModelStatus(int n, Domain *d, GaussPoint *g) : 
 }
 
 void
-HydrationModelStatus :: printOutputAt(FILE *file, TimeStep *tStep) {
+HydrationModelStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+{
     fprintf(file, " ksi %.5f", hydrationDegree);
 }
 
@@ -131,13 +132,13 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     initialHydrationDegree = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, initialHydrationDegree, IFT_HydrationModel_hydration, "hydration"); // Macro
     if ( initialHydrationDegree >= 0. ) {
-        printf("\nHydrationModel: Hydration from %.2f.", initialHydrationDegree);
+        OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
         _error("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
     }
 
     if ( ir->hasField(IFT_HydrationModel_c60mix, "c60mix") ) {
-        printf("\nHydrationModel: Model parameters for Skanska C60/75 mixture.");
+        OOFEM_LOG_INFO("HydrationModel: Model parameters for Skanska C60/75 mixture.");
         setMixture(mtC60);
     }
 
@@ -146,7 +147,7 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_timeScale, "timescale"); // Macro
     if ( value >= 0. ) {
         timeScale = value;
-        printf("\nHydrationModel: Time scale set to %.0f", timeScale);
+        OOFEM_LOG_INFO("HydrationModel: Time scale set to %.0f", timeScale);
     }
 
     // Optional direct input of material parameters
@@ -155,14 +156,14 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_hheat, "hheat"); // Macro
     if ( value >= 0 ) {
         le = value;
-        printf("\nHydrationModel: Latent heat of hydration set to %.0f", le);
+        OOFEM_LOG_INFO("HydrationModel: Latent heat of hydration set to %.0f", le);
     }
 
     value = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModel_cv, "cv"); // Macro
     if ( value >= 0 ) {
         cv = value;
-        printf("\nHydrationModel: Cement content set to %.0f kg/m3", cv);
+        OOFEM_LOG_INFO("HydrationModel: Cement content set to %.0f kg/m3", cv);
         we = 0.23 * cv;
     }
 
@@ -173,7 +174,7 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     }
 
     if ( cv || ( value >= 0 ) ) {
-        printf("\nHydrationModel: Water consumption for hydration set to %.0f kg/m3", we);
+        OOFEM_LOG_INFO("HydrationModel: Water consumption for hydration set to %.0f kg/m3", we);
     }
 
     return IRRT_OK;
@@ -368,15 +369,14 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
             break;
 #ifdef DEBUG
         default: {
-            printf("HydrationModel::dksi: unknown FindRootMethod %d", useFindRoot);
-            exit(0);
+            OOFEM_ERROR2("HydrationModel :: dksi - unknown FindRootMethod %d", useFindRoot);
         }
 #endif
         }
 
         if ( ksi + result > 1.0 ) {
 #ifdef VERBOSE
-            printf("temp=%.12f, dksi %.15f -> %f\n", T, result, 1.0 - ksi);
+            OOFEM_LOG_INFO("temp=%.12f, dksi %.15f -> %f\n", T, result, 1.0 - ksi);
 #endif
             result = 1.0 - ksi;
         }
@@ -498,7 +498,7 @@ HydrationModel :: regulafindroot()
         }
 
 #ifdef VERBOSEFINDROOT
-        printf("regulafindroot: x=%.15f, chyba %.15f \n", x0, y0);
+        OOFEM_LOG_INFO("regulafindroot: x=%.15f, chyba %.15f \n", x0, y0);
 #endif
     } while ( fabs(y0) > ROOT_PRECISION_DKSI );
 
@@ -520,7 +520,7 @@ HydrationModel :: bintreefindroot()
         }
 
 #ifdef VERBOSEFINDROOT
-        printf("bintreefindroot: x=%.15f, chyba %.15f \n", x0, y0);
+        OOFEM_LOG_INFO("bintreefindroot: x=%.15f, chyba %.15f \n", x0, y0);
 #endif
     } while ( fabs(y0) > ROOT_PRECISION_DKSI );
 
@@ -566,7 +566,7 @@ HydrationModel :: mixedfindroot()
             }
 
 #ifdef VERBOSEFINDROOT
-            printf("mixedfindroot: x=%.15f, chyba %.15f \n", x0, y0);
+            OOFEM_LOG_INFO("mixedfindroot: x=%.15f, chyba %.15f \n", x0, y0);
 #endif
         }
     } while ( !done );
@@ -617,7 +617,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     constantHydrationDegree = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_HydrationModelInterface_hydration, "hydration"); // Macro
     if ( value >= 0. ) {
-        printf("\nHydratingMaterial: creating HydrationModel.");
+        OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         if ( !( hydrationModel = new HydrationModel() ) ) {
             ( ( Material * ) this )->_error("Could not create HydrationModel instance.");
         }
@@ -627,10 +627,9 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     // constant hydration degree
     else if ( value >= -1. ) {
         constantHydrationDegree = -value;
-        printf("\nHydratingMaterial: Hydration degree set to %.2f.", -value);
+        OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        printf("\nHydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
-        exit(0);
+        OOFEM_ERROR("HydrationModelInterface :: initializeFrom - Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
     }
 
     // Material cast time - start of hydration
@@ -638,7 +637,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     castAt = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, castAt, IFT_HydrationModelInterface_castAt, "castat"); // Macro
     if ( castAt >= 0. ) {
-        printf("\nHydratingMaterial: Hydration starts at time %.2g.", castAt);
+        OOFEM_LOG_INFO("HydratingMaterial: Hydration starts at time %.2g.", castAt);
     }
 
     return IRRT_OK;

@@ -33,8 +33,8 @@
  */
 
 #include "usrdeftimefunct.h"
+
 #include <sstream>
-#include <math.h>
 
 namespace oofem {
 double UserDefinedLoadTimeFunction :: __at(double time)

@@ -32,13 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "parser.h"
 #include "error.h"
+#include "mathfem.h"
+
 #ifndef __MAKEDEPEND
- #include <ctype.h>
- #include <stdlib.h>
- #include <string.h>
+ #include <cctype>
+ #include <cstdlib>
+ #include <cstring>
 #endif
 
 namespace oofem {
@@ -98,7 +99,7 @@ double Parser :: term(bool get) // multiply and divide
             error("divide by 0");
             return 1;
         case POW:
-            left = pow(left,prim(true));
+            left = __OOFEM_POW(left,prim(true));
             break;
         default:
             return left;
@@ -190,10 +191,10 @@ double Parser :: prim(bool get) // handle primaries
     {
         double time = look("t")->value;
         double e = agr(true);
-        
+
         return time<e?0:1;
     }
-    
+
     default:
         error("primary expected");
         return 1;

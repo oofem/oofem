@@ -33,12 +33,7 @@
  */
 
 #include "initmodule.h"
-#include "oofem_limits.h"
 #include "error.h"
-
-#ifndef __MAKEDEPEND
- #include <stdarg.h>
-#endif
 
 namespace oofem {
 InitModule :: InitModule(int n, EngngModel *e)

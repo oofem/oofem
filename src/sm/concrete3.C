@@ -33,15 +33,8 @@
  */
 
 #include "concrete3.h"
-#include "material.h"
-#include "domain.h"
-#include "flotmtrx.h"
 #include "gausspnt.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
 
 namespace oofem {
 Concrete3 :: Concrete3(int n, Domain *d) : RCM2Material(n, d)
@@ -105,7 +98,7 @@ Concrete3 :: computeStrength(GaussPoint *gp, double charLength)
         // we reduce Ft and there is no softening but sudden drop
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
-        printf("/n Reducing Ft to %f in element %d, gp %d, Le %f",
+        printf("\n Reducing Ft to %f in element %d, gp %d, Le %f",
                Ft, gp->giveElement()->giveNumber(), gp->giveNumber(), charLength);
         //
     }

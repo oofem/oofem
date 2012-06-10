@@ -40,7 +40,10 @@
 #include "node.h"
 #include "mathfem.h"
 
-#include <map>
+#ifndef __MAKEDEPEND
+ #include <cstdlib>
+ #include <map>
+#endif
 
 namespace oofem {
 bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
@@ -48,7 +51,7 @@ bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
                   p3->at(1) * ( p1->at(2) - p2->at(2) );
     // the tolerance probably needs a setter
-    if ( dist < 0.0001 && dist > ( -1 ) * 0.0001 ) {
+    if ( dist < 0.0001 && dist > -0.0001 ) {
         return true;
     } else {
         return false;

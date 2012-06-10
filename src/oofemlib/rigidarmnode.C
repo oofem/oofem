@@ -34,16 +34,8 @@
 
 #include "rigidarmnode.h"
 #include "slavedof.h"
-#include "timestep.h"
-#include "masterdof.h"
 #include "flotarry.h"
-#include "flotmtrx.h"
 #include "intarray.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)

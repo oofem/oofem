@@ -35,9 +35,6 @@
 #ifndef deidynamic_h
 #define deidynamic_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "structengngmodel.h"
 
 namespace oofem {

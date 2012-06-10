@@ -34,17 +34,9 @@
 
 #include "eigenvaluedynamic.h"
 #include "timestep.h"
-#include "element.h"
-#include "node.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "exportmodulemanager.h"
-
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
-#endif
-
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "datastream.h"

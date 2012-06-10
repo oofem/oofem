@@ -32,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "stressstrainbasevector.h"
 #include "intarray.h"
 #include "flotmtrx.h"
@@ -200,13 +197,13 @@ StressStrainBaseVector :: giveReducedSize(MaterialMode mode)
 
     case _3dMatGrad:
         return 7;
-      
+
     case _PlaneStressGrad:
         return 4;
-      
+
     case _PlaneStrainGrad:
         return 5;
-      
+
     case _1dMatGrad:
         return 2;
 

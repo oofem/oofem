@@ -38,9 +38,6 @@
 #include "flotarry.h"
 #include "sparsemtrx.h"
 #include "inputrecord.h"
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 
 namespace oofem {
 /**
@@ -57,14 +54,14 @@ class Preconditioner
 public:
     /**
      * Constructor.
-     * Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
+     * Initializes the the receiver (constructs the preconditioning matrix M) of given matrix.
      * Calls virtual init service.
      * @param a Sparse matrix to be preconditioned.
      * @param attributes Attributes of receiver.
      */
     Preconditioner(const SparseMtrx &a, InputRecord &attributes);
     /**
-     * Constructor. 
+     * Constructor.
      * The user should call initializeFrom and init services in this given order to ensure consistency.
      */
     Preconditioner() { }
@@ -72,7 +69,7 @@ public:
     virtual ~Preconditioner(void) { };
 
     /**
-     * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
+     * Initializes the receiver (constructs the preconditioning matrix M) of given matrix.
      * Virtual service, to be implemented by derived classes. Should be called after initializeFrom service.
      * @param a Sparse matrix to be preconditioned.
      */
@@ -98,13 +95,13 @@ public:
         this->trans_solve(rhs, y);
         return y;
     }
-    /** 
+    /**
      * Solves the linear system.
      * @param rhs Right hand side.
      * @param solution Solution.
      */
     virtual void solve(const FloatArray &rhs, FloatArray &solution) const = 0;
-    /** 
+    /**
      * Solves the transposed system.
      * @param rhs Right hand side.
      * @param solution Solution.

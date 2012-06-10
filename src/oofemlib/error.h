@@ -41,9 +41,6 @@
 
 #include "oofemcfg.h"
 #include "logger.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 /** Cause oofem program termination by calling exit. */

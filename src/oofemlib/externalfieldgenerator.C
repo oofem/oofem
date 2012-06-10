@@ -32,20 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <fstream>
-#include <stdio.h>
 #include "externalfieldgenerator.h"
-#include "cltypes.h"
-#include "material.h"
-#include "time.h"
-#include "math.h"
-#include "domain.h"
-#include <iostream>
-#include <cstdlib>
-#include "element.h"
-#include "node.h"
 #include "flotarry.h"
-#include <string>
+
+#include <iostream>
+#include <fstream>
 
 namespace oofem {
 ExternalFieldGenerator :: ExternalFieldGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
@@ -78,11 +69,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         while ( exitFlag == 0 ) {
             if ( field( 3 * i * numberReal(1) ) > globalCoordinates->at(1) ) {
                 if ( i == 0 ) { //Check soundness
-                    std :: cout << "error in externalfieldgenerator.C: i is zero\n";
-                    std :: exit(1);
+                    OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
                 } else if ( i == numberReal(0) )        {
-                    std :: cout << "error in externalfieldgenerator.C: i is equal to realNumber \n";
-                    std :: exit(1);
+                    OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
                 }
 
                 exitFlag = 1;
@@ -100,11 +89,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         while ( exitFlag == 0 ) {
             if ( field(3 * i + 1) > globalCoordinates->at(2) ) {
                 if ( i == 0 ) {
-                    std :: cout << "error in externalfieldgenerator.C: i is zero\n";
-                    std :: exit(1);
+                    OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
                 } else if ( i == numberReal(0) )        {
-                    std :: cout << "error in externalfieldgenerator.C: i is equal to realNumber \n";
-                    std :: exit(1);
+                    OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
                 }
 
                 exitFlag = 1;
@@ -149,8 +136,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        std :: cout << "In externalfieldgenerator.C: Unable to open file " << name << "\n";
-        std :: exit(1);
+        OOFEM_ERROR2("ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str());
     }
 
     double deltaX, deltaY;
@@ -165,7 +151,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     for ( int i = 0; i < numberReal(0) * numberReal(1); i++ ) {
         inputField >> field(3 * i) >> field(3 * i + 1) >> field(3 * i + 2);
     }
-    
+
     return IRRT_OK;
 }
 } // end namespace oofem

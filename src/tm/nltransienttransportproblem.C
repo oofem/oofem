@@ -33,22 +33,14 @@
  */
 
 #include "nltransienttransportproblem.h"
-#include "nummet.h"
 #include "timestep.h"
-#include "metastep.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "elementside.h"
 #include "dof.h"
-
 #include "verbose.h"
-#include "conTable.h"
 #include "transportelement.h"
 #include "usrdefsub.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 

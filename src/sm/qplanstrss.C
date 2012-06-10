@@ -33,20 +33,13 @@
  */
 
 #include "qplanstrss.h"
-#include "node.h"
-#include "material.h"
-#include "structuralcrosssection.h"
+#include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "domain.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 
 namespace oofem {
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);

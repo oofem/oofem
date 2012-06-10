@@ -34,8 +34,6 @@
 
 #include "slavenode.h"
 #include "slavedof.h"
-#include "masterdof.h"
-#include "timestep.h"
 #include "flotarry.h"
 #include "intarray.h"
 

@@ -37,12 +37,6 @@
 #include "sparselinsystemnm.h"
 #include "petscsparsemtrx.h"
 
-#ifdef __PETSC_MODULE
- #ifndef __MAKEDEPEND
-  #include <petscksp.h>
- #endif
-#endif
-
 namespace oofem {
 class Domain;
 class EngngModel;

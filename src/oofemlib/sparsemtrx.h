@@ -35,10 +35,6 @@
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 #include "matrix.h"
 #include "flotarry.h"
 #include "flotmtrx.h"

@@ -37,29 +37,14 @@
 #include "timestep.h"
 #include "loadtime.h"
 #include "metastep.h"
-#include "element.h"
 #include "exportmodulemanager.h"
-
 #include "mathfem.h"
-#include "clock.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "verbose.h"
 
-#ifndef __MAKEDEPEND
- #include <limits.h>
- #include <string.h>
- #include <stdio.h>
-#endif
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
-#endif
-
-#ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
 #endif
 
 namespace oofem {

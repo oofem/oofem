@@ -36,7 +36,6 @@
 #define calmls_h
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <set>
  #include <vector>
 #endif

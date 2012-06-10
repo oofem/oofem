@@ -35,9 +35,6 @@
 #ifndef util_h
 #define util_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "problemmode.h"
 
 namespace oofem {

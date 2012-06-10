@@ -36,7 +36,7 @@
 #define pair_h
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
+ #include <cstdio>
 #endif
 
 namespace oofem {

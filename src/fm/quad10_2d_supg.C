@@ -35,9 +35,8 @@
 #include "quad10_2d_supg.h"
 #include "fei2dquadlin.h"
 #include "fei2dquadconst.h"
-#include "node.h"
+#include "dofmanager.h"
 #include "material.h"
-#include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
@@ -46,20 +45,12 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "fluiddynamicmaterial.h"
-#include "load.h"
 #include "timestep.h"
-#include "boundaryload.h"
-
 #include "materialinterface.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "contextioerr.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "conTable.h"
 #endif
 
 namespace oofem {

@@ -33,19 +33,10 @@
  */
 
 #include "incrementallinearstatic.h"
-#include "nummet.h"
 #include "timestep.h"
-#include "metastep.h"
-#include "element.h"
-#include "node.h"
 #include "dof.h"
 #include "sparsemtrx.h"
 #include "dictionr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "datastream.h"

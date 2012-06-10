@@ -39,18 +39,11 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "structuralelement.h"
-
 #include "sparsemtrx.h"
-#include "isolinearelasticmaterial.h"
 #include "dynalist.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"
-#include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"

@@ -38,22 +38,18 @@
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "engngm.h"
 #include "mathfem.h"
 #include "masterdof.h"
-#include "slavedof.h"
 #include "simpleslavedof.h"
 #include "nonlocalbarrier.h"
 #include "initial.h"
 #include "usrdefsub.h"
 #include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
-#include "util.h"
 #include "crosssection.h"
 #include "loadtime.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <queue>
  #include <set>
 #endif
@@ -61,7 +57,6 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
-
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"

@@ -32,20 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 #include "mathfem.h"
 #include "rheoChM.h"
 #include "material.h"
 #include "isolinearelasticmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
-#include "matstatus.h"
 #include "gausspnt.h"
 #include "structuralcrosssection.h"
-#include "timestep.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -742,8 +736,7 @@ RheoChainMaterialStatus :: letHiddenVarsVectorBe(int i, FloatArray *newVector)
      * deletes the previous one, if defined
      */
     if ( i > nUnits ) {
-        _error("letHiddenVarsVectorBe: unit number exceeds the specified limit");
-        exit(1);
+        OOFEM_ERROR("RheoChainMaterialStatus :: letHiddenVarsVectorBe - unit number exceeds the specified limit");
     }
 
     if ( hiddenVars [ i - 1 ] ) {

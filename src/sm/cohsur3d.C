@@ -35,19 +35,11 @@
 #include "cohsur3d.h"
 #include "node.h"
 #include "particle.h"
-#include "material.h"
-#include "crosssection.h"
-#include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-
-#include <stdio.h>
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

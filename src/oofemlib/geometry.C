@@ -32,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <math.h>
-
 #include "mathfem.h"
 #include "alist.h"
 #include "geometry.h"

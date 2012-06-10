@@ -40,23 +40,17 @@
 
 #include "node.h"
 #include "dof.h"
-#include "unknowntype.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
 #include "nodload.h"
 #include "timestep.h"
-
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "verbose.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdlib.h>
-#endif
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

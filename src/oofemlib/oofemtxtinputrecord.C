@@ -41,10 +41,11 @@
 #include "range.h"
 
 #ifndef __MAKEDEPEND
+ #include <cstdlib>
  #include <cstdio>
  #include <cstring>
  #include <cctype>
- #include <iostream>
+ #include <ostream>
  #include <sstream>
 #endif
 

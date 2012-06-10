@@ -40,11 +40,6 @@
 #include "initmodule.h"
 #include "datareader.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <time.h>
-#endif
-
 namespace oofem {
 class EngngModel;
 

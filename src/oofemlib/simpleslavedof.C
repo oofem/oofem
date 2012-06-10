@@ -35,21 +35,8 @@
 #include "simpleslavedof.h"
 #include "dofmanager.h"
 #include "domain.h"
-#include "timestep.h"
-#include "boundary.h"
-#include "initial.h"
-
-#include "flotarry.h"
-#include "dictionr.h"
-
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <ctype.h>
- #include <string.h>
-#endif
 
 namespace oofem {
 SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofIDItem id) : Dof(i, aNode, id)

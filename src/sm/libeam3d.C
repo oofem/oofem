@@ -38,16 +38,10 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "structuralcrosssection.h"
-#include "structuralmaterial.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-#include "dof.h"
-#include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)

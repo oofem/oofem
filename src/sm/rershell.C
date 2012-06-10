@@ -42,15 +42,10 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
-#include "verbose.h"
 #include "engngm.h"
 #include "load.h"
 #include "structuralcrosssection.h"
-#include "structuralmaterial.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

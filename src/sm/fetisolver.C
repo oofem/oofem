@@ -34,9 +34,6 @@
 
 #ifdef __PARALLEL_MODE
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "mathfem.h"
 #include "fetisolver.h"
 #include "compiler.h"

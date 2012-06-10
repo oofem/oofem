@@ -37,12 +37,8 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-
 #include "structuralcrosssection.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 #include "contextioerr.h"
 
 namespace oofem {

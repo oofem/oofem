@@ -33,27 +33,11 @@
  */
 
 #include "material.h"
-#include "crosssection.h"
-#include "domain.h"
 #include "verbose.h"
-#include "isolinearelasticmaterial.h"
-
 #include "gausspnt.h"
-#include "flotmtrx.h"
 #include "flotarry.h"
-
 #include "mathfem.h"
-#include "usrdefsub.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
- #include <string.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
-#endif
 
 namespace oofem {
 void

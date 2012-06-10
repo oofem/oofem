@@ -33,9 +33,7 @@
  */
 
 #include "linearedgeload.h"
-#include "loadtime.h"
 #include "flotarry.h"
-#include "timestep.h"
 #include "mathfem.h"
 
 namespace oofem {

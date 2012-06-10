@@ -34,18 +34,9 @@
 
 #include "structengngmodel.h"
 #include "dofmanager.h"
-#include "elementside.h"
-#include "rigidarmnode.h"
 #include "dof.h"
-#include "slavedof.h"
-#include "structuralelement.h"
-#include "nlstructuralelement.h"
+#include "element.h"
 #include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-#include "verbose.h"
-#include "conTable.h"
 #include "outputmanager.h"
 
 namespace oofem {
@@ -193,7 +184,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     for ( int i = 1; i <= nelems; i++ ) {
-        element = ( NLStructuralElement * ) this->giveDomain(di)->giveElement(i);
+        element = this->giveDomain(di)->giveElement(i);
 #ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to

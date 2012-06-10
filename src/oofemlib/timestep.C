@@ -39,14 +39,9 @@
  */
 
 #include "timestep.h"
-#include "domain.h"
 #include "engngm.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter)

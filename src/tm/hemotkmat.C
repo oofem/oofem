@@ -33,13 +33,9 @@
  */
 
 #include "hemotkmat.h"
-#include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 int
@@ -405,8 +401,7 @@ HeMoTKMaterial :: sorption_isotherm(double phi)
     double w;
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        _error2("sorption_isotherm : Relative humidity %.3f is out of range", phi);
-        exit(1);
+        OOFEM_ERROR2("HeMoTKMaterial :: sorption_isotherm : Relative humidity %.3f is out of range", phi);
     }
 
     // water content
@@ -433,8 +428,7 @@ HeMoTKMaterial :: inverse_sorption_isotherm(double w)
     phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        _error2("inverse_sorption_isotherm : Relative humidity %.3f is out of range", phi);
-        exit(1);
+        OOFEM_ERROR2("HeMoTKMaterial :: inverse_sorption_isotherm : Relative humidity %.3f is out of range", phi);
     }
 
     return ( phi );

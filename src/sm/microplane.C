@@ -33,10 +33,6 @@
  */
 
 #include "microplane.h"
-#include "element.h"
-#include "domain.h"
-#include "matstatus.h"
-#include "material.h"
 
 namespace oofem {
 Microplane :: Microplane(IntegrationRule *ir, int n, MaterialMode mode) :

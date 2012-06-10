@@ -33,12 +33,10 @@
  */
 
 #include "mazarsmodel.h"
-#include "isolinearelasticmaterial.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"
-#include "engngm.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"

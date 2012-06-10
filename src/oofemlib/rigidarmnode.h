@@ -37,10 +37,6 @@
 
 #include "node.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 class FloatArray;
 class IntArray;

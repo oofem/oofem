@@ -35,7 +35,6 @@
 #ifndef hydratingconcretemat_h
 #define hydratingconcretemat_h
 
-#include <math.h>
 #include "isoheatmat.h"
 #include "hydratingisoheatmat.h"
 
@@ -104,7 +103,7 @@ protected:
     int reinforcementDegree;
     ///create material status
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-};  
+};
 
 /**
  * HydratingConcreteMatStatus stores degree of hydration in each integration point

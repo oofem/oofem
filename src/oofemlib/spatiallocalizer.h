@@ -41,7 +41,6 @@
 #include "interface.h"
 #include "logger.h"
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <set>
  #include <list>
 #endif

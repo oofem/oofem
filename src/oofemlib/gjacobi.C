@@ -32,14 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-#include "mathfem.h"
-#include "gjacobi.h"
-#include "compiler.h"
 
-#include "verbose.h"
+#include "gjacobi.h"
+#include "mathfem.h"
 #include "flotmtrx.h"
 #include "nmstatus.h"
 

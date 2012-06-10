@@ -35,7 +35,7 @@
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
- #include <stdarg.h>
+ #include <cstdarg>
 #endif
 #include "communicator.h"
 #include "intarray.h"

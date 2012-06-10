@@ -33,18 +33,8 @@
  */
 
 #include "fluiddynamicmaterial.h"
-#include "domain.h"
-#include "verbose.h"
 #include "gausspnt.h"
-#include "flotmtrx.h"
 #include "flotarry.h"
-
-#include "mathfem.h"
-#include "fieldmanager.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "contextioerr.h"
 
 namespace oofem {

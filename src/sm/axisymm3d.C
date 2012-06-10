@@ -34,22 +34,14 @@
 
 #include "axisymm3d.h"
 #include "node.h"
-#include "structuralmaterial.h"
-#include "structuralcrosssection.h"
-#include "structuralms.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
-#include "verbose.h"
 #include "engngm.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

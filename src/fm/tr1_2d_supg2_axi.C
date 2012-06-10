@@ -35,7 +35,6 @@
 #include "tr1_2d_supg2_axi.h"
 #include "node.h"
 #include "material.h"
-#include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
@@ -48,15 +47,9 @@
 #include "load.h"
 #include "timestep.h"
 #include "boundaryload.h"
-
 #include "fei2dtrlin.h"
 #include "fei2dquadlin.h"
 #include "geotoolbox.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

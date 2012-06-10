@@ -35,10 +35,14 @@
 #include "strreader.h"
 
 #include "range.h"
-#include "oofem_limits.h"
+
+#define __OOFEM_DO_NOT_PARSE_NULL
 
 #ifndef __MAKEDEPEND
  #include <cctype>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
 #endif
 
 namespace oofem {

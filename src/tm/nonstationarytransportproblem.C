@@ -35,26 +35,19 @@
 #include "nonstationarytransportproblem.h"
 #include "nummet.h"
 #include "timestep.h"
-#include "metastep.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "elementside.h"
 #include "dof.h"
 #include "maskedprimaryfield.h"
-
-#ifdef __CEMHYD_MODULE
-#include "cemhydmat.h"
-#endif //__CEMHYD_MODULE
-
 #include "verbose.h"
-#include "conTable.h"
 #include "transportelement.h"
 #include "usrdefsub.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "contextioerr.h"
+
+#ifdef __CEMHYD_MODULE
+ #include "cemhydmat.h"
+#endif //__CEMHYD_MODULE
 
 namespace oofem {
 

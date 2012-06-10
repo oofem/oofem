@@ -34,13 +34,8 @@
 
 #include "rankinepm.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "intarray.h"
-
-#include "structuralcrosssection.h"
-#include "mathfem.h"
 
 namespace oofem {
 RankinePlasticMaterial ::        RankinePlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)

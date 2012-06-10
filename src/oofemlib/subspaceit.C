@@ -36,12 +36,6 @@
 
 #include "subspaceit.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
-#include "verbose.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "mathfem.h"

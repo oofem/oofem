@@ -38,10 +38,6 @@
 #include "engngm.h"
 #include "spoolesinterface.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 namespace oofem {
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const

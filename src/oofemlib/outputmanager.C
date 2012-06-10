@@ -35,7 +35,6 @@
 #include "outputmanager.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "logger.h"
 #include "element.h"
 #include "dofmanager.h"
 

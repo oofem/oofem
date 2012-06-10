@@ -34,9 +34,10 @@
 
 #include "dofmanvalfield.h"
 #include "spatiallocalizer.h"
-#include "usrdefsub.h"
 #include "element.h"
 #include "timestep.h"
+#include "dofmanager.h"
+#include "feinterpol.h"
 
 namespace oofem {
 DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanvallist()

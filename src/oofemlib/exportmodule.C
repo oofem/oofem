@@ -35,13 +35,11 @@
 #include "exportmodule.h"
 #include "timestep.h"
 #include "engngm.h"
-#include "logger.h"
 #include "oofem_limits.h"
 #include "range.h"
-#include "mathfem.h"
 
 #ifndef __MAKEDEPEND
- #include <stdarg.h>
+ #include <cstdarg>
 #endif
 
 namespace oofem {

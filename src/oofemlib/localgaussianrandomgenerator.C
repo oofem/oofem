@@ -33,11 +33,9 @@
  */
 
 #include "localgaussianrandomgenerator.h"
-#include "cltypes.h"
-#include "material.h"
-#include "time.h"
-#include "math.h"
-#include "domain.h"
+#include "mathfem.h"
+
+#include <time.h>
 
 namespace oofem {
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
@@ -132,10 +130,7 @@ double LocalGaussianRandomGenerator :: normalCdfInverse(double cdf, double a, do
     double x;
     double x2;
     if ( cdf < 0.0 || 1.0 < cdf ) {
-        printf("\n");
-        printf("NORMAL_CDF_INV - Fatal error!\n");
-        printf("CDF < 0 or 1 < CDF.\n");
-        exit(1);
+        OOFEM_ERROR("LocalGaussianRandomGenerator :: normalCdfInverse - NORMAL_CDF_INV - Fatal error!\nCDF < 0 or 1 < CDF.");
     }
 
     x2 = normal01CdfInverse(cdf);
@@ -213,7 +208,7 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
 
         if ( r <= 0.0 ) {
             value = -1.0;
-            exit(1);
+            OOFEM_ERROR("LocalGaussianRandomGenerator :: normal01CdfInverse - r < 0.0!");
         }
 
         r = sqrt( -log(r) );

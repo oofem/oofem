@@ -33,19 +33,10 @@
  */
 
 #include "nldeidynamic.h"
-#include "nlstructuralelement.h"
-#include "nummet.h"
 #include "timestep.h"
+#include "dofmanager.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
 #include "dof.h"
-#include "initial.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
 #include "verbose.h"
 #include "outputmanager.h"
 #include "mathfem.h"

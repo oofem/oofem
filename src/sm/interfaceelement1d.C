@@ -35,20 +35,12 @@
 #include "interfaceelement1d.h"
 #include "domain.h"
 #include "node.h"
-#include "material.h"
 #include "crosssection.h"
-#include "gausspnt.h"
-#include "lobattoir.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-
-#include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -198,7 +190,7 @@ InterfaceElem1d :: evaluateLocalCoordinateSystem(FloatMatrix &lcs)
         FloatArray ly(3), lz(3);
         normal.normalize();
         ly.zero();
-        if ( abs( normal.at(1) ) > abs( normal.at(2) ) ) {
+        if ( fabs( normal.at(1) ) > fabs( normal.at(2) ) ) {
             ly.at(2) = 1.;
         } else {
             ly.at(1) = 1.;

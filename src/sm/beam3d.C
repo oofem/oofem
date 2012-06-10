@@ -41,15 +41,9 @@
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-#include "dof.h"
 #include "engngm.h"
 #include "boundaryload.h"
-#include "structuralcrosssection.h"
-#include "structuralmaterial.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

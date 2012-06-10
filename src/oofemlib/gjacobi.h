@@ -35,9 +35,6 @@
 #ifndef gjacobi_h
 #define gjacobi_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "nummet.h"
 #include "flotarry.h"
 

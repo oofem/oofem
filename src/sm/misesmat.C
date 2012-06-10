@@ -40,8 +40,6 @@
 #include "intarray.h"
 #include "stressvector.h"
 #include "strainvector.h"
-
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"

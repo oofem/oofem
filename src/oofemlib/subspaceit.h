@@ -40,9 +40,6 @@
 #ifndef subspaceit_h
 #define subspaceit_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"

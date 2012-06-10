@@ -33,15 +33,10 @@
  */
 
 #include "lumpedmasselement.h"
-#include "domain.h"
-#include "node.h"
-#include "material.h"
-#include "crosssection.h"
+#include "dofmanager.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-
-#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

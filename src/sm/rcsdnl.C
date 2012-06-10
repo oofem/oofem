@@ -32,19 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <cstring>
-#endif
-
 #include "rcsdnl.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "isolinearelasticmaterial.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 

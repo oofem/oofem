@@ -43,7 +43,6 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
- #include <math.h>
  #include <cstring>
 #endif
 

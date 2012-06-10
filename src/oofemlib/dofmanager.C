@@ -42,27 +42,10 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
-#include "verbose.h"
-#include "node.h"
-#include "elementside.h"
-#include "rigidarmnode.h"
-#include "hangingnode.h"
-#include "slavenode.h"
 #include "usrdefsub.h"
-#include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
-
-#ifndef __MAKEDEPEND
- #include <string.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :

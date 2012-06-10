@@ -35,10 +35,6 @@
 #include "inputrecord.h"
 #include "error.h"
 
-#ifndef __MAKEDEPEND
- #include <ctype.h>
-#endif
-
 namespace oofem {
 InputRecord :: InputRecord()
 { }

@@ -36,7 +36,6 @@
 //#include "gpinitmodule.h"
 // Milan ?????????????????
 
-#include "femcmpnn.h"
 #include "nummet.h"
 #include "sparsemtrx.h"
 #include "engngm.h"
@@ -44,23 +43,18 @@
 #include "metastep.h"
 #include "element.h"
 #include "oofemdef.h"
-#include "mathfem.h"
 #include "clock.h"
 #include "dofmanager.h"
 #include "node.h"
-#include "elementside.h"
-#include "dof.h"
 #include "activebc.h"
 #include "timestep.h"
 #include "verbose.h"
 #include "datastream.h"
 #include "oofemtxtdatareader.h"
-#include "util.h"
 #include "sloangraph.h"
 #include "logger.h"
 #include "errorestimator.h"
 #include "contextioerr.h"
-#include "material.h"
 #include "xfemmanager.h"
 #include "outputmanager.h"
 #include "exportmodulemanager.h"
@@ -72,10 +66,8 @@
 #endif
 
 #ifndef __MAKEDEPEND
- #include <limits.h>
- #include <string.h>
- #include <stdio.h>
- #include <stdarg.h>
+ #include <cstdio>
+ #include <cstdarg>
 // include unistd.h; needed for access
  #ifdef HAVE_UNISTD_H
   #include <unistd.h>
@@ -91,12 +83,6 @@
 #ifdef TIME_REPORT
  #ifndef __MAKEDEPEND
   #include <time.h>
- #endif
-#endif
-
-#ifdef __PETSC_MODULE
- #ifndef __MAKEDEPEND
-  #include "petscvec.h"
  #endif
 #endif
 

@@ -33,18 +33,12 @@
  */
 
 #include "deidynamic.h"
-#include "nummet.h"
 #include "timestep.h"
+#include "dofmanager.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
 #include "dof.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
 #include "verbose.h"
+#include "mathfem.h"
 
 namespace oofem {
 #define ZERO_MASS  1.E-10   // unit dependent !!!!

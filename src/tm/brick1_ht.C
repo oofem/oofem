@@ -33,23 +33,13 @@
  */
 
 #include "brick1_ht.h"
-#include "node.h"
-#include "material.h"
-#include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "domain.h"
 #include "mathfem.h"
-#include "engngm.h"
-#include "structuralms.h"
 #include "load.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

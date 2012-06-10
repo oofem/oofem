@@ -32,19 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file linesearch.C
-//
-
 #include "linesearch.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <math.h>
-#endif
-
-#include "verbose.h"
 #include "timestep.h"
-#include "flotmtrx.h"
+#include "flotarry.h"
 #include "mathfem.h"
 #include "nmstatus.h"
 

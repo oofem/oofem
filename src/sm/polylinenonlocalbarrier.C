@@ -38,10 +38,6 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
-#endif
 
 namespace oofem {
 PolylineNonlocalBarrier :: PolylineNonlocalBarrier(int n, Domain *aDomain) :

@@ -35,17 +35,9 @@
 #include "macrolspace.h"
 #include "micromaterial.h"
 #include "lspace.h"
-#include "material.h"
 #include "domain.h"
 #include "usrdefsub.h"
-#include "structuralmaterial.h"
-#include "oofem_terminate.h"
-#include "oofemtxtdatareader.h"
 #include "oofemtxtinputrecord.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __OOFEG
  #include "engngm.h"

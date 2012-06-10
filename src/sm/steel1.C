@@ -34,12 +34,7 @@
 
 #include "steel1.h"
 #include "isolinearelasticmaterial.h"
-#include "gausspnt.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
 
 namespace oofem {
 Steel1 :: Steel1(int n, Domain *d) : PerfectlyPlasticMaterial(n, d)

@@ -34,7 +34,6 @@
 
 #include "q4axisymm.h"
 #include "node.h"
-#include "material.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "flotmtrx.h"
@@ -42,12 +41,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "engngm.h"
-#include "structuralcrosssection.h"
-#include "structuralms.h"
-#ifndef __MAKEDEPEND
- #include <math.h>
- #include <stdio.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :

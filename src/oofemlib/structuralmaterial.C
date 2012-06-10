@@ -36,7 +36,6 @@
 #include "structuralcrosssection.h"
 #include "domain.h"
 #include "verbose.h"
-#include "isolinearelasticmaterial.h"
 #include "structuralms.h"
 #include "structuralelement.h"
 #include "gausspnt.h"
@@ -45,11 +44,6 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "fieldmanager.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <math.h>
-#endif
 
 namespace oofem {
 int
@@ -107,7 +101,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->give1dFiberStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR2("StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
         return;
     }
 }
@@ -135,7 +129,7 @@ StructuralMaterial :: giveCharacteristicComplianceMatrix(FloatMatrix &answer,
     } else if ( form == ReducedForm ) {
         answer = redAnswer;
     } else {
-        _error("giveCharacteristicComplianceMatrix - unsupported form mode");
+        OOFEM_ERROR("StructuralMaterial :: giveCharacteristicComplianceMatrix - unsupported form mode");
     }
 }
 
@@ -174,15 +168,15 @@ StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm fo
         this->reduceTo1dFiberStiffMtrx(answer, form, gp, stiffMtrx3d);
         break;
     default:
-        _error2( "reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2("StructuralMaterial :: reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
         return;
     }
 }
 
 
 void
-StructuralMaterial ::  reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
-                                         FloatMatrix &complMtrx3d) const
+StructuralMaterial :: reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm form, GaussPoint *gp,
+                                        FloatMatrix &complMtrx3d) const
 //
 // Returns characteristic material compliance matrix of the receiver
 // reduced to corresponding mode obtained from gp.
@@ -214,7 +208,7 @@ StructuralMaterial ::  reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm fo
         this->reduceTo1dFiberComplMtrx(answer, form, gp, complMtrx3d);
         break;
     default:
-        _error2( "reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2("StructuralMaterial :: reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
         return;
     }
 }
@@ -299,7 +293,7 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
         return 7;
 
     default:
-        _error2( "giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2("StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
 
     return 0;
@@ -468,7 +462,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
             break;
 
         default:
-            _error2( "giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
 
         return 0;
@@ -625,12 +619,12 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
 
 
         default:
-            _error2( "giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
 
         return 0;
     } else {
-        _error("giveStressStrainComponentIndIn : unknown form mode");
+        OOFEM_ERROR("StructuralMaterial :: giveStressStrainComponentIndIn : unknown form mode");
     }
 
     return 0;
@@ -769,7 +763,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(2) = 7;
             break;
         default:
-            _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
     } else if ( form == FullForm ) {
         switch ( mmode ) {
@@ -894,10 +888,10 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             break;
 
         default:
-            _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
     } else {
-        _error("giveStressStrainMask : unknown form mode");
+        OOFEM_ERROR("StructuralMaterial :: giveStressStrainMask : unknown form mode");
     }
 }
 
@@ -954,8 +948,7 @@ StructuralMaterial :: reduceToPlaneStressStiffMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceToPlaneStressStiffMtrx : stiffMtrx size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStressStiffMtrx : stiffMtrx size mismatch");
     }
 }
 
@@ -1015,8 +1008,7 @@ StructuralMaterial :: reduceToPlaneStrainStiffMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceToPlaneStrainStiffMtrx :: stiffMtrx size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStrainStiffMtrx :: stiffMtrx size mismatch");
     }
 }
 
@@ -1054,8 +1046,7 @@ StructuralMaterial :: reduceTo1dStressStiffMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo1dStressStiffMtrx:: stiffMtrx3d size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo1dStressStiffMtrx:: stiffMtrx3d size mismatch");
     }
 }
 
@@ -1138,8 +1129,7 @@ StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo2dPlateLayerStiffMtrx : stiffMtrx size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerStiffMtrx : stiffMtrx size mismatch");
     }
 }
 
@@ -1178,7 +1168,7 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
     FloatMatrix invMat3d, invMatLayer(2, 2), matLayer;
 
     if ( mode != _2dBeamLayer ) {
-        _error("ReduceTo2dBeamLayerStiffMtrx : unsupported mode");
+        OOFEM_ERROR("StructuralMaterial :: ReduceTo2dBeamLayerStiffMtrx : unsupported mode");
     }
 
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
@@ -1205,8 +1195,7 @@ StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
     }
 }
 
@@ -1228,7 +1217,7 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
     FloatMatrix invMat3d, invMatLayer(3, 3), matLayer;
 
     if ( mode != _1dFiber ) {
-        _error("reduceTo1dFiberStiffMtrx : unsupported mode");
+        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberStiffMtrx : unsupported mode");
     }
 
     if ( ( stiffMtrx3d.isSquare() ) && ( stiffMtrx3d.giveNumberOfRows() == 6 ) ) {
@@ -1265,8 +1254,7 @@ StructuralMaterial :: reduceTo1dFiberStiffMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo1dFiberStiffMtrx: stiffMtrx3d size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberStiffMtrx: stiffMtrx3d size mismatch");
     }
 }
 
@@ -1317,8 +1305,7 @@ StructuralMaterial :: reduceToPlaneStressComplMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceToPlaneStressComplMtrx : complMtrx size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStressComplMtrx : complMtrx size mismatch");
     }
 }
 
@@ -1386,8 +1373,7 @@ StructuralMaterial :: reduceToPlaneStrainComplMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceToPlaneStrainComplMtrx :: complMtrx size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceToPlaneStrainComplMtrx :: complMtrx size mismatch");
     }
 }
 
@@ -1417,8 +1403,7 @@ StructuralMaterial :: reduceTo1dStressComplMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo1dStressComplMtrx:: complMtrx3d size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo1dStressComplMtrx:: complMtrx3d size mismatch");
     }
 }
 
@@ -1441,7 +1426,7 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
     int i, j;
 
     if ( !( ( mode == _2dPlateLayer ) || ( mode == _3dShellLayer ) ) ) {
-        _error("reduceTo2dPlateLayerComplMtrx : unsupported mode");
+        OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerComplMtrx : unsupported mode");
     }
 
 
@@ -1495,8 +1480,7 @@ StructuralMaterial :: reduceTo2dPlateLayerComplMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo2dPlateLayerComplMtrx : stiffMtrx size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo2dPlateLayerComplMtrx : stiffMtrx size mismatch");
     }
 }
 
@@ -1535,7 +1519,7 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
     MaterialMode mode = gp->giveMaterialMode();
 
     if ( mode != _2dBeamLayer ) {
-        _error("reduceTo2dBeamLayerComplMtrx : unsupported mode");
+        OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerComplMtrx : unsupported mode");
     }
 
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
@@ -1558,8 +1542,7 @@ StructuralMaterial :: reduceTo2dBeamLayerComplMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo2dBeamLayerStiffMtrx: stiffMtrx3d size mismatch");
     }
 }
 
@@ -1580,7 +1563,7 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
     MaterialMode mode = gp->giveMaterialMode();
 
     if ( mode != _1dFiber ) {
-        _error("reduceTo1dFiberComplMtrx : unsupported mode");
+        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberComplMtrx : unsupported mode");
     }
 
     if ( ( complMtrx3d.isSquare() ) && ( complMtrx3d.giveNumberOfRows() == 6 ) ) {
@@ -1613,8 +1596,7 @@ StructuralMaterial :: reduceTo1dFiberComplMtrx(FloatMatrix &answer,
 
         return;
     } else {
-        _error("reduceTo1dFiberComplMtrx: stiffMtrx3d size mismatch");
-        exit(1);
+        OOFEM_ERROR("StructuralMaterial :: reduceTo1dFiberComplMtrx: stiffMtrx3d size mismatch");
     }
 }
 
@@ -1762,7 +1744,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
     double swap;
     int nonzeroFlag = 0;
     if ( !( ( size == 3 ) || ( size == 6 ) ) ) {
-        _error("ComputePrincipalValues: Vector size mismatch");
+        OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Vector size mismatch");
     }
 
     if ( s.giveSize() == 3 ) {
@@ -1788,11 +1770,11 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         } else if ( mode == principal_stress ) {
             D = dst * dst + 4.0 * s.at(3) * s.at(3);
         } else {
-            _error("ComputePrincipalValues: not supported");
+            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
 
         if ( D < 0. ) {
-            _error("ComputePrincipalValues: Imaginar roots ");
+            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Imaginar roots ");
         }
 
         D = sqrt(D);
@@ -1851,7 +1833,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
                  0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
                          s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
-            _error("ComputePrincipalValues: not supported");
+            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
 
         /*
@@ -1928,7 +1910,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
     // printf ("size is %d\n",size);
     if ( !( ( size == 3 ) || ( size == 6 ) ) ) {
-        _error("computePrincipalValDir: Vector size mismatch");
+        OOFEM_ERROR("StructuralMaterial :: computePrincipalValDir: Vector size mismatch");
     }
 
     if ( s.giveSize() == 3 ) {
@@ -1956,7 +1938,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         } else if ( mode == principal_stress ) {
             ss.at(1, 2) = ss.at(2, 1) = s.at(3);
         } else {
-            _error("computePrincipalValDir: not supported");
+            OOFEM_ERROR("StructuralMaterial :: computePrincipalValDir: not supported");
         }
     } else {
         // 3D problem
@@ -1999,7 +1981,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
             ss.at(1, 3) = ss.at(3, 1) = 0.5 * s.at(5);
             ss.at(2, 3) = ss.at(3, 2) = 0.5 * s.at(4);
         } else {
-            _error("computePrincipalDirection: not supported");
+            OOFEM_ERROR("StructuralMaterial :: computePrincipalDirection: not supported");
         }
     }
 
@@ -2280,15 +2262,15 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 
 #ifdef DEBUG
     if ( ( !pDir->isSquare() ) || ( !toPDir->isSquare() ) ) {
-        _error("sortPrincDirandValCloseTo - Not square matrix");
+        OOFEM_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Not square matrix");
     }
 
     if ( pDir->giveNumberOfRows() != toPDir->giveNumberOfRows() ) {
-        _error("sortPrincDirandValCloseTo - Incompatible matrices");
+        OOFEM_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Incompatible matrices");
     }
 
     if ( pDir->giveNumberOfRows() != pVal->giveSize() ) {
-        _error("sortPrincDirandValCloseTo - Incompatible pVal Array size");
+        OOFEM_ERROR("StructuralMaterial :: sortPrincDirandValCloseTo - Incompatible pVal Array size");
     }
 
 #endif
@@ -2419,7 +2401,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             FloatArray gcoords, et2;
             ( ( StructuralElement * ) aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, atTime) ) ) {
-                _error3("giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
+                OOFEM_ERROR3("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
             }
         } else {
             answer.resize(1);
@@ -2559,7 +2541,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfReducedStressStrainVector(matmode) ) {
-        _error5( "Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+        OOFEM_ERROR5("StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -2571,7 +2553,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         int err;
         elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, stepN) ) ) {
-            _error3("computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
+            OOFEM_ERROR3("StructuralMaterial :: computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
 
         if ( et2.isNotEmpty() ) {
@@ -2667,7 +2649,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
             break;
 
         default:
-            _error2( "Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode) );
+            OOFEM_ERROR2("StructuralMaterial :: Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode) );
         }
 
         answerEigenstrain = fullAnswer;
@@ -2679,7 +2661,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         answer = answerTemper;
         if ( answerEigenstrain.giveSize() ) {
             if ( answerTemper.giveSize() != answerEigenstrain.giveSize() ) {
-                _error4( "Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR4("StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(answerEigenstrain);
@@ -2730,8 +2712,7 @@ StructuralMaterial :: giveFullCharacteristicVector(FloatArray &answer,
 
         return;
     } else {
-        _error("giveFullCharacteristicVector - invalid mode");
-        exit(0);
+        OOFEM_ERROR("StructuralMaterial :: giveFullCharacteristicVector - invalid mode");
     }
 }
 
@@ -2752,8 +2733,7 @@ StructuralMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
     if ( this->hasMaterialModeCapability(mode) ) {
         if ( ( mode == _3dMat ) || ( mode == _3dMicroplane ) ) {
             if ( size != 6 ) {
-                _error("giveReducedCharacteristicVector - charVector3d size mismatch");
-                exit(0);
+                OOFEM_ERROR("StructuralMaterial :: giveReducedCharacteristicVector - charVector3d size mismatch");
             }
 
             answer = charVector3d;
@@ -2772,8 +2752,7 @@ StructuralMaterial :: giveReducedCharacteristicVector(FloatArray &answer, GaussP
 
         return;
     } else {
-        _error("giveFullCharacteristicVector - invalid mode");
-        exit(0);
+        OOFEM_ERROR("StructuralMaterial :: giveFullCharacteristicVector - invalid mode");
     }
 }
 

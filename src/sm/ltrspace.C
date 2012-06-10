@@ -37,23 +37,18 @@
 #include "material.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "structuralms.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "domain.h"
-#include "verbose.h"
-#include "load.h"
 #include "mathfem.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "conTable.h"
+ #include "rcm2.h"
  #ifndef __MAKEDEPEND
-  #include "Etetrawd.h"
-  #include "rcm2.h"
+  #include <Etetrawd.h>
  #endif
 #endif
 

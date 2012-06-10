@@ -38,9 +38,6 @@
 #include "node.h"
 #include "element.h"
 #include "engngm.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 MesherInterface :: returnCode

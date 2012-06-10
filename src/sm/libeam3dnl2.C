@@ -38,18 +38,13 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
-#include "structuralcrosssection.h"
-#include "structuralmaterial.h"
 #include "structuralms.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "flotarry.h"
-#include "dof.h"
 #include "mathfem.h"
-#include "engngm.h"
 #include "timestep.h"
 #include "contextioerr.h"
-#include "util.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

@@ -30,9 +30,6 @@
 
 // adapted & optimized by Borek Patzak
 
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "icprecond.h"
 #include "symcompcol.h"
 #include "mathfem.h"

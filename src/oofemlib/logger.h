@@ -37,13 +37,13 @@
 
 #ifdef __PARALLEL_MODE
  #ifndef __MAKEDEPEND
-  #include "mpi.h"
+  #include <mpi.h>
  #endif
 #endif
 
 #include "oofemcfg.h"
 #ifndef __MAKEDEPEND
- #include <stdio.h>
+ #include <cstdio>
 #endif
 
 namespace oofem {

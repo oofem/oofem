@@ -38,11 +38,9 @@
 #include "sloangraph.h"
 #include "domain.h"
 #include "element.h"
-#include "node.h"
 #include "dof.h"
+#include "dofmanager.h"
 #include "simpleslavedof.h"
-#include "rigidarmnode.h"
-#include "elementside.h"
 #include "intarray.h"
 #include "generalbc.h"
 

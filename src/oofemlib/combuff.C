@@ -36,9 +36,8 @@
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
- #include <stdlib.h>
-// include string.h for memmove
- #include <string.h>
+ #include <cstdlib>
+ #include <cstring> // for memmove
 #endif
 #include "compiler.h"
 #include "combuff.h"

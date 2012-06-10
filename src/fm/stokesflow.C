@@ -37,7 +37,6 @@
 #include "inputrecord.h"
 #include "timestep.h"
 #include "usrdefsub.h"
-#include "masterdof.h"
 #include "domain.h"
 #include "nrsolver.h"
 #include "sparsenonlinsystemnm.h"

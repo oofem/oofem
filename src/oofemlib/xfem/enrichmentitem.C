@@ -42,7 +42,6 @@
 #include "conTable.h"
 #include "oofem_limits.h"
 #include "usrdefsub.h"
-#include "mathfem.h"
 
 namespace oofem {
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMComponent(n, aDomain)

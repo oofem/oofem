@@ -32,12 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "compiler.h"
 #include "errorestimator.h"
 
 namespace oofem {
 void
-ErrorEstimator :: setDomain(Domain *d) {
+ErrorEstimator :: setDomain(Domain *d)
+{
     FEMComponent :: setDomain(d);
     this->giveRemeshingCrit()->setDomain(d);
 }

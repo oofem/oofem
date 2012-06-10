@@ -32,11 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-#include "error.h"
+#include "logger.h"
 
 #ifndef __MAKEDEPEND
- #include <stdlib.h>
+ #include <cstdio>
+ #include <cstdlib>
 #endif
 
 namespace oofem {
@@ -48,7 +48,8 @@ namespace oofem {
 //int oofem_warningLevel = 3;
 
 
-void oofem_exit(int code) {
+void oofem_exit(int code)
+{
     oofem_errLogger.printStatistics();
     fprintf(stderr, "oofem exit code %d\n", code);
     exit(code);

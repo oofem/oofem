@@ -70,10 +70,6 @@ extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a,
 }
 #endif
 
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
-
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif

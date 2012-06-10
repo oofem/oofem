@@ -35,16 +35,12 @@
 #include "supg.h"
 #include "nummet.h"
 #include "timestep.h"
-#include "metastep.h"
 #include "element.h"
 #include "dofmanager.h"
-#include "elementside.h"
 #include "dof.h"
 #include "initial.h"
 #include "maskedprimaryfield.h"
-
 #include "verbose.h"
-#include "conTable.h"
 #include "supgelement.h"
 #include "usrdefsub.h"
 #include "mathfem.h"
@@ -53,16 +49,10 @@
 #include "levelsetpcs.h"
 #include "datastream.h"
 #include "loadtime.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
+#include "contextioerr.h"
 #ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
  #include "clock.h"
 #endif
-#include "contextioerr.h"
 
 namespace oofem {
 /* define if implicit interface update required */

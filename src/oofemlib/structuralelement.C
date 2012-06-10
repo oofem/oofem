@@ -35,9 +35,6 @@
 #include "structuralelement.h"
 #include "feinterpol.h"
 #include "domain.h"
-#include "timestep.h"
-#include "node.h"
-#include "dof.h"
 #include "material.h"
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
@@ -53,24 +50,16 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "verbose.h"
-
-#include "elementside.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
- #include <math.h>
-#endif
+#include "materialmapperinterface.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "conTable.h"
 #endif
 
-#include "materialmapperinterface.h"
 
 namespace oofem {
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
@@ -483,8 +472,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
         } else {
             if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
                 // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
-                _error("computeForceLoadVector : unsupported load type class");
-                exit(1);
+                OOFEM_ERROR("StructuralElement :: computeForceLoadVector - unsupported load type class");
             }
         }
     }
@@ -513,8 +501,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
                 answer.add(helpLoadVector);
             }
         } else {
-            _error("computeForceLoadVector : unsupported load type class");
-            exit(1);
+            OOFEM_ERROR("StructuralElement :: computeForceLoadVector -unsupported load type class");
         }
     }
 }

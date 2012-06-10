@@ -35,10 +35,6 @@
 #ifndef oofemtxtdatareader_h
 #define oofemtxtdatareader_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
-
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
 #include "oofem_limits.h"

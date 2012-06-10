@@ -33,10 +33,8 @@
  */
 
 #include "trabbonematerial.h"
-#include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "contextioerr.h"
 #include "mathfem.h"

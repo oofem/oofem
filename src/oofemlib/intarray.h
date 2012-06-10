@@ -42,15 +42,8 @@
 #define intarray_h
 
 #include "freestor.h"
-
 #include "contextioresulttype.h"
 #include "contextmode.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <stdlib.h>
- #include <assert.h>
-#endif
 
 namespace oofem {
 class DataStream;

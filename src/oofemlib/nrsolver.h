@@ -41,7 +41,6 @@
 #define nrsolver_h
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <set>
  #include <vector>
 #endif
@@ -169,7 +168,7 @@ public:
             linSolver->reinitialize();
         }
     }
-    
+
     virtual SparseLinearSystemNM *giveLinearSolver();
 
 protected:

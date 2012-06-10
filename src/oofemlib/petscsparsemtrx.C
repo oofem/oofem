@@ -34,19 +34,16 @@
 
 #ifdef __PETSC_MODULE
 
-#include "parallel.h"
 #include "petscsparsemtrx.h"
-#include "petscordering.h"
 #include "engngm.h"
 #include "activebc.h"
 #include "element.h"
 
 #ifndef __MAKEDEPEND
- #include <stdio.h>
  #include <set>
  #include <vector>
- #include "petscksp.h"
- #include "petscvec.h"
+ #include <petscksp.h>
+ #include <petscvec.h>
 #endif
 
 namespace oofem {

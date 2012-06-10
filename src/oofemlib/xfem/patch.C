@@ -44,7 +44,6 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "geometry.h"
-#include "mathfem.h"
 
 namespace oofem {
 Patch :: Patch(Element *parent) : BasicGeometry()

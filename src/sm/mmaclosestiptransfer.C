@@ -35,7 +35,6 @@
 #include "mmaclosestiptransfer.h"
 #include "spatiallocalizer.h"
 #include "domain.h"
-#include "element.h"
 #include "material.h"
 #include "gausspnt.h"
 

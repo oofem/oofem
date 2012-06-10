@@ -35,12 +35,9 @@
 //   recasted by Ladislav Svoboda
 
 #include "fei3dhexaquad.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "intarray.h"
-#include "node.h"
 #include "mathfem.h"
-#include "fei2dquadlin.h"
+#include "flotmtrx.h"
+#include "flotarry.h"
 
 namespace oofem {
 void

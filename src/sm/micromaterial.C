@@ -33,19 +33,13 @@
  */
 
 #include "micromaterial.h"
-#include "material.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "gausspnt.h"
 #include "domain.h"
 #include "dofmanager.h"
 #include "usrdefsub.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
-
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 //valgrind --leak-check=full --show-reachable=no -v --log-file=valgr.txt ./oofem -f Macrolspace_1.in

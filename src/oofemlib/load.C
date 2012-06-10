@@ -33,17 +33,9 @@
  */
 
 #include "load.h"
-#include "deadwght.h"
-#include "nodload.h"
-#include "boundary.h"
-#include "initial.h"
 #include "verbose.h"
-#include "usrdefsub.h"
 #include "timestep.h"
 #include "loadtime.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :

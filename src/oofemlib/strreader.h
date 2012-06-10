@@ -35,10 +35,6 @@
 #ifndef strreader_h
 #define strreader_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
 #include "intarray.h"
 #include "flotarry.h"
 #include "dictionr.h"

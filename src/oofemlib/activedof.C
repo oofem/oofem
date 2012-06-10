@@ -34,8 +34,7 @@
 
 #include "activedof.h"
 #include "activebc.h"
-#include "node.h"
-#include "datastream.h"
+#include "dofmanager.h"
 #include "contextioerr.h"
 #include "activebc.h"
 #include "engngm.h"

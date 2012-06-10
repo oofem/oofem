@@ -36,15 +36,11 @@
 using namespace std;
 //----------------------------------------------------------------------
 
-#include "mathfem.h"
-#include "verbose.h"
 #include "nlineardynamic.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
-#include "node.h"
-#include "elementside.h"
 #include "error.h"
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
@@ -58,13 +54,6 @@ using namespace std;
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #ifdef TIME_REPORT
-  #include <time.h>
- #endif
-#endif
 
 namespace oofem {
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
@@ -485,10 +474,10 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
         help.at(i) = ( a2 * velocityVector.at(i) +
-                       a3 * accelerationVector.at(i) ) + 
+                       a3 * accelerationVector.at(i) ) +
                        dumpingCoef * (
-                           a4 * velocityVector.at(i) + 
-                           a5 * accelerationVector.at(i) + 
+                           a4 * velocityVector.at(i) +
+                           a5 * accelerationVector.at(i) +
                            a6 * previousIncrementOfDisplacement.at(i)
                        );
     }

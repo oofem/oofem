@@ -35,9 +35,6 @@
 #ifndef dmexportmodule_h
 #define dmexportmodule_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "exportmodule.h"
 #include "domain.h"
 #include "engngm.h"

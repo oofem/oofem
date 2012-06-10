@@ -35,17 +35,14 @@
 #ifndef dsssolver_h
 #define dsssolver_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "flotarry.h"
 
 namespace oofem {
 class Domain;
 class EngngModel;
 class FloatMatrix;
+class FloatArray;
 
 /**
  * Implements the solution of linear system of equation in the form Ax=b using direct factorization method.
@@ -55,8 +52,8 @@ class FloatMatrix;
 class DSSSolver : public SparseLinearSystemNM
 {
 public:
-    /** 
-     * Constructor. 
+    /**
+     * Constructor.
      * Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
      * @param i Solver number.
      * @param d Domain which solver belongs to.

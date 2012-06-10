@@ -38,9 +38,9 @@
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #include "contextioerr.h"
+#include "mathfem.h"
 
 #ifndef __MAKEDEPEND
- #include <math.h>
  #include <cstring>
 #endif
 
