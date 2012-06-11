@@ -53,7 +53,7 @@ public:
      * @return Length of geometry.
      */
     virtual double giveLength(const FEICellGeometry &cellgeo) const
-    { OOFEM_ERROR("FEInterpolation1d :: giveLength - Not implemented in subclass."); }
+    { OOFEM_ERROR("FEInterpolation1d :: giveLength - Not implemented in subclass."); return 0; }
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

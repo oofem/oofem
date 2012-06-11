@@ -60,32 +60,32 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
     initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
-    //
-    // constructor
-    //
-    stiffnessMatrix = NULL;
-    ddtScheme = newmark; // default
-    internalForcesEBENorm = 0.0;
+    ddtScheme    = euler3;
     numMetStatus = NM_None;
-    internalVarUpdateStamp = 0;
+
+    ndomains                = 1;
+    internalForcesEBENorm   = 0;
+    internalVarUpdateStamp  = 0;
     initFlag = commInitFlag = 1;
+
+    stiffnessMatrix  = NULL;
+    nMethod          = NULL;
+
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
-    nMethod = NULL;
-    ndomains = 1;
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
+
+    communicator       = NULL;
+    nonlocCommunicator = NULL;
+    commBuff           = NULL;
+
+    commMode = ProblemCommMode__NODE_CUT;
 #endif
 }
 
 
 NonLinearDynamic :: ~NonLinearDynamic()
 {
-    //
-    // destructor
-    //
     if ( nMethod ) {
         delete nMethod;
     }
@@ -130,22 +130,22 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     StructuralEngngModel :: updateAttributes(mStep);
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat");
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef"); // Macro
+    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef");
 
     int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme");
 
     ddtScheme = ( NonLinearDynamic_ddtScheme ) _val;
 
     if ( ddtScheme == newmark ) {
         OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
-        IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha"); // Macro
-        IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta"); // Macro
+        IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha");
+        IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta");
     } else if ( ddtScheme == euler2 ) {
         OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
     } else if ( ddtScheme == euler3 ) {
@@ -155,7 +155,7 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
     }
 
     _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_refloadmode, "refloadmode"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_refloadmode, "refloadmode");
     refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 }
 
@@ -168,18 +168,18 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     StructuralEngngModel :: initializeFrom(ir);
     int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_lstype, "lstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_lstype, "lstype");
     solverType = ( LinSystSolverType ) val;
 
     val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_smtype, "smtype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_smtype, "smtype");
     sparseMtrxType = ( SparseMtrxType ) val;
 
     nonlocalStiffnessFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearDynamic_nonlocstiff, "nonlocstiff"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, IFT_NonLinearDynamic_nonlocstiff, "nonlocstiff");
 
     deltaT = 1.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearDynamic_deltat, "deltat");
     if ( deltaT < 0. ) {
         _error("updateAttributes: deltaT < 0");
     }
@@ -541,12 +541,6 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
 
 void NonLinearDynamic :: updateYourself(TimeStep *stepN)
 {
-    //
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    // Store velocity and acceleration from previous time step
     int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
 
     for ( int i = 1; i <= neq; i++ ) {
@@ -560,6 +554,10 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
 
     this->giveInternalForces(previousInternalForces, true, 1, stepN);
 
+    // The following line is potentially serious performance leak.
+    // The numerical method may compute their internal forces - thus causing
+    // internal state to be updated, while checking equilibrium.
+    // update internal state only if necessary
     this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
 }
@@ -579,7 +577,7 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Updating nonlinear LHS\n");
 #endif
-        stiffnessMatrix->zero(); // zero stiffness matrix
+        stiffnessMatrix->zero();
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
@@ -590,11 +588,9 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Updating internal RHS\n");
 #endif
-        // Update internalForces and internalForcesEBENorm concurrently
         this->giveInternalForces(internalForces, true, 1, tStep);
 
-        // Updating the residual vector @ NR-solver by modifying Fint
-        // so it takes into account for the acceleration and velocity
+        // Updating the residual vector @ NR-solver
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = a0 * incrementOfDisplacement.at(i) + dumpingCoef *a1 *incrementOfDisplacement.at(i);
         }
@@ -621,7 +617,7 @@ NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
     //FILE* File = this -> giveDomain() -> giveOutputStream() ;
 
     if ( !this->giveDomain(1)->giveOutputManager()->testTimeStepOutput(stepN) ) {
-        return;                                                                      // do not print even Solution step header
+        return; // Do not print even Solution step header
     }
 
     fprintf(File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
@@ -654,7 +650,7 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
                                     this->giveCurrentStep()->giveVersion(), contextMode_write) ) {
-            THROW_CIOERR(CIO_IOERR); // override
+            THROW_CIOERR(CIO_IOERR);
         }
 
         stream = new FileDataStream(file);
@@ -685,7 +681,6 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    // store InitialLoadVector
     if ( ( iores = initialLoadVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -698,7 +693,7 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
         fclose(file);
         delete stream;
         stream = NULL;
-    } // ensure consistent records
+    }
 
     return CIO_OK;
 }
@@ -715,14 +710,13 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
-            THROW_CIOERR(CIO_IOERR); // override
+            THROW_CIOERR(CIO_IOERR);
         }
 
         stream = new FileDataStream(file);
         closeFlag = 1;
     }
 
-    // save element context
     if ( ( iores = EngngModel :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -747,7 +741,6 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
         THROW_CIOERR(iores);
     }
 
-    // store InitialLoadVector
     if ( ( iores = initialLoadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }

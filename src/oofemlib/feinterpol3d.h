@@ -53,7 +53,7 @@ public:
      * @return Volume of geometry.
      */
     virtual double giveVolume(const FEICellGeometry &cellgeo) const
-    { OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass."); }
+    { OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass."); return 0; }
 
     /**@name Edge interpolation services */
     //@{

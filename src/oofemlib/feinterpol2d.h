@@ -54,7 +54,7 @@ public:
      * @return Area of geometry.
      */
     virtual double giveArea(const FEICellGeometry &cellgeo) const
-    { OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass."); }
+    { OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass."); return 0; }
 
     /**@name Edge interpolation services. */
     //@{

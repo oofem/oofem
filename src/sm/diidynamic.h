@@ -93,7 +93,6 @@ public:
     virtual const char *giveClassName() const { return "DIIDynamic"; }
     virtual classType giveClassID() const { return DIIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
-    virtual int giveNumberOfFirstStep() { return 0; }
     virtual int giveNumberOfTimeStepWhenIcApply() { return -1; }
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,

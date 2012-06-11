@@ -73,9 +73,9 @@ namespace oofem {
  */
 
 enum NonLinearDynamic_ddtScheme {
-    newmark = 0, ///< Newmark-beta method
+    euler3  = 0, ///< Three-point Backward Euler method
     euler2  = 1, ///< Two-point Backward method
-    euler3  = 2, ///< Three-point Backward Euler method
+    newmark = 2, ///< Newmark-beta method
 };
 
 class NonLinearDynamic : public StructuralEngngModel
