@@ -59,7 +59,7 @@ public:
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
     virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs(EquationID ut);
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
@@ -67,7 +67,7 @@ public:
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    virtual double computeArea() const;
+    virtual double computeArea();
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

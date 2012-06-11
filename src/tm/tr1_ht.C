@@ -72,12 +72,6 @@ FEInterpolation *Tr1_ht :: giveInterpolation(DofIDItem id)
     }
 }
 
-double Tr1_ht :: computeArea() const
-{
-    return this->interp.giveArea(FEIElementGeometryWrapper(this));
-}
-
-
 void
 Tr1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 // Returns the displacement interpolation matrix {N} of the receiver,

@@ -414,30 +414,30 @@ public:
      * Computes the volume.
      * @return Volume of element.
      */
-    virtual double computeVolume() const { return 0.0; }
+    virtual double computeVolume();
     /**
      * Computes the area (zero for all but 2d geometries).
      * @return Element area.
      */
-    virtual double computeArea() const { return 0.0; }
+    virtual double computeArea();
     /**
      * Computes the length (zero for all but 1D geometries)
      * @return Element length.
      */
-    virtual double computeLength() const { return 0.0; }
+    virtual double computeLength();
     // If the need arises;
     /*
      * Computes the length of an edge.
      * @param iedge Edge number.
      * @return Edge length.
      */
-    //virtual double computeEdgeLength(int iedge) const { return 0.0; }
+    //virtual double computeEdgeLength(int iedge) { return 0.0; }
     /*
      * Computes the area of a surface.
      * @param isurf Surface number.
      * @param Surface area.
      */
-    //virtual double computeSurfaceArea(int isurf) const { return 0.0; }
+    //virtual double computeSurfaceArea(int isurf) { return 0.0; }
 
     // data management
     /**
@@ -741,33 +741,23 @@ public:
      * @param lcoords Local coordinates.
      * @return Nonzero if successful, zero otherwise.
      */
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
-        answer.resize(0);
-        return 0;
-    }
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     /**
      * Computes the element local coordinates from given global coordinates.
      * Should compute local coordinates even if point is outside element (for mapping purposes in adaptivity)
      * @return Nonzero if point is inside element; zero otherwise.
      * @
      */
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) {
-        answer.resize(0);
-        return 0;
-    }
-    // returns a unit vectors of local coordinate system at element
-    // stored row-wise (mainly used by some materials with ortho- and anisotrophy)
-    // if local c.s == global c.s returns NULL
+    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     /**
-     * Returns local coordinate system of receiver. Required by material models with
-     * ortho- and anisotrophy. If local system is equal to global one, set answer to empty mtrx
-     * and return zero value.
+     * Returns local coordinate system of receiver
+     * Required by material models with ortho- and anisotrophy.
+     * Returns a unit vectors of local coordinate system at element stored row-wise.
+     * If local system is equal to global one, set answer to empty matrix and return zero value.
      * @return nonzero if answer computed, zero value if answer is empty, i.e. no transformation is necessary.
      */
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
-    // mid-plane normal at gaussPoint - for materials with orthotrophy
-    // valid only for plane elements in space (3d)  (shells, plates, ....)
     /**
      * Computes mid-plane normal of receiver at integration point.
      * Only for plane elements in space (3d)  (shells, plates, ....).
@@ -827,7 +817,7 @@ public:
     virtual void drawSpecial(oofegGraphicContext &context) { }
     // added in order to hide IP element details from oofeg
     // to determine the max and min local values, when recovery does not takes place
-    virtual void  giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
+    virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
 
     //virtual void  drawInternalState (oofegGraphicContext& context) {}
     /**
@@ -893,7 +883,7 @@ public:
     /// Sets parallel mode of element
     void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
  #ifdef __PARALLEL_MODE
-    /*
+    /**
      * Returns the parallel mode for particular knot span of the receiver.
      * The knot span identifies the sub-region of the finite element.
      */

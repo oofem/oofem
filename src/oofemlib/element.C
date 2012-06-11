@@ -48,6 +48,10 @@
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "feinterpol.h"
+#include "feinterpol1d.h"
+#include "feinterpol2d.h"
+#include "feinterpol3d.h"
 
 #ifndef __MAKEDEPEND
  #include <cstdio>
@@ -894,6 +898,42 @@ Element :: computeMeanSize()
 
 
 double
+Element :: computeVolume()
+{
+    FEInterpolation3d *fei = dynamic_cast<FEInterpolation3d*>(this->giveInterpolation());
+    if (fei) {
+        return fei->giveVolume(FEIElementGeometryWrapper(this));
+    } else {
+        return 0.0;
+    }
+}
+
+
+double
+Element :: computeArea()
+{
+    FEInterpolation2d *fei = dynamic_cast<FEInterpolation2d*>(this->giveInterpolation());
+    if (fei) {
+        return fei->giveArea(FEIElementGeometryWrapper(this));
+    } else {
+        return 0.0;
+    }
+}
+
+
+double
+Element :: computeLength()
+{
+    FEInterpolation1d *fei = dynamic_cast<FEInterpolation1d*>(this->giveInterpolation());
+    if (fei) {
+        return fei->giveLength(FEIElementGeometryWrapper(this));
+    } else {
+        return 0.0;
+    }
+}
+
+
+double
 Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 //
 // returns receivers projection length (for some material models)
@@ -918,6 +958,33 @@ Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
     }
 
     return maxDis - minDis;
+}
+
+
+int
+Element :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
+    FEInterpolation *fei = this->giveInterpolation();
+    if (fei) {
+        fei->local2global(answer, lcoords, FEIElementGeometryWrapper(this));
+        return true;
+    } else {
+        answer.resize(0);
+        return false;
+    }
+}
+
+
+int
+Element :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
+{
+    FEInterpolation *fei = this->giveInterpolation();
+    if (fei) {
+        return fei->global2local(answer, gcoords, FEIElementGeometryWrapper(this));
+    } else {
+        answer.resize(0);
+        return false;
+    }
 }
 
 

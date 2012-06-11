@@ -79,7 +79,6 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual double computeArea() const;
     virtual FEInterpolation *giveInterpolation() { return &this->interp; }
     virtual FEInterpolation *giveInterpolation(DofIDItem id);
 

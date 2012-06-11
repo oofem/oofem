@@ -46,6 +46,14 @@ class FEInterpolation1d : public FEInterpolation
 public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
     int giveNsd() { return 1; }
+
+    /**
+     * Computes the exact length.
+     * @param cellgeo Cell geometry for the element.
+     * @return Length of geometry.
+     */
+    virtual double giveLength(const FEICellGeometry &cellgeo) const
+    { OOFEM_ERROR("FEInterpolation1d :: giveLength - Not implemented in subclass."); }
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

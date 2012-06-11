@@ -120,8 +120,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual double computeArea() const;
-
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords);
 

@@ -315,7 +315,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
 
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
     } else   {
-        OOFEM_ERROR("Strange boundary condition type");
+        OOFEM_ERROR("Tr21Stokes :: computeEdgeBCSubVectorAt - Strange boundary condition type");
     }
 }
 
@@ -382,11 +382,6 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(15, 15);
     answer.zero();
     answer.assemble(temp, this->ordering);
-}
-
-double Tr21Stokes :: computeArea() const
-{
-    return this->interpolation_quad.giveArea(FEIElementGeometryWrapper(this));
 }
 
 FEInterpolation *Tr21Stokes :: giveInterpolation()

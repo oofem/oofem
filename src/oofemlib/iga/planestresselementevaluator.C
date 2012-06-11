@@ -47,7 +47,8 @@
 #include "iga.h"
 
 namespace oofem {
-void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) {
+void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+{
     int i, nDofMan;
     FloatArray N;
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
@@ -67,7 +68,8 @@ void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answ
     }
 }
 
-void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp) {
+void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+{
     int i, nDofMan;
     //IntArray dofmanSubElementMask;
     FloatMatrix d;
@@ -94,8 +96,8 @@ void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answ
 }
 
 
-
-double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp) {
+double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
+{
     double determinant, weight, thickness, volume;
     determinant = fabs( this->giveElement()->giveInterpolation()
                        ->giveTransformationJacobian(* gp->giveCoordinates(),

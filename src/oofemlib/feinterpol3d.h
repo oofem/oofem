@@ -47,6 +47,14 @@ public:
     FEInterpolation3d(int o) : FEInterpolation(o) { };
     int giveNsd() { return 3; }
 
+    /**
+     * Computes the exact volume.
+     * @param cellgeo Cell geometry for the element.
+     * @return Volume of geometry.
+     */
+    virtual double giveVolume(const FEICellGeometry &cellgeo) const
+    { OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass."); }
+
     /**@name Edge interpolation services */
     //@{
     /**

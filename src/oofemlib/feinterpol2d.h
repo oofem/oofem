@@ -48,6 +48,14 @@ public:
 
     int giveNsd() { return 2; }
 
+    /**
+     * Computes the exact area.
+     * @param cellgeo Cell geometry for the element.
+     * @return Area of geometry.
+     */
+    virtual double giveArea(const FEICellGeometry &cellgeo) const
+    { OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass."); }
+
     /**@name Edge interpolation services. */
     //@{
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;

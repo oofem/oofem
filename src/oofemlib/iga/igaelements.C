@@ -56,7 +56,8 @@ namespace oofem {
 BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 
 
-IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir) {
+IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir)
+{
     BSplineInterpolation *interpol = ( BSplineInterpolation * ) this->giveInterpolation();
     IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
@@ -74,7 +75,8 @@ IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir) {
 NURBSPlaneStressElement :: NURBSPlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 
 
-IRResultType NURBSPlaneStressElement :: initializeFrom(InputRecord *ir) {
+IRResultType NURBSPlaneStressElement :: initializeFrom(InputRecord *ir)
+{
     NURBSInterpolation *interpol = ( NURBSInterpolation * ) this->giveInterpolation();
     IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
@@ -96,7 +98,8 @@ TSplinePlaneStressElement :: TSplinePlaneStressElement(int n, Domain *aDomain) :
 NURBSSpace3dElement :: NURBSSpace3dElement(int n, Domain *aDomain) : IGAElement(n, aDomain), Space3dStructuralElementEvaluator(), interpolation(3) { }
 
 
-IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir) {
+IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir)
+{
     NURBSInterpolation *interpol = ( NURBSInterpolation * ) this->giveInterpolation();
     IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);

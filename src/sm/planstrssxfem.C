@@ -294,8 +294,9 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
 }
 
 
-double PlaneStress2dXfem :: computeArea() const
+double PlaneStress2dXfem :: computeArea()
 {
+    ///@todo Make it general and move it to the interpolation class
     FloatArray *node1 = this->giveDofManager(1)->giveCoordinates();
     FloatArray *node2 = this->giveDofManager(2)->giveCoordinates();
     FloatArray *node3 = this->giveDofManager(3)->giveCoordinates();

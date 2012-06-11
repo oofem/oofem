@@ -724,7 +724,7 @@ public:
      * Returns UnknownNUmberingScheme related to given EquationID
      */
     virtual UnknownNumberingScheme& giveUnknownNumberingScheme(EquationID type) {
-      return this->defaultNumberingScheme;
+        return this->defaultNumberingScheme;
     }
 
     /**
