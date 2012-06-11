@@ -293,18 +293,6 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
     this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
 }
 
-
-double PlaneStress2dXfem :: computeArea()
-{
-    ///@todo Make it general and move it to the interpolation class
-    FloatArray *node1 = this->giveDofManager(1)->giveCoordinates();
-    FloatArray *node2 = this->giveDofManager(2)->giveCoordinates();
-    FloatArray *node3 = this->giveDofManager(3)->giveCoordinates();
-    double a = node1->distance(node2);
-    double b = node2->distance(node3);
-    return a * b;
-}
-
 #ifdef __OOFEG
 void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
 {

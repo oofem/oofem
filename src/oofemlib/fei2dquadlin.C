@@ -38,6 +38,23 @@
 #include "flotarry.h"
 
 namespace oofem {
+
+double
+FEI2dQuadLin :: giveArea(const FEICellGeometry &cellgeo) const
+{
+    const FloatArray *node1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray *node2 = cellgeo.giveVertexCoordinates(2);
+    const FloatArray *node3 = cellgeo.giveVertexCoordinates(3);
+    const FloatArray *node4 = cellgeo.giveVertexCoordinates(4);
+
+    double x13 = node1->at(xind) - node3->at(xind);
+    double y13 = node1->at(yind) - node3->at(yind);
+    double x24 = node2->at(xind) - node4->at(xind);
+    double y24 = node2->at(yind) - node4->at(yind);
+
+    return fabs(0.5*(x13*y24 - x24*y13));
+}
+
 void
 FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

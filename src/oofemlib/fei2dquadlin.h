@@ -39,7 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing a 2d isoparametric linear interpolation based on natural coordinates 
+ * Class representing a 2d isoparametric linear interpolation based on natural coordinates
  * for quadrilateral elements.
  */
 class FEI2dQuadLin : public FEInterpolation2d
@@ -52,6 +52,8 @@ public:
         xind = ind1;
         yind = ind2;
     }
+
+    virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

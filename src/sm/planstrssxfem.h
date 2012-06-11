@@ -67,7 +67,6 @@ public:
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    virtual double computeArea();
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
