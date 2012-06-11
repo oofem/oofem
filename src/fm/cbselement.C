@@ -152,7 +152,7 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
  * this->computePressureLhs (lhs, tStep);
  * this->computeVectorOfPrescribed (EID_ConservationEquation, mode, tStep, usp);
  * answer.beProductOf (lhs, usp);
- * answer.times(-1.0);
+ * answer.negated();
  * }
  */
 

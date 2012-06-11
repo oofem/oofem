@@ -333,7 +333,7 @@ LinearStability :: terminateLinStatic(TimeStep *stepN)
     File = this->giveOutputStream();
     stepN->setTime(0.);
 
-    fprintf( File, "\nOutput for time % .3e \n\n", stepN->giveTargetTime() );
+    fprintf(File, "\nOutput for time % .3e \n\n", stepN->giveTargetTime() );
     fprintf(File, "Linear static:\n\n");
 
     int nnodes = domain->giveNumberOfDofManagers();

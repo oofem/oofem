@@ -641,7 +641,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
     //control !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     int first_control = 0;
     first_control = this->giveNumber();
-    printf("First control, sign(fi) in vertices, element no. %d\n", first_control);
+    OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - First control, sign(fi) in vertices, element no. %d", first_control);
 
 
 
@@ -724,7 +724,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             //kontrola!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             int second_control1;
             second_control1 = this->giveNumber();
-            printf("case 1 - first type of element deviation by LS, element no. %d\n", second_control1);
+            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 1 - first type of element deviation by LS, element no. %d", second_control1);
 
 
 
@@ -758,7 +758,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
 
-            printf("case 1 - after intersections of LS and edges, element no. %d\n", second_control1);
+            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 1 - after intersections of LS and edges, element no. %d", second_control1);
 
 
 
@@ -820,7 +820,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             M.at(2) = ysi + t * ( _Mid.at(2) - ysi );
 
 
-            printf("case 1 - after computing third point on zero level set curve inside element, element no. %d\n", second_control1);
+            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 1 - after computing third point on zero level set curve inside element, element no. %d", second_control1);
 
 
 
@@ -878,7 +878,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             //kontrola!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             int second_control2 = 0;
             second_control2 = this->giveNumber();
-            printf("case 2 - second type of element deviation by LS, element no. %d\n", second_control2);
+            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 2 - second type of element deviation by LS, element no. %d", second_control2);
 
 
             FloatArray inter1(2), inter2(2), crosssect(4);
@@ -1063,7 +1063,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             //kontrola!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             int second_control3 = 0;
             second_control3 = this->giveNumber();
-            printf("case 3 - third type of element deviation by LS, element no. %d\n", second_control3);
+            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 3 - third type of element deviation by LS, element no. %d", second_control3);
 
 
             FloatArray inter1(2), inter2(2), crosssect(4);

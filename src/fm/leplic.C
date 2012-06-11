@@ -421,7 +421,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
     for ( ie = 1; ie <= nelem; ie++ ) {
         if ( ( interface = ( LEPlicElementInterface * ) ( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             if ( interface->giveTempVolumeFraction() > 1.0 ) {
-                printf( "Element %d: vof out of range, vof =%e\n",  ie, interface->giveTempVolumeFraction() );
+                OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping - Element %d: vof out of range, vof =%e",  ie, interface->giveTempVolumeFraction() );
             }
 
             if ( interface->giveTempVolumeFraction() >= 0.99999999 ) {
@@ -430,9 +430,9 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
         }
     }
 
-    OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Total volume is %e\n", total_volume);
+    OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Total volume is %e", total_volume);
     if ( orig_reference_fluid_volume > 0.0 ) {
-        OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Volume error is %5.2f%%\n",
+        OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Volume error is %5.2f%%",
                        ( ( total_volume - orig_reference_fluid_volume ) / orig_reference_fluid_volume ) * 100.0);
     }
 
@@ -525,7 +525,7 @@ LEPlic :: doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool vof_temp_fl
 
                 // compute unit normal
                 fvgrad.normalize();
-                fvgrad.times(-1.0);
+                fvgrad.negated();
 #ifdef __OOFEG
                 /*
                  * EASValsSetLayer(OOFEG_DEBUG_LAYER);

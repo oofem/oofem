@@ -201,7 +201,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
             }
 
             dSigmaIncrement3d.beProductOf(dp, mStrainIncrement3d);
-            dSigmaIncrement3d.times(-1.0);
+            dSigmaIncrement3d.negated();
             dSigmaIncrement3d.add(mStressElasticIncrement3d);
             // compute normal to loading surface
             loadingStressGrad = this->GiveLCStressGradient(gp, & stressVector3d,
@@ -264,9 +264,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     }
 
     // update gp plastic strain
-    plasticStrainIncrement3d = statusFullPlasticVector;
-    plasticStrainIncrement3d.times(-1.0);
-    plasticStrainIncrement3d.add(PlasticStrainVector3d);
+    plasticStrainIncrement3d.beDifferenceOf(PlasticStrainVector3d, statusFullPlasticVector);
     crossSection->giveReducedCharacteristicVector(helpArray, gp, plasticStrainIncrement3d);
     status->letPlasticStrainIncrementVectorBe(helpArray);
 

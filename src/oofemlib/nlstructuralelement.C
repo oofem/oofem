@@ -137,7 +137,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-    FloatMatrix b, bt, A, *ut = NULL, b2;
+    FloatMatrix b, A, *ut = NULL, b2;
     FloatArray bs, TotalStressVector, u;
     int i, j, k;
     double dV;
@@ -173,7 +173,6 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
             }
         } // end nlGeometry
 
-        bt.beTranspositionOf(b);
         if ( useUpdatedGpRecord == 1 ) {
             TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
                                 ->giveStressVector();
@@ -195,10 +194,9 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         // compute nodal representation of internal forces using f = B^T*Sigma dV
         //
         dV  = this->computeVolumeAround(gp);
-        bs.beProductOf(bt, TotalStressVector);
-        bs.times(dV);
+        bs.beTProductOf(b, TotalStressVector);
 
-        answer.add(bs);
+        answer.add(dV, bs);
     }
 
     if ( nlGeometry ) {
@@ -229,7 +227,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule;
 
-    FloatMatrix b, bt, A, *ut = NULL, b2;
+    FloatMatrix b, A, *ut = NULL, b2;
     FloatArray temp, bs, TotalStressVector, u;
     IntArray irlocnum;
     int ir, i, j, k;
@@ -275,7 +273,6 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
                 }
             } // end nlGeometry
 
-            bt.beTranspositionOf(b);
             // TotalStressVector = gp->giveStressVector() ;
             if ( useUpdatedGpRecord == 1 ) {
                 TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
@@ -298,10 +295,9 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             // compute nodal representation of internal forces using f = B^T*Sigma dV
             //
             dV  = this->computeVolumeAround(gp);
-            bs.beProductOf(bt, TotalStressVector);
-            bs.times(dV);
+            bs.beTProductOf(b, TotalStressVector);
 
-            m->add(bs);
+            m->add(dV, bs);
 
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {

@@ -1038,11 +1038,10 @@ MDM :: rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t)
 // columns the local base vectors, transform a fourth-order tensor
 // represented by a matrix from local to global coordinates.
 {
-    FloatMatrix tt, ttt, td;
+    FloatMatrix tt, td;
     this->formTransformationMatrix( tt, t, Dlocal.giveNumberOfRows() );
-    ttt.beTranspositionOf(tt);
     td.beProductOf(tt, Dlocal);
-    Dlocal.beProductOf(td, ttt);
+    Dlocal.beProductTOf(td, tt);
 }
 
 #define FORMT33(i, j, ij) answer.at(ij, 1) = t.at(i, 1) * t.at(j, 1); answer.at(ij, 2) = t.at(i, 2) * t.at(j, 2); answer.at(ij, 3) = t.at(i, 1) * t.at(j, 2) + t.at(i, 2) * t.at(j, 1)

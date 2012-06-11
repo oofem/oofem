@@ -1197,7 +1197,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             convergedStrain = oldStrain;
             tempStrain = strain;
             deltaStrain = oldStrain;
-            deltaStrain.times(-1.);
+            deltaStrain.negated();
             deltaStrain.add(strain);
             //To get into the loop
             returnResult = RR_NotConverged;
@@ -1209,7 +1209,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                 tempKappaP = performRegularReturn(effectiveStress, gp);
 
                 if ( returnResult == RR_NotConverged ) {
-                    printf("Subincrementation required\n");
+                    OOFEM_LOG_INFO("Subincrementation required");
                     subIncrementFlag = 1;
                     deltaStrain.times(0.5);
                     tempStrain = convergedStrain;
@@ -1225,7 +1225,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                     returnResult = RR_NotConverged;
                     convergedStrain = tempStrain;
                     deltaStrain = convergedStrain;
-                    deltaStrain.times(-1.);
+                    deltaStrain.negated();
                     deltaStrain.add(strain);
                     tempStrain = strain;
                 } else   {
@@ -1574,7 +1574,7 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
             }
 
             deltaIncrement.beProductOf(inverseOfJacobian, residuals);
-            deltaIncrement.times(-1.);
+            deltaIncrement.negated();
 
             //compute trial values
             unknownsTrial = unknowns;

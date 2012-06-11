@@ -993,7 +993,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
             helpVectorC = residual;
             helpVectorC.add(deltaLambdaIncrement, flowRules);
             answerIncrement.beProductOf(aMatrix, helpVectorC);
-            answerIncrement.times(-1.);
+            answerIncrement.negated();
             rhoTest = rho + answerIncrement(1);
 
             //Special case, if rho changes sign
@@ -1016,7 +1016,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
                 helpVectorC = residual;
                 helpVectorC.add(deltaLambdaIncrementNew, flowRules);
                 answerIncrement.beProductOf(aMatrix, helpVectorC);
-                answerIncrement.times(-1.);
+                answerIncrement.negated();
 
                 sig += answerIncrement(0);
                 rho += answerIncrement(1);

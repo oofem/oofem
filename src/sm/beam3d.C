@@ -457,8 +457,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
 
     this->computePrescribedStrainLoadVectorAt(prescStrainEndForces, tStep, VM_Total);
     if ( prescStrainEndForces.giveSize() ) {
-        prescStrainEndForces.times(-1.0);
-        answer.add(prescStrainEndForces);
+        answer.subtract(prescStrainEndForces);
     }
 }
 
@@ -474,8 +473,7 @@ Beam3d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     // add exact end forces due to nonnodal loading
     this->computeForceLoadVector(loadEndForces, tStep, VM_Total);
     if ( loadEndForces.giveSize() ) {
-        loadEndForces.times(-1.0);
-        answer.add(loadEndForces);
+        answer.subtract(loadEndForces);
     }
 }
 

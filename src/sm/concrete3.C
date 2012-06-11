@@ -98,7 +98,7 @@ Concrete3 :: computeStrength(GaussPoint *gp, double charLength)
         // we reduce Ft and there is no softening but sudden drop
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
-        printf("\n Reducing Ft to %f in element %d, gp %d, Le %f",
+        OOFEM_LOG_INFO("Reducing Ft to %f in element %d, gp %d, Le %f",
                Ft, gp->giveElement()->giveNumber(), gp->giveNumber(), charLength);
         //
     }

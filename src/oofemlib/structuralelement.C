@@ -107,7 +107,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     double dens, dV;
     GaussPoint *gp;
     FloatArray force, ntf;
-    FloatMatrix n, nt, T;
+    FloatMatrix n, T;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
@@ -126,10 +126,8 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
             this->computeNmatrixAt(gp, n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveMaterial()->give('d', gp);
-            nt.beTranspositionOf(n);
-            ntf.beProductOf(nt, force);
-            ntf.times(dV * dens);
-            answer.add(ntf);
+            ntf.beTProductOf(n, force);
+            answer.add(dV * dens, ntf);
         }
     } else {
         return;
@@ -152,7 +150,6 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     } else {
         _warning("computePointLoadVectorAt: point load outside element");
     }
-
 
     // transform force
     if ( pointLoad->giveCoordSystMode() == PointLoad :: PL_GlobalMode ) {
@@ -196,13 +193,12 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         GaussPoint *gp;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;
-        FloatMatrix n, nt;
+        FloatMatrix n;
 
         for ( i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule.getIntegrationPoint(i);
             this->computeEgdeNMatrixAt(n, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
-            nt.beTranspositionOf(n);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
@@ -224,9 +220,8 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
                 }
             }
 
-            ntf.beProductOf(nt, force);
-            ntf.times(dV);
-            reducedAnswer.add(ntf);
+            ntf.beTProductOf(n, force);
+            reducedAnswer.add(dV, ntf);
         }
 
 
@@ -278,7 +273,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         GaussPoint *gp;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;
-        FloatMatrix n, nt;
+        FloatMatrix n;
         FloatArray globalIPcoords;
 
         approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
@@ -288,7 +283,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             gp  = iRule->getIntegrationPoint(i);
             this->computeSurfaceNMatrixAt(n, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
-            nt.beTranspositionOf(n);
 
             if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
@@ -310,9 +304,8 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                 }
             }
 
-            ntf.beProductOf(nt, force);
-            ntf.times(dV);
-            reducedAnswer.add(ntf);
+            ntf.beTProductOf(n, force);
+            reducedAnswer.add(dV, ntf);
         }
 
         delete iRule;
@@ -340,7 +333,7 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
     double dV;
     GaussPoint *gp;
     FloatArray et, de, bde;
-    FloatMatrix b, bt, d;
+    FloatMatrix b, d;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     StructuralCrossSection *cs = ( StructuralCrossSection * ) this->giveCrossSection();
     //   if (this -> giveBodyLoadArray() -> isEmpty())         // no loads
@@ -355,13 +348,11 @@ StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer
         cs->computeStressIndependentStrainVector(et, gp, tStep, mode);
         if ( et.giveSize() ) {
             this->computeBmatrixAt(gp, b);
-            bt.beTranspositionOf(b);
             this->computeConstitutiveMatrixAt(d, TangentStiffness, gp, tStep);
             dV  = this->computeVolumeAround(gp);
             de.beProductOf(d, et);
-            bde.beProductOf(bt, de);
-            bde.times(dV);
-            answer.add(bde);
+            bde.beTProductOf(b, de);
+            answer.add(dV, bde);
         }
     }
 }
@@ -836,7 +827,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-    FloatMatrix b, bt, R, GNT;
+    FloatMatrix b, R, GNT;
     FloatArray bs, TotalStressVector;
     double dV;
 
@@ -848,7 +839,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
-        bt.beTranspositionOf(b);
+
         // TotalStressVector = gp->giveStressVector() ;
         if ( useUpdatedGpRecord == 1 ) {
             TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
@@ -871,9 +862,8 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         // compute nodal representation of internal forces using f = B^T*Sigma dV
         //
         dV  = this->computeVolumeAround(gp);
-        bs.beProductOf(bt, TotalStressVector);
-        bs.times(dV);
-        answer.add(bs);
+        bs.beTProductOf(b, TotalStressVector);
+        answer.add(dV, bs);
     }
 
     // if inactive update state, but no contribution to global system
@@ -901,7 +891,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule;
 
-    FloatMatrix b, bt, R, GNT;
+    FloatMatrix b, R, GNT;
     int ir;
     FloatArray temp, bs, TotalStressVector;
     IntArray irlocnum;
@@ -924,7 +914,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             this->computeBmatrixAt(gp, b);
-            bt.beTranspositionOf(b);
+
             // TotalStressVector = gp->giveStressVector() ;
             if ( useUpdatedGpRecord == 1 ) {
                 TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
@@ -947,10 +937,9 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             // compute nodal representation of internal forces using f = B^T*Sigma dV
             //
             dV  = this->computeVolumeAround(gp);
-            bs.beProductOf(bt, TotalStressVector);
-            bs.times(dV);
+            bs.beTProductOf(b, TotalStressVector);
 
-            m->add(bs);
+            m->add(dV, bs);
 
             // localize irule contribution into element matrix
             if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {

@@ -339,7 +339,7 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 {
     int i, j, k;
     double s1, s2;
-    FloatMatrix d, x, xt(12, 6), dxt, xtt, sn, sm, sxd, y, tempTc;
+    FloatMatrix d, x, xt(12, 6), dxt, sn, sm, sxd, y, tempTc;
     FloatArray n(3), m(3), xd(3), TotalStressVector;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
@@ -363,9 +363,8 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
         }
     }
 
-    xtt.beTranspositionOf(xt);
     this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
-    dxt.beProductOf(d, xtt);
+    dxt.beProductTOf(d, xt);
     answer.beProductOf(xt, dxt);
     answer.times(1. / this->l0);
 

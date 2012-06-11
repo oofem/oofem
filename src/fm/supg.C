@@ -1188,7 +1188,7 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *atTime)
     int i, nelem = domain->giveNumberOfElements();
     SUPGElement *ePtr;
 
-    printf("updating elements for interface position\n");
+    OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
 
 
     for ( i = 1; i <= nelem; i++ ) {

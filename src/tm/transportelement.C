@@ -493,7 +493,6 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             gp  = iRule.getIntegrationPoint(i);
             this->computeEgdeNMatrixAt(n, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
-            //nt.beTranspositionOf (n);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 edgeLoad->computeValueAt(val, tStep, * ( gp->giveCoordinates() ), mode);
@@ -559,7 +558,6 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             gp  = iRule->getIntegrationPoint(i);
             this->computeSurfaceNMatrixAt(n, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
-            //nt.beTranspositionOf ( n );
 
             if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 surfLoad->computeValueAt(val, tStep, * ( gp->giveCoordinates() ), mode);

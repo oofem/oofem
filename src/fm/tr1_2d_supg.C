@@ -664,7 +664,7 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     answer.at(6, 5) += ( l / 3 ) * beta * d3 * t1 * t2;
     answer.at(6, 6) += ( l / 3 ) * beta * d3 * t2 * t2;
 
-    //answer.times(-1.0);
+    //answer.negated();
 }
 
 
@@ -755,7 +755,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     answer.at(6, 5) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n2;
     answer.at(6, 6) += ( l / 3 ) * ( 1 / alpha ) * d3 * n2 * n2;
 
-    //answer.times(-1.0);
+    //answer.negated();
 }
 
 void

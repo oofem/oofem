@@ -176,7 +176,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     /////////////////////////////////////////////
     invOldF.beInverseOf(oldF);
     //relative deformation radient
-    FloatMatrix f, f_T;
+    FloatMatrix f;
     f.resize(3, 3);
     f.beProductOf(F, invOldF);
 
@@ -190,16 +190,14 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     //if(f.at(1,1)!=f.at(1,1)){
     //  double abcd = 1;
     //}
-    f_T.beTranspositionOf(f);
     ////////////////////////////////////////////////////////////////
     //status->giveLeftCauchyGreen(oldLeftCauchyGreen);
     /////////////////////////////////////////////////////////////////
     status->giveTempLeftCauchyGreen(oldLeftCauchyGreen);
     help.beProductOf(f, oldLeftCauchyGreen);
-    trialLeftCauchyGreen.beProductOf(help, f_T);
-    FloatMatrix def, F_T;
-    F_T.beTranspositionOf(F);
-    def.beProductOf(F, F_T);
+    trialLeftCauchyGreen.beProductTOf(help, f);
+    FloatMatrix def;
+    def.beProductTOf(F, F);
     def.at(1, 1) = def.at(1, 1) - 1;
     def.at(2, 2) = def.at(2, 2) - 1;
     def.at(3, 3) = def.at(3, 3) - 1;
@@ -282,15 +280,12 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
     kirchhoffStress.at(2, 1) = kirchhoffStress.at(1, 2);
 
     //transform Kirchhoff stress into Second Piola - Kirchhoff stress
-    FloatMatrix iF(3, 3), iF_T(3, 3);
+    FloatMatrix iF;
     iF.beInverseOf(F);
-    iF_T.beTranspositionOf(iF);
     FloatMatrix S;
-    help.resize(3, 3);
-    S.resize(3, 3);
 
     help.beProductOf(iF, kirchhoffStress);
-    S.beProductOf(help, iF_T);
+    S.beProductTOf(help, iF);
 
     FloatMatrix Ep(3, 3);
     FloatMatrix E(3, 3);
@@ -336,10 +331,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
 void
 MisesMat :: convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E)
 {
-    E.resize(3, 3);
-    FloatMatrix F_T;
-    F_T.beTranspositionOf(F);
-    E.beProductOf(F_T, F);
+    E.beTProductOf(F, F);
     E.at(1, 1) = E.at(1, 1) - 1;
     E.at(2, 2) = E.at(2, 2) - 1;
     E.at(3, 3) = E.at(3, 3) - 1;
@@ -348,17 +340,14 @@ MisesMat :: convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E)
 void
 MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J)
 {
-    FloatMatrix I, F_T, invB, help;
+    FloatMatrix I, invB, help;
     I.resize(3, 3);
-    help.resize(3, 3);
     I.beUnitMatrix();
-    I.times(-1);
-    F_T.beTranspositionOf(F);
     invB.beInverseOf(b);
-    help.beProductOf(F_T, invB);
+    help.beTProductOf(F, invB);
     Ep.beProductOf(help, F);
     Ep.times( pow(J, -2. / 3.) );
-    Ep.add(I);
+    Ep.subtract(I);
     Ep.times(1. / 2.);
 }
 // returns the stress vector in 3d stress space
@@ -795,12 +784,9 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     T.at(6, 5) = ( invF.at(1, 1) * invF.at(2, 3) + invF.at(1, 3) * invF.at(2, 1) );
     T.at(6, 6) = ( invF.at(1, 1) * invF.at(2, 2) + invF.at(1, 2) * invF.at(2, 1) );
     ///////////////////////////////////////////
-    tT.beTranspositionOf(T);
-    answer.resize(6, 6);
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if ( mode != TangentStiffness ) {
-        help.beProductOf(C, tT);
+        help.beProductTOf(C, T);
         answer.beProductOf(T, help);
         return;
     }
@@ -812,7 +798,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     double dKappa = sqrt(3. / 2.) * ( status->giveTempCumulativePlasticStrain() - kappa );
     //double dKappa = ( status->giveTempCumulativePlasticStrain() - kappa);
     if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        help.beProductOf(C, tT);
+        help.beProductTOf(C, T);
         answer.beProductOf(T, help);
         return;
     }
@@ -869,7 +855,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     devN2.at(4) = mN2.at(2, 3);
     devN2.at(5) = mN2.at(1, 3);
     devN2.at(6) = mN2.at(1, 2);
-    FloatMatrix nonSymPart, symP;
+    FloatMatrix nonSymPart;
     nonSymPart.beDyadicProductOf(n, devN2);
     //symP.beTranspositionOf(nonSymPart);
     //symP.add(nonSymPart);
@@ -879,7 +865,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     C.add(C1);
     C.add(N);
     C.add(nonSymPart);
-    help.beProductOf(C, tT);
+    help.beProductTOf(C, T);
     answer.beProductOf(T, help);
 }
 

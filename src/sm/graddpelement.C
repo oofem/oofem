@@ -224,7 +224,7 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
     GaussPoint *gp;
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
 
-    FloatMatrix b, bt, R, GNT;
+    FloatMatrix b, R, GNT;
     FloatArray bs, TotalStressVector;
     double dV;
     answer.resize(0);
@@ -232,7 +232,6 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         elem->computeBmatrixAt(gp, b);
-        bt.beTranspositionOf(b);
         this->computeStressVector(TotalStressVector, gp, tStep);
         if ( TotalStressVector.giveSize() == 0 ) {
             break;
@@ -244,11 +243,10 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
         // compute nodal representation of internal forces using f = B^T*Sigma dV
         //
 
-        dV  = elem->computeVolumeAround(gp);
-        bs.beProductOf(bt, TotalStressVector);
-        bs.times(dV);
+        dV = elem->computeVolumeAround(gp);
+        bs.beTProductOf(b, TotalStressVector);
 
-        answer.add(bs);
+        answer.add(dV, bs);
     }
 }
 
@@ -386,7 +384,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     //MatResponseForm form = PDGrad_uu;
     ///////////////////////////////////////////////////////////////////
-    FloatMatrix B,DB,D,Nk,NkT, NkDB;
+    FloatMatrix B,DB,D,Nk,NkDB;
     answer.resize(nlSize,locSize);
     answer.zero();
     Material *mat =elem->giveMaterial();
@@ -395,12 +393,10 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
         elem->computeBmatrixAt(gp, B);
         mat->giveCharacteristicMatrix(D,PDGrad_ku,rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);
-        NkT.beTranspositionOf(Nk);
         dV = elem->computeVolumeAround(gp);
         DB.beProductOf(D, B);
-        NkDB.beProductOf(NkT,DB);
-        NkDB.times(-dV);
-        answer.add(NkDB);
+        NkDB.beTProductOf(Nk,DB);
+        answer.add(-dV, NkDB);
     }
 }
 
@@ -415,7 +411,7 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     FloatMatrix lStiff;
     ///////////////////////////////////////////////////////////////////
-    FloatMatrix B,Bt,BtB,N,Nt,NtN;
+    FloatMatrix B,BtB,N,NtN;
     Material *mat = elem->giveMaterial();
     answer.resize(nlSize,nlSize);
     answer.zero();
@@ -423,18 +419,14 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     for (int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         this->computeNkappaMatrixAt(gp,N);
-        Nt.beTranspositionOf(N);
         this->computeBkappaMatrixAt(gp,B);
-        Bt.beTranspositionOf(B);
         dV = elem->computeVolumeAround(gp);
         mat-> giveCharacteristicMatrix(lStiff,PDGrad_kk,rMode, gp, tStep);
         R = lStiff.at(1,1);
-        NtN.beProductOf(Nt,N);
-        NtN.times(dV);
-        BtB.beProductOf(Bt,B);
-        BtB.times(R*dV);
-        answer.add(NtN);
-        answer.add(BtB);
+        NtN.beTProductOf(N,N);
+        BtB.beTProductOf(B,B);
+        answer.add(dV, NtN);
+        answer.add(R*dV, BtB);
 
     }
 }
@@ -449,7 +441,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
     Material *mat = elem->giveMaterial();
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     ///////////////////////////////////////////////////////////////////
-    FloatMatrix B,Bt,Nk,BSN;
+    FloatMatrix B,Nk,BSN;
     FloatMatrix BS;
     FloatMatrix gPSigma;
     answer.resize(locSize,nlSize);
@@ -459,12 +451,10 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
         mat-> giveCharacteristicMatrix(gPSigma,PDGrad_uk,rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp,Nk);
         elem->computeBmatrixAt(gp,B);
-        Bt.beTranspositionOf(B);
         dV = elem->computeVolumeAround(gp);
-        BS.beProductOf(Bt,gPSigma);
+        BS.beTProductOf(B,gPSigma);
         BSN.beProductOf(BS,Nk);
-        BSN.times(-dV);
-        answer.add(BSN);
+        answer.add(-dV, BSN);
     }
 }
 

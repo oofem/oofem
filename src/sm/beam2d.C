@@ -411,8 +411,7 @@ Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
 
     this->computePrescribedStrainLoadVectorAt(prescStrainEndForces, tStep, VM_Total);
     if ( prescStrainEndForces.giveSize() ) {
-        prescStrainEndForces.times(-1.0);
-        answer.add(prescStrainEndForces);
+        answer.subtract(prescStrainEndForces);
     }
 }
 

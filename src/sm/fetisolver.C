@@ -1139,7 +1139,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         qq.zero();
 
         qq.beTProductOf(rbm, * partitionLoad);
-        qq.times(-1.0);
+        qq.negated();
     }
 
     /***************************************************************************/
@@ -1213,7 +1213,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         this->masterMapRBM();
 
         if ( tnse ) {
-            l.times(-1.0);
+            l.negated();
         }
     } else {
         // pack RBMs

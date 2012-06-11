@@ -363,7 +363,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
         return 1. / iwf;
 
     default:
-        printf("IDNLMaterial :: computeWeightFunction ... unknown type of weight function %d\n", weightFun);
+        OOFEM_WARNING2("IDNLMaterial :: computeWeightFunction - unknown type of weight function %d", weightFun);
         return 0.0;
     }
 }

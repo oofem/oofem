@@ -64,7 +64,7 @@ void ElementSide :: printYourself()
 {
     int i;
 
-    printf("Side %d \n", number);
+    printf("Element side %d \n", number);
     for ( i = 0; i < numberOfDofs; i++ ) {
         if ( dofArray [ i ] ) {
             dofArray [ i ]->printYourself();

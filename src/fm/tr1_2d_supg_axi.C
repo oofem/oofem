@@ -983,7 +983,7 @@ TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeSt
         answer.times(dV);
     }
 
-    answer.times(-1.0);
+    answer.negated();
 }
 
 

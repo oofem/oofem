@@ -356,7 +356,7 @@ void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, EquationID type,
 void MasterDof :: printYourself()
 // Prints the receiver on screen.
 {
-    printf( "dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
+    printf("dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
     printf("equation %d    bc %d \n", equationNumber, bc);
 
     // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());

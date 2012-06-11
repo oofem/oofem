@@ -438,7 +438,7 @@ LevelSetPCS :: redistance(TimeStep *atTime)
     } while ( ( cm > this->reinit_err ) && ( ++nite < 2000 ) );
 
     //} while ((++nite < 200));
-    printf("LS reinit: error %le in %d iterations\n", cm, nite);
+    OOFEM_LOG_INFO("LevelSetPCS :: redistance - error %le in %d iterations", cm, nite);
 
     //levelSetValues = d;
 }
@@ -499,7 +499,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
 
                     k.at(i) = F * gfi.dotProduct(n) / ( nsd * gfi_norm );
                 } else {
-                    printf("zero gfi_norm for %d node\n", i);
+                    OOFEM_LOG_INFO("LevelSetPCS :: pcs_stage1 - zero gfi_norm for %d node", i);
                     k.at(i) = 0.0;
                 }
             }
@@ -515,7 +515,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                 if ( fabs(sumkn) > 1.e-12 ) {
                     dfii.at(i) = macbra( k.at(i) ) * help / sumkn;
                 } else {
-                    printf("zero sumkn for %d node\n", i);
+                    OOFEM_LOG_INFO("LevelSetPCS :: pcs_stage1 - zero sumkn for %d node", i);
                     dfii.at(i) = 0.0;
                 }
             }
