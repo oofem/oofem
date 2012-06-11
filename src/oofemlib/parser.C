@@ -99,7 +99,7 @@ double Parser :: term(bool get) // multiply and divide
             error("divide by 0");
             return 1;
         case POW:
-            left = __OOFEM_POW(left,prim(true));
+            left = pow(left,prim(true));
             break;
         default:
             return left;

@@ -177,22 +177,22 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
     // Basic creep parameters
 
     // q1  = 0.6e6 / E28;
-    q1  = 127 * __OOFEM_POW(fc, -0.5);
-    q2  = 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9);
-    q3  = 0.29 * __OOFEM_POW(wc, 4.) * q2;
-    q4  = 20.3 * __OOFEM_POW(ac, -0.7);
+    q1  = 127 * pow(fc, -0.5);
+    q2  = 185.4 * pow(c, 0.5) * pow(fc, -0.9);
+    q3  = 0.29 * pow(wc, 4.) * q2;
+    q4  = 20.3 * pow(ac, -0.7);
 
     // Shrinkage
 
     if ( this->shMode == B3_AverageShrinkage ) {
         // the exact value converted from US units would be 85220
         // but this is the SI formula presented in Inelastic Analysis
-        kt = 85000 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25);
-        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.28) + 270. );
+        kt = 85000 * pow(t0, -0.08) * pow(fc, -0.25);
+        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * pow(w, 2.1) * pow(fc, -0.28) + 270. );
 
         // Creep at drying
 
-        q5 = 7.57e5 * ( 1. / fc ) * __OOFEM_POW(EpsSinf, -0.6);
+        q5 = 7.57e5 * ( 1. / fc ) * pow(EpsSinf, -0.6);
     }
 
     char buff [ 1024 ];
@@ -218,33 +218,33 @@ B3Material :: computeCreepFunction(GaussPoint *gp, double atTime, double ofAge)
 
     // basic creep
 
-    Qf = 1. / ( 0.086 * __OOFEM_POW(ofAge, 2. / 9.) + 1.21 * __OOFEM_POW(ofAge, 4. / 9.) );
-    Z  = __OOFEM_POW(ofAge, -m) * log( 1. + __OOFEM_POW(atTime - ofAge, n) );
-    r  = 1.7 * __OOFEM_POW(ofAge, 0.12) + 8.0;
-    Q  = Qf * __OOFEM_POW( ( 1. + __OOFEM_POW( ( Qf / Z ), r ) ), -1. / r );
+    Qf = 1. / ( 0.086 * pow(ofAge, 2. / 9.) + 1.21 * pow(ofAge, 4. / 9.) );
+    Z  = pow(ofAge, -m) * log( 1. + pow(atTime - ofAge, n) );
+    r  = 1.7 * pow(ofAge, 0.12) + 8.0;
+    Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + __OOFEM_POW(atTime - ofAge, n) ) + q4 *log(atTime / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow(atTime - ofAge, n) ) + q4 *log(atTime / ofAge);
 
 
     if ( this->shMode == B3_AverageShrinkage ) {
         // Aditional creep due to drying
 
-        TauSh = kt * __OOFEM_POW(ks * 2.0 * vs, 2.);
+        TauSh = kt * pow(ks * 2.0 * vs, 2.);
         if ( ( atTime - t0 ) >= 0 ) {
-            St1  = tanh( __OOFEM_POW( ( atTime - t0 ) / TauSh, 1. / 2. ) );
+            St1  = tanh( pow( ( atTime - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
 
         if ( ( ofAge - t0 ) >= 0 ) {
-            St2  = tanh( __OOFEM_POW( ( ofAge - t0 ) / TauSh, 1. / 2. ) );
+            St2  = tanh( pow( ( ofAge - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St2 = 0.0;
         }
 
         H1  = 1. - ( 1. - hum ) * St1;
         H2  = 1. - ( 1. - hum ) * St2;
-        Cd = q5 * __OOFEM_POW( ( exp(-8.0 * H1) - exp(-8.0 * H2) ), 0.5 );
+        Cd = q5 * pow( ( exp(-8.0 * H1) - exp(-8.0 * H2) ), 0.5 );
     } else {
         Cd = 0.0;
     }
@@ -315,23 +315,23 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
     fullAnswer.zero();
 
     // size dependence
-    TauSh = kt * __OOFEM_POW(ks * 2.0 * vs, 2.);
+    TauSh = kt * pow(ks * 2.0 * vs, 2.);
     // time curve
-    St  = tanh( __OOFEM_POW( ( time - t0 ) / TauSh, 1. / 2. ) );
+    St  = tanh( pow( ( time - t0 ) / TauSh, 1. / 2. ) );
     // humidity dependence
     if ( hum <= 0.98 ) {
-        kh = 1. - __OOFEM_POW(hum, 3);
+        kh = 1. - pow(hum, 3);
     } else if ( hum == 1 ) {
         kh = -0.2;              // swelling in water
     } else {
         // linear interpolation for 0.98 <= h <= 1.
-        help = 1. - __OOFEM_POW(hum, 3);
+        help = 1. - pow(hum, 3);
         kh = help + ( -0.2 - help ) / ( 1. - 0.98 ) * ( hum - 0.98 );
     }
 
     // time dependence of ultimate shrinkage
-    E607 = E28 * __OOFEM_POW(607 / ( 4. + 0.85 * 607 ), 0.5);
-    Et0Tau = E28 * __OOFEM_POW( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
+    E607 = E28 * pow(607 / ( 4. + 0.85 * 607 ), 0.5);
+    Et0Tau = E28 * pow( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
     EpsShInf = EpsSinf * E607 / Et0Tau;
     // mean shrinkage in the cross section:
     EpsSh = -EpsShInf * kh * St;

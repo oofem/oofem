@@ -290,7 +290,7 @@ double
 LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
     if ( normalToCrackPlane.giveSize() != 0 ) {
-        double factor = __OOFEM_POW( ( double ) this->numberOfGaussPoints, 1. / 3. );
+        double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
         return this->giveLenghtInDir(normalToCrackPlane) / factor;
     } else {
         int i;
@@ -304,7 +304,7 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
             volume += this->computeVolumeAround(gp);
         }
 
-        return __OOFEM_POW(volume, 1. / 3.);
+        return pow(volume, 1. / 3.);
     }
 }
 
@@ -666,7 +666,7 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
         volume += this->computeVolumeAround(gp);
     }
 
-    return __OOFEM_POW(volume, 1. / 3.);
+    return pow(volume, 1. / 3.);
 }
 
 
@@ -940,7 +940,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
             //
             // obtain gp global coordinates
             this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
-            length = 0.3333 * __OOFEM_POW(this->computeVolumeAround(gp), 1. / 3.);
+            length = 0.3333 * pow(this->computeVolumeAround(gp), 1. / 3.);
             if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 

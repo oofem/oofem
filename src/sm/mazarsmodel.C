@@ -344,8 +344,8 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
         alpha_t = 0.;
         alpha_c = 1.;
     } else if ( alpha < 1. ) {
-        alpha_t = __OOFEM_POW(alpha, this->beta);
-        alpha_c = __OOFEM_POW( ( 1. - alpha ), this->beta );
+        alpha_t = pow(alpha, this->beta);
+        alpha_c = pow( ( 1. - alpha ), this->beta );
     } else   {
         alpha_t = 1.;
         alpha_c = 0.;

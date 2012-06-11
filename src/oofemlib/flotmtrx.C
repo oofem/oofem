@@ -1657,7 +1657,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
         eval.at(i) = this->at(i, i);
     }
 
-    tol = __OOFEM_POW(c_b2, nf);
+    tol = pow(c_b2, nf);
     sum = 0.0;
     for ( i = 1; i <= neq; ++i ) {
         for ( j = 1; j <= neq; ++j ) {

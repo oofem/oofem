@@ -311,9 +311,9 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac, 
 
     // Basic creep parameters
     q1  = 1.e-12 * stiffnessFactor * 126.74271 / ( sqrt(fc) );
-    q2  = 1.e-12 * stiffnessFactor * 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9);
-    q3  = 1.e-6 *  stiffnessFactor * 0.29 * __OOFEM_POW(wc, 4.) * q2;
-    q4  = 1.e-12 * stiffnessFactor * 20.3 * __OOFEM_POW(ac, -0.7);
+    q2  = 1.e-12 * stiffnessFactor * 185.4 * pow(c, 0.5) * pow(fc, -0.9);
+    q3  = 1.e-6 *  stiffnessFactor * 0.29 * pow(wc, 4.) * q2;
+    q4  = 1.e-12 * stiffnessFactor * 20.3 * pow(ac, -0.7);
 
     char buff [ 1024 ];
     sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf", q1, q2, q3, q4);
@@ -361,7 +361,7 @@ MPSMaterial :: computeCharTimes()
     this->charTimes.resize(this->nUnits);
 
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
-        charTimes.at(mu) = Tau1 * __OOFEM_POW(10., mu - 1);
+        charTimes.at(mu) = Tau1 * pow(10., mu - 1);
     }
 }
 
@@ -376,16 +376,16 @@ MPSMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, doubl
 
     // modulus of elasticity of the first unit of Kelvin chain.
     // (aging elastic spring with retardation time = 0)
-    double lambda0ToPowN = __OOFEM_POW(lambda0, 0.1);
-    tau0 = __OOFEM_POW(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
+    double lambda0ToPowN = pow(lambda0, 0.1);
+    tau0 = pow(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
     EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0) );
 
     // evaluation of moduli of elasticity for the remaining units
     // (Solidifying kelvin units with retardation times tauMu)
     answer.resize(nUnits);
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
-        tauMu = __OOFEM_POW(2 * this->giveCharTime(mu), 0.1);
-        answer.at(mu) = 10. * __OOFEM_POW(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN) );
+        tauMu = pow(2 * this->giveCharTime(mu), 0.1);
+        answer.at(mu) = 10. * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN) );
         this->charTimes.at(mu) *= 1.35;
     }
 
@@ -485,7 +485,7 @@ MPSMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
         atAge = computeEquivalentTime(gp, atTime, 0);
     }
 
-    v = 1 / ( alpha + __OOFEM_POW(lambda0 / atAge, m) );
+    v = 1 / ( alpha + pow(lambda0 / atAge, m) );
 
     return v;
 }
@@ -532,7 +532,7 @@ MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
     tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu < 1.e-5 ) {
-        lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( __OOFEM_POW(deltaT / tauMu, 2) ) - 1 / 24 * ( __OOFEM_POW(deltaT / tauMu, 3) );
+        lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
     } else if ( deltaT / tauMu > 30 ) {
         lambdaMu = tauMu / deltaT;
     } else {

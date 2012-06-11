@@ -42,8 +42,8 @@
 #ifdef __GNUC__
 #include <cxxabi.h>
 #include <execinfo.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 // Taken from https://idlebox.net/2008/0901-stacktrace-demangled/ which indicated free usage.
 /** Print a demangled stack backtrace of the caller function to FILE* out. */
 static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63)

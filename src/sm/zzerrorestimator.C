@@ -444,7 +444,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
         currDensity = interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
         elemPolyOrder = interface->ZZRemeshingCriteriaI_givePolynOrder();
-        elemSize = currDensity / __OOFEM_POW(iratio, 1.0 / elemPolyOrder);
+        elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
         ielemNodes = ielem->giveNumberOfDofManagers();
         for ( j = 1; j <= ielemNodes; j++ ) {

@@ -221,18 +221,18 @@ B3SolidMaterial :: predictParametersFrom(double fc, double c, double wc, double 
 
     // q1  = 0.6e6 / E28; // replaced by the formula dependent on fc
     q1  = 126.74271 / sqrt(fc);
-    q2  = 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9); // [1/TPa]
-    q3  = 0.29 * __OOFEM_POW(wc, 4.) * q2;
-    q4  = 20.3 * __OOFEM_POW(ac, -0.7);
+    q2  = 185.4 * pow(c, 0.5) * pow(fc, -0.9); // [1/TPa]
+    q3  = 0.29 * pow(wc, 4.) * q2;
+    q4  = 20.3 * pow(ac, -0.7);
 
     // Shrinkage parameters
 
     if ( this->shMode == B3_AverageShrinkage ) {
-        kt = 85000 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25); // 85000-> result in [days/m^2] or 8.5-> result in [days/cm^2]
-        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.28) + 270. ); // exponent corrected: -0.25 -> -0.28
+        kt = 85000 * pow(t0, -0.08) * pow(fc, -0.25); // 85000-> result in [days/m^2] or 8.5-> result in [days/cm^2]
+        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * pow(w, 2.1) * pow(fc, -0.28) + 270. ); // exponent corrected: -0.25 -> -0.28
 
         // Drying creep parameter
-        q5 = 7.57e5 * ( 1. / fc ) * __OOFEM_POW(EpsSinf, -0.6);
+        q5 = 7.57e5 * ( 1. / fc ) * pow(EpsSinf, -0.6);
     }
 
     char buff [ 1024 ];
@@ -335,7 +335,7 @@ B3SolidMaterial :: computeCharTimes()
     this->charTimes.resize(this->nUnits);
 
     for ( mu = 1; mu <= this->nUnits; mu++ ) {
-        charTimes.at(mu) = Tau1 * __OOFEM_POW(10., mu - 1);
+        charTimes.at(mu) = Tau1 * pow(10., mu - 1);
     }
 }
 
@@ -356,15 +356,15 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
 
         // modulus of elasticity of the first unit of Kelvin chain.
         // (aging elastic spring with retardation time = 0)
-        tau0 = __OOFEM_POW(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
+        tau0 = pow(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
         EspringVal = 1.e6 / ( q2 * log(1.0 + tau0) - q2 * tau0 / ( 10.0 + 10.0 * tau0 ) );
 
         // evaluation of moduli of elasticity for the remaining units
         // (aging kelvin units with retardation time tauMu)
         answer.resize(nUnits);
         for ( mu = 1; mu <= this->nUnits; mu++ ) {
-            tauMu = __OOFEM_POW(2 * this->giveCharTime(mu), 0.1);
-            answer.at(mu) = 10.e6 * __OOFEM_POW(1 + tauMu, 2) / ( log(10.0) * q2 * tauMu * ( 0.9 + tauMu ) );
+            tauMu = pow(2 * this->giveCharTime(mu), 0.1);
+            answer.at(mu) = 10.e6 * pow(1 + tauMu, 2) / ( log(10.0) * q2 * tauMu * ( 0.9 + tauMu ) );
             this->charTimes.at(mu) *= 1.35;
         }
 
@@ -432,7 +432,7 @@ B3SolidMaterial :: computeNonAgingCreepFunction(GaussPoint *gp, double loadDurat
     double lambda0 = 1.0;     // standard value [day]
     double n = 0.1;     // standard value
 
-    Phi = q2 * log( 1 + __OOFEM_POW(loadDuration / lambda0, n) );
+    Phi = q2 * log( 1 + pow(loadDuration / lambda0, n) );
 
     return Phi;
 }
@@ -453,34 +453,34 @@ B3SolidMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double of
     n = 0.1;
 
     // basic creep - approximation of the exact B3 model by closed-form functions
-    Qf = 1. / ( 0.086 * __OOFEM_POW(ofAge, 2. / 9.) + 1.21 * __OOFEM_POW(ofAge, 4. / 9.) );
-    Z  = __OOFEM_POW(ofAge, -m) * log( 1. + __OOFEM_POW(atTime - ofAge, n) );
-    r  = 1.7 * __OOFEM_POW(ofAge, 0.12) + 8.0;
-    Q  = Qf * __OOFEM_POW( ( 1. + __OOFEM_POW( ( Qf / Z ), r ) ), -1. / r );
+    Qf = 1. / ( 0.086 * pow(ofAge, 2. / 9.) + 1.21 * pow(ofAge, 4. / 9.) );
+    Z  = pow(ofAge, -m) * log( 1. + pow(atTime - ofAge, n) );
+    r  = 1.7 * pow(ofAge, 0.12) + 8.0;
+    Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + __OOFEM_POW(atTime - ofAge, n) ) + q4 *log(atTime / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow(atTime - ofAge, n) ) + q4 *log(atTime / ofAge);
 
 
     Cd = 0.0;
     if ( this->shMode == B3_AverageShrinkage ) {
         // additional creep due to drying
 
-        TauSh = kt * __OOFEM_POW(ks * 2.0 * vs, 2.);
+        TauSh = kt * pow(ks * 2.0 * vs, 2.);
         if ( ( atTime - t0 ) >= 0 ) {
-            St1  = tanh( __OOFEM_POW( ( atTime - t0 ) / TauSh, 1. / 2. ) );
+            St1  = tanh( pow( ( atTime - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
 
         if ( ( ofAge - t0 ) >= 0 ) {
-            St2  = tanh( __OOFEM_POW( ( ofAge - t0 ) / TauSh, 1. / 2. ) );
+            St2  = tanh( pow( ( ofAge - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St2 = 0.0;
         }
 
         H1  = 1. - ( 1. - hum ) * St1;
         H2  = 1. - ( 1. - hum ) * St2;
-        Cd = q5 * __OOFEM_POW( ( exp(-8.0 * H1) - exp(-8.0 * H2) ), 0.5 );
+        Cd = q5 * pow( ( exp(-8.0 * H1) - exp(-8.0 * H2) ), 0.5 );
     }
 
     return 1.e-6 * ( q1 + C0 + Cd );
@@ -550,23 +550,23 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
     fullAnswer.zero();
 
     // size dependence
-    TauSh = kt * __OOFEM_POW(ks * 2.0 * vs, 2.);
+    TauSh = kt * pow(ks * 2.0 * vs, 2.);
     // time curve
-    St  = tanh( __OOFEM_POW( ( time - t0 ) / TauSh, 1. / 2. ) );
+    St  = tanh( pow( ( time - t0 ) / TauSh, 1. / 2. ) );
     // humidity dependence
     if ( hum <= 0.98 ) {
-        kh = 1. - __OOFEM_POW(hum, 3);
+        kh = 1. - pow(hum, 3);
     } else if ( hum == 1 ) {
         kh = -0.2;              // swelling in water
     } else {
         // linear interpolation for 0.98 <= h <= 1.
-        help = 1. - __OOFEM_POW(0.98, 3);
+        help = 1. - pow(0.98, 3);
         kh = help + ( -0.2 - help ) / ( 1. - 0.98 ) * ( hum - 0.98 );
     }
 
     // time dependence of ultimate shrinkage
-    E607 = E28 * __OOFEM_POW(607 / ( 4. + 0.85 * 607 ), 0.5);
-    Et0Tau = E28 * __OOFEM_POW( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
+    E607 = E28 * pow(607 / ( 4. + 0.85 * 607 ), 0.5);
+    Et0Tau = E28 * pow( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
 
     EpsShInf = EpsSinf * E607 / Et0Tau;
     // mean shrinkage in the cross section:
@@ -633,7 +633,7 @@ B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
     alpha = q3 / q2;
 
     atAge = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
-    v = 1 / ( alpha + __OOFEM_POW(lambda0 / atAge, m) );
+    v = 1 / ( alpha + pow(lambda0 / atAge, m) );
 
     return v;
 }

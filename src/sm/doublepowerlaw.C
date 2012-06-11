@@ -66,8 +66,8 @@ DoublePowerLawMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, do
 
     e0 = 1.50 * E28;
 
-    h1 = __OOFEM_POW(atTime - ofAge, n);
-    h2 = __OOFEM_POW(ofAge, -m) + alpha;
+    h1 = pow(atTime - ofAge, n);
+    h2 = pow(ofAge, -m) + alpha;
     h3 = fi1 / e0;
 
     return 1. / e0 + h1 * h2 * h3;

@@ -104,7 +104,7 @@ QSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
 double
 QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    double factor = __OOFEM_POW( ( double ) this->numberOfGaussPoints, 1. / 3. );
+    double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
     return this->giveLenghtInDir(normalToCrackPlane) / factor;
 }
 

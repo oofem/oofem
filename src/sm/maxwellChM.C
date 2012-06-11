@@ -89,10 +89,10 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
         for ( j = 1; j <= this->nUnits; j++ ) {
             tauj = this->giveCharTime(j);
             for ( sum = 0., r = 1; r <= rSize; r++ ) {
-                tti = __OOFEM_POW( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                      __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
-                ttj = __OOFEM_POW( ( atTime + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
-                      __OOFEM_POW( atTime / tauj, giveCharTimeExponent(j) );
+                tti = pow( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
+                      pow( atTime / taui, giveCharTimeExponent(i) );
+                ttj = pow( ( atTime + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
+                      pow( atTime / tauj, giveCharTimeExponent(j) );
                 sum += exp(-tti - ttj);
             }
 
@@ -101,8 +101,8 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
 
         // assemble rhs
         for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
-            tti = __OOFEM_POW( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                  __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
+            tti = pow( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
+                  pow( atTime / taui, giveCharTimeExponent(i) );
             sumRhs += exp(-tti) * discreteRelaxFunctionVal.at(r);
         }
 
@@ -137,7 +137,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
             deltaYmu = 1.e-3;
         }
 
-        deltaYmu = __OOFEM_POW( deltaYmu, this->giveCharTimeExponent(mu) );
+        deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
 
         lambdaMu = ( 1.0 - exp(-deltaYmu) ) / deltaYmu;
         Emu      = this->giveEparModulus(mu); // previously updated by updateEparModuli
@@ -173,7 +173,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
 
         for ( mu = 1; mu <= nUnits; mu++ ) {
             deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
-            deltaYmu = __OOFEM_POW( deltaYmu, this->giveCharTimeExponent(mu) );
+            deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
             sigmaMu  = status->giveHiddenVarsVector(mu);
             if ( sigmaMu ) {
                 help.beProductOf(B, * sigmaMu); // B can be moved before sum !!!
@@ -235,7 +235,7 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
     for ( mu = 1; mu <= nUnits; mu++ ) {
         deltaYmu = tNow->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
-        deltaYmu = __OOFEM_POW( deltaYmu, this->giveCharTimeExponent(mu) );
+        deltaYmu = pow( deltaYmu, this->giveCharTimeExponent(mu) );
 
         lambdaMu = ( 1.0 - exp(-deltaYmu) ) / deltaYmu;
         Emu      = this->giveEparModulus(mu);

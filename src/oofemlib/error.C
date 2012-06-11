@@ -59,7 +59,7 @@ void oofem_exit(int code)
  * #ifndef HAVE_MACRO_VA_ARGS
  *
  *#ifndef __MAKEDEPEND
- *#include <stdarg.h>
+ *#include <cstdarg>
  *#endif
  *
  *

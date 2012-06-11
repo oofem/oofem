@@ -37,7 +37,7 @@
 
 #include "alist.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace oofem {
 #define SAVE                       /* memory savings */

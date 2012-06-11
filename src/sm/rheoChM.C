@@ -254,7 +254,7 @@ RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, doubl
 
     help = ( log10(to - from) - almostlogZero ) / ( double ) nsteps;
     for ( i = 0; i <= nsteps; i++ ) {
-        answer.at(i + i0) = __OOFEM_POW( 10., ( almostlogZero + help * i ) ) + from;
+        answer.at(i + i0) = pow( 10., ( almostlogZero + help * i ) ) + from;
         OOFEM_LOG_INFO( "DiscreteTimes.at %d %15.15g \n", i, answer.at(i + i0) );
     }
 

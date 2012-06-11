@@ -936,7 +936,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
         currDensity = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
         elemPolyOrder = interface->HuertaRemeshingCriteriaI_givePolynOrder();
-        elemSize = currDensity / __OOFEM_POW(iratio, 1.0 / elemPolyOrder);
+        elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
         //#ifdef HUHU
         // toto je treba udelat obecne
         // zjistit, zda material na prvku je nelokalni, po te z prvku vytahnout danou velicinu

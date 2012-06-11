@@ -150,7 +150,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
         //
         // check if present off-diagonal element is large enough to require zeroing
         //
-        eps = __OOFEM_POW(0.01, ( double ) nsweep);
+        eps = pow(0.01, ( double ) nsweep);
         eps *= eps;
         for ( j = 1; j <= nr; j++ ) {
             jj = j + 1;

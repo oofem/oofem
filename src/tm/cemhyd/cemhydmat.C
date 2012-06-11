@@ -48,9 +48,9 @@
  * some notice that they have been modified.
  */
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
 #include "cemhydmat.h"
 #include "homogenize.h"
 
@@ -60,7 +60,7 @@
  #include "gausspnt.h"
  #include "oofem_limits.h"
  #ifndef __MAKEDEPEND
-  #include <stdlib.h>
+  #include <cstdlib>
  #endif
 #endif
 

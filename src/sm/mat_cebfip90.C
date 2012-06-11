@@ -363,7 +363,7 @@ double
 CebFipSlip90Material :: computeBondForce(double s)
 {
     if ( s <= s1 ) {
-        return tmax * __OOFEM_POW( ( s / s1 ), alpha );
+        return tmax * pow( ( s / s1 ), alpha );
     } else if ( ( s >= s1 ) && ( s <= s2 ) ) {
         return tmax;
     } else if ( ( s >= s2 ) && ( s <= s3 ) ) {
@@ -379,9 +379,9 @@ CebFipSlip90Material :: computeBondForceStiffness(double s)
 {
     if ( s <= s1 / 1000. ) {
         s = s1 / 1000.;
-        return alpha * tmax * __OOFEM_POW( ( s / s1 ), alpha - 1 ) / s1;
+        return alpha * tmax * pow( ( s / s1 ), alpha - 1 ) / s1;
     } else if ( s <= s1 ) {
-        return alpha * tmax * __OOFEM_POW( ( s / s1 ), alpha - 1 ) / s1;
+        return alpha * tmax * pow( ( s / s1 ), alpha - 1 ) / s1;
     } else if ( ( s >= s1 ) && ( s <= s2 ) ) {
         return 1.e-6; // should be zero
     } else if ( ( s >= s2 ) && ( s <= s3 ) ) {

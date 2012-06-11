@@ -75,12 +75,12 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
 
     e0 = E28 * sqrt( 1.36 * t0 / ( t0 + 10. ) );
 
-    fi0 = 0.95 * __OOFEM_POW(t0, -0.3) - 0.1;
+    fi0 = 0.95 * pow(t0, -0.3) - 0.1;
     if ( fi0 < 0. ) {
         fi0 = 0.;
     }
 
-    firv = 0.11 + 0.2 * atan( 0.05 * __OOFEM_POW( ( t - t0 ), 2. / 3. ) );
+    firv = 0.11 + 0.2 * atan( 0.05 * pow( ( t - t0 ), 2. / 3. ) );
     if ( firv < 0.4 ) {
         firv = 0.4;
     }
@@ -97,7 +97,7 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
     alpha = 0.078 * exp( -1.20 * log10(hd) );
     beta  = 0.530 * exp( -0.13 * log10(hd) );
 
-    fiir = 0.25 * ( 5.4 - log10(hd) ) * ( exp( -__OOFEM_POW(alpha * t0, beta) ) - exp( -__OOFEM_POW(alpha * t, beta) ) );
+    fiir = 0.25 * ( 5.4 - log10(hd) ) * ( exp( -pow(alpha * t0, beta) ) - exp( -pow(alpha * t, beta) ) );
     fiir = fibf * fiir;
 
     fi = fi0 + firv + fiir;

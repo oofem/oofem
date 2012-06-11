@@ -655,7 +655,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
             xc = xc / 4.;
             yc = yc / 4.;
             zc = zc / 4.;
-            length = TR_LENGHT_REDUCT * __OOFEM_POW(this->computeVolumeAround(gp), 1. / 3.) / 2.0;
+            length = TR_LENGHT_REDUCT * pow(this->computeVolumeAround(gp), 1. / 3.) / 2.0;
             if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 
@@ -758,7 +758,7 @@ double
 LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
     FloatArray lc(4);
     double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this));
-    return __OOFEM_POW(volume * 6.0, 1. / 3.);
+    return pow(volume * 6.0, 1. / 3.);
 }
 
 

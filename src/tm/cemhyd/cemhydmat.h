@@ -39,8 +39,8 @@
 /*modified to an object-oriented version by smilauer@cml.fsv.cvut.cz*/
 
 #include "mathfem.h"
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <tinyxml.h>
 
 #define TINYXML //read CEMHYD3D input file through tinyXML library

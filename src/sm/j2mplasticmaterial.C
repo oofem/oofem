@@ -339,8 +339,8 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
         }
 
         f = this->computeJ2InvariantAt(helpVector);
-        f12 = __OOFEM_POW(f, 1. / 2.);
-        f32 = __OOFEM_POW(f, 3. / 2.);
+        f12 = pow(f, 1. / 2.);
+        f32 = pow(f, 3. / 2.);
 
         ax = helpVector.at(1);
         ay = helpVector.at(2);

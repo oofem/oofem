@@ -40,7 +40,7 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
- #include <stdlib.h>
+ #include <cstdlib>
 #endif
 
 namespace oofem {

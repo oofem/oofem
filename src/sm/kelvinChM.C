@@ -153,7 +153,7 @@ KelvinChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, dou
 
     help = ( log10(to) - log10(from) ) / ( double ) ( nsteps );
     for ( i = 1; i <= nsteps; i++ ) {
-        answer.at(i + 1) = __OOFEM_POW( 10., ( i * help + log10(from) ) );
+        answer.at(i + 1) = pow( 10., ( i * help + log10(from) ) );
     }
 
     answer.at(1) = from;
@@ -186,7 +186,7 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     for ( mu = 1; mu <= nUnits; mu++ ) {
         tauMu = this->giveCharTime(mu);
         if ( deltaT / tauMu < 1.e-5 ) {
-            lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( __OOFEM_POW(deltaT / tauMu, 2) ) - 1 / 24 * ( __OOFEM_POW(deltaT / tauMu, 3) );
+            lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
         } else if ( deltaT / tauMu > 30 ) {
             lambdaMu = tauMu / deltaT;
         } else {
@@ -285,7 +285,7 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
         if ( deltaT / tauMu < 1.e-5 ) {
             betaMu = exp(-( deltaT ) / tauMu);
-            lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( __OOFEM_POW(deltaT / tauMu, 2) ) - 1 / 24 * ( __OOFEM_POW(deltaT / tauMu, 3) );
+            lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
         } else if ( deltaT / tauMu > 30 )       {
             betaMu = 0;
             lambdaMu = tauMu / deltaT;

@@ -35,42 +35,29 @@
 /*
  * This file contains some functions used in the finite element application.
  * ref : Lippman p 104
- * ! friend functions may not be declared inline (C++\Views p 17)
  */
 #ifndef mathfem_h
 #define mathfem_h
 
+#include "error.h"
+#include "compiler.h"
+
 #ifndef __MAKEDEPEND
  #include <cmath>
+ #include <cfloat> // For _isnan
 #endif
-#include "compiler.h"
 #include "error.h"
 
 namespace oofem {
-#ifndef HAVE_M_PI
- #define M_PI 3.1415926535897932384626433832795029L /* pi */
-#endif
-#ifndef HAVE_M_LN2
- #define M_LN2 0.6931471805599453094172321214581766L /* log_e 2 */
-#endif
 
 class FloatArray;
 
-//#ifdef LINUX_PLATFORM
-/**
- * Macro returning the value of _VAL1 raised to the power of _VAL2.
- */
-#define __OOFEM_POW(_VAL1, _VAL2) ( pow( ( _VAL1 ), ( _VAL2 ) ) )
-//#define __OOFEM_POW(_VAL1,_VAL2) (exp((_VAL2)*log(_VAL1)))
-//#endif
-//#ifndef LINUX_PLATFORM
-//#define __OOFEM_POW(_VAL1,_VAL2) pow (_VAL1,_VAL2)
-//#endif
-
-#ifndef HAVE_NEAREST
- #define nearest(x) floor( ( x ) + 0.5 )
+#ifndef HAVE_M_PI
+ #define M_PI 3.1415926535897932384626433832795029L
 #endif
-
+#ifndef HAVE_M_LN2
+ #define M_LN2 0.6931471805599453094172321214581766L
+#endif
 
 /// Returns smaller value from two given decimals
 inline int min(int i, int j)
@@ -108,17 +95,27 @@ inline double clamp(double a, double lower, double upper)
 inline double sgn(double i)
 { return ( i < 0. ? -1. : 1. ); }
 
+#ifndef HAVE_ISNAN
+#ifdef _MSC_VER
+/// Returns true is x is NaN
+inline bool isnan(double x) { return _isnan(x); }
+#endif
+#endif
+
+#ifndef HAVE_NEAREST
+/// Returns the nearest integer
+inline int nearest(double x) { return (int)floor( x + 0.5 ); }
+#endif
+
+#ifndef HAVE_CBRT
+/// Returns the cubic root of x.
+inline double cbrt(double x) { return sgn(x)*pow(fabs(x),1.0/3.0); }
+#endif
+
 /// Returns the positive part of given float
 inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
 /// Returns the negative part of given float
 inline double negbra(double x) { return ( x <= 0 ? x : 0 ); }
-
-#ifndef HAVE_CBRT
-/// Returns the cubic root of x.
-inline double cbrt(double x)
-{ return sgn(x)*pow(fabs(x),1.0/3.0); }
-#endif
-
 
 /**
  * Solves cubic equation for real roots.
