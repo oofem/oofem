@@ -38,22 +38,60 @@
 #include "flotarry.h"
 
 namespace oofem {
+
+double
+FEI2dQuadQuad :: giveArea(const FEICellGeometry &cellgeo) const
+{
+    double x1, x2, x3, x4, y1, y2, y3, y4;
+    double x85, x56, x67, x78, y85, y56, y67, y78;
+
+    const FloatArray *node1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray *node2 = cellgeo.giveVertexCoordinates(2);
+    const FloatArray *node3 = cellgeo.giveVertexCoordinates(3);
+    const FloatArray *node4 = cellgeo.giveVertexCoordinates(4);
+    const FloatArray *node5 = cellgeo.giveVertexCoordinates(5);
+    const FloatArray *node6 = cellgeo.giveVertexCoordinates(6);
+    const FloatArray *node7 = cellgeo.giveVertexCoordinates(7);
+    const FloatArray *node8 = cellgeo.giveVertexCoordinates(8);
+
+    x1 = node1->at(xind);
+    x2 = node2->at(xind);
+    x3 = node3->at(xind);
+    x4 = node4->at(xind);
+
+    y1 = node1->at(yind);
+    y2 = node2->at(yind);
+    y3 = node3->at(yind);
+    y4 = node4->at(yind);
+
+    x85 = node8->at(xind) - node5->at(xind);
+    x56 = node5->at(xind) - node6->at(xind);
+    x67 = node6->at(xind) - node7->at(xind);
+    x78 = node7->at(xind) - node8->at(xind);
+
+    y85 = node8->at(yind) - node5->at(yind);
+    y56 = node5->at(yind) - node6->at(yind);
+    y67 = node6->at(yind) - node7->at(yind);
+    y78 = node7->at(yind) - node8->at(yind);
+
+    double p1 = (x2-x4)*(y1-y3) - (x1-x3)*(y2-y4);
+    double p2 = y1*x85 + y2*x56 + y3*x67 + y4*x78 - x1*y85 - x2*y56 - x3*y67 - x4*x78;
+
+    return fabs(p1 + p2*4.0)/6.; // Expression derived with mathematica, but not verified in any computations
+}
+
 void
 FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /* Local Node Numbering
      *
-     *     4----7--- 3
-     |         |
-     |         |
-     |         |
-     |     8         6
-     |         |
-     |         |
-     |         |
-     |     1----5----2
-     |
-     |
+     *  4----7--- 3
+     *  |         |
+     *  |         |
+     *  8         6
+     *  |         |
+     *  |         |
+     *  1----5----2
      */
 
     double ksi, eta;

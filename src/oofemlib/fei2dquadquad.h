@@ -52,6 +52,8 @@ public:
         yind = ind2;
     }
 
+    double giveArea(const FEICellGeometry &cellgeo) const;
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
