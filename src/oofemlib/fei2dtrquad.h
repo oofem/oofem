@@ -47,7 +47,7 @@ protected:
     int xind, yind;
 
 public:
-    FEI2dTrQuad(int ind1, int ind2) : FEInterpolation2d(1) {
+    FEI2dTrQuad(int ind1, int ind2) : FEInterpolation2d(2) {
         xind = ind1;
         yind = ind2;
     }
@@ -59,12 +59,6 @@ public:
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    // Help functions
-    /**
-     * Computes the exact area of the triangle.
-     * @param cellgeo Cell geometry for the element.
-     * @return Area of triangle.
-     */
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.

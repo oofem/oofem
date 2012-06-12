@@ -46,7 +46,7 @@ namespace oofem {
 class FEI3dTetQuad : public FEInterpolation3d
 {
 public:
-    FEI3dTetQuad() : FEInterpolation3d(1) { }
+    FEI3dTetQuad() : FEInterpolation3d(2) { }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

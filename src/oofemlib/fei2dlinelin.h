@@ -55,6 +55,8 @@ public:
     }
     ~FEI2dLineLin() { }
 
+    virtual double giveArea(const FEICellGeometry &cellgeo) const { return 0.0; }
+
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
 

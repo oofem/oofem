@@ -48,7 +48,7 @@ class FEI3dHexaQuad : public FEInterpolation3d
 protected:
 
 public:
-    FEI3dHexaQuad() : FEInterpolation3d(1) { }
+    FEI3dHexaQuad() : FEInterpolation3d(2) { }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

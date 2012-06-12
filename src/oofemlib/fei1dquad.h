@@ -47,7 +47,7 @@ protected:
     int cindx;
 
 public:
-    FEI1dQuad(int coordIndx) : FEInterpolation1d(1) { cindx = coordIndx; }
+    FEI1dQuad(int coordIndx) : FEInterpolation1d(2) { cindx = coordIndx; }
 
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

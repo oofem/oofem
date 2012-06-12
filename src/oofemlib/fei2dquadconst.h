@@ -47,7 +47,7 @@ protected:
     int xind, yind;
 
 public:
-    FEI2dQuadConst(int ind1, int ind2) : FEInterpolation2d(1) {
+    FEI2dQuadConst(int ind1, int ind2) : FEInterpolation2d(0) {
         xind = ind1;
         yind = ind2;
     }
