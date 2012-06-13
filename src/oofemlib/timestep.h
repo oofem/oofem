@@ -46,6 +46,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "statecountertype.h"
+#include "timediscretizationtype.h"
 
 namespace oofem {
 /**
@@ -97,6 +98,8 @@ protected:
     int version;
     /// Corresponding meta step number.
     int mstepNumber;
+    /// Time discretization.
+    TimeDiscretizationType timeDiscretization;
 
 public:
     /**
@@ -107,8 +110,10 @@ public:
      * @param tt Intrinsic time.
      * @param dt Intrinsic time increment.
      * @param counter Solution state counter.
+     * @param timeDiscretization Time discretization.
      */
     TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter);
+    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td);
     TimeStep(const TimeStep &);
     TimeStep(EngngModel *e);
     TimeStep &operator=(const TimeStep &);
@@ -142,6 +147,8 @@ public:
     void setTargetTime(double newt) { targetTime = newt; }
     /// Sets only intrinsic time.
     void setIntrinsicTime(double newt) { intrinsicTime = newt; }
+    /// Sets time discretization.
+    void setTimeDiscretization(TimeDiscretizationType td) { timeDiscretization = td; }
 
     /**
      * Check if solution step is not the last step.
@@ -171,6 +178,8 @@ public:
     void incrementStateCounter() { solutionStateCounter++; }
     /// Increments receiver's version.
     void incrementVersion() { version++; }
+    /// Returns time discretization.
+    TimeDiscretizationType giveTimeDiscretization() { return timeDiscretization; }
 
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /**

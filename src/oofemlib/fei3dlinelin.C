@@ -164,6 +164,7 @@ double
 FEI3dLineLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI3dLineLin :: surfaceEvalNormal: no surfaces available");
+    return 0.0;
 }
 
 void

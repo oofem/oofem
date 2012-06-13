@@ -188,7 +188,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
 
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode"); // Macro
-    stiffMode = ( NonLinearStatic_stifnessMode ) _val;
+    stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
 
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode"); // Macro

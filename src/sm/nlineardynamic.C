@@ -60,8 +60,8 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
     initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
-    ddtScheme    = euler3;
-    numMetStatus = NM_None;
+    initialTimeDiscretization = TD_ThreePointBackward;
+    numMetStatus       = NM_None;
 
     ndomains                = 1;
     internalForcesEBENorm   = 0;
@@ -137,26 +137,9 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 
     IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef");
 
-    int _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme");
-
-    ddtScheme = ( NonLinearDynamic_ddtScheme ) _val;
-
-    if ( ddtScheme == newmark ) {
-        OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
-        IR_GIVE_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha");
-        IR_GIVE_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta");
-    } else if ( ddtScheme == euler2 ) {
-        OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
-    } else if ( ddtScheme == euler3 ) {
-        OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
-    } else {
-        _error("NonLinearDynamic: Time-stepping scheme not found!\n");
-    }
-
-    _val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearDynamic_refloadmode, "refloadmode");
-    refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
+    int val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_refloadmode, "refloadmode");
+    refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) val;
 }
 
 
@@ -184,6 +167,24 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
         _error("updateAttributes: deltaT < 0");
     }
 
+    val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_ddtScheme, "ddtscheme");
+
+    initialTimeDiscretization = ( TimeDiscretizationType ) val;
+
+    alpha = 0.5; beta = 0.25; // Default Newmark parameters.
+    if ( initialTimeDiscretization == TD_Newmark ) {
+        OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
+        IR_GIVE_OPTIONAL_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha");
+        IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta");
+    } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
+        OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
+    } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
+        OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
+    } else {
+        _error("NonLinearDynamic: Time-stepping scheme not found!\n");
+    }
+
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
@@ -198,7 +199,6 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
                                                          ProblemCommMode__REMOTE_ELEMENT_MODE);
         }
     }
-
 #endif
     return IRRT_OK;
 }
@@ -250,6 +250,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
     StateCounterType counter = 1;
     double deltaTtmp = deltaT;
     double totalTime = deltaT;
+    TimeDiscretizationType td = initialTimeDiscretization;
 
     //Do not increase deltaT on microproblem
     if ( pScale == microScale ) {
@@ -262,6 +263,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
         mstepNum = currentStep->giveMetaStepNumber();
+        td = currentStep->giveTimeDiscretization();
 
         if ( !this->giveMetaStep(mstepNum)->isStepValid(istep) ) {
             mstepNum++;
@@ -272,7 +274,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mstepNum, totalTime, deltaTtmp, counter);
+    currentStep = new TimeStep(istep, this, mstepNum, totalTime, deltaTtmp, counter, td);
 
     return currentStep;
 }
@@ -343,7 +345,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     // Time-stepping constants
     double dt2 = deltaT * deltaT;
 
-    if ( ddtScheme == newmark ) {
+    if ( tStep->giveTimeDiscretization() == TD_Newmark ) {
         OOFEM_LOG_DEBUG("Solving using Newmark-beta method\n");
         a0 = 1 / ( beta * dt2 );
         a1 = alpha / ( beta * deltaT );
@@ -352,8 +354,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         a4 = ( alpha / beta ) - 1;
         a5 = deltaT / 2 * ( alpha / beta - 2 );
         a6 = 0;
-    } else if ( ( ddtScheme == euler2 ) || ( tStep->giveNumber() == giveNumberOfFirstStep() ) ) {
-        if ( ddtScheme != euler3 ) {
+    } else if ( ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) || ( tStep->giveNumber() == giveNumberOfFirstStep() ) ) {
+        if ( tStep->giveTimeDiscretization() != TD_ThreePointBackward ) {
             OOFEM_LOG_DEBUG("Solving using Backward Euler method\n");
         } else {
             OOFEM_LOG_DEBUG("Solving initial step using Three-point Backward Euler method\n");
@@ -365,7 +367,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         a4 = 0;
         a5 = 0;
         a6 = 0;
-    } else if ( ddtScheme == euler3 ) {
+    } else if ( tStep->giveTimeDiscretization() == TD_ThreePointBackward ) {
         OOFEM_LOG_DEBUG("Solving using Three-point Backward Euler method\n");
         a0 = 2 / dt2;
         a1 = 3 / ( 2 * deltaT );

@@ -337,7 +337,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     //
     if ( equilibrateMappedConfigurationFlag ) {
         // use secant stiffness to resrore equilibrium
-        NonLinearStatic_stifnessMode oldStiffMode = this->stiffMode;
+        NonLinearStatic_stiffnessMode oldStiffMode = this->stiffMode;
         stiffMode = nls_secantStiffness;
 
 
@@ -673,7 +673,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //
     if ( equilibrateMappedConfigurationFlag ) {
         // use secant stiffness to resrore equilibrium
-        NonLinearStatic_stifnessMode oldStiffMode = this->stiffMode;
+        NonLinearStatic_stiffnessMode oldStiffMode = this->stiffMode;
         stiffMode = nls_secantStiffness;
 
 

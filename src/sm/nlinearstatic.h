@@ -40,7 +40,7 @@
 
 namespace oofem {
 /// Type determining the stiffness mode.
-enum NonLinearStatic_stifnessMode {
+enum NonLinearStatic_stiffnessMode {
     nls_tangentStiffness = 0, ///< The tangent stiffness is used and updated whenever requested.
     nls_secantStiffness = 1, ///< The secant stiffness is used and updated whenever requested.
     nls_elasticStiffness = 2, ///< The initial elastic stiffness is used in the whole solution.
@@ -92,7 +92,7 @@ protected:
     double loadLevel, cumulatedLoadLevel;
     bool mstepCumulateLoadLevelFlag;
     int currentIterations;
-    NonLinearStatic_stifnessMode stiffMode;
+    NonLinearStatic_stiffnessMode stiffMode;
     int loadInitFlag;
     int nonlocalStiffnessFlag;
     NM_Status numMetStatus;

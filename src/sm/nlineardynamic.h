@@ -72,12 +72,6 @@ namespace oofem {
  * @author Alper Cesur
  */
 
-enum NonLinearDynamic_ddtScheme {
-    euler3  = 0, ///< Three-point Backward Euler method
-    euler2  = 1, ///< Two-point Backward method
-    newmark = 2, ///< Newmark-beta method
-};
-
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
@@ -87,7 +81,7 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     int initFlag;
-    NonLinearDynamic_ddtScheme ddtScheme;
+    TimeDiscretizationType initialTimeDiscretization;
     double dumpingCoef, alpha, beta;
     double a0, a1, a2, a3, a4, a5, a6, a7;
 
