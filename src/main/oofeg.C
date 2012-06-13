@@ -65,6 +65,8 @@
 #include "contextioerr.h"
 #include "oofem_terminate.h"
 #include "classfactory.h"
+
+#include <sstream>
 //
 // for c++ compiler to be succesfull on some c files
 //
@@ -293,7 +295,7 @@ main(int argc, char *argv[])
     std :: stringstream inputFileName;
     char buff [ 20 ];
     unsigned long mask = 0;
-    bool parallelFlag
+    bool parallelFlag;
 
 
     // print prg header on stdout
@@ -360,7 +362,7 @@ main(int argc, char *argv[])
     std::string jobName = temp.substr(k);
     std::string viewTitle = "OOFEG ("+jobName+")";
 
-    problem = InstanciateProblem(& dr, _postProcessor, 0, parallelFlag);
+    problem = InstanciateProblem(& dr, _postProcessor, 0, NULL, parallelFlag);
     dr.finish();
     problem->checkProblemConsistency();
 
@@ -379,7 +381,8 @@ main(int argc, char *argv[])
 
 
     ESIBuildInterface(mask, argc, argv);
-    myview  =  ElixirNewView(viewTitle.c_str(), const_cast< char * >("OOFEG"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+    myview  =  ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("OOFEG"), 
+			     const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                              const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
@@ -2535,7 +2538,8 @@ void
 oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
-    view = ElixirNewView(viewTitle.c_str(), const_cast< char * >("SimpleXF"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+    view = ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("SimpleXF"), 
+			 const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                          const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
     EMAttachView(ESIModel(), view);

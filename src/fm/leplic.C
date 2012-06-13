@@ -43,6 +43,10 @@
 #include "contextioerr.h"
 #include "element.h"
 
+#ifdef __OOFEG
+ #include "util.h"
+#endif
+
 namespace oofem {
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12

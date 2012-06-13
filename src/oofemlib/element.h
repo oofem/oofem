@@ -55,6 +55,11 @@
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
 
+#ifdef __OOFEG
+ #include "node.h"
+ #include "engngm.h"
+#endif
+
 #include <cstdio>
 
 namespace oofem {

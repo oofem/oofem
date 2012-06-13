@@ -52,6 +52,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "oofem_terminate.h"
+#include "util.h"
 
 #ifdef __PETSC_MODULE
  #include "petsccontext.h"

@@ -132,6 +132,10 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
             for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
                 node = element->giveDofManager(elementNode)->giveNumber();
                 interface->NodalAveragingRecoveryMI_computeNodalValue(val, elementNode, type, tStep);
+		// if the elemet cannot evaluate this variable, it is ignored
+		if ( val.giveSize() == 0 ) {
+		  continue;
+		}
                 eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
                 for ( i = 1; i <= regionValSize; i++ ) {
                     lhs.at(eq + i) += val.at(i);

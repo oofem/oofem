@@ -51,6 +51,7 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "conTable.h"
+ #include "util.h"
 #endif
 
 namespace oofem {

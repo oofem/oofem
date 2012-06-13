@@ -47,6 +47,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
+ #include "structuralmaterial.h"
 #endif
 
 namespace oofem {
