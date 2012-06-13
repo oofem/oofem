@@ -41,6 +41,7 @@
 #include "directerrorindicatorrc.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
+#include "fei3dlinelin.h"
 
 namespace oofem {
 
@@ -54,27 +55,28 @@ class Truss3d : public NLStructuralElement,
     public NodalAveragingRecoveryModelInterface
 {
 protected:
-    double length;
+    static FEI3dLineLin interp;
 
 public:
     Truss3d(int n, Domain *d);
     virtual ~Truss3d() { }
 
+    virtual FEInterpolation *giveInterpolation() { return &interp; }
+
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { computeLumpedMassMatrix(answer, tStep); }
+    { this->computeLumpedMassMatrix(answer, tStep); }
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
-    { return this->giveLength(); }
+    { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -87,7 +89,7 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->giveLength(); }
+    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->computeLength(); }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -116,8 +118,6 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    double giveLength();
-    double givePitch();
     virtual int giveApproxOrder() { return 1; }
 };
 } // end namespace oofem

@@ -48,15 +48,13 @@
 #endif
 
 namespace oofem {
-//
-// adjust the temperature at geom. nonlinearities
-//
+
+FEI3dLineLin Truss3d :: interp;
 
 Truss3d :: Truss3d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
 {
-    numberOfDofMans     = 2;
-    length              = 0.;
+    numberOfDofMans = 2;
 }
 
 
@@ -86,23 +84,16 @@ Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
 {
-    int i;
-    double ksi;
-    FloatArray n(2);
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    n.at(1)  = ( 1. - ksi ) * 0.5;
-    n.at(2)  = ( 1. + ksi ) * 0.5;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 2);
-    } else {
+    if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
+    FloatArray n(2);
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
-    for ( i = 1; i <= 2; i++ ) {
+    answer.resize(1, 2);
+    for ( int i = 1; i <= 2; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
 }
@@ -126,36 +117,26 @@ Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int sid
 
 
 void
-Truss3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
 //
 {
-    double coeff, l, x1, x2, y1, y2, z1, z2;
-
-    x1 = this->giveNode(1)->giveCoordinate(1);
-    y1 = this->giveNode(1)->giveCoordinate(2);
-    z1 = this->giveNode(1)->giveCoordinate(3);
-    x2 = this->giveNode(2)->giveCoordinate(1);
-    y2 = this->giveNode(2)->giveCoordinate(2);
-    z2 = this->giveNode(2)->giveCoordinate(3);
+    FloatMatrix dN;
+    this->interp.evaldNdx(dN, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 6);
-    answer.at(1, 1) = x1 - x2;
-    answer.at(1, 2) = y1 - y2;
-    answer.at(1, 3) = z1 - z2;
-    answer.at(1, 4) = x2 - x1;
-    answer.at(1, 5) = y2 - y1;
-    answer.at(1, 6) = z2 - z1;
-
-    l = this->giveLength();
-    coeff = 1.0 / l / l;
-    answer.times(coeff);
+    answer.at(1, 1) = dN.at(1,1);
+    answer.at(1, 2) = dN.at(1,2);
+    answer.at(1, 3) = dN.at(1,3);
+    answer.at(1, 4) = dN.at(2,1);
+    answer.at(1, 5) = dN.at(2,2);
+    answer.at(1, 6) = dN.at(2,3);
 }
 
 void
-Truss3d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+Truss3d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 //
 // Returns nonlinear part of geometrical equations of the receiver at gp.
 //
@@ -163,7 +144,7 @@ Truss3d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int 
 {
     double coeff, l;
 
-    l = this->giveLength();
+    l = this->computeLength();
     coeff = 1.0 / l / l;
 
     answer.resize(6, 6);
@@ -212,8 +193,8 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
         return;
     }
 
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    mat = this->giveMaterial();
+    halfMass = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->computeLength() / 2.;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
@@ -224,67 +205,28 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Truss3d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
-    double ksi, n1, n2;
+    FloatArray n;
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
     answer.resize(3, 6);
     answer.zero();
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 4) = n2;
-    answer.at(2, 2) = n1;
-    answer.at(2, 5) = n2;
-    answer.at(3, 3) = n1;
-    answer.at(3, 6) = n2;
-}
-
-
-int
-Truss3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double ksi, n1, n2;
-
-    ksi = lcoords.at(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
-
-    return 1;
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = n.at(1);
+    answer.at(1, 4) = answer.at(2, 5) = answer.at(3, 6) = n.at(2);
 }
 
 
 double
-Truss3d :: computeVolumeAround(GaussPoint *aGaussPoint)
+Truss3d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give(CS_Area);
-}
-
-
-double
-Truss3d :: giveLength()
-// Returns the length of the receiver.
-{
-    Node *nodeA, *nodeB;
-
-    if ( length == 0. ) {
-        nodeA   = this->giveNode(1);
-        nodeB   = this->giveNode(2);
-        length  = nodeB->giveCoordinates()->distance(*nodeA->giveCoordinates());
-    }
-    return length;
+    double detJ = this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    double weight  = gp->giveWeight();
+    return detJ * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 
@@ -296,7 +238,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx, ly(3), lz(3), help(3);
-    double length = this->giveLength();
+    double length = this->computeLength();
     Node *nodeA, *nodeB;
     int i;
 
@@ -305,12 +247,12 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
     answer.resize(3, 3);
     answer.zero();
-    nodeA  = this->giveNode(1);
-    nodeB  = this->giveNode(2);
+    nodeA = this->giveNode(1);
+    nodeB = this->giveNode(2);
     // refNode= this->giveDomain()->giveNode (this->referenceNode);
 
     lx.beDifferenceOf(*nodeB->giveCoordinates(),*nodeA->giveCoordinates());
-    lx.times(1/length);
+    lx.times(1.0/length);
 
     int minIndx = 1;
     for ( i = 2; i <= 3; i++ ) {
@@ -354,7 +296,7 @@ Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 
 
 void
-Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     /*
      *
@@ -370,7 +312,7 @@ Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(aGaussPoint, answer);
+    this->computeNmatrixAt(gp, answer);
 }
 
 
@@ -386,7 +328,6 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         _error("giveEdgeDofMapping: wrong edge number");
     }
 
-
     answer.resize(6);
     answer.at(1) = 1;
     answer.at(2) = 2;
@@ -398,14 +339,14 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Truss3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        _error("computeEdgeVolumeAround: wrong edge number");
     }
 
-    double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    double weight = gp->giveWeight();
+    return this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) * weight;
 }
 
 
