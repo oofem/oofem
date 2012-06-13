@@ -61,15 +61,15 @@ FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     FloatArray vec;
     vec.beDifferenceOf(*cellgeo.giveVertexCoordinates(2), *cellgeo.giveVertexCoordinates(1));
 
-    double l2 = vec.computeSquaredNorm();
+    double l2_inv = 1.0 / vec.computeSquaredNorm();
     answer.resize(2, 3);
 
-    answer.at(1, 1) = -vec.at(1);
-    answer.at(2, 1) =  vec.at(1);
-    answer.at(1, 2) = -vec.at(2);
-    answer.at(2, 2) =  vec.at(2);
-    answer.at(1, 3) = -vec.at(3);
-    answer.at(2, 3) =  vec.at(3);
+    answer.at(1, 1) = -vec.at(1)*l2_inv;
+    answer.at(2, 1) =  vec.at(1)*l2_inv;
+    answer.at(1, 2) = -vec.at(2)*l2_inv;
+    answer.at(2, 2) =  vec.at(2)*l2_inv;
+    answer.at(1, 3) = -vec.at(3)*l2_inv;
+    answer.at(2, 3) =  vec.at(3)*l2_inv;
 }
 
 
@@ -166,6 +166,7 @@ FEI3dLineLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
                                                   const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI3dLineLin :: computeEdgeMapping: no surfaces available");
+    return 0.0;
 }
 
 void
