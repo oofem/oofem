@@ -159,7 +159,7 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 
     FloatArray n;
     this->interp.edgeEvalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
-
+    answer.resize(2,4);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 3) = n.at(2);
     answer.at(2, 2) = n.at(1);

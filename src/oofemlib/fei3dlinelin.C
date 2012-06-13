@@ -72,6 +72,12 @@ FEI3dLineLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     answer.at(2, 3) =  vec.at(3)*l2_inv;
 }
 
+void
+FEI3dLineLin :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    answer.resize(2,3); ///@todo Check this part
+    answer.zero();
+}
 
 void
 FEI3dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -152,6 +158,12 @@ void
 FEI3dLineLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI3dLineLin :: computeEdgeMapping: no surfaces available");
+}
+
+double
+FEI3dLineLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    OOFEM_ERROR("FEI3dLineLin :: surfaceEvalNormal: no surfaces available");
 }
 
 void
