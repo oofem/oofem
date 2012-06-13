@@ -45,23 +45,12 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
+#include "fei1dlin.h"
 
 namespace oofem {
-
 /**
  * This class implements a two-node truss bar element for one-dimensional
  * analysis.
- *
- * A truss bar element is characterized by its 'length' and its 'pitch'. The
- * pitch is the angle in radians between the X-axis and the axis of the
- * element (oriented node1 to node2).
- * Note: element is formulated in global c.s.
- * Tasks:
- * - Calculating its Gauss points.
- * - Calculating its B,D,N matrices and dV.
- * - Expressing M,K,f,etc, in global axes. Methods like 'computeStiffness-
- *   Matrix' of class Element are here overloaded in order to account for
- *   rotational effects.
  */
 class Truss1d : public StructuralElement,
     public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
@@ -71,25 +60,24 @@ class Truss1d : public StructuralElement,
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
-    double length;
+    static FEI1dLin interp;
 
 public:
     Truss1d(int n, Domain *d);
     virtual ~Truss1d() { }
 
+    virtual FEInterpolation* giveInterpolation() { return & interp; }
+
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int computeNumberOfDofs(EquationID ut) { return 2; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // characteristic length in gp (for some material models)
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
-    { return this->giveLength(); }
+    { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -177,9 +165,6 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
-
-    double giveLength();
-    double givePitch();
     virtual int giveApproxOrder() { return 1; }
 };
 } // end namespace oofem

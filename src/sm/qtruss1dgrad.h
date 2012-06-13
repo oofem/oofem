@@ -44,18 +44,8 @@
 namespace oofem {
 
 /**
- * This class implements a two-node truss bar element for two-dimensional analysis.
- *
- * A truss bar element is characterized by its 'length' and its 'pitch'. The
- * pitch is the angle in radians between the X-axis and the axis of the
- * element (oriented node1 to node2).
- * Note: element is formulated in global c.s.
- * Tasks:
- * - calculating its Gauss points ;
- * - calculating its B,D,N matrices and dV ;
- * - expressing M,K,f,etc, in global axes. Methods like 'computeStiffness-
- *   Matrix' of class Element are here overloaded in order to account for
- *   rotational effects.
+ * This class implements a three-node gradient truss bar element for one-dimensional
+ * analysis.
  */
 class QTruss1dGrad : public QTruss1d, public GradDpElement
 {

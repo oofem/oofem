@@ -697,8 +697,8 @@ public:
 
     // characteristic length in gp (for some material models)
     /**
-     * @return Element length in given direction. Default implementation returns length
-     * of element projection into specified direction
+     * Default implementation returns length of element projection into specified direction.
+     * @return Element length in given direction.
      */
     virtual double giveLenghtInDir(const FloatArray &normalToCrackPlane);
     /**

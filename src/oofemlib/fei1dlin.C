@@ -38,6 +38,13 @@
 #include "flotarry.h"
 
 namespace oofem {
+
+double
+FEI1dLin :: giveLength(const FEICellGeometry &cellgeo) const
+{
+    return fabs( cellgeo.giveVertexCoordinates(1)->at(cindx) - cellgeo.giveVertexCoordinates(2)->at(cindx) );
+}
+
 void
 FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

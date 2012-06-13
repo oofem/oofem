@@ -42,6 +42,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "fei1dlin.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -49,6 +50,10 @@
 #endif
 
 namespace oofem {
+
+FEI1dLin Truss1d::interp(1); // Initiates the static interpolator
+
+
 Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
@@ -57,28 +62,7 @@ Truss1d :: Truss1d(int n, Domain *aDomain) :
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 {
-    numberOfDofMans     = 2;
-    length              = 0.;
-}
-
-
-void
-Truss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
-//
-// Returns linear part of geometrical equations of the receiver at gp.
-// Returns the linear part of the B matrix
-//
-{
-    double l, x1, x2;
-    l = this->giveLength();
-
-    x1 = this->giveNode(1)->giveCoordinate(1);
-    x2 = this->giveNode(2)->giveCoordinate(1);
-
-    answer.resize(1, 2);
-
-    answer.at(1, 1) = ( x1 - x2 ) / l / l;
-    answer.at(1, 2) = ( x2 - x1 ) / l / l;
+    numberOfDofMans = 2;
 }
 
 
@@ -103,8 +87,8 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double halfMass;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    mat = this->giveMaterial();
+    halfMass = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->computeLength() * 0.5;
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -113,64 +97,39 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-Truss1d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
+Truss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+//
+// Returns linear part of geometrical equations of the receiver at gp.
+// Returns the linear part of the B matrix
+//
 {
-    double ksi, n1, n2;
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-    answer.resize(1, 2);
-    answer.zero();
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 2) = n2;
+    FloatMatrix dN;
+    this->interp.evaldNdx(dN, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    answer.beTranspositionOf(dN); ///@todo It would be more suitable to follow the column-major version as done in FEI-classes
 }
 
 
-int
-Truss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+void
+Truss1d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the displacement interpolation matrix {N} of the receiver,
+// evaluated at gp.
 {
-    double ksi, n1, n2;
-
-    ksi = lcoords.at(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.resize(1);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-
-    return 1;
+    FloatArray n;
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    // Reshape
+    answer.resize(1, 2); ///@todo It would be more suitable to follow the column-major order and just do answer.setColumn(...)
+    answer.at(1,1) = n.at(1);
+    answer.at(1,2) = n.at(2);
 }
 
 
 double
-Truss1d :: computeVolumeAround(GaussPoint *aGaussPoint)
+Truss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give(CS_Area);
-}
-
-
-double
-Truss1d :: giveLength()
-// Returns the length of the receiver.
-{
-    double dx;
-    Node *nodeA, *nodeB;
-
-    if ( length == 0. ) {
-        nodeA   = this->giveNode(1);
-        nodeB   = this->giveNode(2);
-        dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-        length  = fabs(dx);
-    }
-
-    return length;
+    double detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    return  detJ * gp->giveWeight() * this->giveCrossSection()->give(CS_Area);
 }
 
 
@@ -445,26 +404,17 @@ Truss1d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
-    double ksi, n1, n2;
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 2);
-    } else {
+    if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 2) = n2;
+    FloatArray n;
+    this->computeNmatrixAt(gp, answer);
 }
 
 
@@ -483,36 +433,6 @@ Truss1d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int sid
                                                      InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
-}
-
-
-#define POINT_TOL 1.e-3
-
-int
-Truss1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
-{
-    Node *node1, *node2;
-    double ksi, x1, x2;
-
-    answer.resize(1);
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-
-    answer.at(1) = ksi = ( 2.0 * gcoords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
-
-    if ( ksi < ( -1. - POINT_TOL ) ) {
-        return 0;
-    }
-
-    if ( ksi > ( 1. + POINT_TOL ) ) {
-        return 0;
-    }
-
-    return 1;
 }
 
 
@@ -554,7 +474,7 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
 double
 Truss1d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    return this->giveLength();
+    return this->computeLength();
 }
 
 
@@ -563,21 +483,13 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
                                                             TimeStep *stepN, const FloatArray &coords,
                                                             FloatArray &answer)
 {
-    FloatArray u, ksi;
-    FloatMatrix n;
+    FloatArray n, u, ksi;
     int result;
 
     result = this->computeLocalCoordinates(ksi, coords);
-
-    n.resize(1, 2);
-    n.zero();
-
-    n.at(1, 1) = ( 1 - ksi.at(1) ) * 0.5;
-    n.at(1, 2) = ( 1 + ksi.at(1) ) * 0.5;
-
+    this->interp.evalN(n, ksi, FEIElementGeometryWrapper(this));
     this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
-    answer.beProductOf(n, u);
-
+    answer.setValues(1, n.dotProduct(u));
     return result;
 }
 
@@ -594,23 +506,19 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
                                                                 coordType ct, nodalValContainerType &list,
                                                                 InternalStateType type, TimeStep *tStep)
 {
-    int i, n;
-    double n1, n2;
-    FloatArray ksi(1);
+    double vars;
+    FloatArray lcoords, n;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        ksi.at(1) = coords.at(1);
+        lcoords = coords;
     } else {
-        computeLocalCoordinates(ksi, coords);
+        computeLocalCoordinates(lcoords, coords);
     }
+    this->interp.evalN(n, lcoords, FEIElementGeometryWrapper(this));
 
-    n1  = ( 1. - ksi.at(1) ) * 0.5;
-    n2  = ( 1. + ksi.at(1) ) * 0.5;
-
-    n = list.at(1)->giveSize();
-    answer.resize(n);
-
-    for ( i = 1; i <= n; i++ ) {
-        answer.at(i) = n1 * list.at(1)->at(i) + n2 *list.at(2)->at(i);
+    vars = list.at(1)->giveSize();
+    answer.resize(vars);
+    for ( int i = 1; i <= vars; i++ ) {
+        answer.at(i) = n.at(1) * list.at(1)->at(i) + n.at(2) * list.at(2)->at(i);
     }
 }
 } // end namespace oofem

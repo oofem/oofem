@@ -49,13 +49,13 @@ protected:
 public:
     FEI1dQuad(int coordIndx) : FEInterpolation1d(2) { cindx = coordIndx; }
 
+    virtual double giveLength(const FEICellGeometry &cellgeo);
+
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-
-double computeLength(const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif

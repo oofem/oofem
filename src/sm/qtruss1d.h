@@ -43,17 +43,6 @@ namespace oofem {
 /**
  * This class implements a three-node truss bar element for one-dimensional
  * analysis.
- *
- * A truss bar element is characterized by its 'length' and its 'pitch'. The
- * pitch is the angle in radians between the X-axis and the axis of the
- * element (oriented node1 to node2).
- * Note: element is formulated in global c.s.
- * Tasks:
- * - calculating its Gauss points ;
- * - calculating its B,D,N matrices and dV ;
- * - expressing M,K,f,etc, in global axes. Methods like 'computeStiffness-
- *   Matrix' of class Element are here overloaded in order to account for
- *   rotational effects.
  */
 class QTruss1d : public StructuralElement
 {
@@ -67,14 +56,11 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
     virtual int computeNumberOfDofs(EquationID ut) { return 3; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
-    { return this->giveLength(); }
+    { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -93,8 +79,6 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    double giveLength();
-    double givePitch();
     virtual int giveApproxOrder() { return 2; }
 };
 } // end namespace oofem

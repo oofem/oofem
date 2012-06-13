@@ -42,13 +42,15 @@
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
+#include "fei2dquadlin.h"
 
 namespace oofem {
 /// Comment or uncomment the following line to force full or reduced integration
+///@todo Removed for now.
 //#define Quad1PlaneStrain_reducedShearIntegration
 /**
  * This class implements an isoparametric four-node quadrilateral plane-
- * stress elasticity finite element. Each node has 2 degrees of freedom.
+ * stress structural finite element. Each node has 2 degrees of freedom.
  */
 class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface,
@@ -56,7 +58,7 @@ class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelIn
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
-    FloatMatrix *jacobianMatrix;
+    static FEI2dQuadLin interp;
     int numberOfGaussPoints;
 
 public:
@@ -66,16 +68,15 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
+    virtual FEInterpolation *giveInterpolation() { return &interp; }
+
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ext == Element_EdgeLoadSupport; }
 
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual double computeVolumeAround(GaussPoint *gp);
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -148,9 +149,6 @@ protected:
 
     virtual void computeGaussPoints();
 
-    void giveDerivativeKsi(FloatArray &answer, double);
-    void giveDerivativeEta(FloatArray &answer, double);
-    virtual void computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *);
     virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };

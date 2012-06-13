@@ -40,6 +40,7 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
+#include "mathfem.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -76,20 +77,13 @@ QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 
 
 double
-QTruss1d :: computeVolumeAround(GaussPoint *aGaussPoint)
+QTruss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double J = this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    double weight  = aGaussPoint->giveWeight();
-    return  J * weight * this->giveCrossSection()->give(CS_Area);
-}
-
-int
-QTruss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer,lcoords,FEIElementGeometryWrapper(this));
-    return 1;
+    double detJ = fabs( this->interpolation.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    double weight  = gp->giveWeight();
+    return  detJ * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 
@@ -105,15 +99,15 @@ void QTruss1d :: computeGaussPoints()
 }
 
 void
-QTruss1d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QTruss1d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
     FloatArray n;
     answer.resize(1,3);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     answer.at(1,1) = n.at(1);
     answer.at(1,2) = n.at(2);
     answer.at(1,3) = n.at(3);
@@ -121,7 +115,7 @@ QTruss1d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
 
 void
-QTruss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
 // Returns the linear part of the B matrix
@@ -130,24 +124,7 @@ QTruss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     answer.resize(1,3);
     answer.zero();
 
-    this->interpolation.evaldNdx(answer, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-}
-
-
-double
-QTruss1d :: giveLength()
-// Returns the length of the receiver.
-{
-    return interpolation.computeLength(FEIElementGeometryWrapper(this));
-}
-
-
-int
-QTruss1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
-{
-    int ok;
-    ok = interpolation.global2local(answer, gcoords, FEIElementGeometryWrapper(this));
-    return ok;
+    this->interpolation.evaldNdx(answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 } // end namespace oofem

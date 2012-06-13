@@ -41,6 +41,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "fei2dquadlin.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -49,6 +50,9 @@
 #endif
 
 namespace oofem {
+
+FEI2dQuadLin Quad1PlaneStrain::interp(1,2);
+
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(),
@@ -56,100 +60,50 @@ Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 {
     numberOfDofMans  = 4;
-    jacobianMatrix = NULL;
     numberOfGaussPoints = 4;
 }
 
 
 Quad1PlaneStrain :: ~Quad1PlaneStrain()
 {
-    delete jacobianMatrix;
 }
 
 
 void
-Quad1PlaneStrain :: giveDerivativeKsi(FloatArray &answer, double eta)
-{
-    answer.resize(4);
-
-    answer.at(1) =  0.25 * ( 1. + eta );
-    answer.at(2) = -0.25 * ( 1. + eta );
-    answer.at(3) = -0.25 * ( 1. - eta );
-    answer.at(4) =  0.25 * ( 1. - eta );
-}
-
-
-void
-Quad1PlaneStrain :: giveDerivativeEta(FloatArray &answer, double ksi)
-{
-    answer.resize(4);
-
-    answer.at(1) =  0.25 * ( 1. + ksi );
-    answer.at(2) =  0.25 * ( 1. - ksi );
-    answer.at(3) = -0.25 * ( 1. - ksi );
-    answer.at(4) = -0.25 * ( 1. + ksi );
-}
-
-
-void
-Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns the [4x8] strain-displacement matrix {B} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 // (epsilon_x,epsilon_y,epsilon_z,gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
-    int i;
-    double ksi, eta;
-    FloatArray nx, ny;
-    FloatMatrix jacMtrx, inv;
-#ifdef  Quad1PlaneStrain_reducedShearIntegration
-    GaussPoint *helpGaussPoint;
-    FloatArray *coord;
-#endif
+    FloatMatrix dN;
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
+    this->interp.evaldNdx(dN, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
-    this->giveDerivativeKsi(nx, eta);
-    this->giveDerivativeEta(ny, ksi);
-
-    this->computeJacobianMatrixAt(jacMtrx, aGaussPoint);
-    inv.beInverseOf(jacMtrx);
-
+    // Reshape
     answer.resize(4, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = nx.at(i) * inv.at(1, 1) + ny.at(i) * inv.at(1, 2);
-        answer.at(2, 2 * i - 0) = nx.at(i) * inv.at(2, 1) + ny.at(i) * inv.at(2, 2);
-    }
-
-#ifdef  Quad1PlaneStrain_reducedShearIntegration
-
-    coord = new FloatArray(2);
-    coord->at(1)    = 0.0;
-    coord->at(2)    = 0.0;
-    helpGaussPoint     = new GaussPoint(this, 1, coord, 4.0, _PlaneStress);
-
-    this->computeJacobianMatrixAt(jacMtrx, helpGaussPoint)
-    inv.beInverseOf(jacMtrx);
-
-    eta = helpGaussPoint->giveCoordinate(1);
-    ksi = helpGaussPoint->giveCoordinate(2);
-
-    this->giveDerivativeKsi(nx, eta);
-    this->giveDerivativeEta(ny, ksi);
-
-#endif
-
-    for ( i = 1; i <= 4; i++ ) {
-        answer.at(4, 2 * i - 1) = nx.at(i) * inv.at(2, 1) + ny.at(i) * inv.at(2, 2);
-        answer.at(4, 2 * i - 0) = nx.at(i) * inv.at(1, 1) + ny.at(i) * inv.at(1, 2);
-    }
-
 #ifdef Quad1PlaneStrain_reducedShearIntegration
-    delete helpGaussPoint;
+    FloatMatrix dN_red;
+    FloatArray lcoords_red(2);
+    lcoords_red.zero();
+    this->interp.evaldNdx(dN_red, lcoords_red, FEIElementGeometryWrapper(this));
+
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 2 * i - 1) = dN.at(i, 1);
+        answer.at(2, 2 * i - 0) = dN.at(i, 2);
+        answer.at(4, 2 * i - 1) = dN_red.at(i, 2);
+        answer.at(4, 2 * i - 0) = dN_red.at(i, 1);
+    }
+#else
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 2 * i - 1) = dN.at(i, 1);
+        answer.at(2, 2 * i - 0) = dN.at(i, 2);
+        answer.at(4, 2 * i - 1) = dN.at(i, 2);
+        answer.at(4, 2 * i - 0) = dN.at(i, 1);
+    }
 #endif
 }
 
@@ -168,27 +122,18 @@ Quad1PlaneStrain :: computeGaussPoints()
 
 
 void
-Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
+// evaluated at gp.
 {
-    int i;
-    double ksi, eta;
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
-
-    FloatArray n(4);
-
-    n.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    n.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    n.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    n.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
+    FloatArray n;
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
@@ -196,7 +141,7 @@ Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answe
 
 
 void
-Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     /*
      *
@@ -212,18 +157,13 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGauss
      * without regarding particular side
      */
 
-    double ksi, n1, n2;
-    answer.resize(2, 4);
-    answer.zero();
+    FloatArray n;
+    this->interp.edgeEvalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 3) = n2;
-    answer.at(2, 2) = n1;
-    answer.at(2, 4) = n2;
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 3) = n.at(2);
+    answer.at(2, 2) = n.at(1);
+    answer.at(2, 4) = n.at(2);
 }
 
 
@@ -263,70 +203,17 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Quad1PlaneStrain ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double dx, dy, length;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-    return 0.5 *length *aGaussPoint->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    return detJ * gp->giveWeight();
 }
 
 
 void
 Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    double n1, n2, ksi = gp->giveCoordinate(1);
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
-    } else {
-        _error("computeEdgeIpGlobalCoords: wrong egde number");
-    }
-
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    answer.resize(2);
-    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB->giveCoordinate(1);
-    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB->giveCoordinate(2);
+    this->interp.edgeLocal2global(answer, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -363,11 +250,11 @@ Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
         _error("computeEdgeVolumeAround: wrong egde number");
     }
 
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
+    nodeA = this->giveNode(aNode);
+    nodeB = this->giveNode(bNode);
 
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+    dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+    dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
 
     answer.at(1, 1) = dx / length;
@@ -380,49 +267,15 @@ Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
 
 
 double
-Quad1PlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, thickness, volume;
-    FloatMatrix jacMtrx;
+    double detJ, weight, thickness;
 
-    this->computeJacobianMatrixAt(jacMtrx, aGaussPoint);
-    determinant = fabs( jacMtrx.giveDeterminant() );
-    weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
-    volume      = determinant * weight * thickness;
-
-    return volume;
-}
-
-
-void
-Quad1PlaneStrain :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
-// Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
-{
-    int i;
-    double ksi, eta, x, y;
-    FloatArray nx, ny;
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
-
-    this->giveDerivativeKsi(nx, eta);
-    this->giveDerivativeEta(ny, ksi);
-
-    for ( i = 1; i <= 4; i++ ) {
-        x = this->giveNode(i)->giveCoordinate(1);
-        y = this->giveNode(i)->giveCoordinate(2);
-
-        answer.at(1, 1) += nx.at(i) * x;
-        answer.at(1, 2) += nx.at(i) * y;
-        answer.at(2, 1) += ny.at(i) * x;
-        answer.at(2, 2) += ny.at(i) * y;
-    }
+    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    weight = gp->giveWeight();
+    thickness = this->giveCrossSection()->give(CS_Thickness);
+    return detJ * weight * thickness;
 }
 
 
@@ -465,29 +318,6 @@ Quad1PlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer)
 }
 
 
-int
-Quad1PlaneStrain :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double ksi, eta, n1, n2, n3, n4;
-
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
-
-    n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    n3 = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
-
-    answer.resize(2);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1) +
-                   n3 *this->giveNode(3)->giveCoordinate(1) + n4 *this->giveNode(4)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2) +
-                   n3 *this->giveNode(3)->giveCoordinate(2) + n4 *this->giveNode(4)->giveCoordinate(2);
-
-    return 1;
-}
-
-
 Interface *
 Quad1PlaneStrain :: giveInterface(InterfaceType interface)
 {
@@ -524,34 +354,26 @@ Quad1PlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType typ
 
 
 void
-Quad1PlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+Quad1PlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
-    double ksi, eta, n1, n2, n3, n4;
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
-
-    n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
-    n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
-    n3 = ( 1. - ksi ) * ( 1. - eta ) * 0.25;
-    n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 4);
-    } else {
+    if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
 
-    answer.zero();
+    FloatArray n;
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
-    answer.at(1, 1) = n1;
-    answer.at(1, 2) = n2;
-    answer.at(1, 3) = n3;
-    answer.at(1, 4) = n4;
+    answer.resize(1, 4);
+    answer.zero();
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n.at(2);
+    answer.at(1, 3) = n.at(3);
+    answer.at(1, 4) = n.at(4);
 }
 
 
@@ -1029,140 +851,9 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-#define POINT_TOL 1.e-6
-
 int
-Quad1PlaneStrain :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
+Quad1PlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
-    Node *node1, *node2, *node3, *node4;
-    double x1, x2, x3, x4, y1, y2, y3, y4, a1, a2, a3, a4, b1, b2, b3, b4;
-    double a, b, c, ksi1, ksi2, ksi3, eta1 = 0.0, eta2 = 0.0, denom;
-    int nroot, xind = 1, yind = 2;
-
-    answer.resize(2);
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-    node4 = this->giveNode(4);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-    x4 = node4->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-    y4 = node4->giveCoordinate(2);
-
-    a1 = x1 + x2 + x3 + x4;
-    a2 = x1 - x2 - x3 + x4;
-    a3 = x1 + x2 - x3 - x4;
-    a4 = x1 - x2 + x3 - x4;
-
-    b1 = y1 + y2 + y3 + y4;
-    b2 = y1 - y2 - y3 + y4;
-    b3 = y1 + y2 - y3 - y4;
-    b4 = y1 - y2 + y3 - y4;
-
-    a = a2 * b4 - b2 * a4;
-    b = a1 * b4 + a2 * b3 - a3 * b2 - b1 * a4 - b4 * 4.0 * coords.at(1) + a4 * 4.0 * coords.at(2);
-    c = a1 * b3 - a3 * b1 - 4.0 * coords.at(1) * b3 + 4.0 * coords.at(2) * a3;
-
-    // solve quadratic equation for ksi
-    cubic(0.0, a, b, c, & ksi1, & ksi2, & ksi3, & nroot);
-
-    if ( nroot == 0 ) {
-        return 0;
-    }
-
-    if ( nroot ) {
-        denom = ( b3 + ksi1 * b4 );
-        if ( fabs(denom) <= 1.0e-10 ) {
-            eta1 = ( 4.0 * coords.at(xind) - a1 - ksi1 * a2 ) / ( a3 + ksi1 * a4 );
-        } else {
-            eta1 = ( 4.0 * coords.at(yind) - b1 - ksi1 * b2 ) / denom;
-        }
-    }
-
-    if ( nroot > 1 ) {
-        double diff_ksi1, diff_eta1, diff_ksi2, diff_eta2, diff1, diff2;
-
-        denom = b3 + ksi2 * b4;
-        if ( fabs(denom) <= 1.0e-10 ) {
-            eta2 = ( 4.0 * coords.at(xind) - a1 - ksi2 * a2 ) / ( a3 + ksi2 * a4 );
-        } else {
-            eta2 = ( 4.0 * coords.at(yind) - b1 - ksi2 * b2 ) / denom;
-        }
-
-        // choose the one which seems to be closer to the parametric space (square <-1;1>x<-1;1>)
-        diff_ksi1 = 0.0;
-        if ( ksi1 > 1.0 ) {
-            diff_ksi1 = ksi1 - 1.0;
-        }
-
-        if ( ksi1 < -1.0 ) {
-            diff_ksi1 = ksi1 + 1.0;
-        }
-
-        diff_eta1 = 0.0;
-        if ( eta1 > 1.0 ) {
-            diff_eta1 = eta1 - 1.0;
-        }
-
-        if ( eta1 < -1.0 ) {
-            diff_eta1 = eta1 + 1.0;
-        }
-
-        diff_ksi2 = 0.0;
-        if ( ksi2 > 1.0 ) {
-            diff_ksi2 = ksi2 - 1.0;
-        }
-
-        if ( ksi2 < -1.0 ) {
-            diff_ksi2 = ksi2 + 1.0;
-        }
-
-        diff_eta2 = 0.0;
-        if ( eta2 > 1.0 ) {
-            diff_eta2 = eta2 - 1.0;
-        }
-
-        if ( eta2 < -1.0 ) {
-            diff_eta2 = eta2 + 1.0;
-        }
-
-        diff1 = diff_ksi1 * diff_ksi1 + diff_eta1 * diff_eta1;
-        diff2 = diff_ksi2 * diff_ksi2 + diff_eta2 * diff_eta2;
-
-        // ksi2, eta2 seems to be closer
-        if ( diff1 > diff2 ) {
-            ksi1 = ksi2;
-            eta1 = eta2;
-        }
-    }
-
-    answer.at(1) = ksi1;
-    answer.at(2) = eta1;
-
-    // test if inside
-    for ( int i = 1; i <= 2; i++ ) {
-        if ( answer.at(i) < ( -1. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-
-int
-Quad1PlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
     int result;
     FloatArray lcoords;
     result = this->computeLocalCoordinates(lcoords, coords);
@@ -1199,7 +890,8 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 
 
 double
-Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     int i;
     IntegrationRule *iRule;
     GaussPoint *gp;
@@ -1222,23 +914,21 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
                                                                      TimeStep *stepN, const FloatArray &coords,
                                                                      FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray lcoords, u, nv;
     FloatMatrix n;
-    double ksi, eta;
     int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
+    this->interp.evalN(nv, lcoords, FEIElementGeometryWrapper(this));
 
     n.resize(2, 8);
     n.zero();
 
-    n.at(1, 1) = n.at(2, 2) = 0.25 * ( 1.0 + ksi ) * ( 1.0 + eta );
-    n.at(1, 3) = n.at(2, 4) = 0.25 * ( 1.0 - ksi ) * ( 1.0 + eta );
-    n.at(1, 5) = n.at(2, 6) = 0.25 * ( 1.0 - ksi ) * ( 1.0 - eta );
-    n.at(1, 7) = n.at(2, 8) = 0.25 * ( 1.0 + ksi ) * ( 1.0 - eta );
+    n.at(1, 1) = n.at(2, 2) = nv.at(1);
+    n.at(1, 3) = n.at(2, 4) = nv.at(2);
+    n.at(1, 5) = n.at(2, 6) = nv.at(3);
+    n.at(1, 7) = n.at(2, 8) = nv.at(4);
 
     this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
     answer.beProductOf(n, u);

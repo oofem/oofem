@@ -47,7 +47,7 @@ namespace oofem {
 class SpringElement : public StructuralElement
 {
 public:
-    /// Defines type of spring element (longitudial/rotational) spring.
+    /// Defines type of spring element (longitudinal/rotational) spring.
     enum SpringElementType {
         SE_1D_SPRING = 0,             ///< 1D spring element along x-axis.
         SE_2D_SPRING_XY = 1,          ///< 2D spring element in xy plane, requires D_u and D_v DOFs in each node (orientation vector should be in this plane).
@@ -57,10 +57,10 @@ public:
     };
 
 protected:
-    /// The longitudinal spring constant [Force/Length], torsional spring constant [Force*Length/Radian].
+    /// The longitudinal spring constant [Force/Length], torsional spring constant [Force*Length/Radians].
     double springConstant;
     /**
-     * Orientation vector.  Defines orientation of spring element- for spring it defines the direction of spring,
+     * Orientation vector. Defines orientation of spring element- for spring it defines the direction of spring,
      * for torsional spring it defines the axis of rotation.
      */
     FloatArray dir;
@@ -88,7 +88,7 @@ public:
 
     virtual void updateInternalState(TimeStep *tStep) {}
     virtual void updateYourself(TimeStep *tStep) {}
-    virtual int checkConsistency() {return 1;}
+    virtual int checkConsistency() { return 1; }
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG

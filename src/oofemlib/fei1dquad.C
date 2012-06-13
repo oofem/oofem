@@ -141,8 +141,8 @@ FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICell
 }
 
 double
-FEI1dQuad :: computeLength(const FEICellGeometry &cellgeo)
+FEI1dQuad :: giveLength(const FEICellGeometry &cellgeo)
 {
-    return ( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
+    return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
 } // end namespace oofem
