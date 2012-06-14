@@ -153,21 +153,6 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
     return volume;
 }
 
-
-int
-QTrPlaneStrain :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-
-int
-QTrPlaneStrain :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
-
 void QTrPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {

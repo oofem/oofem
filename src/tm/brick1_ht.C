@@ -365,13 +365,6 @@ Brick1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTi
     }
 }
 
-int
-Brick1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
 
 Interface *
 Brick1_ht :: giveInterface(InterfaceType interface)
@@ -450,15 +443,6 @@ Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
 
     return dist;
 }
-
-
-int
-Brick1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
-
-
 
 
 #ifdef __OOFEG

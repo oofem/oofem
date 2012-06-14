@@ -310,14 +310,6 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
 }
 
 
-int
-LSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-
 void
 LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
@@ -490,13 +482,6 @@ LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side
                                                     InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
-}
-
-
-int
-LSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
 }
 
 

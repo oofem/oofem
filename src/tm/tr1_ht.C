@@ -309,13 +309,6 @@ Tr1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime,
     }
 }
 
-int
-Tr1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interp.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
 Interface *
 Tr1_ht :: giveInterface(InterfaceType interface)
 {
@@ -395,11 +388,5 @@ Tr1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
     return dist;
 }
 
-
-int
-Tr1_ht :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords)
-{
-    return this->interp.global2local(lcoords, coords, FEIElementGeometryWrapper(this));
-}
 
 } // end namespace oofem

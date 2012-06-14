@@ -153,12 +153,6 @@ void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     }
 }
 
-int Tet21Stokes :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    interpolation_quad.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
-    return true;
-}
-
 void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -362,12 +356,6 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(GT, this->conservation_ordering, this->momentum_ordering);
 }
 
-double Tet21Stokes :: computeVolume() const
-{
-    OOFEM_ERROR("Tet21Stokes :: computeVolume - Not implemented yet");
-    return -1; //this->interpolation_quad.giveVolume(FEIElementGeometryWrapper(this));
-}
-
 FEInterpolation *Tet21Stokes :: giveInterpolation()
 {
     return &interpolation_quad;
@@ -381,11 +369,6 @@ FEInterpolation *Tet21Stokes :: giveInterpolation(DofIDItem id)
 void Tet21Stokes :: updateYourself(TimeStep *tStep)
 {
     Element :: updateYourself(tStep);
-}
-
-int Tet21Stokes :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords)
-{
-    return this->interpolation_quad.global2local(lcoords,coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 // Some extension Interfaces to follow:

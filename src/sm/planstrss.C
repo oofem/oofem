@@ -541,14 +541,6 @@ PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 }
 
 
-int
-PlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-
 Interface *
 PlaneStress2d :: giveInterface(InterfaceType interface)
 {
@@ -1267,13 +1259,6 @@ PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_2dxy;
 }
 
-
-#define PLANSTRSS_SMALLNUM 1.e-6
-int
-PlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
 
 int
 PlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {

@@ -68,15 +68,14 @@ public:
     LTRSpace(int n, Domain *d);
     virtual ~LTRSpace() { }
 
+    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 

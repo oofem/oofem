@@ -271,13 +271,6 @@ LTRSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToC
 
 
 int
-LTRSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-int
 LTRSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
@@ -710,14 +703,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
 }
 
 #endif
-
-
-int
-LTRSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
-
 
 int
 LTRSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)

@@ -58,8 +58,6 @@ public:
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     // definition
     virtual const char *giveClassName() const { return "Tr1_htElement"; }
     virtual classType giveClassID() const { return Tr1_htClass; }

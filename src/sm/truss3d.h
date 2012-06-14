@@ -63,6 +63,8 @@ public:
 
     virtual FEInterpolation *giveInterpolation() { return &interp; }
 
+    virtual double computeLength() const;
+
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { this->computeLumpedMassMatrix(answer, tStep); }

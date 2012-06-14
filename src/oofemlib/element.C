@@ -901,11 +901,13 @@ double
 Element :: computeVolume()
 {
     FEInterpolation3d *fei = dynamic_cast<FEInterpolation3d*>(this->giveInterpolation());
-    if (fei) {
-        return fei->giveVolume(FEIElementGeometryWrapper(this));
-    } else {
+#ifdef DEBUG
+    if (!fei) {
+        OOFEM_ERROR("Element :: computeVolume - Function not overloaded and necessary interpolator isn't available");
         return 0.0;
     }
+#endif
+    return fei->giveVolume(FEIElementGeometryWrapper(this));
 }
 
 
@@ -913,11 +915,13 @@ double
 Element :: computeArea()
 {
     FEInterpolation2d *fei = dynamic_cast<FEInterpolation2d*>(this->giveInterpolation());
-    if (fei) {
-        return fei->giveArea(FEIElementGeometryWrapper(this));
-    } else {
+#ifdef DEBUG
+    if (!fei) {
+        OOFEM_ERROR("Element :: computeArea - Function not overloaded and necessary interpolator isn't available");
         return 0.0;
     }
+#endif
+    return fei->giveArea(FEIElementGeometryWrapper(this));
 }
 
 
@@ -925,11 +929,13 @@ double
 Element :: computeLength()
 {
     FEInterpolation1d *fei = dynamic_cast<FEInterpolation1d*>(this->giveInterpolation());
-    if (fei) {
-        return fei->giveLength(FEIElementGeometryWrapper(this));
-    } else {
+#ifdef DEBUG
+    if (!fei) {
+        OOFEM_ERROR("Element :: computeLength - Function not overloaded and necessary interpolator isn't available");
         return 0.0;
     }
+#endif
+    return fei->giveLength(FEIElementGeometryWrapper(this));
 }
 
 
@@ -965,13 +971,14 @@ int
 Element :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     FEInterpolation *fei = this->giveInterpolation();
-    if (fei) {
-        fei->local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-        return true;
-    } else {
+#ifdef DEBUG
+    if (!fei) {
         answer.resize(0);
         return false;
     }
+#endif
+    fei->local2global(answer, lcoords, FEIElementGeometryWrapper(this));
+    return true;
 }
 
 

@@ -241,21 +241,6 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
     return volume;
 }
 
-
-int
-QTrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-
-int
-QTrPlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
-
 void QTrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {

@@ -339,13 +339,6 @@ Tetrah1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atT
     }
 }
 
-int
-Tetrah1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
 
 Interface *
 Tetrah1_ht :: giveInterface(InterfaceType interface)
@@ -422,15 +415,6 @@ Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
 
     return dist;
 }
-
-
-int
-Tetrah1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
-
-
 
 
 #ifdef __OOFEG

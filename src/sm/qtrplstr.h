@@ -67,9 +67,6 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType it);

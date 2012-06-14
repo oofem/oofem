@@ -64,9 +64,6 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
 
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }

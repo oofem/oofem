@@ -152,12 +152,6 @@ void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     }
 }
 
-int Tr21Stokes :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    interpolation_quad.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return true;
-}
-
 void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -397,11 +391,6 @@ FEInterpolation *Tr21Stokes :: giveInterpolation(DofIDItem id)
 void Tr21Stokes :: updateYourself(TimeStep *tStep)
 {
     Element :: updateYourself(tStep);
-}
-
-int Tr21Stokes :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords)
-{
-    return this->interpolation_quad.global2local(lcoords,coords, FEIElementGeometryWrapper(this));
 }
 
 // Some extension Interfaces to follow:

@@ -73,9 +73,6 @@ public:
 
     virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
 
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-
     /**
      * Gives the boundary number.
      * @todo Use regions instead?

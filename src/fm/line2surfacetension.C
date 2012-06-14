@@ -60,12 +60,6 @@ void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoor
     this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 }
 
-int Line2SurfaceTension :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords)
-{
-    this->fei.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this));
-    return true;
-}
-
 double Line2SurfaceTension :: computeNXIntegral() const
 {
     Node *node;

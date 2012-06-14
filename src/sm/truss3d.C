@@ -178,6 +178,13 @@ Truss3d :: computeGaussPoints()
 }
 
 
+double
+Truss3d :: computeLength() const
+{
+    return this->interp.giveLength(FEIElementGeometryWrapper(this));
+}
+
+
 void
 Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver. This expression is

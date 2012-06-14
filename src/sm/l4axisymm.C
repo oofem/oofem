@@ -341,19 +341,6 @@ L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.setValues(2, D_u, D_v);
 }
 
-int
-L4Axisymm :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-int
-L4Axisymm :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this));
-}
-
 void
 L4Axisymm :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

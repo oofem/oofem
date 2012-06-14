@@ -153,11 +153,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual double computeVolume() const;
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords);
-
     // Spatial localizer interface:
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);

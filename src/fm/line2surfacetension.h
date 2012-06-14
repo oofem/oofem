@@ -72,7 +72,6 @@ public:
     virtual double computeNXIntegral() const;
 
     virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
-    virtual int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords);
 
     virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &gcoords) { return false; }

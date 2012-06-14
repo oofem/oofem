@@ -69,9 +69,6 @@ public:
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
     }
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType it);

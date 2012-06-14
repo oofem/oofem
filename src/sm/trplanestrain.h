@@ -46,6 +46,7 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
+#include "fei2dtrlin.h"
 
 namespace oofem {
 
@@ -63,6 +64,7 @@ class TrPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInter
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
+    static FEI2dTrLin interp;
     double area;
     int numberOfGaussPoints;
 
@@ -70,15 +72,14 @@ public:
     TrPlaneStrain(int n, Domain *d);
     virtual ~TrPlaneStrain() { }
 
+    virtual FEInterpolation* giveInterpolation() { return &interp; }
+
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType it);
@@ -174,9 +175,6 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &);
     virtual void computeGaussPoints();
 
-    virtual double giveArea();
-    virtual FloatArray *GivebCoeff();
-    virtual FloatArray *GivecCoeff();
     virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 1; }
 };
