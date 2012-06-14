@@ -46,8 +46,6 @@
 #include "classtype.h"
 #include "freestor.h"
 
-#include <cassert>
-
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
 extern "C" {
@@ -166,8 +164,7 @@ double FloatMatrix :: at(int i, int j) const
 double &FloatMatrix :: operator() (int i, int j)
 {
 #ifdef DEBUG
-    assert(0 <= i && i < nRows);
-    assert(0 <= j && j < nColumns);
+    this->checkBounds(i+1, j+1);
 #endif
     return values [ ( j ) * nRows + i ];
 }
@@ -176,8 +173,7 @@ double &FloatMatrix :: operator() (int i, int j)
 double FloatMatrix :: operator() (int i, int j) const
 {
 #ifdef DEBUG
-    assert(0 <= i && i < nRows);
-    assert(0 <= j && j < nColumns);
+    this->checkBounds(i+1, j+1);
 #endif
     return values [ ( j ) * nRows + i ];
 }
