@@ -32,29 +32,31 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei2dlinelin_h
-#define fei2dlinelin_h
+#ifndef fei2dlinehermite_h
+#define fei2dlinehermite_h
 
 #include "feinterpol2d.h"
 
 namespace oofem {
 /**
- * Class representing a 2d line with linear interpolation.
- * @todo{Some more routines to be implemented here}
+ * Class representing a 2d line with Hermitian interpolation.
+ * The order used is cubic, quadratic, cubic, quadratic.
+ * The functions that need geometric information, a linear interpolation is assumed (for geometry). This means functions such as evaldNdx.
  * @author Mikael Öhman
  */
-class FEI2dLineLin : public FEInterpolation2d
+class FEI2dLineHermite : public FEInterpolation2d
 {
 protected:
     int xind, yind;
 
 public:
-    FEI2dLineLin(int ind1, int ind2) : FEInterpolation2d(1) {
+    FEI2dLineHermite(int ind1, int ind2) : FEInterpolation2d(1) {
         xind = ind1;
         yind = ind2;
     }
 
     virtual double giveArea(const FEICellGeometry &cellgeo) const { return 0.0; }
+    virtual double giveLength(const FEICellGeometry &cellgeo) const;
 
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
@@ -71,13 +73,13 @@ public:
     virtual void edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void edgeEvald2Nds2(FloatArray &answer, int iedge,
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) {};
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
                                                   const FEICellGeometry &cellgeo) { return 0.0; };
-
-protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
-#endif // fei2dlinelin_h
+#endif // fei2dlinehermite_h

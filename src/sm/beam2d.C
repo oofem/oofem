@@ -52,6 +52,7 @@
 namespace oofem {
 // Set up interpolation coordinates
 FEI2dLineLin Beam2d :: interp_geom(1, 3);
+FEI2dLineHermite Beam2d :: interp_beam(1, 3);
 
 Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
 {
@@ -83,13 +84,13 @@ Beam2d :: giveInterface(InterfaceType interface)
 
 
 void
-Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, kappa;
 
     l     = this->giveLength();
-    ksi   = 0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
     kappa = this->giveKappaCoeff();
 
     answer.resize(3, 6);
@@ -124,9 +125,9 @@ Beam2d :: computeGaussPoints()
 
 
 void
-Beam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+Beam2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint. Used for numerical calculation of consistent mass
+// luated at gp. Used for numerical calculation of consistent mass
 // matrix. Must contain only interpolation for displacement terms,
 // not for any rotations. (Inertia forces do not work on rotations).
 // r = {u1,w1,fi_y1,u2,w2,fi_y2}^T
@@ -135,7 +136,7 @@ Beam2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     double l, ksi, ksi2, ksi3, kappa, c1;
 
     l     = this->giveLength();
-    ksi =   0.5 + 0.5 * aGaussPoint->giveCoordinate(1);
+    ksi =   0.5 + 0.5 * gp->giveCoordinate(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
     ksi2 = ksi * ksi;
@@ -249,9 +250,9 @@ Beam2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 double
-Beam2d :: computeVolumeAround(GaussPoint *aGaussPoint)
+Beam2d :: computeVolumeAround(GaussPoint *gp)
 {
-    double weight  = aGaussPoint->giveWeight();
+    double weight  = gp->giveWeight();
     return weight * 0.5 * this->giveLength();
 }
 
@@ -623,23 +624,6 @@ Beam2d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
             this->condense(& stiff, NULL, & answer, dofsToCondense);
         }
     }
-}
-
-
-int
-Beam2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double ksi, n1, n2;
-
-    ksi = lcoords.at(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
-
-    return 1;
 }
 
 

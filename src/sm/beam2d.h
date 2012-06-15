@@ -38,13 +38,13 @@
 #include "structuralelement.h"
 #include "layeredcrosssection.h"
 #include "fei2dlinelin.h"
-//#include "fei2dlinehermite.h"
+#include "fei2dlinehermite.h"
 
 namespace oofem {
 /**
  * This class implements a 2-dimensional beam element
- * with cubic lateral displacement and geometry, quadratic rotations,
- * and linear longitudinal displacements.
+ * with cubic lateral displacement, quadratic rotations,
+ * and linear longitudinal displacements and geometry.
  * This is an exact displacement approximation for beam with no
  * nonnodal loading.
  *
@@ -58,7 +58,7 @@ protected:
     IntArray *dofsToCondense;
 
     static FEI2dLineLin interp_geom;
-    //static FEI2dLineHermite interp_beam;
+    static FEI2dLineHermite interp_beam;
 
 public:
     Beam2d(int n, Domain *aDomain);
@@ -72,9 +72,7 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
     virtual Interface *giveInterface(InterfaceType);
 
@@ -118,7 +116,7 @@ protected:
     virtual void computeGaussPoints();
     virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }
-    virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem
 #endif // beam2d_h
