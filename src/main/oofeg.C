@@ -353,7 +353,8 @@ main(int argc, char *argv[])
     std::string temp = inputFileName.str();
     // extract job name
     size_t k = temp.size();
-    while ( k-- ) {
+    while ( k ) {
+        k--;
         if ( temp[k] == '/' ) {
             k++;
             break;

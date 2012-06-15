@@ -77,6 +77,12 @@ protected:
     FloatArray *GiveDerivativeKsi(double, double);
     FloatArray *GiveDerivativeEta(double, double);
     void computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+
+#ifdef __OOFEG
+    void drawRawGeometry(oofegGraphicContext &gc);
+    void drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type);
+#endif
+
 };
 } // end namespace oofem
 #endif // q4axisymm_h
