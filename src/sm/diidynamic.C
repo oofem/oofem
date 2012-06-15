@@ -53,6 +53,9 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
     stiffnessMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
+
+    initialTimeDiscretization = TD_Unspecified;
+
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
@@ -206,8 +209,7 @@ void DIIDynamic :: solveYourself()
 
 void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // Determine the constants.
-    deltaT = tStep->giveTimeIncrement();
-    this->determineConstants();
+    this->determineConstants(tStep);
 
     Domain *domain = this->giveDomain(1);
     int neq =  this->giveNumberOfEquations(EID_MomentumBalance);
@@ -323,15 +325,18 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     nMethod->solve(stiffnessMatrix, & rhs, & help);
 
     for ( int i = 1; i <= neq; i++ ) {
-        rhs.at(i) = a4 * help.at(i) + a5 *previousDisplacementVector.at(i) +
-                    a6 *previousVelocityVector.at(i) +
-                    a7 *previousAccelerationVector.at(i);
+        accelerationVector.at(i) = a4 * help.at(i) + 
+                                   a5 * previousDisplacementVector.at(i) +
+                                   a6 * previousVelocityVector.at(i) +
+                                   a7 * previousAccelerationVector.at(i);
 
-        displacementVector.at(i) += deltaT * previousVelocityVector.at(i) +
-                                    a9 *previousAccelerationVector.at(i) +
-                                    a10 *rhs.at(i);
-        velocityVector.at(i)     += a8 * ( previousAccelerationVector.at(i) + rhs.at(i) );
-        accelerationVector.at(i)  = rhs.at(i);
+        displacementVector.at(i) = previousDisplacementVector.at(i) +
+                                   deltaT * previousVelocityVector.at(i) +
+                                   a9 * previousAccelerationVector.at(i) +
+                                   a10 * accelerationVector.at(i);
+
+        velocityVector.at(i) = previousVelocityVector.at(i) +
+                               a8 * ( previousAccelerationVector.at(i) + accelerationVector.at(i) );
     }
 }
 
@@ -447,8 +452,9 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 }
 
 void
-DIIDynamic :: determineConstants()
+DIIDynamic :: determineConstants(TimeStep *tStep)
 {
+    deltaT = tStep->giveTimeIncrement();
     if ( Psi < 1.1 ) { // Newmark Method
         Psi = 1.;
         double dt2 = deltaT * deltaT;

@@ -74,6 +74,9 @@ protected:
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
+
+    TimeDiscretizationType initialTimeDiscretization;
+
     /// Numerical method used to solve the problem
     SparseLinearSystemNM *nMethod;
 
@@ -102,7 +105,7 @@ public:
 
     void timesMassMtrx(FloatArray &answer, FloatArray &vec, Domain *domain, TimeStep *tStep);
     void assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep);
-    void determineConstants();
+    void determineConstants(TimeStep *tStep);
     virtual int checkConsistency();
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

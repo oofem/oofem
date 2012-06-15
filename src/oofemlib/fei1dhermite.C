@@ -78,7 +78,7 @@ FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const
 
     answer.at(1, 1) =  l_inv * 6.0 * ksi * l_inv;
     answer.at(1, 2) =  l_inv * (3.0 * ksi - 1.0);
-    answer.at(1, 3) = -l_inv * 6.0 * ksi * l_inv
+    answer.at(1, 3) = -l_inv * 6.0 * ksi * l_inv;
     answer.at(1, 4) =  l_inv * (3.0 * ksi + 1.0);
 }
 
@@ -110,7 +110,7 @@ double
 FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // This isn't really relevant, interpolation of geometry will be just linear
-    double l = computeLength(cellgeo);
+    double l = this->giveLength(cellgeo);
     return 0.5 * l;
 }
 
