@@ -73,35 +73,36 @@ public:
     virtual double giveConcreteConductivity(GaussPoint *gp);
     virtual double giveConcreteCapacity(GaussPoint *gp);
     virtual double giveConcreteDensity(GaussPoint *gp);
-    ///type of hydration model, e.g. exponential curve, Cervera's model
+    /// Type of hydration model, e.g. exponential curve, Cervera's model.
     int hydrationModelType;
     double maxModelIntegrationTime;
-    ///minimum number of integration steps for hydration model within a given timeStep
+    /// Minimum number of integration steps for hydration model within a given timeStep.
     double minModelTimeStepIntegrations;
-    ///Potential heat of hdyration, for ordinary Portland cement approximately 500 J/g
+    /// Potential heat of hydration, for ordinary Portland cement approximately 500 J/g.
     double Qpot;
-    ///mass of cement in kg per 1m3 of concrete
+    /// Mass of cement in kg per 1m3 of concrete.
     double massCement;
-    ///activation energy of concrete (default 38400 J/mol/K)
+    /// Activation energy of concrete (default 38400 J/mol/K).
     double activationEnergy;
-    ///reference temperature for hydration model
+    /// Reference temperature for hydration model.
     double referenceTemperature;
-    /**Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard:
+    /**
+     * Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard:
      * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
      */
     double tau, beta;
 
-    /**Parameters for affinity hydration model inspired by Cervera et al.
+    /**
+     * Parameters for affinity hydration model inspired by Cervera et al.
      * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
      */
     double B1, B2, eta, DoHInf;
 
 protected:
-    ///use different methods to evaluate material conductivity, capacity, or density
+    /// Use different methods to evaluate material conductivity, capacity, or density
     int conductivityType, capacityType, densityType;
-    ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
+    /// Degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
     int reinforcementDegree;
-    ///create material status
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 
@@ -115,7 +116,7 @@ public:
     virtual ~HydratingConcreteMatStatus();
     double power;
     double GivePower(TimeStep *atTime);
-    /// Returns actual degree of hydration at last known equilibrium
+    /// Returns actual degree of hydration at last known equilibrium.
     virtual double giveDoHActual(void);
     virtual void updateYourself(TimeStep *atTime);
     virtual void printOutputAt(FILE *file, TimeStep *atTime);
@@ -123,7 +124,7 @@ public:
 protected:
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
     double scaleTemperature(void);
-    ///return affinity scaled to 25C
+    /// Return affinity scaled to 25C.
     double affinity25(double alpha);
 };
 } // end namespace oofem
