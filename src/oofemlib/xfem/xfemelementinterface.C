@@ -135,7 +135,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList<
             if ( det > 0.00001 ) {
                 int sz = answer1->giveSize();
                 answer1->put(sz + 1, nodesCopy);
-            } else if ( det < ( -1 ) * 0.00001 )          {
+            } else if ( det < ( -1 ) * 0.00001 ) {
                 int sz = answer2->giveSize();
                 answer2->put(sz + 1, nodesCopy);
             }

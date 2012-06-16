@@ -126,8 +126,8 @@ public:
     /// Clear the receiver
     void clear();
     /**
-     * Stores the state of receiver to output stream. 
-     * @param stream Context stream. 
+     * Stores the state of receiver to output stream.
+     * @param stream Context stream.
      * @param mode Determines amount of info in stream.
      * @param obj Special parameter, used to pass optional parameters.
      * @return contextIOResultType.
@@ -135,7 +135,7 @@ public:
      */
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
-     * Restores the state of receiver from output stream. 
+     * Restores the state of receiver from output stream.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
      * @param obj Special parameter for sending extra information.
@@ -145,7 +145,7 @@ public:
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 protected:
-    // Changes dofIdPos to next index.
+    /// Changes dofIdPos to next index.
     DofIDItem allocateNewDofID();
 };
 } // end namespace oofem

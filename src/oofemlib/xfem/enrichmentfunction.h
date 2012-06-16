@@ -55,12 +55,12 @@ class EnrichmentFunction : public FEMComponent
 public:
     /**
      * Constructor.
-     * @param n number associated with receiver
-     * @param aDomain reference to domain.
+     * @param n Number associated with receiver.
+     * @param aDomain Reference to domain.
      */
     EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) { }
     /// Destructor
-    ~EnrichmentFunction() { };
+    virtual ~EnrichmentFunction() { };
     /// Evaluates a function at a particular point
     virtual double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) = 0;
     /// Evaluates a function derivative at a particular point
@@ -69,16 +69,12 @@ public:
     virtual double evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei);
     /// Evaluates a function derivative at a particular point
     virtual void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei);
-    /// Inserts EnrichmentItem into associatedEnrItem array
+    // Inserts EnrichmentItem into associatedEnrItem array
     // void insertEnrichmentItem(EnrichmentItem *er);
-    /// Sets a particular EnrichmentItem active
+    // Sets a particular EnrichmentItem active
     // void setActive(EnrichmentItem *er);
-    /// Initializes EnrichmentItem from InputRecord
-    IRResultType initializeFrom(InputRecord *ir);
-
-    const char *giveClassName() const {
-        return "EnrichmentFunction";
-    }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "EnrichmentFunction"; }
     /// Accessor.
     int giveNumberOfDofs() { return numberOfDofs; }
 

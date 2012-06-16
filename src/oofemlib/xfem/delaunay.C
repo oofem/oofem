@@ -83,11 +83,12 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles) {
-    /// 4th order algorithm - four loops, only for testing puropses
+void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles)
+{
+    // 4th order algorithm - four loops, only for testing purposes
     int n = overtices->giveSize();
     int count = 0;
-    /// copy of vertices, since they will be shifted
+    // copy of vertices, since they will be shifted
     AList< FloatArray > *vertices = new AList< FloatArray >();
     std :: map< FloatArray *, FloatArray * >backToOld; // map for putting the shifted vertices into the old position
     for ( int i = 1; i <= overtices->giveSize(); i++ ) {

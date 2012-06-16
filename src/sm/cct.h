@@ -40,6 +40,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "fei2dtrlin.h"
 
 namespace oofem {
 
@@ -55,6 +56,9 @@ class CCTPlate : public NLStructuralElement,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
 {
 protected:
+    static FEI2dTrLin interp_lin;
+    //static FEI2dTrRot interp_rot;
+
     double area;
     int numberOfGaussPoints;
 
@@ -62,15 +66,18 @@ public:
     CCTPlate(int n, Domain *d);
     virtual ~CCTPlate() { }
 
-protected:
+    virtual FEInterpolation *giveInterpolation() { return &interp_lin; }
+    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+
     virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
+
+protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    virtual double giveArea();
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
                                      double *z = NULL);
@@ -94,9 +101,8 @@ public:
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
 
-    Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 

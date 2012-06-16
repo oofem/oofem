@@ -51,7 +51,7 @@ FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICell
 void
 FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double x1, x2, x3, y1, y2, y3, area;
+    double x1, x2, x3, y1, y2, y3, detJ;
     answer.resize(3, 2);
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
@@ -62,16 +62,16 @@ FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+    detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
 
-    answer.at(1, 1) = ( y2 - y3 ) / ( 2. * area );
-    answer.at(1, 2) = ( x3 - x2 ) / ( 2. * area );
+    answer.at(1, 1) = ( y2 - y3 ) / detJ;
+    answer.at(1, 2) = ( x3 - x2 ) / detJ;
 
-    answer.at(2, 1) = ( y3 - y1 ) / ( 2. * area );
-    answer.at(2, 2) = ( x1 - x3 ) / ( 2. * area );
+    answer.at(2, 1) = ( y3 - y1 ) / detJ;
+    answer.at(2, 2) = ( x1 - x3 ) / detJ;
 
-    answer.at(3, 1) = ( y1 - y2 ) / ( 2. * area );
-    answer.at(3, 2) = ( x2 - x1 ) / ( 2. * area );
+    answer.at(3, 1) = ( y1 - y2 ) / detJ;
+    answer.at(3, 2) = ( x2 - x1 ) / detJ;
 }
 
 void
@@ -97,7 +97,7 @@ FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
 int
 FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    double area, x1, x2, x3, y1, y2, y3;
+    double detJ, x1, x2, x3, y1, y2, y3;
     answer.resize(3);
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
@@ -108,12 +108,11 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+    detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
 
-
-    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / 2. / area;
-    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / 2. / area;
-    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(xind) + ( x2 - x1 ) * coords.at(yind) ) / 2. / area;
+    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
+    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
+    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(xind) + ( x2 - x1 ) * coords.at(yind) ) / detJ;
 
     // check if point is inside
     int i;
@@ -134,7 +133,7 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 double
 FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double area, x1, x2, x3, y1, y2, y3;
+    double x1, x2, x3, y1, y2, y3;
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
     x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
@@ -144,8 +143,7 @@ FEI2dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICel
     y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
     y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-    return 2.0 * area;
+    return ( x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2) );
 }
 
 
@@ -243,15 +241,15 @@ FEI2dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cell
     double dx, dy;
     int nodeA, nodeB;
 
-    nodeA   = edgeNodes.at(1);
-    nodeB   = edgeNodes.at(2);
+    nodeA = edgeNodes.at(1);
+    nodeB = edgeNodes.at(2);
 
-    dx      = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    dy      = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
+    dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
+    dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
     return ( sqrt(dx * dx + dy * dy) );
 }
 
-double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo)
+double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
 {
     const FloatArray *p;
     double x1, x2, x3, y1, y2, y3;

@@ -58,10 +58,10 @@ class EnrichmentItem : public FEMComponent
 public:
     /// Constructor.
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
-    /// Initializes EnrichmentItem from InputRecord.
-    IRResultType initializeFrom(InputRecord *ir);
-    /// Returns class name.
-    const char *giveClassName() const { return "EnrichmentItem"; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "EnrichmentItem"; }
+
     /// Accessor.
     BasicGeometry *giveGeometry();
     /// Checks whether EnrichmentItem interacts element.
@@ -115,11 +115,12 @@ class Inclusion : public EnrichmentItem
 {
 protected:
     Material *mat;
+
 public:
     Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
-    const char *giveClassName() const { return "Inclusion"; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Material *giveMaterial() { return mat; }
+    virtual const char *giveClassName() const { return "Inclusion"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Material *giveMaterial() { return mat; }
 };
 } // end namespace oofem
 #endif  // enrichmentitem_h
