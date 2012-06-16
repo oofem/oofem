@@ -63,7 +63,7 @@ class DataStream;
 class XfemManager
 {
 protected:
-    /// Associated EngineeringModel.
+    /// Associated Engineering Model.
     EngngModel *emodel;
     /// Index of the associated domain.
     int domainIndex;
@@ -94,9 +94,9 @@ public:
      * are referenced by a number from the domain
      */
     void getInteractedEI(IntArray &answer, Element *elem);
-    /// checks whether an element is interacted
+    /// Checks whether an element is interacted.
     bool isInteracted(Element *elem);
-    /// checks whether a node is interacted
+    /// Checks whether a node is interacted.
     bool isEnriched(int nodeNumber);
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);

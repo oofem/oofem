@@ -39,41 +39,41 @@
 #include "dofmanager.h"
 
 namespace oofem {
-BasicGeometry :: BasicGeometry() {
+BasicGeometry :: BasicGeometry()
+{
     this->vertices = new AList< FloatArray >(0);
 }
 
-BasicGeometry :: ~BasicGeometry() {
+BasicGeometry :: ~BasicGeometry()
+{
     delete vertices;
 }
 
-FloatArray *BasicGeometry :: giveVertex(int n) {
+FloatArray *BasicGeometry :: giveVertex(int n)
+{
     return this->vertices->at(n);
 }
 
-void BasicGeometry :: setVertex(FloatArray *vertex) {
+void BasicGeometry :: setVertex(FloatArray *vertex)
+{
     int sz = this->vertices->giveSize();
     this->vertices->put(sz + 1, vertex);
 }
 
-bool Line :: intersects(Element *element) {
-    bool ret = 0;
+bool Line :: intersects(Element *element)
+{
     int ip = this->computeNumberOfIntersectionPoints(element);
-    if ( ip > 0 ) {
-        ret = true;
-    } else {
-        ret = false;
-    }
-
-    return ret;
+    return ( ip > 0 );
 }
 
-Line :: Line(FloatArray *pointA, FloatArray *pointB) : BasicGeometry() {
+Line :: Line(FloatArray *pointA, FloatArray *pointB) : BasicGeometry()
+{
     this->vertices->put(1, pointA);
     this->vertices->put(2, pointB);
 }
 
-double Line :: computeDistanceTo(FloatArray *point) {
+double Line :: computeDistanceTo(FloatArray *point)
+{
     FloatArray *pointA = this->vertices->at(1);
     FloatArray *pointB = this->vertices->at(2);
     double a = pointA->at(2) - pointB->at(2);
@@ -83,11 +83,13 @@ double Line :: computeDistanceTo(FloatArray *point) {
     return ( a * point->at(1) + b * point->at(2) + c ) / l;
 }
 
-void Line :: computeProjection(FloatArray &answer) {
+void Line :: computeProjection(FloatArray &answer)
+{
     answer.beDifferenceOf(*vertices->at(2), *vertices->at(1));
 }
 
-double Line :: computeTangentialDistanceToEnd(FloatArray *point) {
+double Line :: computeTangentialDistanceToEnd(FloatArray *point)
+{
     FloatArray projection;
     this->computeProjection(projection);
     FloatArray tmp;
@@ -95,25 +97,24 @@ double Line :: computeTangentialDistanceToEnd(FloatArray *point) {
     return tmp.dotProduct(projection)/projection.computeNorm();
 }
 
-int Line :: computeNumberOfIntersectionPoints(Element *element) {
+int Line :: computeNumberOfIntersectionPoints(Element *element)
+{
     int count = 0;
     int nrNodes = element->giveNumberOfDofManagers();
     FloatArray signedDist(nrNodes);
     FloatArray tanSignDist(nrNodes);
-    // here I need to get max value and min value in the FloatArray
-    // there is no function for that in FloatArray
-    // below I set some values to start from, the values should be related to element size
-    // rather than very big doubles
-    double maxDist = -1000000.0;
-    double maxTanDist = -1000000.0;
-    double minDist = 1000000.0;
-    double minTanDist = 1000000.0;
+
     for ( int i = 1; i <= nrNodes; i++ ) {
         signedDist.at(i) = computeDistanceTo( element->giveDofManager(i)->giveCoordinates() );
         tanSignDist.at(i) = computeTangentialDistanceToEnd( element->giveDofManager(i)->giveCoordinates() );
     }
 
-    for ( int i = 1; i <= nrNodes; i++ ) {
+    // here I need to get max value and min value in the FloatArray
+    double maxDist = signedDist.at(1);
+    double maxTanDist = tanSignDist.at(1);
+    double minDist = signedDist.at(1);
+    double minTanDist = tanSignDist.at(1);
+    for ( int i = 2; i <= nrNodes; i++ ) {
         // finding out max and min values
         if ( signedDist.at(i) > maxDist ) {
             maxDist = signedDist.at(i);
@@ -145,7 +146,8 @@ int Line :: computeNumberOfIntersectionPoints(Element *element) {
     return count;
 }
 
-void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) {
+void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+{
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         int n1 = i;
         int n2 = 0;
@@ -175,7 +177,8 @@ void Line :: computeIntersectionPoints(Element *element, AList< FloatArray > *in
     }
 }
 
-double Line :: computeInclinationAngle() {
+double Line :: computeInclinationAngle()
+{
     FloatArray *pointA = this->vertices->at(1);
     FloatArray *pointB = this->vertices->at(2);
     double y = pointB->at(2) - pointA->at(2);
@@ -183,16 +186,19 @@ double Line :: computeInclinationAngle() {
     return atan2(y, x);
 }
 
-void Line :: computeTransformationMatrix(FloatMatrix &answer) {
+void Line :: computeTransformationMatrix(FloatMatrix &answer)
+{
     answer.resize(2, 2);
     double alpha = this->computeInclinationAngle();
-    answer.at(1, 1) = cos(alpha);
-    answer.at(1, 2) = sin(alpha);
-    answer.at(2, 1) = ( -1 ) * sin(alpha);
-    answer.at(2, 2) = cos(alpha);
+    answer.at(1, 1) =  cos(alpha);
+    answer.at(1, 2) =  sin(alpha);
+    answer.at(2, 1) = -sin(alpha);
+    answer.at(2, 2) =  cos(alpha);
 }
 
-void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer) {
+void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
+{
+    OOFEM_ERROR("WTF");
     FloatArray xp;
     FloatMatrix Qt;
     FloatArray help;
@@ -204,7 +210,8 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer) {
     answer.at(2) = atan2( xp.at(2), xp.at(1) );
 }
 
-IRResultType Line :: initializeFrom(InputRecord *ir) {
+IRResultType Line :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
@@ -217,7 +224,8 @@ IRResultType Line :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-bool Line :: isPointInside(FloatArray *point) {
+bool Line :: isPointInside(FloatArray *point)
+{
     double maxX, minX, maxY, minY;
     if ( vertices->at(1)->at(1) > vertices->at(2)->at(1) ) {
         maxX = vertices->at(1)->at(1);
@@ -242,15 +250,16 @@ bool Line :: isPointInside(FloatArray *point) {
         return false;
     }
 
-    /*
-     *  if ((point->at(2) > vertices->at(1)->at(2) && point->at(2) < vertices->at(2)->at(2)) ||
-     *          (point->at(2) < vertices->at(1)->at(2) && point->at(2) > vertices->at(2)->at(2)))
-     *      return true;
-     *  else return false;
-     */
+#if 0
+     if ((point->at(2) > vertices->at(1)->at(2) && point->at(2) < vertices->at(2)->at(2)) ||
+         (point->at(2) < vertices->at(1)->at(2) && point->at(2) > vertices->at(2)->at(2)))
+        return true;
+     else return false;
+#endif
 }
 
-bool Line :: isOutside(BasicGeometry *bg) { // equivalent to up
+bool Line :: isOutside(BasicGeometry *bg)
+{ // equivalent to up
     int count = 0;
     for ( int i = 1; i <= bg->giveNrVertices(); i++ ) {
         if ( this->computeDistanceTo( bg->giveVertex(i) ) > 0.1 ) {
@@ -258,32 +267,33 @@ bool Line :: isOutside(BasicGeometry *bg) { // equivalent to up
         }
     }
 
-    if ( count != 0 ) {
-        return true;
-    } else {
-        return false;
-    }
+    return ( count != 0 );
 }
 
-Triangle :: Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3) : BasicGeometry() {
+Triangle :: Triangle(FloatArray *p1, FloatArray *p2, FloatArray *p3) : BasicGeometry()
+{
+    this->vertices->growTo(3);
     this->vertices->put(1, p1);
     this->vertices->put(2, p2);
     this->vertices->put(3, p3);
 }
 
-double Triangle :: getArea() {
+double Triangle :: getArea()
+{
     return fabs( 0.5 * ( vertices->at(1)->at(1) * ( vertices->at(2)->at(2) - vertices->at(3)->at(2) )
                         + vertices->at(2)->at(1) * ( vertices->at(3)->at(2) - vertices->at(1)->at(2) ) +
                         vertices->at(3)->at(1) * ( vertices->at(1)->at(2) - vertices->at(2)->at(2) ) ) );
 }
 
-double Triangle :: getRadiusOfCircumCircle() {
+double Triangle :: getRadiusOfCircumCircle()
+{
     return 0.25 * vertices->at(1)->distance( vertices->at(2) ) *
            vertices->at(2)->distance( vertices->at(3) ) *
            vertices->at(1)->distance( vertices->at(3) ) / this->getArea();
 }
 
-void Triangle :: computeBarycentrCoor(FloatArray &answer) {
+void Triangle :: computeBarycentrCoor(FloatArray &answer)
+{
     double c = vertices->at(1)->distance( vertices->at(2) );
     double a = vertices->at(2)->distance( vertices->at(3) );
     double b = vertices->at(1)->distance( vertices->at(3) );
@@ -294,12 +304,13 @@ void Triangle :: computeBarycentrCoor(FloatArray &answer) {
     double cPow = c * c;
 
     answer.resize(3);
-    answer.at(1) = aPow * ( ( -1 ) * aPow + bPow + cPow );
+    answer.at(1) = aPow * (-aPow + bPow + cPow );
     answer.at(2) = bPow * ( aPow - bPow + cPow );
     answer.at(3) = cPow * ( aPow + bPow - cPow );
 }
 
-void Triangle :: computeCenterOfCircumCircle(FloatArray &answer) {
+void Triangle :: computeCenterOfCircumCircle(FloatArray &answer)
+{
     FloatArray bar;
     this->computeBarycentrCoor(bar);
     double sum = bar.at(1) + bar.at(2) + bar.at(3);
@@ -310,7 +321,9 @@ void Triangle :: computeCenterOfCircumCircle(FloatArray &answer) {
     }
 }
 
-void Triangle :: printYourself() {
+void Triangle :: printYourself()
+{
+    printf("Triangle: ");
     for ( int i = 1; i <= vertices->giveSize(); i++ ) {
         vertices->at(i)->printYourself();
     }
@@ -318,7 +331,8 @@ void Triangle :: printYourself() {
     printf("\n");
 }
 
-bool Triangle :: isOrientedAnticlockwise() {
+bool Triangle :: isOrientedAnticlockwise()
+{
     FloatMatrix fm(3, 2);
     for ( int i = 1; i <= fm.giveNumberOfRows(); i++ ) {
         for ( int j = 1; j <= fm.giveNumberOfColumns(); j++ ) {
@@ -339,7 +353,8 @@ bool Triangle :: isOrientedAnticlockwise() {
     }
 }
 
-void Triangle :: changeToAnticlockwise() {
+void Triangle :: changeToAnticlockwise()
+{
     FloatArray *p2e = new FloatArray( *this->giveVertex(3) );
     FloatArray *p3e = new FloatArray( *this->giveVertex(2) );
     this->vertices->remove(2);
@@ -348,16 +363,19 @@ void Triangle :: changeToAnticlockwise() {
     this->vertices->put(3, p3e);
 }
 
-Circle :: Circle(FloatArray *center, double radius) {
+Circle :: Circle(FloatArray *center, double radius)
+{
     this->vertices->put(1, center);
     this->radius = radius;
 }
 
-double Circle :: computeDistanceTo(FloatArray *point) {
+double Circle :: computeDistanceTo(FloatArray *point)
+{
     return vertices->at(1)->distance(point) - radius;
 }
 
-IRResultType Circle :: initializeFrom(InputRecord *ir) {
+IRResultType Circle :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
@@ -368,7 +386,8 @@ IRResultType Circle :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-bool Circle :: intersects(Element *element) {
+bool Circle :: intersects(Element *element)
+{
     int count = 0;
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         FloatArray *nodeCoor = element->giveDofManager(i)->giveCoordinates();
@@ -386,7 +405,8 @@ bool Circle :: intersects(Element *element) {
     }
 }
 
-void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) {
+void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
+{
     if ( intersects(element) ) {
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
             AList< FloatArray >oneLineIntersects;
@@ -411,7 +431,8 @@ void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *
     }
 }
 
-void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints) {
+void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints)
+{
     double x1 = l->giveVertex(1)->at(1);
     double y1 = l->giveVertex(1)->at(2);
     double x2 = l->giveVertex(2)->at(1);
@@ -439,7 +460,7 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
         sz = 0;
     } else if ( D == 0 ) {
         sz = 1;
-    } else                             {
+    } else {
         sz = 2;
     }
 
@@ -469,7 +490,8 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
     }
 }
 
-bool Circle :: isOutside(BasicGeometry *bg) {
+bool Circle :: isOutside(BasicGeometry *bg)
+{
     int count = 0;
     for ( int i = 1; i <= bg->giveNrVertices(); i++ ) {
         if ( 0.9999 * bg->giveVertex(i)->distance( this->vertices->at(1) ) > this->radius ) {
@@ -484,10 +506,9 @@ bool Circle :: isOutside(BasicGeometry *bg) {
     }
 }
 
-
-
-void Circle :: printYourself() {
-    printf("Circle: ");
+void Circle :: printYourself()
+{
+    printf("Circle: radius = %e, center = ",this->radius);
     vertices->at(1)->printYourself();
     printf("\n");
 }

@@ -58,13 +58,13 @@ public:
     BasicGeometry();
     /// Destructor.
     virtual ~BasicGeometry();
-    /// computes normal signed distance between this object and a point.
+    /// Computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(FloatArray *point) { return 0; }
-    /// checks whether an element is interacted, Element reference will be later replaced by Geometry.
+    /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
-    /// gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
+    /// Gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
-    // gives intersection points between this Geometry and Element.
+    /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
     /// Accessor.
     FloatArray *giveVertex(int n);
@@ -88,8 +88,8 @@ public:
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual void printYourself() { }
     /**
-     * Stores the state of receiver to output stream. 
-     * @param stream Context stream. 
+     * Stores the state of receiver to output stream.
+     * @param stream Context stream.
      * @param mode Determines amount of info in stream.
      * @param obj Special parameter, used to pass optional parameters.
      * @return contextIOResultType.
@@ -97,7 +97,7 @@ public:
      */
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
     /**
-     * Restores the state of receiver from output stream. 
+     * Restores the state of receiver from output stream.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
      * @param obj Special parameter for sending extra information.
@@ -105,7 +105,7 @@ public:
      * @exception ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
-    
+
 #ifdef __OOFEG
     virtual void draw(oofegGraphicContext &gc) { }
 #endif
@@ -117,20 +117,20 @@ public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
     Line(FloatArray *pointA, FloatArray *pointB);
-    /// Computes normal distance to a point
-    double computeDistanceTo(FloatArray *point);
+
+    virtual double computeDistanceTo(FloatArray *point);
     /// Computes tangential distance to a point
     double computeTangentialDistanceToEnd(FloatArray *point);
     void computeProjection(FloatArray &answer);
-    int computeNumberOfIntersectionPoints(Element *element);
-    void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
+    virtual int computeNumberOfIntersectionPoints(Element *element);
+    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
     double computeInclinationAngle();
     void computeTransformationMatrix(FloatMatrix &answer);
     void transformIntoPolar(FloatArray *point, FloatArray &answer);
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     bool isPointInside(FloatArray *point);
-    bool intersects(Element *element);
-    bool isOutside(BasicGeometry *bg);
+    virtual bool intersects(Element *element);
+    virtual bool isOutside(BasicGeometry *bg);
 };
 
 class Triangle : public BasicGeometry
@@ -142,8 +142,8 @@ public:
     void computeBarycentrCoor(FloatArray &answer);
     double getRadiusOfCircumCircle();
     void computeCenterOfCircumCircle(FloatArray &answer);
-    void printYourself();
-    int computeNumberOfIntersectionPoints(Element *element) { return 0; }
+    virtual void printYourself();
+    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     bool isOrientedAnticlockwise();
     void changeToAnticlockwise();
 };
@@ -157,14 +157,14 @@ public:
     virtual ~Circle() { }
     Circle(FloatArray *center, double radius);
     /// Computes the normal distance to the surface not to the center.
-    double computeDistanceTo(FloatArray *point);
-    IRResultType initializeFrom(InputRecord *ir);
-    const char *giveClassName() const { return "Circle"; }
-    bool intersects(Element *element);
-    void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
-    void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
-    bool isOutside(BasicGeometry *bg);
-    void printYourself();
+    virtual double computeDistanceTo(FloatArray *point);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "Circle"; }
+    virtual bool intersects(Element *element);
+    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
+    virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+    virtual bool isOutside(BasicGeometry *bg);
+    virtual void printYourself();
 };
 } // end namespace oofem
 #endif  // geometry_h
