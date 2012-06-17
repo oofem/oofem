@@ -105,6 +105,10 @@ protected:
 
 protected:
     virtual Element *giveElement() = 0;
+
+    /**
+     * Computes the matrix for which the unknown field is obtained, typically [N1, 0, N2, 0, ...; 0, N1, 0, N2, ...].
+     */
     virtual void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);

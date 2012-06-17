@@ -330,7 +330,7 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = this->interp_lin.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    detJ = fabs( this->interp_lin.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
     return detJ * weight; ///@todo What about thickness?
 }
 

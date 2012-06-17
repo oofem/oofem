@@ -1779,11 +1779,7 @@ void TR1_2D_SUPG2_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG2_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    n.resize(3);
-
-    n.at(1) = gp->giveCoordinate(1);
-    n.at(2) = gp->giveCoordinate(2);
-    n.at(3) = 1. - n.at(1) - n.at(2);
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 void

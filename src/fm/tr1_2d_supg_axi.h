@@ -97,7 +97,7 @@ protected:
     virtual void initGeometry();
     virtual double computeRadiusAt(GaussPoint *gp);
     virtual void computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeNVector(FloatArray &answer, GaussPoint *gp);
+    void computeNVector(FloatArray &answer, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // tr1_2d_supg_axi_h

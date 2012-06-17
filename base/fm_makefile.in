@@ -31,7 +31,7 @@ VPATH=@OOFEM_DIR@/src/fm @OOFEM_DIR@/src/fm/pfem
 ## source files
 srcs0= cbselement.C cbs.C tr1_2d_cbs.C tractionpressurebc.C fmelement.C
 srcs1= fluiddynamicmaterial.C newtonianfluid.C binghamfluid2.C fe2fluidmaterial.C
-srcs2= stokesflow.C stokesflowstresshomogenization.C linesurfacetension.C line2surfacetension.C tr21stokes.C line2boundaryelement.C
+srcs2= stokesflow.C stokesflowstresshomogenization.C linesurfacetension.C line2surfacetension.C tr21stokes.C tet21stokes.C line2boundaryelement.C
 srcs3=
 srcs4=
 srcs5=

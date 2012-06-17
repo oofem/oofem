@@ -250,7 +250,7 @@ void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeS
             lcoords = gp->giveCoordinates();
 
             rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this));
+            detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             dA = detJ * gp->giveWeight();
 
             this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this));

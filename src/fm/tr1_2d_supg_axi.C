@@ -90,7 +90,7 @@ TR1_2D_SUPG_AXI :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atT
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         for ( i = 1; i <= 3; i++ ) {
             for ( j = 1; j <= 3; j++ ) {
@@ -133,7 +133,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
         _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
@@ -176,7 +176,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeSt
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
         _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
@@ -256,7 +256,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 #if 1
         // stabilization term k_delta
         _r = this->computeRadiusAt(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
         _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
 
@@ -303,7 +303,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
 
 #if 1
         _r = this->computeRadiusAt(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
         eps.beProductOf(_b, u);
         ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(stress, gp,
                                                                                            eps, atTime);
@@ -347,7 +347,7 @@ TR1_2D_SUPG_AXI :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
         _r = this->computeRadiusAt(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
         // G matrix
         for ( i = 1; i <= 3; i++ ) {
             for ( j = 1; j <= 3; j++ ) {
@@ -449,7 +449,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
         _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
@@ -485,7 +485,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeSt
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
         _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
@@ -593,12 +593,12 @@ TR1_2D_SUPG_AXI :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atT
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         for ( i = 1; i <= 3; i++ ) {
             for ( j = 1; j <= 3; j++ ) {
                 answer.at(i, 2 * j - 1) += t_pspg * dV * b [ i - 1 ] * n.at(j);
-                answer.at(i, 2 * j)   += t_pspg * dV * c [ i - 1 ] * n.at(j);
+                answer.at(i, 2 * j)     += t_pspg * dV * c [ i - 1 ] * n.at(j);
             }
         }
     }
@@ -684,7 +684,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
                     dV = this->computeVolumeAround(gp);
                     _r = this->computeRadiusAt(gp);
-                    computeNVector(n, gp);
+                    this->computeNVector(n, gp);
                     coeff = rho * dV;
                     u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
                     v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
@@ -863,7 +863,7 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         nt.at(1) = n.at(1) * t1;
         nt.at(2) = n.at(1) * t2;
@@ -965,7 +965,7 @@ TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeSt
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
-        computeNVector(n, gp);
+        this->computeNVector(n, gp);
 
         nt.at(1) = n.at(1) * n1;
         nt.at(2) = n.at(1) * n2;
@@ -1029,18 +1029,12 @@ TR1_2D_SUPG_AXI :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *at
 double
 TR1_2D_SUPG_AXI :: computeRadiusAt(GaussPoint *gp)
 {
-    double r1, r2, r3;
-    double n1, n2, n3;
+    FloatArray n;
+    this->computeNVector(n, gp);
 
-    r1 = this->giveNode(1)->giveCoordinate(1);
-    r2 = this->giveNode(2)->giveCoordinate(1);
-    r3 = this->giveNode(3)->giveCoordinate(1);
-
-    n1 = gp->giveCoordinate(1);
-    n2 = gp->giveCoordinate(2);
-    n3 = 1. - n1 - n2;
-
-    return n1 * r1 + n2 * r2 + n3 * r3;
+    return n.at(1) * this->giveNode(1)->giveCoordinate(1)
+         + n.at(2) * this->giveNode(2)->giveCoordinate(1)
+         + n.at(3) * this->giveNode(3)->giveCoordinate(1);
 }
 
 void TR1_2D_SUPG_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
@@ -1092,23 +1086,19 @@ void TR1_2D_SUPG_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    n.resize(3);
-
-    n.at(1) = gp->giveCoordinate(1);
-    n.at(2) = gp->giveCoordinate(2);
-    n.at(3) = 1. - n.at(1) - n.at(2);
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 double
-TR1_2D_SUPG_AXI :: computeVolumeAround(GaussPoint *aGaussPoint)
+TR1_2D_SUPG_AXI :: computeVolumeAround(GaussPoint *gp)
 {
-    double _r, weight;
+    double _r, weight, detJ;
 
-    weight  = aGaussPoint->giveWeight();
-    _r = computeRadiusAt(aGaussPoint);
-    //_r = 1.0;
+    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    weight = gp->giveWeight();
+    _r = computeRadiusAt(gp);
 
-    return 2.0 * area * weight * _r;
+    return detJ * weight * _r;
 }
 
 void
@@ -1268,7 +1258,7 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
             y3 = y1 + t * ( this->giveNode(prev_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );
 
 
-            // compute volume associated to traingle (x1,y1; x2,y2; x3,y3)
+            // compute volume associated to triangle (x1,y1; x2,y2; x3,y3)
             double __volume = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) * ((x1+x2+x3)/3.);
             double volume = this->area*((this->giveNode(1)->giveCoordinate(1)+this->giveNode(2)->giveCoordinate(1)+this->giveNode(3)->giveCoordinate(1))/3.);
             if ( fabs(__volume) / volume > 1.00001 ) {

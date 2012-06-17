@@ -725,7 +725,8 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 
 
 double
-LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     FloatArray lc(4);
     double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this));
     return pow(volume * 6.0, 1. / 3.);
@@ -889,7 +890,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-LTRSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+LTRSpace :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this));
@@ -898,7 +899,7 @@ LTRSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 
 
 void
-LTRSpace ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+LTRSpace :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }

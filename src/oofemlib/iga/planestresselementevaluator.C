@@ -64,7 +64,7 @@ void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answ
 
     for ( i = 1; i <= nDofMan; i++ ) {
         answer.at(1, i * 2 - 1) = N.at(i);
-        answer.at(2, i * 2 - 0)   = N.at(i);
+        answer.at(2, i * 2 - 0) = N.at(i);
     }
 }
 
@@ -88,7 +88,7 @@ void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answ
 
     for ( i = 1; i <= nDofMan; i++ ) {
         answer.at(1, i * 2 - 1) = d.at(i, 1);
-        answer.at(2, i * 2 - 0)   = d.at(i, 2);
+        answer.at(2, i * 2 - 0) = d.at(i, 2);
 
         answer.at(3, 2 * i - 1) = d.at(i, 2);
         answer.at(3, 2 * i - 0) = d.at(i, 1);

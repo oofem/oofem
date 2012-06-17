@@ -95,7 +95,7 @@ int Tet21Stokes :: computeNumberOfDofs(EquationID ut)
     } else if ( ut == EID_ConservationEquation ) {
         return 4;
     } else {
-        OOFEM_ERROR("computeNumberOfDofs: Unknown equation id encountered");
+        OOFEM_ERROR("Tet21Stokes :: computeNumberOfDofs: Unknown equation id encountered");
     }
 
     return 0;
@@ -113,9 +113,9 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
         } else if ( ut == EID_ConservationEquation ) {
             answer.setValues(1, P_f);
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.resize(4, V_u, V_v, V_w, P_f);
+            answer.setValues(4, V_u, V_v, V_w, P_f);
         } else {
-            _error("giveDofManDofIDMask: Unknown equation id encountered");
+            OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
     } else if ( inode <= 10 ) {
         if ( ut == EID_MomentumBalance || ut == EID_AuxMomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
@@ -123,7 +123,7 @@ void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
         } else if ( ut == EID_ConservationEquation ) {
             answer.resize(0);
         } else {
-            _error("giveDofManDofIDMask: Unknown equation id encountered");
+            OOFEM_ERROR("Tet21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
         }
     }
     answer.resize(0);
@@ -138,7 +138,7 @@ void Tet21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, 
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Tet21Stokes :: giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -149,7 +149,7 @@ void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Tet21Stokes :: giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -170,9 +170,9 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        double detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
+        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this));
         double dV = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < 10; j++, k+=3 ) {
@@ -248,10 +248,10 @@ void Tet21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, Time
             lcoords = gp->giveCoordinates();
 
             rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, tStep);
-            detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
+            detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
             dA = detJ * gp->giveWeight();
 
-            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dA;
                 temparray(3 * j + 1) += N(j) * rho * gVector(1) * dA;
@@ -286,14 +286,14 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interpolation_quad.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-            double dA = gp->giveWeight() * this->interpolation_quad.edgeGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+            this->interpolation_quad.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this));
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // load in xi-eta system
                 boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
             } else   { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.surfaceLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+                this->interpolation_quad.surfaceLocal2global(gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this));
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -307,7 +307,7 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
 
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
     } else   {
-        OOFEM_ERROR("Strange boundary condition type");
+        OOFEM_ERROR("Tet21Stokes :: Strange boundary condition type");
     }
 }
 
@@ -327,11 +327,11 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
-        double detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
+        double detJ = fabs( this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)) );
         double dV = detJ * gp->giveWeight();
 
-        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this), 0.0);
+        this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
+        this->interpolation_lin.evalN(Nlin, * lcoords, FEIElementGeometryWrapper(this));
 
         for ( int j = 0, k = 0; j < 10; j++, k+=3 ) {
             dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
@@ -397,8 +397,8 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
-    this->interpolation_quad.evalN(n, lcoords, FEIElementGeometryWrapper(this), 0.0);
-    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation_quad.evalN(n, lcoords, FEIElementGeometryWrapper(this));
+    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this));
     answer.resize(4);
     answer.zero();
     for (int i = 1; i <= n.giveSize(); i++) {
@@ -443,7 +443,8 @@ void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &a
 double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords(4, 0.3333333, 0.3333333, 0.3333333, 0.3333333);
+    FloatArray lcoords;
+    lcoords.setValues(4, 0.3333333, 0.3333333, 0.3333333, 0.3333333);
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
 }

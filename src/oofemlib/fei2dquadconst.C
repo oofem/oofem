@@ -68,7 +68,6 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
                     cellgeo.giveVertexCoordinates(4)->at(yind) );
 }
 
-#define POINT_TOL 1.e-3
 
 int
 FEI2dQuadConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)

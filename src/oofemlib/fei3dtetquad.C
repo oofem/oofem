@@ -129,7 +129,7 @@ void
 FEI3dTetQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray N;
-    this->evalN(N,lcoords, cellgeo, time);
+    this->evalN(N, lcoords, cellgeo);
     answer.resize(0);
     for ( int i = 1; i <= N.giveSize(); i++ ) {
         answer.add( N(i), *cellgeo.giveVertexCoordinates(i));
@@ -155,7 +155,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     // apply Newton-Raphson to solve the problem
     for (int nite = 0; nite < 10; nite++) {
         // compute the residual
-        this->local2global(guess, lcoords_guess, cellgeo, time);
+        this->local2global(guess, lcoords_guess, cellgeo);
         res.beDifferenceOf(gcoords, guess);
 
         // check for convergence
@@ -255,7 +255,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     IntArray edgeNodes;
     FloatArray N;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(N, lcoords, cellgeo, time);
+    this->edgeEvalN(N, lcoords, cellgeo);
 
     answer.resize(0);
     for (int i = 0; i < N.giveSize(); ++i) {
@@ -341,7 +341,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     IntArray nodes;
     FloatArray N;
     this->computeLocalSurfaceMapping(nodes, isurf);
-    this->surfaceEvalN(N, lcoords, cellgeo, 0.0);
+    this->surfaceEvalN(N, lcoords, cellgeo);
 
     answer.resize(0);
     for (int i = 0; i < N.giveSize(); ++i) {
@@ -376,7 +376,7 @@ FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray
         lcoords_tet.at(3) = b;
         lcoords_tet.at(1) = c;
     }
-    this->evaldNdx(answer, lcoords_tet, cellgeo, 0.0);
+    this->evaldNdx(answer, lcoords_tet, cellgeo);
 }
 
 double
