@@ -66,19 +66,16 @@ public:
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,

@@ -305,25 +305,6 @@ Quad1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return 0;
 }
 
-void
-Quad1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    int i;
-    FloatMatrix n;
-    this->computeNmatrixAt( n, aGaussPoint->giveCoordinates() );
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 4);
-    } else {
-        return;
-    }
-
-    for ( i = 1; i <= 4; i++ ) {
-        answer.at(1, i)  = n.at(1, i);
-    }
-}
-
-
 int
 Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
     FloatArray lcoords;

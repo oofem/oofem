@@ -67,6 +67,21 @@ Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
 Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
 { }
 
+FEInterpolation *
+Quad10_2D_SUPG :: giveInterpolation()
+{
+    return & this->velocityInterpolation;
+}
+
+FEInterpolation *
+Quad10_2D_SUPG :: giveInterpolation(DofIDItem id)
+{
+    if (id == P_f) {
+        return & this->pressureInterpolation;
+    } else {
+        return & this->velocityInterpolation;
+    }
+}
 
 DofManager *
 Quad10_2D_SUPG :: giveInternalDofManager(int i) const
@@ -634,31 +649,6 @@ Quad10_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-
-void
-Quad10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 3);
-    } else {
-        return;
-    }
-
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
 }
 
 

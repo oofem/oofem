@@ -55,6 +55,8 @@ public:
     QPlaneStrain(int N, Domain *d);
     virtual ~QPlaneStrain() { }
 
+    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // definition & identification
@@ -69,7 +71,6 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
@@ -77,8 +78,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

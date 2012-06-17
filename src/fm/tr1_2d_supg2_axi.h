@@ -96,7 +96,6 @@ public:
     virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
@@ -123,8 +122,6 @@ protected:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);

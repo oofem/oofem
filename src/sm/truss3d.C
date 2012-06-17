@@ -84,18 +84,12 @@ Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
+Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
 {
     if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
-    FloatArray n(2);
-    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 2);
-    for ( int i = 1; i <= 2; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
+    this->interp.evalN(answer, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 

@@ -49,6 +49,9 @@
 #endif
 
 namespace oofem {
+
+FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
+
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
@@ -99,22 +102,7 @@ TrPlaneStress2d :: giveArea()
         return area;         // check if previously computed
     }
 
-    Node *node1, *node2, *node3;
-    double x1, x2, x3, y1, y2, y3;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    return ( area = fabs( 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) ) );
+    return ( area = fabs( this->interp.giveArea(FEIElementGeometryWrapper(this)) ) );
 }
 
 
@@ -169,51 +157,35 @@ FloatArray *TrPlaneStress2d :: GivecCoeff()
 
 
 void
-TrPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
+TrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                     int li, int ui)
 // Returns the [3x6] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
-    Node *node1, *node2, *node3;
-    double x1, x2, x3, y1, y2, y3, area;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+    FloatMatrix dN;
+    this->interp.evaldNdx(dN, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 6);
 
-    answer.at(1, 1) = y2 - y3;
-    answer.at(1, 3) = y3 - y1;
-    answer.at(1, 5) = y1 - y2;
+    answer.at(1, 1) = dN.at(1,1);
+    answer.at(1, 3) = dN.at(2,1);
+    answer.at(1, 5) = dN.at(3,1);
 
-    answer.at(2, 2) = x3 - x2;
-    answer.at(2, 4) = x1 - x3;
-    answer.at(2, 6) = x2 - x1;
+    answer.at(2, 2) = dN.at(1,2);
+    answer.at(2, 4) = dN.at(2,2);
+    answer.at(2, 6) = dN.at(3,2);
 
-    answer.at(3, 1) = x3 - x2;
-    answer.at(3, 2) = y2 - y3;
-    answer.at(3, 3) = x1 - x3;
-    answer.at(3, 4) = y3 - y1;
-    answer.at(3, 5) = x2 - x1;
-    answer.at(3, 6) = y1 - y2;
-
-    answer.times( 1. / ( 2. * area ) );
+    answer.at(3, 1) = dN.at(1,2);
+    answer.at(3, 2) = dN.at(1,1);
+    answer.at(3, 3) = dN.at(2,2);
+    answer.at(3, 4) = dN.at(2,1);
+    answer.at(3, 5) = dN.at(3,2);
+    answer.at(3, 6) = dN.at(3,1);
 }
 
 
 void
-TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
 //
 // Returns nonlinear part of geometrical equations of the receiver at gp.
 //
@@ -316,59 +288,29 @@ void TrPlaneStress2d :: computeGaussPoints()
 
 
 void
-TrPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+TrPlaneStress2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+// luated at gp.
 {
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
+    FloatArray n;
+    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 6);
     answer.zero();
-
-    answer.at(1, 1) = l1;
-    answer.at(1, 3) = l2;
-    answer.at(1, 5) = l3;
-
-    answer.at(2, 2) = l1;
-    answer.at(2, 4) = l2;
-    answer.at(2, 6) = l3;
+    answer.at(1, 1) = answer.at(2, 2) = n.at(1);
+    answer.at(1, 3) = answer.at(2, 4) = n.at(2);
+    answer.at(1, 5) = answer.at(2, 6) = n.at(3);
 }
 
 
 void
-TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress triangle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    double ksi, n1, n2;
-
+    FloatArray n;
+    this->interp.edgeEvalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2, 4);
-    answer.zero();
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 3) = n2;
-    answer.at(2, 2) = n1;
-    answer.at(2, 4) = n2;
+    answer.at(1, 1) = answer.at(2, 2) = n.at(1);
+    answer.at(1, 3) = answer.at(2, 4) = n.at(2);
 }
 
 void
@@ -401,64 +343,17 @@ TrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 double
-TrPlaneStress2d :: computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
+TrPlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double dx, dy, length;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-    return 0.5 *length *aGaussPoint->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    return detJ * gp->giveWeight();
 }
 
 
 void
 TrPlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    double n1, n2, ksi = gp->giveCoordinate(1);
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
-
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    answer.resize(2);
-    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB->giveCoordinate(1);
-    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB->giveCoordinate(2);
+    this->interp.edgeLocal2global(answer, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -510,15 +405,15 @@ TrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
 
 
 
-double TrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+double TrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
-    double area, weight;
+    double detJ, weight;
 
-    weight  = aGaussPoint->giveWeight();
-    area    = this->giveArea();
+    weight = gp->giveWeight();
+    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
 
-    return 2.0 *area *weight *this->giveCrossSection()->give(CS_Thickness);
+    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
 }
 
 
@@ -647,25 +542,6 @@ TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 
 
 int
-TrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double l1, l2, l3;
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
-
-    answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
-                   l3 *this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
-                   l3 *this->giveNode(3)->giveCoordinate(2);
-
-    return 1;
-}
-
-
-int
 TrPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
@@ -676,30 +552,6 @@ TrPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type
     return this->giveIPValueSize(type, gp);
 }
 
-
-void
-TrPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 3);
-    } else {
-        return;
-    }
-
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
-}
 
 void
 TrPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -1264,48 +1116,6 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_2dxy;
 }
 
-
-#define POINT_TOL 1.e-3
-
-int
-TrPlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    Node *node1, *node2, *node3;
-    double area, x1, x2, x3, y1, y2, y3;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-
-    answer.resize(3);
-
-    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(1) + ( x3 - x2 ) * coords.at(2) ) / 2. / area;
-    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(1) + ( x1 - x3 ) * coords.at(2) ) / 2. / area;
-    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(1) + ( x2 - x1 ) * coords.at(2) ) / 2. / area;
-
-
-    for ( int i = 1; i <= 3; i++ ) {
-        if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
 
 int
 TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {

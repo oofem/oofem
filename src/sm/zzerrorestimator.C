@@ -245,8 +245,8 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     Element *elem = this->ZZErrorEstimatorI_giveElement();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
     const FloatArray *recoveredStress;
-    FloatArray sig, diff;
-    FloatMatrix nodalRecoveredStreses, n;
+    FloatArray sig, diff, n;
+    FloatMatrix nodalRecoveredStreses;
     GaussPoint *gp;
     double dV;
 
@@ -275,7 +275,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, IST_StressTensor);
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= nDofMans; k++ ) {
-                    diff.at(j) += n.at(1, k) * nodalRecoveredStreses.at(k, j);
+                    diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
 
@@ -305,7 +305,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                  gp, tStep);
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= nDofMans; k++ ) {
-                    diff.at(j) += n.at(1, k) * nodalRecoveredStreses.at(k, j);
+                    diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
 

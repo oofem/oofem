@@ -36,6 +36,7 @@
 #define q4axisymm_h
 
 #include "structuralelement.h"
+#include "fei2dquadquad.h"
 
 namespace oofem {
 
@@ -48,18 +49,19 @@ namespace oofem {
 class Q4Axisymm : public StructuralElement
 {
 protected:
+    static FEI2dQuadQuad interp;
     int numberOfGaussPoints, numberOfFiAndShGaussPoints;
 
 public:
     Q4Axisymm(int n, Domain *d);
     virtual ~Q4Axisymm();
 
+    virtual FEInterpolation *giveInterpolation() { return &interp; }
+
     virtual int computeNumberOfDofs(EquationID ut) { return 16; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // definition & identification
     virtual Interface *giveInterface(InterfaceType) { return NULL; }

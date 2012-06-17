@@ -152,17 +152,9 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-QPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(2, D_u, D_v);
-}
-
-
-int
-QPlaneStrain :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
 }
 
 
@@ -175,30 +167,6 @@ QPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-void
-QPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-
-    int i;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 8);
-    } else {
-        return;
-    }
-
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    for ( i = 1; i <= 8; i++ ) {
-        answer.at(1, i) = n.at(i);
-    }
 }
 
 

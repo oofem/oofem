@@ -39,7 +39,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
-
+#include "fei2dtrlin.h"
 #include "primaryfield.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -58,10 +58,14 @@ namespace oofem {
  * properties using VOF value, requiring the use of twofluidmaterial class
  * as material model for this situation.
  */
-class TR1_2D_SUPG : public SUPGElement, public SpatialLocalizerInterface, public EIPrimaryFieldInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
-    , public LEPlicElementInterface, public LevelSetPCSElementInterface
+class TR1_2D_SUPG : public SUPGElement,
+    public SpatialLocalizerInterface, public EIPrimaryFieldInterface,
+    public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+    public LEPlicElementInterface, public LevelSetPCSElementInterface
 {
 protected:
+    static FEI2dTrLin interp;
+
     //double a[3];
     double b [ 3 ];
     double c [ 3 ];
@@ -70,6 +74,8 @@ protected:
 public:
     TR1_2D_SUPG(int n, Domain *d);
     virtual ~TR1_2D_SUPG();
+
+    virtual FEInterpolation *giveInterpolation() { return &interp; }
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime);
     virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime);
@@ -100,9 +106,6 @@ public:
 
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG"; }
@@ -146,8 +149,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);

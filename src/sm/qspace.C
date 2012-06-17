@@ -94,13 +94,6 @@ QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 
-int
-QSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
 double
 QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
@@ -142,8 +135,9 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
 
 void
-QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) {
-    OOFEM_ERROR("NLBmatrix not implemented");
+QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+{
+    OOFEM_ERROR("QSpace :: NLBmatrix not implemented");
 }
 
 
@@ -179,8 +173,9 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 
 void
-QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) {
-    OOFEM_ERROR("BFmatrix not implemented");
+QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+{
+    OOFEM_ERROR("QSpace :: BFmatrix not implemented");
 }
 
 
@@ -349,24 +344,6 @@ QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-void
-QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    int i;
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 20);
-    } else {
-        return;
-    }
-
-    for ( i = 1; i <= 20; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
 }
 
 int

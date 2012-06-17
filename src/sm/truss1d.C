@@ -404,7 +404,7 @@ Truss1d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
+Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
@@ -413,8 +413,7 @@ Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answ
     if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
-    FloatArray n;
-    this->computeNmatrixAt(gp, answer);
+    this->interp.evalN(answer, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 

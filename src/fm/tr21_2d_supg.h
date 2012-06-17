@@ -65,7 +65,8 @@ public:
     TR21_2D_SUPG(int n, Domain *aDomain);
     virtual ~TR21_2D_SUPG();
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation(DofIDItem id);
 
     // definition
     virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
@@ -94,8 +95,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

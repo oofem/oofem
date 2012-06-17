@@ -65,6 +65,9 @@ public:
     Quad10_2D_SUPG(int n, Domain *d);
     virtual ~Quad10_2D_SUPG();
 
+    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation(DofIDItem id);
+
     // definition
     virtual const char *giveClassName() const { return "Quad1_2D_SUPG"; }
     virtual classType giveClassID() const { return Quad10_2D_SUPGClass; }
@@ -91,8 +94,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);

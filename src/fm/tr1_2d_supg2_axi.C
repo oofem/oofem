@@ -1153,24 +1153,6 @@ TR1_2D_SUPG2_AXI :: computeCriticalTimeStep(TimeStep *tStep)
 }
 
 
-int
-TR1_2D_SUPG2_AXI :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double l1, l2, l3;
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
-
-    answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
-                   l3 *this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
-                   l3 *this->giveNode(3)->giveCoordinate(2);
-
-    return 1;
-}
-
 void
 TR1_2D_SUPG2_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -1839,30 +1821,6 @@ TR1_2D_SUPG2_AXI :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType typ
     return this->giveIPValueSize(type, gp);
 }
 
-
-void
-TR1_2D_SUPG2_AXI :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 3);
-    } else {
-        return;
-    }
-
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
-}
 
 void
 TR1_2D_SUPG2_AXI :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

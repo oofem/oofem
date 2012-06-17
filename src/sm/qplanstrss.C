@@ -161,13 +161,6 @@ QPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) c
 }
 
 
-int
-QPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
 double
 QPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
@@ -511,30 +504,6 @@ QPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
-
-void
-QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    int i;
-    FloatArray n;
-
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 8);
-    } else {
-        return;
-    }
-
-    for ( i = 1; i <= 8; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
-}
-
 
 void
 QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

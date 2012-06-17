@@ -257,8 +257,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
    // Definition : sigmaVector = N * nodalSigmaVector
     int i, j, k, size;
     double dV;
-    FloatArray stressVector, help;
-    FloatMatrix n;
+    FloatArray stressVector, help, n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
     GaussPoint *gp;
@@ -276,7 +275,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         for ( j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {
             for ( k = 1; k <= size; k++ ) {
-                answer.at(j, k) += n.at(1, j) * stressVector.at(k) * dV;
+                answer.at(j, k) += n.at(j) * stressVector.at(k) * dV;
             }
         }
 
@@ -295,7 +294,8 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     //
     int i, size;
     double sum, dV, volume = 0.0;
-    FloatMatrix n, fullAnswer;
+    FloatMatrix fullAnswer;
+    FloatArray n;
     Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
     GaussPoint *gp;
@@ -309,8 +309,8 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
         gp  = iRule->getIntegrationPoint(i);
         dV  = elem->computeVolumeAround(gp);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
-        fullAnswer.plusProductSymmUpper(n, n, dV);
-        pok += ( n.at(1, 1) * dV );
+        fullAnswer.plusDyadSymmUpper(n, n, dV);
+        pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
     }
 
@@ -328,7 +328,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 }
 
 void
-ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
@@ -341,20 +341,17 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolation
 
     // test if underlying element provides interpolation
     if (interpol) {
-
-        FloatArray n;
-        interpol->evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(elem));
-
-        size = n.giveSize();
-        answer.resize (1,size);
-        for ( i = 1; i <= size; i++ ) {
-            answer.at(1, i) = n.at(i);
+        if ( !elem->giveIPValueSize(type, gp) ) {
+            OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", elem->giveNumber(), type);
+            return;
         }
+
+        interpol->evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
     } else {
         // ok default implementation can not work, as element is not providing valid interpolation
         // to resolve this, one can overload this method for element implementing ZZNodalRecoveryModelInterface
         // or element should provide interpolation.
-        OOFEM_ERROR2 ("ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", ZZNodalRecoveryMI_giveElement()->giveNumber());
+        OOFEM_ERROR2("ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", elem->giveNumber());
     }
 }
 

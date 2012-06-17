@@ -364,25 +364,6 @@ Tetrah1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     return 0;
 }
 
-void
-Tetrah1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    int i;
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 4);
-    } else {
-        return;
-    }
-
-    for ( i = 1; i <= 4; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
-}
-
-
 int
 Tetrah1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
     FloatArray lcoords;

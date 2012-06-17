@@ -363,14 +363,6 @@ Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) con
 
 
 int
-Axisymm3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-
-int
 Axisymm3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
@@ -379,30 +371,6 @@ Axisymm3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-
-void
-Axisymm3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 3);
-    } else {
-        return;
-    }
-
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
 }
 
 

@@ -39,7 +39,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
-
+#include "fei2dtrlin.h"
 #include "primaryfield.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -69,6 +69,7 @@ class TR1_2D_CBS : public CBSElement, public SpatialLocalizerInterface, public E
     //</RESTRICTED_SECTION>
 {
 protected:
+    static FEI2dTrLin interp;
     //double a[3];
     double b [ 3 ];
     double c [ 3 ];
@@ -77,6 +78,8 @@ protected:
 public:
     TR1_2D_CBS(int n, Domain *aDomain);
     virtual ~TR1_2D_CBS();
+
+    virtual FEInterpolation *giveInterpolation() { return &interp; }
 
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
@@ -89,9 +92,6 @@ public:
     virtual void computePressureLhs(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeCorrectionRhs(FloatArray &answer, TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_CBS"; }
@@ -136,8 +136,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);

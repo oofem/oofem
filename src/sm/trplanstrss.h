@@ -36,6 +36,7 @@
 #define trplanstrss_h
 
 #include "nlstructuralelement.h"
+#include "fei2dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -63,6 +64,7 @@ class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelI
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
+    static FEI2dTrLin interp;
     double area;
     int numberOfGaussPoints;
 
@@ -70,14 +72,12 @@ public:
     TrPlaneStress2d(int n, Domain *d);
     virtual ~TrPlaneStress2d() { }
 
+    virtual FEInterpolation *giveInterpolation() { return &interp; }
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -102,8 +102,6 @@ public:
     //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
@@ -133,7 +131,7 @@ public:
 
     // ZZErrorEstimatorInterface
     virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp,
+    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
                                                                            InternalStateType type)
     { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
 

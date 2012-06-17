@@ -181,6 +181,7 @@ public:
     virtual int checkConsistency() { return 1; }
     /**
      * Prints output of receiver to stream, for given time step.
+     * This is used for output into the standard output file.
      * @param file File pointer to print to.
      * @param tStep Time step to write for.
      */

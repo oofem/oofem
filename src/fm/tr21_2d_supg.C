@@ -66,6 +66,21 @@ TR21_2D_SUPG :: ~TR21_2D_SUPG()
 // Destructor
 { }
 
+FEInterpolation *
+TR21_2D_SUPG :: giveInterpolation()
+{
+    return & this->velocityInterpolation;
+}
+
+FEInterpolation *
+TR21_2D_SUPG :: giveInterpolation(DofIDItem id)
+{
+    if (id == P_f) {
+        return & this->pressureInterpolation;
+    } else {
+        return & this->velocityInterpolation;
+    }
+}
 
 int
 TR21_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
@@ -1451,7 +1466,6 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, FloatArray line)
 }
 
 
-
 int
 TR21_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
@@ -1461,36 +1475,6 @@ TR21_2D_SUPG :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-
-void
-TR21_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    double l1, l2, l3;
-
-    l1 = aGaussPoint->giveCoordinate(1);
-    l2 = aGaussPoint->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 6);
-    } else {
-        return;
-    }
-
-    //answer.resize(6);
-
-    answer.at(1, 1) = ( 2. * l1 - 1. ) * l1;
-    answer.at(1, 2) = ( 2. * l2 - 1. ) * l2;
-    answer.at(1, 3) = ( 2. * l3 - 1. ) * l3;
-    answer.at(1, 4) = 4. * l1 * l2;
-    answer.at(1, 5) = 4. * l2 * l3;
-    answer.at(1, 6) = 4. * l3 * l1;
 }
 
 
@@ -1508,37 +1492,6 @@ TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, in
                                                           InternalStateType type, TimeStep *tStep)
 {
     answer.resize(0);
-}
-
-
-
-
-int
-TR21_2D_SUPG :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double lc1, lc2, lc3, l1, l2, l3, l4, l5, l6;
-
-    lc1 = lcoords.at(1);
-    lc2 = lcoords.at(2);
-    lc3 = 1.0 - lc1 - lc2;
-
-    l1 = ( 2. * lc1 - 1. ) * lc1;
-    l2 = ( 2. * lc2 - 1. ) * lc2;
-    l3 = ( 2. * lc3 - 1. ) * lc3;
-    l4 = 4. * lc1 * lc2;
-    l5 = 4. * lc2 * lc3;
-    l6 = 4. * lc3 * lc1;
-
-    answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1) + l4 * this->giveNode(4)->giveCoordinate(1) + l5 * this->giveNode(5)->giveCoordinate(1) +
-    l6 * this->giveNode(6)->giveCoordinate(1);
-
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2) + l4 * this->giveNode(4)->giveCoordinate(2) + l5 * this->giveNode(5)->giveCoordinate(2) +
-    l6 * this->giveNode(6)->giveCoordinate(2);
-
-    return 1;
 }
 
 

@@ -155,19 +155,6 @@ TrPlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void
 TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
     FloatArray n;
     this->interp.edgeEvalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2, 4);
@@ -231,6 +218,8 @@ TrPlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, 
     //
     // i.e. f(element local) = T * f(edge local)
     //
+
+    ///@todo Move this to interpolation class (similar code is repeated in several elements)
     double dx, dy, length;
     Node *nodeA, *nodeB;
     int aNode = 0, bNode = 0;
@@ -273,7 +262,7 @@ double TrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
 
     return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
 }
@@ -325,28 +314,6 @@ TrPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
-}
-
-
-void
-TrPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-
-    if ( !this->giveIPValueSize(type, gp) ) {
-        return;
-    }
-
-    FloatArray n;
-    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 3);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
 }
 
 

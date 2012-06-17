@@ -51,6 +51,9 @@
 #endif
 
 namespace oofem {
+
+FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
+
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
@@ -109,6 +112,10 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 // Returns the [6x16] strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint.
 {
+    ///@todo Not sure how to deal with li and lu. This should be changed, in which case "GiveDerivatice***" and "computeJacobianMatrixAt" will be deprecated.
+    //FloatMatrix dN;
+    //this->interp.evaldNdx(dN, *aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+
     int i;
     FloatMatrix jacMtrx, inv;
     FloatArray *nx, *ny;
@@ -208,27 +215,12 @@ Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    int i;
-    double ksi, eta;
-
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
-
-    FloatArray n(8);
-
-    n.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
-    n.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
-    n.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. );
-    n.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. );
-    n.at(5) = 0.5 * ( 1. - ksi * ksi ) * ( 1. + eta );
-    n.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
-    n.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
-    n.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
+    FloatArray n;
+    this->interp.evalN(n, *aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 16);
     answer.zero();
-
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
@@ -321,38 +313,17 @@ double
 Q4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    FloatMatrix jacMtrx;
-    FloatArray *n;
-    int i;
-    double determinant, weight, volume, r, ksi, eta, x;
+    FloatArray n;
+    double determinant, r;
 
-    ksi = aGaussPoint->giveCoordinate(1);
-    eta = aGaussPoint->giveCoordinate(2);
+    this->interp.evalN(n, *aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
 
-    n = new FloatArray(8);
-
-    n->at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
-    n->at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
-    n->at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. );
-    n->at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. );
-    n->at(5) = 0.5 * ( 1. - ksi * ksi ) * ( 1. + eta );
-    n->at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
-    n->at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
-    n->at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
-
-    r = 0.0;
-    for ( i = 1; i <= 8; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n->at(i);
+    for ( int i = 1; i <= 8; i++ ) {
+        r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
     }
 
-    this->computeJacobianMatrixAt(jacMtrx, aGaussPoint);
-    determinant = fabs( jacMtrx.giveDeterminant() );
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight * r;
-
-    delete n;
-    return volume;
+    determinant = fabs( this->interp.giveTransformationJacobian(*aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    return determinant * aGaussPoint->giveWeight() * r;
 }
 
 
@@ -419,36 +390,6 @@ void
 Q4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(2, D_u, D_v);
-}
-
-
-int
-Q4Axisymm :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    int i;
-    double ksi, eta;
-    FloatArray n(8);
-
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
-
-    n.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
-    n.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
-    n.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. );
-    n.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. );
-    n.at(5) = 0.5 * ( 1. - ksi * ksi ) * ( 1. + eta );
-    n.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
-    n.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
-    n.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
-
-    answer.resize(2);
-    answer.zero();
-    for ( i = 1; i <= 8; i++ ) {
-        answer.at(1) += n.at(i) * this->giveNode(i)->giveCoordinate(1);
-        answer.at(2) += n.at(i) * this->giveNode(i)->giveCoordinate(2);
-    }
-
-    return 1;
 }
 
 

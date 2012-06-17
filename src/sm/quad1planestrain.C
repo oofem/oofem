@@ -354,30 +354,6 @@ Quad1PlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType typ
 
 
 void
-Quad1PlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *gp, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-
-    if ( !this->giveIPValueSize(type, gp) ) {
-        return;
-    }
-
-    FloatArray n;
-    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 4);
-    answer.zero();
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
-    answer.at(1, 4) = n.at(4);
-}
-
-
-void
 Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                      IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                      HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,

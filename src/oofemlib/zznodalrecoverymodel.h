@@ -133,7 +133,7 @@ public:
      * Evaluates N matrix (interpolation estimated value matrix).
      * Default implementation requires element to provide valid interpolation via giveInterpolation method.
      */
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint,
                                                                      InternalStateType type);
     //@}
 };

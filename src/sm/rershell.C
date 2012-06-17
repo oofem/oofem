@@ -713,7 +713,7 @@ RerShell :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-RerShell :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+RerShell :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
@@ -726,15 +726,15 @@ RerShell :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &ans
     l3 = 1.0 - l1 - l2;
 
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer.resize(1, 3);
+        answer.resize(3);
     } else {
         return;
     }
 
     answer.zero();
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
+    answer.at(1) = l1;
+    answer.at(2) = l2;
+    answer.at(3) = l3;
 }
 
 

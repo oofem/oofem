@@ -47,7 +47,7 @@
 
 namespace oofem {
 /**
- * Class representing 2d linear  triangular element
+ * Class representing 2d linear triangular element
  * for solving incompressible fluid with SUPG solver
  *
  * This class is similar to TR1_2D_SUPG, but the difference is in handling
@@ -111,9 +111,6 @@ public:
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { this->updateIntegrationRules(); }
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
     // definition
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2"; }
     virtual classType giveClassID() const { return TR1_2D_SUPG2Class; }
@@ -151,7 +148,7 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint,
                                                              InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

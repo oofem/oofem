@@ -1229,24 +1229,6 @@ TR1_2D_SUPG2 :: computeCriticalTimeStep(TimeStep *tStep)
 }
 
 
-int
-TR1_2D_SUPG2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    double l1, l2, l3;
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
-
-    answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
-
-    return 1;
-}
-
 Interface *
 TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 {
@@ -1298,48 +1280,6 @@ TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatAr
     }
 
     return dist;
-}
-
-
-
-int
-TR1_2D_SUPG2 :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
-{
-    Node *node1, *node2, *node3;
-    double area, x1, x2, x3, y1, y2, y3;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-
-    answer.resize(3);
-
-    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(1) + ( x3 - x2 ) * coords.at(2) ) / 2. / area;
-    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(1) + ( x1 - x3 ) * coords.at(2) ) / 2. / area;
-    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(1) + ( x2 - x1 ) * coords.at(2) ) / 2. / area;
-
-
-    for ( int i = 1; i <= 3; i++ ) {
-        if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 
@@ -2010,7 +1950,7 @@ TR1_2D_SUPG2 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-TR1_2D_SUPG2 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+TR1_2D_SUPG2 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
     // evaluates N matrix (interpolation estimated stress matrix)
     // according to Zienkiewicz & Zhu paper
@@ -2028,9 +1968,9 @@ TR1_2D_SUPG2 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix 
         return;
     }
 
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
+    answer.at(1) = l1;
+    answer.at(2) = l2;
+    answer.at(3) = l3;
 }
 
 void

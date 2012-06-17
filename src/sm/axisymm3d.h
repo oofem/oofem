@@ -73,7 +73,6 @@ public:
     virtual double giveArea();
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
@@ -88,8 +87,6 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep);
