@@ -893,7 +893,18 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
         }
     } // end loop over dofmans
 
-#ifndef __VTK_MODULE
+#ifdef __VTK_MODULE
+    if (type == ISVT_SCALAR) {
+        stream->GetPointData()->SetActiveScalars(__InternalStateTypeToString(valID));
+        stream->GetPointData()->SetScalars(intVarArray);
+    } else if (type == ISVT_VECTOR) {
+        stream->GetPointData()->SetActiveVectors(__InternalStateTypeToString(valID));
+        stream->GetPointData()->SetVectors(intVarArray);
+    } else {
+        stream->GetPointData()->SetActiveTensors(__InternalStateTypeToString(valID));
+        stream->GetPointData()->SetTensors(intVarArray);
+    }
+#else
     fprintf(stream, "</DataArray>\n");
 #endif
 }
@@ -1011,8 +1022,10 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     } // end loop over nodes
 #ifdef __VTK_MODULE
     if ( type == ISVT_SCALAR ) {
+        stream->GetPointData()->SetActiveScalars(__UnknownTypeToString(valID));
         stream->GetPointData()->SetScalars(primVarArray);
     } else if ( type == ISVT_VECTOR ) {
+        stream->GetPointData()->SetActiveVectors(__UnknownTypeToString(valID));
         stream->GetPointData()->SetVectors(primVarArray);
     }
 #else
@@ -1198,6 +1211,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             }
         }
 #ifdef __VTK_MODULE
+        stream->GetCellData()->SetActiveScalars(__InternalStateTypeToString(type));
         stream->GetCellData()->SetScalars(cellVarsArray);
 #endif
         break;
@@ -1238,78 +1252,113 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
         }
 
 #ifdef __VTK_MODULE
+        stream->GetCellData()->SetActiveVectors(__InternalStateTypeToString(type));
         stream->GetCellData()->SetVectors(cellVarsArray);
 #endif
         break;
 
     default:
+        bool reshape = false;
         InternalStateValueType vt = giveInternalStateValueType(type);
-        switch ( vt ) {
-        case ISVT_TENSOR_S3: // These could be written as tensors as well, if one wants to.
-        case ISVT_TENSOR_S3E:
-        case ISVT_VECTOR:
-        case ISVT_SCALAR:
-            if (vt == ISVT_SCALAR) {
-                ncomponents = 1;
-            } else if (vt == ISVT_TENSOR_G) {
-                ncomponents = 9;
-            } else {
-                ncomponents = 3;
-            }
+        if ( vt == ISVT_SCALAR ) {
+            ncomponents = 1;
+        } else if ( vt == ISVT_VECTOR ) {
+            ncomponents = 3;
+        } else {
+            ncomponents = 9;
+            reshape = true;
+        }
 #ifdef __VTK_MODULE
-            cellVarsArray->SetNumberOfComponents(ncomponents);
-            cellVarsArray->SetNumberOfTuples(nelem);
+        cellVarsArray->SetNumberOfComponents(ncomponents);
+        cellVarsArray->SetNumberOfTuples(nelem);
 #else
-            fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", __InternalStateTypeToString(type), ncomponents );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", __InternalStateTypeToString(type), ncomponents );
 #endif
 
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                elem = d->giveElement(ielem);
-                if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
-                        || this->isElementComposite(elem) ) { // composite cells exported individually
-                    continue;
-                }
+        for ( ielem = 1; ielem <= nelem; ielem++ ) {
+            elem = d->giveElement(ielem);
+            if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
+                    || this->isElementComposite(elem) ) { // composite cells exported individually
+                continue;
+            }
 #ifdef __PARALLEL_MODE
-                if ( elem->giveParallelMode() != Element_local ) {
-                    continue;
-                }
+            if ( elem->giveParallelMode() != Element_local ) {
+                continue;
+            }
 #endif
-                gptot = 0;
-                answer.resize(0);
-                iRule = elem->giveDefaultIntegrationRulePtr();
-                if (iRule) {
-                    for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
-                        gp = iRule->getIntegrationPoint(i);
-                        elem->giveIPValue(temp, gp, type, tStep);
-                        gptot += gp->giveWeight();
-                        answer.add(gp->giveWeight(), temp);
+            gptot = 0;
+            answer.resize(0);
+            iRule = elem->giveDefaultIntegrationRulePtr();
+            if (iRule) {
+                for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
+                    gp = iRule->getIntegrationPoint(i);
+                    elem->giveIPValue(temp, gp, type, tStep);
+                    gptot += gp->giveWeight();
+                    answer.add(gp->giveWeight(), temp);
+                }
+                answer.times(1/gptot);
+            }
+            // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
+            ///@todo Have this code elsewhere maybe? What about the order? The VTK documentation doesn't say much / Mikael
+            if ( reshape && answer.giveSize() != 9) { // If it has 9 components, then it is assumed to be proper already.
+                FloatArray tmp;
+                int size = answer.giveSize();
+                tmp = answer;
+                answer.resize(9);
+                answer.zero();
+                if (size == 6) {
+                    answer.at(1) = tmp.at(1);
+                    answer.at(5) = tmp.at(2);
+                    answer.at(9) = tmp.at(3);
+                    if ( vt == ISVT_TENSOR_S3E ) {
+                        answer.at(6) = answer.at(8) = tmp.at(4)*0.5;
+                        answer.at(3) = answer.at(7) = tmp.at(5)*0.5;
+                        answer.at(2) = answer.at(4) = tmp.at(6)*0.5;
+                    } else {
+                        answer.at(6) = answer.at(8) = tmp.at(4);
+                        answer.at(3) = answer.at(7) = tmp.at(5);
+                        answer.at(2) = answer.at(4) = tmp.at(6);
                     }
-                    answer.times(1/gptot);
+                } else if (size == 3) {
+                    answer.at(1) = tmp.at(1);
+                    answer.at(5) = tmp.at(2);
+                    if ( vt == ISVT_TENSOR_S3E ) {
+                        answer.at(2) = answer.at(4) = tmp.at(3)*0.5;
+                    } else {
+                        answer.at(2) = answer.at(4) = tmp.at(3);
+                    }
+                } else if (size == 1) {
+                    answer.at(1) = tmp.at(1);
                 }
-                for (int i = 1; i <= answer.giveSize(); ++i) {
+            } else if ( vt == ISVT_VECTOR && answer.giveSize() < 3) {
+                answer.setValues(3,
+                                 answer.giveSize() > 1 ? answer.at(1) : 0.0,
+                                 answer.giveSize() > 2 ? answer.at(2) : 0.0,
+                                 0.0);
+            }
+            for (int i = 1; i <= ncomponents; ++i) {
 #ifdef __VTK_MODULE
-                    cellVarsArray->SetComponent(ielem-1, i-1, answer.at(i));
+                cellVarsArray->SetComponent(ielem-1, i-1, answer.at(i));
 #else
-                    fprintf( stream, "%e ", answer.at(i) );
+                fprintf( stream, "%e ", answer.at(i) );
 #endif
-                }
+            }
 #ifndef __VTK_MODULE
-                fprintf( stream, "\n" );
+            fprintf( stream, "\n" );
 #endif
-            }
-#ifdef __VTK_MODULE
-            if (ncomponents == 1) {
-                stream->GetCellData()->SetScalars(cellVarsArray);
-            } else if (ncomponents == 3) {
-                stream->GetCellData()->SetVectors(cellVarsArray);
-            } else {
-                stream->GetCellData()->SetTensors(cellVarsArray);
-            }
-#endif
-            break;
-        default:
-            OOFEM_ERROR2("Quantity %s not handled yet.", __InternalStateTypeToString(type) );
         }
+#ifdef __VTK_MODULE
+        if (ncomponents == 1) {
+            stream->GetCellData()->SetActiveScalars(__InternalStateTypeToString(type));
+            stream->GetCellData()->SetScalars(cellVarsArray);
+        } else if (ncomponents == 3) {
+            stream->GetCellData()->SetActiveVectors(__InternalStateTypeToString(type));
+            stream->GetCellData()->SetVectors(cellVarsArray);
+        } else {
+            stream->GetCellData()->SetActiveTensors(__InternalStateTypeToString(type));
+            stream->GetCellData()->SetTensors(cellVarsArray);
+        }
+#endif
     }
 #ifndef __VTK_MODULE
     fprintf(stream, "</DataArray>\n");
