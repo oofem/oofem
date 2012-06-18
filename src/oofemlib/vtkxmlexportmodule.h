@@ -67,6 +67,9 @@ protected:
     /// List of cell data to export.
     IntArray cellVarsToExport;
 
+    /// Map from Voigt to full tensor.
+    IntArray redToFull;
+
     /// Smoother type.
     NodalRecoveryModel::NodalRecoveryModelType stype;
     /// Smoother.
@@ -96,6 +99,9 @@ public:
     virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
 
 protected:
+    /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
+    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
+
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
     /// Returns the smoother for primary variables (nodal averaging).

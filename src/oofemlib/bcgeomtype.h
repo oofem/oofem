@@ -43,7 +43,7 @@ enum bcGeomType {
     BodyLoadBGT,    ///< Distributed body load.
     EdgeLoadBGT,    ///< Distrubuted edge load.
     SurfaceLoadBGT, ///< Distrubuted surface load.
-    PointLoadBGT,   ///< Concentrated point load (placed anywhere). 
+    PointLoadBGT,   ///< Concentrated point load (placed anywhere).
 };
 } // end namespace oofem
 #endif // bcgeomtype_h

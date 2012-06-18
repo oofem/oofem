@@ -78,11 +78,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 {
     switch ( type ) {
     case IST_StressTensor:
-    case IST_PrincipalStressTensor:
-    case IST_PrincipalStressTempTensor:
     case IST_StrainTensor:
-    case IST_PrincipalStrainTensor:
-    case IST_PrincipalStrainTempTensor:
     case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
@@ -96,7 +92,6 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_DamageTensorTemp:
     case IST_DamageInvTensorTemp:
     case IST_PlasticStrainTensor:
-    case IST_PrincipalPlasticStrainTensor:
     case IST_CylindricalStressTensor:
     case IST_CylindricalStrainTensor:
     case IST_MaxEquivalentStrainLevel:
@@ -112,6 +107,11 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellStrainCurvatureTensor:
         return ISVT_TENSOR_G;
 
+    case IST_PrincipalStressTensor:
+    case IST_PrincipalStressTempTensor:
+    case IST_PrincipalStrainTensor:
+    case IST_PrincipalStrainTempTensor:
+    case IST_PrincipalPlasticStrainTensor:
     case IST_DisplacementVector:
     case IST_DisplacementVectorTemp:
     case IST_CrackState:

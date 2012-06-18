@@ -67,6 +67,7 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 {
     primVarSmoother = NULL;
     smoother = NULL;
+    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);
 }
 
 
@@ -120,6 +121,32 @@ void
 VTKXMLExportModule :: terminate()
 { }
 
+
+void
+VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx)
+{
+    answer.resize(9);
+    answer.zero();
+    if (type == ISVT_TENSOR_S3) {
+        for (int i = 1; i < redIndx.giveSize(); i++) {
+            if (redIndx.at(i) > 0) {
+                answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i);
+            }
+        }
+    } else if ( type == ISVT_TENSOR_S3E ) {
+        for (int i = 1; i < redIndx.giveSize(); i++) {
+            if (redIndx.at(i) > 3) {
+                answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i)*0.5;
+            } else if (redIndx.at(i) > 0) {
+                answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i);
+            }
+        }
+    }
+    // Symmetrize
+    answer.at(4) = answer.at(2);
+    answer.at(7) = answer.at(3);
+    answer.at(8) = answer.at(4);
+}
 
 std::string
 VTKXMLExportModule :: giveOutputFileName(TimeStep *tStep)
@@ -211,7 +238,7 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
             return 20;
 
         default:
-            OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
+            OOFEM_ERROR("VTKXMLExportModule: unsupported cell type ID");
     }
 
     return 0; // to make compiler happy
@@ -245,7 +272,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
             answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
         }
     } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
+        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
 }
 
@@ -271,7 +298,7 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
         return 1;
     } else {
-        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
+        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
 
     return 0;
@@ -727,8 +754,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
     Domain *d = emodel->giveDomain(1);
     int inode;
     int j, jsize, valSize;
-    FloatArray iVal(3);
-    FloatMatrix t(3, 3);
+    FloatArray iVal(3), t(9);
     const FloatArray *val;
     IntArray regionVarMap;
 
@@ -832,39 +858,15 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             fprintf(stream, " ");
 #endif
 
-        } else if ( type == ISVT_TENSOR_S3 ) {
-            int ii, jj, iii;
-            t.zero();
-            for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
-                iii = regionVarMap.at(ii);
-                iii *= (valSize >= iii); // set iii to zero if val array size mismatch
+        } else if ( type == ISVT_TENSOR_S3 || type == ISVT_TENSOR_S3E ) {
+            this->makeFullForm(t, *val, type, regionVarMap);
 
-                if ( ( ii == 1 ) && iii ) {
-                    t.at(1, 1) = val->at(iii);
-                } else if ( ( ii == 2 ) && iii ) {
-                    t.at(2, 2) = val->at( regionVarMap.at(2) );
-                } else if ( ( ii == 3 ) && iii ) {
-                    t.at(3, 3) = val->at( regionVarMap.at(3) );
-                } else if ( ( ii == 4 ) && iii ) {
-                    t.at(2, 3) = val->at( regionVarMap.at(4) );
-                    t.at(3, 2) = val->at( regionVarMap.at(4) );
-                } else if ( ( ii == 5 ) && iii ) {
-                    t.at(1, 3) = val->at( regionVarMap.at(5) );
-                    t.at(3, 1) = val->at( regionVarMap.at(5) );
-                } else if ( ( ii == 6 ) && iii ) {
-                    t.at(1, 2) = val->at( regionVarMap.at(6) );
-                    t.at(2, 1) = val->at( regionVarMap.at(6) );
-                }
-            }
-
-            for ( ii = 1; ii <= 3; ii++ ) {
-                for ( jj = 1; jj <= 3; jj++ ) {
+            for ( j = 1; j <= 9; j++ ) {
 #ifdef __VTK_MODULE
-                    intVarArray->SetComponent(inode-1, (ii-1)*3+jj-1, t.at(ii,jj));
+                intVarArray->SetComponent(inode-1, j-1, t.at(j));
 #else
-                    fprintf( stream, "%e ", t.at(ii, jj) );
+                fprintf( stream, "%e ", t.at(j) );
 #endif
-                }
             }
 #ifndef __VTK_MODULE
             fprintf(stream, " ");
@@ -1275,6 +1277,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
         fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">\n", __InternalStateTypeToString(type), ncomponents );
 #endif
 
+        IntArray redIndx;
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
@@ -1293,43 +1296,17 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
                 for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
                     elem->giveIPValue(temp, gp, type, tStep);
+                    MaterialMode mmode;
                     gptot += gp->giveWeight();
                     answer.add(gp->giveWeight(), temp);
                 }
                 answer.times(1/gptot);
+                elem->giveMaterial()->giveIntVarCompFullIndx(redIndx, type, gp->giveMaterialMode());
             }
             // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
-            ///@todo Have this code elsewhere maybe? What about the order? The VTK documentation doesn't say much / Mikael
             if ( reshape && answer.giveSize() != 9) { // If it has 9 components, then it is assumed to be proper already.
-                FloatArray tmp;
-                int size = answer.giveSize();
-                tmp = answer;
-                answer.resize(9);
-                answer.zero();
-                if (size == 6) {
-                    answer.at(1) = tmp.at(1);
-                    answer.at(5) = tmp.at(2);
-                    answer.at(9) = tmp.at(3);
-                    if ( vt == ISVT_TENSOR_S3E ) {
-                        answer.at(6) = answer.at(8) = tmp.at(4)*0.5;
-                        answer.at(3) = answer.at(7) = tmp.at(5)*0.5;
-                        answer.at(2) = answer.at(4) = tmp.at(6)*0.5;
-                    } else {
-                        answer.at(6) = answer.at(8) = tmp.at(4);
-                        answer.at(3) = answer.at(7) = tmp.at(5);
-                        answer.at(2) = answer.at(4) = tmp.at(6);
-                    }
-                } else if (size == 3) {
-                    answer.at(1) = tmp.at(1);
-                    answer.at(5) = tmp.at(2);
-                    if ( vt == ISVT_TENSOR_S3E ) {
-                        answer.at(2) = answer.at(4) = tmp.at(3)*0.5;
-                    } else {
-                        answer.at(2) = answer.at(4) = tmp.at(3);
-                    }
-                } else if (size == 1) {
-                    answer.at(1) = tmp.at(1);
-                }
+                FloatArray tmp = answer;
+                this->makeFullForm(answer, tmp, vt, redIndx);
             } else if ( vt == ISVT_VECTOR && answer.giveSize() < 3) {
                 answer.setValues(3,
                                  answer.giveSize() > 1 ? answer.at(1) : 0.0,
