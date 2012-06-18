@@ -992,7 +992,7 @@ public:
     int giveNumberOfProcesses() { return numProcs; }
     /// Request domain rank and problem size
     void initParallel();
-    /// Returns reference to itself -> required by comunicator.h
+    /// Returns reference to itself -> required by communicator.h
     EngngModel *giveEngngModel() { return this; }
     /// Returns Communicator mode. Determines current domain-decomposition strategy used.
     ProblemCommunicatorMode giveProblemCommMode() { return this->commMode; }

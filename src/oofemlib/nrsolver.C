@@ -463,11 +463,11 @@ NRSolver :: initPrescribedEqs()
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
 
     for ( j = 1; j <= ndofman; j++ ) {
-#ifdef __PARALLEL_MODE
+ #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
         if ( !parallel_context->isLocal(domain->giveNode(j)) ) {
             continue;
         }
-#endif
+ #endif
         jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
             inode = prescribedDofs.at(2 * i - 1);
@@ -745,7 +745,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         // loop over dof managers
         for ( _idofman = 1; _idofman <= ndofman; _idofman++ ) {
             _idofmanptr = domain->giveDofManager(_idofman);
- #ifdef __PARALLEL_MODE
+ #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
             if ( !parallel_context->isLocal(_idofmanptr) ) {
                 continue;
             }
@@ -827,11 +827,26 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 
  #ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
+#ifdef __PETSC_MODULE
         FloatArray collectiveErr(_ng);
         parallel_context->accumulate(dg_forceErr,       collectiveErr); dg_forceErr       = collectiveErr;
         parallel_context->accumulate(dg_dispErr,        collectiveErr); dg_dispErr        = collectiveErr;
         parallel_context->accumulate(dg_totalLoadLevel, collectiveErr); dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp,      collectiveErr); dg_totalDisp      = collectiveErr;
+#else
+        if (this->engngModel->isParallel()) {
+            FloatArray collectiveErr(_ng);
+            MPI_Allreduce(dg_forceErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, comm);
+            dg_forceErr = collectiveErr;
+            MPI_Allreduce(dg_dispErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, comm);
+            dg_dispErr = collectiveErr;
+            MPI_Allreduce(dg_totalLoadLevel.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, comm);
+            dg_totalLoadLevel = collectiveErr;
+            MPI_Allreduce(dg_totalDisp.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, comm);
+            dg_totalDisp = collectiveErr;
+            return globalNorm;
+        }
+#endif
  #endif
         OOFEM_LOG_INFO("NRSolver:     %-10d ", nite);
         // loop over dof groups

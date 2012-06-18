@@ -1061,7 +1061,15 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
     localNorm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain);
     localNorm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain);
 #ifdef __PARALLEL_MODE
+ #ifdef __PETSC_MODULE
     return this->givePetscContext(domain->giveNumber(), eid)->accumulate(localNorm);
+ #else
+    if (this->isParallel()) {
+        double globalNorm;
+        MPI_Allreduce(&localNorm, &globalNorm, 1, MPI_DOUBLE, MPI_SUM, comm);
+        return globalNorm;
+    }
+ #endif
 #else
     return localNorm;
 #endif
