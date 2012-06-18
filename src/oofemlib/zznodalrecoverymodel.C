@@ -335,7 +335,6 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolation
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
 
-    int i, size;
     Element* elem = ZZNodalRecoveryMI_giveElement();
     FEInterpolation* interpol = elem->giveInterpolation();
 

@@ -523,7 +523,6 @@ ConnectivityTable :: instanciateConnectivityTable()
 
     for ( i = 1; i <= nelems; i++ ) {
         ielem = domain->giveElement(i);
-        ielem = domain->giveElement(i);
         nnodes = ielem->giveNumberOfDofManagers();
         for ( j = 1; j <= nnodes; j++ ) {
             jnode = ielem->giveDofManager(j)->giveNumber();

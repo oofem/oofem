@@ -415,7 +415,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
         }
     }
 
-    return 1;
+    return ok;
 }
 
 

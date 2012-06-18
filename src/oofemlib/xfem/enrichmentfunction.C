@@ -94,7 +94,6 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
     Element *el = gp->giveElement();
     el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el));
     double dist = 0;
-    double absMember = 0;
     double member = 0;
     for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
         dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
