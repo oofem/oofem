@@ -382,11 +382,12 @@ Element :: invalidateLocationArray()
 Material *Element :: giveMaterial()
 // Returns the material of the receiver.
 {
+#ifdef DEBUG
     if ( !material ) {
         // material = this -> readInteger("mat") ;
         _error("giveMaterial: material not defined");
     }
-
+#endif
     return domain->giveMaterial(material);
 }
 
@@ -394,10 +395,11 @@ Material *Element :: giveMaterial()
 CrossSection *Element :: giveCrossSection()
 // Returns the crossSection of the receiver.
 {
+#ifdef DEBUG
     if ( !crossSection ) {
         _error("giveCrossSection: crossSection not defined");
     }
-
+#endif
     return domain->giveCrossSection(crossSection);
 }
 
@@ -414,10 +416,11 @@ Element :: giveDofManager(int i) const
 // Returns the i-th node of the receiver.
 {
     int n;
+#ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         OOFEM_ERROR2("giveNode: Node %i is not defined", i);
     }
-
+#endif
     n = dofManArray.at(i);
     return domain->giveDofManager(n);
 }
@@ -428,10 +431,11 @@ Element :: giveNode(int i) const
 // Returns the i-th node of the receiver.
 {
     int n;
+#ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         _error("giveNode: Node is not defined");
     }
-
+#endif
     n = dofManArray.at(i);
     return domain->giveNode(n);
 }
@@ -442,11 +446,11 @@ Element :: giveSide(int i) const
 // Returns the i-th side of the receiver.
 {
     int n;
-
+#ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
         _error("giveNode: Side is not defined");
     }
-
+#endif
     n = dofManArray.at(i);
     return domain->giveSide(n);
 }

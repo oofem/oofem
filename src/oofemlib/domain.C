@@ -290,20 +290,21 @@ Node *
 Domain :: giveNode(int n)
 // Returns the n-th node if it exists.
 {
+#ifdef DEBUG
     Node *node = NULL;
 
-#ifdef DEBUG
     if ( !dofManagerList->includes(n) ) {
         _error2("giveNode: undefined dofManager (%d)", n);
     }
 
-#endif
     node = dynamic_cast< Node * >( dofManagerList->at(n) );
     if ( node == NULL ) {
         _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
     }
+#else
+    return static_cast< Node * >( dofManagerList->at(n) );
+#endif
 
-    return node;
 }
 
 

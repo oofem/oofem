@@ -90,12 +90,12 @@ public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     VTKXMLExportModule(int n, EngngModel *e);
     /// Destructor
-    ~VTKXMLExportModule();
+    virtual ~VTKXMLExportModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    void doOutput(TimeStep *tStep);
-    void initialize();
-    void terminate();
+    virtual void doOutput(TimeStep *tStep);
+    virtual void initialize();
+    virtual void terminate();
     virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
 
 protected:
