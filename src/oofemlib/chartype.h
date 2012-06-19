@@ -57,7 +57,7 @@ namespace oofem {
     ENUM_ITEM(ElasticStiffnessMatrix)             \
     ENUM_ITEM(MassMatrix)                         \
     ENUM_ITEM(LumpedMassMatrix)                   \
-    ENUM_ITEM(ModifiedStiffnessMatrix)            \
+    ENUM_ITEM(EffectiveStiffnessMatrix)           \
     ENUM_ITEM(ConductivityMatrix)                 \
     ENUM_ITEM(CapacityMatrix)                     \
     ENUM_ITEM(InitialStressMatrix)                \
@@ -99,7 +99,7 @@ namespace oofem {
     ENUM_ITEM(AdvectionTerm_MB)                                           \
     ENUM_ITEM(DiffusionTerm_MB)                                           \
     /* characteristic vectors */ \
-    ENUM_ITEM(ExternalForcesVector)                                         \
+    ENUM_ITEM(ExternalForcesVector)                                       \
     ENUM_ITEM(InternalForcesVector)                                       \
     ENUM_ITEM(LastEquilibratedInternalForcesVector)                       \
     ENUM_ITEM(ElementBCTransportVector)                                   \

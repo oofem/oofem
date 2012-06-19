@@ -47,14 +47,14 @@
 namespace oofem {
 DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     loadVector(), previousLoadVector(), rhs(), displacementVector(), velocityVector(), accelerationVector(),
-    previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), help()
+                                                       previousDisplacementVector(), previousVelocityVector(), previousAccelerationVector(), previousIncrementOfDisplacement(), help()
 {
     initFlag = true;
     stiffnessMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
 
-    initialTimeDiscretization = TD_Unspecified;
+    initialTimeDiscretization = TD_ThreePointBackward;
 
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
@@ -129,17 +129,39 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_smtype, "smtype"); // Macro
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat"); // Macro
-    IR_GIVE_FIELD(ir, alpha, IFT_DIIDynamic_alpha, "alpha"); // Macro
-    IR_GIVE_FIELD(ir, beta, IFT_DIIDynamic_beta, "beta"); // Macro
-    IR_GIVE_FIELD(ir, Psi, IFT_DIIDynamic_psi, "psi"); // Macro
-    if ( Psi < 1.1 ) {
-        Psi = 1.0;
+    val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DIIDynamic_ddtScheme, "ddtscheme");
+
+    eta = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, eta, IFT_DIIDynamic_eta, "eta");
+
+    delta = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, delta, IFT_DIIDynamic_delta, "delta");
+
+    initialTimeDiscretization = ( TimeDiscretizationType ) val;
+
+    gamma = 0.5; beta = 0.25; // Default Newmark parameters.
+    theta = 1.37; // Default Wilson parameter.
+    if ( initialTimeDiscretization == TD_Newmark ) {
+        OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
+        IR_GIVE_OPTIONAL_FIELD(ir, gamma, IFT_DIIDynamic_gamma, "gamma");
+        IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_DIIDynamic_beta, "beta");
+    } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
+        OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
+    } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
+        OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
+    } else if ( initialTimeDiscretization == TD_Wilson ) {
+        OOFEM_LOG_INFO( "Selecting Wilson-theta metod\n" );
+        IR_GIVE_OPTIONAL_FIELD(ir, theta, IFT_DIIDynamic_psi, "theta"); // Macro
+        if ( theta < 1.37 ) {
+            OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
+            theta = 1.37;
+        }
+    } else {
+        _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
-    if ( ( Psi > 1.1 ) && ( Psi < 1.37 ) ) {
-        Psi = 1.37;
-    }
+    IR_GIVE_FIELD(ir, deltaT, IFT_DIIDynamic_deltat, "deltat"); // Macro
 
     return IRRT_OK;
 }
@@ -188,16 +210,23 @@ TimeStep *DIIDynamic :: giveNextStep()
     int istep = giveNumberOfFirstStep();
     double totalTime = deltaT;
     StateCounterType counter = 1;
+    TimeDiscretizationType td = initialTimeDiscretization;
 
     delete previousStep;
     if ( currentStep != NULL ) {
         totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter   = currentStep->giveSolutionStateCounter() + 1;
+        td        = currentStep->giveTimeDiscretization();
+        if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() )
+            && ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
+            td = TD_ThreePointBackward;
+        }
     }
 
     previousStep = currentStep;
-    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter);
+
+    currentStep  = new TimeStep(istep, this, 1, totalTime, deltaT, counter, td);
 
     return currentStep;
 }
@@ -228,6 +257,8 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         velocityVector.zero();
         accelerationVector.resize(neq);
         accelerationVector.zero();
+        previousIncrementOfDisplacement.resize(neq);
+        previousIncrementOfDisplacement.zero();
 
         int nDofs, j, k, jj;
         int nman  = domain->giveNumberOfDofManagers();
@@ -270,7 +301,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, ModifiedStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -288,7 +319,16 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
             previousLoadVector.at(i)         = loadVector.at(i);
         }
 
-        initFlag = false;
+        initFlag = 0;
+    }
+
+    if ( ( previousStep != NULL ) && ( tStep->giveTimeDiscretization() != previousStep->giveTimeDiscretization() ) ) {
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
+#endif
+        stiffnessMatrix->zero();
+        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+                       EModelDefaultEquationNumbering(), domain);
     }
 
 #ifdef VERBOSE
@@ -302,17 +342,41 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     //
 
     for ( int i = 1; i <= neq; i++ ) {
-        help.at(i) = a1 * previousDisplacementVector.at(i) +
-                     a2 * previousVelocityVector.at(i)     +
-                     a3 * previousAccelerationVector.at(i);
+        help.at(i) = a0 * previousDisplacementVector.at(i)
+            + a2 * previousVelocityVector.at(i)
+            + a3 * previousAccelerationVector.at(i)
+            + eta * ( a1 * previousDisplacementVector.at(i)
+                      + a4 * previousVelocityVector.at(i)
+                      + a5 * previousAccelerationVector.at(i)
+                      + a11 * previousIncrementOfDisplacement.at(i) );
     }
 
-    this->timesMassMtrx(help, rhs, domain, tStep);
+    this->timesMtrx(help, rhs, MassMatrix, domain, tStep);
     help.zero();
 
-    for ( int i = 1; i <= neq; i++ ) {
-        rhs.at(i) += previousLoadVector.at(i) +
-                     Psi * ( loadVector.at(i) - previousLoadVector.at(i) );
+    if ( delta != 0 ) {
+        for ( int i = 1; i <= neq; i++ ) {
+            help.at(i) = delta * ( a1 * previousDisplacementVector.at(i)
+                                   + a4 * velocityVector.at(i)
+                                   + a5 * accelerationVector.at(i)
+                                   + a6 * previousIncrementOfDisplacement.at(i) );
+        }
+        this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
+        help.zero();
+        for ( int i = 1; i <= neq; i++ ) {
+            rhs.at(i) += rhs2.at(i);
+        }
+    }
+
+    if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
+        for ( int i = 1; i <= neq; i++ ) {
+            rhs.at(i) += previousLoadVector.at(i)
+                + theta * ( loadVector.at(i) - previousLoadVector.at(i) );
+        }
+    } else {
+        for ( int i = 1; i <= neq; i++ ) {
+            rhs.at(i) += loadVector.at(i);
+        }
     }
 
     //
@@ -322,41 +386,65 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    nMethod->solve(stiffnessMatrix, & rhs, & help);
+    nMethod->solve(stiffnessMatrix, & rhs, & displacementVector);
 
-    for ( int i = 1; i <= neq; i++ ) {
-        accelerationVector.at(i) = a4 * help.at(i) + 
-                                   a5 * previousDisplacementVector.at(i) +
-                                   a6 * previousVelocityVector.at(i) +
-                                   a7 * previousAccelerationVector.at(i);
+    if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
+        OOFEM_LOG_INFO("TD_Wilson: Updating acceleration, velocity and displacement.\n");
+        for ( int i = 1; i <= neq; i++ ) {
+            accelerationVector.at(i) = a6 * ( displacementVector.at(i)- previousDisplacementVector.at(i) )
+                - a7 * previousVelocityVector.at(i)
+                + a8 * previousAccelerationVector.at(i);
 
-        displacementVector.at(i) = previousDisplacementVector.at(i) +
-                                   deltaT * previousVelocityVector.at(i) +
-                                   a9 * previousAccelerationVector.at(i) +
-                                   a10 * accelerationVector.at(i);
+            velocityVector.at(i) = previousVelocityVector.at(i)
+                + a9 * ( previousAccelerationVector.at(i) + accelerationVector.at(i) );
 
-        velocityVector.at(i) = previousVelocityVector.at(i) +
-                               a8 * ( previousAccelerationVector.at(i) + accelerationVector.at(i) );
+            displacementVector.at(i) = previousDisplacementVector.at(i)
+                + deltaT * previousVelocityVector.at(i)
+                + a10 * ( accelerationVector.at(i) + 2 * previousAccelerationVector.at(i) );
+        }
+    } else if ( ( tStep->giveTimeDiscretization() == TD_ThreePointBackward ) 
+                || ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) ) {
+        for ( int i = 1; i <= neq; i++ ) {
+            accelerationVector.at(i) = a0 * ( displacementVector.at(i) - previousDisplacementVector.at(i) )
+                - a2 * previousVelocityVector.at(i);
+
+            velocityVector.at(i) = a1  * ( displacementVector.at(i) - previousDisplacementVector.at(i) )
+                - a11 * previousIncrementOfDisplacement.at(i);
+        }        
+    } else {
+        for ( int i = 1; i <= neq; i++ ) {
+            accelerationVector.at(i) = a0 * ( displacementVector.at(i) - previousDisplacementVector.at(i) )
+                - a2 * previousVelocityVector.at(i)
+                - a3 * previousAccelerationVector.at(i);
+            
+            velocityVector.at(i) = previousVelocityVector.at(i)
+                + a6 * previousAccelerationVector.at(i)
+                + a7 * accelerationVector.at(i);
+        }
     }
 }
 
+
 void
 DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                              CharType type, TimeStep *tStep, Domain *domain)
+                                                    CharType type, TimeStep *tStep, Domain *domain)
 {
     // We don't directly call element ->GiveCharacteristicMatrix() function, because some
     // engngm classes may require special modification of base types supported on
     // element class level.
 
-    if ( type == ModifiedStiffnessMatrix ) {
+    if ( type == EffectiveStiffnessMatrix ) {
         Element *element;
-        FloatMatrix charMtrx1, charMtrx2;
+        FloatMatrix charMtrx;
 
         element = domain->giveElement(num);
         element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrx2, MassMatrix, tStep);
-        charMtrx2.times(this->a0);
-        answer.add(charMtrx2);
+        answer.times(1 + this->delta * a1);
+
+        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
+        charMtrx.times(this->a0 + this->eta * this->a1);
+
+        answer.add(charMtrx);
 
         return;
     } else {
@@ -365,19 +453,21 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
 }
 
 
-void DIIDynamic :: updateYourself(TimeStep *stepN)
+void DIIDynamic :: updateYourself(TimeStep *tStep)
 {
+    OOFEM_LOG_INFO("updateYourself\n");
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
 
     for ( int i = 1; i <= neq; i++ ) {
-        previousDisplacementVector.at(i) = displacementVector.at(i);
-        previousVelocityVector.at(i)     = velocityVector.at(i);
-        previousAccelerationVector.at(i) = accelerationVector.at(i);
-        previousLoadVector.at(i)         = loadVector.at(i);
+        previousIncrementOfDisplacement.at(i) = displacementVector.at(i) - previousDisplacementVector.at(i);
+        previousDisplacementVector.at(i)      = displacementVector.at(i);
+        previousVelocityVector.at(i)          = velocityVector.at(i);
+        previousAccelerationVector.at(i)      = accelerationVector.at(i);
+        previousLoadVector.at(i)              = loadVector.at(i);
     }
 
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
+    this->updateInternalState(tStep);
+    StructuralEngngModel :: updateYourself(tStep);
 }
 
 
@@ -392,8 +482,9 @@ DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
     iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
 }
 
+
 void
-DIIDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *domain, TimeStep *tStep)
+DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
     int neq   = this->giveNumberOfEquations(EID_MomentumBalance);
@@ -417,7 +508,7 @@ DIIDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *domain,
 #endif
 
         element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
 #ifdef DEBUG
         if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
@@ -441,6 +532,7 @@ DIIDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *domain,
     }
 }
 
+
 void
 DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep)
 {
@@ -454,38 +546,70 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
-    deltaT = tStep->giveTimeIncrement();
-    if ( Psi < 1.1 ) { // Newmark Method
-        Psi = 1.;
-        double dt2 = deltaT * deltaT;
-        a0  = ( 4. + 2. * alpha * deltaT ) / ( dt2 + 2. * beta * deltaT );
-        a1  = 4. / dt2 + 2 * ( alpha - a0 * beta ) / deltaT;
-        a2  = 4. / deltaT + alpha - a0 * beta;
-        a3  = 1.;
-        a4  = 4. / ( dt2 + 2. * beta * deltaT );
-        a5  = -a4;
-        a6  = a5 * ( deltaT + beta );
-        a7  = -1.;
-        a8  = deltaT / 2.;
-        a9  = dt2 / 4.;
-        a10 = a9;
-    } else { // Wilson Method
-        if ( Psi < 1.37 ) {
-            Psi = 1.37;
-        }
+    if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() )
+         && ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
+        currentStep->setTimeDiscretization( TD_TwoPointBackward );
+    }
 
-        double tau = Psi * deltaT;
-        a0  = ( 6. + 3. * alpha * tau ) / ( tau * tau + 3. * beta * tau );
-        a1  = 6. / ( tau * tau ) + 3. * ( alpha - beta * a0 ) / tau;
-        a2  = 6. / tau + 2. * ( alpha - beta * a0 );
-        a3  = 2. + tau * ( alpha - beta * a0 ) / 2.;
-        a4  = 3. / ( ( 3. * beta + tau ) * tau );
-        a5  = 3. * beta * a4 / tau - 6. / ( Psi * tau * tau );
-        a6  = 2. * beta * a4 - 6. / ( Psi * tau );
-        a7  = 1. - 3. / Psi + beta * tau * a4 / 2.;
-        a8  = deltaT / 2.;
-        a9  = deltaT * deltaT / 3.;
-        a10 = deltaT * deltaT / 6.;
+    deltaT = tStep->giveTimeIncrement();
+
+    if ( tStep->giveTimeDiscretization() == TD_Newmark ) {
+        double dt2 = deltaT * deltaT;
+        a0  = 1 / ( beta * dt2 );
+        a1  = gamma / ( beta * deltaT );
+        a2  = 1 / ( beta * deltaT );
+        a3  = 1 / ( 2 *  beta ) - 1;
+        a4  = ( gamma / beta ) - 1;
+        a5  = deltaT / 2 * ( gamma / beta - 2 );
+        a6  = deltaT * ( 1 - gamma );
+        a7  = deltaT * gamma;
+        a8  = dt2 * ( ( 1 / 2 ) - beta );
+        a9  = dt2 * beta;
+        a10 = 0;
+        a11 = 0;
+    } else if ( tStep->giveTimeDiscretization() == TD_TwoPointBackward  ) {
+        double dt2 = deltaT * deltaT;
+        a0  = 1 / dt2;
+        a1  = 1 / deltaT;
+        a2  = 1 / deltaT;
+        a3  = 0;
+        a4  = 0;
+        a5  = 0;
+        a6  = 0;
+        a7  = 0;
+        a8  = 0;
+        a9  = 0;
+        a10 = 0;
+        a11 = 0;
+    } else if ( tStep->giveTimeDiscretization() == TD_ThreePointBackward ) {
+        double dt2 = deltaT * deltaT;
+        a0  = 2 / dt2;
+        a1  = 3 / ( 2 * deltaT );
+        a2  = 2 / deltaT;
+        a3  = 0;
+        a4  = 0;
+        a5  = 0;
+        a6  = 0;
+        a7  = 0;
+        a8  = 0;
+        a9  = 0;
+        a10 = 0;
+        a11 = 1 / ( 2 * deltaT );
+    } else if ( tStep->giveTimeDiscretization() ==  TD_Wilson ){
+        a0  = 6 / ( ( theta * deltaT ) * ( theta * deltaT ) );
+        a1  = 3 / ( theta * deltaT );
+        a2  = 2 * a1;
+        a3  = 2;
+        a4  = 2;
+        a5  = theta * deltaT / 2;
+        a6  = a0 / theta;
+        a7  = a2 / theta;
+        a8  = 1 - 3 / theta;
+        a9  = deltaT / 2;
+        a10 = deltaT * deltaT / 6;
+        a11 = 0;
+    } else {
+        _error("DIIDynamic: Time-stepping scheme not found!\n");
     }
 }
 
@@ -554,6 +678,10 @@ contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
+    if ( ( iores = previousIncrementOfDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
     if ( closeFlag ) {
         fclose(file);
         delete stream;
@@ -597,6 +725,10 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
     }
 
     if ( ( iores = loadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = previousIncrementOfDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

@@ -44,37 +44,39 @@ namespace oofem {
  * This class implements Direct Implicit Integration of Dynamic problem
  *
  * Solution of this problem is series of loading cases, maintained as sequence of
- * time-steps. This solution is in form of linear equation system Ax=b
- * for Psi = 1 .... Newmark Method
- *     Psi >=1.37   Wilson  Method
- * dumping Matrix is assumed to be modeled as Rayleigh damping ( C = alpha*M + beta*K)
+ * time-steps. This solution is in form of linear equation system Ax=b.
+ * The damping Matrix is assumed to be modeled as Rayleigh damping ( C = eta*M + delta*K)
  *
- * We start to assemble governing equations at time step 0 (by boundary and initial conditions
- * we prescribe step -1 ) so solution is obtained first for step 0.
- * see deidynamic.h for difference.
- * When You specify initial conditions, you specify them in time step -1
+ * Initial conditions is specified at time 0.
  *
- * Tasks:
- * - Creating Numerical method for solving Ax=b.
- * - Interfacing Numerical method to Elements.
- * - Managing time steps.
+ * Solution proceedure described in:
+ * A SURVEY OF DIRECT TIME-INTEGRATION METHODS IN COMPUTATIONAL STRUCTURAL DYNAMICS - II. IMPLICIT METHODS
+ * K. Subbaraj and M. A. Dokainish
+ * Computers & Structures Vol. 32. No. 6. pp. 1387-1401, 1989
+ *
+ * @author Andreas Feymark
+ *
  */
+
 class DIIDynamic : public StructuralEngngModel
 {
 protected:
     bool initFlag;
     SparseMtrx *stiffnessMatrix;
-    FloatArray loadVector, previousLoadVector, rhs;
+    FloatArray loadVector, previousLoadVector, rhs, rhs2;
     FloatArray displacementVector, velocityVector, accelerationVector;
     FloatArray previousDisplacementVector, previousVelocityVector, previousAccelerationVector;
+    FloatArray previousIncrementOfDisplacement;
     FloatArray help;
-    double a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
-    double alpha, beta, deltaT;
-    double Psi;
+    double a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11;
+    double gamma, beta, deltaT;
+    double eta, delta;
+    double theta;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
 
+    TimeDiscretizationType previousTimeDiscretization;
     TimeDiscretizationType initialTimeDiscretization;
 
     /// Numerical method used to solve the problem
@@ -96,14 +98,14 @@ public:
     virtual const char *giveClassName() const { return "DIIDynamic"; }
     virtual classType giveClassID() const { return DIIDynamicClass; }
     virtual fMode giveFormulation() { return TL; }
-    virtual int giveNumberOfTimeStepWhenIcApply() { return -1; }
+    virtual int giveNumberOfTimeStepWhenIcApply() { return 0; }
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
 
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
-    void timesMassMtrx(FloatArray &answer, FloatArray &vec, Domain *domain, TimeStep *tStep);
+    void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
     void assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
     virtual int checkConsistency();

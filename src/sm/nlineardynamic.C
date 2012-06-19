@@ -135,7 +135,11 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
         _error("updateAttributes: deltaT < 0");
     }
 
-    IR_GIVE_FIELD(ir, dumpingCoef, IFT_NonLinearDynamic_dumpcoef, "dumpcoef");
+    eta = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, eta, IFT_NonLinearDynamic_eta, "eta");
+
+    delta = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, delta, IFT_NonLinearDynamic_delta, "delta");
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonLinearDynamic_refloadmode, "refloadmode");
@@ -172,10 +176,10 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 
     initialTimeDiscretization = ( TimeDiscretizationType ) val;
 
-    alpha = 0.5; beta = 0.25; // Default Newmark parameters.
+    gamma = 0.5; beta = 0.25; // Default Newmark parameters.
     if ( initialTimeDiscretization == TD_Newmark ) {
         OOFEM_LOG_INFO( "Selecting Newmark-beta metod\n" );
-        IR_GIVE_OPTIONAL_FIELD(ir, alpha, IFT_NonLinearDynamic_alpha, "alpha");
+        IR_GIVE_OPTIONAL_FIELD(ir, gamma, IFT_NonLinearDynamic_gamma, "gamma");
         IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_NonLinearDynamic_beta, "beta");
     } else if ( initialTimeDiscretization == TD_TwoPointBackward ) {
         OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
@@ -348,11 +352,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     if ( tStep->giveTimeDiscretization() == TD_Newmark ) {
         OOFEM_LOG_DEBUG("Solving using Newmark-beta method\n");
         a0 = 1 / ( beta * dt2 );
-        a1 = alpha / ( beta * deltaT );
+        a1 = gamma / ( beta * deltaT );
         a2 = 1 / ( beta * deltaT );
         a3 = 1 / ( 2 *  beta ) - 1;
-        a4 = ( alpha / beta ) - 1;
-        a5 = deltaT / 2 * ( alpha / beta - 2 );
+        a4 = ( gamma / beta ) - 1;
+        a5 = deltaT / 2 * ( gamma / beta - 2 );
         a6 = 0;
     } else if ( ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) || ( tStep->giveNumber() == giveNumberOfFirstStep() ) ) {
         if ( tStep->giveTimeDiscretization() != TD_ThreePointBackward ) {
@@ -475,19 +479,29 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
-        help.at(i) = ( a2 * velocityVector.at(i) +
-                       a3 * accelerationVector.at(i) ) +
-                       dumpingCoef * (
-                           a4 * velocityVector.at(i) +
-                           a5 * accelerationVector.at(i) +
-                           a6 * previousIncrementOfDisplacement.at(i)
-                       );
+        help.at(i) = a2 * velocityVector.at(i) + a3 * accelerationVector.at(i)
+            + eta * ( a4 * velocityVector.at(i)
+                      + a5 * accelerationVector.at(i)
+                      + a6 * previousIncrementOfDisplacement.at(i) );
     }
 
-    this->timesMassMtrx(help, rhs2, this->giveDomain(di), tStep);
+    this->timesMtrx(help, rhs, MassMatrix, this->giveDomain(di), tStep);
+
+    if ( delta != 0 ) {
+        for ( int i = 1; i <= neq; i++ ) {
+            help.at(i) = delta * ( a4 * velocityVector.at(i)
+                                   + a5 * accelerationVector.at(i)
+                                   + a6 * previousIncrementOfDisplacement.at(i) );
+        }
+        this->timesMtrx(help, rhs2, StiffnessMatrix, this->giveDomain(di), tStep);
+        help.zero();
+        for ( int i = 1; i <= neq; i++ ) {
+            rhs.at(i) += rhs2.at(i);
+        }
+    }
 
     for ( int i = 1; i <= neq; i++ ) {
-        rhs2.at(i) += incrementalLoadVector.at(i) - previousInternalForces.at(i);
+        rhs.at(i) += incrementalLoadVector.at(i) - previousInternalForces.at(i);
         totalDisplacement.at(i) = previousTotalDisplacement.at(i);
     }
 
@@ -501,18 +515,19 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     //
     double loadLevel = 1.0;
     if ( initialLoadVector.isNotEmpty() ) {
-        numMetStatus = nMethod->solve(stiffnessMatrix, & rhs2, & initialLoadVector,
+        numMetStatus = nMethod->solve(stiffnessMatrix, & rhs, & initialLoadVector,
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
-        numMetStatus = nMethod->solve(stiffnessMatrix, & rhs2, NULL,
+        numMetStatus = nMethod->solve(stiffnessMatrix, & rhs, NULL,
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 
     OOFEM_LOG_INFO("Equilibrium reached in %d iterations\n", currentIterations);
 }
-//----------------------------------------------------------------------
+
+
 void
 NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                     CharType type, TimeStep *tStep, Domain *domain)
@@ -521,25 +536,25 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
     // engngm classes may require special modification of base types supported on
     // element class level.
 
-    if ( type == ModifiedStiffnessMatrix ) {
+    if ( type == EffectiveStiffnessMatrix ) {
         Element *element;
-        FloatMatrix charMtrx2, charMtrx3;
+        FloatMatrix charMtrx;
 
-        element = ( NLStructuralElement * ) domain->giveElement(num);
-
+        element = domain->giveElement(num);
         element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrx2, MassMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrx3, MassMatrix, tStep);
+        answer.times(1 + this->delta * a1);
 
-        // Basically, performing Task.4
-        answer.add(this->a0, charMtrx2);
-        answer.add(this->a1*dumpingCoef, charMtrx3);
+        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
+        charMtrx.times(this->a0 + this->eta * this->a1);
+
+        answer.add(charMtrx);
+
         return;
     } else {
         StructuralEngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
     }
 }
-//----------------------------------------------------------------------
+
 
 void NonLinearDynamic :: updateYourself(TimeStep *stepN)
 {
@@ -548,8 +563,13 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i)                             = velocityVector.at(i);
         rhs2.at(i)                            = accelerationVector.at(i);
-        accelerationVector.at(i)              = a0 * incrementOfDisplacement.at(i) - a2 * rhs.at(i) - a3 * rhs2.at(i);
-        velocityVector.at(i)                  = a1 * incrementOfDisplacement.at(i) - a4 * rhs.at(i) - a5 * rhs2.at(i) - a6 * previousIncrementOfDisplacement.at(i);
+
+        accelerationVector.at(i)              = a0 * incrementOfDisplacement.at(i)
+            - a2 * rhs.at(i) - a3 * rhs2.at(i);
+
+        velocityVector.at(i)                  = a1 * incrementOfDisplacement.at(i)
+            - a4 * rhs.at(i) - a5 * rhs2.at(i) - a6 * previousIncrementOfDisplacement.at(i);
+
         previousIncrementOfDisplacement.at(i) = totalDisplacement.at(i) - previousTotalDisplacement.at(i);
         previousTotalDisplacement.at(i)       = totalDisplacement.at(i);
     }
@@ -583,7 +603,7 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, ModifiedStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), d);
         break;
     case InternalRhs:
@@ -594,13 +614,25 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 
         // Updating the residual vector @ NR-solver
         for ( int i = 1; i <= neq; i++ ) {
-            help.at(i) = a0 * incrementOfDisplacement.at(i) + dumpingCoef *a1 *incrementOfDisplacement.at(i);
+            help.at(i) = ( a0 + eta * a1 ) * incrementOfDisplacement.at(i);
         }
 
-        this->timesMassMtrx(help, rhs, this->giveDomain(1), tStep);
+        this->timesMtrx(help, rhs2, MassMatrix, this->giveDomain(1), tStep);
 
         for ( int i = 1; i <= neq; i++ ) {
-            internalForces.at(i) += rhs.at(i) - previousInternalForces.at(i);
+            internalForces.at(i) += rhs2.at(i) - previousInternalForces.at(i);
+        }
+
+        if ( delta != 0 ) {
+            for ( int i = 1; i <= neq; i++ ) {
+                help.at(i) = delta * a1 * incrementOfDisplacement.at(i);
+            }
+
+            this->timesMtrx(help, rhs2, StiffnessMatrix, this->giveDomain(1), tStep);
+
+            for ( int i = 1; i <= neq; i++ ) {
+                internalForces.at(i) += rhs2.at(i);
+            }
         }
 
         break;
@@ -884,8 +916,9 @@ NonLinearDynamic :: assembleIncrementalReferenceLoadVectors(FloatArray &_increme
 #endif
 }
 
+
 void
-NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *domain, TimeStep *tStep)
+NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
     //int neq = this->giveNumberOfEquations(EID_MomentumBalance);
@@ -895,7 +928,7 @@ NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *d
     Element *element;
     EModelDefaultEquationNumbering en;
 
-    //    answer.resize(neq);
+    answer.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     answer.zero();
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
@@ -910,7 +943,7 @@ NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *d
 #endif
 
         element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
+        element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
         //
         // assemble it manually
@@ -941,6 +974,7 @@ NonLinearDynamic :: timesMassMtrx(FloatArray &vec, FloatArray &answer, Domain *d
     this->updateSharedDofManagers(answer, MassExchangeTag);
 #endif
 }
+
 
 #ifdef __PARALLEL_MODE
 int

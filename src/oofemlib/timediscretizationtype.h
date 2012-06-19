@@ -40,8 +40,9 @@ namespace oofem {
     enum TimeDiscretizationType {
         TD_Unspecified         = -1, ///< Unspecified
         TD_ThreePointBackward  =  0, ///< Three-point Backward Euler method
-        TD_TwoPointBackward    =  1, ///< Two-point Backward method
+        TD_TwoPointBackward    =  1, ///< Two-point Backward Euler method
         TD_Newmark             =  2, ///< Newmark-beta method
+        TD_Wilson              =  3, ///< Wilson-theta method
     };
 } // end namespace oofem
 #endif // timediscretizationtype_h

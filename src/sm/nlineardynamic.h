@@ -82,7 +82,8 @@ protected:
 
     int initFlag;
     TimeDiscretizationType initialTimeDiscretization;
-    double dumpingCoef, alpha, beta;
+    double gamma, beta;
+    double eta, delta;
     double a0, a1, a2, a3, a4, a5, a6, a7;
 
     FloatArray velocityVector, accelerationVector, previousLoadVector;
@@ -151,7 +152,7 @@ public:
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
     { return ( int ) mode; }
-    void timesMassMtrx(FloatArray &answer, FloatArray &vec, Domain *domain, TimeStep *tStep);
+    void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
 #ifdef __OOFEG
     void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
