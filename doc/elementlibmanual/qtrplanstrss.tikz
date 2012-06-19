@@ -5,7 +5,7 @@
  
  \draw[thick,xshift=-2] 
      (0.2,0.1) node[elemnode] {} node[below] {1}
-  to[out=-10,in=210] node[elemnode,midway] {} node[below,midway] {4} (0.7,0.2) node[elemnode] {} node[below right] {2}
-  to[out=110,in=-20] node[elemnode,midway] {} node[above right,midway] {5} (0.4,0.5) node[elemnode] {} node[above] {3}
-  to[out=-90,in=40] node[elemnode,midway] {} node[above left,midway] {6} (0.2,0.1);
+  to[out=-10,in=210] node[elemnode,midway] {} node[below,midway] {4} node[blue,below,near end] {1} (0.7,0.2)  node[elemnode] {} node[below right] {2}
+  to[out=110,in=-20] node[elemnode,midway] {} node[above right,midway] {5} node[blue,above right,near end] {2} (0.4,0.5) node[elemnode] {} node[above] {3}
+  to[out=-90,in=40] node[elemnode,midway] {} node[above left,midway] {6} node[blue,above left,near end] {3} (0.2,0.1);
 \end{tikzpicture}

@@ -2,6 +2,7 @@
 \usepackage{html}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{hyperref}
 \usepackage{ifpdf}
 \usepackage{ifthen}
 \input{include.tex}
@@ -133,10 +134,9 @@ Two node linear isoparametric truss element for 2D analysis. The
 element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{truss2d.eps}}
- \end{htmlonly}
- \input{truss2d.tikz}
+ \begin{makeimage}
+  \input{truss2d.tikz}
+ \end{makeimage}
  \caption{Truss2d element in (x,z) plane.}
 \end{figure}
 
@@ -199,10 +199,9 @@ printed.
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{beam2d.eps}}
- \end{htmlonly}
- \input{beam2d.tikz}
+ \begin{makeimage}
+   \input{beam2d.tikz}
+ \end{makeimage}
  \caption{Beam2d element. Definition of local c.s.(a)  and definition of
  local end forces and local element dofs (b).}
  \label{beam2dfig}
@@ -258,10 +257,9 @@ z-axis direction vector by local x-axis direction vector.
 \end{enumerate}
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{beam3d.eps}}
- \end{htmlonly}
- \input{beam3d.tikz}
+ \begin{makeimage}
+   \input{beam3d.tikz}
+ \end{makeimage}
  \caption{Beam3d element. Definition of local c.s., local end forces
  and local element dofs numbering.}
  \label{beam3dfig}
@@ -311,10 +309,9 @@ z-axis).
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
- \end{htmlonly}
- \input{planestress2d.tikz}
+ \begin{makeimage}
+  \input{planestress2d.tikz}
+ \end{makeimage}
  \caption{PlaneStress2d element. Node numbering, Side numbering and
  definition of local edge c.s.(a).}
  \label{Planestress2dfig}
@@ -358,10 +355,9 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
 
 \begin{figure}[htb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.eps}}
- \end{htmlonly}
- \input{qplanstrss.tikz}
+ \begin{makeimage}
+  \input{qplanstrss.tikz}
+ \end{makeimage}
  \caption{QPlaneStress element - node numbering.}
  \label{qplanstrssfig}
 \end{figure}
@@ -394,10 +390,9 @@ The node numbering is anti-clockwise
 
 \begin{figure}[htb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
- \end{htmlonly}
- \input{trplanstrss.tikz}
+ \begin{makeimage}
+   \input{trplanstrss.tikz}
+ \end{makeimage}
  \caption{TrPlaneStress element - node and side numbering.}
  \label{TrPlanestressfig}
 \end{figure}
@@ -435,10 +430,9 @@ anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}).
 
 \begin{figure}[htb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
- \end{htmlonly}
- \input{qtrplanstrss.tikz}
+ \begin{makeimage}
+  \input{qtrplanstrss.tikz}
+ \end{makeimage}
  \caption{QTrPlStr element - node and side numbering.}
  \label{qtrplanstressfig}
 \end{figure}
@@ -499,10 +493,9 @@ z-axis).
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
- \end{htmlonly}
- \input{planestress2d.tikz}
+ \begin{makeimage}
+  \input{planestress2d.tikz}
+ \end{makeimage}
  \caption{Quad1PlaneStrain element. Node numbering, Side numbering and
  definition of local edge c.s.(a).}
  \label{Quad1PlaneStrainfig}
@@ -545,10 +538,9 @@ The node numbering is anti-clockwise
 
 \begin{figure}[htb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.eps}}
- \end{htmlonly}
- \input{trplanstrss.tikz} % Same image for plane stress
+ \begin{makeimage}
+  \input{trplanstrss.tikz} % Same image for plane stress
+ \end{makeimage}
  \caption{TrplaneStrain element - node and side numbering.}
  \label{TrplaneStrain}
 \end{figure}
@@ -656,11 +648,9 @@ Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane st
 for membrane behavior. It comes with complete set of 6 DOFs per node.
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.eps}}
- \end{htmlonly}
- %\input{trshell_lin.tikz}
- \includegraphics[width=0.7\textwidth]{trshell_lin}
+ \begin{makeimage}
+  \input{trshell_lin.tikz}
+ \end{makeimage}
  \caption{Geometry of tr\_shell01 element.}
 \end{figure}
 
@@ -742,10 +732,9 @@ Implementation of Linear 3d  eight - node
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
- \end{htmlonly}
- \input{hexa_lin.tikz}
+ \begin{makeimage}
+  \input{hexa_lin.tikz}
+ \end{makeimage}
  \caption{lspace element (Node numbers in black, side numbers in blue,
  and surface numbers in red).}
 \end{figure}
@@ -775,11 +764,10 @@ Implementation of quadratic 3d  20-node
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.eps}}
- \end{htmlonly}
- \raisebox{-0.5\height}{\input{hexa_quad_a.tikz}}
- \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
+ \begin{makeimage}
+  \raisebox{-0.5\height}{\input{hexa_quad_a.tikz}}
+  \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
+ \end{makeimage}
  \caption{qspace element.}
 \end{figure}
 
@@ -809,10 +797,9 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
  
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
- \end{htmlonly}
- \input{tetrahedra_lin.tikz}
+ \begin{makeimage}
+  \input{tetrahedra_lin.tikz}
+ \end{makeimage}
  \caption{Linear terahedra element. Definition and node numbering convention}
  \label{lintetrahedron_fig}
 \end{figure}
@@ -836,10 +823,9 @@ approximation of displacement field. Can be used to glue together two elements w
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.eps}}
- \end{htmlonly}
+ \begin{makeimage}
  \input{interf2d_quad.tikz}
+ \end{makeimage}
  \caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
  \label{interf2d_quad_fig}
 \end{figure}
@@ -862,10 +848,9 @@ approximation of displacement field. Can be used to glue together two elements w
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.eps}}
- \end{htmlonly}
- \input{interf3d_lin.tikz}
+ \begin{makeimage}
+  \input{interf3d_lin.tikz}
+ \end{makeimage}
  \caption{3D interface element with linear interpolation. Definition and node numbering convention}
  \label{interf3d_lin_fig}
 \end{figure}
@@ -1005,10 +990,10 @@ z-axis).
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
- \end{htmlonly}
- \input{planestress2d.tikz}
+ \begin{makeimage}
+  \input{planestress2d.tikz}
+ \end{makeimage}
+
  \caption{Quad1ht element. Node numbering, Side numbering and
  definition of local edge c.s.(a).}
  \label{Quad1htfig}
@@ -1049,10 +1034,9 @@ The node numbering is anti-clockwise
 
 \begin{figure}[htb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
- \end{htmlonly}
- \input{trplanstrss.tikz}
+ \begin{makeimage}
+  \input{trplanstrss.tikz}
+ \end{makeimage}
  \caption{Tr1ht element - node and side numbering.}
  \label{Tr1htfig}
 \end{figure}
@@ -1096,10 +1080,9 @@ Represents isoparametric eight-node brick/hexahedron finite element for
 heat transfer problems. Each node has 1 degrees of freedom.
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
- \end{htmlonly}
- \input{hexa_lin.tikz}
+ \begin{makeimage}
+  \input{hexa_lin.tikz}
+ \end{makeimage}
  \caption{brick element (Node numbers in black, side numbers in blue,
  and surface numbers in red).}
  \label{Brick1htfig}
@@ -1130,6 +1113,24 @@ Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 %\subsection{Other Elements}
 
 \section{Elements for Fluid Dynamics problems\\(FM Module)}
+\subsection{Stokes' Flow Elements}
+Stokes' flow elements neglect acceleration, and thus requires no additional stabilization.
+
+\subsubsection{Tr21Stokes element}
+Standard 6 node triangular element for stokes flow, with quadratic geometry, velocity and linear pressure.
+Both compressible and incompressible material behavior is supported (and also the seamless transition between the two).
+\elemkeyword{Tr121Stokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes.
+\descitem{Status} Reliable.
+
+\subsubsection{Tet21Stokes element}
+Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure.
+\elemkeyword{Tr121Stokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.
+\descitem{Status} Untested.
+
 \subsection{2D CBS Elements}
 \subsubsection{Tr1CBS element}
 \label{Tr1CBS}
@@ -1141,10 +1142,9 @@ The node numbering is anti-clockwise
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
- \end{htmlonly}
- \input{trplanstrss.tikz}
+ \begin{makeimage}
+  \input{trplanstrss.tikz}
+ \end{makeimage}
  \caption{Tr1CBS element. Node numbering, Side numbering and
  definition of local edge c.s.(a).}
  \label{Tr1CBSfig}
@@ -1192,10 +1192,9 @@ The node numbering is anti-clockwise
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
- \end{htmlonly}
- \input{trplanstrss.tikz}
+ \begin{makeimage}
+  \input{trplanstrss.tikz}
+ \end{makeimage}
  \caption{Tr1SUPG element. Node numbering, Side numbering and
  definition of local edge c.s.(a).}
  \label{Tr1SUPG2fig}
@@ -1240,10 +1239,9 @@ The node numbering is anti-clockwise, vertices are numbered first.
 
 \begin{figure}[htb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
- \end{htmlonly}
- \input{qtrplanstrss.tikz}
+ \begin{makeimage}
+  \input{qtrplanstrss.tikz}
+ \end{makeimage}
  \caption{Tr21SUPG element - node and side numbering.}
  \label{Tr21SUPGfig}
 \end{figure}
@@ -1277,10 +1275,9 @@ axis of ratational symmetry. The node numbering is anti-clockwise
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
- \end{htmlonly}
- \input{trplanstrss.tikz}
+ \begin{makeimage}
+  \input{trplanstrss.tikz}
+ \end{makeimage}
  \caption{Tr1SUPGAxi element. Node numbering, Side numbering and
  definition of local edge c.s.(a).}
  \label{Tr1SUPGAxifig}
@@ -1322,10 +1319,9 @@ of freedoms (two components of velocity and pressure).
 
 \begin{figure}[tb]
  \centering
- \begin{htmlonly}
-   \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
- \end{htmlonly}
- \input{tetrahedra_lin.tikz}
+ \begin{makeimage}
+  \input{tetrahedra_lin.tikz}
+ \end{makeimage}
  \caption{Tet1\_3D\_SUPG element.}
  \label{PY1_3D_SUPGfig}
 \end{figure}

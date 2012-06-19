@@ -1,0 +1,28 @@
+\tikzstyle{elemnode} = [solid,draw,thin,circle,inner sep=1,fill=white]
+
+\begin{tikzpicture}[scale=6,>=stealth,
+  x={(1cm,0cm)}, y={(0.5cm,0.5cm)}, z={(0cm,1cm)}]
+ 
+ \begin{scope}
+ \draw[->] (-0.05,0,0) -- (0.5,0,0) node[at end, below] {$x_g$};
+ \draw[->] (0,-0.05,0) -- (0,0.5,0) node[at end, below right] {$y_g$};
+ \draw[->] (0,0,-0.05) -- (0,0,0.5) node[at end, right] {$z_g$};
+ \end{scope}
+
+ \draw[very thick,-]
+    (0.50, 0.10, 0.25) node[elemnode] {} node[below left] {1} -- node[midway, blue, below right] {1}
+    (1.00, 0.25, 0.25) node[elemnode] {} node[right] {2}      -- node[near end, blue, above] {2}
+    (0.10, 0.30, 0.50) node[elemnode] {} node[above left] {3} -- node[midway, blue, below left] {3}
+    (0.50, 0.10, 0.25);
+
+ % Shadow helps to visualize the depth
+ \fill[fill=black!10]
+    (0.50, 0.10, 0.) -- 
+    (1.00, 0.25, 0.) -- 
+    (0.10, 0.30, 0.) -- 
+    (0.50, 0.10, 0.);
+
+ % Draw normal (using latex arrow head, looks nicest)
+ \draw[-latex] (0.5333,0.22, 0.33) -- +(0.1,-0.125,0.25) node[below right] {$\mathbf{n}$};
+ 
+\end{tikzpicture}
