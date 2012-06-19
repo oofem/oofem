@@ -301,6 +301,7 @@ Domain :: giveNode(int n)
     if ( node == NULL ) {
         _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
     }
+    return node;
 #else
     return static_cast< Node * >( dofManagerList->at(n) );
 #endif

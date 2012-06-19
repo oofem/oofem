@@ -1296,7 +1296,6 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
                 for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
                     elem->giveIPValue(temp, gp, type, tStep);
-                    MaterialMode mmode;
                     gptot += gp->giveWeight();
                     answer.add(gp->giveWeight(), temp);
                 }
