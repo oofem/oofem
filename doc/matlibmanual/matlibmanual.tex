@@ -1,7 +1,7 @@
 \documentclass[a4paper]{article}
 \usepackage{html}
 \usepackage{graphicx}
-\usepackage{ifpdf}
+%\usepackage{hyperref}
 \usepackage{amssymb,amsmath}
 \input{include.tex}
 
@@ -67,11 +67,7 @@
 
 %begin{latexonly}
 \title{
-\ifpdf
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.pdf}}}
-\else
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
-\fi
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}}
 Material Model Library Manual}
 \author{\bp \\ \\
 Czech Technical University\\
@@ -765,11 +761,7 @@ Masonry is a composite material made of bricks and mortar. Nonlinear behavior of
   \centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{constmodel.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{constmodel}}
 %end{latexonly}
   \caption{Composite yield surface model for masonry}
   \label{compyieldsurffig}
@@ -782,11 +774,7 @@ The approach used in this work is based on idea of concentrating all the damage 
   \centerline{\includegraphics[width=0.7\textwidth]{mmodel.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{mmodel.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{mmodel.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{mmodel}}
 %end{latexonly}
   \caption{Modeling strategy for masonry}
 \end{figure}
@@ -814,11 +802,7 @@ where the yield value $f_t$ is defined as
   \centerline{\includegraphics[width=0.7\textwidth]{tension.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{tension.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{tension.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{tension}}
 %end{latexonly}
   \caption{Tensile behavior of proposed model ($f_t=0.2$ MPa, $G_f^I=0.018$ N/mm)}
   \label{tensfig}
@@ -846,11 +830,7 @@ where $c_0$ is initial cohesion of joint, $\phi_0$ initial friction angle, $\phi
   \centerline{\includegraphics[width=0.7\textwidth]{shearconf.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{shearconf.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{shearconf.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{shearconf}}
 %end{latexonly}
   \caption{Shear behavior of proposed model for different confinement levels in MPa ($c_0=0.8\ \rm{MPa},\ \tan\phi_0=1.0,\ \tan\phi_r=0.75,{\rm and}\ G_f^{II}=0.05\ {N/mm}$)}
 \end{figure}
@@ -894,11 +874,7 @@ An associated flow and strain hardening hypothesis are being considered. This yi
   \centerline{\includegraphics[width=0.7\textwidth]{capmode.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{capmode.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{capmode.eps}}
-\fi
+\centerline{\includegraphics[width=0.7\textwidth]{capmode}}
 %end{latexonly}
 \caption{Hardening/softening law for cap mode}
 \label{hs3fig}
@@ -1489,11 +1465,7 @@ three modes of a softening law with corresponding variables.
   \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.pdf}}
-\else
- \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag.eps}}
-\fi
+ \centerline{\includegraphics[width=0.99\textwidth]{Damage_material_diag}}
 %end{latexonly}
   \caption{Implemented stress-strain diagrams for isotropic damage material. Fracturing strain $\varepsilon_f$ and crack opening at zero stress $w_f$ are interrelated through effective thickness $h$ of the crack band. Note that the
 figure is somewhat misleading because the grey area is not $G_f$ but $G_f/h$ 
@@ -1878,11 +1850,7 @@ $\veps = \displaystyle\frac{3}{2\pi}\int_\Omega (\ve\otimes\mbf{n})\sym\dO$
   \centerline{\includegraphics[width=0.8\textwidth]{dm_comp.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{dm_comp.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{dm_comp.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{dm_comp}}
 %end{latexonly}
 \caption{Structure of microplane-based anisotropic damage model}
 \label{ff4}
@@ -2978,22 +2946,13 @@ The eccentricity parameter $e$ that appears in this function, as well as the fri
 \begin{tabular}{cc}
 (a) & (b)
 \\
-\begin{htmlonly}
-  \includegraphics[width=0.5\textwidth]{meridians.eps}&
-  \includegraphics[width=0.5\textwidth]{deviatoric.eps}
-\end{htmlonly}
+%\begin{htmlonly}
+ % \includegraphics[width=0.5\textwidth]{meridians.eps}&
+ % \includegraphics[width=0.5\textwidth]{deviatoric.eps}
+%\end{htmlonly}
 %begin{latexonly}
-\ifpdf
-\includegraphics[width=0.5\textwidth]{meridians.pdf}
-\else
-\includegraphics[width=0.5\textwidth]{meridians.eps}
-\fi
-&
-\ifpdf
-\includegraphics[width=0.5\textwidth]{deviatoric.pdf}
-\else
-\includegraphics[width=0.5\textwidth]{deviatoric.eps}
-\fi
+ \includegraphics[width=0.5\textwidth]{meridians}&
+ \includegraphics[width=0.5\textwidth]{deviatoric}
 %end{latexonly}
 \end{tabular} 
 \caption{Evolution of the yield surface during hardening:
@@ -3266,11 +3225,7 @@ The index $p,~p\in\{11,22,33,23,31,12\}$ symbolizes six components of stress or 
   \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag}}
 %end{latexonly}
   \caption{Implemented stress-strain evolution with damage for 1D case. Tension and compression are separated, but sharing the same damage parameter.}
   \label{comp_softening}
@@ -3324,11 +3279,7 @@ The damage initiation is based on a trial stress. It becomes necessary for  high
   \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.pdf}}
-\else
-\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.eps}}
-\fi
+\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test}}
 %end{latexonly}
   \caption{Typical loading/unloading material performance for homogenized stress and strain in the direction `${2}$'. Note that one damage parameter is common for both tension and compression.}
   \label{comp_performance}
@@ -3756,11 +3707,7 @@ Supported modes& \_2dHeat, \_3dHeat\\
   \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time.eps}}
 \end{htmlonly}
 %begin{latexonly}
-\ifpdf
- \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time.pdf}}
-\else
- \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time.eps}}
-\fi
+ \centerline{\includegraphics[width=0.7\textwidth]{Mokra_OOFEM_affinity_time}}
 %end{latexonly}
   \caption{Performance of implemented hydration models: exponential model from \refeq{eq:affinity1}, affinity model from \refeq{eq:affinity2}, CEMHYD3D model from Subsection~\ref{Cemhyd}.}
   \label{hydration_comparison}
@@ -3832,7 +3779,7 @@ Record Format & \descitem{NewtonianFluid} \elemparam{num}{in}
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{mu} viscosity\\
-Supported modes& \_2dFlow\\
+Supported modes& 2d, 3d flow\\
 \hline
 \end{tabular}
 \caption{Newtonian Fluid material - summary.}
@@ -3904,7 +3851,7 @@ Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{mu0} viscosity\\
 &- \param{tau0} Yield stress\\
-Supported modes& \_2dFlow\\
+Supported modes& 2d, 3d flow\\
 \hline
 \end{tabular}
 \caption{Bingham Fluid material - summary.}
@@ -3929,16 +3876,43 @@ Description & Two-Fluid material\\
 Record Format & \descitem{TwoFluidMat} \elemparam{num}{in}
 \elemparam{mat}{ia}\\
 Parameters &- \param{num} material model number\\
-&- \param{mat} integer array contaning two numbers representing
+&- \param{mat} integer array containing two numbers representing
 numbers of material models of which the receiver is composed. Material
 with index 0 is a material, that is fully active in a cell with VOF=0,
-material with index 1 is a material fuully active in a cell with VOF=1.\\
-Supported modes& \_2dFlow\\
+material with index 1 is a material fully active in a cell with VOF=1.\\
+Supported modes& 2d flow\\
 \hline
 \end{tabular}
 \caption{Two-Fluid material - summary.}
 \label{TwoFluidMaterial_table}
 %\end{center}
+\end{table}
+
+\subsection{FE\textsuperscript{2} fluid - FE2FluidMaterial}
+\label{FE2FluidMaterial}
+Constitutive model of multiscale fluids.
+The macroscale fluid behavior is determined by a Representative Volume Element (RVE) which is solved for in each integration point.
+Some requirements are put on the RVE, such as the it must use the MixedGradientPressure boundary condition along its outer boundary. This boundary condition is equivalent to that of Dirichlet boundary condition in classical homogenization, only adjusted for a mixed control; deviatoric gradient + pressure, instead of the full gradient only.
+Worth noting is that the macroscale (and microscale) behavior can still be compressible,  in particular is the RVE contains pores.
+The triangular and tetrahedral Stokes' flow elements both support compressible behavior, but it perhaps be applicable other types of flow, as long as the extended mixed control option is used when calling the material routine (the function with gradient and pressure as input). If the RVE doesn't contain any pores (such that the response turns out to be incompressible) then material should work for all problem classes.
+This could for example be the case of a oil-water mixture.
+The model parameters are summarized in table~\ref{FE2FluidMaterial_table}.
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & FE\textsuperscript{2} Fluid material\\
+\hline
+Record Format  & \descitem{FE2FluidMaterial} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{inputfile}{s}\\
+Parameters &- \param{num}       material model number\\
+           &- \param{d}         unused\\
+           &- \param{inputfile} input file for RVE problem\\
+Supported modes&  2d, 3d flow\\
+\hline
+\end{tabular}
+\caption{FE\textsuperscript{2} fluid material - summary.}
+\label{NewtonianFluidMaterial_table}
 \end{table}
 
 \clearpage
