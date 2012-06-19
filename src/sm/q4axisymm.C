@@ -114,7 +114,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 {
     ///@todo Not sure how to deal with li and lu. This should be changed, in which case "GiveDerivatice***" and "computeJacobianMatrixAt" will be deprecated.
     //FloatMatrix dN;
-    //this->interp.evaldNdx(dN, *aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    //this->interp.evaldNdx(dN, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     int i;
     FloatMatrix jacMtrx, inv;
@@ -216,7 +216,7 @@ Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // evaluated at aGaussPoint.
 {
     FloatArray n;
-    this->interp.evalN(n, *aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(n, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 16);
     answer.zero();
@@ -316,13 +316,13 @@ Q4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
     FloatArray n;
     double determinant, r;
 
-    this->interp.evalN(n, *aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(n, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     for ( int i = 1; i <= 8; i++ ) {
         r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
     }
 
-    determinant = fabs( this->interp.giveTransformationJacobian(*aGaussPoint->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interp.giveTransformationJacobian(*aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     return determinant * aGaussPoint->giveWeight() * r;
 }
 

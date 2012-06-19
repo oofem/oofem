@@ -89,7 +89,7 @@ Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answe
     if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
-    this->interp.evalN(answer, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -118,7 +118,7 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx(dN, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(1, 6);
     answer.at(1, 1) = dN.at(1,1);
@@ -211,7 +211,7 @@ Truss3d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 6);
     answer.zero();
@@ -225,7 +225,7 @@ Truss3d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    double detJ = this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     double weight  = gp->giveWeight();
     return detJ * weight * this->giveCrossSection()->give(CS_Area);
 }
@@ -347,7 +347,7 @@ Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight = gp->giveWeight();
-    return this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) * weight;
+    return this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) * weight;
 }
 
 

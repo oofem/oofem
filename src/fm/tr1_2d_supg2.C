@@ -78,7 +78,7 @@ TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 void
 TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)
 {
-    this->interp.evalN(answer, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 

@@ -79,7 +79,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dN;
 
-    this->interp.evaldNdx(dN, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     // Reshape
     answer.resize(4, 8);
@@ -128,7 +128,7 @@ Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
 
     FloatArray n;
-    this->interp.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 8);
     answer.zero();
@@ -158,7 +158,7 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      */
 
     FloatArray n;
-    this->interp.edgeEvalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeEvalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     answer.resize(2,4);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 3) = n.at(2);
@@ -205,7 +205,7 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
     return detJ * gp->giveWeight();
 }
 
@@ -213,7 +213,7 @@ Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeLocal2global(answer, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -272,7 +272,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight, thickness;
 
-    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     weight = gp->giveWeight();
     thickness = this->giveCrossSection()->give(CS_Thickness);
     return detJ * weight * thickness;

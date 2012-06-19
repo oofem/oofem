@@ -117,7 +117,7 @@ void
 Tr1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 {
     ///@todo Deal with matrix and vector (I find that the row-wise matrices should be transposed).
-    //this->interp.evaldNdx(answer, gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    //this->interp.evaldNdx(answer, gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3, area;
 
@@ -230,7 +230,7 @@ Tr1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      * without regarding particular side
      */
     ///@todo Use the interpolation class for this
-    //this->interp.edgeEvalN(answer_vec, gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    //this->interp.edgeEvalN(answer_vec, gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     double ksi, n1, n2;
     answer.resize(1, 2);
@@ -281,7 +281,7 @@ Tr1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 void
 Tr1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeLocal2global(answer, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 void

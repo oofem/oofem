@@ -330,7 +330,7 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian(*gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -458,7 +458,7 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answ
     FloatArray n;
 
     if ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) {
-        this->interp_lin.evalN(n, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+        this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
         answer.resize(1, 3);
         answer.zero();
         answer.at(1) = n.at(1);
