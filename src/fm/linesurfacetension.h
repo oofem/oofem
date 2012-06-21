@@ -43,6 +43,7 @@
 #include "eleminterpmapperinterface.h"
 
 namespace oofem {
+class FEI2dLineLin;
 
 /**
  * Implements the load and tangent for surface tension boundary potential.
@@ -59,6 +60,9 @@ class LineSurfaceTension :
     public SpatialLocalizerInterface,
     public EIPrimaryUnknownMapperInterface
 {
+protected:
+    static FEI2dLineLin interp;
+
 public:
     /**
      * Constructor.
@@ -70,6 +74,7 @@ public:
     virtual ~LineSurfaceTension();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual FEInterpolation *giveInterpolation();
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
@@ -84,11 +89,6 @@ public:
      * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
      */
     virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
-
-    virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}

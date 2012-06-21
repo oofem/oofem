@@ -37,8 +37,10 @@
 #include "domain.h"
 #include "material.h"
 #include "mathfem.h"
+#include "fei2dlinelin.h"
 
 namespace oofem {
+FEI2dLineLin LineSurfaceTension :: interp(1, 2);
 
 LineSurfaceTension :: LineSurfaceTension(int n, Domain *aDomain) : FMElement (n, aDomain)
 {
@@ -53,33 +55,9 @@ IRResultType LineSurfaceTension :: initializeFrom(InputRecord *ir)
     return Element :: initializeFrom(ir);
 }
 
-void LineSurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
+FEInterpolation * LineSurfaceTension :: giveInterpolation()
 {
-    double xi = lcoords(0);
-    answer.resize(2);
-    answer(0) = 1.0 - xi;
-    answer(1) = xi;
-}
-
-int LineSurfaceTension :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    FloatArray n;
-    this->computeN(n, lcoords);
-    answer.resize(0);
-    for (int i = 1; i <= n.giveSize(); i++) {
-        answer.add(n.at(i), *this->giveNode(i)->giveCoordinates());
-    }
-    return true;
-}
-
-int LineSurfaceTension :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
-{
-    FloatArray v, u;
-    u.beDifferenceOf(gcoords, *this->giveNode(1)->giveCoordinates());
-    v.beDifferenceOf(*this->giveNode(2)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
-    answer.resize(1);
-    answer(0) = u.dotProduct(v)/(u.computeNorm()*v.computeNorm());
-    return true;
+    return &this->interp;
 }
 
 double LineSurfaceTension :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -108,7 +86,7 @@ void LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-    this->computeN(n, lcoords);
+    this->interp.evalN(n, lcoords, FEIElementGeometryWrapper(this));
 
     answer.resize(2);
     answer.zero();
@@ -120,25 +98,21 @@ void LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal
 
 void LineSurfaceTension :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer.resize(2);
-    answer(0) = V_u;
-    answer(1) = V_v;
+    answer.setValues(2, V_u, V_v);
 }
 
 void LineSurfaceTension :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 // Returns the mask for this element. Should i handle EquationID gracefully?
 {
     if (ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation) {
-        answer.resize(2);
         if (this->giveDomain()->giveDomainType() == _2dIncompressibleFlow) {
-            answer.at(1) = V_u;
-            answer.at(2) = V_v;
+            answer.setValues(2, V_u, V_v);
         } else {
-            answer.at(1) = D_u;
-            answer.at(1) = D_v;
+            answer.setValues(2, D_u, D_v);
         }
-    } else
+    } else {
         answer.resize(0);
+    }
 }
 
 void LineSurfaceTension :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)

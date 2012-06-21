@@ -61,6 +61,8 @@ public:
     /// Destructor.
     virtual ~Line2SurfaceTension();
 
+    virtual FEInterpolation *giveInterpolation();
+
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
@@ -75,6 +77,7 @@ public:
 
     virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &gcoords) { return false; }
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
                                                                  TimeStep *tStep, const FloatArray &gcoords,

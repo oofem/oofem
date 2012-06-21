@@ -60,6 +60,11 @@ void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoor
     this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this));
 }
 
+FEInterpolation *Line2SurfaceTension :: giveInterpolation()
+{
+    return &this->fei;
+}
+
 double Line2SurfaceTension :: computeNXIntegral() const
 {
     Node *node;
@@ -207,6 +212,12 @@ double Line2SurfaceTension :: SpatialLocalizerI_giveClosestPoint(FloatArray &lco
     this->computeGlobalCoordinates(closest, lcoords);
     return closest.distance(gcoords);
 }
+
+double Line2SurfaceTension :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords)
+{
+    return this->giveNode(3)->giveCoordinates()->distance(gcoords);
+}
+
 
 int Line2SurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
         TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
