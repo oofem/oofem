@@ -38,6 +38,7 @@
 #include "node.h"
 #include "conTable.h"
 #include "integrationrule.h"
+#include "gausspnt.h"
 
 namespace oofem {
 SPRNodalRecoveryModel :: SPRNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
@@ -418,12 +419,12 @@ void
 SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDetermine,
                                    IntArray &pap, int papNumber, int ireg)
 {
-    int nelem, ielem, count, patchElements, i, j, includes, npap, ipap;
+    int nelem, ndofman, ielem, count, patchElements, i, j, includes, npap, ipap;
     const IntArray *papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(papNumber);
     dynaList< int >dofManToDetermineList;
     dynaList< int > :: iterator dofManToDetermineListIter;
     SPRNodalRecoveryModelInterface *interface;
-    IntArray toDetermine, toDetermine2, elemPap;
+    IntArray toDetermine, toDetermine2, elemPap, papInv;
     Element *element;
 
     // looop over elements sharing dofManager with papNumber and
@@ -455,6 +456,14 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         if ( this->giveElementVirtualRegionNumber( papDofManConnectivity->at(ielem) ) == ireg ) {
             patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
         }
+    }
+
+    // Invert the pap array for faster access later
+    ndofman = this->domain->giveNumberOfDofManagers();
+    papInv.resize(ndofman);
+    papInv.zero();
+    for (int i = 1; i <= pap.giveSize(); ++i) {
+        papInv.at(pap.at(i)) = 1;
     }
 
     // determine dofManagers which values will be determined by this patch
@@ -495,7 +504,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
                 for ( ipap = 1; ipap <= npap; ipap++ ) {
                     // test if element reported SPRAssembly point is not global assembly point
                     // then determine this point from this patch
-                    if ( pap.findFirstIndexOf( elemPap.at(ipap) ) ==  0 ) {
+                    if ( papInv.at( elemPap.at(ipap) ) ==  0 ) {
                         includes = 0;
                         // test if INCLUDED
                         for ( dofManToDetermineListIter = dofManToDetermineList.begin();
@@ -583,7 +592,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
             for ( i = 0; i < nip; i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
                 element->giveIPValue(ipVal, gp, type, tStep);
-                interface->SPRNodalRecoveryMI_computeIPGlobalCoordinates(coords, gp);
+                element->computeGlobalCoordinates(coords, *gp->giveLocalCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
                 for ( j = 1; j <= neq; j++ ) {

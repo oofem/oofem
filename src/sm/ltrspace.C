@@ -356,13 +356,6 @@ LTRSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 { return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
 
 
-void
-LTRSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
-}
-
-
 SPRPatchType
 LTRSpace :: SPRNodalRecoveryMI_givePatchType()
 {

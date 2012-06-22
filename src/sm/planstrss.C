@@ -1247,12 +1247,6 @@ PlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
 }
 
 
-void
-PlaneStress2d :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
-}
-
 SPRPatchType
 PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {

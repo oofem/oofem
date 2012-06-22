@@ -617,15 +617,6 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_giveNumberOfIP()
 }
 
 
-void
-QTrPlaneStress2d :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
-        _error("SPRNodalRecoveryMI_computeIPGlobalCoordinates: computeGlobalCoordinates failed");
-    }
-}
-
-
 SPRPatchType
 QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {

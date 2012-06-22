@@ -389,14 +389,6 @@ QSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 }
 
 
-void
-QSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
-        _error("SPRNodalRecoveryMI_computeIPGlobalCoordinates: computeGlobalCoordinates failed");
-    }
-}
-
 SPRPatchType
 QSpace :: SPRNodalRecoveryMI_givePatchType()
 {

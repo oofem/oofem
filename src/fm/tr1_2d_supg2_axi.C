@@ -1866,12 +1866,6 @@ TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_giveNumberOfIP()
 { return 1; }
 
 
-void
-TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
-}
-
 SPRPatchType
 TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_givePatchType()
 {

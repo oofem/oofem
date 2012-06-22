@@ -813,13 +813,6 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveNumberOfIP()
 }
 
 
-void
-Quad1PlaneStrain :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
-}
-
-
 SPRPatchType
 Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 {

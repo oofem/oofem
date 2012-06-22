@@ -1913,16 +1913,6 @@ TR1_2D_SUPG :: SPRNodalRecoveryMI_giveNumberOfIP()
 { return 1; }
 
 
-void
-TR1_2D_SUPG :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( gp == integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) {
-        this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
-    } else {
-        _error("SPRNodalRecoveryMI_computeIPGlobalCoordinates: unsupported ip num");
-    }
-}
-
 SPRPatchType
 TR1_2D_SUPG :: SPRNodalRecoveryMI_givePatchType()
 {

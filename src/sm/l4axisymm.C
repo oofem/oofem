@@ -376,13 +376,6 @@ L4Axisymm :: SPRNodalRecoveryMI_giveNumberOfIP()
 }
 
 
-void
-L4Axisymm :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    this->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
-}
-
-
 SPRPatchType
 L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 {
