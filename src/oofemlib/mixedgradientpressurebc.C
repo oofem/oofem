@@ -46,7 +46,7 @@
 #include "masterdof.h"
 #include "usrdefsub.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
-#include "line2boundaryelement.h"
+#include "../fm/line2boundaryelement.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"

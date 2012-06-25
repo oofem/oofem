@@ -427,7 +427,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
 void
 DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
-                                                    CharType type, TimeStep *tStep, Domain *domain)
+                                              CharType type, TimeStep *tStep, Domain *domain)
 {
     // We don't directly call element ->GiveCharacteristicMatrix() function, because some
     // engngm classes may require special modification of base types supported on
