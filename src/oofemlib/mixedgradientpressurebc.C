@@ -46,6 +46,7 @@
 #include "masterdof.h"
 #include "usrdefsub.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
+#include "line2boundaryelement.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -219,9 +220,6 @@ double MixedGradientPressureBC :: giveUnknown(double vol, const FloatArray &dev,
 
 double MixedGradientPressureBC :: domainSize()
 {
-#if 1
-    return this->domain->giveArea();
-#else
     ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
@@ -234,14 +232,19 @@ double MixedGradientPressureBC :: domainSize()
             domain_size += e->computeNXIntegral();
         }
     }
-    return domain_size/nsd;
-#endif
+    if  (domain_size == 0.0) { // No boundary elements? Assume full density;
+        return this->domain->giveArea(); ///@todo Support more than 2D
+    } else {
+        return domain_size/nsd;
+    }
 }
 
 
 void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
 {
     vol = this->giveVolDof()->giveUnknown(eid, VM_Total, tStep);
+    int npeq = this->giveDomain()->giveEngngModel()->giveNumberOfPrescribedDomainEquations(this->giveDomain()->giveNumber(), eid);
+    sigmaDev.resize(npeq);
     sigmaDev.zero();
     this->domain->giveEngngModel()->assembleVector(sigmaDev, tStep, eid,
         InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
