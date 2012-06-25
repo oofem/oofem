@@ -821,12 +821,12 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
                 iVal.at(1) = mi->giveNodalScalarRepresentation( mapL2G.at(inode) );
             }
         } else {
-            this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
-            if ( val == NULL ) {
+            int found = this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
+            if ( !found ) {
                 iVal.resize( regionVarMap.giveSize() );
                 iVal.zero();
                 val = & iVal;
-                //OOFEM_ERROR2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
+                //OOFEM_WARNING2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
             }
         }
 
