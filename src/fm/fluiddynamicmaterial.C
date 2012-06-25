@@ -120,14 +120,11 @@ FluidDynamicMaterialStatus :: initTempStatus()
 int
 FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-  /*
     FluidDynamicMaterialStatus *status = ( FluidDynamicMaterialStatus * ) this->giveStatus(aGaussPoint);
-    if ( type == IST_DeviatoricStrain ) {
+    if ( type == IST_DeviatoricStress ) {
         answer = status->giveDeviatoricStressVector();
         return 1;
-    }
-  */
-    if (type == IST_Viscosity ) {
+    } else if ( type == IST_Viscosity ) {
         answer.resize(1); answer.at(1) = this->giveCharacteristicValue (MRM_Viscosity, aGaussPoint, atTime);
         return 1;
     } else {
@@ -139,12 +136,9 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint,
 InternalStateValueType
 FluidDynamicMaterial :: giveIPValueType(InternalStateType type)
 {
-#if 0
-    if ( ( type == IST_DeviatoricStrain ) ) {
+    if ( type == IST_DeviatoricStress ) {
         return ISVT_TENSOR_S3;
-    }
-#endif
-    if (type == IST_Viscosity ) {
+    } else if (type == IST_Viscosity ) {
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
@@ -155,33 +149,22 @@ FluidDynamicMaterial :: giveIPValueType(InternalStateType type)
 int
 FluidDynamicMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-#if 0
-    if ( ( type == IST_DeviatoricStrain ) ) {
+    if ( type == IST_DeviatoricStress ) {
         if ( mmode == _2dFlow ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(6) = 3;
+            answer.setValues(3, 1, 2, 3);
             return 1;
-        } else if (mmode == _2dAxiFlow ) {
-            answer.resize(6);
-            answer.at(1) = 1;
-            answer.at(2) = 2;
-            answer.at(3) = 3;
-            answer.at(6) = 4;
+        } else if ( mmode == _2dAxiFlow ) {
+            answer.setValues(4, 1, 2, 3, 6);
             return 1;
-        } else if (mmode == _3dFlow ) {
+        } else if ( mmode == _3dFlow ) {
             answer.resize(6);
-            int i;
-            for (i=1; i<=6; i++) answer.at(i) = i;
+            for ( int i = 1; i <= 6; i++ ) answer.at(i) = i;
             return 1;
         } else {
             OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
             return 0;
         }
-    }
-#endif
-    if (type == IST_Viscosity ) {
+    } else if ( type == IST_Viscosity ) {
         answer.resize(1); answer.at(1) = 1;
         return 1;
     }  else {
@@ -193,9 +176,8 @@ FluidDynamicMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateTy
 int
 FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-#if 0
     MaterialMode mmode = aGaussPoint->giveMaterialMode();
-    if ( ( type == IST_DeviatoricStrain ) ) {
+    if ( type == IST_DeviatoricStress ) {
         if ( mmode == _2dFlow ) {
             return 3;
         } else if (mmode == _2dAxiFlow ) {
@@ -206,9 +188,7 @@ FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGau
             OOFEM_ERROR ("FluidDynamicMaterial :: giveIPValueSize: material mode not supported");
             return 0;
         }
-    }
-#endif
-    if (type == IST_Viscosity ) {
+    } else if (type == IST_Viscosity ) {
         return 1;
     } else {
         return Material :: giveIPValueSize(type, aGaussPoint);
@@ -246,7 +226,6 @@ FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
 // current state)
 //
 {
-    // FloatArray *s;
     contextIOResultType iores;
     if ( stream == NULL ) {
         _error("saveContex : can't write into NULL stream");
