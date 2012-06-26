@@ -101,7 +101,11 @@ public:
     double giveDeltaT(int n);
 
     void averageOverElements(TimeStep *tStep);
-    
+
+#ifdef __PETSC_MODULE
+    virtual void initPetscContexts();
+#endif
+
 protected:
     /**
      * Contains last time stamp of internal variable update.
