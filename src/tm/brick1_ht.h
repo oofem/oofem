@@ -56,7 +56,7 @@ public:
 
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *gp);
-
+    virtual FEInterpolation *giveInterpolation() { return & interpolation; }
     // definition
     virtual const char *giveClassName() const { return "Brick1_ht"; }
     virtual classType giveClassID() const { return Brick1_htClass; }
