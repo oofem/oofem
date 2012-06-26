@@ -51,18 +51,18 @@ StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_mas
     conductivityMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
-}  
+}
 
 StationaryTransportProblem :: ~StationaryTransportProblem()
 {
     delete  conductivityMatrix;
-    if ( nMethod ) { 
+    if ( nMethod ) {
         delete nMethod;
     }
     if ( UnknownsField ) {
         delete UnknownsField;
     }
-     
+
 }
 
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -120,7 +120,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
             }
         }
     }
-    
+
     return IRRT_OK;
 }
 
@@ -168,7 +168,8 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
 }
 
 
-void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
+void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
+{
     //
     // creates system of governing eq's and solves them at given time step
     //

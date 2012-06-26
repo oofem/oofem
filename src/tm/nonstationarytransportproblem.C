@@ -54,9 +54,6 @@ namespace oofem {
 
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
-    UnknownsField = NULL;
-    lhs = NULL;
-    nMethod = NULL;
     ndomains = 1;
     lumpedCapacityStab = 0;
     initT = 0.;
@@ -69,17 +66,6 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
 {
-    if ( lhs ) {
-        delete lhs;
-    }
-
-    if ( nMethod ) {
-        delete nMethod;
-    }
-
-    if ( UnknownsField ) {
-       // delete UnknownsField;
-    }
 }
 
 
@@ -107,7 +93,7 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
-    
+
     if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
         IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt"); // Macro
     }
@@ -271,25 +257,25 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
     //Create a new lhs matrix if necessary
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( lhs ) {
-            delete lhs;
+        if ( conductivityMatrix ) {
+            delete conductivityMatrix;
         }
 
-        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
+        this->assemble( conductivityMatrix, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        lhs->times(alpha);
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
+        conductivityMatrix->times(alpha);
+        this->assemble( conductivityMatrix, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -339,7 +325,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     UnknownsField->giveSolutionVector(tStep)->resize(neq);
-    nMethod->solve( lhs, & rhs, UnknownsField->giveSolutionVector(tStep) );
+    nMethod->solve( conductivityMatrix, & rhs, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 }
@@ -753,19 +739,4 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     }
 }
 
-
-#ifdef __PETSC_MODULE
-void
-NonStationaryTransportProblem :: initPetscContexts()
-{
-    int i;
-    PetscContext *petscContext;
-
-    petscContextList->growTo(ndomains);
-    for ( i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this, EID_ConservationEquation);
-        petscContextList->put(i + 1, petscContext);
-    }
-}
-#endif
 } // end namespace oofem

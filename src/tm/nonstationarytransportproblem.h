@@ -49,6 +49,33 @@ namespace oofem {
  */
 class NonStationaryTransportProblem : public StationaryTransportProblem
 {
+protected:
+    /**
+     * Contains last time stamp of internal variable update.
+     * This update is made via various services
+     * (like those for computing real internal forces or updating the internal state).
+     */
+    StateCounterType internalVarUpdateStamp;
+
+    /// Right hand side vector from boundary conditions.
+    FloatArray bcRhs;
+
+    SparseMtrxType sparseMtrxType;
+
+    /// Initial time from which the computation runs. Default is zero.
+    double initT;
+    double deltaT;
+    double alpha;
+
+    /// If set then stabilization using lumped capacity will be used.
+    int lumpedCapacityStab;
+
+    /// Associated time function for time step increment.
+    int dtTimeFunction;
+
+    /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
+    bool changingProblemSize;
+
 public:
     /// Constructor.
     NonStationaryTransportProblem(int i, EngngModel *_master);
@@ -102,41 +129,7 @@ public:
 
     void averageOverElements(TimeStep *tStep);
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
-#endif
-
 protected:
-    /**
-     * Contains last time stamp of internal variable update.
-     * This update is made via various services
-     * (like those for computing real internal forces or updating the internal state).
-     */
-    StateCounterType internalVarUpdateStamp;
-
-    SparseMtrx *lhs;
-    /// Right hand side vector from boundary conditions.
-    FloatArray bcRhs;
-
-    SparseMtrxType sparseMtrxType;
-    /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
-
-    /// Initial time from which the computation runs. Default is zero.
-    double initT;
-    double deltaT;
-    double alpha;
-
-    
-    /// If set then stabilization using lumped capacity will be used.
-    int lumpedCapacityStab;
-
-    /// Associated time function for time step increment.
-    int dtTimeFunction;
-
-    /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
-    bool changingProblemSize;
-
     virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
                                               const UnknownNumberingScheme &s, TimeStep *tStep);
 

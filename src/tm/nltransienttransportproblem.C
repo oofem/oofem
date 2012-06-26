@@ -95,16 +95,16 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 #endif
     //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
-        if ( lhs ) {
-            delete lhs;
+        if ( conductivityMatrix ) {
+            delete conductivityMatrix;
         }
 
-        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
@@ -112,7 +112,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
     //create previous solution from IC or from previous tStep
     if ( tStep->isTheFirstStep() ) {
-        if(stepWhenIcApply==NULL){
+        if( stepWhenIcApply == NULL ){
             stepWhenIcApply = new TimeStep(*tStep->givePreviousStep());
         }
         this->applyIC(stepWhenIcApply); //insert solution to hash=1(previous), if changes in equation numbering
@@ -158,15 +158,15 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 #endif
 
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
-            lhs->zero();
+            conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, LHSBCMatrix,
+            this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, LHSBCMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
+            this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            lhs->times(alpha);
+            conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
+            this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
@@ -195,7 +195,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         // compute norm of residuals from balance equations
         solutionErr = rhs.computeNorm();
 
-        nMethod->solve(lhs, & rhs, & solutionVectorIncrement);
+        nMethod->solve(conductivityMatrix, & rhs, & solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
