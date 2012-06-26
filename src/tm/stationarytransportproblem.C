@@ -45,6 +45,26 @@
 
 namespace oofem {
 
+StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
+{
+    UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0);
+    conductivityMatrix = NULL;
+    ndomains = 1;
+    nMethod = NULL;
+}  
+
+StationaryTransportProblem :: ~StationaryTransportProblem()
+{
+    delete  conductivityMatrix;
+    if ( nMethod ) { 
+        delete nMethod;
+    }
+    if ( UnknownsField ) {
+        delete UnknownsField;
+    }
+     
+}
+
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -91,19 +111,16 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
                 mask.at(1) = T_f;
-                MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, &this->FluxField, mask);
-
+                MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask);
                 fm->registerField(_temperatureField, ( FieldType ) exportFields.at(i), true);
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
                 mask.at(1) = C_1;
-                MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, &this->FluxField, mask);
-
+                MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask);
                 fm->registerField(_concentrationField, ( FieldType ) exportFields.at(i), true);
             }
         }
     }
-
-
+    
     return IRRT_OK;
 }
 
@@ -120,7 +137,7 @@ double StationaryTransportProblem ::  giveUnknownComponent(EquationID chc, Value
     }
 
     if ( chc == EID_ConservationEquation ) { // heat and mass concetration vector
-        return FluxField.giveUnknownValue(dof, mode, tStep);
+        return UnknownsField->giveUnknownValue(dof, mode, tStep);
     } else {
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
     }
@@ -156,7 +173,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     // creates system of governing eq's and solves them at given time step
     //
     // first assemble problem at current time step
-    FluxField.advanceSolution(tStep);
+    UnknownsField->advanceSolution(tStep);
 
     if ( tStep->giveNumber() == 1 ) {
 #ifdef VERBOSE
@@ -164,8 +181,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 #endif
 
         // alocate space for solution vector
-        FloatArray *solutionVector;
-        solutionVector = FluxField.giveSolutionVector(tStep);
+        FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
         solutionVector->resize( this->giveNumberOfEquations(EID_ConservationEquation) );
         solutionVector->zero();
 
@@ -217,7 +233,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 #endif
 
     //nMethod -> solveYourselfAt(tStep);
-    nMethod->solve( conductivityMatrix, & rhsVector, FluxField.giveSolutionVector(tStep) );
+    nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 }
@@ -254,7 +270,7 @@ StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = FluxField.saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -297,7 +313,7 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = FluxField.restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

@@ -965,7 +965,7 @@ MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
             return 0;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return 1;
-    } else if ( type == IST_DamageScalar ) {
+    } else if ( type == IST_DamageScalar || type == IST_DamageTensor) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, gp);

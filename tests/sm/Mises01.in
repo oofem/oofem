@@ -1,0 +1,28 @@
+Mises01.out
+Test of Mises plasticity model with linear hardening/softening
+NonLinearStatic nsteps 20 rtolv 0.0001 MaxIter 20 stiffMode 1 controlmode 1 nmodules 0
+#vtkxml tstep_all domain_all primvars 1 1
+domain 1dtruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 2 nic 0
+node 1 coords 3 0.0 0.0 0.0 bc 1 1
+node 2 coords 3 0.5 0.0 0.0 bc 1 2
+truss1d 1 nodes 2 1 2 mat 1 crossSect 1
+SimpleCS 1 thick 1.0 width 10.0
+MisesMat 1 d 1.0 tAlpha 12.e-6 E 1. n 0.2 sig0 1 H 0.1 omega_crit 0.1 a 0.1
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 0.4
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 5 t 5 0.0 5.0 10.0 15.0 20.0 f(t) 5 0.0 5.0 -5.0 5.0 -5.
+###
+### Used for Extractor
+###
+#%BEGIN_CHECK% tolerance 1.e-4
+##TIME
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.8
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 0.8
+#ELEMENT tStep 5 number 1 gp 1 keyword "strains" component 1  value 4.0
+#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 1  value 1.2423
+#ELEMENT tStep 19 number 1 gp 1 keyword "strains" component 1  value -2.4
+#ELEMENT tStep 19 number 1 gp 1 keyword "stresses" component 1  value -2.1853
+#%END_CHECK%

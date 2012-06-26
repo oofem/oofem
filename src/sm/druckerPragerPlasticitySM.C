@@ -46,8 +46,6 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 
-#define PRINTFDP //if defined, printf debug info simultaneously on screen
-
 namespace oofem {
 DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
@@ -104,7 +102,7 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, " Yielding, ");
         break;
     case DruckerPragerPlasticitySMStatus :: DP_Vertex:
-        fprintf(file, " Vertex return, ");
+        fprintf(file, " Vertex_return, ");
         break;
     case DruckerPragerPlasticitySMStatus :: DP_Unloading:
         fprintf(file, " Unloading, ");
@@ -115,7 +113,7 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StrainVector plasticStrainVector( gp->giveMaterialMode() );
     giveFullPlasticStrainVector(plasticStrainVector);
 
-    fprintf(file, "plastic strains ");
+    fprintf(file, "plasticStrains ");
     int n = plasticStrainVector.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         fprintf( file, " % .4e", plasticStrainVector.at(i) );
@@ -123,7 +121,7 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf(file, "}\n");
 
-    fprintf(file, "\t\thardening parameter ");
+    fprintf(file, "\t\thardening_parameter ");
     // print hardening parameter
     fprintf(file, " % .4e\n", kappa);
 }
@@ -265,7 +263,7 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
 int
 DruckerPragerPlasticitySM :: hasMaterialModeCapability(MaterialMode mMode)
 {
-    if ( ( mMode == _3dMat ) ||
+    if ( ( mMode == _3dMat ) || //mMode == _PlaneStress - this mode needs to be elaborated
         ( mMode == _PlaneStrain ) ||
         ( mMode == _3dRotContinuum ) ) {
         return 1;
@@ -469,9 +467,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
         //printf("newtonError = %e\n", newtonError) ;
     }
 
-#ifdef PRINTFDP
-    printf("iterationCount in regular return = %d\n", iterationCount) ;
-#endif
+    OOFEM_LOG_DEBUG("IterationCount in regular return = %d\n", iterationCount) ;
 
     if ( deltaLambda < 0. ) {
         _error("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
@@ -526,15 +522,13 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         tempKappa = kappa + deltaKappa;
         yieldValue = computeYieldValue(volumetricStress, 0., tempKappa, eM);
         newtonError = fabs(yieldValue / eM);
-#ifdef PRINTFDP
-        printf("newtonError in iteration %d in vertex return = %e\n", iterationCount, newtonError) ;
-#endif
+        OOFEM_LOG_DEBUG("NewtonError in iteration %d in vertex return = %e\n", iterationCount, newtonError) ;
     }
 
-    printf("Done iteration in vertex return, after %d\n", iterationCount) ;
+    OOFEM_LOG_DEBUG("Done iteration in vertex return, after %d\n", iterationCount);
 
     if ( deltaKappa < 0. ) {
-        _error("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.\n");
+        _error("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with a local snapback, which is physically inadmissible.\n");
     }
 }
 

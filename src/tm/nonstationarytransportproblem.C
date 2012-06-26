@@ -33,6 +33,7 @@
  */
 
 #include "nonstationarytransportproblem.h"
+#include "stationarytransportproblem.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
@@ -51,7 +52,7 @@
 
 namespace oofem {
 
-NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
+NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     UnknownsField = NULL;
     lhs = NULL;
@@ -77,7 +78,7 @@ NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
     }
 
     if ( UnknownsField ) {
-        delete UnknownsField;
+       // delete UnknownsField;
     }
 }
 
@@ -106,14 +107,7 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
-    int val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonStationaryTransportProblem_lstype, "lstype"); // Macro
-    solverType = ( LinSystSolverType ) val;
-
-    val = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_NonStationaryTransportProblem_smtype, "smtype"); // Macro
-    sparseMtrxType = ( SparseMtrxType ) val;
-
+    
     if ( ir->hasField(IFT_NonStationaryTransportProblem_initt, "initt") ) {
         IR_GIVE_FIELD(ir, initT, IFT_NonStationaryTransportProblem_initt, "initt"); // Macro
     }
@@ -143,28 +137,8 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
         UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
     }
 
-    // read field export flag
-    IntArray exportFields;
-    exportFields.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_NonStationaryTransportProblem_exportfields, "exportfields" ); // Macro
-    if ( exportFields.giveSize() ) {
-        // export flux fields
-        IntArray mask(1);
-        FieldManager *fm = this->giveContext()->giveFieldManager();
-        for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
-            if ( exportFields.at(i) == FT_Temperature ) {
-                mask.at(1) = T_f;
-                MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask);
-
-                fm->registerField(_temperatureField, ( FieldType ) exportFields.at(i), true);
-            } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                mask.at(1) = C_1;
-                MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask);
-
-                fm->registerField(_concentrationField, ( FieldType ) exportFields.at(i), true);
-            }
-        }
-    }
+    //read other input data from StationaryTransportProblem
+    StationaryTransportProblem :: initializeFrom(ir);
 
     return IRRT_OK;
 }

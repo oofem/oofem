@@ -33,13 +33,13 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK% tolerance 1.e-3
 ## TIME
 ## Check temperature
-#NODE tStep 3.60000000e+03 number 2 dof 1 unknown f value 2.04967474e+01
-#NODE tStep 3.60000000e+03 number 3 dof 1 unknown f value 2.04737043e+01
-#NODE tStep 3.24000000e+04 number 2 dof 1 unknown f value 3.61721975e+01
-#NODE tStep 3.24000000e+04 number 3 dof 1 unknown f value 4.23928537e+01
+#NODE tStep 3.60000000e+03 number 2 dof 1 unknown f value 20.4511434
+#NODE tStep 3.60000000e+03 number 3 dof 1 unknown f value 20.4460065
+#NODE tStep 3.24000000e+04 number 2 dof 1 unknown f value 37.9775067
+#NODE tStep 3.24000000e+04 number 3 dof 1 unknown f value 44.5165403
 ## Check degree of hydration
 #ELEMENT tStep 3.60000000e+03 number 1 gp 1 keyword "DoH" component 1 value 0.019081
-#ELEMENT tStep 3.60000000e+03 number 6 gp 1 keyword "DoH" component 1 value 0.025063
-#ELEMENT tStep 3.24000000e+04 number 1 gp 1 keyword "DoH" component 1 value 0.468629
-#ELEMENT tStep 3.24000000e+04 number 6 gp 1 keyword "DoH" component 1 value 0.484074
+#ELEMENT tStep 3.60000000e+03 number 6 gp 1 keyword "DoH" component 1 value 0.019081
+#ELEMENT tStep 3.24000000e+04 number 1 gp 1 keyword "DoH" component 1 value 0.494072
+#ELEMENT tStep 3.24000000e+04 number 6 gp 1 keyword "DoH" component 1 value 0.479393
 #%END_CHECK%

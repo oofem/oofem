@@ -54,12 +54,10 @@ class Context:
 
 
 
-begin_re = re.compile(r"""
-        ^\#%BEGIN_CHECK%
-        """, re.X)
+begin_re = re.compile(r"""^\#%BEGIN_CHECK%""", re.X)
 
 end_re   = re.compile(r"""
-        ^           #beginning of the line
+        ^              #beginning of the line
         \#%END_CHECK%
         """, re.X)
 
@@ -107,44 +105,13 @@ gp_re = re.compile(r"""
         \s*:.*          # eat some chars
         """,re.X)
 
-gpstress_re = re.compile (r"""
-        stresses\s*
-        ([\s+-e\d]+)
-        """,re.X)
-
-gpstrain_re = re.compile (r"""
-        strains\s*
-        ([\s+-e\d]+)
-        """,re.X)
-
-gpstrain_re = re.compile (r"""
-        strains\s*
-        ([\s+-e\d]+)
-        """,re.X)
-
-gpstatus_re = re.compile (r"""
-        status\s.*
-        """, re.X)
-
-gpstate_re = re.compile (r"""
-        state\s*
-        ([\s+-e\d]+)
-        """,re.X)
-
-gpflow_re = re.compile (r"""
-        flow\s*
-        ([\s+-e\d]+)
-        """,re.X)
-
-gpDoH_re = re.compile (r"""
-        DoH\s*
-        ([\s+-e\d]+)
-        """,re.X)
-
-gpHeatPower_re = re.compile (r"""
-        HeatPower\s*
-        ([\s+-e\d]+)
-        """,re.X)
+gpstress_re = re.compile (r"""[ ]stresses\s*([\s+-e\d]+)""",re.X)
+gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
+gpstatus_re = re.compile (r"""status\s.*""", re.X)
+gpstate_re = re.compile (r"""state\s*([\s+-e\d]+)""",re.X)
+gpflow_re = re.compile (r"""flow\s*([\s+-e\d]+)""",re.X)
+gpDoH_re = re.compile (r"""DoH\s*([\s+-e\d]+)""",re.X)
+gpHeatPower_re = re.compile (r"""HeatPower\s*([\s+-e\d]+)""",re.X)
 
 beamrec_re  = re.compile (r"""
         displacements|forces
@@ -420,40 +387,40 @@ def match_gpsubrec (context, aline):
     pmatch=gpstress_re.search(aline)
     if pmatch:
         check_element_rec (context, 'stresses', aline)
-        if debug: print "     stress rec"
+        if debug: print "     stress rec %s" % aline
         return 1
     ppmatch = gpstrain_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'strains', aline)
-        if debug: print "     strain rec"
+        if debug: print "     strain rec %s" % aline
         return 1
     ppmatch = gpstatus_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'status', aline)
-        if debug: print "     status rec"
+        if debug: print "     status rec %s" % aline
         return 1
     #state variables in transport problems
     ppmatch = gpstate_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'state', aline)
-        if debug: print "     state rec"
+        if debug: print "     state rec %s" % aline
         return 1
     #flow vector in transport problems
     ppmatch = gpflow_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'flow', aline)
-        if debug: print "     flow rec"
+        if debug: print "     flow rec %s" % aline
         return 1
     #Degree of hydration in cement hydration models
     ppmatch = gpDoH_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'DoH', aline)
-        if debug: print "     DoH rec"
+        if debug: print "     DoH rec %s" % aline
         return 1
     ppmatch = gpHeatPower_re.search(aline)
     if ppmatch:
         check_element_rec (context, 'HeatPower', aline)
-        if debug: print "     HeatPower rec"
+        if debug: print "     HeatPower rec %s" % aline
         return 1
     return 0
 
@@ -531,7 +498,7 @@ def check_results (context, tolerance):
             err = float(rec[-1])
         if (abs(err) > float(tolerance)):
             if (success): print header # print header before reporting error for the first time
-            print "\tError when checking rule ",irec,": err = ",err, ", value is ",float(rec[-1])," and should be ",float(context.recVal[irec])
+            print "\tError when checking rule %d: err = %g, value is %g and should be %g" % (irec, err, float(rec[-1]) ,float(context.recVal[irec]))
             # print rec, recVal
             success = 0
 

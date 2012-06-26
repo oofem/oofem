@@ -41,49 +41,14 @@
 #include "primaryfield.h"
 #include "dofdistributedprimaryfield.h"
 #include "transportmaterial.h"
+#include "stationarytransportproblem.h"
 
 namespace oofem {
 /**
  * This class represents linear nonstationary transport problem.
  */
-class NonStationaryTransportProblem : public EngngModel
+class NonStationaryTransportProblem : public StationaryTransportProblem
 {
-protected:
-    /**
-     * Contains last time stamp of internal variable update.
-     * This update is made via various services
-     * (like those for computing real internal forces or updating the internal state).
-     */
-    StateCounterType internalVarUpdateStamp;
-
-    SparseMtrx *lhs;
-    /// Right hand side vector from boundary conditions.
-    FloatArray bcRhs;
-    /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
-    PrimaryField *UnknownsField;
-
-    LinSystSolverType solverType;
-    SparseMtrxType sparseMtrxType;
-    /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
-
-    /// Initial time from which the computation runs. Default is zero.
-    double initT;
-    double deltaT;
-    double alpha;
-
-    /// If set then stabilization using lumped capacity will be used.
-    int lumpedCapacityStab;
-
-    // if set, the receiver flux field will be exported using FieldManager
-    //int exportFieldFlag;
-
-    /// Associated time function for time step increment.
-    int dtTimeFunction;
-
-    /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
-    bool changingProblemSize;
-
 public:
     /// Constructor.
     NonStationaryTransportProblem(int i, EngngModel *_master);
@@ -136,12 +101,38 @@ public:
     double giveDeltaT(int n);
 
     void averageOverElements(TimeStep *tStep);
-
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
-#endif
-
+    
 protected:
+    /**
+     * Contains last time stamp of internal variable update.
+     * This update is made via various services
+     * (like those for computing real internal forces or updating the internal state).
+     */
+    StateCounterType internalVarUpdateStamp;
+
+    SparseMtrx *lhs;
+    /// Right hand side vector from boundary conditions.
+    FloatArray bcRhs;
+
+    SparseMtrxType sparseMtrxType;
+    /// Numerical method used to solve the problem.
+    SparseLinearSystemNM *nMethod;
+
+    /// Initial time from which the computation runs. Default is zero.
+    double initT;
+    double deltaT;
+    double alpha;
+
+    
+    /// If set then stabilization using lumped capacity will be used.
+    int lumpedCapacityStab;
+
+    /// Associated time function for time step increment.
+    int dtTimeFunction;
+
+    /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
+    bool changingProblemSize;
+
     virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
                                               const UnknownNumberingScheme &s, TimeStep *tStep);
 

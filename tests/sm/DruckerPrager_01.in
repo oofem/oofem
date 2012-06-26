@@ -1,0 +1,31 @@
+DruckerPrager_01.out
+Test of DruckerPrager material under plane-strain conditions
+NonLinearStatic nsteps 10 rtolv 1.e-6 controlmode 1 maxiter 100 nmodules 0
+#vtkxml tstep_step 1 domain_all primvars 1 1 vars 3 1 4 27 stype 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2
+Node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
+Node 2 coords 3  4.0   0.0   0.0  bc 2 2 1
+Node 3 coords 3  4.0   2.0   0.0  bc 2 2 0
+Node 4 coords 3  0.0   2.0   0.0  bc 2 1 0
+Quad1PlaneStrain 1 nodes 4 1 2 3 4  mat 1 NIP 4 crossSect 1
+SimpleCS 1 thick 0.3
+DruckerPrager 1 d 1.0 tAlpha 0.000012  E 30000. n 0.25 alpha 0.3 alphaPsi 0.3 ht 1 iys 8. hm 1.e-6
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 4.e-4
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 npoints 2 t 2 0. 100. f(t) 2 0. 100.
+###
+### Used for Extractor
+###
+#%BEGIN_CHECK% tolerance 1.e-6
+##TIME
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0001
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 3.2
+#ELEMENT tStep 5 number 1 gp 1 keyword "strains" component 1  value 0.0005
+#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 1  value 9.0328
+#ELEMENT tStep 9 number 1 gp 1 keyword "strains" component 1  value 0.0009
+#ELEMENT tStep 9 number 1 gp 1 keyword "stresses" component 1  value 9.0957
+#%END_CHECK%
+

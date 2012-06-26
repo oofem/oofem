@@ -429,7 +429,7 @@ the stress strain law
 \end{equation}
 the definition of the yield function in terms of the effective stress,
 \begin{equation}\label{VMvonMisesCondition}
-f(\bar{\vs},\kappa) = \sqrt{\frac{3}{2}\bar{\vs}:\bar{\vs}}-\sigma_Y(\kappa),
+f(\bar{\vs},\kappa) = \sqrt{\frac{3}{2}\bar{\vs}:\bar{\vs}}-\sigma_Y(\kappa) = \sqrt{3 J_2(\bar{\vsig})}-\sigma_Y(\kappa),
 \end{equation}
 the incremental definition of cumulative plastic strain
 \begin{equation}\label{VMcumPlasStrain}
@@ -480,7 +480,7 @@ Parameters &- \param{} material number\\
 &- \param{H} hardening modulus (can be negative in the case of plastic softening)\\
 &- \param{omega\_crit} critical damage in damage law (\ref{damagelawmp})\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
-Supported modes& 1dMat, PlaneStress, 3dMat, 3dMatF\\
+Supported modes& 1dMat, PlaneStrain, 3dMat, 3dMatF\\
 \hline
 \end{tabular}
 \caption{Mises plasticity -- summary.}
@@ -488,8 +488,9 @@ Supported modes& 1dMat, PlaneStress, 3dMat, 3dMatF\\
 %\end{center}
 \end{table}
 
+VTKxml output can report Mises stress, which equals to $\sqrt{3J_2}$. When no hardening/softening exists, Mises stress reaches values up to given uniaxial yield stress $\param{sig0}$. 
 
-\subsubsection{Nonlocal formulation}
+\subsubsection{Mises plasticity model with isotropic damage, nonlocal - MisesMatNL}
 The small-strain version of the model is regularized by the over-nonlocal formulation with damage driven by a combination of local and nonlocal cumulated plastic strain,
 \begin{equation}\label{overKappa1}
 \hat{\kappa} = (1-m)\kappa + m\bar{\kappa},
@@ -511,8 +512,8 @@ where
 \begin{equation}\label{alpha0}
 \alpha_0(r) = \begin{cases} \left(1-\frac{r^2}{R^2}\right)^2 &\text{if $r<R$}\\ 
 \\
-							0 & \text{if $r \ge R$}
-			  \end{cases}
+0 & \text{if $r \ge R$}
+\end{cases}
 \end{equation}
 is a nonnegative function, for $r<R$ monotonically decreasing with increasing distance $r=\Vert x-s\Vert$, and $V$ denotes the domain occupied by the investigated material body.
 The key idea is that the damage evolution at a certain point depends not only on the cumulated plastic strain at that point, but also on points at distances smaller than the interaction radius $R$, considered as a new material parameter. 
@@ -537,8 +538,8 @@ multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimensio
 \hline
 Description & Nonlocal Mises plasticity with isotropic hardening\\
 \hline
-Record Format & \descitem{MisesMatNl}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\elemparam{r}{rn}\elemparam{m}{rn}\\\\
+Record Format & \descitem{MisesMatNL} \elemparam{}{in} \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} 
+\elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\elemparam{r}{rn}\elemparam{m}{rn} \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
@@ -549,7 +550,7 @@ Parameters &- \param{} material number\\
 &- \param{a} exponent in damage law\\
 &- \param{r} nonlocal interaction radius $R$  from eq.~(\ref{alpha0})\\
 &- \param{m} over-nonlocal parameter\\
-Supported modes& 1dMat, PlaneStress, 3dMat\\
+Supported modes& 1dMat, PlaneStrain, 3dMat\\
 \hline
 \end{tabular}
 \caption{Nonlocal integral Mises plasticity -- summary.}
@@ -574,7 +575,7 @@ Parameters &- \param{} material number\\
 &- \param{a} exponent in damage law\\
 &- \param{r} internal length scale parameter $l^2$ from eq.~(\ref{implicitGradient})\\
 &- \param{m} over-nonlocal parameter\\
-Supported modes& 1dMat, PlaneStress, 3dMat\\
+Supported modes& 1dMat, PlaneStrain, 3dMat\\
 \hline
 \end{tabular}
 \caption{Gradient-enhanced Mises plasticity -- summary.}

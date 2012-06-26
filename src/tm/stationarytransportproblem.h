@@ -46,32 +46,11 @@ namespace oofem {
  */
 class StationaryTransportProblem : public EngngModel
 {
-protected:
-    SparseMtrx *conductivityMatrix;
-    FloatArray rhsVector;
-
-    //FloatArray solutionVector;
-    PrimaryField FluxField;
-
-    LinSystSolverType solverType;
-    SparseMtrxType sparseMtrxType;
-    /// Numerical method used to solve the problem
-    SparseLinearSystemNM *nMethod;
-    //// if set, the receiver flux field will be exported using FieldManager
-    //int exportFieldFlag;
-
 public:
-    StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master), rhsVector(),
-        FluxField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0)
-    {
-        conductivityMatrix = NULL;
-        ndomains = 1;
-        nMethod = NULL;
-    }
-    virtual ~StationaryTransportProblem()
-    {
-        delete  conductivityMatrix;
-        if ( nMethod ) { delete nMethod; } }
+    /// Constructor.  
+    StationaryTransportProblem(int i, EngngModel *_master);
+    /// Destructor.
+    virtual ~StationaryTransportProblem();
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
@@ -94,12 +73,22 @@ public:
     virtual const char *giveClassName() const { return "StationaryTransportProblem"; }
     virtual classType giveClassID() const { return StationaryTransportProblemClass; }
     virtual fMode giveFormulation() { return TL; }
+    LinSystSolverType solverType;
+    SparseMtrxType sparseMtrxType;
+    /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
+    PrimaryField *UnknownsField;
 
 #ifdef __PETSC_MODULE
     virtual void initPetscContexts();
 #endif
-
+ 
 protected:
+    SparseMtrx *conductivityMatrix;
+    FloatArray rhsVector;
+
+    /// Numerical method used to solve the problem
+    SparseLinearSystemNM *nMethod;
+
     /**
      * Assembles part of rhs due to Dirichlet boundary conditions.
      * @param answer Global vector where the contribution will be added.
