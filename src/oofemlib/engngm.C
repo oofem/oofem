@@ -1199,12 +1199,6 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Eq
     answer.resize( this->giveNumberOfEquations( eid ) );
     answer.zero();
 
-#ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
-        exchangeRemoteElementData( RemoteElementExchangeTag  );
-    }
-#endif
-
     nelems = domain->giveNumberOfElements();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
