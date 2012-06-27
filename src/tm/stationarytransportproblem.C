@@ -47,7 +47,7 @@ namespace oofem {
 
 StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
 {
-    UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0);
+    UnknownsField = NULL;
     conductivityMatrix = NULL;
     ndomains = 1;
     nMethod = NULL;
@@ -119,6 +119,10 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
                 fm->registerField(_concentrationField, ( FieldType ) exportFields.at(i), true);
             }
         }
+    }
+
+    if( UnknownsField == NULL ){//can exist from nonstationary transport problem
+        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0);
     }
 
     return IRRT_OK;

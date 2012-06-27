@@ -58,7 +58,6 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     lumpedCapacityStab = 0;
     initT = 0.;
     deltaT = 0.;
-    //exportFieldFlag = 0;
     dtTimeFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;

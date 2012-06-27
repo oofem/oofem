@@ -978,7 +978,6 @@ CemhydMatStatus :: ~CemhydMatStatus(void) {
     if ( xmlFile != NULL ) {
         delete xmlFile;
     }
-
 #endif
 
     delete [] CSH_vicinity;
