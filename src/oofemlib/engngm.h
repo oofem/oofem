@@ -176,6 +176,17 @@ public:
     enum EngngModelCommType { PC_default, PC_nonlocal };
 #endif
 
+    /**
+     * Means to choose methods for finding a good initial guess.
+     * This is ad-hoc methods, often problem-specific for obtaining a point from which Newton iterations work.
+     * Only nonlinear analysis needs to worry about this.
+     */
+    enum InitialGuess {
+        IG_None = 0, ///< No special treatment for new iterations. Probably means ending up using @f$ {}^{n+1}x = {}^{n}x @f$ for all free dofs.
+        IG_Tangent = 1, ///< Solves an approximated tangent problem from the last iteration. Useful for changing Dirichlet boundary conditions.
+        //IG_Extrapolated = 2, ///< Assumes constant increment extrapolating @f$ {}^{n+1}x = {}^{n}x + \Delta t\delta{x}'@f$, where @f$ \delta x' = ({}^{n}x - {}^{n-1}x)/{}^{n}Delta t@f$.
+    };
+
 protected:
     /// Number of receiver domains.
     int ndomains;
@@ -864,6 +875,19 @@ public:
     double assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                       CharType type, ValueModeType mode,
                                       const UnknownNumberingScheme &s, Domain *domain);
+
+    /**
+     * Assembles the extrapolated internal forces vector,
+     * useful for obtaining a good initial guess in nonlinear analysis with Dirichlet boundary conditions.
+     * @param answer Assembled vector.
+     * @param tStep Time step, when answer is assembled.
+     * @param eid Determines type of equation and corresponding element code numbers.
+     * @param type Determines the type of matrix to use, typically the tangent matrix or possibly the elastic tangent.
+     * @param domain Domain to assemble from.
+     * @return Sum of element norm (squared) of assembled vector.
+     */
+    void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                                    CharType type, Domain *domain);
 
 protected:
 #ifdef __PARALLEL_MODE

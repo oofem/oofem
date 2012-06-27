@@ -86,7 +86,7 @@ protected:
     FloatArray incrementalLoadVector;
     /// A load vector which does not scale for prescribed DOFs.
     FloatArray initialLoadVectorOfPrescribed;
-    /// incremental Load Vector for prescribed DOFs.
+    /// Incremental Load Vector for prescribed DOFs.
     FloatArray incrementalLoadVectorOfPrescribed;
 
     double loadLevel, cumulatedLoadLevel;
@@ -112,6 +112,9 @@ protected:
      * obtained as incremental load vector at given time.
      */
     SparseNonLinearSystemNM :: referenceLoadInputModeType refLoadInputMode;
+
+    /// The initial guess type to use before starting the nonlinear solver.
+    InitialGuess initialGuessType;
 
 public:
     NonLinearStatic(int i, EngngModel *_master = NULL);
@@ -175,17 +178,7 @@ protected:
                                                  SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                  Domain *sourceDomain, EquationID ut, TimeStep *tStep);
 #ifdef __PARALLEL_MODE
-    /** Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
-     *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
-     *  are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
-     *  data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
-     */
     virtual void packMigratingData(TimeStep *tStep);
-    /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
-     *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
-     *  are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
-     *  data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
-     */
     virtual void unpackMigratingData(TimeStep *tStep);
 #endif
 };

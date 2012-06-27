@@ -1186,6 +1186,55 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
 
 
 void
+EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, Domain *domain)
+{
+    // Simply assembles contributions from each element in domain
+    Element *element;
+    IntArray loc;
+    FloatArray charVec, delta_u;
+    FloatMatrix charMatrix;
+    int nelems;
+    EModelDefaultEquationNumbering dn;
+
+    answer.resize( this->giveNumberOfEquations( eid ) );
+    answer.zero();
+
+#ifdef __PARALLEL_MODE
+    if ( isParallel() ) {
+        exchangeRemoteElementData( RemoteElementExchangeTag  );
+    }
+#endif
+
+    nelems = domain->giveNumberOfElements();
+    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+
+    for ( int i = 1; i <= nelems; i++ ) {
+        element = domain->giveElement(i);
+#ifdef __PARALLEL_MODE
+        // Skip remote elements (these are used as mirrors of remote elements on other domains
+        // when nonlocal constitutive models are used. Their introduction is necessary to
+        // allow local averaging on domains without fine grain communication between domains).
+        if ( element->giveParallelMode() == Element_remote ) continue;
+#endif
+        element->giveLocationArray( loc, eid, dn );
+
+        // Take the tangent from the previous step
+        ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
+        ///(tangent will be computed for the previous step, with whatever deltaT it had)
+        element->giveCharacteristicMatrix( charMatrix, type, tStep );
+        element->computeVectorOf(eid, VM_Incremental, tStep, delta_u);
+        charVec.beProductOf(charMatrix, delta_u);
+
+        ///@todo Deal with element deactivation and reactivation properly.
+
+        answer.assemble(charVec, loc);
+    }
+
+    this->timer.pauseTimer( EngngModelTimer :: EMTT_NetComputationalStepTimer );
+}
+
+
+void
 EngngModel :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
 {
     domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep);

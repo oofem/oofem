@@ -76,6 +76,7 @@ enum InputFieldType {
     IFT_EngngModel_nxfemman,
     IFT_EngngModel_nonLinFormulation,
     IFT_EngngModel_eetype,
+    IFT_EngngModel_initialGuess,
 
     IFT_MetaStep_nsteps,
 

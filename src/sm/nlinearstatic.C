@@ -72,6 +72,7 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     controlMode = nls_indirectControl;
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
+    initialGuessType = IG_None;
 
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
@@ -175,10 +176,14 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
      * this->loadLevel = 0.0;
      * }
      */
-    int _val = 0;
+    int _val = nls_indirectControl;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controlmode"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_controlmode, "controllmode"); // for backward compatibility
-    controlMode = ( NonLinearStatic_controlType ) _val;
+    this->controlMode = ( NonLinearStatic_controlType ) _val;
+
+    _val = IG_None;
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_EngngModel_initialGuess, "initialguess");
+    this->initialGuessType = ( InitialGuess ) _val;
 
     deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_NonLinearStatic_deltat, "deltat"); // Macro
@@ -186,13 +191,13 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
         _error("updateAttributes: deltaT < 0");
     }
 
-    _val = 0;
+    _val = nls_tangentStiffness;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode"); // Macro
-    stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
+    this->stiffMode = ( NonLinearStatic_stiffnessMode ) _val;
 
-    _val = 0;
+    _val = SparseNonLinearSystemNM :: rlm_total;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_refloadmode, "refloadmode"); // Macro
-    refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
+    this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( ir->hasField(IFT_NonLinearStatic_keepll, "keepll") ) {
         mstepCumulateLoadLevelFlag = true;
@@ -540,6 +545,25 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d]\n\n", tStep->giveNumber(), tStep->giveVersion() );
 #endif
 
+    if ( this->initialGuessType == IG_Tangent ) {
+#ifdef VERBOSE
+        OOFEM_LOG_RELEVANT( "Computing initial guess\n");
+#endif
+        FloatArray extrapolatedForces;
+        this->assembleExtrapolatedForces(extrapolatedForces, tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(di));
+        extrapolatedForces.negated();
+
+        this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));
+        SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
+        OOFEM_LOG_RELEVANT( "solving for increment\n");
+        linSolver->solve(stiffnessMatrix, &extrapolatedForces, &incrementOfDisplacement);
+        OOFEM_LOG_RELEVANT( "initial guess found\n");
+        totalDisplacement.add(incrementOfDisplacement);
+    } else if ( this->initialGuessType != IG_None ) {
+        OOFEM_ERROR2("Initial guess type: %d not supported", initialGuessType);
+    }
+
+
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
@@ -613,10 +637,16 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
 
         break;
     case InternalRhs:
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Updating internal forces\n");
+#endif
         // update internalForces and internalForcesEBENorm concurrently
         this->giveInternalForces(internalForces, true, 1, tStep);
         break;
     case NonLinearRhs_Incremental:
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Updating incremental reference load vectors\n");
+#endif
         this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
                                                       refLoadInputMode, d, EID_MomentumBalance, tStep);
         break;
