@@ -121,21 +121,15 @@ protected:
     void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer) {
         this->giveElement()->computeVectorOf(field, u, stepN, answer);
     }
-    void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer) {
-        this->giveElement()->computeVectorOfPrescribed(ut, type, stepN, answer);
-    }
     bool isActivated(TimeStep *atTime) { return true; }
     void updateInternalState(TimeStep *stepN);
-    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    /*
+    /**
      * Optimized version, allowing to pass element displacements as parameter.
      * Standard version has a huge performance leak; in typical IGA element the element vector is VERY large
      * and its querying for each point take more time than strain evaluation. And this has to be done for each
      * integration point. This optimized version allows to assemble displacement vector only once (for all IP)
      * and pass this vector as parameter
      */
-    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
 
     /*

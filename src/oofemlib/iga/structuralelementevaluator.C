@@ -119,7 +119,7 @@ void StructuralElementEvaluator :: giveCharacteristicVector(FloatArray &answer, 
     if ( type == InternalForcesVector ) {
         this->giveInternalForcesVector(answer, tStep, false); /// @todo Only for total value mode type (?)
     } else if ( type == LastEquilibratedInternalForcesVector ) {
-        this->giveInternalForcesVector(answer, tStep, true); ///  @todo Only for total value mode type (?)
+        this->giveInternalForcesVector(answer, tStep, true); /// @todo Only for total value mode type (?)
     } else {
         answer.resize(0);
     }
@@ -264,14 +264,17 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord)
 {
     Element *elem = this->giveElement();
+    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
     GaussPoint *gp;
     Material *mat = elem->giveMaterial();
     IntegrationRule *iRule;
     int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
     FloatMatrix b;
-    FloatArray bs, stress, temp;
+    FloatArray bs, strain, stress, u, temp;
     IntArray irlocnum;
     double dV;
+
+    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     answer.resize(ndofs);
     FloatArray *m = & answer;
@@ -290,7 +293,8 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             if ( useUpdatedGpRecord ) {
                 stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
             } else {
-                this->computeStressVector(stress, gp, tStep);
+                this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
+                cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
             }
 
             if ( stress.giveSize() == 0 ) {
@@ -315,25 +319,9 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
 }
 
 
-void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
-{
-    FloatArray u;
-    Element *elem = this->giveElement();
-
-
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-
-    /*
-     * // subtract initial displacements, if defined
-     * if (initialDisplacements) u.subtract(initialDisplacements);
-     */
-
-    this->computeStrainVector(answer, gp, stepN, u);
-}
-
-void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u)
+void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u)
 // Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these strains depends
+// the receiver, at time step tStep. The nature of these strains depends
 // on the element's type.
 {
     int i;
@@ -341,7 +329,7 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     FloatArray ur;
     Element *elem = this->giveElement();
 
-    if ( !this->isActivated(stepN) ) {
+    if ( !this->isActivated(tStep) ) {
         answer.resize( elem->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp) );
         answer.zero();
         return;
@@ -360,82 +348,55 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     answer.beProductOf(b, ur);
 }
 
-
-void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
-// Computes the vector containing the stresses at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these stresses depends
-// on the element's type.
-// this version assumes TOTAL LAGRANGE APPROACH
-{
-    FloatArray Epsilon;
-    Element *elem = this->giveElement();
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
-
-    this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
-}
-
-
-void StructuralElementEvaluator :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u)
-// Computes the vector containing the stresses at the Gauss point gp of
-// the receiver, at time step stepN. The nature of these stresses depends
-// on the element's type.
-// this version assumes TOTAL LAGRANGE APPROACH
-{
-    FloatArray Epsilon;
-    Element *elem = this->giveElement();
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
-
-    this->computeStrainVector(Epsilon, gp, stepN, u);
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
-}
-
-void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
+void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     FloatArray u;
     Element *elem = this->giveElement();
+    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
-    /*
-     * // subtract initial displacements, if defined
-     * if (initialDisplacements) u.subtract(initialDisplacements);
-     */
+#if 0
+     // subtract initial displacements, if defined
+     if (initialDisplacements) u.subtract(initialDisplacements);
+#endif
 
     int i, j;
     IntegrationRule *iRule;
-    FloatArray stress;
+    FloatArray strain, stress;
+    GaussPoint *gp;
 
     // force updating strains & stresses
     for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
 #ifdef __PARALLEL_MODE
-      if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
+        if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
 #endif
         iRule = elem->giveIntegrationRule(i);
         for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-            computeStressVector(stress, iRule->getIntegrationPoint(j), stepN, u);
+            gp = iRule->getIntegrationPoint(j);
+            this->computeStrainVector(strain, gp, tStep, u);
+            cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
         }
     }
 
-    /*
-     * // Original unoptimized version
-     * int i, j;
-     * IntegrationRule *iRule;
-     * FloatArray stress;
-     * Element *elem = this->giveElement();
-     *
-     * // force updating strains & stresses
-     * for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
-     * #ifdef __PARALLEL_MODE
-     *     if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
-     * #endif
-     *  iRule = elem->giveIntegrationRule(i);
-     *    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-     *      computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
-     *    }
-     * }
-     */
+#if 0
+     // Original unoptimized version
+     int i, j;
+     IntegrationRule *iRule;
+     FloatArray stress;
+     Element *elem = this->giveElement();
+     // force updating strains & stresses
+     for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+     #ifdef __PARALLEL_MODE
+         if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
+     #endif
+        iRule = elem->giveIntegrationRule(i);
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            computeStressVector(stress, iRule->getIntegrationPoint(j), tStep);
+        }
+     }
+#endif
 }
 
 
@@ -446,6 +407,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     IntegrationRule *iRule;
     GaussPoint *gp;
     Element *elem = this->giveElement();
+    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
     int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
     IntArray irlocnum;
@@ -464,8 +426,8 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
 
 #ifdef __PARALLEL_MODE
-      if (this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote) continue;
-      //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
+        if (this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote) continue;
+        //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
 #endif
         m->resize(0, 0);
         iRule = elem->giveIntegrationRule(ir);
@@ -474,8 +436,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
             gp = iRule->getIntegrationPoint(j);
             this->computeBMatrixAt(bj, gp);
             //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
-            ( ( StructuralCrossSection * ) elem->giveCrossSection() )
-            ->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
+            cs->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
 
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
