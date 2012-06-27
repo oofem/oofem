@@ -145,7 +145,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    FloatArray c [ 4 ], cg [ 4 ];
+    FloatArray c [ 4 ], cg [ 4 ], u;
     IntArray sign[4];
 
     if ( nsd == 2 ) {
@@ -170,6 +170,8 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -210,10 +212,12 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
                         FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                         GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
 #ifdef COMPUTE_STRAIN
-                        this->computeStrainVector (val, &gp, tStep);
+                        this->computeStrainVector (val, &gp, tStep, u);
 #endif
 #ifdef COMPUTE_STRESS
-                        this->computeStressVector(val, & gp, tStep);
+                        FloatArray strain;
+                        this->computeStrainVector (strain, &gp, tStep, u);
+                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
 #endif
                         s [ k ] = val.at(indx);
                     }
@@ -240,7 +244,8 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 }
 
 
-void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
+void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
+{
     int indx;
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -248,7 +253,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     double s [ 4 ];
     IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
-    FloatArray val;
+    FloatArray val, u;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -288,6 +293,8 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
         return;
     }
 
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+
     //double maxs=-1.0e10, mins=1.0e10;
 
     // loop over individual integration rules (i.e., knot spans)
@@ -326,10 +333,12 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
                         FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                         GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
 #ifdef COMPUTE_STRAIN
-                        this->computeStrainVector (val, &gp, tStep);
+                        this->computeStrainVector (val, &gp, tStep, u);
 #endif
 #ifdef COMPUTE_STRESS
-                        this->computeStressVector(val, & gp, tStep);
+                        FloatArray strain;
+                        this->computeStrainVector (strain, &gp, tStep, u);
+                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
 #endif
                         s [ k ] = val.at(indx);
 
@@ -434,7 +443,8 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
 // the reason is to ensure compatible division to quads over which scalar quantity is interpolated
 // bilinearly !!!
 
-void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
+void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
+{
     int indx;
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -456,7 +466,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    FloatArray c [ 4 ], cg [ 4 ];
+    FloatArray c [ 4 ], cg [ 4 ], u;
     IntArray sign [ 4 ];
 
     if ( nsd == 2 ) {
@@ -481,6 +491,8 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -520,10 +532,12 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
                         FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                         GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
 #ifdef COMPUTE_STRAIN
-                        this->computeStrainVector (val, &gp, tStep);
+                        this->computeStrainVector (val, &gp, tStep, u);
 #endif
 #ifdef COMPUTE_STRESS
-                        this->computeStressVector(val, & gp, tStep);
+                        FloatArray strain;
+                        this->computeStrainVector (strain, &gp, tStep, u);
+                        ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
 #endif
                         s [ k ] = val.at(indx);
                     }
@@ -559,7 +573,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
     double s [ 8 ];
     IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
-    FloatArray val;
+    FloatArray val, u;
     //int huhu = 0;
 
     if ( !context.testElementGraphicActivity(this) ) {
@@ -627,6 +641,8 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
         huhu = 2;
     }
 #endif
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
@@ -712,10 +728,12 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
                             FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                             GaussPoint gp(iRule, 999, cc, 1.0, _3dMat);
 #ifdef COMPUTE_STRAIN
-                            this->computeStrainVector (val, &gp, tStep);
+                            this->computeStrainVector (val, &gp, tStep, u);
 #endif
 #ifdef COMPUTE_STRESS
-                            this->computeStressVector(val, & gp, tStep);
+                            FloatArray strain;
+                            this->computeStrainVector (strain, &gp, tStep, u);
+                            ((StructuralCrossSection*)this->giveCrossSection())->giveRealStresses(val, ReducedForm, &gp, strain, tStep);
 #endif
                             s [ k ] = val.at(indx);
 
