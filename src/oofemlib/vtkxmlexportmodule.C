@@ -659,6 +659,8 @@ VTKXMLExportModule :: exportIntVars(
     int i, n = internalVarsToExport.giveSize();
     InternalStateType isttype;
     InternalStateValueType vtype;
+
+    this->giveSmoother()->init(); // Makes sure smoother is up-to-date with potentially new mesh.
     // should be performed over regions
     for ( i = 1; i <= n; i++ ) {
         isttype = ( InternalStateType ) internalVarsToExport.at(i);
@@ -950,6 +952,7 @@ VTKXMLExportModule :: exportPrimaryVars(
     // should be performed over regions
     UnknownType type;
 
+    this->givePrimVarSmoother()->init(); // Makes sure primary smoother is up-to-date with potentially new mesh.
     for (int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         type = ( UnknownType ) primaryVarsToExport.at(i);
         this->exportPrimVarAs(type, mapG2L, mapL2G, regionDofMans, region, stream, tStep);

@@ -137,11 +137,14 @@ NodalRecoveryModel :: init()
     vectorDictType *dict;
 
     // allocate array of nodal dictionaries, containing nodal values for each region
-    if ( this->nodalValList.giveSize() != nnodes ) {
-        // printf("<NodalRecoveryModel:clearing>\n");
-        this->nodalValList.clear();
-        this->nodalValList.growTo(nnodes);
+    if ( this->nodalValList.giveSize() == nnodes ) {  // Already allocated.
+        this->stateCounter = 0;
+        this->valType = IST_Undefined;
+        return 1;
     }
+
+    this->nodalValList.clear();
+    this->nodalValList.growTo(nnodes);
 
     for ( i = 1; i <= nnodes; i++ ) {
         if ( this->nodalValList.at(i) == NULL ) {
