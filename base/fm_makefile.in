@@ -1,5 +1,5 @@
 #
-# fmlib target makefile
+# libfm target makefile
 #
 
 SHELL      = @SHELL@
@@ -43,15 +43,15 @@ srcs9= leplic.C twofluidmaterial.C
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1)
 
 ## object files
-fmLib_objs := $(all_src:.C=.o)
+libfm_objs := $(all_src:.C=.o)
 ## dependency files
-fmLib_deps := $(all_src:.C=.d)
+libfm_deps := $(all_src:.C=.d)
 
 
-all: fmlib.a
+all: libfm.a
 	echo all target done
 
--include $(fmLib_deps)
+-include $(libfm_deps)
 
 %.o:	%.C
 	@$(MAKEDEPEND)
@@ -61,13 +61,13 @@ all: fmlib.a
 	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
-fmlib.a:  $(fmLib_objs)
+libfm.a:  $(libfm_objs)
 	echo huhu
-	rm -f fmlib.a
-	@echo $(AR) fmlib.a
-	@$(AR) fmlib.a $(fmLib_objs)
+	rm -f libfm.a
+	@echo $(AR) libfm.a
+	@$(AR) libfm.a $(libfm_objs)
 
-deps:  $(fmLib_deps)
+deps:  $(libfm_deps)
 
 clean::
 	rm -fr *.o *.d *.a

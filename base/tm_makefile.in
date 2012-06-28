@@ -1,5 +1,5 @@
 #
-# tmlib target makefile
+# libtm target makefile
 #
 
 SHELL      = @SHELL@
@@ -46,14 +46,14 @@ psrc1=
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1)
 ## object files
-tmLib_objs := $(all_src:.C=.o)
+libtm_objs := $(all_src:.C=.o)
 ## dependency files
-tmLib_deps := $(all_src:.C=.d)
+libtm_deps := $(all_src:.C=.d)
 
-all: tmlib.a 
+all: libtm.a 
 	echo all target done
 
--include $(tmLib_deps)
+-include $(libtm_deps)
 
 %.o:	%.C
 	@$(MAKEDEPEND)
@@ -63,12 +63,12 @@ all: tmlib.a
 	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
-tmlib.a:  $(tmLib_objs) 
-	rm -f tmlib.a
-	@echo $(AR) tmlib.a
-	@$(AR) tmlib.a $(tmLib_objs) 
+libtm.a:  $(libtm_objs) 
+	rm -f libtm.a
+	@echo $(AR) libtm.a
+	@$(AR) libtm.a $(libtm_objs) 
 
-deps:	$(tmLib_deps)
+deps:	$(libtm_deps)
 
 clean::
 	rm -fr *.o *.d *.a

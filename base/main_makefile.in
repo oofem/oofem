@@ -1,8 +1,6 @@
-# $Header: /home/cvs/bp/oofem/main/src/makefile.in,v 1.8.4.2 2004/04/08 11:39:20 bp Exp $ 
-
-#   makefile 1.27 95/02/27 08:39:22
 #
- 
+# main target makefile
+#
 
 .SUFFIXES:  .h .C
 

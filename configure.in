@@ -1006,7 +1006,7 @@ TM_INCLUDES="-I$PWD/src/tm"
 FM_INCLUDES="-I$PWD/src/fm -I$PWD/src/fm/pfem"
 
 MODULE_INCLUDES="$OOFEMLIB_INCLUDES"
-OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/oofemlib/oofemlib.a"
+OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/oofemlib/liboofemlib.a"
 
 MODULE_LIST="oofemlib"
 MODULE_TOBUILD="oofemlib"    
@@ -1017,7 +1017,7 @@ if test x$sm_module = xyes; then
     MODULE_TOBUILD="$MODULE_TOBUILD sm"
     MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SM_MODULE"
     MODULE_INCLUDES="$MODULE_INCLUDES $SM_INCLUDES"
-    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/sm/smlib.a $OOFEM_LIBS"    
+    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/sm/libsm.a $OOFEM_LIBS"    
     TEST_TARGETS="sm"
 fi
 
@@ -1027,7 +1027,7 @@ if test x$tm_module = xyes; then
     tinyxml_module=yes
     MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE -D__CEMHYD_MODULE"
     MODULE_INCLUDES="$MODULE_INCLUDES $TM_INCLUDES"
-    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/tm/tmlib.a $OOFEM_LIBS"    
+    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/tm/libtm.a $OOFEM_LIBS"    
     TEST_TARGETS="$TEST_TARGETS tm"
 fi
 
@@ -1041,7 +1041,7 @@ if test x$fm_module = xyes; then
     MODULE_TOBUILD="$MODULE_TOBUILD fm"
     MODULE_SYMBOLS="$MODULE_SYMBOLS -D__FM_MODULE"
     MODULE_INCLUDES="$MODULE_INCLUDES $FM_INCLUDES"
-    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/fm/fmlib.a $OOFEM_LIBS"    
+    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/fm/libfm.a $OOFEM_LIBS"    
     TEST_TARGETS="$TEST_TARGETS fm"
 fi
 
@@ -1090,7 +1090,7 @@ if test x$dss_module = xyes; then
     MODULE_SYMBOLS="$MODULE_SYMBOLS -D__DSS_MODULE"
     DSS_MODULE_SYMBOL="-D__DSS_MODULE"
     MODULE_INCLUDES="$MODULE_INCLUDES $DSS_INCLUDES"
-    OOFEM_LIBS="$OOFEM_LIBS $PWD/targets/$OOFEM_TARGET/lib/dss/dsslib.a"    
+    OOFEM_LIBS="$OOFEM_LIBS $PWD/targets/$OOFEM_TARGET/lib/dss/libdss.a"    
 fi
 
 if test x$petsc_module = xyes; then

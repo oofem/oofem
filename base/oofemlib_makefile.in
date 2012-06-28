@@ -72,7 +72,7 @@ oofemLib_objs2 := $(oofemLib_objs1:.cpp=.o)
 oofemLib_deps1 := $(all_src:.C=.d)
 oofemLib_deps2 := $(oofemLib_deps1:.cpp=.d)
 
-all: oofemlib.a
+all: liboofemlib.a
 	echo all target done
 
 -include $(oofemLib_deps)
@@ -91,11 +91,11 @@ all: oofemlib.a
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
 
-oofemlib.a:  $(oofemLib_objs2)
+liboofemlib.a:  $(oofemLib_objs2)
 	echo huhu
-	rm -f oofemlib.a
-	@echo $(AR) oofemlib.a
-	@$(AR) oofemlib.a $(oofemLib_objs2)
+	rm -f liboofemlib.a
+	@echo $(AR) liboofemlib.a
+	@$(AR) liboofemlib.a $(oofemLib_objs2)
 
 deps:   $(oofemLib_deps2)
 

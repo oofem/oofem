@@ -14,16 +14,16 @@ OBJS := $(SRC:.cpp=.o)
 %.o: %.cpp
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
-all: dsslib.a
+all: libdss.a
 
-dsslib.a: $(OBJS)
-	rm -f dsslib.a
-	@echo $(AR) -r  dsslib.a
-	@$(AR) -r  dsslib.a *.o
+libdss.a: $(OBJS)
+	rm -f libdss.a
+	@echo $(AR) -r  libdss.a
+	@$(AR) -r  libdss.a *.o
 
 deps:
 	@echo
 
 clean::
-	rm -f *.o  dsslib.a
+	rm -f *.o  libdss.a
 

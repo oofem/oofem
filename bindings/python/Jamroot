@@ -12,19 +12,19 @@ use-project boost
 # boost_python library defined in the project whose global ID is
 # /boost/python.
 project boost-python-quickstart
-  : requirements <library>/boost/python//boost_python <library>../../targets/oofem-debug/lib/main/classfactory.o <library>../../targets/oofem-debug/lib/main/usrdefsub.o <library>../../targets/oofem-debug/lib/sm/smlib.a <library>../../targets/oofem-debug/lib/tm/tmlib.a <library>../../targets/oofem-debug/lib/fm/fmlib.a <library>../../targets/oofem-debug/lib/oofemlib/oofemlib.a
+  : requirements <library>/boost/python//boost_python <library>../../targets/oofem-debug/lib/main/classfactory.o <library>../../targets/oofem-debug/lib/main/usrdefsub.o <library>../../targets/oofem-debug/lib/sm/libsm.a <library>../../targets/oofem-debug/lib/tm/libtm.a <library>../../targets/oofem-debug/lib/fm/libfm.a <library>../../targets/oofem-debug/lib/oofemlib/liboofemlib.a
     ;
 
 # Make the definition of the python-extension rule available
 import python ;
 
 
-lib oofemlib_a : ../../targets/oofem-debug/lib/oofemlib/oofemlib.a ;
+lib liboofemlib_a : ../../targets/oofem-debug/lib/oofemlib/liboofemlib.a ;
 
 #  : requirements /usr/include/boost/python//boost_python ;
 # Declare the three extension modules.  You can specify multiple
 # source files after the colon separated by spaces.
-python-extension oofemlib : oofemlib.cpp : <include>../../src/oofemlib <include>../../src/main <include>../../src/oofemlib/xfem <include>../../targets/oofem-debug/include <define>BOOST_PYTHON <source>oofemlib_a ;
+python-extension oofemlib : oofemlib.cpp : <include>../../src/oofemlib <include>../../src/main <include>../../src/oofemlib/xfem <include>../../targets/oofem-debug/include <define>BOOST_PYTHON <source>liboofemlib_a ;
 
 
 # A little "rule" (function) to clean up the syntax of declaring tests

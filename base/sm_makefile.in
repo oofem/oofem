@@ -1,5 +1,5 @@
 #
-# smlib target makefile
+# libsm target makefile
 #
 
 SHELL      = @SHELL@
@@ -52,14 +52,14 @@ psrc1=  feticommunicator.C fetiboundarydofman.C fetisolver.C
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs10) $(srcs98) $(srcs99) $(psrc1)
 
 ## object files
-smLib_objs := $(all_src:.C=.o)
+libsm_objs := $(all_src:.C=.o)
 ## dependency files
-smLib_deps := $(all_src:.C=.d)
+libsm_deps := $(all_src:.C=.d)
 
-all: smlib.a
+all: libsm.a
 	echo all target done
 
--include $(smLib_deps)
+-include $(libsm_deps)
 
 %.o:	%.C
 	@$(MAKEDEPEND)
@@ -69,12 +69,12 @@ all: smlib.a
 	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
-smlib.a:  $(smLib_objs)
-	rm -f smlib.a
-	@echo $(AR) smlib.a
-	@$(AR) smlib.a $(smLib_objs)
+libsm.a:  $(libsm_objs)
+	rm -f libsm.a
+	@echo $(AR) libsm.a
+	@$(AR) libsm.a $(libsm_objs)
 
-deps:	$(smLib_deps)
+deps:	$(libsm_deps)
 
 clean::
 	rm -fr *.o *.d *.a
