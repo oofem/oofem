@@ -85,7 +85,7 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     }
 #endif
     Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
+    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
     VecSetType(globY, VECSEQ);
     VecSetSizes(globY, PETSC_DECIDE, this->nRows);
@@ -116,7 +116,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     }
 #endif
     Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
+    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
     VecSetType(globY, VECSEQ);
     VecSetSizes(globY, PETSC_DECIDE, this->nColumns);

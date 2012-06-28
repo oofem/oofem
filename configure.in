@@ -706,6 +706,8 @@ if test x$petsc_module = xyes; then
   AC_MSG_CHECKING(PETSC_ARCH)
   if test -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.a; then
     AC_MSG_RESULT(${PETSC_ARCH})
+  elif test -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.so; then
+    AC_MSG_RESULT(${PETSC_ARCH})
   else
     while test ! -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.a; do
       echo "PETSC_ARCH ${PETSC_ARCH} does not seem to be available."
