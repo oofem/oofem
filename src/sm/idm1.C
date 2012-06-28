@@ -519,7 +519,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     int i, indx = 1;
     double le;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
-    FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
+    FloatArray principalStrains, crackPlaneNormal(3), fullstrain, crackVect(3);
     FloatMatrix principalDir(3, 3);
     IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
@@ -559,6 +559,18 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
+        // find index with minimal value but non-zero for plane-stress condition - this is the crack direction
+        indx = 1;
+        for ( i = 2; i <= 3; i++ ) {
+            if ( principalStrains.at(i) < principalStrains.at(indx) && fabs(principalStrains.at(i))>1.e-10 ) {
+                indx = i;
+            }
+        }
+        for ( i = 1; i <= 3; i++ ) {
+            crackVect.at(i) = principalDir.at(i, indx);
+        }
+        status->setCrackVector(crackVect);
+
         // old approach (default projection method)
         // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
         // new approach, with choice of method
@@ -573,7 +585,9 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         status->setCrackAngle(ca);
-
+        
+        
+        
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
             _error6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le );
         } else if ( wf == 0. && e0 >= ef ) {

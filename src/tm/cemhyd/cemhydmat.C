@@ -553,6 +553,66 @@ CemhydMatStatus :: CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatSt
     PhaseFrac = NULL;
     last_values = NULL;
     phase = NULL;
+    
+    adiafile = NULL;
+    thfile = NULL;
+    elasfile = NULL;
+    heatfile = NULL;
+    chsfile = NULL;
+    ptmpfile = NULL;
+    movfile = NULL;
+    pHfile = NULL;
+    micfile = NULL;
+    fileperc = NULL;
+    percfile = NULL;
+    disprobfile = NULL;
+    phasfile = NULL;
+    perc_phases = NULL;
+    CSHfile = NULL;
+    infoperc = NULL;
+    infoUnperc = NULL;
+
+    mic = NULL;
+    micorig = NULL;
+    micpart = NULL;
+    cement = NULL;
+    cemreal = NULL;
+    clust = NULL;
+    mask = NULL;
+    curvature = NULL;
+    mic_CSH = NULL;
+    ArrPerc = NULL;
+    ConnNumbers = NULL;
+    faces = NULL;
+
+#ifdef TINYXML
+    xmlFile = NULL;
+#endif
+
+    headant = NULL;
+    tailant = NULL;
+    soluble = NULL;
+    creates = NULL;
+    CSH_vicinity = NULL;
+    molarvcsh = NULL;
+    watercsh = NULL;
+    xsph = NULL;
+    ysph = NULL;
+    zsph = NULL;
+    iv = NULL;
+    discount = NULL;
+    count = NULL;
+    disprob = NULL;
+    disbase = NULL;
+    specgrav = NULL;
+    molarv = NULL;
+    heatf = NULL;
+    waterc = NULL;
+    pHeffect = NULL;
+    soluble = NULL;
+    creates = NULL;
+
+    
     //set common variables in constructor
  #ifdef PRINTF
     printf("Constructor of CemhydMatStatus on GP %p, withMicrostructure %d, copy from CemhydMatStatus %p\n", gp, withMicrostructure, CemStat);
@@ -875,43 +935,6 @@ void CemhydMatStatus :: initializeMicrostructure()
         disprob [ i ] = 0.;
     }
 
-    adiafile = NULL;
-    thfile = NULL;
-    elasfile = NULL;
-    heatfile = NULL;
-    chsfile = NULL;
-    ptmpfile = NULL;
-    movfile = NULL;
-    pHfile = NULL;
-    micfile = NULL;
-    fileperc = NULL;
-    percfile = NULL;
-    disprobfile = NULL;
-    phasfile = NULL;
-    perc_phases = NULL;
-    CSHfile = NULL;
-    infoperc = NULL;
-    infoUnperc = NULL;
-
-    mic = NULL;
-    micorig = NULL;
-    micpart = NULL;
-    cement = NULL;
-    cemreal = NULL;
-    clust = NULL;
-    mask = NULL;
-    curvature = NULL;
-    mic_CSH = NULL;
-    ArrPerc = NULL;
-    ConnNumbers = NULL;
-    faces = NULL;
-
-#ifdef TINYXML
-    xmlFile = NULL;
-#endif
-
-    headant = NULL;
-    tailant = NULL;
     soluble = new int [ EMPTYP + 1 ];
     creates = new int [ EMPTYP + 1 ];
 }

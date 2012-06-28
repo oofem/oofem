@@ -256,6 +256,10 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
         answer.resize(1);
         answer.at(1) = status->giveCrackAngle();
         return 1;
+    } else if ( type == IST_CrackVector ) {
+        answer.resize(3);
+        status->giveCrackVector(answer);
+        return 1;
 
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_StressWorkDensity ) {
@@ -287,6 +291,8 @@ IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
         return ISVT_TENSOR_S3;
     } else if ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
         return ISVT_SCALAR;
+    } else if ( type == IST_CrackVector ){
+        return ISVT_VECTOR;
 
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_DissWorkDensity ) {
@@ -315,6 +321,9 @@ IsotropicDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStat
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
+    } else if ( type == IST_CrackVector ) {
+        answer.resize(3);
+        return 1;
 
 #ifdef keep_track_of_dissipated_energy
     } else if ( ( type == IST_DissWorkDensity ) || ( type == IST_StressWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
@@ -332,16 +341,16 @@ IsotropicDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStat
 int
 IsotropicDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ||
-        ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ||
-        ( type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) ) {
+    if ( type == IST_DamageTensor || type == IST_DamageTensorTemp ||
+         type == IST_PrincipalDamageTensor  ||  type == IST_PrincipalDamageTempTensor  ||
+         type == IST_MaxEquivalentStrainLevel || type == IST_CharacteristicLength || type == IST_CrackDirs ) {
         return 1;
+    } else if ( type == IST_CrackVector ) {
+        return 3;
 
 #ifdef keep_track_of_dissipated_energy
-    } else if ( ( type == IST_StressWorkDensity ) ||
-               ( type == IST_DissWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
+    } else if ( ( type == IST_StressWorkDensity ) || ( type == IST_DissWorkDensity ) || ( type == IST_FreeEnergyDensity ) ) {
         return 1;
-
 #endif
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
@@ -403,6 +412,8 @@ IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(int n, Domain *d,
     damage = tempDamage = 0.0;
     le = 0.0;
     crack_angle = -1000.0;
+    crackVector.resize(3);
+    crackVector.zero();
 #ifdef keep_track_of_dissipated_energy
     stressWork = tempStressWork = 0.0;
     dissWork = tempDissWork = 0.0;
@@ -420,7 +431,7 @@ IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->damage > 0.0 ) {
-        fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
+        fprintf(file, "kappa %f, damage %f crackVector %f %f %f", this->kappa, this->damage, this->crackVector.at(1), this->crackVector.at(2), this->crackVector.at(3) );
 
 #ifdef keep_track_of_dissipated_energy
         fprintf(file, ", dissW %f, freeE %f, stressW %f ", this->dissWork, ( this->stressWork ) - ( this->dissWork ), this->stressWork);
@@ -457,6 +468,13 @@ IsotropicDamageMaterialStatus :: updateYourself(TimeStep *atTime)
     this->stressWork = this->tempStressWork;
     this->dissWork = this->tempDissWork;
 #endif
+}
+
+void
+IsotropicDamageMaterialStatus :: giveCrackVector(FloatArray &answer)
+{
+    answer = crackVector;
+    answer.times(damage);
 }
 
 

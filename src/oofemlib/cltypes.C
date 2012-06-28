@@ -126,6 +126,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_HumidityFlow:
     case IST_CrackDirs:
     case IST_CrackStatuses:
+    case IST_CrackVector:
         return ISVT_VECTOR;
 
     case IST_ErrorIndicatorLevel:
