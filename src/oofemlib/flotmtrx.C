@@ -965,9 +965,9 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         mtrx = this;
     }
 
-    //FloatArray *answer = b -> GiveCopy();
     answer = b;
 
+    mtrx->printYourself();
     // initialize answer to be unity matrix;
     // lower triangle elimination by columns
     for ( i = 1; i < nRows; i++ ) {
@@ -981,18 +981,17 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
             }
         }
 
-        if ( fabs(piv) < 1.e-20 ) {
-            OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve  a %d by %d matrix", nRows, nColumns);
+        if ( piv < 1.e-20 ) {
+            OOFEM_ERROR2("FloatMatrix::solveForRhs : cannot solve, seems to be singular at row %d", pivRow);
         }
 
         // exchange rows
         if ( pivRow != i ) {
             for ( j = i; j <= nRows; j++ ) {
                 help = mtrx->at(i, j);
-                this->at(i, j) = mtrx->at(pivRow, j);
-                this->at(pivRow, j) = help;
+                mtrx->at(i, j) = mtrx->at(pivRow, j);
+                mtrx->at(pivRow, j) = help;
             }
-
             help = answer.at(i);
             answer.at(i) = answer.at(pivRow);
             answer.at(pivRow) = help;
