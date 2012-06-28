@@ -164,6 +164,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     Element *element;
     IntArray loc;
     FloatArray charVec;
+    FloatMatrix R;
     int nelems;
     EModelDefaultEquationNumbering dn;
 
@@ -194,7 +195,9 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 #endif
         element->giveLocationArray( loc, EID_MomentumBalance, dn );
         element->giveCharacteristicVector( charVec, InternalForcesVector, VM_Total, stepN );
-
+        if ( element->giveRotationMatrix(R, EID_MomentumBalance) ) {
+            charVec.rotatedWith(R, 't');
+        }
         answer.assemble(charVec, loc);
 
         // Compute element norm contribution.
