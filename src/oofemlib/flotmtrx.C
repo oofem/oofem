@@ -967,7 +967,6 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 
     answer = b;
 
-    mtrx->printYourself();
     // initialize answer to be unity matrix;
     // lower triangle elimination by columns
     for ( i = 1; i < nRows; i++ ) {

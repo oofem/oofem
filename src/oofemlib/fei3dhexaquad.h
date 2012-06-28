@@ -50,6 +50,8 @@ protected:
 public:
     FEI3dHexaQuad() : FEInterpolation3d(2) { }
 
+    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
+
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

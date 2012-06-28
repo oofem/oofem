@@ -145,13 +145,62 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
     }
 }
 
-// #define POINT_TOL 1.e-3
-//
-int
-FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI3dHexaQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
-    return 1;
+    const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray *n2 = cellgeo.giveVertexCoordinates(7);
+    return n1->distance(n2);
+}
+
+
+#define POINT_TOL 1.e-3
+
+int
+FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
+{
+    FloatArray res, delta, guess;
+    FloatMatrix jac;
+    double convergence_limit, error;
+
+    // find a suitable convergence limit
+    convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
+
+    // setup initial guess
+    answer.resize(gcoords.giveSize());
+    answer.zero();
+
+    // apply Newton-Raphson to solve the problem
+    for (int nite = 0; nite < 10; nite++) {
+        // compute the residual
+        this->local2global(guess, answer, cellgeo);
+        res.beDifferenceOf(gcoords, guess);
+
+        // check for convergence
+        error = res.computeNorm();
+        if ( error < convergence_limit ) {
+            break;
+        }
+
+        // compute the corrections
+        this->giveJacobianMatrixAt(jac, answer, cellgeo);
+        jac.solveForRhs(res, delta, true);
+
+        // update guess
+        answer.add(delta);
+    }
+    if ( error > convergence_limit) { // Imperfect, could give false negatives.
+        //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
+        return false;
+    }
+
+    // check limits for each local coordinate [-1,1] for quadrilaterals. (different for other elements, typically [0,1]).
+    for ( int i = 1; i <= answer.giveSize(); i++ ) {
+        if ( fabs( answer.at(i) ) > ( 1. + POINT_TOL ) ) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 double
