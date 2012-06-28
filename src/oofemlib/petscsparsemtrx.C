@@ -366,12 +366,13 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     //MatSetType(mtrx, MATSEQAIJ);
     MatSetType(mtrx, MATSEQSBAIJ);
     MatSetFromOptions(mtrx);
-    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
     //The incompatible preallocations are ignored automatically.
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
     MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); ///@todo Not sure about PETSC_DECIDE here.
     //MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() ); // Symmetry should practically never apply here.
+
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
     this->newValues = true;
     return true;
@@ -473,10 +474,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         MatSetFromOptions(mtrx);
-        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
         MatMPIAIJSetPreallocation(mtrx, 0, d_nnz.givePointer(), 0, o_nnz.givePointer());
         //MatMPIBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer(), onz, onnz );
         //MatMPISBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer(), onz, onnz );
+
+        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
@@ -549,11 +551,12 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     //MatSetType(mtrx, MATSBAIJ);
     //MatSetType(mtrx, MATDENSE);
     MatSetFromOptions(mtrx);
-    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
     MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() );
     MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() );
+
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
 
 #ifdef __PARALLEL_MODE
     }
