@@ -455,7 +455,6 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
 
 void DIIDynamic :: updateYourself(TimeStep *tStep)
 {
-    OOFEM_LOG_INFO("updateYourself\n");
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
 
     for ( int i = 1; i <= neq; i++ ) {
