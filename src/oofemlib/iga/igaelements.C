@@ -171,7 +171,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    EngngModel::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -293,7 +293,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    EngngModel::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
@@ -492,7 +492,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    EngngModel::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -565,7 +565,8 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
 
 
-void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
+void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
+{
     int indx;
     WCRec p [ 8 ];
     GraphicObj *go;
@@ -642,7 +643,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
     }
 #endif
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    EngngModel::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
