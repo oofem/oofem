@@ -126,6 +126,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackVector:
         return ISVT_VECTOR;
 
+    case IST_MaxEquivalentStrainLevel:
     case IST_ErrorIndicatorLevel:
     case IST_InternalStressError:
     case IST_PrimaryUnknownError:
@@ -146,6 +147,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_TotalStrainEnerDens:
     case IST_DamageScalar:
     case IST_CrackedFlag:
+    case IST_CumPlasticStrain:
+    case IST_CumPlasticStrain_2:
     case IST_StressWorkDensity:
     case IST_DissWorkDensity:
     case IST_FreeEnergyDensity:
@@ -156,11 +159,11 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_PoissonRatioVirginPaste:
     case IST_YoungModulusConcrete:
     case IST_PoissonRatioConcrete:
+    case IST_VolumetricPlasticStrain:
     case IST_Viscosity:
+    case IST_DeviatoricStrainMeasure:
+    case IST_DeviatoricStressMeasure:
     case IST_vonMisesStress:
-    case IST_MaxEquivalentStrainLevel:
-    case IST_CumPlasticStrain:
-    case IST_CumPlasticStrain_2:
         return ISVT_SCALAR;
 
     default:
