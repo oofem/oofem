@@ -272,7 +272,10 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
         gp  = iRule->getIntegrationPoint(i);
         dV  = elem->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, stepN);
-        elem->giveIPValue(stressVector, gp, type, tStep);
+        if (!elem->giveIPValue(stressVector, gp, type, tStep)) {
+	  stressVector.resize(size);
+	  stressVector.zero();
+	}
 
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         for ( j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {

@@ -593,7 +593,10 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
             nip = iRule->getNumberOfIntegrationPoints();
             for ( i = 0; i < nip; i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
-                element->giveIPValue(ipVal, gp, type, tStep);
+                if (!element->giveIPValue(ipVal, gp, type, tStep)) {
+		  ipVal.resize(regionValSize);
+		  ipVal.zero();
+		}
                 element->computeGlobalCoordinates(coords, *gp->giveLocalCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
