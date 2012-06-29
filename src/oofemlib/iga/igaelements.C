@@ -45,6 +45,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "iga.h"
+#include "equationid.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -171,7 +172,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    Element::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -293,7 +294,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    Element::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
@@ -492,7 +493,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    Element::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -643,7 +644,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
     }
 #endif
 
-    Element::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator::computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
