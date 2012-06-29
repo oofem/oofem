@@ -128,13 +128,13 @@ VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reduced
     answer.resize(9);
     answer.zero();
     if (type == ISVT_TENSOR_S3) {
-        for (int i = 1; i < redIndx.giveSize(); i++) {
+        for (int i = 1; i <= redIndx.giveSize(); i++) {
             if (redIndx.at(i) > 0) {
                 answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i);
             }
         }
     } else if ( type == ISVT_TENSOR_S3E ) {
-        for (int i = 1; i < redIndx.giveSize(); i++) {
+        for (int i = 1; i <= redIndx.giveSize(); i++) {
             if (redIndx.at(i) > 3) {
                 answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i)*0.5;
             } else if (redIndx.at(i) > 0) {
@@ -145,7 +145,7 @@ VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reduced
     // Symmetrize
     answer.at(4) = answer.at(2);
     answer.at(7) = answer.at(3);
-    answer.at(8) = answer.at(4);
+    answer.at(8) = answer.at(6);
 }
 
 std::string
