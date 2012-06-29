@@ -168,6 +168,7 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
     int nregions = this->giveNumberOfVirtualRegions();
     int ielem, nelem = domain->giveNumberOfElements();
     int i, regionsSkipped = 0;
+    int elemVR;
     Element *element;
     SPRNodalRecoveryModelInterface *interface;
 
@@ -193,29 +194,30 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-            int elemVR = this->giveElementVirtualRegionNumber(ielem);
+	  if ((elemVR = this->giveElementVirtualRegionNumber(ielem))) { // test if elementVR is nonzero
             if ( regionValSize.at(elemVR) ) {
-                if ( regionValSize.at(elemVR) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
-                    // This indicates a size mis-match between different elements, no choice but to skip the region.
-                    regionMap.at(elemVR) = 1;
-                    regionsSkipped = 1;
-                }
-
-                if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
-                    regionMap.at(elemVR) = 1;
-                    /*
-                     *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
-                     */
-                    regionsSkipped = 1;
-                }
+	      if ( regionValSize.at(elemVR) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
+		// This indicates a size mis-match between different elements, no choice but to skip the region.
+		regionMap.at(elemVR) = 1;
+		regionsSkipped = 1;
+	      }
+	      
+	      if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
+		regionMap.at(elemVR) = 1;
+		/*
+		 *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
+		 */
+		regionsSkipped = 1;
+	      }
             } else {
-                regionValSize.at(elemVR) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
-                regionTypes.at(elemVR) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
-                if ( regionValSize.at(elemVR) == 0 ) {
-                    regionMap.at(elemVR) = 1;
-                    regionsSkipped = 1;
-                }
+	      regionValSize.at(elemVR) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
+	      regionTypes.at(elemVR) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
+	      if ( regionValSize.at(elemVR) == 0 ) {
+		regionMap.at(elemVR) = 1;
+		regionsSkipped = 1;
+	      }
             }
+	  }
         }
     }
 

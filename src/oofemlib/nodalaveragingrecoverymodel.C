@@ -179,7 +179,7 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
 {
     int nregions = this->giveNumberOfVirtualRegions();
     int ielem, nelem = domain->giveNumberOfElements();
-    int i, regionsSkipped = 0;
+    int i, elemVR, regionsSkipped = 0;
     Element *element;
     NodalAveragingRecoveryModelInterface *interface;
 
@@ -207,7 +207,7 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-            int elemVR = this->giveElementVirtualRegionNumber(ielem);
+	  if ((elemVR = this->giveElementVirtualRegionNumber(ielem))) { // test if elemVR is nonzero
             if ( regionValSize.at(elemVR) ) {
                 if ( regionValSize.at(elemVR) !=
                     interface->NodalAveragingRecoveryMI_giveDofManRecordSize(type) ) {
@@ -219,6 +219,7 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
                 regionValSize.at(elemVR) = interface->
                                            NodalAveragingRecoveryMI_giveDofManRecordSize(type);
             }
+	  }
         }
     }
 

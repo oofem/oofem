@@ -194,6 +194,7 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
     int nregions = this->giveNumberOfVirtualRegions();
     int ielem, nelem = domain->giveNumberOfElements();
     int i, regionsSkipped = 0;
+    int elementVR;
     Element *element;
     ZZNodalRecoveryModelInterface *interface;
 
@@ -218,21 +219,22 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-            int elementVR = this->giveElementVirtualRegionNumber(ielem);
-            if ( regionValSize.at(elementVR) ) {
+  	    if ((elementVR = this->giveElementVirtualRegionNumber(ielem))) {  // test if elementVR is nonzero
+	      if ( regionValSize.at(elementVR) ) {
                 if ( regionValSize.at(elementVR) != interface->ZZNodalRecoveryMI_giveDofManRecordSize(type) ) {
-                    // This indicates a size mis-match between different elements, no choice but to skip the region.
-                    regionMap.at(elementVR) = 1;
-                    regionsSkipped = 1;
+		  // This indicates a size mis-match between different elements, no choice but to skip the region.
+		  regionMap.at(elementVR) = 1;
+		  regionsSkipped = 1;
                 }
-            } else {
+	      } else {
                 regionValSize.at(elementVR) = interface->ZZNodalRecoveryMI_giveDofManRecordSize(type);
                 if ( regionValSize.at(elementVR) == 0 ) {
-                    regionMap.at(elementVR) = 1;
-                    regionsSkipped = 1;
-                    OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
+		  regionMap.at(elementVR) = 1;
+		  regionsSkipped = 1;
+		  OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
                 }
-            }
+	      }
+	   }
         }
     }
 
