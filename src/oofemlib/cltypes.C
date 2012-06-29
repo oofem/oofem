@@ -94,9 +94,6 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_PlasticStrainTensor:
     case IST_CylindricalStressTensor:
     case IST_CylindricalStrainTensor:
-    case IST_MaxEquivalentStrainLevel:
-    case IST_CumPlasticStrain:
-    case IST_CumPlasticStrain_2:
     case IST_DeviatoricStrain:
     case IST_DeviatoricStress:
         return ISVT_TENSOR_S3;
@@ -161,6 +158,9 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_PoissonRatioConcrete:
     case IST_Viscosity:
     case IST_vonMisesStress:
+    case IST_MaxEquivalentStrainLevel:
+    case IST_CumPlasticStrain:
+    case IST_CumPlasticStrain_2:
         return ISVT_SCALAR;
 
     default:

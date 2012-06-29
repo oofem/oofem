@@ -45,7 +45,6 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "iga.h"
-#include "equationid.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
