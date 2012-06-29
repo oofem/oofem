@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-FEI2dQuadLin Quad1PlaneStrain::interp(1,2);
+FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
@@ -65,8 +64,7 @@ Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
 
 
 Quad1PlaneStrain :: ~Quad1PlaneStrain()
-{
-}
+{ }
 
 
 void
@@ -79,7 +77,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dN;
 
-    this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     // Reshape
     answer.resize(4, 8);
@@ -89,7 +87,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
     FloatMatrix dN_red;
     FloatArray lcoords_red(2);
     lcoords_red.zero();
-    this->interp.evaldNdx(dN_red, lcoords_red, FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx( dN_red, lcoords_red, FEIElementGeometryWrapper(this) );
 
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dN.at(i, 1);
@@ -97,6 +95,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
         answer.at(4, 2 * i - 1) = dN_red.at(i, 2);
         answer.at(4, 2 * i - 0) = dN_red.at(i, 1);
     }
+
 #else
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dN.at(i, 1);
@@ -104,6 +103,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
         answer.at(4, 2 * i - 1) = dN.at(i, 2);
         answer.at(4, 2 * i - 0) = dN.at(i, 1);
     }
+
 #endif
 }
 
@@ -126,9 +126,8 @@ Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
-
     FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
     answer.zero();
@@ -158,8 +157,8 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      */
 
     FloatArray n;
-    this->interp.edgeEvalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.resize(2,4);
+    this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.resize(2, 4);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 3) = n.at(2);
     answer.at(2, 2) = n.at(1);
@@ -205,15 +204,15 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    return detJ * gp->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ *gp->giveWeight();
 }
 
 
 void
 Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -272,7 +271,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight, thickness;
 
-    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     thickness = this->giveCrossSection()->give(CS_Thickness);
     return detJ * weight * thickness;
@@ -509,8 +508,8 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
             return;
         }
 
@@ -889,7 +888,7 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interp.evalN(nv, lcoords, FEIElementGeometryWrapper(this));
+    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
     n.resize(2, 8);
     n.zero();

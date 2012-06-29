@@ -49,7 +49,6 @@
 #endif
 
 namespace oofem {
-
 FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
@@ -102,7 +101,7 @@ TrPlaneStress2d :: giveArea()
         return area;         // check if previously computed
     }
 
-    return ( area = fabs( this->interp.giveArea(FEIElementGeometryWrapper(this)) ) );
+    return ( area = fabs( this->interp.giveArea( FEIElementGeometryWrapper(this) ) ) );
 }
 
 
@@ -163,24 +162,24 @@ TrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
 
-    answer.at(1, 1) = dN.at(1,1);
-    answer.at(1, 3) = dN.at(2,1);
-    answer.at(1, 5) = dN.at(3,1);
+    answer.at(1, 1) = dN.at(1, 1);
+    answer.at(1, 3) = dN.at(2, 1);
+    answer.at(1, 5) = dN.at(3, 1);
 
-    answer.at(2, 2) = dN.at(1,2);
-    answer.at(2, 4) = dN.at(2,2);
-    answer.at(2, 6) = dN.at(3,2);
+    answer.at(2, 2) = dN.at(1, 2);
+    answer.at(2, 4) = dN.at(2, 2);
+    answer.at(2, 6) = dN.at(3, 2);
 
-    answer.at(3, 1) = dN.at(1,2);
-    answer.at(3, 2) = dN.at(1,1);
-    answer.at(3, 3) = dN.at(2,2);
-    answer.at(3, 4) = dN.at(2,1);
-    answer.at(3, 5) = dN.at(3,2);
-    answer.at(3, 6) = dN.at(3,1);
+    answer.at(3, 1) = dN.at(1, 2);
+    answer.at(3, 2) = dN.at(1, 1);
+    answer.at(3, 3) = dN.at(2, 2);
+    answer.at(3, 4) = dN.at(2, 1);
+    answer.at(3, 5) = dN.at(3, 2);
+    answer.at(3, 6) = dN.at(3, 1);
 }
 
 
@@ -293,7 +292,7 @@ TrPlaneStress2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();
@@ -307,7 +306,7 @@ void
 TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
-    this->interp.edgeEvalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = answer.at(2, 2) = n.at(1);
     answer.at(1, 3) = answer.at(2, 4) = n.at(2);
@@ -345,15 +344,15 @@ TrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 TrPlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    return detJ * gp->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ *gp->giveWeight();
 }
 
 
 void
 TrPlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -411,9 +410,9 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
+    return detJ *weight *this->giveCrossSection()->give(CS_Thickness);
 }
 
 
@@ -732,9 +731,9 @@ void TrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
 
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

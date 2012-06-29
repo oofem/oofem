@@ -64,8 +64,8 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     // evaluation of N,dNdx
     FloatMatrix dNdx;
     FloatArray N;
-    interpolation.evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    interpolation.evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.evaldNdx( dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.evalN( N, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     FloatMatrix *simple = new FloatMatrix(3, 8);
     simple->zero();
@@ -159,9 +159,9 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
             if ( er->isDofManEnriched( dofManArray.at(i) ) ) {
                 IntArray *dofIdAr = er->getDofIdArray();
                 for ( int k = 1; k <= dofIdAr->giveSize(); k++ ) {
-                    if ( dm->hasDofID( (DofIDItem)dofIdAr->at(k) ) == false ) {
+                    if ( dm->hasDofID( ( DofIDItem ) dofIdAr->at(k) ) == false ) {
                         int sz = dm->giveNumberOfDofs();
-                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, (DofIDItem)dofIdAr->at(k) );
+                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, ( DofIDItem ) dofIdAr->at ( k ) );
                         int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
                         df->setEquationNumber(eqN);
                         dm->appendDof(df);
@@ -262,6 +262,7 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
     for ( int i = 1; i <= m; i++ ) {
         answer.at(k + i) = p1.at(i);
     }
+
     // Rotate it as well? but this element doesn't support local coordinate systems anyway.
 }
 
@@ -330,13 +331,13 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
         PlaneStress2d :: drawScalar(context);
     } else {
         if ( context.giveIntVarMode() == ISM_local ) {
-            int i, j, indx, result = 1;
+            int i, j, indx, ans, result = 1;
             double val;
             FloatArray s(3), v;
             IntArray map;
 
-            this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+            ans = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+            if ( ( !ans ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
                 return;
             }
 

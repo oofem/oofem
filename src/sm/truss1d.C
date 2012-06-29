@@ -50,8 +50,7 @@
 #endif
 
 namespace oofem {
-
-FEI1dLin Truss1d::interp(1); // Initiates the static interpolator
+FEI1dLin Truss1d :: interp(1); // Initiates the static interpolator
 
 
 Truss1d :: Truss1d(int n, Domain *aDomain) :
@@ -104,7 +103,7 @@ Truss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dN); ///@todo It would be more suitable to follow the column-major version as done in FEI-classes
 }
 
@@ -115,11 +114,11 @@ Truss1d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // evaluated at gp.
 {
     FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     // Reshape
     answer.resize(1, 2); ///@todo It would be more suitable to follow the column-major order and just do answer.setColumn(...)
-    answer.at(1,1) = n.at(1);
-    answer.at(1,2) = n.at(2);
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n.at(2);
 }
 
 
@@ -128,8 +127,8 @@ Truss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
-    return  detJ * gp->giveWeight() * this->giveCrossSection()->give(CS_Area);
+    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    return detJ *gp->giveWeight() * this->giveCrossSection()->give(CS_Area);
 }
 
 
@@ -273,9 +272,9 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
 
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 
@@ -413,7 +412,8 @@ Truss1d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answe
     if ( !this->giveIPValueSize(type, gp) ) {
         return;
     }
-    this->interp.evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    this->interp.evalN( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -486,9 +486,9 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
     int result;
 
     result = this->computeLocalCoordinates(ksi, coords);
-    this->interp.evalN(n, ksi, FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, ksi, FEIElementGeometryWrapper(this) );
     this->computeVectorOf(EID_MomentumBalance, mode, stepN, u);
-    answer.setValues(1, n.dotProduct(u));
+    answer.setValues( 1, n.dotProduct(u) );
     return result;
 }
 
@@ -512,7 +512,8 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
     } else {
         computeLocalCoordinates(lcoords, coords);
     }
-    this->interp.evalN(n, lcoords, FEIElementGeometryWrapper(this));
+
+    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
     vars = list.at(1)->giveSize();
     answer.resize(vars);

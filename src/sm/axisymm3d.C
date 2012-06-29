@@ -93,7 +93,7 @@ Axisymm3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(2, 6);
     answer.zero();
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     for ( i = 1; i <= 3; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -112,7 +112,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
 
     if ( ui == ALL_STRAINS ) {
@@ -145,7 +145,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         FloatArray n(4);
-        this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+        this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
         for ( i = 1; i <= numberOfDofMans; i++ ) {
@@ -186,7 +186,8 @@ Axisymm3d :: giveArea()
     if ( area > 0 ) {
         return area;         // check if previously computed
     }
-    area = fabs( this->interpolation.giveArea(FEIElementGeometryWrapper(this)) );
+
+    area = fabs( this->interpolation.giveArea( FEIElementGeometryWrapper(this) ) );
     return area;
 }
 
@@ -198,7 +199,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
     double determinant, weight, volume, r, x;
     FloatArray n(4);
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
@@ -206,8 +207,8 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight * r;
@@ -452,7 +453,7 @@ Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -499,8 +500,8 @@ Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this));
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) );
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();
@@ -510,7 +511,7 @@ Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 Axisymm3d ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -564,7 +565,7 @@ int
 Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;
-    return this->interpolation.global2local(lcoords, coords, FEIElementGeometryWrapper(this));
+    return this->interpolation.global2local( lcoords, coords, FEIElementGeometryWrapper(this) );
 }
 
 
@@ -692,9 +693,9 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
 
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

@@ -51,7 +51,6 @@
 #endif
 
 namespace oofem {
-
 FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 //FEI2dTrRot CCTPlate :: interp_rot(1, 2);
 
@@ -69,8 +68,8 @@ CCTPlate :: CCTPlate(int n, Domain *aDomain) :
 FEInterpolation *
 CCTPlate :: giveInterpolation(DofIDItem id)
 {
-    if (id == D_w) {
-        return &interp_lin;
+    if ( id == D_w ) {
+        return & interp_lin;
     } else {
         return NULL; //&interp_rot;
     }
@@ -306,10 +305,10 @@ CCTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 // returns normal vector to midPlane in GaussPoinr gp of receiver
 {
     FloatArray u, v;
-    u.beDifferenceOf(*this->giveNode(2)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
-    v.beDifferenceOf(*this->giveNode(3)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
+    u.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    v.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
 
-    answer.beVectorProductOf(u,v);
+    answer.beVectorProductOf(u, v);
     answer.normalize();
 }
 
@@ -330,7 +329,7 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -386,7 +385,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
 
     // Fetch local coordinates.
-    int ok = this->interp_lin.global2local(answer, coords, FEIElementGeometryWrapper(this));
+    int ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) );
 
     //get midplane location at this point
     double midplZ;
@@ -440,7 +439,7 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 int
 CCTPlate :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor) ) {
+    if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
         return 5;
     }
 
@@ -458,7 +457,7 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answ
     FloatArray n;
 
     if ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) {
-        this->interp_lin.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+        this->interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
         answer.resize(1, 3);
         answer.zero();
         answer.at(1) = n.at(1);
@@ -672,9 +671,9 @@ CCTPlate  :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
 
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

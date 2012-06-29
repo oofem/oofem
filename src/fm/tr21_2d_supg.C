@@ -1743,9 +1743,9 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
 
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

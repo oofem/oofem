@@ -73,7 +73,7 @@ QPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 16);
     answer.zero();
@@ -98,7 +98,7 @@ QPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(2, 16);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -144,8 +144,8 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
@@ -164,10 +164,10 @@ QPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) c
 double
 QPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-    if ( normalToCrackPlane.at(3) < 0.999999 ){//ensure that characteristic length is in the plane of element
+    if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
-    } else {//otherwise compute out-of-plane characteristic length from element area
-        return sqrt ( this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints );
+    } else { //otherwise compute out-of-plane characteristic length from element area
+        return sqrt(this->computeVolumeAreaOrLength() / ( double ) this->numberOfGaussPoints);
     }
 }
 
@@ -272,8 +272,8 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
             return;
         }
 
@@ -530,7 +530,7 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
 
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
         this->giveIPValue(answer, gp, type, tStep);
-    } else   {
+    } else {
         switch ( node ) {
         case 5: i1 = 4;
             i2 = 2;
@@ -591,7 +591,7 @@ QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPo
      */
 
     FloatArray n(3);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();
@@ -618,24 +618,24 @@ QPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
 
     answer.resize(6);
-    for (i=1; i<=3; i++) {
-        answer.at(i*2-1) = eNodes.at(i)*2-1;
-        answer.at(i*2  ) = eNodes.at(i)*2;
+    for ( i = 1; i <= 3; i++ ) {
+        answer.at(i * 2 - 1) = eNodes.at(i) * 2 - 1;
+        answer.at(i * 2) = eNodes.at(i) * 2;
     }
 }
 
 double
 QPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this));
-    return result * aGaussPoint->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *aGaussPoint->giveWeight();
 }
 
 void
 QPlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -653,14 +653,13 @@ QPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge,
     answer.resize(2, 2);
     answer.zero();
 
-    this->interpolation.edgeEvalNormal(normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    answer.at(1, 1) = (-1.0)*normal.at(2);
-    answer.at(1, 2) = (-1.0)*normal.at(1);
+    answer.at(1, 1) = ( -1.0 ) * normal.at(2);
+    answer.at(1, 2) = ( -1.0 ) * normal.at(1);
     answer.at(2, 1) = normal.at(1);
-    answer.at(2, 2) = (-1.0)*normal.at(2);
+    answer.at(2, 2) = ( -1.0 ) * normal.at(2);
 
     return 1;
 }
-
 } // end namespace oofem

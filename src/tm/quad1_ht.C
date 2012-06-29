@@ -400,8 +400,8 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+        result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+        if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
             return;
         }
 

@@ -48,8 +48,7 @@
 #endif
 
 namespace oofem {
-
-FEI2dTrLin TrPlaneStrain :: interp(1,2);
+FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
@@ -103,24 +102,24 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 6);
 
-    answer.at(1, 1) = dN.at(1,1);
-    answer.at(1, 3) = dN.at(2,1);
-    answer.at(1, 5) = dN.at(3,1);
+    answer.at(1, 1) = dN.at(1, 1);
+    answer.at(1, 3) = dN.at(2, 1);
+    answer.at(1, 5) = dN.at(3, 1);
 
-    answer.at(2, 2) = dN.at(1,2);
-    answer.at(2, 4) = dN.at(2,2);
-    answer.at(2, 6) = dN.at(3,2);
+    answer.at(2, 2) = dN.at(1, 2);
+    answer.at(2, 4) = dN.at(2, 2);
+    answer.at(2, 6) = dN.at(3, 2);
 
-    answer.at(4, 1) = dN.at(1,2);
-    answer.at(4, 2) = dN.at(1,1);
-    answer.at(4, 3) = dN.at(2,2);
-    answer.at(4, 4) = dN.at(2,1);
-    answer.at(4, 5) = dN.at(3,2);
-    answer.at(4, 6) = dN.at(3,1);
+    answer.at(4, 1) = dN.at(1, 2);
+    answer.at(4, 2) = dN.at(1, 1);
+    answer.at(4, 3) = dN.at(2, 2);
+    answer.at(4, 4) = dN.at(2, 1);
+    answer.at(4, 5) = dN.at(3, 2);
+    answer.at(4, 6) = dN.at(3, 1);
 }
 
 
@@ -142,7 +141,7 @@ TrPlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-    this->interp.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();
@@ -156,7 +155,7 @@ void
 TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
-    this->interp.edgeEvalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = answer.at(2, 2) = n.at(1);
     answer.at(1, 3) = answer.at(2, 4) = n.at(2);
@@ -196,15 +195,15 @@ TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 TrPlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian(iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-    return detJ * gp->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ *gp->giveWeight();
 }
 
 
 void
 TrPlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -262,9 +261,9 @@ double TrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    return detJ * weight * this->giveCrossSection()->give(CS_Thickness);
+    return detJ *weight *this->giveCrossSection()->give(CS_Thickness);
 }
 
 IRResultType
@@ -426,7 +425,7 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interp.evalN(nv, lcoords, FEIElementGeometryWrapper(this));
+    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
     n.resize(2, 6);
     n.zero();
@@ -463,7 +462,7 @@ TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray
         computeLocalCoordinates(lcoords, coords);
     }
 
-    this->interp.evalN(n, lcoords, FEIElementGeometryWrapper(this));
+    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
     vals = list.at(1)->giveSize();
     answer.resize(vals);
@@ -628,9 +627,9 @@ void TrPlaneStrain :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
 
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

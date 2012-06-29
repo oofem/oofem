@@ -50,7 +50,7 @@
 
 namespace oofem {
 CohesiveSurface3d :: CohesiveSurface3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-// Constructor.
+    // Constructor.
 {
     numberOfDofMans = -1;
     area   = -1.;
@@ -528,6 +528,7 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 void
 CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
 {
+    int result;
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
@@ -541,8 +542,8 @@ CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
 
     IntArray map;
     int indx;
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 
@@ -573,7 +574,7 @@ CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
             p [ 2 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
             p [ 2 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(EID_MomentumBalance, VM_Total, tStep) );
         }
-    } else   {
+    } else {
         // use initial geometry
         p [ 0 ].x = nodeA->giveCoordinate(1);
         p [ 0 ].y = nodeA->giveCoordinate(2);

@@ -54,7 +54,7 @@ FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
-// Constructor.
+    // Constructor.
 {
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
@@ -92,7 +92,7 @@ QTrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(2, 12);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     for ( i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -125,7 +125,7 @@ QTrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 12);
     answer.zero();
@@ -144,8 +144,8 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
@@ -298,8 +298,8 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 
@@ -392,8 +392,7 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
 
 void
 QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
-{
-}
+{ }
 
 #endif
 
@@ -493,7 +492,7 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interpolation.evalN(nn, lcoords, FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
 
     for ( i = 1; i <= 6; i++ ) {
         n.at(1, 2 * i - 1) = nn.at(i);

@@ -391,6 +391,7 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
             answer.at(3 + i, 3 + j) = lcs.at(i, j);
         }
     }
+
     return 1;
 }
 
@@ -398,8 +399,8 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 void
 LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
-    answer.times(this->giveCrossSection()->give(CS_Area));
+    NLStructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
+    answer.times( this->giveCrossSection()->give(CS_Area) );
 }
 
 
@@ -768,7 +769,7 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
     IntArray map;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double defScale;
-    int indx;
+    int result, indx;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -800,8 +801,8 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

@@ -70,7 +70,7 @@ QPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, i
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 16);
     answer.zero();
@@ -95,7 +95,7 @@ QPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(2, 16);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -141,8 +141,8 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
@@ -260,88 +260,88 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     if ( context.giveIntVarMode() == ISM_recovered ) {
-      // ============ plot the recovered values (smoothed data) ===============
-      /*
-        for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
-        }
-
-        if ( result != 4 ) {
-            return;
-        }
-
-        this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-            return;
-        }
-
-        for ( i = 1; i <= 4; i++ ) {
-            s [ i - 1 ] = v [ i - 1 ].at(indx);
-        }
-
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
-            for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
-                    // use deformed geometry
-                    defScale = context.getDefScale();
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].z = 0.;
-                } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                    p [ i ].z = 0.;
-                }
-            }
-
-            //EASValsSetColor(gc.getYieldPlotColor(ratio));
-            context.updateFringeTableMinMax(s, 4);
-            tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
-            EGWithMaskChangeAttributes(LAYER_MASK, tr);
-            EMAddGraphicsToModel(ESIModel(), tr);
-        } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-            double landScale = context.getLandScale();
-
-            for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
-                    // use deformed geometry
-                    defScale = context.getDefScale();
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].z = s [ i ] * landScale;
-                } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                    p [ i ].z = s [ i ] * landScale;
-                }
-
-                // this fixes a bug in ELIXIR
-                if ( fabs(s [ i ]) < 1.0e-6 ) {
-                    s [ i ] = 1.0e-6;
-                }
-            }
-
-            if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-                EASValsSetColor( context.getDeformedElementColor() );
-                EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-                tr =  CreateQuad3D(p);
-                EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
-            } else {
-                context.updateFringeTableMinMax(s, 4);
-                tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
-                EGWithMaskChangeAttributes(LAYER_MASK, tr);
-            }
-
-            EMAddGraphicsToModel(ESIModel(), tr);
-        }
-      */
+        // ============ plot the recovered values (smoothed data) ===============
+        /*
+         * for ( i = 1; i <= 4; i++ ) {
+         *    result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+         * }
+         *
+         * if ( result != 4 ) {
+         *    return;
+         * }
+         *
+         * this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+         * if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+         *    return;
+         * }
+         *
+         * for ( i = 1; i <= 4; i++ ) {
+         *    s [ i - 1 ] = v [ i - 1 ].at(indx);
+         * }
+         *
+         * if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+         *    for ( i = 0; i < 4; i++ ) {
+         *        if ( context.getInternalVarsDefGeoFlag() ) {
+         *            // use deformed geometry
+         *            defScale = context.getDefScale();
+         *            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+         *            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+         *            p [ i ].z = 0.;
+         *        } else {
+         *            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+         *            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+         *            p [ i ].z = 0.;
+         *        }
+         *    }
+         *
+         *    //EASValsSetColor(gc.getYieldPlotColor(ratio));
+         *    context.updateFringeTableMinMax(s, 4);
+         *    tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+         *    EGWithMaskChangeAttributes(LAYER_MASK, tr);
+         *    EMAddGraphicsToModel(ESIModel(), tr);
+         * } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+         *    double landScale = context.getLandScale();
+         *
+         *    for ( i = 0; i < 4; i++ ) {
+         *        if ( context.getInternalVarsDefGeoFlag() ) {
+         *            // use deformed geometry
+         *            defScale = context.getDefScale();
+         *            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+         *            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+         *            p [ i ].z = s [ i ] * landScale;
+         *        } else {
+         *            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+         *            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+         *            p [ i ].z = s [ i ] * landScale;
+         *        }
+         *
+         *        // this fixes a bug in ELIXIR
+         *        if ( fabs(s [ i ]) < 1.0e-6 ) {
+         *            s [ i ] = 1.0e-6;
+         *        }
+         *    }
+         *
+         *    if ( context.getScalarAlgo() == SA_ZPROFILE ) {
+         *        EASValsSetColor( context.getDeformedElementColor() );
+         *        EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
+         *        tr =  CreateQuad3D(p);
+         *        EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
+         *    } else {
+         *        context.updateFringeTableMinMax(s, 4);
+         *        tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+         *        EGWithMaskChangeAttributes(LAYER_MASK, tr);
+         *    }
+         *
+         *    EMAddGraphicsToModel(ESIModel(), tr);
+         * }
+         */
     } else if ( context.giveIntVarMode() == ISM_local ) {
-      // ========== plot the local values (raw data) =====================
+        // ========== plot the local values (raw data) =====================
         if ( numberOfGaussPoints != 4 ) {
             return;
         }
 
-        int ip;
+        int ip, result;
         GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
@@ -394,8 +394,8 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
                 return;
             }
 
-            this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-            if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+            result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+            if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
                 return;
             }
 
