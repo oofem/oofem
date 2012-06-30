@@ -85,7 +85,7 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     }
 #endif
     Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
+    VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
     VecSetType(globY, VECSEQ);
     VecSetSizes(globY, PETSC_DECIDE, this->nRows);
@@ -116,7 +116,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     }
 #endif
     Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
+    VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
     VecSetType(globY, VECSEQ);
     VecSetSizes(globY, PETSC_DECIDE, this->nColumns);
@@ -403,37 +403,33 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
         int rank;
-        PetscNatural2GlobalOrdering *n2g = NULL;
+        PetscNatural2GlobalOrdering *n2g;
+        PetscNatural2LocalOrdering *n2l;
         rank = eModel->giveRank();
         n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
+        n2l = eModel->givePetscContext(di, ut)->giveN2Lmap();
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
  #endif
 
-        // initialize n2l map
-        PetscNatural2LocalOrdering n2l;
-        n2l.init(eModel, ut, di);
-
-        // initialize n2g map
-        // n2g.init(eModel, di);
-
-
         leqs = n2g->giveNumberOfLocalEqs();
         geqs = n2g->giveNumberOfGlobalEqs();
+
+        //printf("%d, leqs = %d, geqs = %d\n", this->emodel->giveRank(), leqs, geqs);
 
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfEquations(ut) );
  #endif
 
-        //determine nonzero structure of a "local (maintained)" part of matrix
+        // determine nonzero structure of a "local (maintained)" part of matrix, and the off-diagonal part
         int i, ii, j, jj, n;
         Element *elem;
         // allocation map
         std :: vector< std :: set< int > >d_rows(leqs);  // diagonal sub-matrix allocation
         std :: vector< std :: set< int > >o_rows(leqs);  // off-diagonal allocation
 
-        IntArray d_nnz(leqs), o_nnz(leqs), lloc;
+        IntArray d_nnz(leqs), o_nnz(leqs), lloc, gloc;
 
         //fprintf (stderr,"[%d] n2l map: ",rank);
         //for (n=1; n<=n2l.giveN2Lmap()->giveSize(); n++) fprintf (stderr, "%d ", n2l.giveN2Lmap()->at(n));
@@ -443,16 +439,18 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             //fprintf (stderr, "(elem %d) ", n);
             elem = domain->giveElement(n);
             elem->giveLocationArray(loc, ut, s);
-            n2l.map2New(lloc, loc, 0); // translate natural->local numbering
+            n2l->map2New(lloc, loc, 0); // translate natural->local numbering (remark, 1-based indexing)
+            n2g->map2New(gloc, loc, 0); // translate natural->global numbering (remark, 0-based indexing)
+            // See the petsc manual for details on how this allocation is constructed.
             for ( i = 1; i <= lloc.giveSize(); i++ ) {
                 if ( ( ii = lloc.at(i) ) ) {
                     for ( j = 1; j <= lloc.giveSize(); j++ ) {
-                        if ( ( jj = lloc.at(j) ) ) {
-                            //fprintf (stderr, "{[%d] %d-%d %d-%d} ", rank, loc.at(i),ii-1,loc.at(j),jj-1);
-                            ///@todo Split this. How do i find the appropriate columns indices?
-                            // This should be on the safe side for now;
-                            d_rows [ ii - 1 ].insert(jj - 1);
-                            o_rows [ ii - 1 ].insert(jj - 1);
+                        if ( ( jj = gloc.at(j) ) >= 0 ) { // if negative, then it is prescribed
+                            if ( lloc.at(j) ) { // if true, then its the local part (the diagonal block matrix)
+                                d_rows [ ii - 1 ].insert(jj);
+                            } else { // Otherwise it must be off-diagonal
+                                o_rows [ ii - 1 ].insert(jj);
+                            }
                         }
                     }
                 }
@@ -460,8 +458,16 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             //fprintf (stderr, "\n");
         }
 
+        // Diagonal must always be allocated; this code ensures that for every local line, it adds the global column number
+        IntArray *n2gmap = n2g->giveN2Gmap();
+        IntArray *n2lmap = n2l->giveN2Lmap();
+        for ( int n = 1; n <= n2lmap->giveSize(); ++n ) {
+            if ( n2lmap->at(n) ) {
+                d_rows [ n2lmap->at(n)-1 ].insert( n2gmap->at(n) );
+            }
+        }
+
         for ( i = 0; i < leqs; i++ ) {
-            d_rows [ i ].insert( i ); // Diagonal must always be allocated.
             d_nnz(i) = d_rows [ i ].size();
             o_nnz(i) = o_rows [ i ].size();
         }
