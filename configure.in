@@ -1059,19 +1059,19 @@ if test x$tinyxml_module = xyes; then
     AC_MSG_CHECKING(TINYXML module location)
     if test -f ${PWD}/tinyxml/tinyxml.h && test -z ${TINYXML_DIR} ; then
         AC_MSG_RESULT(${PWD}/tinyxml)
-        TINYXML_INCLUDES="-I${PWD}"
-        TINYXML_DIR="${PWD}"
-    elif test -f $TINYXML_DIR/tinyxml/tinyxml.h; then
+        TINYXML_INCLUDES="-I${PWD}/tinyxml"
+        TINYXML_DIR="${PWD}/tinyxml"
+    elif test -f $TINYXML_DIR/tinyxml.h; then
           TINYXML_INCLUDES="-I${TINYXML_DIR}"
-          AC_MSG_RESULT(${TINYXML_DIR}/tinyxml)
+          AC_MSG_RESULT(${TINYXML_DIR})
     else
         while true; do
-            read -p "Type in tinyxml directory (use absolute path, excluding the last tinyxml/ directory):" TINYXML_DIR
-            if test -e ${TINYXML_DIR}/tinyxml/tinyxml.h ; then
+            read -p "Type in tinyxml directory (use absolute path):" TINYXML_DIR
+            if test -e ${TINYXML_DIR}/tinyxml.h ; then
                 TINYXML_INCLUDES="-I${TINYXML_DIR}"
                 break;
             else
-                echo "tinyxml includes not found under ${TINYXML_DIR}/tinyxml"
+                echo "tinyxml includes not found under ${TINYXML_DIR}"
             fi
         done
     fi

@@ -29,7 +29,7 @@ RM         = rm -f
 
 MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 #search *.C *.cpp files in these directories
-VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oofemlib/iga @OOFEM_DIR@/src/oofemlib/iml @TINYXML_DIR@/tinyxml
+VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oofemlib/iga @OOFEM_DIR@/src/oofemlib/iml @TINYXML_DIR@
 
 ## sources
 srcs0=
