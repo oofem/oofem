@@ -409,6 +409,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
         n2l = eModel->givePetscContext(di, ut)->giveN2Lmap();
 
+        n2l->init(eModel, ut, di);
+        n2g->init(eModel, ut, di);
+
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
  #endif

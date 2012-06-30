@@ -494,12 +494,14 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
 
 
 int
-PetscNatural2GlobalOrdering :: giveNewEq(int leq) {
+PetscNatural2GlobalOrdering :: giveNewEq(int leq)
+{
     return locGlobMap.at(leq);
 }
 
 int
-PetscNatural2GlobalOrdering :: giveOldEq(int eq) {
+PetscNatural2GlobalOrdering :: giveOldEq(int eq)
+{
     std :: map< int, int > :: iterator i = globLocMap.find(eq);
     if ( i != globLocMap.end() ) {
         return i->second;
