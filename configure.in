@@ -1061,7 +1061,7 @@ if test x$tinyxml_module = xyes; then
         AC_MSG_RESULT(${PWD}/tinyxml)
         TINYXML_INCLUDES="-I${PWD}/tinyxml"
         TINYXML_DIR="${PWD}/tinyxml"
-    elif test -f $TINYXML_DIR/tinyxml.h; then
+    elif test -f $TINYXML_DIR/tinyxml.h ; then
           TINYXML_INCLUDES="-I${TINYXML_DIR}"
           AC_MSG_RESULT(${TINYXML_DIR})
     else
