@@ -725,6 +725,7 @@ enum InputFieldType {
     IFT_IsotropicDamageMaterial1_ep,
     IFT_IsotropicDamageMaterial1_e2,
     IFT_IsotropicDamageMaterial1_nd,
+    IFT_IsotropicDamageMaterial1_checkSnapBack,
 
     IFT_CompoDamageMat_ex,
     IFT_CompoDamageMat_ez,

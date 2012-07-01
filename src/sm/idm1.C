@@ -97,6 +97,9 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     RandomMaterialExtensionInterface :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
+    checkSnapBack = 1;//check by default
+    IR_GIVE_OPTIONAL_FIELD(ir, checkSnapBack, IFT_IsotropicDamageMaterial1_checkSnapBack, "checksnapback");     // Macro
+
     // specify the type of formula for equivalent strain
     IR_GIVE_OPTIONAL_FIELD(ir, equivStrainType, IFT_IsotropicDamageMaterial1_equivstraintype, "equivstraintype");     // Macro
     if ( equivStrainType == 1 ) {
@@ -390,17 +393,20 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             double minGf = 0.;
             OOFEM_WARNING5("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, e0, gp->giveElement()->giveNumber(), Le);
             if ( gf != 0. ) { //cohesive crack
-                if ( softType == ST_Exponential_Cohesive_Crack ) { // exponential softening
+                if ( softType == ST_Exponential_Cohesive_Crack ) { //exponential softening
                     minGf = E * e0 * e0 * Le;
-                } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { // (bi)linear softening law
+                } else if ( softType == ST_Linear_Cohesive_Crack || softType == ST_BiLinear_Cohesive_Crack ) { //(bi)linear softening law
                     minGf = E * e0 * e0 * Le / 2.;
                 } else {
                     OOFEM_WARNING2("Gf unsupported for softening type softType = %d", softType);
                 }
-
-                OOFEM_ERROR4("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
+                if ( checkSnapBack ) { 
+                    OOFEM_ERROR4("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
+                }
             }
-            _error("\n");
+            if ( checkSnapBack ) {//given fracturing strain 
+                    OOFEM_ERROR4("Material number %d, increase ef %f to minimum e0 %f", this->giveNumber(), ef, e0);
+            }
         }
 
         if ( this->softType == ST_Linear_Cohesive_Crack ) {
@@ -454,9 +460,22 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             OOFEM_ERROR1("Unknown softening type for cohesive crack model.");
         }
 
-        if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-            _error("computeDamageParam: damage parameter out of range, snap-back problems");
+        if ( omega > 1.0 ) {
+            OOFEM_WARNING2("computeDamageParam: damage parameter is %f, which is greater than 1, snap-back problems", omega);
+            omega = maxOmega;
+            if ( checkSnapBack ){
+                OOFEM_ERROR1("\n");
+            }
         }
+        
+        if ( omega < 0.0 ) {
+            OOFEM_WARNING2("computeDamageParam: damage parameter is %f, which is smaller than 0, snap-back problems", omega);
+            omega = 0.0;
+            if ( checkSnapBack ){
+                OOFEM_ERROR1("\n");
+            }
+        }
+        
     }
 }
 double
@@ -589,11 +608,20 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         
         
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            _error6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le );
+            OOFEM_WARNING6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le );
+            if ( checkSnapBack ){
+                OOFEM_ERROR1("\n");
+            }
         } else if ( wf == 0. && e0 >= ef ) {
-            _error5("Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel());
+            OOFEM_WARNING5("Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel());
+            if ( checkSnapBack ){
+                OOFEM_ERROR1("\n");
+            }
         } else if ( ef == 0. && e0 * le >= wf ) {
-            _error5("Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le,gp->giveElement()->giveLabel());
+            OOFEM_WARNING5("Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le,gp->giveElement()->giveLabel());
+            if ( checkSnapBack ){
+                OOFEM_ERROR1("\n");
+            }
         }
     }
 }

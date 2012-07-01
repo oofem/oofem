@@ -1505,7 +1505,8 @@ Record Format & \descitem{Idm1}
 [\elemparam{e1}{rn}] 
 [\elemparam{e2}{rn}] 
 [\elemparam{nd}{rn}] 
-[\elemparam{maxOmega}{rn}]\\
+[\elemparam{maxOmega}{rn}]
+[\elemparam{checkSnapBack}{rn}]\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
@@ -1549,6 +1550,7 @@ of equivalent strain:
 &- \param{maxOmega} maximum damage, used for convergence improvement
 (its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
 but not the stress)\\
+&- \param{checkSnapBack} parameter for snap back checking, 0 no check, 1 check (default)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline

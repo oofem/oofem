@@ -158,6 +158,8 @@ protected:
 
     /// Parameters used if softType = 7 (extended smooth damage law)
     double e1, e2, s1, nd;
+    /// Check possible snap back flag
+    int checkSnapBack;
 
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
