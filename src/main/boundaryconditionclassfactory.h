@@ -48,6 +48,7 @@
  #include "structeigenstrainload.h"
  #include "usrdeftempfield.h"
  #include "tf1.h"
+ #include "rotatingboundary.h"
 #endif //__SM_MODULE
 
 #ifdef __FM_MODULE
@@ -70,6 +71,7 @@ REGISTER_CLASS(SurfaceTensionBoundaryCondition, "surfacetension", SurfaceTension
 REGISTER_CLASS(StructuralTemperatureLoad, "structtemperatureload", StructuralTemperatureLoadClass)
 REGISTER_CLASS(StructuralEigenstrainLoad, "structeigenstrainload", StructuralEigenstrainLoadClass)
 REGISTER_CLASS(UserDefinedTemperatureField, "usrdeftempfield", UserDefinedTemperatureFieldClass)
+REGISTER_CLASS(RotatingBoundary, "rotatingboundary", RotatingBoundaryClass)
 REGISTER_CLASS(TF1, "tf1", TF1Class)
 #endif //__SM_MODULE
 #ifdef __FM_MODULE

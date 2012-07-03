@@ -64,6 +64,7 @@ enum classType {
     ConstantSurfaceLoadClass,
     PointLoadClass,
     UserDefinedTemperatureFieldClass,
+    RotatingBoundaryClass,
     TF1Class,
     TractionPressureBCClass,
     TransmissionBCClass,

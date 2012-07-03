@@ -335,6 +335,10 @@ enum InputFieldType {
     IFT_SurfaceTensionBoundaryCondition_gamma,
     IFT_SurfaceTensionBoundaryCondition_useTangent,
 
+    IFT_RotatingBoundary_axis,
+    IFT_RotatingBoundary_center,
+    IFT_RotatingBoundary_frequency,
+
     IFT_InitialCondition_conditions,
 
     IFT_LoadTimeFunction_initialvalue,
