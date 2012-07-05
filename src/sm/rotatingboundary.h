@@ -43,6 +43,7 @@ namespace oofem {
 /**
  * Class implementing rotating boundary surface.
  * This boundary condition is usually attribute of one or more degrees of freedom (DOF).
+ *
  * @author Andreas Feymark
  */
 class RotatingBoundary : public BoundaryCondition
@@ -53,9 +54,6 @@ protected:
 
     /// Axis and center of rotation.
     FloatArray axis, center;
-
-    /// Frequency by which the boundary rotates.
-    double frequency;
 
 public:
     /**

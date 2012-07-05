@@ -328,6 +328,9 @@ Parser :: Token_value Parser :: get_token()
                 return curr_tok = EXP_FUNC;
             } else if ( !strncmp(string_value, "h", 1) ) {
                 return curr_tok = HEAVISIDE_FUNC;
+            } else if ( !strncmp(string_value, "pi", 2) ) {
+                number_value = M_PI;
+                return curr_tok = NUMBER;
             } else {
                 return curr_tok = NAME;
             }

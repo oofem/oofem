@@ -36,6 +36,7 @@
 #include "engngm.h"
 #include "dofmanager.h"
 #include "mathfem.h"
+#include "loadtime.h"
 
 namespace oofem {
 double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
@@ -45,8 +46,9 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     DofIDItem id = dof->giveDofID();
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
     FloatArray answer, newcoords;
+    double theta;
 
-    double theta = 2 * M_PI * frequency * stepN->giveTargetTime();
+    theta = this->giveLoadTimeFunction()->evaluate(stepN, mode);
 
     if ( axis.giveSize() != 3 ) {
         OOFEM_ERROR("RotatingBoundary :: give - Size of rotation axis != 3.");
@@ -102,15 +104,10 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     switch ( id ) {
     case D_u:
         return answer.at(1);
-    case V_u:
-    case P_f:
-    case T_f:
     case D_v:
         return answer.at(2);
-    case V_v:
     case D_w:
         return answer.at(3);
-    case V_w:
     default:
         return 0.0;
     }
@@ -134,9 +131,6 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
     axis.normalize();
 
     IR_GIVE_OPTIONAL_FIELD(ir, center, IFT_RotatingBoundary_center, "center"); // Macro
-
-    frequency = 0;
-    IR_GIVE_FIELD(ir, frequency, IFT_RotatingBoundary_frequency, "frequency"); // Macro    
 
     return IRRT_OK;
 }
