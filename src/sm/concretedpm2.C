@@ -45,6 +45,7 @@
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include <math.h>
 
 namespace oofem {
 ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :
@@ -1411,7 +1412,8 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                          pow(rhoTrial / ( 2. * gM ), 2.) );
 
-    double ductilityMeasure = computeDuctilityMeasure(sig, rho);
+    double thetaVertex = 0.;
+    double ductilityMeasure = computeDuctilityMeasure(sig, rho, thetaVertex);
 
     return kappaInitial + equivalentDeltaPlasticStrain / ductilityMeasure;
 }
@@ -1419,9 +1421,10 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
 
 double
 ConcreteDPM2 :: computeDuctilityMeasure(const double sig,
-                                        const double rho)
+                                        const double rho,
+					const double theta)
 {
-    double thetaConst = pow(2. * cos(thetaTrial), 2.);
+    double thetaConst = pow(2. * cos(theta), 2.);
     double ductilityMeasure;
     double x = -( sig + fc / 3 ) / fc;
     if ( x < 0. ) {
@@ -1559,7 +1562,7 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
         normOfResiduals = residualsNorm.computeNorm();
 
-        if ( isnan(normOfResiduals) ) {
+        if ( std::isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return 0.;
         }
@@ -1826,7 +1829,7 @@ ConcreteDPM2 :: computeDKappaDDeltaLambda(const double sig,
     equivalentDGDStress = sqrt( 1. / 3. * pow(dGDInv(0), 2.) +
                                 pow(dGDInv(1), 2.) );
 
-    double ductilityMeasure = computeDuctilityMeasure(sig, rho);
+    double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
 
     double dKappaDDeltaLambda = equivalentDGDStress / ductilityMeasure;
     return dKappaDDeltaLambda;
@@ -1857,7 +1860,7 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDInv(FloatArray &answer,
                                 pow(dGDInv(1), 2.) );
 
     //computeDuctilityMeasure
-    double ductilityMeasure = computeDuctilityMeasure(sig, rho);
+    double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
 
     //Compute dEquivalentDGDStressDInv
     dEquivalentDGDStressDInv(0) =
@@ -1899,7 +1902,7 @@ ConcreteDPM2 :: computeDDKappaDDeltaLambdaDKappa(const double sig,
                                 pow(dGDInv(1), 2.) );
 
     //computeDuctilityMeasure
-    double ductilityMeasure = computeDuctilityMeasure(sig, rho);
+    double ductilityMeasure = computeDuctilityMeasure(sig, rho, this->thetaTrial);
 
     //Compute dEquivalentDGDStressDKappa
     dEquivalentDGDStressDKappa =
