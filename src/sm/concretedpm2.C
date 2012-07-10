@@ -45,7 +45,6 @@
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include <math.h>
 
 namespace oofem {
 ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :

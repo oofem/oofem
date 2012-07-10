@@ -560,10 +560,12 @@ public:
      * Compute the ductility measure based on the stress state.
      * @param sig Volumetric stress.
      * @param rho Length of the deviatoric strength.
+     * @param theta Lode angle of stress state.
      * @returns Ductility measure.
      */
     virtual double computeDuctilityMeasure(const double sig,
-                                           const double rho);
+                                           const double rho,
+					   const double theta);
 
 
     /**
