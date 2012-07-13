@@ -357,11 +357,8 @@ Tetrah1_ht :: giveInterface(InterfaceType interface)
 int
 Tetrah1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_TemperatureFlow ) || ( type == IST_HumidityFlow ) ) {
-        return 3;
-    }
-
-    return 0;
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
 }
 
 int

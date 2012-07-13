@@ -61,7 +61,7 @@ protected:
         FloatArray *lhs;
         FloatMatrix *rhs;
         IntArray *regionNodalNumbers;
-        parallelStruct(FloatArray *a, FloatMatrix *b, IntArray *c):
+        parallelStruct(FloatArray *a, FloatMatrix *b, IntArray *c) :
             lhs(a), rhs(b), regionNodalNumbers(c) { }
     };
 

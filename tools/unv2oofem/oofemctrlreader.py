@@ -65,6 +65,7 @@ class CTRLParser:
     oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
     oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
     oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
+    oofem_elemProp.append(oofem_elementProperties("Interface1d", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
     oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))

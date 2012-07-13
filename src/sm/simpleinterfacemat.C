@@ -150,8 +150,10 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
         _error("giveMaterialMode: Unsupported coord mode");
     }
 
-    double lim = 1e50;
-    answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
+    double lim = 1.e+50;
+    answer.at(1) = min( normalStress, lim );//threshold on maximum
+    answer.at(1) = max( answer.at(1), -lim );//threshold on minimum
+    //answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
 
     // update gp
     status->setTempShearStressShift(tempShearStressShift);

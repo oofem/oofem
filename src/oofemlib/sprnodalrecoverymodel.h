@@ -69,7 +69,7 @@ protected:
         IntArray *dofManPatchCount;
         IntArray *regionNodalNumbers;
         int regionValSize;
-        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d):
+        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d) :
             dofManValues(a), dofManPatchCount(b), regionNodalNumbers(c), regionValSize(d) { }
     };
 

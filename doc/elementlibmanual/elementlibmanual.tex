@@ -817,6 +817,35 @@ Full integration of all strain components using four point Gauss integration for
 \descitem{Status} 
 
 \subsection{Interface elements}
+
+Interface elements represent a contact between two adjacent nodes. Interface material specific to interface element needs to be assigned - consult the {\it matlibmanual} for interface support. 
+
+\subsubsection{Interface1d element}
+Implementation of one dimensional (slip) interface element. 
+This element can connect two separate nodes by specifying the
+one-dimensional slip law, that determines the force acting between
+these nodes depending on their relative displacement. This element can
+be applied in 1D, 2D, and 3D settings (default).
+
+\elemkeyword{Interface1d}\\
+\descitem{Parameters} \optelemparam{refnode}{in} \optelemparam{normal}{ra}\\
+The optional parameter \param{refnode} determines the reference node, which is used to
+specify a reference direction (the direction vector is obtained by
+subtracting the coordinates of the first node from the reference node). The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.
+The magnitude of slip is then obtained as relative displacement vector
+of two element nodes projected to reference direction. As a
+consequence, this will lead to linearized geometrical equations, where
+slip is always related to the original (undeformed) configuration.
+Element requires material model with \_1dInterface support.
+\descitem{Unknowns}
+One, two, or three DOFs (u-displacement, v-displacement,
+w-displacement) are required in each node, according to element mode.\\
+\descitem{Approximation} None.
+\descitem{Integration} None.
+\descitem{Features} None.\\
+\descitem{Loads} \\
+\descitem{Status} 
+
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
@@ -866,34 +895,6 @@ Full integration of all components using one point integration formula.
 \descitem{Features} None.\\
 \descitem{Loads} \\
 \descitem{Status} 
-
-
-\subsubsection{Interface1d element}
-Implementation of one dimensional (slip) interface element. 
-This element can connect two separate nodes by specifying the
-one-dimensional slip law, that determines the force acting between
-these nodes depending on their relative displacement. This element can
-be applied in 1D, 2D, and 3D settings (default).
-
-\elemkeyword{Interface1d}\\
-\descitem{Parameters} \optelemparam{refnode}{in} \optelemparam{normal}{ra}\\
-The optional parameter \param{refnode} determines the reference node, which is used to
-specify a reference direction (the direction vector is obtained by
-subtracting the coordinates of the first node from the reference node). The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.
-The magnitude of slip is then obtained as relative displacement vector
-of two element nodes projected to reference direction. As a
-consequence, this will lead to linearized geometrical equations, where
-slip is always related to the original (undeformed) configuration.
-Element requires material model with \_1dInterface support.
-\descitem{Unknowns}
-One, two, or three DOFs (u-displacement, v-displacement,
-w-displacement) are required in each node, according to element mode.\\
-\descitem{Approximation} None.
-\descitem{Integration} None.
-\descitem{Features} None.\\
-\descitem{Loads} \\
-\descitem{Status} 
-
 
 \subsection{Iso Geometric Analysis based (IGA) elements}
 The following record describes the common part of IGA element record:
@@ -947,8 +948,8 @@ None.\\
 \descitem{Status} 
 
 \subsubsection{Spring element}
-This element represent longitudial or torsional spring element. It is defined by two nodes, orientation and spring constant.
-The spring element has no mass associated, mass  can be added using LumpedMass element.
+This element represent longitudial or torsional spring element. It is defined by two nodes, orientation and a spring constant.
+The spring element has no mass associated, the mass can be added using LumpedMass element. The spring is linear and works the same way in tension or in compression. 
 
 \elemkeyword{Spring}\\
 \descitem{Parameters} \elemparam{mode}{in} \elemparam{k}{rn} \elemparam{orientation}{ra}\\

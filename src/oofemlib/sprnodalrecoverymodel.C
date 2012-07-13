@@ -137,10 +137,10 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                     }
                 } else {
 #ifndef __PARALLEL_MODE
-                    OOFEM_WARNING2("SPRNodalRecoveryModel::recoverValues : values of dofmanager %d undetermined", i);
+                    OOFEM_WARNING3("SPRNodalRecoveryModel::recoverValues : values of %s in dofmanager %d undetermined", __InternalStateTypeToString(type), i);
 #else
-                    OOFEM_WARNING3("[%d] SPRNodalRecoveryModel::recoverValues : values of dofmanager %d undetermined",
-                                   domain->giveEngngModel()->giveRank(), i);
+                    OOFEM_WARNING4("[%d] SPRNodalRecoveryModel::recoverValues : values of %s in dofmanager %d undetermined",
+                                   domain->giveEngngModel()->giveRank(), __InternalStateTypeToString(type), i);
 #endif
                     dofManValues.at(eq + j) = 0.0;
                     //abortFlag = true;
@@ -194,35 +194,35 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-	  if ((elemVR = this->giveElementVirtualRegionNumber(ielem))) { // test if elementVR is nonzero
-            if ( regionValSize.at(elemVR) ) {
-	      if ( regionValSize.at(elemVR) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
-		// This indicates a size mis-match between different elements, no choice but to skip the region.
-		regionMap.at(elemVR) = 1;
-		regionsSkipped = 1;
-	      }
-	      
-	      if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
-		regionMap.at(elemVR) = 1;
-		/*
-		 *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
-		 */
-		regionsSkipped = 1;
-	      }
-            } else {
-	      regionValSize.at(elemVR) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
-	      regionTypes.at(elemVR) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
-	      if ( regionValSize.at(elemVR) == 0 ) {
-		regionMap.at(elemVR) = 1;
-		regionsSkipped = 1;
-	      }
+            if ( ( elemVR = this->giveElementVirtualRegionNumber(ielem) ) ) { // test if elementVR is nonzero
+                if ( regionValSize.at(elemVR) ) {
+                    if ( regionValSize.at(elemVR) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
+                        // This indicates a size mis-match between different elements, no choice but to skip the region.
+                        regionMap.at(elemVR) = 1;
+                        regionsSkipped = 1;
+                    }
+
+                    if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
+                        regionMap.at(elemVR) = 1;
+                        /*
+                         *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
+                         */
+                        regionsSkipped = 1;
+                    }
+                } else {
+                    regionValSize.at(elemVR) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
+                    regionTypes.at(elemVR) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
+                    if ( regionValSize.at(elemVR) == 0 ) {
+                        regionMap.at(elemVR) = 1;
+                        regionsSkipped = 1;
+                    }
+                }
             }
-	  }
         }
     }
 
     if ( regionsSkipped ) {
-        OOFEM_LOG_RELEVANT("SPRNodalRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
+        OOFEM_LOG_RELEVANT( "SPRNodalRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
         for ( i = 1; i <= nregions; i++ ) {
             if ( regionMap.at(i) ) {
                 OOFEM_LOG_RELEVANT("%d ", i);
@@ -464,8 +464,8 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     ndofman = this->domain->giveNumberOfDofManagers();
     papInv.resize(ndofman);
     papInv.zero();
-    for (int i = 1; i <= pap.giveSize(); ++i) {
-        papInv.at(pap.at(i)) = 1;
+    for ( int i = 1; i <= pap.giveSize(); ++i ) {
+        papInv.at( pap.at(i) ) = 1;
     }
 
     // determine dofManagers which values will be determined by this patch
@@ -593,11 +593,12 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
             nip = iRule->getNumberOfIntegrationPoints();
             for ( i = 0; i < nip; i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
-                if (!element->giveIPValue(ipVal, gp, type, tStep)) {
-		  ipVal.resize(regionValSize);
-		  ipVal.zero();
-		}
-                element->computeGlobalCoordinates(coords, *gp->giveLocalCoordinates() );
+                if ( !element->giveIPValue(ipVal, gp, type, tStep) ) {
+                    ipVal.resize(regionValSize);
+                    ipVal.zero();
+                }
+
+                element->computeGlobalCoordinates( coords, * gp->giveLocalCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
                 for ( j = 1; j <= neq; j++ ) {

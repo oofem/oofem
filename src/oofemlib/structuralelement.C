@@ -1093,12 +1093,12 @@ StructuralElement :: checkConsistency()
 {
     int result = 1;
     if ( !dynamic_cast<StructuralMaterial*>(this->giveMaterial()) ) {
-        _warning("checkConsistency : material without structural support");
+        _warning2("checkConsistency : material %s without structural support", this->giveMaterial()->giveClassName());
         result = 0;
     }
 
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_StructuralCapability) ) {
-        _warning("checkConsistency : cross-section without structural support");
+        _warning2("checkConsistency : cross-section %s without structural support", this->giveCrossSection()->giveClassName());
         result = 0;
     }
 

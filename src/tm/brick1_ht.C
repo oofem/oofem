@@ -383,13 +383,8 @@ Brick1_ht :: giveInterface(InterfaceType interface)
 int
 Brick1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( type == IST_Temperature || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
-        return 1;
-    } else if ( type == IST_TemperatureFlow || type == IST_HumidityFlow ) {
-        return 3;
-    }
-
-    return 0;
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
 }
 
 int

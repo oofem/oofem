@@ -219,22 +219,22 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-  	    if ((elementVR = this->giveElementVirtualRegionNumber(ielem))) {  // test if elementVR is nonzero
-	      if ( regionValSize.at(elementVR) ) {
-                if ( regionValSize.at(elementVR) != interface->ZZNodalRecoveryMI_giveDofManRecordSize(type) ) {
-		  // This indicates a size mis-match between different elements, no choice but to skip the region.
-		  regionMap.at(elementVR) = 1;
-		  regionsSkipped = 1;
+            if ( ( elementVR = this->giveElementVirtualRegionNumber(ielem) ) ) {  // test if elementVR is nonzero
+                if ( regionValSize.at(elementVR) ) {
+                    if ( regionValSize.at(elementVR) != interface->ZZNodalRecoveryMI_giveDofManRecordSize(type) ) {
+                        // This indicates a size mis-match between different elements, no choice but to skip the region.
+                        regionMap.at(elementVR) = 1;
+                        regionsSkipped = 1;
+                    }
+                } else {
+                    regionValSize.at(elementVR) = interface->ZZNodalRecoveryMI_giveDofManRecordSize(type);
+                    if ( regionValSize.at(elementVR) == 0 ) {
+                        regionMap.at(elementVR) = 1;
+                        regionsSkipped = 1;
+                        OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
+                    }
                 }
-	      } else {
-                regionValSize.at(elementVR) = interface->ZZNodalRecoveryMI_giveDofManRecordSize(type);
-                if ( regionValSize.at(elementVR) == 0 ) {
-		  regionMap.at(elementVR) = 1;
-		  regionsSkipped = 1;
-		  OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
-                }
-	      }
-	   }
+            }
         }
     }
 
@@ -272,10 +272,10 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
         gp  = iRule->getIntegrationPoint(i);
         dV  = elem->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, stepN);
-        if (!elem->giveIPValue(stressVector, gp, type, tStep)) {
-	  stressVector.resize(size);
-	  stressVector.zero();
-	}
+        if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
+            stressVector.resize(size);
+            stressVector.zero();
+        }
 
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         for ( j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {
@@ -340,31 +340,31 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolation
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
 
-    Element* elem = ZZNodalRecoveryMI_giveElement();
-    FEInterpolation* interpol = elem->giveInterpolation();
+    Element *elem = ZZNodalRecoveryMI_giveElement();
+    FEInterpolation *interpol = elem->giveInterpolation();
 
     // test if underlying element provides interpolation
-    if (interpol) {
+    if ( interpol ) {
         if ( !elem->giveIPValueSize(type, gp) ) {
             OOFEM_ERROR3("ZZNodalRecoveryMI_computeNNMatrix: Element %d not supporting type %d", elem->giveNumber(), type);
             return;
         }
 
-        interpol->evalN(answer, *gp->giveCoordinates(), FEIElementGeometryWrapper(elem));
+        interpol->evalN( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
     } else {
         // ok default implementation can not work, as element is not providing valid interpolation
         // to resolve this, one can overload this method for element implementing ZZNodalRecoveryModelInterface
         // or element should provide interpolation.
-        OOFEM_ERROR2("ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", elem->giveNumber());
+        OOFEM_ERROR2( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", elem->giveNumber() );
     }
 }
 
 int
 ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    IntegrationRule* iRule = ZZNodalRecoveryMI_giveElement()->giveDefaultIntegrationRulePtr();
-    if (iRule) {
-        return ZZNodalRecoveryMI_giveElement()->giveIPValueSize(type, iRule->getIntegrationPoint(0));
+    IntegrationRule *iRule = ZZNodalRecoveryMI_giveElement()->giveDefaultIntegrationRulePtr();
+    if ( iRule ) {
+        return ZZNodalRecoveryMI_giveElement()->giveIPValueSize( type, iRule->getIntegrationPoint(0) );
     } else {
         return 0;
     }

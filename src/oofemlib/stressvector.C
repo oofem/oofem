@@ -104,7 +104,7 @@ void
 StressVector :: computePrincipalValues(FloatArray &answer) const
 {
     //
-    // This function cumputes Principal values of strain vector.
+    // This function cumputes Principal values of stress vector.
     // Engineering notation is used.
     //
     MaterialMode myMode = this->giveStressStrainMode();
@@ -179,7 +179,7 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
 
         /*
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
-         * This aloows to overcome various rounding errors when solving general cubic equation.
+         * This allows to overcome various rounding errors when solving general cubic equation.
          */
         cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & i );
 

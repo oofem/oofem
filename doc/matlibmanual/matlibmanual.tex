@@ -5,9 +5,9 @@
 \usepackage{amssymb,amsmath}
 \input{include.tex}
 
-\renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
-\renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
-\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\topfraction}{0.99}    % 99% of page top can be a float
+\renewcommand{\bottomfraction}{0.99}    % 99% of page bottom can be a float
+\renewcommand{\textfraction}{0.01}    % only 1% of page must to be the text
 \renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
 \setcounter{totalnumber}{5} %maximum floating objects on one page
 
@@ -2055,7 +2055,7 @@ Features & Adaptivity support\\
 \subsubsection{Isotropic damage model for interfaces}
 \label{sec:idmfi}
 
-The model provides an interface law, which can be used to describe  a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+The model provides an interface law, which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
 the normal direction and \param{ks} in the tangential direction.
 Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
 direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
@@ -2315,9 +2315,9 @@ The basic creep is in the microprestress-solidification theory influenced by the
 \end{eqnarray}
 Here, $\bar{f_c}$ is the average compressive cylinder strength at age of 28 days [MPa], $a$, $w$ and $c$ is the weight  of aggregates, water and cement per unit volume of concrete [kg/m$^3$].
 
-%%%% 	SPRING %%%%
+%%%%     SPRING %%%%
 The non-aging spring stiffness represents the asymptotic modulus of the material; it is equal to $1/q_1$.
-%%%% 	KELIVIN CHAIN %%%%
+%%%%     KELIVIN CHAIN %%%%
 The solidifying Kelvin chain is composed of $M$ Kelvin units with fixed retardation times $\tau_{\mu}$, $\mu = 1, 2, \dots, M$, which form a geometric progression with quotient 10. The lowest retardation time $\tau_1$ is equal to $0.3\; begoftimeofinterest$, the highest retardation time $\tau_M$ is bigger than $0.5\; endoftimeofinterest$. The chain also contains a spring with stiffness $E_0^\infty$
 (a special case of Kelvin unit with zero retardation time).
 Moduli $E_{\mu}^\infty$ of individual Kelvin units are determined such that the chain
@@ -2330,7 +2330,7 @@ leads to the following formulae:
 \end{eqnarray}
 Viscosities $\eta_{\mu}^\infty$ of individual Kelvin units are obtained from simple relation $\eta_{\mu}^\infty=\tau_{\mu}/E_{\mu}^\infty$. A higher accuracy is reached if all retardation times are in the end multiplied by the factor 1.35 and the last modulus $E_M$ is divided by 1.2.
 
-%%%% 	SOLIDIFICATION %%%%
+%%%%     SOLIDIFICATION %%%%
 The actual viscosities $\eta_{\mu}$ and stiffnesses $E_{\mu}$ of the solidifying chain change in time according to $\eta_{\mu}(t) = v(t) \eta_{\mu}^\infty$ and $E_{\mu}(t) = v(t) E_{\mu}^\infty$, where 
 \begin{equation}
 v(t)= \frac{1}{\frac{q_3}{q_2} + \left( \frac{\lambda_0}{ t} \right)^m}
@@ -2339,7 +2339,7 @@ is the volume growth function, and exponent $m = 0.5$. In the case of variable t
 $t$ is replaced by the equivalent time $t_e$, which is obtained by integrating
 (\ref{dtedt}).
 
-%%%% 	MICROPRESTRESS %%%%
+%%%%     MICROPRESTRESS %%%%
 Evolution of viscosity of the aging dashpot is governed by the differential
 equation 
 \begin{equation}
@@ -2363,7 +2363,7 @@ The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$, where $t_0$ 
 
 
 
-%%%% 	MODIFIED TIMES %%%%
+%%%%     MODIFIED TIMES %%%%
 As mentioned above, under variable humidity and temperature conditions the physical time $t$ in function $v(t)$ describing evolution of the solidified volume is replaced by the equivalent time $t_e$. In a similar spirit, $t$ is replaced by the solidification time $t_s$ in the equation describing creep of the solidifying constituent, and by the reduced time $t_r$ in equation $\mbox{d} \varepsilon_f / \mbox{d} t_r = \sigma / \eta(t)$ relating the flow strain rate to the stress.
 Factors transforming the physical time $t$ into $t_e$, $t_r$ and $t_s$ are defined as follows:
 \begin{eqnarray}
@@ -2389,7 +2389,7 @@ Functions describing the influence of humidity have the form
 \end{eqnarray}
 where $\alpha_e$, $\alpha_r$ and $\alpha_s$ are parameters. 
 
-%%%% 	HYGRO AND THERMAL STRAIN  %%%%
+%%%%     HYGRO AND THERMAL STRAIN  %%%%
 The rate of thermal strain is expressed as $\dot{\varepsilon}_T = \alpha_T \dot{T}$ and the rate of shrinkage strain as $\dot{\varepsilon}_{sh} = k_{sh} \dot{h}$, where both $\alpha_T$ and $k_{sh}$ are assumed to be constant in time and independent of temperature and humidity. 
 
 
@@ -2548,7 +2548,7 @@ Record Format & \descitem{B3solidmat}
 %
 %shm = 1 B3_AverageShrinkage
 \elemparam{ks}{rn} 
-%for shm = 1 and mode = 0			
+%for shm = 1 and mode = 0            
 \optelemparam{alpha1}{rn} \optelemparam{alpha2}{rn} \elemparam{hum}{rn} \elemparam{vs}{rn}
 %for shm = 1 and mode = 1
 \elemparam{q5}{rn} \elemparam{kt}{rn} \elemparam{EpsSinf}{rn}
@@ -2559,7 +2559,7 @@ Record Format & \descitem{B3solidmat}
 \elemparam{kSh}{rn}
 %nebo
 \elemparam{inithum}{rn} \elemparam{finalhum}{rn}\\
-%	   	  
+%             
 Parameters 
 &- \param{num} material model number\\
 &- \param{d} material density\\
@@ -2716,7 +2716,7 @@ Record Format & \descitem{mps}
 \optelemparam{alphaE}{rn} \optelemparam{alphaR}{rn} \optelemparam{alphaS}{rn}
 \optelemparam{QEtoR}{rn} \optelemparam{QRtoR}{rn} \optelemparam{QStoR}{rn}
 \optelemparam{cT}{rn} \elemparam{kappaT}{rn}
-%	   	  
+%             
 \\Parameters 
 &- \param{num} material model number\\
 &- \param{d} material density\\
@@ -3513,15 +3513,18 @@ This model is described in Section~\ref{sec:idmfi}.
 This model provides a simple interface law with penalty-type contact and friction. 
 In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
 By setting \param{kn} to a high value, the penetration (overlap) can be reduced,
-in the spirit of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
+in the sense of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
 of the gap can be allowed. 
 The shear response is elastoplastic, with the yield limit dependent on the normal traction.
 The magnitude of the shear traction $\vsig_T$ must not exceed the yield limit computed 
 according to a Coulomb-like friction law as the product of the (negative part of)
  normal traction $\sigma_N$ and a dimensionless coefficient of friction $fc$:
 \begin{equation}
-	||\vsig_T|| \leq \left\langle-\sigma_N\cdot fc\right\rangle
+    ||\vsig_T|| \leq \left\langle-\sigma_N\cdot fc\right\rangle 
 \end{equation}
+$\sigma_N$ is computed multiplying a known normal strain and a known stiffness in 
+tension or in compression.
+
 The shear elastic stiffness is assumed to be \param{kn} (i.e., equal to the
 normal stiffness). If the normal traction is tensile
 or zero, no shear traction can be transmitted by the interface.

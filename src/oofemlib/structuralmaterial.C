@@ -305,7 +305,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
 //
 // this function returns index of reduced(if form == ReducedForm)
 // or Full(if form==FullForm) stressStrain component in Full or reduced
-// stressStrainVector acording to stressStrain mode of given gp.
+// stressStrainVector according to stressStrain mode of given gp.
 //
 {
     //MaterialMode mode  = gp -> giveMaterialMode ();
@@ -2354,8 +2354,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         answer = status->giveTempStrainVector();
         return 1;
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStressTempTensor ) ) {
-        int indx;
-        FloatArray st(6), s;
+//         int indx;
+//         FloatArray st(6);
+        FloatArray s;
 
         if ( type == IST_PrincipalStressTensor ) {
             s = status->giveStressVector();
@@ -2363,14 +2364,14 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             s = status->giveTempStressVector();
         }
 
-        for ( int i = 1; i <= s.giveSize(); i++ ) {
-            indx = this->giveStressStrainComponentIndOf(ReducedForm, aGaussPoint->giveMaterialMode(), i);
-            if ( indx ) {
-                st.at(indx) = s.at(i);
-            }
-        }
-
-        this->computePrincipalValues(answer, st, principal_stress);
+//         for ( int i = 1; i <= s.giveSize(); i++ ) {
+//             indx = this->giveStressStrainComponentIndOf(ReducedForm, aGaussPoint->giveMaterialMode(), i);
+//             if ( indx ) {
+//                 st.at(indx) = s.at(i);
+//             }
+//         }
+//         this->computePrincipalValues(answer, st, principal_stress);
+        this->computePrincipalValues(answer, s, principal_stress);
         return 1;
     } else if ( ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
         int indx;
