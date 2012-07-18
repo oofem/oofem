@@ -88,9 +88,10 @@ public:
     virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
-
+    virtual IRResultType giveField(double &answer, int tokenNumber);
+    
     virtual bool hasField(InputFieldType fieldID, const char *idString);
-
+    virtual void printYourself();
     // Setters, unique for the dynamic input record
     virtual void setRecordKeywordField(const std::string &keyword, int number);
     virtual void setField(int item, InputFieldType fieldID);

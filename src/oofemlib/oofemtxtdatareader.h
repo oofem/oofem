@@ -61,12 +61,13 @@ public:
     virtual ~OOFEMTXTDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
+    virtual void giveLine(char *line);
     virtual void finish();
     virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
 
 protected:
-    void giveRawLineFromInput(char *line);
     void giveLineFromInput(char *line);
+    void giveRawLineFromInput(char *line);
 };
 } // end namespace oofem
 #endif // oofemtxtdatareader_h

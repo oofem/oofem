@@ -76,6 +76,7 @@ enum classType {
     PiecewiceClass,
     PeriodicPiecewiseClass,
     PiecewiseLinFunctionClass,
+    PiecewiseLinFunctionBlockClass,
     PeriodicPiecewiseLinFunctionClass,
     HeavisideLTFClass,
     UserDefinedLoadTimeFunctionClass,

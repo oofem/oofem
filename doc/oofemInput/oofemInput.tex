@@ -1565,7 +1565,7 @@ Currently, the supported export modules are following
   \end{record}
 
 \begin{itemize}
-\item The vtk module is obsolete, use vtkxml instead. It allows to export results recovered on region by region basis and has more features.
+\item The vtk module is obsolete, use vtkxml instead. Vtkxml allows to export results recovered on region by region basis and has more features.
 
 \item The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
@@ -1588,12 +1588,13 @@ on an element (cell), e.g. a material number. Identifier numbers are specified i
 internal variables, which is used to compute nodal values from values
 in integration points.
 
-\item The parameter \param{nvr} allows to set number of virual regions. The internal (state) variables defined in integration poits need to be transfered into nodal values. This process is called nodal recovery. VTKXML module allows to perform recovery not only over the whole domain, but also over so called virtual regions. This allows to exactly match discontinuity along region boundary instead of smoothing it. The concept of virtual regions allows to map several true regions onto single virtual region and then perform recovery over virtual regions instead of true ones. If \param{nvr} is set to zero (default), the recovery is performed over whole domain (single virtual region), when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over real regions is used.
+\item The parameter \param{nvr} allows to set number of virual regions. The internal (state) variables defined in integration points need to be transfered into nodal values. This process is called nodal recovery. VTKXML module allows to perform recovery not only over the whole domain, but also over so called virtual regions. This allows to exactly match discontinuity along region boundary instead of smoothing it. The concept of virtual regions allows to map several true regions onto single virtual region and then perform recovery over virtual regions instead of true ones. Number of true region is given by element cross-section. If \param{nvr} is set to zero (default), the recovery is performed over whole domain (single virtual region), when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over real regions is used.
 
 \item The array \param{vrmap} defines the mapping from real (true) regions to virtual regions. The size of this array
-should equal to number of true regions and values should be in range <1, nvr>. When \param{nvr} is zero or negative, this parameter 
-is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or nagative value causes
-region to be ignored.
+should equal to number of true regions and values should be in a range $\langle 1, nvr \rangle$. When \param{nvr} is zero or negative, this parameter is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative value causes region to be ignored. For example, to disregard all elements associated with a cross-section 2, use the line (relevant are \param{nvr} and \param{vrmap})
+
+{\footnotesize vtkxml tstep\_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2 nvr 1 vrmap 2 1 0}
+
 
 \end{itemize}
 
@@ -2465,11 +2466,23 @@ otherwise zero value is returned.
     \recentry{}{\field{t}{ra} \field{f(t)}{ra}}
   \end{record}
 
-  Represents the piecewise time function. The particular time values in
+Represents the piecewise time function. The particular time values in
 \param{t} array  should be sorted according to time scale. Corresponding time
 function values are in \param{f(t)} array. Value for time, which
 is not present in \param{t} is computed using liner interpolation scheme.
 Number of time-value pairs is in \param{nPoints} parameter.
+
+\item Piecewise function - data in a block
+
+  \begin{record}[0.9\textwidth]
+    \recentry{\entKeywordInst{PiecewiseLinFunctionBlock}}{\field{nPoints}{in}}\\
+    On every line: {(rn) (rn)}
+  \end{record}
+
+This function only stores data differently than the {\it PiecewiseLinFunction}. 
+The \param{nPoints} specifies number of rows in a block. A hash commented line (\#) is 
+skipped during block reading.
+
 \item Heaviside-like time function
 
   \begin{record}[0.9\textwidth]

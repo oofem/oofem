@@ -96,7 +96,9 @@ public:
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
 
+    virtual IRResultType giveField(double &answer, int tokenNumber);
     virtual bool hasField(InputFieldType fieldID, const char *idString);
+    virtual void printYourself();
 
 protected:
     int giveKeywordIndx(const char *kwd);

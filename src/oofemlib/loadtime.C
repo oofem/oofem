@@ -82,6 +82,14 @@ LoadTimeFunction :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
+IRResultType
+LoadTimeFunction :: initializeFrom(InputRecord *ir, DataReader *dr)
+{
+    return initializeFrom(ir);
+}
+
+
 int
 LoadTimeFunction :: giveInputRecordString(std :: string &str, bool keyword)
 {

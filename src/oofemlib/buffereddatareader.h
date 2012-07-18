@@ -45,7 +45,7 @@
 
 namespace oofem {
 /**
- * Class representing the implementation of plain text date reader.
+ * Class representing the implementation of plain text data reader.
  * It reads a sequential sequence of input records from data file
  * and creates the corresponding input records.
  * There is no check for record type requested, it is assumed that records are
@@ -92,6 +92,9 @@ public:
     /// Prints buffer to stdout.
     void printYourself();
 
+    /// Return the whole line
+    virtual void giveLine(char *line);
+    
     /**
      * Dumps buffer to file.
      * @param fileName Name of file to dump data to.

@@ -42,6 +42,7 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
     dataSourceName = std::string(inputfilename);
+    lineNumber = 0;
 }
 
 OOFEMTXTDataReader :: ~OOFEMTXTDataReader()
@@ -60,7 +61,15 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     }
 
     ir.setRecordString(line);
+    ir.setLineNumber(this->lineNumber);
     return & ir;
+}
+
+
+void
+OOFEMTXTDataReader :: giveLine(char *line)
+{
+  this->giveRawLineFromInput(line);
 }
 
 void
@@ -76,7 +85,7 @@ OOFEMTXTDataReader :: finish()
 void
 OOFEMTXTDataReader :: giveLineFromInput(char *line)
 {
-    // reads one line from inputStream - for private use only.
+    // reads one line from inputStream
     // if " detected, start/stop changing to lower case characters
     char *ptr;
     bool flag = false; //0-tolower, 1-remain with capitals
@@ -103,9 +112,10 @@ OOFEMTXTDataReader :: giveRawLineFromInput(char *line)
     int maxchar = OOFEM_MAX_LINE_LENGTH;
     char *_res;
     do {
+        this->lineNumber++;
         _res = fgets(line, maxchar, inputStream);
         if ( _res == NULL ) {
-            OOFEM_ERROR("OOFEMTXTDataReader::giveRawLineFromInput: Premature end  of file encountered");
+            OOFEM_ERROR2("OOFEMTXTDataReader::giveRawLineFromInput: Premature end of file encountered at line %d", this->giveLineNumber() );
         }
     } while ( * line == '#' ); // skip comments
 

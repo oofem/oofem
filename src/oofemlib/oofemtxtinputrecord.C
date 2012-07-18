@@ -382,6 +382,18 @@ OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, InputFieldType fieldID
     }
 }
 
+IRResultType
+OOFEMTXTInputRecord :: giveField(double &answer, int tokenNumber){
+    if ( scanDouble(tokenizer.giveToken(tokenNumber), answer) == 0 ) {
+        OOFEM_ERROR4("Double not found on line %d in token number %d, string %s", this->lineNumber, tokenNumber, this->record.c_str() );
+        return IRRT_BAD_FORMAT;
+    }
+
+    setReadFlag(tokenNumber);
+    return IRRT_OK;
+}
+
+
 bool
 OOFEMTXTInputRecord :: hasField(InputFieldType fieldID, const char *idString)
 {
@@ -393,6 +405,13 @@ OOFEMTXTInputRecord :: hasField(InputFieldType fieldID, const char *idString)
 
     return ( indx > 0 ) ? true : false;
 }
+
+void
+OOFEMTXTInputRecord :: printYourself()
+{
+  printf( "%s", this->record.c_str() );
+}
+
 
 int
 OOFEMTXTInputRecord :: scanInteger(const char *source, int &value)

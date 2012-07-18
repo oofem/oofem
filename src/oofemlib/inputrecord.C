@@ -37,10 +37,14 @@
 
 namespace oofem {
 InputRecord :: InputRecord()
-{ }
+{
+  this->lineNumber = 0;
+}
 
 InputRecord :: InputRecord(const InputRecord &src)
-{ }
+{ 
+  this->lineNumber = src.lineNumber;
+}
 
 InputRecord &
 InputRecord :: operator = ( const InputRecord & src )
@@ -67,7 +71,7 @@ void
 InputRecord :: report_error(const char *_class, const char *proc, InputFieldType fieldID, const char *kwd,
                             IRResultType result, const char *file, int line)
 {
-    __OOFEM_ERROR6(file, line, "Input error: \"%s\", field keyword \"%s\" (fieldID=%d)\n%s::%s", strerror(result), kwd, fieldID, _class, proc);
+    __OOFEM_ERROR7(file, line, "Input error on line %d: \"%s\", field keyword \"%s\" (fieldID=%d)\n%s::%s", lineNumber, strerror(result), kwd, fieldID, _class, proc);
 }
 
 

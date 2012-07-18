@@ -1146,6 +1146,8 @@ enum InputFieldType {
     IFT_PiecewiseLinFunction_npoints,
     IFT_PiecewiseLinFunction_t,
     IFT_PiecewiseLinFunction_ft,
+    
+    IFT_PiecewiseLinFunctionBlock_npoints,
 
     IFT_PeriodicPiecewiseLinFunction_period,
     IFT_PeriodicPiecewiseLinFunction_addtf,
@@ -1381,6 +1383,8 @@ public:
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the dynaList<Range> field value.
     virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
+    /// Returns a double on the position tokenNumber
+    virtual IRResultType giveField(double &answer, int tokenNumber) = 0;
     //@}
 
     /**@name Optional field extraction methods
@@ -1415,6 +1419,8 @@ public:
 
     /// Returns error string corresponding to given value of IRResultType type.
     const char *strerror(IRResultType);
+    /// Print input record.
+    virtual void printYourself() = 0;
 
     /// Prints the error message.
     void report_error(const char *_class, const char *proc, InputFieldType fieldID, const char *kwd,
@@ -1422,6 +1428,12 @@ public:
 
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
+    /// Sets line number from dataReader.
+    void setLineNumber(const int lineNumber) {this->lineNumber = lineNumber; };
+    
+protected:    
+    /// Keep track of read line
+    int lineNumber;
 };
 } // end namespace oofem
 #endif // inputrecord_h

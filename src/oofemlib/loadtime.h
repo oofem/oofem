@@ -109,6 +109,8 @@ public:
 
     // Overloaded methods:
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir, DataReader *dr);
+    
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     virtual classType giveClassID() const { return LoadTimeFunctionClass; }

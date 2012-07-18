@@ -57,7 +57,7 @@ double PiecewiseLinFunction :: __at(double time)
             return values.at(i);
         } else if ( dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING2("PiecewiseLinFunction :: __at: time %f out of defined range, extrapolating value(s)", dates.at(i) );
+                OOFEM_WARNING3("PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 

@@ -70,6 +70,14 @@ public:
     virtual InputRecord *giveInputRecord(InputRecordType irType, int recordId) = 0;
 
     /**
+     * Reads the whole line
+     */
+    virtual void giveLine(char *line) { };
+    
+    /// Return a line number, which is helpful for tracking errors.
+    virtual int giveLineNumber() { return lineNumber; };
+    
+    /**
      * Allows to detach all data connections.
      */
     virtual void finish() = 0;
@@ -78,6 +86,10 @@ public:
     virtual const char *giveDataSourceName() const = 0;
     /// Prints the error message.
     void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
+    
+protected:
+    /// Keep track of read line from stream. Used for error repors.
+    int lineNumber;
 };
 } // end namespace oofem
 #endif // datareader_h

@@ -183,6 +183,12 @@ IRResultType DynamicInputRecord :: giveField(dynaList< Range > &answer, InputFie
     return IRRT_OK;
 }
 
+IRResultType
+DynamicInputRecord :: giveField(double &answer, int tokenNumber){
+    OOFEM_ERROR("Not implemented");
+    return IRRT_OK;
+}
+
 bool DynamicInputRecord :: hasField(InputFieldType fieldID, const char *idString)
 {
     return this->intRecord.find(fieldID) != this->intRecord.end() ||
@@ -193,6 +199,12 @@ bool DynamicInputRecord :: hasField(InputFieldType fieldID, const char *idString
            this->stringListRecord.find(fieldID) != this->stringListRecord.end() ||
            this->dictionaryRecord.find(fieldID) != this->dictionaryRecord.end() ||
            this->rangeRecord.find(fieldID) != this->rangeRecord.end();
+}
+
+void
+DynamicInputRecord :: printYourself()
+{
+  //printf( "%s", this->record );
 }
 
 // Setters

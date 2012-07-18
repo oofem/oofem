@@ -53,7 +53,7 @@ private:
     char tokens [ OOFEM_MAX_TOKENS_LENGTH ];
     /// Array of pointers to token buffer. The i-th pointer points to the position of i-th token in token buffer.
     char *tokenPosition [ OOFEM_MAX_TOKENS ];
-    /// Token separator; zero represents  whitespace chars
+    /// Token separator; zero represents whitespace chars
     char separator;
     /// Number of tokens.
     int nTokens;

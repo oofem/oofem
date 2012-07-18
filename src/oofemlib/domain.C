@@ -791,7 +791,7 @@ Domain :: instanciateYourself(DataReader *dr)
         if ( ( ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), num, this) ) == NULL ) {
             OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str());
         }
-        ltf->initializeFrom(ir);
+        ltf->initializeFrom(ir, dr);
 
         // check number
         if ( ( num < 1 ) || ( num > nloadtimefunc ) ) {

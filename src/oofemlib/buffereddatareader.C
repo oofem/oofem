@@ -112,6 +112,12 @@ BufferedDataReader :: printYourself()
 
 
 void
+BufferedDataReader :: giveLine(char *line)
+{
+  this->giveRawLineFromInput(line);
+}
+
+void
 BufferedDataReader :: writeToFile(char *fileName)
 {
     dynaList< std :: string > :: iterator rec;
