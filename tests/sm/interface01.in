@@ -17,7 +17,7 @@ Interface1d 3   nodes 2   5 6 crosssect 2 mat 2 normal 2 1. 0.
 SimpleCS 1 thick 0.1
 SimpleCS 2 thick 0.1 width 0.1
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6
-simpleintermat 2 d 1.0 kn 1.e+7 fc 1.0 stiffcoeff 0.0
+simpleintermat 2 d 1.0 kn 1.e+3 fc 1.0 stiffcoeff 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 0.01
 ConstantFunction 1 f(t) 1.0
@@ -25,9 +25,9 @@ PiecewiseLinFunction 2 npoints 3 t 3 0 4 9 f(t) 3 0. -1. 1.
 #%BEGIN_CHECK% tolerance 1.e-4
 ##Step 1
 #NODE tStep 1 number 5 dof 1 unknown d value -1.39973869e-03
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1 value -1.1003e+02
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1 value -1.1003e+00
 #REACTION tStep 1 number 6 dof 1 value -1.1003e+00
-##Step 2
+##Step 9
 #NODE tStep 9 number 5 dof 1 unknown d value -3.33145815e-07 
 #ELEMENT tStep 9 number 3 gp 1 keyword "stresses" component 1 value 0.0000e+00
 #REACTION tStep 9 number 6 dof 1 value 0.0000e+00

@@ -127,7 +127,8 @@ InterfaceElem1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer
 //
 {
     setCoordMode();
-    double area = this->giveCrossSection()->give(CS_Area);
+    //double area = this->giveCrossSection()->give(CS_Area);
+    double area = 1.;
     this->computeLocalSlipDir(normal);
     FloatMatrix bLoc, lcs;
     evaluateLocalCoordinateSystem(lcs);

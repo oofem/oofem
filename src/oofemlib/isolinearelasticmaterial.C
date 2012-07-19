@@ -366,7 +366,7 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
                                                       GaussPoint *gp,
                                                       TimeStep *tStep)
 //
-// return material stiffness matrix for derived types of stressStreinState
+// return material stiffness matrix for derived types of stressStrainState
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
