@@ -203,6 +203,12 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
+    // write timeDiscretization
+    int tDiscretization = (int) timeDiscretization;
+    if ( !stream->write(&tDiscretization, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
     // return result back
     return CIO_OK;
 }
@@ -249,6 +255,13 @@ TimeStep :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     if ( !stream->read(& this->solutionStateCounter, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+
+    // read timeDiscretization
+    int tDiscretization = 0;
+    if ( !stream->read(& tDiscretization, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+    timeDiscretization = ( TimeDiscretizationType ) tDiscretization;
 
     // return result back
     return CIO_OK;

@@ -92,7 +92,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
         R.at(3, 2) = nz * ny * ( 1 - cos( theta ) ) + nx * sin( theta );
         R.at(3, 3) = cos( theta ) + nz * nz * ( 1 - cos( theta ) );
     } else {
-        OOFEM_ERROR("RotatingBoundary :: give - Size of coordinate system has to be either 2 or 3.");
+        OOFEM_ERROR("RotatingBoundary :: give - Size of coordinate system has to be 1, 2 or 3.");
     }
 
     newcoords.subtract( center );
