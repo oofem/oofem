@@ -298,13 +298,9 @@ protected:
 
 public:
     /**
-     * Constructor. Creates Engng model with number i belonging to domain d.
+     * Constructor. Creates Engng model with number i.
      */
     EngngModel(int i, EngngModel *_master = NULL);
-    /**
-     * Constructor. Creates Engng model with number i and input file given by path.
-     */
-    EngngModel(int i, char *s, EngngModel *_master = NULL);
     /// Destructor.
     virtual ~EngngModel();
 
@@ -315,6 +311,13 @@ public:
      * @return Domain number n.
      */
     Domain *giveDomain(int n);
+    /**
+     * Sets i-th domain of receiver. Given domain is assumed to be owned (and deleted) by receiver.
+     * The old domain, if defined, will be deleted.
+     * @param i Domain index.
+     * @param ptr Pointer to valid domain instance.
+     */
+    void setDomain (int i, Domain *ptr);
     /// Returns number of domains in problem.
     int giveNumberOfDomains() { return ndomains; }
     /** Service for accessing ErrorEstimator corresponding to particular domain */

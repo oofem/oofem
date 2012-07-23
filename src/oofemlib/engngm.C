@@ -139,7 +139,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     petscContextList = new AList< PetscContext >(0);
 #endif
 }
-
+  /*
 EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
 // constructor
 {
@@ -185,7 +185,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     petscContextList = new AList< PetscContext >(0);
 #endif
 }
-
+  */
 
 EngngModel ::  ~EngngModel()
 // destructor
@@ -1664,6 +1664,18 @@ EngngModel :: giveDomain(int i)
 
     return NULL;
 }
+
+void
+EngngModel :: setDomain(int i, Domain* ptr)
+{
+    if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
+      this->domainList->put (i, ptr);
+    } else {
+      _error3("setDomain: Domain index %d out of range [1,%d]", i, this->ndomains);
+    }
+}
+
+
 
 XfemManager *
 EngngModel :: giveXfemManager(int i)
