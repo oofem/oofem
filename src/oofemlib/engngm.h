@@ -516,6 +516,11 @@ public:
      */
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
     /**
+     * Initializes the default output stream according to given name.
+     * @param dataOutputFileName Name of default output stream
+     */
+    void initializeOutputFile (const char *dataOutputFileName);
+    /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database
      * belonging to receiver. Receiver may use value-name extracting functions

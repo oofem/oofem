@@ -264,13 +264,9 @@ if ( this->parallelFlag ) {
 }
 
 
-int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
-// simple input - only number of steps variable is read
+void
+EngngModel :: initializeOutputFile (const char *dataOutputFileName)
 {
-    Domain *domain;
-    int i;
-    bool inputReaderFinish = true;
-
     this->coreOutputFileName = std::string(dataOutputFileName);
     this->dataOutputFileName = std::string(dataOutputFileName);
 
@@ -282,6 +278,17 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
         _error2("instanciateYourself: Can't open output file %s", this->dataOutputFileName.c_str());
     }
+}
+
+
+int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
+// simple input - only number of steps variable is read
+{
+    Domain *domain;
+    int i;
+    bool inputReaderFinish = true;
+
+    this->initializeOutputFile(dataOutputFileName);
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = getTime();
