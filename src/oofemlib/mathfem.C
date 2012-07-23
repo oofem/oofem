@@ -314,4 +314,15 @@ void ls2fit(const FloatArray &x, const FloatArray &y, FloatArray &a)
     }
 }
 
+double signum(double i) {
+    if ( i < 0 ) {
+        return -1;
+    } else if ( i > 0 ) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
 } // end namespace oofem

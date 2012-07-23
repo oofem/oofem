@@ -95,6 +95,9 @@ inline double clamp(double a, double lower, double upper)
 inline double sgn(double i)
 { return ( i < 0. ? -1. : 1. ); }
 
+/// Returns the signum of given value (i = 0 returns 0, i < 0 returns -1, i > 0 returns 1)
+double signum(double i);
+
 #ifndef HAVE_ISNAN
 #ifdef _MSC_VER
 /// Returns true is x is NaN

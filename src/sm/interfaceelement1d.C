@@ -271,11 +271,13 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_Node_coords, "normal");
+    IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, IFT_InterfaceElement1_normalClearance, "normalclearance");
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         _error("instanciateFrom: wrong reference node or normal specified");
     }
 
     this->computeGaussPoints();
+    this->computeLocalSlipDir(normal);
     return IRRT_OK;
 }
 
@@ -345,7 +347,7 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 {
     normal.resize(3);
     if ( this->referenceNode ) {
-        // tangent
+        // normal
         normal.at(1) = domain->giveNode(this->referenceNode)->giveCoordinate(1) - this->giveNode(1)->giveCoordinate(1);
         normal.at(2) = domain->giveNode(this->referenceNode)->giveCoordinate(2) - this->giveNode(1)->giveCoordinate(2);
         normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
@@ -357,6 +359,22 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 
     normal.normalize();
 }
+
+const double
+InterfaceElem1d :: computeClearanceStrain ()
+{
+//     int j;
+//     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
+//     FloatArray relDisplacement(3);
+//     
+//     for ( j = 1; j <= 3; j++ ) {
+//         relDisplacement.at(j) = domain->giveNode(0)->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.) - domain->giveNode(1)->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.)
+//     }
+//     
+//     return relDisplacement.dotProduct(normal) / computeLength();
+    return normalClearance / computeLength();
+}
+
 
 
 #ifdef __OOFEG

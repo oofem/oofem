@@ -50,6 +50,8 @@ protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
     int referenceNode;
     FloatArray normal;
+    /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).
+    double normalClearance;
 
 public:
     InterfaceElem1d(int n, Domain *d);
@@ -85,6 +87,7 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() { return _Point; }
     virtual MaterialMode giveMaterialMode();
+    virtual const double computeClearanceStrain ();
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
