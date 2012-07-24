@@ -1,34 +1,32 @@
 interface01.out
 2D quadrilateral with one contacts. The contact works in compression and separates in tension.
-NonLinearStatic nsteps 10 controllmode 1 rtolv 1.e-3 MaxIter 300 stiffmode 1 manrmsteps 30 deltaT 1.0 renumber 1 nmodules 0
-#vtkxml tstep_all primvars 1 1 stype 2
+NonLinearStatic nsteps 10 controllmode 1 rtolv 1.e-3 MaxIter 300 stiffmode 1 manrmsteps 30 deltaT 1.0 renumber 1 nmodules 1 
+vtkxml tstep_all primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 6 nelem 3 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 2
+ndofman 5 nelem 2 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 2
 node 1     coords 3 0    0      0      bc 2 1 1
 node 2     coords 3 0.5  0      0      bc 2 0 1
-node 3     coords 3 0.5  0      0       
-node 4     coords 3 0    1.     0      bc 2 0 1
-node 5     coords 3 0.5  1.     0      bc 2 0 1
-node 6     coords 3 0.5  1.     0      bc 2 2 1 
-PlaneStress2D 1   nodes 4   1 2 5 4 crosssect 1 mat 1
-Interface1d 2   nodes 2   2 3 crosssect 2 mat 2 normal 2 1. 0.
-Interface1d 3   nodes 2   5 6 crosssect 2 mat 2 normal 2 1. 0.
+node 3     coords 3 0    1.     0      bc 2 0 1
+node 4     coords 3 0.5  1.     0      bc 2 0 1
+node 5     coords 3 0.5  1.     0      bc 2 2 1 
+PlaneStress2D 1   nodes 4   1 2 4 3 crosssect 1 mat 1
+Interface1d 2   nodes 2   4 5 crosssect 2 mat 2 normal 2 1. 0.
 SimpleCS 1 thick 0.1
 SimpleCS 2 thick 0.1 width 0.1
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6
-simpleintermat 2 d 1.0 kn 1.e+3 fc 1.0 stiffcoeff 0.0
+simpleintermat 2 d 1.0 kn 1.e+3 fc 1.0 stiffcoeff 0.2   
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 2 prescribedvalue 0.01
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 npoints 3 t 3 0 4 9 f(t) 3 0. -1. 1.
 #%BEGIN_CHECK% tolerance 1.e-4
 ##Step 1
-#NODE tStep 1 number 5 dof 1 unknown d value -1.39973869e-03
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1 value -1.1003e+00
-#REACTION tStep 1 number 6 dof 1 value -1.1003e+00
+#NODE tStep 1 number 4 dof 1 unknown d value -1.39973869e-03
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1 value -1.1003e+00
+#REACTION tStep 1 number 5 dof 1 value -1.1003e+00
 ##Step 9
-#NODE tStep 9 number 5 dof 1 unknown d value -3.33145815e-07 
-#ELEMENT tStep 9 number 3 gp 1 keyword "stresses" component 1 value 0.0000e+00
-#REACTION tStep 9 number 6 dof 1 value 0.0000e+00
+#NODE tStep 9 number 4 dof 1 unknown d value 2.02829954e-03 
+#ELEMENT tStep 9 number 2 gp 1 keyword "stresses" component 1 value 1.5943e+00
+#REACTION tStep 9 number 5 dof 1 value 1.5943e+00
 #%END_CHECK%

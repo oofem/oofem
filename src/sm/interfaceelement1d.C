@@ -252,13 +252,12 @@ InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray 
     return 0;
 }
 
-
 double
 InterfaceElem1d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    return 1.0;
+    return 1.0;//MUST be set to 1.0
 }
 
 
@@ -271,7 +270,6 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, IFT_Beam3d_refnode, "refnode"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, normal, IFT_Node_coords, "normal");
-    IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, IFT_InterfaceElement1_normalClearance, "normalclearance");
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         _error("instanciateFrom: wrong reference node or normal specified");
     }
@@ -359,22 +357,6 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 
     normal.normalize();
 }
-
-const double
-InterfaceElem1d :: computeClearanceStrain ()
-{
-//     int j;
-//     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
-//     FloatArray relDisplacement(3);
-//     
-//     for ( j = 1; j <= 3; j++ ) {
-//         relDisplacement.at(j) = domain->giveNode(0)->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.) - domain->giveNode(1)->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.)
-//     }
-//     
-//     return relDisplacement.dotProduct(normal) / computeLength();
-    return normalClearance / computeLength();
-}
-
 
 
 #ifdef __OOFEG

@@ -75,7 +75,7 @@ protected:
     /// List of engineering models to solve sequentially.
     AList< EngngModel > *emodelList;
     double deltaT;
-    std::string *inputStreamNames;
+    std :: string *inputStreamNames;
     /// Associated time function for time step increment
     int dtTimeFunction;
     /**
@@ -83,6 +83,9 @@ protected:
      * two consecutive time steps. Efficient for creep and relaxation analyses.
      */
     double stepMultiplier;
+
+    /// Optional parameter which specify problems to define load time functions
+    int timeDefinedByProb;
 
 public:
     /**
@@ -97,6 +100,7 @@ public:
     void setProblemMode(problemMode pmode);
     void setRenumberFlag();
 
+    virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual int forceEquationNumbering();
     virtual void updateYourself(TimeStep *stepN);
@@ -157,6 +161,7 @@ public:
     virtual int giveNumberOfTimeStepWhenIcApply() {
         if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; }
     }
+    virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
 protected:
     int instanciateSlaveProblems();

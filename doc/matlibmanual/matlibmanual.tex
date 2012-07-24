@@ -3514,8 +3514,8 @@ This model provides a simple interface law with penalty-type contact and frictio
 In the normal direction, the response is linear elastic, but with different stiffnesses in tension and in compression (stiffness \param{kn} in compression, \param{kn}*\param{stiffcoeff} in tension). 
 By setting \param{kn} to a high value, the penetration (overlap) can be reduced,
 in the sense of the penalty approach. By setting  \param{stiffcoeff} to 0, free opening
-of the gap can be allowed. 
-The shear response is elastoplastic, with the yield limit dependent on the normal traction. Crosssection's width, height or area have no influence on results.
+of the gap can be allowed.
+The shear response is elastoplastic, with the yield limit dependent on the normal traction. Crosssection's width, height or area have no influence on the results.
 The magnitude of the shear traction $\vsig_T$ must not exceed the yield limit computed 
 according to a Coulomb-like friction law as the product of the (negative part of)
  normal traction $\sigma_N$ and a dimensionless coefficient of friction $fc$:
@@ -3530,7 +3530,7 @@ normal stiffness). If the normal traction is tensile
 or zero, no shear traction can be transmitted by the interface.
 In the future, this law will be enriched by a cohesion-like term.
 
-If used in connection of two nodes with {\tt interface1delement}, the element-level parameter \param{normal} determines what is compression and what is tension (from the 1st node to the 2nd node in \param{normal} direction it is tension). 
+If used in connection of two nodes with {\tt interface1delement}, the element-level parameter \param{normal} determines what is compression and what is tension (from the 1st node to the 2nd node in \param{normal} direction it is tension). If \param{normalClearance} is defined, the element has tensile stiffness until the gap within the element is closed. This feature allows simulating two faces with a gap. When the gap is smaller than \param{normalClearance}, the element stiffness changes to compression, see Figure~\ref{SimpleInterfaceMat}. 
 
 The model description and parameters are summarized in table~\ref{simpleinterfacemat_table}.
 
@@ -3541,11 +3541,13 @@ The model description and parameters are summarized in table~\ref{simpleinterfac
 Description & Simple interface material\\
 \hline
 Record Format & \descitem{simpleintermat}  \elemparam{}{in}
-\elemparam{kn}{rn} \optelemparam{fc}{rn} \optelemparam{stiffcoeff}{rn}\\
+\elemparam{kn}{rn} \optelemparam{fc}{rn} \optelemparam{stiffcoeff}{rn} \optelemparam{normalClearance}{rn}\\
 Parameters &- \param{} material number\\
 &- \param{kn} (penalty) stiffness in compression\\
 &- \param{fc} friction coefficient\\
 &- \param{stiffcoeff} ratio (tensile stiffness / compression stiffness)\\
+&- \param{normalClearance} free distance within element\\
+
 Supported modes& \_1dInterface\\
 \hline
 \end{tabular}
@@ -3553,6 +3555,18 @@ Supported modes& \_1dInterface\\
 \label{simpleinterfacemat_table}
 %\end{center}
 \end{table}
+
+\begin{figure}[!htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{Simple_interface_material_diag.eps}}
+\end{htmlonly}
+%begin{latexonly}
+ \centerline{\includegraphics[width=0.7\textwidth]{Simple_interface_material_diag.pdf}}
+%end{latexonly}
+  \caption{Working diagram of SimpleInterfaceMat.}
+  \label{SimpleInterfaceMat}
+\end{figure}
+
 
 
 

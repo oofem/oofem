@@ -210,6 +210,7 @@ enum InputFieldType {
 
     IFT_StaggeredProblem_deltat,
     IFT_StaggeredProblem_dtf,
+    IFT_StaggeredProblem_timeDefinedByProb,
     IFT_StaggeredProblem_stepmultiplier,
     IFT_StaggeredProblem_prob1,
     IFT_StaggeredProblem_prob2,
@@ -1121,11 +1122,11 @@ enum InputFieldType {
     IFT_NonlocalMaterialExtensionInterface_scalingtype,
     IFT_NonlocalMaterialExtensionInterface_averagedquantity,
 
-    IFT_InterfaceElement1_normalClearance,
-    
     IFT_SimpleInterfaceMaterial_kn,
     IFT_SimpleInterfaceMaterial_knt,
     IFT_SimpleInterfaceMaterial_frictCoeff,
+    IFT_SimpleInterfaceMaterial_stiffCoeff,
+    IFT_SimpleInterfaceMaterial_normalClearance,
 
     IFT_OutputManager_name,
     IFT_OutputManager_tstepall,

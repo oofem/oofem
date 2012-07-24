@@ -531,7 +531,7 @@ public:
     /// Instanciate problem meta steps by calling their instanciateYourself() service
     int instanciateMetaSteps(DataReader *dr);
     /// Instanciate default metastep, if nmsteps is zero
-    int instanciateDefaultMetaStep(InputRecord *ir);
+    virtual int instanciateDefaultMetaStep(InputRecord *ir);
 
     /**
      * Update receiver attributes according to step metaStep attributes.

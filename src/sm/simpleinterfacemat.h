@@ -90,6 +90,8 @@ protected:
     double kn;
     double stiffCoeff;
     double frictCoeff;
+    /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).
+    double normalClearance;
 
 public:
     /// Constructor

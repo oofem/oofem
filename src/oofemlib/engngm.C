@@ -298,7 +298,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     fprintf(outputStream, "%s\n", desc);
 
 #  ifdef VERBOSE
-    OOFEM_LOG_DEBUG("Reading all data from input file \n");
+    OOFEM_LOG_DEBUG("Reading all data from input file %s\n", dr->giveDataSourceName());
 #  endif
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() )

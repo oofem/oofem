@@ -34,6 +34,7 @@
 
 #include "simpleinterfacemat.h"
 #include "structuralelement.h"
+#include "interfaceelement1d.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
@@ -100,15 +101,16 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
     const double normalStrain = strainVector.at(1);
     double normalStress, maxShearStress, dp;
+    double shift = -this->kn * this->stiffCoeff * normalClearance;
 
     MaterialMode mMode = el->giveMaterialMode();
     //answer.resize(giveSizeOfReducedStressStrainVector(mMode));
     answer.zero();
-    if ( normalStrain <= 0. ) {
-        normalStress = this->kn * normalStrain;
+    if ( normalStrain + normalClearance <= 0. ) {
+        normalStress = this->kn * (normalStrain + normalClearance ) + shift;//in compression and after the clearance gap closed
         maxShearStress = fabs(normalStress) * this->frictCoeff;
     } else {
-        normalStress = this->kn * this->stiffCoeff * normalStrain;
+        normalStress = this->kn * this->stiffCoeff * (normalStrain + normalClearance) + shift;
         maxShearStress = 0.;
     }
 
@@ -147,7 +149,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
         answer.at(3) = shearStress.at(2);
         break;
     default:
-        _error("giveMaterialMode: Unsupported coord mode");
+        _error("giveMaterialMode: Unsupported interface mode");
     }
 
     double lim = 1.e+50;
@@ -170,23 +172,23 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    //MaterialMode mMode = gp->giveMaterialMode();
     MaterialMode mMode = gp->giveElement()->giveMaterialMode();
 
-    //SimpleInterfaceMaterialStatus *status = ( SimpleInterfaceMaterialStatus * ) this->giveStatus(gp);
     FloatArray strainVector;
     StructuralElement *el = ( StructuralElement * ) gp->giveElement();
+    double normalStrain;
+    
     el->computeStrainVector(strainVector, gp, atTime);
-    double normalStrain = strainVector.at(1);
+    normalStrain = strainVector.at(1);
     answer.zero();
     switch ( mMode ) {
     case _1dInterface:
         answer.resize(1, 1);
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            if ( normalStrain <= 0 ) {
-                answer.at(1, 1) = this->kn;
+            if ( normalStrain + normalClearance <= 0 ) {
+                answer.at(1, 1) = this->kn;//in compression and after the clearance gap closed
             } else {
-                answer.at(1, 1) = this->kn * this->frictCoeff;
+                answer.at(1, 1) = this->kn * this->stiffCoeff;
             }
         } else {
             if ( rMode == ElasticStiffness ) {
@@ -201,10 +203,10 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     case _2dInterface:
         answer.resize(2, 2);
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            if ( normalStrain <= 0. ) {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn;
+            if ( normalStrain + normalClearance <= 0. ) {
+                answer.at(1, 1) = answer.at(2, 2) = this->kn;//in compression and after the clearance gap closed
             } else {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn * this->frictCoeff;
+                answer.at(1, 1) = answer.at(2, 2) = this->kn * this->stiffCoeff;
             }
         } else {
             if ( rMode == ElasticStiffness ) {
@@ -219,10 +221,10 @@ SimpleInterfaceMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     case _3dInterface:
         answer.resize(3, 3);
         if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            if ( normalStrain <= 0. ) {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
+            if ( normalStrain + normalClearance <= 0. ) {
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;//in compression and after the clearance gap closed
             } else {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->frictCoeff;
+                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->stiffCoeff;
             }
         } else {
             if ( rMode == ElasticStiffness ) {
@@ -401,9 +403,11 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
 
     frictCoeff = 0.;
     stiffCoeff = 0.;
+    normalClearance = 0.;
     IR_GIVE_FIELD(ir, kn, IFT_SimpleInterfaceMaterial_kn, "kn");
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "fc");
-    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, IFT_SimpleInterfaceMaterial_frictCoeff, "stiffcoeff");
+    IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, IFT_SimpleInterfaceMaterial_stiffCoeff, "stiffcoeff");
+    IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, IFT_SimpleInterfaceMaterial_normalClearance, "normalclearance");
 
     return StructuralMaterial :: initializeFrom(ir);
 }
