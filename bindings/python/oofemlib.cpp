@@ -2,9 +2,14 @@
 //#include <boost/python/return_internal_reference.hpp>
 //#include <boost/python/manage_new_object.hpp>
 //#include <boost/python/return_value_policy.hpp>
-using namespace boost::python;
+#include <boost/python/copy_non_const_reference.hpp>
+#include <boost/python/raw_function.hpp>
 using namespace std;
+using namespace boost::python;
+namespace bp = boost::python;
 #include <memory> // for std::auto_ptr<>
+
+
 
 /*****************************************************
 *
@@ -49,20 +54,21 @@ using namespace std;
 #include "matstatus.h"
 #include "structuralms.h"
 #include "exportmodulemanager.h"
+#include "outputmanager.h"
 #include "classfactory.h"
 
 
 namespace oofem {
 
-/* DefaulT oofem loggers */
+/*****************************************************
+* OOFEM global objects
+*****************************************************/
 Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 ClassFactory classFactory;
 
-EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag)
-{
-    return InstanciateProblem (dr, mode, contextFlag, 0);
-}
+
+
 
 
 /*****************************************************
@@ -142,7 +148,7 @@ void pyclass_FloatMatrix()
 {
     class_<FloatMatrix, boost::noncopyable>("FloatMatrix")
         .def(init<int, int>())
-        //.def(init< FloatMatrix& >())
+        .def(init< FloatMatrix& >())
         .def("assemble", assemble_1, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
         .def("assemble", assemble_2, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
         .def("assemble", assemble_3, "Assembles the contribution using localization array into receiver. The receiver must have dimensions large enough to localize contribution")
@@ -327,7 +333,7 @@ void pyclass_SpatialLocalizer()
 void pyclass_EngngModelContext()
 {
     class_<EngngModelContext, boost::noncopyable>("EngngModelContext", no_init)
-        .Sdef("giveFieldManager", &EngngModelContext::giveFieldManager, return_internal_reference<>())
+        .def("giveFieldManager", &EngngModelContext::giveFieldManager, return_internal_reference<>())
         ;
 }
 
@@ -340,7 +346,6 @@ class PyEngngModel : public EngngModel, public wrapper<EngngModel>
 public:
     //PyEngngModel(int i) : EngngModel(i, NULL) {}
     PyEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master) {}
-    PyEngngModel(int i, char *s, EngngModel *_master = NULL): EngngModel(i,s,_master) {}
 
     void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) {
         this->get_override("printDofOutputAt")();
@@ -382,7 +387,11 @@ void pyclass_EngngModel()
         //.def(init<int, optional<EngngModel*> > ())
         //.def(init<int, char*, optional<EngngModel*> >())
         .def("giveDomain", &PyEngngModel::giveDomain, return_internal_reference<>())
+        .def("setDomain", &EngngModel::setDomain)
         .def("giveNumberOfDomains", &PyEngngModel::giveNumberOfDomains)
+        .add_property("numberOfDomains",&PyEngngModel::giveNumberOfDomains)
+        .def("giveOutputBaseFileName", &PyEngngModel::giveOutputBaseFileName)
+        .add_property("outputBaseFileName", &PyEngngModel::giveOutputBaseFileName)
         .def("giveDomainErrorEstimator", &PyEngngModel::giveDomainErrorEstimator, return_internal_reference<>())
         .def("terminateAnalysis", &PyEngngModel::terminateAnalysis)
         .def("solveYourself", &EngngModel::solveYourself, &PyEngngModel::default_solveYourself)
@@ -391,13 +400,25 @@ void pyclass_EngngModel()
         .def("updateYourself", &EngngModel::updateYourself, &PyEngngModel::default_updateYourself)
         .def("initializeYourself", &PyEngngModel::initializeYourself)
         .def("printDofOutputAt", pure_virtual(&EngngModel::printDofOutputAt))
+        .def("printYourself", pure_virtual(&EngngModel::printYourself))
+        .def("checkConsistency", &PyEngngModel::checkConsistency)
         .def("checkProblemConsistency", &PyEngngModel::checkProblemConsistency)
         .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
+        .def("giveNumberOfSteps", &EngngModel::giveNumberOfSteps)
+        .add_property("numberOfSteps",&PyEngngModel::giveNumberOfSteps)
         .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
-        .def("giveContext", &EngngModel::giveContext, return_internal_reference<>())
+        .add_property("currentStep",make_function(&PyEngngModel::giveCurrentStep, return_internal_reference<>()))
         .def("giveNextStep",&EngngModel::giveNextStep, &PyEngngModel::default_giveNextStep, return_internal_reference<>())
         .def("giveExportModuleManager",&EngngModel::giveExportModuleManager, return_internal_reference<>())
+        .add_property("exportModuleManager",make_function(&PyEngngModel::giveExportModuleManager, return_internal_reference<>()))
+        .def("giveContext", &PyEngngModel::giveContext, return_internal_reference<>())
+        .add_property("context", make_function(&PyEngngModel::giveContext, return_internal_reference<>()))
         ;
+}
+
+EngngModel *InstanciateProblem_1 (DataReader *dr, problemMode mode, int contextFlag)
+{
+    return InstanciateProblem (dr, mode, contextFlag, 0);
 }
 
 
@@ -432,44 +453,6 @@ void pyclass_ExportModule()
 {
     class_<PyExportModule, boost::noncopyable>("ExportModule", no_init)
         .def("doOutput", pure_virtual(&ExportModule::doOutput))
-        ;
-}
-
-
-/*****************************************************
-* Domain
-*****************************************************/
-void pyclass_Domain()
-{
-    class_<Domain, boost::noncopyable>("Domain", init<int, int, EngngModel* >())
-        .def("giveNumber", &Domain::giveNumber)
-        .def("giveElement", &Domain::giveElement, return_internal_reference<>())
-        .def("giveEngngModel", &Domain::giveEngngModel, return_internal_reference<>())
-        .def("giveLoad", &Domain::giveLoad, return_internal_reference<>())
-        .def("giveBc", &Domain::giveBc, return_internal_reference<>())
-        .def("giveIc", &Domain::giveIc, return_internal_reference<>())
-        .def("giveLoadTimeFunction", &Domain::giveLoadTimeFunction, return_internal_reference<>())
-        .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
-        .def("giveCrossSection", &Domain::giveCrossSection, return_internal_reference<>())
-        .def("giveNode", &Domain::giveNode, return_internal_reference<>())
-        .def("giveDofManager", &Domain::giveDofManager, return_internal_reference<>())
-        .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
-
-        .def("giveNumberOfDofManagers", &Domain::giveNumberOfDofManagers)
-        .def("giveNumberOfElements", &Domain::giveNumberOfElements)
-        .def("giveNumberOfMaterialModels", &Domain::giveNumberOfMaterialModels)
-        .def("giveNumberOfCrossSectionModels", &Domain::giveNumberOfCrossSectionModels)
-        .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
-        .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
-        .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
-
-        .def("checkConsistency", &Domain::checkConsistency)
-        .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
-        .def("giveSpatialLocalizer", &Domain::giveSpatialLocalizer, return_internal_reference<>())
-        .def("giveErrorEstimator", &Domain::giveErrorEstimator, return_internal_reference<>())
-        .def("giveSmoother", &Domain::giveSmoother, return_internal_reference<>())
-
-        .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
         ;
 }
 
@@ -511,45 +494,94 @@ void pyclass_OOFEMTXTDataReader()
 
 
 /*****************************************************
-* Element
+* Domain
 *****************************************************/
-class PyElement : public Element, public wrapper<Element>
+void pyclass_Domain()
 {
-public:
-    PyElement (int n, Domain *d) : Element (n,d) {}
+    class_<Domain, boost::noncopyable>("Domain", init<int, int, EngngModel* >())
+        .def("giveNumber", &Domain::giveNumber)
+        .def("setNumber", &Domain::setNumber)
+        .add_property("number",&Domain::giveNumber,&Domain::setNumber)
+        .def("giveElement", &Domain::giveElement, return_internal_reference<>())
+        .def("giveEngngModel", &Domain::giveEngngModel, return_internal_reference<>())
+        .def("giveLoad", &Domain::giveLoad, return_internal_reference<>())
+        .def("giveBc", &Domain::giveBc, return_internal_reference<>())
+        .def("giveIc", &Domain::giveIc, return_internal_reference<>())
+        .def("giveLoadTimeFunction", &Domain::giveLoadTimeFunction, return_internal_reference<>())
+        .def("giveMaterial", &Domain::giveMaterial, return_internal_reference<>())
+        .def("giveCrossSection", &Domain::giveCrossSection, return_internal_reference<>())
+        .def("giveNode", &Domain::giveNode, return_internal_reference<>())
+        .def("giveDofManager", &Domain::giveDofManager, return_internal_reference<>())
+        .def("giveMateriatal", &Domain::giveMaterial, return_internal_reference<>())
+        .def("giveOutputManager", &Domain::giveOutputManager, return_internal_reference<>())
+        .add_property("outputManager",make_function(&Domain::giveOutputManager, return_internal_reference<>()))
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
-        this->get_override("giveCharacteristicMatrix")();
-    }
+        .def("giveNumberOfDofManagers", &Domain::giveNumberOfDofManagers)
+        .add_property("numberOfDofManagers",&Domain::giveNumberOfDofManagers)
+        .def("giveNumberOfElements", &Domain::giveNumberOfElements)
+        .add_property("numberOfElements",&Domain::giveNumberOfElements)
+        .def("giveNumberOfMaterialModels", &Domain::giveNumberOfMaterialModels)
+        .add_property("numberOfMaterialModels",&Domain::giveNumberOfMaterialModels)
+        .def("giveNumberOfCrossSectionModels", &Domain::giveNumberOfCrossSectionModels)
+        .add_property("numberOfCrossSectionModels",&Domain::giveNumberOfCrossSectionModels)
+        .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
+        .add_property("numberOfBoundaryConditions",&Domain::giveNumberOfBoundaryConditions)
+        .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
+        .add_property("numberOfInitialConditions",&Domain::giveNumberOfInitialConditions)
+        .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
+        .add_property("numberOfLoadTimeFunctions",&Domain::giveNumberOfLoadTimeFunctions)
+        .def("giveNumberOfRegions", &Domain::giveNumberOfRegions)
+        .add_property("numberOfRegions",&Domain::giveNumberOfRegions)
 
-    void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
-        this->get_override("giveCharacteristicVector")();
-    }
+        .def("resizeDofManagers", &Domain::resizeDofManagers)
+        .def("resizeElements", &Domain::resizeElements)
+        .def("resizeCrossSectionModels", &Domain::resizeCrossSectionModels)
+        .def("resizeMaterials", &Domain::resizeMaterials)
+        .def("resizeBoundaryConditions", &Domain::resizeBoundaryConditions)
+        .def("resizeInitialConditions", &Domain::resizeInitialConditions)
+        .def("resizeLoadTimeFunctions", &Domain::resizeLoadTimeFunctions)
 
-    double giveCharacteristicValue(CharType, TimeStep *) {
-        return this->get_override("giveCharacteristicValue")();
-    }
+        .def("setDofManager", &Domain::setDofManager)
+        .def("setElement", &Domain::setElement)
+        .def("setCrossSection", &Domain::setCrossSection)
+        .def("setMaterial", &Domain::setMaterial)
+        .def("setBoundaryCondition", &Domain::setBoundaryCondition)
+        .def("setInitialCondition", &Domain::setInitialCondition)
+        .def("setLoadTimeFunction", &Domain::setLoadTimeFunction)
 
-    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
-        this->get_override("giveDofManDofIDMask")();
-    }
-};
+        .def("checkConsistency", &Domain::checkConsistency)
+        .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
+        .def("giveSpatialLocalizer", &Domain::giveSpatialLocalizer, return_internal_reference<>())
+        .def("giveErrorEstimator", &Domain::giveErrorEstimator, return_internal_reference<>())
+        .def("giveSmoother", &Domain::giveSmoother, return_internal_reference<>())
 
-void pyclass_Element()
+        .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
+        .add_property("numberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
+        .def("giveDomainType", &Domain::giveDomainType)
+        .def("setDomainType", &Domain::setDomainType)
+        .add_property("domainType", &Domain::giveDomainType, &Domain::setDomainType)
+
+        .def("checkConsistency", &Domain::checkConsistency)
+        .def("giveArea", &Domain::giveArea)
+        .def("giveVolume", &Domain::giveVolume)
+        ;
+}
+
+
+/*****************************************************
+* FEMComponent
+*****************************************************/
+void pyclass_FEMComponent()
 {
-    class_<PyElement, boost::noncopyable>("Element", init<int, Domain* >())
-        .def("giveLabel", &Element::giveLabel)
-        .def("giveNumber", &Element::giveNumber)
-        .def("giveLocationArray", &PyElement::giveLocationArray)
-        .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
-        .def("giveCharacteristicMatrix", &PyElement::giveCharacteristicMatrix)
-        .def("giveCharacteristicVector", &PyElement::giveCharacteristicVector)
-        .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
-        .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
-        .def("giveGeometryType", &PyElement::giveGeometryType)
-        .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
-        .def("giveNumberOfIntegrationRules", &Element::giveNumberOfIntegrationRules)
-        .def("giveDefaultIntegrationRulePtr", &Element::giveDefaultIntegrationRulePtr, return_internal_reference<>())
+    class_<FEMComponent, boost::noncopyable>("FEMComponent", no_init)
+        .def("giveNumber", &FEMComponent::giveNumber)
+        .def("setNumber", &FEMComponent::setNumber)
+        .add_property("number", &FEMComponent::giveNumber, &FEMComponent::setNumber)
+        .def("giveDomain", &FEMComponent::giveDomain, return_internal_reference<>())
+        .def("setDomain", &FEMComponent::setDomain)
+        .add_property("domain", make_function(&FEMComponent::giveDomain, return_internal_reference<>()), &FEMComponent::setDomain)
+        .def("checkConsistency", &FEMComponent::checkConsistency)
+        .def("printYourself", &FEMComponent::printYourself)
         ;
 }
 
@@ -583,13 +615,216 @@ void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofM
 
 void pyclass_DofManager()
 {
-    class_<DofManager, boost::noncopyable>("DofManager", init<int, Domain* >())
+    class_<DofManager, bases<FEMComponent>, boost::noncopyable>("DofManager", no_init)
         .def("hasCoordinates", &DofManager::hasCoordinates)
+        // TODO return type (copy rather than pointer?)
         .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
+        .add_property("coordinates", make_function(&DofManager::giveCoordinates, return_internal_reference<>()))
         .def("giveCoordinate", &DofManager::giveCoordinate)
+        // TODO return type (copy rather than pointer?)
+        .def("giveLoadArray", &DofManager::giveLoadArray, return_internal_reference<>())
+        // TODO return type (copy rather than pointer?)
+        .add_property("loadArray", make_function(&DofManager::giveLoadArray, return_internal_reference<>()))
         .def("giveLabel", &DofManager::giveLabel)
+        .add_property("label",&DofManager::giveLabel)
         .def("giveUnknownVector", giveUnknownVector_1)
         .def("computeL2GTransformation", &DofManager::computeL2GTransformation)
+        ;
+}
+
+
+/*****************************************************
+* Element
+*****************************************************/
+class PyElement : public Element, public wrapper<Element>
+{
+public:
+    PyElement (int n, Domain *d) : Element (n,d) {}
+
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+        this->get_override("giveCharacteristicMatrix")();
+    }
+
+    void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
+        this->get_override("giveCharacteristicVector")();
+    }
+
+    double giveCharacteristicValue(CharType, TimeStep *) {
+        return this->get_override("giveCharacteristicValue")();
+    }
+
+    void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+        this->get_override("giveDofManDofIDMask")();
+    }
+};
+
+void pyclass_Element()
+{
+    class_<PyElement, bases<FEMComponent>, boost::noncopyable>("Element", no_init)
+        .def("giveNumberOfDofs", &PyElement::giveNumberOfDofs)
+        .add_property("numberOfDofs", &PyElement::giveNumberOfDofs)
+        .def("giveNumberOfInternalDofManagers", &PyElement::giveNumberOfInternalDofManagers)
+        .add_property("numberOfInternalDofManagers", &PyElement::giveNumberOfInternalDofManagers)
+        .def("giveInternalDofManager", &PyElement::giveInternalDofManager, return_internal_reference<>())
+        .def("giveCharacteristicMatrix", &PyElement::giveCharacteristicMatrix)
+        .def("giveCharacteristicVector", &PyElement::giveCharacteristicVector)
+        .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
+        .def("computeMeanSize", &PyElement::computeMeanSize)
+        .add_property("meanSize", &PyElement::computeMeanSize)
+        .def("computeVolume", &PyElement::computeVolume)
+        .add_property("volume", &PyElement::computeVolume)
+        .def("computeArea", &PyElement::computeArea)
+        .add_property("area", &PyElement::computeArea)
+        .def("computeLength", &PyElement::computeLength)
+        .add_property("length", &PyElement::computeLength)
+        .def("giveLabel", &Element::giveLabel)
+        .add_property("label",&Element::giveLabel)
+        .def("giveLocationArray", &PyElement::giveLocationArray)
+        .def("invalidateLocationArray", &PyElement::invalidateLocationArray)
+        .def("giveNumberOfDofManagers", &PyElement::giveNumberOfDofManagers)
+        .add_property("numberOfDofManagers", &PyElement::giveNumberOfDofManagers)
+        .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
+        .def("giveNumberOfNodes", &PyElement::giveNumberOfNodes)
+        .def("giveGeometryType", &PyElement::giveGeometryType)
+        .add_property("geometryType", &PyElement::giveGeometryType)
+        .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
+        .def("giveDofManager", &Element::giveDofManager, return_internal_reference<>())
+        .def("giveNode", &Element::giveNode, return_internal_reference<>())
+        // TODO return type (copy rather than pointer?)
+        .def("giveDofManArray", &Element::giveDofManager, return_value_policy<reference_existing_object>())
+        .def("giveNumberOfIntegrationRules", &Element::giveNumberOfIntegrationRules)
+        .add_property("numberOfIntegrationRules", &PyElement::giveNumberOfIntegrationRules)
+        .def("giveDefaultIntegrationRulePtr", &Element::giveDefaultIntegrationRulePtr, return_internal_reference<>())
+        .add_property("defaultIntegrationRule",make_function(&PyElement::giveDefaultIntegrationRulePtr, return_internal_reference<>()))
+        .def("giveMaterial", &Element::giveMaterial, return_internal_reference<>())
+        .def("setMaterial", &Element::setMaterial)
+        .add_property("material",make_function(&PyElement::giveMaterial, return_internal_reference<>()), &PyElement::setMaterial)
+        .def("giveCrossSection", &Element::giveCrossSection, return_internal_reference<>())
+        .def("setCrossSection", &Element::setCrossSection)
+        .add_property("crossSection",make_function(&PyElement::giveCrossSection, return_internal_reference<>()), &PyElement::setCrossSection)
+        .def("giveRegionNumber", &Element::giveRegionNumber)
+        .add_property("regionNumber", &PyElement::giveRegionNumber)
+        ;
+}
+
+
+/*****************************************************
+* Material
+*****************************************************/
+void pyclass_Material()
+{
+    class_<Material, bases<FEMComponent>, boost::noncopyable >("Material", no_init)
+        .def("giveIPValue", &Material::giveIPValue)
+        .def("setIPValue", &Material::setIPValue)
+        .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
+        .def("giveStatus", &Material::giveStatus, return_internal_reference<>())
+        ;
+}
+
+
+/*****************************************************
+* StructuralMaterial
+*****************************************************/
+struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
+{
+    PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
+    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
+        if (override f = this->get_override("giveRealStressVector")) { f(answer,form,gp,reducedStrain,tStep);}
+        this->get_override("giveRealStressVector")(answer,form,gp,reducedStrain,tStep);
+    }
+};
+void pyclass_StructuralMaterial()
+{
+    class_<PyStructuralMaterial, bases<Material>, boost::noncopyable >("StructuralMaterial", no_init)
+        .def("giveRealStressVector", pure_virtual( &StructuralMaterial::giveRealStressVector))
+        ;
+}
+
+StructuralMaterial* material2structuralMaterial(Material *mat) { return (StructuralMaterial*)mat; }
+
+
+
+/*****************************************************
+* CrossSection
+*****************************************************/
+void pyclass_CrossSection()
+{
+    class_<CrossSection, bases<FEMComponent>, boost::noncopyable >("CrossSection", no_init)
+        ;
+}
+
+
+/*****************************************************
+* GeneralBoundaryCondition
+*****************************************************/
+void pyclass_GeneralBoundaryCondition()
+{
+    class_<GeneralBoundaryCondition, bases<FEMComponent>, boost::noncopyable >("GeneralBoundaryCondition", no_init)
+        ;
+}
+
+
+/*****************************************************
+* BoundaryCondition
+*****************************************************/
+void pyclass_BoundaryCondition()
+{
+    class_<BoundaryCondition, bases<GeneralBoundaryCondition>, boost::noncopyable >("BoundaryCondition", init<int, Domain*>())
+        .def("setPrescribedValue", &BoundaryCondition::setPrescribedValue)
+        .def("give", &BoundaryCondition::give)
+        .def("isImposed", &BoundaryCondition::isImposed)
+        ;
+}
+
+
+/*****************************************************
+* Load
+*****************************************************/
+struct PyLoad : Load , wrapper<Load>
+{
+    PyLoad(int i, Domain *d) : Load(i,d) {}
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) {
+        if (override f = this->get_override("computeValueAt")) { f(answer,tStep,coords,mode);}
+        this->get_override("computeValueAt")(answer,tStep,coords,mode);
+    }
+};
+void pyclass_Load()
+{
+    class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", init<int, Domain*>())
+        .def("setComponentArray", &Load::setComponentArray)
+        .def("giveCopyOfComponentArray", &Load::giveCopyOfComponentArray)
+        .def("computeValueAt", pure_virtual( &Load::computeValueAt))
+        ;
+}
+
+
+/*****************************************************
+* LoadTimeFunction
+*****************************************************/
+void pyclass_LoadTimeFunction()
+{
+    class_<LoadTimeFunction, bases<FEMComponent>, boost::noncopyable >("LoadTimeFunction", no_init)
+        ;
+}
+
+
+/*****************************************************
+* MaterialStatus
+*****************************************************/
+void pyclass_MaterialStatus()
+{
+    class_<MaterialStatus, boost::noncopyable >("MaterialStatus", no_init)
+        .def("updateYourself", &MaterialStatus::updateYourself)
+        ;
+}
+
+
+/*****************************************************
+* StructuralMaterialStatus
+*****************************************************/
+void pyclass_StructuralMaterialStatus()
+{
+    class_<StructuralMaterialStatus, bases<MaterialStatus>, boost::noncopyable >("StructuralMaterialStatus", no_init)
         ;
 }
 
@@ -601,10 +836,14 @@ void pyclass_TimeStep()
 {
     class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
         .def("giveTargetTime", &TimeStep::giveTargetTime)
-        .def("giveIntrinsicTime", &TimeStep::giveIntrinsicTime)
         .def("setTargetTime", &TimeStep::setTargetTime)
+        .add_property("targetTime",&TimeStep::giveTargetTime, &TimeStep::setTargetTime)
+        .def("giveIntrinsicTime", &TimeStep::giveIntrinsicTime)
         .def("setIntrinsicTime", &TimeStep::setIntrinsicTime)
+        .add_property("intrinsicTime",&TimeStep::giveIntrinsicTime, &TimeStep::setIntrinsicTime)
+        .def("giveTimeIncrement", &TimeStep::giveTimeIncrement)
         .def("setTimeIncrement", &TimeStep::setTimeIncrement)
+        .add_property("timeIncrement",&TimeStep::giveTimeIncrement, &TimeStep::setTimeIncrement)
         ;
 }
 
@@ -719,50 +958,6 @@ void pyclass_DofManValueField()
 
 
 /*****************************************************
-* GeneralBoundaryCondition
-*****************************************************/
-void pyclass_GeneralBoundaryCondition()
-{
-    class_<GeneralBoundaryCondition, boost::noncopyable >("GeneralBoundaryCondition", init<int, Domain*>())
-        ;
-}
-
-
-/*****************************************************
-* BoundaryCondition
-*****************************************************/
-void pyclass_BoundaryCondition()
-{
-    class_<BoundaryCondition, bases<GeneralBoundaryCondition>, boost::noncopyable >("BoundaryCondition", init<int, Domain*>())
-        .def("setPrescribedValue", &BoundaryCondition::setPrescribedValue)
-        .def("give", &BoundaryCondition::give)
-        .def("isImposed", &BoundaryCondition::isImposed)
-        ;
-}
-
-
-/*****************************************************
-* Load
-*****************************************************/
-struct PyLoad : Load , wrapper<Load>
-{
-    PyLoad(int i, Domain *d) : Load(i,d) {}
-    void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) {
-        if (override f = this->get_override("computeValueAt")) { f(answer,tStep,coords,mode);}
-        this->get_override("computeValueAt")(answer,tStep,coords,mode);
-    }
-};
-void pyclass_Load()
-{
-    class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", init<int, Domain*>())
-        .def("setComponentArray", &Load::setComponentArray)
-        .def("giveCopyOfComponentArray", &Load::giveCopyOfComponentArray)
-        .def("computeValueAt", pure_virtual( &Load::computeValueAt))
-        ;
-}
-
-
-/*****************************************************
 * IntegrationRule
 *****************************************************/
 void pyclass_IntegrationRule()
@@ -781,67 +976,35 @@ void pyclass_GaussPoint()
 {
     class_<GaussPoint, boost::noncopyable >("GaussPoint", no_init)
         .def("giveNumber", &GaussPoint::giveNumber)
+        .add_property("number", &GaussPoint::giveNumber)
         .def("giveElement", &GaussPoint::giveElement, return_internal_reference<>())
+        .add_property("element",make_function(&GaussPoint::giveElement, return_internal_reference<>()))
         .def("giveMaterial", &GaussPoint::giveMaterial, return_internal_reference<>())
+        .add_property("material",make_function(&GaussPoint::giveMaterial, return_internal_reference<>()))
         ;
 }
 
 
 /*****************************************************
-* Material
+* OutputManager
 *****************************************************/
-void pyclass_Material()
+void pyclass_OutputManager()
 {
-    class_<Material, boost::noncopyable >("Material", init<int, Domain*>())
-        .def("giveIPValue", &Material::giveIPValue)
-        .def("setIPValue", &Material::setIPValue)
-        .def("giveCharacteristicMatrix", &Material::giveCharacteristicMatrix)
-        .def("giveStatus", &Material::giveStatus, return_internal_reference<>())
-        .def("giveNumber", &Material::giveNumber)
+    class_<OutputManager, boost::noncopyable >("OutputManager", no_init)
         ;
 }
 
 
 /*****************************************************
-* StructuralMaterial
+* ClassFactory
 *****************************************************/
-struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
+void pyclass_ClassFactory()
 {
-    PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
-    void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
-        if (override f = this->get_override("giveRealStressVector")) { f(answer,form,gp,reducedStrain,tStep);}
-        this->get_override("giveRealStressVector")(answer,form,gp,reducedStrain,tStep);
-    }
-};
-void pyclass_StructuralMaterial()
-{
-    class_<PyStructuralMaterial, bases<Material>, boost::noncopyable >("StructuralMaterial", init<int, Domain* >())
-        .def("giveRealStressVector", pure_virtual( &StructuralMaterial::giveRealStressVector))
-        ;
-}
-StructuralMaterial* material2structuralMaterial(Material *mat) { return (StructuralMaterial*)mat; }
-
-
-
-/*****************************************************
-* MaterialStatus
-*****************************************************/
-void pyclass_MaterialStatus()
-{
-    class_<MaterialStatus, boost::noncopyable >("MaterialStatus", no_init)
-        .def("updateYourself", &MaterialStatus::updateYourself)
+    class_<ClassFactory, boost::noncopyable >("ClassFactory", no_init)
         ;
 }
 
 
-/*****************************************************
-* StructuralMaterialStatus
-*****************************************************/
-void pyclass_StructuralMaterialStatus()
-{
-    class_<StructuralMaterialStatus, bases<MaterialStatus>, boost::noncopyable >("StructuralMaterialStatus", no_init)
-        ;
-}
 
 
 
@@ -873,15 +1036,15 @@ void pyenum_Element_Geometry_Type()
 {
     enum_<Element_Geometry_Type>("Element_Geometry_Type")
         .value("EGT_line_1", EGT_line_1)
-        .value("EGT_line_2", EGT_line_2) /* line element with three nodes 1---2---3 */  \
-        .value("EGT_triangle_1",EGT_triangle_1) /* triangle element with three nodes */ \
-        .value("EGT_triangle_2", EGT_triangle_2) /* triangle element with 6 nodes */    \
-        .value("EGT_quad_1",EGT_quad_1)   /* quadrialateral with 4 nodes */             \
-        .value("EGT_quad_2", EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */  \
-        .value("EGT_tetra_1", EGT_tetra_1)  /* tetrahedron with 4 nodes */              \
-        .value("EGT_hexa_1", EGT_hexa_1)   /* hexahedron with 8 nodes */                \
-        .value("EGT_hexa_2", EGT_hexa_2)   /* hexahedron with 20 nodes */               \
-        .value("EGT_Composite", EGT_Composite)/* Composite" geometry, vtk export supported by individual elements */ \
+        .value("EGT_line_2", EGT_line_2) /* line element with three nodes 1---2---3 */
+        .value("EGT_triangle_1",EGT_triangle_1) /* triangle element with three nodes */
+        .value("EGT_triangle_2", EGT_triangle_2) /* triangle element with 6 nodes */
+        .value("EGT_quad_1",EGT_quad_1)   /* quadrialateral with 4 nodes */
+        .value("EGT_quad_2", EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */
+        .value("EGT_tetra_1", EGT_tetra_1)  /* tetrahedron with 4 nodes */
+        .value("EGT_hexa_1", EGT_hexa_1)   /* hexahedron with 8 nodes */
+        .value("EGT_hexa_2", EGT_hexa_2)   /* hexahedron with 20 nodes */
+        .value("EGT_Composite", EGT_Composite)/* Composite" geometry, vtk export supported by individual elements */
         .value("EGT_unknown", EGT_unknown)  /* unknown" element geometry type */
         ;
 }
@@ -1005,6 +1168,334 @@ void pyenum_MatResponseForm()
 }
 
 
+/*****************************************************
+* domainType
+*****************************************************/
+void pyenum_domainType()
+{
+    enum_<domainType>("domainType")
+        .value("_unknownMode", _unknownMode)
+        .value("_2dPlaneStressMode", _2dPlaneStressMode)
+        .value("_PlaneStrainMode", _PlaneStrainMode)
+        .value("_2dPlaneStressRotMode", _2dPlaneStressRotMode)
+        .value("_3dMode", _3dMode)
+        .value("_3dAxisymmMode", _3dAxisymmMode)
+        .value("_2dMindlinPlateMode", _2dMindlinPlateMode)
+        .value("_3dShellMode", _3dShellMode)
+        .value("_2dTrussMode", _2dTrussMode)
+        .value("_1dTrussMode", _1dTrussMode)
+        .value("_2dBeamMode", _2dBeamMode)
+        .value("_HeatTransferMode", _HeatTransferMode)
+        .value("_HeatMass1Mode", _HeatMass1Mode)
+        .value("_2dIncompressibleFlow", _2dIncompressibleFlow)
+        .value("_3dIncompressibleFlow", _3dIncompressibleFlow)
+        .value("_2dLatticeMode", _2dLatticeMode)
+        ;
+}
+
+
+
+
+
+
+
+
+/*****************************************************
+*
+* O O F E M L I B   " C O N S T R U C T O R S "
+*
+*****************************************************/
+
+
+/*****************************************************
+* Auxiliary functions
+*****************************************************/
+
+// constuct auxiliary global object (for eval and exec functions) only once
+dict temp_global(import("__main__").attr("__dict__"));
+
+/*
+make oofem input line from **kw arguments. This function is used by "constructor" methods
+e.g. in function:
+  engngModel("nonLinearStatic",nSteps=10) # kw = {'nSteps':10}
+*/
+OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(dict &kw) {
+    temp_global["kw"] = kw;
+    str command =
+        "ret = ''\n"
+        "for key,val in kw.iteritems():\n" // iterate over key,val pairs
+        "  if key.lower()=='number' or key.lower()=='domain': continue\n" // do not include "number" and "domain" kws
+        "  if key=='f_t': key='f(t)'\n" // handle f(t) loadTimeFunction field name
+        "  ret += ' %s'%key\n" // add key
+        "  if isinstance(val,(int,float,str)): ret += ' %s'%val\n" // add val if it is int, float or str
+        "  elif isinstance(val,(list,tuple)):\n" // if val is tuple or list
+        "    ret += ' %d'%len(val)\n" // add its length first
+        "    for v in val:\n" // and then its values
+        "      if isinstance(v,(int,float,str)): ret += ' %s'%v\n" // int, float, str
+        "      else: ret += ' %d'%(v.giveNumber())\n" // or any other object, that have giveNumber method (e.g. nodes can be passed to elemnt function as they are, without the need of extracting their numbers first
+        "  else: ret += ' %d'%(val.giveNumber())\n" // add arbitrary object with giveNumber method
+        "ret = ret.lower()\n" // finally make it lower case
+        "print ret\n"
+        ;
+    exec(command,temp_global,temp_global);
+    // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it
+    return OOFEMTXTInputRecord( ( extract<string>(temp_global["ret"])() ).c_str() );
+}
+
+OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(dict &kw) {
+    bp::list keys = kw.keys();
+    bp::list vals = kw.values();
+    kw.clear();
+    for (int i=0; i<len(keys); i++) {
+        str s = extract<str>(keys[i])().lower();
+        if (s=="tstep_all" || s=="tstep_step" || s=="tsteps_out" || s=="dofman_all" || s=="dofman_output" || s=="dofman_except" || s=="element_all" || s=="element_output" || s=="element_except") {
+            kw[s] = vals[i];
+        }
+        kw[""] = "outputmanager";
+    }
+    return makeOOFEMTXTInputRecordFrom(kw);
+}
+
+// transform all keys of given dictionary to lower case
+void makeDictKeysLowerCase(dict &kw) {
+    bp::list keys = kw.keys();
+    bp::list vals = kw.values();
+    kw.clear();
+    for (int i=0; i<len(keys); i++) {
+        kw[extract<str>(keys[i])().lower()] = vals[i];
+    }
+}
+
+
+
+/*
+The process is almost same for all classes, therefore only Element part is documented line by line
+*/
+
+/*****************************************************
+* EngngModel
+*****************************************************/
+// engngModel(aClass,number=0,master=None,**kw)
+object engngModel(tuple args, dict kw) {
+    //args
+    string aClass = extract<string>(args[0])();
+    int number = len(args)>1? extract<int>(args[1])() : 0;
+    EngngModel* master = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
+    EngngModel *engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
+    if (engngm==NULL) { LOG_ERROR(oofem_errLogger,"engngModel: wrong input data"); }
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    engngm->initializeFrom(&ir);
+    // instanciateYourself
+    if ( ir.hasField(IFT_EngngModel_nmsteps, "nmsteps") ) {
+        LOG_ERROR(oofem_errLogger,"engngModel: simulation with metasteps is not (yet) supported in Python");
+    } else {
+        engngm->instanciateDefaultMetaStep(&ir);
+    }
+    string outFile;
+    if ( ir.hasField(IFT_EngngModel_nmsteps, "outfile") ) {
+       ir.giveField(outFile, IFT_EngngModel_outfile, "outfile");
+    } else {
+       outFile = "oofem.out.XXXXXX";
+    }
+    engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
+    //
+    object ret = object(ptr(engngm));
+    /* ????????????????????
+    // sets the last created engngModel as default one for further script
+    temp_global["defaultEngngModel"] = ret;
+    ???????????????????? */
+    return ret;
+}
+
+object createEngngModelOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return engngModel(args,kw);
+}
+object linearStatic(tuple args, dict kw) { return createEngngModelOfType("linearstatic", args, kw); }
+
+
+/*****************************************************
+* Domain
+*****************************************************/
+// domain(number=1,serialNumber=1,engngModel*=None,dType=_unknownMode,**kw)
+object domain(tuple args, dict kw) {
+    // args
+    int number =             len(args)>0? extract<int>(args[0])() : 0;
+    int serialNumber =       len(args)>1? extract<int>(args[1])() : 0;
+    EngngModel *engngModel = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
+    domainType dType =       len(args)>3? extract<domainType>(args[3])() : _unknownMode;
+    Domain *d = new Domain(number,serialNumber,engngModel);
+    d->setDomainType(dType);
+    // output manager record
+    OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
+    d->giveOutputManager()->initializeFrom(&omir);
+    object ret = object(ptr(d));
+    /* ????????????????????
+    // sets the last created domain as default one for furtherscript
+    temp_global["defaultDomain"] = ret;
+    ???????????????????? */
+    return object(ptr(d));
+}
+
+
+/*****************************************************
+* Element
+*****************************************************/
+// element(aClass,domain=defaultDomain,**kw)
+object element(tuple args, dict kw) {
+    // extracts first python argument (string element type)
+    string aClass = extract<string>(args[0])();
+    // extracts values from args if they are specified
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    /* ????????????????
+    // if no material is specified, set it to 1
+    if (!kw.has_key("mat")) { kw["mat"] = 1; }
+    // if no cross section is specified, set it to 1
+    if (!kw.has_key("crosssect")) { kw["crosssect"] = 1; }
+    // if no domain is specified and one already exists in the script, use that one
+    if (domain == NULL && temp_global.has_key("defaultDomain")) { domain = extract<Domain*>(temp_global["defaultDomain"])(); }
+    if (domain==NULL) { LOG_ERROR(oofem_errLogger,"wrong Domain"); }
+    ???????????????????? */
+    // create Element (convert aClass to char* - expected by classFactory.createElement)
+    Element *elem = classFactory.createElement(aClass.c_str(),number,domain);
+    // if elem==NULL, something was wrong
+    if (elem==NULL) { LOG_ERROR(oofem_errLogger,"element: wrong input data"); }
+    // sets globalNumber == number befor initializeFrom
+    elem->setGlobalNumber(number);
+    // construct OOFEMTXTInputRecord from dict **kw
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    // pass input record to elem
+    elem->initializeFrom(&ir);
+    // convert element to PyObject (expected by raw_function, which enables fun(*args,**kw) syntax in python)
+    return object(ptr(elem));
+}
+
+// auxiliary constructor for specific element type (name is passed as first argument)
+object createElementOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return element(args, kw);
+}
+// specific elements
+object beam2d(tuple args, dict kw) { return createElementOfType("beam2d",args,kw); }
+
+
+
+/*****************************************************
+* DofManager
+*****************************************************/
+// dofManager(aClass,domain=defaultDomain,**kw)
+object dofManager(tuple args, dict kw) {
+    string aClass = extract<string>(args[0])();
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    DofManager *dofMan = classFactory.createDofManager(aClass.c_str(),number,domain);
+    if (dofMan==NULL) { LOG_ERROR(oofem_errLogger,"dofManager: wrong input data"); }
+    dofMan->setGlobalNumber(number);
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    dofMan->initializeFrom(&ir);
+    return object(ptr(dofMan));
+}
+
+object createDofManagerOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return dofManager(args, kw);
+}
+object node(tuple args, dict kw) { return createDofManagerOfType("node",args,kw); }
+
+
+/*****************************************************
+* GeneralBoundaryCondition
+*****************************************************/
+// generalBoundaryCondition(aClass,domain=defaultDomain,**kw)
+object generalBoundaryCondition(tuple args, dict kw) {
+    string aClass = extract<string>(args[0])();
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    GeneralBoundaryCondition *bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
+    if (bc==NULL) { LOG_ERROR(oofem_errLogger,"generalBoundaryCondition: wrong input data"); }
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    bc->initializeFrom(&ir);
+    return object(ptr(bc));
+}
+
+object CreateBCOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return generalBoundaryCondition(args, kw);
+}
+object boundaryCondition(tuple args, dict kw) { return CreateBCOfType("boundarycondition",args,kw); }
+object constantEdgeLoad(tuple args, dict kw) { return CreateBCOfType("constantedgeload",args,kw); }
+object nodalLoad(tuple args, dict kw) { return CreateBCOfType("nodalload",args,kw); }
+object structTemperatureLoad(tuple args, dict kw) { return CreateBCOfType("structtemperatureload",args,kw); }
+
+
+/*****************************************************
+* Material
+*****************************************************/
+object material(tuple args, dict kw) {
+    string aClass = extract<string>(args[0])();
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    Material *mat = classFactory.createMaterial(aClass.c_str(),number,domain);
+    if (mat==NULL) { LOG_ERROR(oofem_errLogger,"material: wrong input data"); }
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    mat->initializeFrom(&ir);
+    return object(ptr(mat));
+}
+
+object CreateMaterialOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return material(args, kw);
+}
+object isoLE(tuple args, dict kw) { return CreateMaterialOfType("isole",args,kw); }
+
+
+/*****************************************************
+* CrossSection
+*****************************************************/
+object crossSection(tuple args, dict kw) {
+    string aClass = extract<string>(args[0])();
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    CrossSection *cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
+    if (cs==NULL) { LOG_ERROR(oofem_errLogger,"crossSection: wrong input data"); }
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    cs->initializeFrom(&ir);
+    return object(ptr(cs));
+}
+
+object CreateCrossSectionOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return crossSection(args, kw);
+}
+object simpleCS(tuple args, dict kw) { return CreateCrossSectionOfType("simplecs",args,kw); }
+
+
+
+/*****************************************************
+* LoadTimeFunction
+*****************************************************/
+object loadTimeFunction(tuple args, dict kw) {
+    string aClass = extract<string>(args[0])();
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    LoadTimeFunction *ltf = classFactory.createLoadTimeFunction(aClass.c_str(),number,domain);
+    if (ltf==NULL) { LOG_ERROR(oofem_errLogger,"loadTimeFunction: wrong input data"); }
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    ltf->initializeFrom(&ir);
+    return object(ptr(ltf));
+}
+
+object CreateLoadTimeFunctionOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return loadTimeFunction(args, kw);
+}
+object peakFunction(tuple args, dict kw) { return CreateLoadTimeFunctionOfType("peakfunction",args,kw); }
+
+
+
+
+
 
 
 /*****************************************************
@@ -1025,23 +1516,28 @@ BOOST_PYTHON_MODULE (oofemlib)
     pyclass_ExportModule();
     pyclass_DataReader();
     pyclass_OOFEMTXTDataReader();
+    pyclass_Domain();
+    pyclass_FEMComponent();
+    pyclass_DofManager();
     pyclass_Element();
     pyclass_Material();
     pyclass_StructuralMaterial();
+    pyclass_CrossSection();
+    pyclass_GeneralBoundaryCondition();
+    pyclass_BoundaryCondition();
+    pyclass_Load();
+    pyclass_LoadTimeFunction();
     pyclass_MaterialStatus();
     pyclass_StructuralMaterialStatus();
-    pyclass_Domain();
-    pyclass_DofManager();
     pyclass_TimeStep();
     pyclass_DataStream();
     pyclass_Field();
     pyclass_FieldManager();
     pyclass_DofManValueField();
-    pyclass_GeneralBoundaryCondition();
-    pyclass_BoundaryCondition();
-    pyclass_Load();
     pyclass_IntegrationRule();
     pyclass_GaussPoint();
+    pyclass_OutputManager();
+    pyclass_ClassFactory();
 
     pyenum_problemMode();
     pyenum_Element_Geometry_Type();
@@ -1053,9 +1549,11 @@ BOOST_PYTHON_MODULE (oofemlib)
     pyenum_InternalStateType();
     pyenum_MatResponseMode();
     pyenum_MatResponseForm();
+    pyenum_domainType();
 
-    def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
+
     //def("make_foo", make_foo, return_value_policy<manage_new_object>())
+    def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
     def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
     def("FieldManager_registerField", &FieldManager_registerField);
 
@@ -1063,5 +1561,36 @@ BOOST_PYTHON_MODULE (oofemlib)
     register_ptr_to_python< std::auto_ptr<Field> >();
 
     def("material2structuralMaterial", &material2structuralMaterial, return_internal_reference<>());
+    // modul variable classFactory
+    scope().attr("classFactory") = object(ptr(&classFactory));
+
+
+    // "constructors" for python interface
+    def("engngModel", raw_function(engngModel,1));
+    def("linearStatic", raw_function(linearStatic,0));
+
+    def("domain", raw_function(domain,0));
+
+    def("dofManager", raw_function(dofManager,1));
+    def("node", raw_function(node,0));
+
+    def("element", raw_function(element,1));
+    def("beam2d", raw_function(beam2d,0));
+
+    def("generalBoundaryCondition", raw_function(generalBoundaryCondition,1));
+    def("boundaryCondition", raw_function(boundaryCondition,0));
+    def("constantEdgeLoad", raw_function(constantEdgeLoad,0));
+    def("nodalLoad", raw_function(nodalLoad,0));
+    def("structTemperatureLoad", raw_function(structTemperatureLoad,0));
+
+    def("material", raw_function(material,1));
+    def("isoLE", raw_function(isoLE,0));
+
+    def("crossSection", raw_function(crossSection,1));
+    def("simpleCS", raw_function(simpleCS,0));
+
+    def("loadTimeFunction", raw_function(loadTimeFunction,1));
+    def("peakFunction", raw_function(peakFunction,0));
+
 }
 } // end namespace oofem

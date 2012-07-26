@@ -37,5 +37,4 @@ local rule run-test ( test-name : sources + )
 
 # Declare test targets
 run-test hello : oofemlib test.py ;
-
-
+run-test hello2 : oofemlib test2.py ;

@@ -139,7 +139,7 @@ public:
  * and creates the solution steps accordingly. This allows to switch to
  * different time increment, different solution control, etc. If no metastep is specified, the engng model
  * creates default one for all required solution steps. There are two services, where attributes are updated, the first one,
- * used for those attributes, which do not vary during solution of problem are set in initializeForm service.
+ * used for those attributes, which do not vary during solution of problem are set in initializeFrom service.
  * The second service is updateAttributes, where the attributes allowed to change (with metastep validity) are updated.
  * If no metastep is introduced, default one is created (with attributes set to engng model init record).
  * Then there is no difference, whether attributes are read in initializeFrom or updateAttributes, but

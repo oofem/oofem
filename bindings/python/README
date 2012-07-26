@@ -69,15 +69,15 @@ modules.
 
 - Optionally, to run a simple example:
   - Set PYTHONPATH to contain paths to directory containing oofem python directory:
-    export PYTHONPATH=$PYTHONPATH:{PATH_TO_OOFEM_TOP_DIR}/bindings/python/bin/gcc-4.4.3/debug
+    export PYTHONPATH=$PYTHONPATH:{PATH_TO_OOFEM_TOP_DIR}/bindings/python/bin/gcc-4.6/debug
 
   - Set LD_LIBRARY_PATH to point to boost generated libraries of oofem 
     python module. This path can be best obtained from "bjam -d+2" 
     when compiling oofem python module.
 
-    export LD_LIBRARY_PATH={PATH_TO_BOOST_ROOT}/bin.v2/libs/python/build/gcc-4.4.3/debug:\
-           {PATH_TO_OOFEM_TOP_DIR}/bindings/python/bin/gcc-4.4.3/debug:$LD_LIBRARY_PATH
-	   
+    export LD_LIBRARY_PATH={PATH_TO_BOOST_ROOT}/bin.v2/libs/python/build/gcc-4.6/debug:\
+           {PATH_TO_OOFEM_TOP_DIR}/bindings/python/bin/gcc-4.6/debug:$LD_LIBRARY_PATH
+
     Replace {PATH_TO_BOOST_ROOT} by the path to your Boost root dir and {PATH_TO_OOFEM_TOP_DIR}
     by the path to oofem top directory
 
@@ -107,7 +107,7 @@ modules.
 3.4 Build oofem python library
     - go to the directory bindings/python in your oofem top dir
     - run bjam.exe, where bjam.exe is located in boost.build\bin directory (see step (3)):
-      >	..\..\boost.build\bin\bjam.exe -d+2
+      > ..\..\boost.build\bin\bjam.exe -d+2
     - watch output for lines with Path and PYTHONPATH variables, should look like following:
       > set Path=C:\Program Files\Python26;C:\Program Files\Python26\libs;.....
       > set PYTHONPATH=bin\msvc-10.0\debug
