@@ -67,7 +67,7 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 {
     primVarSmoother = NULL;
     smoother = NULL;
-    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);
+    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);//position of yz, xx, yy, zz, yz, xz, xy in tensor 
 }
 
 
@@ -130,15 +130,15 @@ VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reduced
     if (type == ISVT_TENSOR_S3) {
         for (int i = 1; i <= redIndx.giveSize(); i++) {
             if (redIndx.at(i) > 0) {
-                answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i);
+                answer.at(redToFull.at(i)) = reducedForm.at(redIndx.at(i));
             }
         }
     } else if ( type == ISVT_TENSOR_S3E ) {
         for (int i = 1; i <= redIndx.giveSize(); i++) {
             if (redIndx.at(i) > 3) {
-                answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i)*0.5;
+                answer.at(redToFull.at(i)) = reducedForm.at(i)*0.5;
             } else if (redIndx.at(i) > 0) {
-                answer.at(redToFull.at(redIndx.at(i))) = reducedForm.at(i);
+                answer.at(redToFull.at(i)) = reducedForm.at(i);
             }
         }
     }

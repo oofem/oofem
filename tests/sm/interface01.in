@@ -1,7 +1,7 @@
 interface01.out
 2D quadrilateral with one contacts. The contact works in compression and separates in tension.
-NonLinearStatic nsteps 10 controllmode 1 rtolv 1.e-3 MaxIter 300 stiffmode 1 manrmsteps 30 deltaT 1.0 renumber 1 nmodules 1 
-vtkxml tstep_all primvars 1 1 stype 2
+NonLinearStatic nsteps 10 controllmode 1 rtolv 1.e-3 MaxIter 300 stiffmode 1 manrmsteps 30 deltaT 1.0 renumber 1 nmodules 0
+#vtkxml tstep_all primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 5 nelem 2 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 2

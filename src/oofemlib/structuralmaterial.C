@@ -221,7 +221,7 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
 {
     /*
      * This functions subtract from reducedStrainVector its stress independent part
-     * caused by temperature, shrinkage and possibly by other phenomenas.
+     * caused by temperature, shrinkage and possibly by other phenomena.
      */
     FloatArray epsilonTemperature;
     StructuralCrossSection *cs = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();

@@ -119,7 +119,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, MatRespon
         tempKappa = status->giveKappa();
         omega     = status->giveDamage();
     } else {
-        // damage grow
+        // damage grows
         tempKappa = equivStrain;
         // evaluate damage parameter
         this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
