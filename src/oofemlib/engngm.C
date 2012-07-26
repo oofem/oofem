@@ -265,8 +265,11 @@ if ( this->parallelFlag ) {
 
 
 void
-EngngModel :: initializeOutputFile (const char *dataOutputFileName)
+EngngModel :: Instanciate_init (const char *dataOutputFileName, int ndomains)
 {
+    int i;
+    Domain *domain;
+
     this->coreOutputFileName = std::string(dataOutputFileName);
     this->dataOutputFileName = std::string(dataOutputFileName);
 
@@ -278,17 +281,34 @@ EngngModel :: initializeOutputFile (const char *dataOutputFileName)
     if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
         _error2("instanciateYourself: Can't open output file %s", this->dataOutputFileName.c_str());
     }
+
+
+    // create domains
+    domainNeqs.resize(ndomains);
+    domainPrescribedNeqs.resize(ndomains);
+    domainList->growTo(ndomains);
+    for ( i = 0; i < ndomains; i++ ) {
+      domain =  new Domain(i + 1, 0, this);
+      domainList->put(i + 1, domain);
+    }
+    this->ndomains = ndomains;
+
+#ifdef __PETSC_MODULE
+    this->initPetscContexts();
+#endif
+  
+
 }
 
 
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
-    Domain *domain;
+    
     int i;
     bool inputReaderFinish = true;
 
-    this->initializeOutputFile(dataOutputFileName);
+    this->Instanciate_init(dataOutputFileName, this->ndomains);
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = getTime();
@@ -303,19 +323,6 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() )
         fprintf(outputStream, "Problem rank is %d/%d on %s\n\n", this->rank, this->numProcs, this->processor_name);
-#endif
-
-    // create domains
-    domainNeqs.resize(this->ndomains);
-    domainPrescribedNeqs.resize(this->ndomains);
-    domainList->growTo(ndomains);
-    for ( i = 0; i < this->ndomains; i++ ) {
-        domain =  new Domain(i + 1, 0, this);
-        domainList->put(i + 1, domain);
-    }
-
-#ifdef __PETSC_MODULE
-    this->initPetscContexts();
 #endif
 
     // instanciate receiver

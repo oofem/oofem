@@ -516,10 +516,13 @@ public:
      */
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir, const char *outFileName, const char *desc);
     /**
-     * Initializes the default output stream according to given name.
+     * Initialization of the receiver state (opening the default output stream, empty domain creation, 
+     * initialization of PETSc context, etc)
+     * before Initialization form DataReader. Called at the beginning of instanciateYourself.
      * @param dataOutputFileName Name of default output stream
+     * @param ndomains number of receiver domains 
      */
-    void initializeOutputFile (const char *dataOutputFileName);
+    void Instanciate_init (const char *dataOutputFileName, int ndomains);
     /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database
