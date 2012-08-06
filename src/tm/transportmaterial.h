@@ -116,6 +116,8 @@ public:
     /// Destructor.
     virtual ~TransportMaterial() { }
 
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) {};
+
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseForm form,
                                           MatResponseMode mode,
