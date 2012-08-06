@@ -169,6 +169,7 @@ enum classType {
     Quad1_htClass,
     Quad1_hmtClass,
     Tr1_htClass,
+    Tr1DarcyClass,
     Tr1_hmtClass,
     QuadAxisym1_htClass,
     QuadAxisym1_hmtClass,
@@ -221,6 +222,7 @@ enum classType {
     SUPGClass,
     StokesFlowClass,
     StokesFlowStressHomogenizationClass,
+    DarcyFlowClass,
 
     NumericalMethodClass,
     SparseLinearSystemNMClass,

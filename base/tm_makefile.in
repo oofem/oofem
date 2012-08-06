@@ -31,9 +31,9 @@ VPATH=@OOFEM_DIR@/src/tm @OOFEM_DIR@/src/tm/cemhyd @TINYXML_DIR@
 ##
 ## source files
 ##
-srcs0=stationarytransportproblem.C nonstationarytransportproblem.C  nltransienttransportproblem.C staggeredproblem.C
+srcs0=stationarytransportproblem.C nonstationarytransportproblem.C  nltransienttransportproblem.C staggeredproblem.C darcyflow.C
 srcs1=transportelement.C
-srcs2=quad1_ht.C tr1_ht.C quadaxisym1_ht.C traxisym1_ht.C brick1_ht.C tetrah1_ht.C
+srcs2=quad1_ht.C tr1_ht.C quadaxisym1_ht.C traxisym1_ht.C brick1_ht.C tetrah1_ht.C tr1darcy.C
 srcs3=transportmaterial.C isoheatmat.C hemotkmat.C
 srcs4=hydratingisoheatmat.C hydratinghemomat.C cemhydmat.C hydratingconcretemat.C
 srcs5= 

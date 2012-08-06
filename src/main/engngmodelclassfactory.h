@@ -50,6 +50,7 @@
  #include "nonstationarytransportproblem.h"
  #include "nltransienttransportproblem.h"
  #include "staggeredproblem.h"
+ #include "darcyflow.h"
 #endif //__TM_MODULE
 
 #ifdef __FM_MODULE
@@ -78,6 +79,7 @@ REGISTER_CLASS(StationaryTransportProblem, "stationaryproblem", StationaryTransp
 REGISTER_CLASS(NonStationaryTransportProblem, "nonstationaryproblem", NonStationaryTransportProblemClass)
 REGISTER_CLASS(NLTransientTransportProblem, "nltransienttransportproblem", NLTransientTransportProblemClass)
 REGISTER_CLASS(StaggeredProblem, "staggeredproblem", StaggeredProblemClass)
+REGISTER_CLASS(DarcyFlow, "darcyflow", DarcyFlowClass)
 #endif //__TM_MODULE
 
 #ifdef __FM_MODULE

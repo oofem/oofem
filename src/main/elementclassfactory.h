@@ -99,6 +99,7 @@
  #include "traxisym1_ht.h"
  #include "brick1_ht.h"
  #include "tetrah1_ht.h"
+ #include "tr1darcy.h"
 #endif
 
 #ifdef __FM_MODULE
@@ -202,4 +203,5 @@ REGISTER_CLASS(Tetrah1_hmt, "tetrah1hmt", Tetrah1_hmtClass)
 REGISTER_CLASS(Tr1_ht, "tr1ht", Tr1_htClass)
 REGISTER_CLASS(Tr1_hmt, "tr1hmt", Tr1_hmtClass)
 REGISTER_CLASS(TrAxisym1_ht, "traxisym1ht", TrAxisym1_htClass)
+REGISTER_CLASS(Tr1Darcy, "tr1darcy", Tr1DarcyClass)
 #endif

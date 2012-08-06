@@ -245,6 +245,9 @@ enum InputFieldType {
     IFT_SUPG_stopmaxiter,
     IFT_SUPG_fsflag,
 
+    IFT_DARCYFLOW_lstype,
+    IFT_DARCYFLOW_smtype,
+
     IFT_CylindricalALM_psi,
     IFT_CylindricalALM_maxiter,
     IFT_CylindricalALM_minsteplength,
