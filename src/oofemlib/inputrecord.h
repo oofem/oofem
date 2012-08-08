@@ -519,6 +519,10 @@ enum InputFieldType {
     IFT_IsotropicHeatTransferMaterial_k,
     IFT_IsotropicHeatTransferMaterial_c,
 
+    IFT_AnisotropicMassTransferMaterial_c,
+    IFT_NonlinearMassTransferMaterial_c,
+    IFT_NonlinearMassTransferMaterial_alpha,
+
     IFT_HeMoTKMaterial_a_0,
     IFT_HeMoTKMaterial_nn,
     IFT_HeMoTKMaterial_phi_c,

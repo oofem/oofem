@@ -315,6 +315,9 @@ enum classType {
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
+    AnisotropicMassTransferMaterialClass,
+    AnisotropicMassTransferMaterialStatusClass,
+    NonlinearMassTransferMaterialClass,
     HeMoTKMaterialClass,
 
     HydratingIsoHeatMaterialClass,

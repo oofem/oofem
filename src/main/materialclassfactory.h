@@ -91,6 +91,8 @@
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
  #include "hydratingconcretemat.h"
+ #include "anisomassmat.h"
+ #include "nonlinearmassmat.h"
  #ifdef __CEMHYD_MODULE
   #include "cemhydmat.h"
  #endif
@@ -162,6 +164,8 @@ REGISTER_CLASS(LatticeDamage2d, "latticedamage2d", LatticeDamage2dClass)
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)
 REGISTER_CLASS(HeMoTKMaterial, "hemotk", HeMoTKMaterialClass)
 REGISTER_CLASS(HydratingConcreteMat, "hydratingconcretemat", HydratingConcreteMatClass)
+REGISTER_CLASS(AnisotropicMassTransferMaterial, "anisomass", AnisotropicMassTransferMaterialClass)
+REGISTER_CLASS(NonlinearMassTransferMaterial, "nonlinmass", NonlinearMassTransferMaterialClass)
  #ifdef __CEMHYD_MODULE
 REGISTER_CLASS(CemhydMat, "cemhydmat", CemhydMatClass)
  #endif //__CEMHYD_MODULE
