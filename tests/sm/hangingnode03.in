@@ -1,4 +1,4 @@
-hangingnode01.out
+hangingnode03.out
 Test of hanging node in with automatic element detection.
 LinearStatic nsteps 1
 #LinearStatic nsteps 1 nmodules 1
