@@ -1929,14 +1929,14 @@ corresponding dofType value equal to 2) the corresponding value of
 
   \begin{record}[0.9\textwidth]
     \recentry{\entKeywordInst{HangingNode}}{\field{coords}{ra}}
-    \recentry{}{\field{dofType}{in}} \recentry{}{\field{masterElement}{in}}
+    \recentry{}{\field{dofType}{in}} \recentry{}{\optField{masterElement}{in}} \recentry{}{\optField{masterRegion}{in}}
   \end{record}
 
 Hanging node is connected to an a master element using generalized interpolation.
 Hanging node posses no degrees of freedom (except unlined dofs) - all values are
 interpolated from corresponding master elements and its DOFs.
 arbitrary FE mesh of concrete specimen or to facilitate the local
-refinment of FE mesh. The hanging nodes can be in a chain.
+refinement of FE mesh. The hanging nodes can be in a chain.
 
 The contributions of hanging node are localized directly to master related equations.
 The hanging node can have its own boundary or initial conditions, but
@@ -1952,6 +1952,11 @@ The value of \param{masterElement} specifies the element number to which the han
 The node can be attached to any arbitrary coordinate within the master element.
 The element must support the necessary interpolation classes.
 The same interpolation for unknowns and geometry is assumed.
+
+The no (or -1) value for \param{masterElement} is supplied, then the node will locate the element closest to its coordinate.
+If no (or zero) value for \param{masterRegion} is supplied, then all regions will be searched, 
+otherwise only the elements in cross section with number \param{masterRegion}.
+If \param{masterElement} is directly supplied \param{masterRegion} is unused.
 
 \item Slave node
 

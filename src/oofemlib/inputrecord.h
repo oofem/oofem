@@ -391,6 +391,7 @@ enum InputFieldType {
     IFT_SlaveNode_masterDofManagers,
     IFT_SlaveNode_weights,
     IFT_HangingNode_masterElement,
+    IFT_HangingNode_masterRegion,
 
     IFT_Element_mat,
     IFT_Element_crosssect,

@@ -56,6 +56,8 @@ IRResultType HangingNode :: initializeFrom(InputRecord *ir)
     Node :: initializeFrom(ir);
     this->masterElement = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, IFT_HangingNode_masterElement, "masterelement");
+    this->masterRegion = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, IFT_HangingNode_masterRegion, "masterregion");
     return IRRT_OK;
 }
 
@@ -81,7 +83,7 @@ int HangingNode :: checkConsistency()
         sp->init();
         // Closest point or containing point? It should be contained, but with numerical errors it might be slightly outside
         // so the closest point is more robust.
-        if ( !(e = sp->giveElementClosestToPoint(lcoords, closest, coordinates)) ) {
+        if ( !(e = sp->giveElementClosestToPoint(lcoords, closest, coordinates, this->masterRegion)) ) {
             OOFEM_WARNING("HangingNode :: checkConsistency - Couldn't find closest element (automatically).");
             return false;
         }

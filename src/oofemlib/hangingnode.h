@@ -51,12 +51,17 @@ namespace oofem {
  * they are determined completely from master dof conditions.
  * The local coordinate system in slave is not supported in current implementation, the global cs applies.
  * On the other hand, hanging node can be loaded independently of master.
+ * 
+ * If no master element number is supplied (or negative) then it will locate it using the global coordinates.
+ * and if no master region number is supplied (or zero), it will look for elements in all regions.
  */
 class HangingNode : public Node
 {
 protected:
     /// Number of the master element.
     int masterElement;
+    /// Region of the master element (used for automatic detection).
+    int masterRegion;
 #ifdef __OOFEG
     /// Flag whether consistency check already completed.
     bool consistencyChecked;
