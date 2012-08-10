@@ -1,0 +1,41 @@
+hangingnode01.out
+Test of hanging node in with automatic element detection.
+LinearStatic nsteps 1
+#LinearStatic nsteps 1 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 5 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
+node 2 coords 3  0.0   4.0   0.0  bc 2 1 0
+node 3 coords 3  8.0   4.0   0.0  bc 2 0 0
+node 4 coords 3  8.0   0.0   0.0  bc 2 0 0
+hangingnode 5 coords 3  6.0 1.8 0.0 dofType 2  2 2 load 1  2
+PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1
+SimpleCS 1 thick 0.15
+IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 2 2.5 0.0
+ConstantFunction 1 f(t) 1.0
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value -1.3750e+00
+#REACTION tStep 1 number 2 dof 1 value -1.1250e+00
+## check nodes
+#NODE tStep 1 number 2 dof 2 unknown d value -2.08333333e-01
+#NODE tStep 1 number 3 dof 1 unknown d value 1.19791667e+00
+#NODE tStep 1 number 3 dof 2 unknown d value 7.29166667e-01
+#NODE tStep 1 number 4 dof 1 unknown d value 2.13541667e+00
+#NODE tStep 1 number 4 dof 2 unknown d value 9.37500000e-01
+#NODE tStep 1 number 5 dof 1 unknown d value 1.28515625e+00
+#NODE tStep 1 number 5 dof 2 unknown d value 6.09375000e-01
+## check element no. 1 strain vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 1.7450e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value -5.2083e-02
+## check element no. 1 stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 2.5837e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value -1.3532e-01
+#%END_CHECK%

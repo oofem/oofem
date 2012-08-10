@@ -38,6 +38,7 @@
 #include "intarray.h"
 #include "element.h"
 #include "feinterpol.h"
+#include "spatiallocalizer.h"
 
 namespace oofem {
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
@@ -53,7 +54,8 @@ IRResultType HangingNode :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, masterElement, IFT_HangingNode_masterElement, "masterelement");
+    this->masterElement = -1;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, IFT_HangingNode_masterElement, "masterelement");
     return IRRT_OK;
 }
 
@@ -73,7 +75,18 @@ int HangingNode :: checkConsistency()
     result = result && Node :: checkConsistency();
 
     // First check element and interpolation
-    if ( !(e = this->giveDomain()->giveElement(this->masterElement)) ) {
+    if (masterElement == -1) { // Then we find it by taking the closest (probably containing element)
+        FloatArray closest;
+        SpatialLocalizer *sp = this->domain->giveSpatialLocalizer();
+        sp->init();
+        // Closest point or containing point? It should be contained, but with numerical errors it might be slightly outside
+        // so the closest point is more robust.
+        if ( !(e = sp->giveElementClosestToPoint(lcoords, closest, coordinates)) ) {
+            OOFEM_WARNING("HangingNode :: checkConsistency - Couldn't find closest element (automatically).");
+            return false;
+        }
+        this->masterElement = e->giveNumber();
+    } else if ( !(e = this->giveDomain()->giveElement(this->masterElement)) ) {
         OOFEM_WARNING2("HangingNode :: checkConsistency - Requested element %d doesn't exist.", this->masterElement);
         return false;
     }
@@ -102,7 +115,9 @@ int HangingNode :: checkConsistency()
         }
     }
 
-    fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e));
+    if (lcoords.giveSize() == 0) { // we don't need to do this again if the spatial localizer was used.
+        fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e));
+    }
 
     // Initialize slave dofs (inside check of consistency of receiver and master dof)
     const IntArray &masterNodes = e->giveDofManArray();

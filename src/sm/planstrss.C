@@ -1288,6 +1288,21 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     return dist;
 }
 
+double
+PlaneStress2d :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
+{
+    if ( !this->interpolation.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this)) ) {
+        // Point is outside, so lets clamp it into the local coordinate region;
+        // (should be true closest point for well behaved bilinear and linear elements)
+        lcoords.at(1) = clamp(lcoords.at(1),-1.0, 1.0);
+        lcoords.at(2) = clamp(lcoords.at(2),-1.0, 1.0);
+        this->interpolation.local2global(closest, lcoords, FEIElementGeometryWrapper(this));
+        return closest.distance(gcoords);
+    } else {
+        closest = gcoords;
+        return 0.0;
+    }
+}
 
 double
 PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize() {

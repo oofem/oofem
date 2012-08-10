@@ -81,7 +81,7 @@ protected:
     /**
      * Computes lumped mass matrix of receiver. Default implementation returns lumped consistent mass matrix.
      * Then returns lumped mass transformed into nodal coordinate system.
-     * The lumping procedure zeroes all off-diagonal members and zeroes also all diagonal members
+     * The lumping procedure zeros all off-diagonal members and zeros also all diagonal members
      * corresponding to non-displacement DOFs. Such diagonal matrix is then rescaled, to preserve
      * the element mass.
      * Requires the computeNmatrixAt and giveMassMtrxIntegrationgMask services to be implemented.
