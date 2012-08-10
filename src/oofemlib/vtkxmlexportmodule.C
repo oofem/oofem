@@ -1314,6 +1314,9 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
                                  answer.giveSize() > 1 ? answer.at(1) : 0.0,
                                  answer.giveSize() > 2 ? answer.at(2) : 0.0,
                                  0.0);
+            } else if ( ncomponents != answer.giveSize() ) { // Trying to gracefully handle bad cases, just output zeros.
+                answer.resize(ncomponents);
+                answer.zero();
             }
             for (int i = 1; i <= ncomponents; ++i) {
 #ifdef __VTK_MODULE
