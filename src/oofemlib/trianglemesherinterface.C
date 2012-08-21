@@ -275,7 +275,10 @@ void custom_triangulate(char *triswitches, struct triangulateio *in, struct tria
         m.regions = in->numberofregions;
         if (!b.refine) {
             /* Only increase quality if the regions are properly defined. */
-            b.quality *= custom_carveholes(&m, &b, outside, inside);
+            int sane = custom_carveholes(&m, &b, outside, inside);
+            b.quality *= sane;
+            if (sane == 0) { printf("Probably bad PSLG\n"); exit(-1); }
+            
         }
     } else {
         m.holes = 0;
