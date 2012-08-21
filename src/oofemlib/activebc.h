@@ -82,8 +82,8 @@ public:
             this->addElementSide(tempB(i*2+1),tempB(i*2));
         }
         IR_GIVE_OPTIONAL_FIELD(ir, tempC, IFT_ActiveBoundaryCondition_dofManagers, "dofmans");
-        for (int i = 0; i < tempB.giveSize()/2; ++i) {
-            this->addElementSide(tempB(i*2+1),tempB(i*2));
+        for (int i = 0; i < tempC.giveSize(); ++i) {
+            this->addDofman(tempC(i));
         }
 
         return IRRT_OK;

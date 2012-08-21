@@ -959,6 +959,13 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
             }
         }
     }
+    
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(i));
+        if (bc != NULL)
+            bc->assemble(answer,tStep, eid, type, s, s, domain);
+    }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
@@ -1020,6 +1027,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
             }
         }
     }
+    
+    ///@todo This function is rarely called. Do we need the active bc to assemble here as well?
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
@@ -1057,6 +1066,13 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                 OOFEM_ERROR("EngngModel :: assemble: sparse matrix assemble error");
             }
         }
+    }
+    
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    for ( int i = 1; i <= nbc; ++i ) {
+        ActiveBoundaryCondition *bc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(i));
+        if (bc != NULL)
+            bc->assemble(answer,tStep, eid, type, rs, cs, domain);
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
