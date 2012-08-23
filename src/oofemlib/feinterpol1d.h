@@ -36,6 +36,7 @@
 #define feinterpol1d_h
 
 #include "feinterpol.h"
+#include "flotarry.h"
 
 namespace oofem {
 /**
@@ -45,8 +46,11 @@ class FEInterpolation1d : public FEInterpolation
 {
 public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
-    int giveNsd() { return 1; }
+    virtual int giveNsd() { return 1; }
 
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary) { OOFEM_ERROR("FEInterpolation1d :: boundaryGiveNodes - Not implemented") }
+    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { answer.resize(1); answer.at(1) = 1.0; }
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return 1.0; }
     /**
      * Computes the exact length.
      * @param cellgeo Cell geometry for the element.

@@ -202,6 +202,11 @@ public:
      */
     virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
     /**
+     * Returns the location array for the boundary of the element.
+     * The boundary is the corner nodes for 1D elements, the edges for a 2D element and the surfaces for a 3D element.
+     */
+    void giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s);
+    /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
      * to avoid time consuming assembly of code numbers every time when requested. Some engineering models
      * may support dynamic changes of static system (generally of boundary conditions during analysis),

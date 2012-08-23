@@ -337,7 +337,7 @@ Element :: giveBoundaryLoadArray()
 
 
 void
-Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme &s) const
+Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const UnknownNumberingScheme &s) const
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
@@ -351,10 +351,30 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const Unkno
     } else {
         locationArray.resize(0);
         for ( i = 1; i <= numberOfDofMans; i++ ) {
-            this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+            this->giveDofManDofIDMask(i, eid, nodeDofIDMask);
             this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
             locationArray.followedBy(nodalArray);
         }
+    }
+}
+
+
+void
+Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s)
+// Returns the location array of the receiver. This array is obtained by
+// simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
+{
+    IntArray bNodes;
+    IntArray nodeDofIDMask;
+    IntArray nodalArray;
+    int i;
+
+    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+    locationArray.resize(0);
+    for ( i = 1; i <= bNodes.giveSize(); i++ ) {
+        this->giveDofManDofIDMask(bNodes.at(i), eid, nodeDofIDMask);
+        this->giveDofManager(bNodes.at(i))->giveLocationArray(nodeDofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
     }
 }
 

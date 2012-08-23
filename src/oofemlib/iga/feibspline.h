@@ -72,8 +72,16 @@ public:
     BSplineInterpolation(int nsd) : FEInterpolation(0) { this->nsd = nsd; }
     ~BSplineInterpolation();
 
-    int giveNsd() { return nsd; }
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual int giveNsd() { return nsd; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary)
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveNodes - Not implemented"); }
+    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalN - Not implemented"); }
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); }
+    
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
     virtual const double * const * giveKnotVector() { return this->knotVector; }

@@ -45,7 +45,7 @@ class FEInterpolation3d : public FEInterpolation
 {
 public:
     FEInterpolation3d(int o) : FEInterpolation(o) { };
-    int giveNsd() { return 3; }
+    virtual int giveNsd() { return 3; }
 
     /**
      * Computes the exact volume.
@@ -54,6 +54,13 @@ public:
      */
     virtual double giveVolume(const FEICellGeometry &cellgeo) const
     { OOFEM_ERROR("FEInterpolation3d :: giveVolume - Not implemented in subclass."); return 0; }
+    
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary)
+    { this->computeLocalSurfaceMapping(answer, boundary); }
+    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { this->surfaceEvalN(answer, lcoords, cellgeo); }
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { return this->surfaceGiveTransformationJacobian(boundary, lcoords, cellgeo); }
 
     /**@name Edge interpolation services */
     //@{

@@ -176,6 +176,34 @@ public:
 
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    
+    /**@name General boundary functions */
+    //@{
+    /**
+     * Gives the boundary nodes for requested boundary number.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     */
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary) = 0;
+    
+    /**
+     * Evaluates the basis functions on the requested boundary.
+     * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Basis functions Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
+     */
+    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+
+    /**
+     * Evaluates the determinant of the transformation Jacobian on the requested boundary.
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param boundary Boundary number.
+     * @return The determinant of the boundary transformation Jacobian.
+     */
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */
     //@{
