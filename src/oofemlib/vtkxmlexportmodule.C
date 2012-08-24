@@ -561,7 +561,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     // Writing the *.pvd-file. Only time step information for now. It's named "timestep" but is actually the total time.
     // First we check to see that there are more than 1 time steps, otherwise it is redundant;
 #ifdef __PARALLEL_MODE
-    if ( (emodel->giveNumberOfSteps() > 1 || emodel->giveNumberOfProcesses() > 1 ) && emodel->giveRank() == 0 ) {
+    if ( emodel->isParallel() && emodel->giveRank() == 0 ) {
         ///@todo Should use probably use PVTU-files instead. It is starting to get messy.
         // For this to work, all processes must have an identical output file name.
         for (int i = 0; i < this->emodel->giveNumberOfProcesses(); ++i) {
@@ -577,13 +577,13 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             this->pvdBuffer.pushBack(pvdEntry.str());
         }
         this->writeVTKCollection();
-#else
-   if ( emodel->giveNumberOfSteps() > 1 ) {
+    } else
+#endif
+    if ( tStep->giveNumber() > 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
         std::ostringstream pvdEntry;
         pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.pushBack(pvdEntry.str());
         this->writeVTKCollection();
-#endif
     }
 }
 

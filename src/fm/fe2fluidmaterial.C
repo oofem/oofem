@@ -333,7 +333,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std::strin
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
 #if __PARALLEL_MODE
     if (this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1) {
-        name << "." << this->domain->giveEngngModel()->giveNumberOfProcesses();
+        name << "." << this->domain->giveEngngModel()->giveRank();
     }
 #endif
     this->rve->letOutputBaseFileNameBe(name.str());

@@ -235,7 +235,7 @@ class VTKXMLExportModuleElementInterface : public Interface
 {
 public:
     VTKXMLExportModuleElementInterface() : Interface() {}
-    const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
+    virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) = 0;
 };
 } // end namespace oofem
