@@ -59,7 +59,7 @@ public:
 
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)  { this->computeLocalEdgeMapping(answer, boundary); }
     virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { this->edgeEvalN(answer, lcoords, cellgeo); }
-    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo); }
+    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo); }
     
     /**@name Edge interpolation services. */
     //@{
