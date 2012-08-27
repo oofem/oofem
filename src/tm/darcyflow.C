@@ -97,7 +97,6 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 	FloatArray *solutionVector = NULL;
 	int neq = this->giveNumberOfEquations(EID_ConservationEquation);
 
-    Domain *domain = this->giveDomain(1);
     // Move solution space to current timestep
     if ( !hasAdvanced ) {
     	PressureField->advanceSolution(tStep);
@@ -162,7 +161,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 
 void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector)
 {
-	    int i, j, k;
+	    int i, j;
 	    FloatMatrix K;
 
 
@@ -250,6 +249,9 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
 	    this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
 		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 	    break;
+
+	default:
+	  _error2("updateComponent: Unknown component id (%d)", (int) cmpn);
 
 	}
 

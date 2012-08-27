@@ -144,6 +144,9 @@ NonlinearMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGa
     case IST_PressureGradient:
         answer = thisMaterialStatus->giveGradP();
         break;
+    default:
+      return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
+    return 1;
 }
 } // end namespace oofem

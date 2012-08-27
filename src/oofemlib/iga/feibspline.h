@@ -80,7 +80,7 @@ public:
     virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalN - Not implemented"); }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); }
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); return 0;}
     
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
