@@ -1,0 +1,25 @@
+simpleNonlinearDarcy.out
+Test for stokes flow on triangular Taylor-Hood element
+darcyflow nsteps 1 rtolv 0.000010  linesearch 0  maxiter 100000  manrmsteps 1.000000 nmodules 0
+# vtkxml tstep_all domain_all  primvars 1 5 cellvars 1 41
+domain 2dIncompFlow
+OutputManager tstep_all dofman_all element_all
+ndofman 5        nelem 4        ncrosssect  1 nmat 1 nbc 2         nic 0 nltf 1 
+node 1 coords 3 0.0 0.0 0.0 ndofs 1 DofIDMask 1 11 bc 1 1 
+node 2 coords 3 1.0 0.0 0.0 ndofs 1 DofIDMask 1 11 bc 1 2
+node 3 coords 3 1.0 1.0 0.0 ndofs 1 DofIDMask 1 11 bc 1 2
+node 4 coords 3 0.0 1.0 0.0 ndofs 1 DofIDMask 1 11 bc 1 1 
+node 5 coords 3 0.5 0.5 0.0 ndofs 1 DofIDMask 1 11 
+tr1darcy	1	nodes	3	1	5	4	crossSect 1 mat 1  
+tr1darcy	2	nodes	3	1	2	5	crossSect 1 mat 1  
+tr1darcy	3	nodes	3	2	3	5	crossSect 1 mat 1  
+tr1darcy	4	nodes	3	3	4	5	crossSect 1 mat 1  
+emptycs 1
+nonlinmass 1 d 1.000000 c 1.0 alpha 1.0
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.00000000000000000000
+BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 1.00000000000000000000
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#NODE tStep 1 number 5 dof 1 unknown p value 5.00000000e-01
+#%END_CHECK%
