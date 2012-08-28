@@ -125,19 +125,12 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 {
     Domain *domain = this->giveDomain();
     int nNodes = domain->giveNumberOfDofManagers();
-
-    int dofType [ 3 ] = {
-        0, 0, 0
-    };
+    IntArray dofType;
     domainType d = domain->giveDomainType();
     if ( d == _2dIncompressibleFlow || d == _3dIncompressibleFlow ) {
-        dofType [ 0 ] = V_u;
-        dofType [ 1 ] = V_v;
-        dofType [ 2 ] = V_w;
+        dofType.setValues(3, V_u, V_v, V_w);
     } else if ( d == _3dMode || d == _2dPlaneStressMode || d == _PlaneStrainMode || d == _2dTrussMode )     {
-        dofType [ 0 ] = D_u;
-        dofType [ 1 ] = D_v;
-        dofType [ 2 ] = D_w;
+        dofType.setValues(3, D_u, D_v, D_w);
     } else   {
         OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - Unsupported domain type to construct C matrix");
     }
@@ -156,8 +149,8 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     for ( int i = 1; i <= nNodes; i++ ) {
         Node *n = domain->giveNode(i);
         FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID(dofType [ 0 ]);
-        Dof *d2 = n->giveDofWithID(dofType [ 1 ]);
+        Dof *d1 = n->giveDofWithID(dofType(0));
+        Dof *d2 = n->giveDofWithID(dofType(1));
         int k1 = d1->__givePrescribedEquationNumber();
         int k2 = d2->__givePrescribedEquationNumber();
         if ( nsd == 2 ) {
@@ -172,7 +165,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
             }
         } else   { // nsd == 3
             OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - 3D Not tested yet!");
-            Dof *d3 = n->giveDofWithID(dofType [ 2 ]);
+            Dof *d3 = n->giveDofWithID(dofType(2));
             int k3 = d3->__givePrescribedEquationNumber();
 
             if ( k1 ) {

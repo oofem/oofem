@@ -61,7 +61,7 @@ public:
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
-virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

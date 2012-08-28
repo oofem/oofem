@@ -86,7 +86,7 @@ protected:
     void giveDerivativeEta(FloatArray &, double, double, double);
     void giveDerivativeDzeta(FloatArray &, double, double, double);
 public:
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif

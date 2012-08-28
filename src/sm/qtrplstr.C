@@ -253,11 +253,9 @@ void QTrPlaneStress2d :: computeGaussPoints()
 }
 
 void
-QTrPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer.resize(2);
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
+    answer.setValues(2, D_u, D_v);
 }
 
 

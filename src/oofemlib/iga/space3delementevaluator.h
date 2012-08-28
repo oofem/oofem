@@ -59,10 +59,7 @@ protected:
     void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     double computeVolumeAround(GaussPoint *gp);
     void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
+        answer.setValues(3, D_u, D_v, D_w);
     }
 };
 } // end namespace oofem

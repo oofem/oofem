@@ -59,9 +59,7 @@ protected:
     void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     double computeVolumeAround(GaussPoint *gp);
     void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        answer.resize(2);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
+        answer.setValues(2, D_u, D_v);
     }
 }; // end of PlaneStressStructuralElementEvaluator definition
 } // end namespace oofem

@@ -133,7 +133,7 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
     int i;
     FloatArray n(20);
 
-    this->evalN(n, lcoords, cellgeo);   // inspirace
+    this->evalN(n, lcoords, cellgeo);
 
     answer.resize(3);
     answer.zero();
@@ -257,7 +257,7 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     computeLocalSurfaceMapping(nodes, isurf);
 
-    this->surfaceEvalN(n, lcoords, cellgeo); // inspirace
+    this->surfaceEvalN(n, lcoords, cellgeo);
 
     answer.resize(3);
     answer.zero();

@@ -41,7 +41,7 @@
 #include "mathfem.h"
 
 namespace oofem {
-Masonry02 ::     Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
+Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //
     // constructor
@@ -53,7 +53,7 @@ Masonry02 ::     Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
     this->plType = nonassociatedPT;
 }
 
-Masonry02 ::    ~Masonry02()
+Masonry02 :: ~Masonry02()
 { }
 
 int
@@ -537,8 +537,6 @@ Masonry02 :: giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode m
 // stressStrainVector acording to stressStrain mode of given gp.
 //
 {
-    //MaterialMode mode  = gp -> giveMaterialMode ();
-
     if ( mmode == _2dInterface ) {
         return ind;
     } else {
@@ -611,7 +609,7 @@ Masonry02 :: giveFullCharacteristicVector(FloatArray &answer,
 // 1) strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
-// you must assigng your stress strain mode to one of the folloving modes (or add new)
+// you must assign your stress strain mode to one of the following modes (or add new)
 // FullForm of MaterialStiffnessMatrix must have the same form.
 //
 {

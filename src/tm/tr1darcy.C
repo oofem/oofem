@@ -49,21 +49,11 @@
 #include "matresponsemode.h"
 #include "fei2dtrlin.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
- #include <stdlib.h>
-#endif
-
-
 namespace oofem {
 FEI2dTrLin Tr1Darcy :: interpolation_lin(1, 2);
 
 Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
 {
-    /*
-     * Contructor
-     */
     numberOfDofMans  = 3;
     numberOfGaussPoints = 1;
     this->computeGaussPoints();
@@ -71,42 +61,12 @@ Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
 
 Tr1Darcy :: ~Tr1Darcy()   
 {
-    /*
-     * Destructor
-     */
 }
 
 IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
     this->TransportElement :: initializeFrom(ir);
-
-
     return IRRT_OK;
-}
-
-void Tr1Darcy :: initGeometry()
-{
-    /*
-     * Setup geometry. Even though there are quadratic shape functions on the element, since the pressure is
-     * approximated using linear shape functions, the area is calculated according to the linear ones.
-     */
-    Node *node1, *node2, *node3;
-    double x1, x2, x3, y1, y2, y3;
-
-    node1 = giveNode(1);
-    node2 = giveNode(2);
-    node3 = giveNode(3);
-
-    // init geometry data
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    this->area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 }
 
 void Tr1Darcy :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
@@ -120,14 +80,11 @@ void Tr1Darcy :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 
 void Tr1Darcy :: computeGaussPoints()
 {
-    /*
-     *	Set up gausspoints for element
-     */
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dHeat);        //_2dFlow);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dHeat);
     }
 }
 
@@ -137,8 +94,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
      * Return Ke = integrate(B^T K B)
      */
 
-    FloatMatrix Bxieta, B, BT, K, K2, Ke_Temp1, Ke_Temp2, J, JT, dNdxy;
-    FloatArray devstress, eps, a;
+    FloatMatrix B, BT, K, KB;
     FloatArray *lcoords;
     GaussPoint *gp;
 
@@ -146,69 +102,39 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
-    K2.resize(2, 2);
-
     answer.resize(3, 3);
     answer.zero();
-
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, atTime, a);
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = gp->giveCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evaldNdx( B, * lcoords, FEIElementGeometryWrapper(this) );
-        eps.beTProductOf(B, a);
-        //		eps.resize(3,3);	// To avoid memory trouble...
-
-        mat->giveFluxVector(devstress, gp, eps, atTime);
+        this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
+        
         mat->giveCharacteristicMatrix(K, FullForm, TangentStiffness, gp, atTime);
 
-        //mat->computeDeviatoricStressVector(devstress, gp, eps, atTime);
-        //mat->giveDeviatoricStiffnessMatrix(K, TangentStiffness, gp, atTime);
-
-        K2.at(1, 1) = K.at(1, 1);
-        K2.at(1, 2) = K.at(1, 2);
-        K2.at(2, 1) = K.at(2, 1);
-        K2.at(2, 2) = K.at(2, 2);
-
-        Ke_Temp1.beProductOf(B, K2);
-        Ke_Temp2.beProductTOf(Ke_Temp1, B);
-        Ke_Temp2.times( detJ * gp->giveWeight() );
-
-        answer.add(Ke_Temp2);
+        B.beTranspositionOf(BT);
+        KB.beProductOf(K, B);
+        answer.plusProductUnsym(B, KB, detJ * gp->giveWeight() ); // Symmetric part is just a single value, not worth it.
     }
-
-    return;
 }
 
-void Tr1Darcy ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
-                                           TimeStep *tStep)
+void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
 {
-    /*
-     * Compute characteristic vector for this element. I.e the load vector(s)
-     *
-     *  TODO: Implement support for body forces
-     *
-     */
-
     if ( mtrx == ExternalForcesVector ) {
         this->computeLoadVector(answer, tStep);
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
-    } else   {
+    } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
 
 void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTime)
 {
-
     FloatArray *lcoords, w, a, gradP, I;
-    FloatMatrix N, B, p;
+    FloatMatrix BT;
     GaussPoint *gp;
 
     TransportMaterial *mat = ( TransportMaterial * ) this->domain->giveMaterial(this->material);
@@ -224,23 +150,22 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
         lcoords = gp->giveCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evaldNdx( B, * lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
 
-        gradP.beTProductOf(B, a);
+        gradP.beTProductOf(BT, a);
 
         mat->giveFluxVector(w, gp, gradP, atTime);
 
-        I.beProductOf(B, w);
-        I.times(-1 * gp->giveWeight() * detJ);
-
-        answer.add(I);
+        I.beProductOf(BT, w);
+        answer.add(- gp->giveWeight() * detJ, I);
     }
 }
 
 void Tr1Darcy :: computeLoadVector(FloatArray &answer, TimeStep *atTime)
 {
-    FloatArray p, vec;
-    FloatMatrix Ke;
+    // TODO: Implement support for body forces
+
+    FloatArray vec;
 
     answer.resize(3);
     answer.zero();
@@ -265,7 +190,7 @@ void Tr1Darcy :: computeLoadVector(FloatArray &answer, TimeStep *atTime)
         answer.add(vec);
     }
 
-    answer.times(-1.0);
+    answer.negated();
 }
 
 void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep)
@@ -276,7 +201,6 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
      */
 
     answer.resize(3);
-
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) {                 // Neumann boundary conditions (traction)
@@ -288,8 +212,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         GaussPoint *gp;
-        FloatMatrix N;
-        FloatArray loadValue, reducedAnswer;
+        FloatArray N, loadValue, reducedAnswer;
         reducedAnswer.resize(3);
         reducedAnswer.zero();
         IntArray mask;
@@ -298,106 +221,43 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
         for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
             gp = iRule.getIntegrationPoint(i);
-            this->giveNEdge_xieta(N, gp);
+            FloatArray *lcoords = gp->giveCoordinates();
+            this->interpolation_lin.edgeEvalN(N, *lcoords, FEIElementGeometryWrapper(this));
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {                // Edge load in xi-eta system
-                boundaryLoad->computeValueAt(loadValue, tStep, * ( gp->giveCoordinates() ), VM_Total);
-            } else   {  // Edge load in x-y system
+                boundaryLoad->computeValueAt(loadValue, tStep, *lcoords, VM_Total);
+            } else {  // Edge load in x-y system
+                FloatArray gcoords;
+                this->interpolation_lin.edgeLocal2global(gcoords, iEdge, *lcoords, FEIElementGeometryWrapper(this));
+                boundaryLoad->computeValueAt(loadValue, tStep, gcoords, VM_Total);
             }
 
-            reducedAnswer.at(1) += N.at(1, 1) * loadValue.at(1) * dV;
-            reducedAnswer.at(2) += N.at(1, 2) * loadValue.at(1) * dV;
-            reducedAnswer.at(3) += N.at(1, 3) * loadValue.at(1) * dV;
+            reducedAnswer.add(loadValue.at(1) * dV, N);
         }
 
-        this->giveEdgeDofMappingV(mask, iEdge);
-
-        mask.resize(3);
-        mask.at(3) = 0;
-
+        this->interpolation_lin.computeLocalEdgeMapping(mask, iEdge);
         answer.assemble(reducedAnswer, mask);
     }
 }
 
-void Tr1Darcy :: giveNEdge_xieta(FloatMatrix &answer, GaussPoint *aGaussPoint)
-{
-    /*
-     * Returns value of quadratic shape functions on interval [-1 1]. User when computing contributions
-     * to load vector from boundary terms thru Gauss integration.
-     */
-
-    double xi = -1, xj = 0, xk = 1, x;
-
-    answer.resize(1, 3);
-    answer.zero();
-
-    x = aGaussPoint->giveCoordinate(1);
-
-    answer.at(1, 1) = ( ( x - xj ) * ( x - xk ) ) / ( ( xi - xj ) * ( xi - xk ) );
-    answer.at(1, 2) = -( ( ( x - xi ) * ( x - xk ) ) / ( ( xi - xj ) * ( xj - xk ) ) );
-    answer.at(1, 3) = ( ( x - xi ) * ( x - xj ) ) / ( ( xi - xk ) * ( xj - xk ) );
-}
-
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    /*
-     * Gives length of edge iEdge.
-     */
-    Node *node1, *node2;
-
-    if ( iEdge == 1 ) {
-        node1 = this->giveNode(1);
-        node2 = this->giveNode(2);         // 4
-    } else if ( iEdge == 2 )       {
-        node1 = this->giveNode(2);
-        node2 = this->giveNode(3);         // 5
-    } else if ( iEdge == 3 )       {
-        node1 = this->giveNode(3);
-        node2 = this->giveNode(1);         // 6
-    }
-
-    double dx = node1->giveCoordinate(1) - node2->giveCoordinate(1);
-    double dy = node1->giveCoordinate(2) - node2->giveCoordinate(2);
-    double length = sqrt(dx * dx + dy * dy);
-    double thickness;
-    thickness = 1;
-    return length * thickness * gp->giveWeight() / 2;
+    double thickness = 1;
+    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian(iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this)) );
+    return detJ * thickness * gp->giveWeight();
 }
 
-void Tr1Darcy :: giveEdgeDofMappingV(IntArray &answer, int iEdge)
-{
-    /*
-     * Given an edge iEdge, return velocity dofs at that edge
-     */
-    answer.resize(2);
-
-    if ( iEdge == 1 ) {
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-    } else if ( iEdge == 2 ) {
-        answer.at(1) = 2;
-        answer.at(2) = 3;
-    } else if ( iEdge == 3 ) {
-        answer.at(1) = 3;
-        answer.at(2) = 1;
-    }
-}
-
-
-void Tr1Darcy ::  giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep)
+void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep)
 {
     /*
      * Compute characteristic matrix for this element. The only option is the stiffness matrix...
      */
-
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
-
-    return;
 }
 
 void Tr1Darcy :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -410,8 +270,7 @@ void Tr1Darcy :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
 
     if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
         if ( ut == EID_ConservationEquation ) {
-            answer.resize(1);
-            answer.at(1) = P_f;
+            answer.setValues(1, P_f);
         } else {
             _error("giveDofManDofIDMask: Unknown equation id encountered");
         }

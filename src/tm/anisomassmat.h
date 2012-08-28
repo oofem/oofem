@@ -44,7 +44,7 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * Material status class for a linear anisotropic mass transfer material. The material is used with the tr1darcy element.
+ * Material status class for a linear anisotropic mass transfer material. The material is used with the Tr1Darcy element.
  *
  * @author Carl Sandström
  */
@@ -76,11 +76,9 @@ public:
 /**
  *
  * Class for an anisotropic linear transport material. The constitutive equation is given as
- *
- * \f[ \mathbf{w}=-\mathbf{K} \mathbf{\nabla} p \f]
- *
- * where \f@\mathbm{w}\f@ is the seepage velocity, \f@ \mathbm{K} \f@ is the permeability which is given in the input file
- * and \f@ p \f@ is the pressure.
+ * @f[ \mathbf{w}=-\mathbf{K} \mathbf{\nabla} p @f]
+ * where @f$ \mathbm{w} @f$ is the seepage velocity, @f$ \mathbm{K} @f$ is the permeability which is given in the input file
+ * and @f$ p @f$ is the pressure.
  *
  * @author Carl Sandström
  *
@@ -88,15 +86,14 @@ public:
 class AnisotropicMassTransferMaterial : public TransportMaterial
 {
 protected:
-
     FloatMatrix k; ///< Conductivity/permeability matrix. This matrix is read from the input file and should be given row-wise as a vector of 4, eg "C 4 1 0 0 1".
 
 public:
 
     AnisotropicMassTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { };
-    ~AnisotropicMassTransferMaterial() { };
+    virtual ~AnisotropicMassTransferMaterial() { };
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
@@ -106,18 +103,16 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
-    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    const char *giveClassName() const { return "AnisotropicMassTransferMaterial"; }
-    classType giveClassID()     const { return AnisotropicMassTransferMaterialClass; }
+    virtual const char *giveClassName() const { return "AnisotropicMassTransferMaterial"; }
+    virtual classType giveClassID() const { return AnisotropicMassTransferMaterialClass; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new AnisotropicMassTransferMaterialStatus(1, domain, gp);  }
-
-protected:
 };
 } // end namespace oofem
 #endif // anisomassmat_h

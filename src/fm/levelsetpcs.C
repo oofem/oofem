@@ -164,12 +164,9 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
                 double v;
                 // get velocity in inode
                 if ( nsd == 2 ) {
-                    mask.at(1) = V_u;
-                    mask.at(2) = V_v;
+                    mask.setValues(2, V_u, V_v);
                 } else if ( nsd == 3 ) {
-                    mask.at(1) = V_u;
-                    mask.at(2) = V_v;
-                    mask.at(3) = V_w;
+                    mask.setValues(3, V_u, V_v, V_w);
                 }
 
                 domain->giveDofManager(inode)->giveUnknownVector( un, mask, EID_MomentumBalance, VM_Total, atTime->givePreviousStep() );

@@ -43,8 +43,6 @@
 namespace oofem {
 AnisotropicMassTransferMaterialStatus :: AnisotropicMassTransferMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)
 {
-    pressureGradient.resize(2);
-    seepageVelocity.resize(2);
 }
 
 void
@@ -89,18 +87,9 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
     case _1dHeat:
-        answer.resize(1, 1);
-        answer.at(1, 1) = k.at(1, 1);
     case _2dHeat:
-        answer.resize(2, 2);
-        answer.at(1, 1) = k.at(1, 1);
-        answer.at(1, 2) = k.at(1, 2);
-        answer.at(2, 1) = k.at(2, 1);
-        answer.at(2, 2) = k.at(2, 2);
-        return;
-
     case _3dHeat:
-        _error2( "giveCharacteristicMatrix : 3D capabilitiet not yet implemented (%s)", __MaterialModeToString(mMode) );
+        answer = k;
         return;
 
     default:
@@ -126,7 +115,7 @@ AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint
     thisMaterialStatus->setPressureGradient(eps);
 
     answer.beProductOf(k, eps);
-    answer.times(-1.0);
+    answer.negated();
 
     thisMaterialStatus->setSeepageValocity(answer);
 }

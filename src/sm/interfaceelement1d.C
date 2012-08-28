@@ -302,22 +302,6 @@ InterfaceElem1d :: computeNumberOfDofs(EquationID)
 void
 InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    /*
-     * cmode mode = giveCoordMode();
-     * if ( mode == ie1d_1d ) {
-     * answer.resize(1);
-     * answer.at(1) = D_u;
-     * } else if ( mode == ie1d_2d ) {
-     * answer.resize(2);
-     * answer.at(1) = D_u;
-     * answer.at(2) = D_v;
-     * } else if ( mode == ie1d_3d ) {
-     * answer.resize(3);
-     * answer.at(1) = D_u;
-     * answer.at(2) = D_v;
-     * answer.at(3) = D_w;
-     * } else {
-     */
     switch ( domain->giveDomainType() ) {
     case _2dPlaneStressMode:
     case _PlaneStrainMode:

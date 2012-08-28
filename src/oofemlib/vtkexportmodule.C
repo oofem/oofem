@@ -1213,8 +1213,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     }
                 }
             } else if ( valID == PressureVector ) {
-                dofIDMask.resize(1);
-                dofIDMask.at(1) = P_f;
+                dofIDMask.setValues(1, P_f);
                 this->getDofManPrimaryVariable(iVal, dman, dofIDMask, EID_ConservationEquation,
                                                VM_Total, tStep, IST_Pressure);
             } else {

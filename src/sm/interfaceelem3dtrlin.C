@@ -102,16 +102,13 @@ InterfaceElement3dTrLin :: computeGaussPoints()
 int
 InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    int i;
     FloatArray n(6);
 
-    answer.resize(3);
-    answer.zero();
     this->interpolation.evalN(n, lcoords, FEIElementGeometryWrapper(this));
 
     answer.resize(3);
     answer.zero();
-    for ( i = 1; i <= 3; i++ ) {
+    for (int i = 1; i <= 3; i++ ) {
         answer.at(1) += n.at(i) * this->giveNode(i)->giveCoordinate(1);
         answer.at(2) += n.at(i) * this->giveNode(i)->giveCoordinate(2);
         answer.at(3) += n.at(i) * this->giveNode(i)->giveCoordinate(3);
@@ -169,7 +166,7 @@ InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
 
 
 void
-InterfaceElement3dTrLin ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElement3dTrLin :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(3, D_u, D_v, D_w);
 }

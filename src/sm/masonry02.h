@@ -100,13 +100,9 @@ public:
     void giveFullCharacteristicVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &strainVector);
 
-    virtual int giveSizeOfFullHardeningVarsVector()  { return 3; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *)  { return 3; }
+    virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 3; }
 
-    /**
-     *  Returns true if stiffness matrix of receiver is symmetric
-     *  Default implementation returns true.
-     */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
@@ -140,10 +136,10 @@ protected:
                                                         const FloatArray &gamma);
     virtual int hasHardening() { return 1; }
 
-    virtual void  computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                                 const FloatArray &strainSpaceHardeningVariables);
-    virtual void  computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                                 const FloatArray &strainSpaceHardeningVariables);
+    virtual void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
+                                                const FloatArray &strainSpaceHardeningVariables);
+    virtual void computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
+                                                const FloatArray &strainSpaceHardeningVariables);
 
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,

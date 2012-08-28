@@ -169,15 +169,14 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
     double dt = atTime->giveTimeIncrement();
     DofManager *dman;
     Node *inode;
-    IntArray velocityMask(2);
+    IntArray velocityMask;
     FloatArray x, x2(nsd), v_t, v_tn1;
     FloatMatrix t;
 #if 1
     EngngModel *emodel = domain->giveEngngModel();
     int err;
 #endif
-    velocityMask.at(1) = V_u;
-    velocityMask.at(2) = V_v;
+    velocityMask.setValues(2, V_u, V_v);
 
     updated_XCoords.resize(ndofman);
     updated_YCoords.resize(ndofman);

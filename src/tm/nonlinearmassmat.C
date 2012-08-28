@@ -36,10 +36,7 @@
 #include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"
-#include <math.h>
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
+#include "mathfem.h"
 
 namespace oofem {
 IRResultType
@@ -66,43 +63,38 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     AnisotropicMassTransferMaterialStatus *status = ( ( AnisotropicMassTransferMaterialStatus * ) this->giveStatus(gp) );
     FloatArray eps = status->giveGradP();
-    FloatArray eps2;
     double gradPNorm;
-    FloatMatrix t1, t2, op;
+    FloatMatrix t1, t2;
+
+    gradPNorm = eps.computeNorm();
+
+    t1.beDyadicProductOf(eps, eps);
+    if ( gradPNorm != 0.0 ) {
+        t1.times( C * alpha * pow(gradPNorm, alpha - 2) );
+    }
 
     switch  ( mMode ) {
     case _1dHeat:
-        answer.resize(1, 1);
+        t2.resize(1, 1);
+        t2.at(1, 1) = 1;
+        break;
     case _2dHeat:
-        answer.resize(2, 2);
-
-        gradPNorm = sqrt( eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) );
-
-        eps2.resize(2);
-        eps2.at(1) = eps.at(1);
-        eps2.at(2) = eps.at(2);
-
-        t1.beDyadicProductOf(eps2, eps2);
-
-        if ( gradPNorm != 0.0 ) {
-            t1.times( C * alpha * pow(gradPNorm, alpha - 2) );
-        }
-
         t2.resize(2, 2);
         t2.at(1, 1) = t2.at(2, 2) = 1;
-        t2.times( 1 + C * pow(gradPNorm, alpha) );
-
-        answer.add(t1);
-        answer.add(t2);
-        answer.times(1.0);
-
-        return;
-
+        break;
+    case _3dHeat:
+        t2.resize(3, 3);
+        t2.at(1, 1) = t2.at(2, 2) = t2.at(3, 3) = 1;
+        break;
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
-}
+    
+    answer.beEmptyMtrx();
+    answer.add(t1);
+    answer.add(1 + C * pow(gradPNorm, alpha), t2);
 
+}
 
 double
 NonlinearMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
@@ -120,12 +112,11 @@ NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
 
     thisMaterialStatus->setPressureGradient(eps);
 
-    double gradPNorm = sqrt( eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) );
+    double gradPNorm = eps.computeNorm();
 
-    answer.resize(2);
     answer = eps;
     answer.times( 1 + C * pow(gradPNorm, alpha) );
-    answer.times(-1.0);
+    answer.negated();
 
     thisMaterialStatus->setSeepageValocity(answer);
 }

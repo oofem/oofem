@@ -37,20 +37,16 @@
 
 #include "transportmaterial.h"
 #include "anisomassmat.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
 
 namespace oofem {
-class GaussPoint;
 
 /**
  *
  * Class for a nonlinear fictitious transport material. The constitutive equation is given as
  *
- * \f[ \mathbf{w}=-\left( 1+C \mid \mid \mathbf{\nabla} p \mid\mid^{\alpha}\right) \mathbf{\nabla} p \f]
+ * @f[ \mathbf{w}=-\left( 1+C \mid \mid \mathbf{\nabla} p \mid\mid^{\alpha}\right) \mathbf{\nabla} p @f]
  *
- * where \f@\mathbm{w}\f@ is the seepage velocity, \f@ \alpha \f@ and \f@ C\f@ are constants and \f@p \f@ is the pressure.
+ * where @f$ \mathbm{w} @f$ is the seepage velocity, @f$ \alpha @f$ and @f$ C @f$ are constants and @f$ p @f$ is the pressure.
  *
  * @author Carl Sandström
  *
@@ -58,17 +54,15 @@ class GaussPoint;
 class NonlinearMassTransferMaterial : public TransportMaterial
 {
 protected:
-
-    /// C indicates the level of nonlinearity in the model
+    /// Indicates the level of nonlinearity in the model
     double C;
-
-    /// alpha indicates the level of nonlinearity in the model
+    /// Indicates the level of nonlinearity in the model
     double alpha;
 
 public:
 
     NonlinearMassTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { };
-    ~NonlinearMassTransferMaterial() { };
+    virtual ~NonlinearMassTransferMaterial() { };
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
@@ -80,18 +74,16 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
-    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
-    const char *giveClassName() const { return "NonlinearMassTransferMaterial"; };
-    classType giveClassID() const { return NonlinearMassTransferMaterialClass; };
+    virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; };
+    virtual classType giveClassID() const { return NonlinearMassTransferMaterialClass; };
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new AnisotropicMassTransferMaterialStatus(1, domain, gp);  };
-
-protected:
 };
 } // end namespace oofem
 #endif // nonlinearheatmat_h
