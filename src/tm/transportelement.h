@@ -188,30 +188,47 @@ protected:
     void computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, int iSurf,
                                      TimeStep *tStep, ValueModeType mode, int indx);
 
-    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)  = 0;
     /**
-     * Computes the sub-matrix of interpolation matrix corresponding to single unknown.
-     * Currently, the same approximation order is assumed, but it can be extended.
+     * Computes the basis functions.
+     * @param answer The basis functions evaluated at lcoord.
+     * @param lcoord The local coordinate.
      */
-    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords)  = 0;
-    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords)  = 0;
+    virtual void computeNAt(FloatArray &answer, const FloatArray &lcoord);
+    /**
+     * Computes the interpolation matrix corresponding to all unknowns.
+     * In the default implementation the same approximation order is assumed, but it can be extended.
+     */
+    virtual void computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
+    /**
+     * Computes the gradient matrix corresponding to one unknown.
+     */
+    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     /**
      * Computes the contribution to balance equation(s) due to internal sources
      */
     virtual void computeInternalSourceRhsSubVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode, int indx);
 
-    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp) = 0;
+    /**
+     * Computes the basis functions at the edge for one unknown.
+     */
+    virtual void computeEgdeNAt(FloatArray &answer, const FloatArray &lcoord);
+    /**
+     * Gives the node indexes for given edge.
+     */
+    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge);
+    /**
+     * Computes the length around a integration point on a edge.
+     */
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) = 0;
-    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge) = 0;
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) = 0;
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iEdge);
 
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder) { return NULL; }
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge) { return 0.; }
-    virtual void giveSurfaceDofMapping(IntArray &mask, int iEdge)  { mask.resize(0); }
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)  { answer.resize(0); }
+    virtual void computeSurfaceNAt(FloatArray &answer, const FloatArray &lcoord);
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
+    virtual void giveSurfaceDofMapping(IntArray &mask, int iSurf);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iSurf);
 
-    virtual int giveApproxOrder(int unknownIndx) = 0;
+    virtual int giveApproxOrder(int unknownIndx);
 
     /**
      * Assembles the given source matrix of size (ndofs, ndofs) into target matrix answer.

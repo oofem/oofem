@@ -64,48 +64,6 @@ Tetrah1_hmt :: Tetrah1_hmt(int n, Domain *aDomain) : Tetrah1_ht(n, aDomain)
 Tetrah1_ht :: ~Tetrah1_ht()
 { }
 
-void
-Tetrah1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n;
-    this->interpolation.evalN(n, * coords, FEIElementGeometryWrapper(this));
-    answer.resize(1, 4);
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = n.at(i);
-    }
-}
-
-void
-Tetrah1_ht :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeNSubMatrixAt(answer, coords);
-    } else {
-        FloatMatrix n;
-        int i, j;
-
-        this->computeNSubMatrixAt(n, coords);
-        answer.resize(2, 8);
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 4; j++ ) {
-                answer.at(i, ( j - 1 ) * 2 + i) = n.at(1, j);
-            }
-        }
-    }
-}
-
-void
-Tetrah1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.beTranspositionOf(dnx);
-}
-
 
 void
 Tetrah1_ht :: computeGaussPoints()
@@ -161,42 +119,16 @@ Tetrah1_ht :: initializeFrom(InputRecord *ir)
 
 
 double
-Tetrah1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* gp->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this)) );
 
-    weight = aGaussPoint->giveWeight();
+    weight = gp->giveWeight();
     volume = determinant * weight;
     return volume;
-}
-
-
-
-void
-Tetrah1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-    FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 2);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
 }
 
 
@@ -209,44 +141,6 @@ Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-void
-Tetrah1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(2);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 2;
-        answer.at(2) = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 1
-        answer.at(1) = 3;
-        answer.at(2) = 1;
-    } else if ( iEdge == 4 ) { // edge between nodes 1 4
-        answer.at(1) = 1;
-        answer.at(2) = 4;
-    } else if ( iEdge == 5 ) { // edge between nodes 2 4
-        answer.at(1) = 2;
-        answer.at(2) = 4;
-    } else if ( iEdge == 6 ) { // edge between nodes 3 4
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-    } else {
-        _error("giveEdgeDofMapping: wrong edge number");
-    }
-}
-
-void
-Tetrah1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-}
-
 IntegrationRule *
 Tetrah1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
@@ -256,61 +150,15 @@ Tetrah1_ht :: GetSurfaceIntegrationRule(int approxOrder)
     return iRule;
 }
 
-void
-Tetrah1_ht :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    FloatArray n(3);
-    interpolation.surfaceEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 3);
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
-}
 
 double
 Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    double detJ, weight;
+    detJ = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
-    weight      = gp->giveWeight();
-    volume      = 2.0 * determinant * weight;
-
-    return volume;
-}
-
-void
-Tetrah1_ht :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
-{
-    answer.resize(3);
-    if ( iSurf == 1 ) {
-        answer.at(1) = 1; // node 1
-        answer.at(2) = 3; // node 3
-        answer.at(3) = 2; // node 2
-    } else if ( iSurf == 2 ) {
-        answer.at(1) = 1; // node 1
-        answer.at(2) = 2; // node 2
-        answer.at(3) = 4; // node 4
-    } else if ( iSurf == 3 ) {
-        answer.at(1) = 2; // node 2
-        answer.at(2) = 3; // node 3
-        answer.at(3) = 4; // node 4
-    } else if ( iSurf == 4 ) {
-        answer.at(1) = 1; // node 1
-        answer.at(2) = 4; // node 4
-        answer.at(3) = 3; // node 3
-    } else {
-        _error("giveSurfaceDofMapping: wrong surface number");
-    }
-}
-
-void
-Tetrah1_ht :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
-{
-    interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    weight = gp->giveWeight();
+    return 2.0 * detJ * weight; ///@todo Fairly sure this should have a factor 2.0 in there......
 }
 
 
@@ -362,7 +210,8 @@ Tetrah1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 int
-Tetrah1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+Tetrah1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }

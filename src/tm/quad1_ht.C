@@ -67,57 +67,6 @@ Quad1_ht :: ~Quad1_ht()
 { }
 
 void
-Quad1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n(4);
-    this->interpolation.evalN(n, *coords, FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 4);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
-    answer.at(1, 4) = n.at(4);
-}
-
-void
-Quad1_ht :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeNSubMatrixAt(answer, coords);
-    } else {
-        FloatMatrix n;
-        int i, j;
-
-        this->computeNSubMatrixAt(n, coords);
-        answer.resize(2, 8);
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 4; j++ ) {
-                answer.at(i, ( j - 1 ) * 2 + i) = n.at(1, j);
-            }
-        }
-    }
-}
-
-void
-Quad1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
-{
-    int i;
-    FloatMatrix dnx;
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(2, 4);
-    answer.zero();
-
-    for ( i = 1; i <= 4; i++ ) {
-      answer.at(1, i) = dnx.at(i,1);
-      answer.at(2, i) = dnx.at(i,2);
-    }
-}
-
-
-void
 Quad1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
@@ -184,34 +133,6 @@ Quad1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     return volume;
 }
 
-void
-Quad1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 2);
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-}
-
-
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
@@ -219,39 +140,6 @@ Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
                                                                        FEIElementGeometryWrapper(this));
     double thick = this->giveCrossSection()->give(CS_Thickness); // 't'
     return result*thick *gp->giveWeight();
-}
-
-
-void
-Quad1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(2);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 2;
-        answer.at(2) = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.at(1) = 4;
-        answer.at(2) = 1;
-    } else {
-        _error("giveEdgeDofMapping: wrong edge number");
-    }
-}
-
-void
-Quad1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 void
@@ -311,26 +199,9 @@ double
 Quad1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray lcoords(2), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = 0.0;
+    lcoords.zero();
     this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resize(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
+    return gcoords.distance(coords);
 }
 
 

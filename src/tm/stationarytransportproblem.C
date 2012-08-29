@@ -121,7 +121,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         }
     }
 
-    if( UnknownsField == NULL ){//can exist from nonstationary transport problem
+    if( UnknownsField == NULL ){ //can exist from nonstationary transport problem
         UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0);
     }
 
@@ -130,9 +130,9 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
 
 
-double StationaryTransportProblem ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
-                                                           TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
+double StationaryTransportProblem :: giveUnknownComponent(EquationID chc, ValueModeType mode,
+                                                          TimeStep *tStep, Domain *d, Dof *dof)
+// returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
@@ -167,7 +167,7 @@ TimeStep *StationaryTransportProblem :: giveNextStep()
 
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
 }
 
@@ -185,7 +185,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("Assembling conductivity matrix\n");
 #endif
 
-        // alocate space for solution vector
+        // allocate space for solution vector
         FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
         solutionVector->resize( this->giveNumberOfEquations(EID_ConservationEquation) );
         solutionVector->zero();
@@ -250,6 +250,34 @@ StationaryTransportProblem :: updateYourself(TimeStep *stepN)
     EngngModel :: updateYourself(stepN);
 }
 
+/*
+void
+StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+{
+    // update element stabilization
+    int i, nelem = d->giveNumberOfElements();
+    for ( i = 1; i <= nelem; ++i ) {
+        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+    }
+
+    if (cmpn == InternalRhs) {
+        this->internalForces.zero();
+        this->eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        return;
+
+    } else if (cmpn == NonLinearLhs) {
+        this->conductivityMatrix->zero();
+        ///@todo StiffnessMatrix should be renamed TangentMatrix
+        this->assemble(this->conductivityMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
+                EModelDefaultEquationNumbering(), d);
+        return;
+
+    } else {
+        OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
+    }
+}
+*/
 
 contextIOResultType
 StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)

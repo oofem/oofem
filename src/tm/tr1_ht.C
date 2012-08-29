@@ -72,82 +72,6 @@ FEInterpolation *Tr1_ht :: giveInterpolation(DofIDItem id)
     }
 }
 
-void
-Tr1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    ///@todo Deal with matrix and vector (I find that the row-wise matrices should be transposed).
-    //this->interp.evalN(answer, coords, FEIElementGeometryWrapper(this), 0.0);
-    double l1, l2, l3;
-
-    l1 = coords->at(1);
-    l2 = coords->at(2);
-    l3 = 1.0 - l1 - l2;
-
-    answer.resize(1, 3);
-    answer.zero();
-
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
-}
-
-void
-Tr1_ht :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeNSubMatrixAt(answer, coords);
-    } else {
-        FloatMatrix n;
-        int i, j;
-
-        this->computeNSubMatrixAt(n, coords);
-        answer.resize(2, 6);
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
-                answer.at(i, ( j - 1 ) * 2 + i) = n.at(1, j);
-            }
-        }
-    }
-}
-
-
-void
-Tr1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
-{
-    ///@todo Deal with matrix and vector (I find that the row-wise matrices should be transposed).
-    //this->interp.evaldNdx(answer, gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    Node *node1, *node2, *node3;
-    double x1, x2, x3, y1, y2, y3, area;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-
-    answer.resize(2, 3);
-
-    answer.at(1, 1) = y2 - y3;
-    answer.at(1, 2) = y3 - y1;
-    answer.at(1, 3) = y1 - y2;
-
-    answer.at(2, 1) = x3 - x2;
-    answer.at(2, 2) = x1 - x3;
-    answer.at(2, 3) = x2 - x1;
-
-    answer.times( 1. / ( 2. * area ) );
-}
-
 
 void
 Tr1_ht :: computeGaussPoints()
@@ -202,7 +126,7 @@ Tr1_ht :: initializeFrom(InputRecord *ir)
 
 double
 Tr1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
     determinant = fabs( this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
@@ -210,38 +134,6 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
     volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness);
 
     return volume;
-}
-
-
-void
-Tr1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress triangle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-    ///@todo Use the interpolation class for this
-    //this->interp.edgeEvalN(answer_vec, gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-
-    double ksi, n1, n2;
-    answer.resize(1, 2);
-    answer.zero();
-
-    ksi = gp->giveCoordinate(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
-
-    answer.at(1, 1) = n1;
-    answer.at(1, 2) = n2;
 }
 
 
@@ -254,35 +146,6 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return determinant *thick *gp->giveWeight();
 }
 
-
-void
-Tr1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(2);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 2;
-        answer.at(2) = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.at(1) = 3;
-        answer.at(2) = 1;
-    } else {
-        _error("giveEdgeDofMapping: wrong edge number");
-    }
-}
-
-void
-Tr1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp.edgeLocal2global(answer, iEdge, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-}
 
 void
 Tr1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
@@ -342,27 +205,9 @@ double
 Tr1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
     lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
     this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resize(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
+    return gcoords.distance(coords);
 }
-
 
 } // end namespace oofem

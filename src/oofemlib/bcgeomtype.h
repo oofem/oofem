@@ -41,8 +41,8 @@ enum bcGeomType {
     UnknownBGT,     ///< Unknown type.
     NodalLoadBGT,   ///< Concentrated nodal load.
     BodyLoadBGT,    ///< Distributed body load.
-    EdgeLoadBGT,    ///< Distrubuted edge load.
-    SurfaceLoadBGT, ///< Distrubuted surface load.
+    EdgeLoadBGT,    ///< Distributed edge load.
+    SurfaceLoadBGT, ///< Distributed surface load.
     PointLoadBGT,   ///< Concentrated point load (placed anywhere).
 };
 } // end namespace oofem

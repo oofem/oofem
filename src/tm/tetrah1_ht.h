@@ -54,6 +54,8 @@ public:
     Tetrah1_ht(int n, Domain *d);
     virtual ~Tetrah1_ht();
 
+    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *gp);
 
@@ -88,23 +90,9 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-
-    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
-    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
-
-    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &n, GaussPoint *gp);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void giveSurfaceDofMapping(IntArray &mask, int iEdge);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
-
-    virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
 
 class Tetrah1_hmt : public Tetrah1_ht

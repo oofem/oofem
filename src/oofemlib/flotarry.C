@@ -528,7 +528,6 @@ void FloatArray :: resize(int n, int allocChunk)
 
 void FloatArray :: hardResize(int n)
 // Reallocates the receiver with new size.
-// Initializes all new coefficients to zero.
 {
     int i;
     double *newValues, *p1, *p2;

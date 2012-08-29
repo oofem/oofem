@@ -37,7 +37,6 @@ private:
     LinSystSolverType solverType;
 
 protected:
-
     PrimaryField *PressureField;
     SparseMtrxType sparseMtrxType;
     SparseNonLinearSystemNM *nMethod;
@@ -54,17 +53,15 @@ protected:
     FloatArray incrementalBCLoadVector;
     FloatArray incrementalLoadVector;
     FloatArray initialLoad;
-    // FloatArray *solutionVector;
     SparseNonLinearSystemNM :: referenceLoadInputModeType refLoadInputMode;
     bool hasAdvanced;
 
 public:
+    DarcyFlow(int i, EngngModel *_master);
+    virtual ~DarcyFlow();
 
-	DarcyFlow(int i, EngngModel *_master);
-	virtual ~DarcyFlow();
-
-    virtual void solveYourselfAt(TimeStep *);
-    virtual void updateYourself(TimeStep *);
+    virtual void solveYourselfAt(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK; };
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK; };
@@ -78,18 +75,17 @@ public:
 
     virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
     void DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector);
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    TimeStep * giveNextStep();
+    virtual TimeStep * giveNextStep();
 
-    int forceEquationNumbering(int id);
+    virtual int forceEquationNumbering(int id);
 
-
-	virtual const char *giveClassName() const { return "DarcyFlowEngngModel"; }
-    virtual classType giveClassID()      const { return DarcyFlowClass; }
+    virtual const char *giveClassName() const { return "DarcyFlowEngngModel"; }
+    virtual classType giveClassID() const { return DarcyFlowClass; }
 
 #ifdef __PARALLEL_MODE
     CommunicatorBuff *commBuff; //new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);

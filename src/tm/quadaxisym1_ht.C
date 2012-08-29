@@ -64,9 +64,8 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this)) );
 
-
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight * this->computeRadiusAt(aGaussPoint);
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight * this->computeRadiusAt(aGaussPoint);
 
     return volume;
 }
@@ -75,49 +74,20 @@ double
 QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double radius;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-    FloatMatrix n;
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    this->computeEgdeNMatrixAt(n, gp);
-
-    radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this));
-    return result*gp->giveWeight()*radius;
+    FloatArray gcoords;
+    this->interpolation.edgeLocal2global(gcoords, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    radius = gcoords.at(1);
+    
+    double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
+                                                                     FEIElementGeometryWrapper(this)) );
+    return detJ*gp->giveWeight()*radius;
 }
 
 double
 QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 {
-    double r = 0.0;
-    int i;
-    FloatMatrix n;
-
-    this->computeNmatrixAt( n, gp->giveCoordinates() );
-    for ( i = 1; i <= 4; i++ ) {
-        r += n.at(1, i) * this->giveNode(i)->giveCoordinate(1);
-    }
-
-    return r;
+    FloatArray gcoords;
+    this->interpolation.local2global(gcoords, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    return gcoords.at(1);
 }
 } // end namespace oofem

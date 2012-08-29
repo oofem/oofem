@@ -55,8 +55,7 @@ public:
     virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *); // Empty function. Temporary workaround.
     virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) { }; // Empty function. Temporary workaround.
     virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *)  { return; }; // Empty function. Temporary workaround.
-    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *) { return; }; // Empty function. Temporary workaround.
-    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp) { return; }; // Empty function. Temporary workaround.
+    virtual void computeEgdeNAt(FloatArray &n, GaussPoint *gp) { return; }; // Empty function. Temporary workaround.
     virtual void giveEdgeDofMapping(IntArray &mask, int iEdge) { return; }; // Empty function. Temporary workaround.
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) { }; // Empty function. Temporary workaround.
     virtual int giveApproxOrder(int unknownIndx) { return 0; }; // Empty function. Temporary workaround.	virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode) {};

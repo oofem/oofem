@@ -86,17 +86,7 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-
-    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *lcoords);
-    virtual void computeNSubMatrixAt(FloatMatrix &n, FloatArray *lcoords);
-
-    virtual void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-
-    virtual int giveApproxOrder(int unknownIndx) { return 1; }
 };
 
 /**

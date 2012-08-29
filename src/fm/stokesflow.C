@@ -200,7 +200,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
     if (cmpn == InternalRhs) {
         this->internalForces.zero();
-        eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+        this->eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
         return;
 

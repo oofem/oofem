@@ -27,9 +27,6 @@ namespace oofem {
 
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel (i, _master)
 {
-	/*
-	 * Constructor
-	 */
     this->nMethod = NULL;
     this->ndomains = 1;
     this->hasAdvanced = false;
@@ -38,24 +35,16 @@ DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel (i, _master)
 
 DarcyFlow :: ~DarcyFlow ()
 {
-	/*
-	 * Destructor
-	 */
-	delete (PressureField);
-	delete (nMethod);
+    delete (PressureField);
+    delete (nMethod);
 }
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-	/*
-	 * Initialize Engineering model
-	 */
-
-	const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-	IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-	EngngModel :: initializeFrom(ir);
+    EngngModel :: initializeFrom(ir);
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DARCYFLOW_lstype, "lstype"); // Macro
@@ -65,37 +54,37 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_DARCYFLOW_smtype, "smtype"); // Macro
     sparseMtrxType = ( SparseMtrxType ) val;
 
-	// Create solution space for EID_ConservationEquation
-	PressureField = new PrimaryField(this, 1, FT_Pressure, EID_ConservationEquation, 1);
+    // Create solution space for EID_ConservationEquation
+    PressureField = new PrimaryField(this, 1, FT_Pressure, EID_ConservationEquation, 1);
+#if 0
+#ifdef __PARALLEL_MODE
 
-//#ifdef __PARALLEL_MODE
-//
-//
-//	printf("Parallel mode!\n");
-//    if ( isParallel() ) {
-//        commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-//        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-//                                               this->giveNumberOfProcesses(),
-//                                               this->commMode);
-//    }
-//
-//#endif
 
+    printf("Parallel mode!\n");
+    if ( isParallel() ) {
+        commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
+        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
+                                               this->giveNumberOfProcesses(),
+                                               this->commMode);
+    }
+
+#endif
+#endif
 	return IRRT_OK;
 
 }
 
 void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 {
-	/*
-	 * Assemble and solve system of equations as given timestep tStep.
-	 *
-	 */
+    /*
+     * Assemble and solve system of equations as given timestep tStep.
+     *
+     */
 
-	OOFEM_LOG_INFO("Parallelflag: %u\n", parallelFlag);
+    OOFEM_LOG_INFO("Parallelflag: %u\n", parallelFlag);
 
-	FloatArray *solutionVector = NULL;
-	int neq = this->giveNumberOfEquations(EID_ConservationEquation);
+    FloatArray *solutionVector = NULL;
+    int neq = this->giveNumberOfEquations(EID_ConservationEquation);
 
     // Move solution space to current timestep
     if ( !hasAdvanced ) {
@@ -161,36 +150,35 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 
 void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector)
 {
-	    int i, j;
-	    FloatMatrix K;
+        int i, j;
+        FloatMatrix K;
 
+        FILE *rhsFile = fopen("RHS.txt", "w");
+        // rhs.printYourself();
 
-	    FILE *rhsFile = fopen("RHS.txt", "w");
-	   // rhs.printYourself();
+        for (i=1;i<=RHS->giveSize();i++)
+            fprintf(rhsFile, "%0.15e\n", RHS->at(i));
+        fclose(rhsFile);
 
-	    for (i=1;i<=RHS->giveSize();i++)
-	    	fprintf(rhsFile, "%0.15e\n", RHS->at(i));
-	    fclose(rhsFile);
+        FILE *lhsFile = fopen("LHS.txt", "w");
 
-	    FILE *lhsFile = fopen("LHS.txt", "w");
+        for (i=1;i<=this->giveNumberOfEquations(EID_ConservationEquation);i++) {
+            for (j=1;j<=this->giveNumberOfEquations(EID_ConservationEquation);j++) {
+                fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
+            }
+            fprintf(lhsFile, "\n");
+        }
 
-	    for (i=1;i<=this->giveNumberOfEquations(EID_ConservationEquation);i++) {
-	    	for (j=1;j<=this->giveNumberOfEquations(EID_ConservationEquation);j++) {
-	    		fprintf(lhsFile, "%0.15e\t", LHS->at(i,j));
-	    	}
-	    	fprintf(lhsFile, "\n");
-	    }
+        fclose(lhsFile);
 
-	    fclose(lhsFile);
+        if (SolutionVector==NULL) {
+            return;
+        }
 
-	    if (SolutionVector==NULL) {
-	    	return;
-	    }
-
-	    FILE *SolutionFile = fopen("SolutionVector.txt", "w");
-	    for (i=1;i<=SolutionVector->giveSize();i++)
-	    	fprintf(SolutionFile, "%0.15e\n", SolutionVector->at(i));
-	    fclose(SolutionFile);
+        FILE *SolutionFile = fopen("SolutionVector.txt", "w");
+        for (i=1;i<=SolutionVector->giveSize();i++)
+            fprintf(SolutionFile, "%0.15e\n", SolutionVector->at(i));
+        fclose(SolutionFile);
 
 }
 void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
@@ -218,49 +206,48 @@ void DarcyFlow :: updateYourself (TimeStep *tStep)
 
 double DarcyFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-	/*
-	 * Return value of argument dof
-	 */
+    /*
+     * Return value of argument dof
+     */
 
-	if ( ( chc==EID_ConservationEquation) or ( chc==EID_MomentumBalance) ) {
-		return PressureField->giveUnknownValue(dof, mode, tStep);
-	} else {
+    if ( ( chc==EID_ConservationEquation) or ( chc==EID_MomentumBalance) ) {
+        return PressureField->giveUnknownValue(dof, mode, tStep);
+    } else {
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
-	}
+    }
 
-	return 0;
+    return 0;
 
 }
 
 void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-
-	switch (cmpn) {
-	case InternalRhs:
-		this->internalForces.zero();
-		this->assembleVectorFromElements(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
+    switch (cmpn) {
+    case InternalRhs:
+        this->internalForces.zero();
+        this->assembleVectorFromElements(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
                 EModelDefaultEquationNumbering(), d);
-		break;
+        break;
 
-	case NonLinearLhs:
+    case NonLinearLhs:
 
-		this->stiffnessMatrix->zero();
-	    this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
-		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	    break;
+        this->stiffnessMatrix->zero();
+        this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
+            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        break;
 
-	default:
-	  _error2("updateComponent: Unknown component id (%d)", (int) cmpn);
+    default:
+    _error2("updateComponent: Unknown component id (%d)", (int) cmpn);
 
-	}
+    }
 
 }
 
 int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
 {
 
-	int neq = EngngModel :: forceEquationNumbering(id);
+    int neq = EngngModel :: forceEquationNumbering(id);
 
     this->equationNumberingCompleted = false;
     if ( this->stiffnessMatrix ) {
@@ -269,10 +256,11 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
     }
 
     return neq;
-	/*
-	 * Force numbering of equations. First all velocities on domain, then pressures.
-	 */
-/*    int i, j, ndofs, nnodes, nelem;
+    /*
+     * Force numbering of equations. First all velocities on domain, then pressures.
+     */
+#if 0
+    int i, j, ndofs, nnodes, nelem;
     DofManager *inode;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
@@ -306,15 +294,16 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
         domain->giveElement(i)->invalidateLocationArray();
     }
 
-    return domainNeqs.at(id);*/
+    return domainNeqs.at(id);
+#endif
 }
 
 NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
 {
-	/*
-	 * Returns pointer to NumericalMethod object. The solver used for StokesFlow is SparseLinearSystemNM.
-	 * If no solver has bee initialized, create one, otherwise, return the existing solver.
-	 */
+    /*
+     * Returns pointer to NumericalMethod object. The solver used for StokesFlow is SparseLinearSystemNM.
+     * If no solver has bee initialized, create one, otherwise, return the existing solver.
+     */
 
     if ( this->nMethod ) {
         return this->nMethod;

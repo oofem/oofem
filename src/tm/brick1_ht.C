@@ -64,48 +64,6 @@ Brick1_hmt :: Brick1_hmt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
 Brick1_ht :: ~Brick1_ht()
 { }
 
-void
-Brick1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at aGaussPoint.
-{
-    FloatArray n;
-    this->interpolation.evalN(n, * coords, FEIElementGeometryWrapper(this));
-    answer.resize(1, 8);
-
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, i) = n.at(i);
-    }
-}
-
-void
-Brick1_ht :: computeNmatrixAt(FloatMatrix &answer, FloatArray *coords)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeNSubMatrixAt(answer, coords);
-    } else {
-        FloatMatrix n;
-        int i, j;
-
-        this->computeNSubMatrixAt(n, coords);
-        answer.resize(2, 16);
-        for ( i = 1; i <= 2; i++ ) {
-            for ( j = 1; j <= 8; j++ ) {
-                answer.at(i, ( j - 1 ) * 2 + i) = n.at(1, j);
-            }
-        }
-    }
-}
-
-void
-Brick1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
-    answer.beTranspositionOf(dnx);
-}
-
 
 void
 Brick1_ht :: computeGaussPoints()
@@ -172,30 +130,6 @@ Brick1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     return volume;
 }
 
-void
-Brick1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-    FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 2);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-}
-
 
 double
 Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
@@ -206,62 +140,6 @@ Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-void
-Brick1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(2);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 2;
-        answer.at(2) = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.at(1) = 4;
-        answer.at(2) = 1;
-    } else if ( iEdge == 5 ) { // edge between nodes 1 5
-        answer.at(1) = 1;
-        answer.at(2) = 5;
-    } else if ( iEdge == 6 ) { // edge between nodes 2 6
-        answer.at(1) = 2;
-        answer.at(2) = 6;
-    } else if ( iEdge == 7 ) { // edge between nodes 3 7
-        answer.at(1) = 3;
-        answer.at(2) = 7;
-    } else if ( iEdge == 8 ) { // edge between nodes 4 8
-        answer.at(1) = 4;
-        answer.at(2) = 8;
-    } else if ( iEdge == 9 ) { // edge between nodes 5 6
-        answer.at(1) = 5;
-        answer.at(2) = 6;
-    } else if ( iEdge == 10 ) { // edge between nodes 6 7
-        answer.at(1) = 6;
-        answer.at(2) = 7;
-    } else if ( iEdge == 11 ) { // edge between nodes 7 8
-        answer.at(1) = 7;
-        answer.at(2) = 8;
-    } else if ( iEdge == 12 ) { // edge between nodes 8 5
-        answer.at(1) = 8;
-        answer.at(2) = 5;
-    } else {
-        _error("giveEdgeDofMapping: wrong edge number");
-    }
-}
-
-void
-Brick1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-}
-
 IntegrationRule *Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
@@ -270,73 +148,14 @@ IntegrationRule *Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
     return iRule;
 }
 
-void Brick1_ht :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    FloatArray n(4);
-    interpolation.surfaceEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-
-    answer.resize(1, 4);
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
-    answer.at(1, 3) = n.at(3);
-    answer.at(1, 4) = n.at(4);
-}
 
 double Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
-
-    weight      = gp->giveWeight();
-    volume      = determinant * weight;
-
+    weight = gp->giveWeight();
+    volume = determinant * weight;
     return volume;
-}
-
-void Brick1_ht :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
-{
-    answer.resize(4);
-    if ( iSurf == 1 ) {
-        answer.at(1) = 1; // node 1
-        answer.at(2) = 4; // node 4
-        answer.at(3) = 3; // node 3
-        answer.at(4) = 2; // node 2
-    } else if ( iSurf == 2 ) {
-        answer.at(1) = 5; // node 5
-        answer.at(2) = 6; // node 6
-        answer.at(3) = 7; // node 7
-        answer.at(4) = 8; // node 8
-    } else if ( iSurf == 3 ) {
-        answer.at(1) = 1; // node 1
-        answer.at(2) = 2; // node 2
-        answer.at(3) = 6; // node 6
-        answer.at(4) = 5; // node 5
-    } else if ( iSurf == 4 ) {
-        answer.at(1) = 2; // node 2
-        answer.at(2) = 3; // node 3
-        answer.at(3) = 7; // node 7
-        answer.at(4) = 6; // node 6
-    } else if ( iSurf == 5 ) {
-        answer.at(1) = 3; // node 3
-        answer.at(2) = 4; // node 4
-        answer.at(3) = 8; // node 8
-        answer.at(4) = 7; // node 7
-    } else if ( iSurf == 6 ) {
-        answer.at(1) = 4; // node 4
-        answer.at(2) = 1; // node 1
-        answer.at(3) = 5; // node 5
-        answer.at(4) = 8; // node 8
-    } else {
-        _error("giveSurfaceDofMapping: wrong surface number");
-    }
-}
-
-void
-Brick1_ht :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
-{
-    interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 }
 
 
@@ -388,7 +207,8 @@ Brick1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 int
-Brick1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+Brick1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
@@ -398,26 +218,9 @@ double
 Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 0.0;
+    lcoords.zero();
     this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resize(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
+    return gcoords.distance(coords);
 }
 
 
