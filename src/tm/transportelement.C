@@ -868,7 +868,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
         answer.resize( dofId.giveSize() );
         for (int i = 1; i <= dofId.giveSize(); i++ ) {
             if ( ( indx = elemdofs.findFirstIndexOf( dofId.at(i) ) ) ) {
-                int sum = 0.0;
+                double sum = 0.0;
                 for (int j = 1; j <= elemvector.giveSize(); j++ ) {
                     sum += n.at(indx, j) * elemvector.at(j);
                 }

@@ -98,7 +98,7 @@ public:
     void setContextOutputMode(ContextOutputMode contextMode);
     void setUDContextOutputMode(int cStep);
     void setProblemMode(problemMode pmode);
-    void setRenumberFlag();
+    virtual void setRenumberFlag();
 
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);

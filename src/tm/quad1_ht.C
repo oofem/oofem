@@ -189,7 +189,8 @@ Quad1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 }
 
 int
-Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
