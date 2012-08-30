@@ -97,6 +97,24 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     }
 }
 
+
+void
+TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+{
+    if ( eid == EID_ConservationEquation ) {
+        if ( emode == HeatTransferEM ) {
+            answer.setValues(1, T_f);
+        } else if ( emode == HeatMass1TransferEM ) {
+            answer.setValues(2, T_f, C_1);
+        } else {
+            _error("Unknown ElementMode");
+        }
+    } else {
+        answer.resize(0);
+    }
+}
+
+
 void
 TransportElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                               TimeStep *tStep)
@@ -157,11 +175,11 @@ TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
         MatResponseMode rmode [ 2 ] = {
             Capacity_hh, Capacity_ww
         };
-        double coeff = 1.0; //this->giveMaterial()->give('d');
+        //double coeff = 1.0; //this->giveMaterial()->give('d');
 
         for (int i = 1; i <= 2; i++ ) {
             this->computeCapacitySubMatrix(subAnswer, rmode [ i - 1 ], 0, tStep);
-            this->assembleLocalContribution(answer, subAnswer, 2, i, i, coeff);
+            this->assembleLocalContribution(answer, subAnswer, 2, i, i);
         }
     } else {
         _error("Unknown ElementMode");
@@ -182,7 +200,7 @@ TransportElement :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMo
         for (int i = 1; i <= 2; i++ ) {
             for (int j = 1; j <= 2; j++ ) {
                 this->computeConductivitySubMatrix(subAnswer, 2, 0, rmode [ i - 1 ] [ j - 1 ], tStep);
-                this->assembleLocalContribution(answer, subAnswer, 2, i, j, 1.0);
+                this->assembleLocalContribution(answer, subAnswer, 2, i, j);
             }
         }
     } else {
@@ -400,6 +418,30 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 }
 
 
+void
+TransportElement :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
+{
+    if ( emode == HeatTransferEM ) {
+        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
+    } else if ( emode == HeatMass1TransferEM ) {
+        FloatArray subAnswer;
+
+        for (int i = 1; i <= 2; i++ ) {
+            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
+            if ( subAnswer.isNotEmpty() ) {
+                if ( answer.isEmpty() ) {
+                    answer.resize(2*subAnswer.giveSize());
+                    answer.zero();
+                }
+
+                this->assembleLocalContribution(answer, subAnswer, 2, i);
+            }
+        }
+    } else {
+        _error("Unknown ElementMode");
+    }
+}
+
 
 void
 TransportElement :: computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -417,11 +459,11 @@ TransportElement :: computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tSt
             MatResponseMode rmode [ 2 ] = {
                 IntSource_hh, IntSource_ww
             };
-            double coeff = 1.0; //this->giveMaterial()->give('d');
+            //double coeff = 1.0; //this->giveMaterial()->give('d');
 
             for ( i = 1; i <= 2; i++ ) {
                 this->computeIntSourceLHSSubMatrix(subAnswer, rmode [ i - 1 ], 0, tStep);
-                this->assembleLocalContribution(answer, subAnswer, 2, i, i, coeff);
+                this->assembleLocalContribution(answer, subAnswer, 2, i, i);
             }
         } else {
             _error("Unknown ElementMode");
@@ -480,7 +522,7 @@ TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, Value
 
         for (int i = 1; i <= 2; i++ ) {
             this->computeBCSubVectorAt(subAnswer, tStep, mode, i);
-            this->assembleLocalContribution(answer, subAnswer, 2, i, 1.0);
+            this->assembleLocalContribution(answer, subAnswer, 2, i);
         }
     } else {
         _error("Unknown ElementMode");
@@ -502,7 +544,7 @@ TransportElement :: computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueM
         for ( int i = 1; i <= 2; i++ ) {
             this->computeBCSubMtrxAt(subAnswer, tStep, mode, i);
             if ( subAnswer.isNotEmpty() ) {
-                this->assembleLocalContribution(answer, subAnswer, 2, i, i, 1.0);
+                this->assembleLocalContribution(answer, subAnswer, 2, i, i);
             }
         }
     } else {
@@ -747,7 +789,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
 
 void
 TransportElement :: assembleLocalContribution(FloatMatrix &answer, FloatMatrix &src,
-                                              int ndofs, int rdof, int cdof, double coeff)
+                                              int ndofs, int rdof, int cdof)
 {
     int ti, tj;
     int nnodes = this->giveNumberOfDofManagers();
@@ -756,7 +798,7 @@ TransportElement :: assembleLocalContribution(FloatMatrix &answer, FloatMatrix &
         ti = ( i - 1 ) * ndofs + rdof;
         for (int j = 1; j <= nnodes; j++ ) {
             tj = ( j - 1 ) * ndofs + cdof;
-            answer.at(ti, tj) += src.at(i, j) * coeff;
+            answer.at(ti, tj) += src.at(i, j);
         }
     }
 }
@@ -764,14 +806,14 @@ TransportElement :: assembleLocalContribution(FloatMatrix &answer, FloatMatrix &
 
 void
 TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &src,
-                                              int ndofs, int rdof, double coeff)
+                                              int ndofs, int rdof)
 {
     int ti;
     int nnodes = this->giveNumberOfDofManagers();
 
     for (int i = 1; i <= nnodes; i++ ) {
         ti = ( i - 1 ) * ndofs + rdof;
-        answer.at(ti) += src.at(i) * coeff;
+        answer.at(ti) += src.at(i);
     }
 }
 

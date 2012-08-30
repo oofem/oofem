@@ -51,7 +51,6 @@ protected:
     static FEI2dTrLin interpolation_lin;
 
 public:
-
     Tr1Darcy(int, Domain *);
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -65,8 +64,6 @@ public:
     virtual void computeLoadVector(FloatArray &answer, TimeStep *atTime);
     virtual void computeGaussPoints();
     virtual int computeNumberOfDofs(EquationID ut);
-
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) { }; // Empty function. Temporary workaround.
 
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
     void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);

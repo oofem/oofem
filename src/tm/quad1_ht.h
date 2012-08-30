@@ -54,14 +54,12 @@ public:
     Quad1_ht(int n, Domain *d);
     virtual ~Quad1_ht();
 
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual const char *giveClassName() const { return "Quad1_ht"; }
     virtual classType giveClassID() const { return Quad1_htClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 4 : 8; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }

@@ -55,7 +55,6 @@ public:
     Tr1_ht(int n, Domain *d);
     virtual ~Tr1_ht();
 
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *gp);
 
     // definition
@@ -63,7 +62,6 @@ public:
     virtual classType giveClassID() const { return Tr1_htClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 3 : 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
@@ -77,7 +75,6 @@ public:
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual FEInterpolation *giveInterpolation() { return &this->interp; }
-    virtual FEInterpolation *giveInterpolation(DofIDItem id);
 
 #ifdef __OOFEG
     // Graphics output

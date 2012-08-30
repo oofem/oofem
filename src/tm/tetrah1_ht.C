@@ -85,18 +85,6 @@ Tetrah1_ht :: computeGaussPoints()
     }
 }
 
-void
-Tetrah1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
-{
-    if ( emode == HeatTransferEM ) {
-        answer.setValues(1, T_f);
-    } else if ( emode == HeatMass1TransferEM ) {
-        answer.setValues(2, T_f, C_1);
-    } else {
-        _error("Unknown ElementMode");
-    }
-}
-
 
 IRResultType
 Tetrah1_ht :: initializeFrom(InputRecord *ir)
@@ -159,32 +147,6 @@ Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 
     weight = gp->giveWeight();
     return 2.0 * detJ * weight; ///@todo Fairly sure this should have a factor 2.0 in there......
-}
-
-
-void
-Tetrah1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
-    } else if ( emode == HeatMass1TransferEM ) {
-        FloatArray subAnswer;
-        int i;
-
-        for ( i = 1; i <= 2; i++ ) {
-            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
-            if ( subAnswer.isNotEmpty() ) {
-                if ( answer.isEmpty() ) {
-                    answer.resize(8);
-                    answer.zero();
-                }
-
-                this->assembleLocalContribution(answer, subAnswer, 2, i, 1.0);
-            }
-        }
-    } else {
-        _error("Unknown ElementMode");
-    }
 }
 
 

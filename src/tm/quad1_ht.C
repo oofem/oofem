@@ -86,17 +86,6 @@ Quad1_ht :: computeGaussPoints()
     }
 }
 
-void
-Quad1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
-{
-    if ( emode == HeatTransferEM ) {
-        answer.setValues(1, T_f);
-    } else if ( emode == HeatMass1TransferEM ) {
-        answer.setValues(2, T_f, C_1);
-    } else {
-        _error("Unknown ElementMode");
-    }
-}
 
 IRResultType
 Quad1_ht :: initializeFrom(InputRecord *ir)
@@ -120,13 +109,13 @@ Quad1_ht :: initializeFrom(InputRecord *ir)
 
 
 double
-Quad1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
+Quad1_ht :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* gp->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this)) );
-    weight      = aGaussPoint->giveWeight();
+    weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness); // 't'
     volume      = determinant * weight * thickness;
 
@@ -140,31 +129,6 @@ Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
                                                                        FEIElementGeometryWrapper(this));
     double thick = this->giveCrossSection()->give(CS_Thickness); // 't'
     return result*thick *gp->giveWeight();
-}
-
-void
-Quad1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
-    } else if ( emode == HeatMass1TransferEM ) {
-        FloatArray subAnswer;
-        int i;
-
-        for ( i = 1; i <= 2; i++ ) {
-            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
-            if ( subAnswer.isNotEmpty() ) {
-                if ( answer.isEmpty() ) {
-                    answer.resize(8);
-                    answer.zero();
-                }
-
-                this->assembleLocalContribution(answer, subAnswer, 2, i, 1.0);
-            }
-        }
-    } else {
-        _error("Unknown ElementMode");
-    }
 }
 
 Interface *

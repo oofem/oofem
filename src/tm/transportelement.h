@@ -64,6 +64,8 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
+    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    
     /** Computes the capacity matrix of the receiver */
     virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the conductivity matrix of the receiver */
@@ -73,7 +75,7 @@ public:
     /** Computes the LHS contribution to balance equation(s) due to boundary conditions */
     virtual void computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueModeType mode);
     /** Computes the contribution to balance equation(s) due to internal sources */
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode) = 0;
+    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /** Computes the LHS contribution to balance equation(s) due to material internal source */
     virtual void computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the part of internal source LHS contribution corresponding to unknown identified by rmode parameter */
@@ -242,9 +244,8 @@ protected:
      * @param ndofs Number of DOFs per node (assumed same for all nodes).
      * @param rdof Rows of src are localized into rows of answer corresponding to rdof-th dof.
      * @param cdof Columns of src are localized into columns of answer corresponding to cdof-th dof.
-     * @param coeff All coefficients of src are multiplied by coeff before localized.
      */
-    void assembleLocalContribution(FloatMatrix &answer, FloatMatrix &src, int ndofs, int rdof, int cdof, double coeff);
+    void assembleLocalContribution(FloatMatrix &answer, FloatMatrix &src, int ndofs, int rdof, int cdof);
     /**
      * Assembles the given source vector of size (ndofs) into target answer.
      * The coefficients in src vector are assumed to represent local sub-vector for specific DOF.
@@ -256,9 +257,8 @@ protected:
      * @param src Source vector containing local subvector corresponding to single DOF.
      * @param ndofs Number of DOFs per node (assumed same for all nodes).
      * @param rdof Rows of src are localized into rows of answer corresponding to rdof-th dof.
-     * @param coeff All coefficients of src are multiplied by coeff before localized.
      */
-    void assembleLocalContribution(FloatArray &answer, FloatArray &src, int ndofs, int rdof, double coeff);
+    void assembleLocalContribution(FloatArray &answer, FloatArray &src, int ndofs, int rdof);
 };
 } // end namespace oofem
 #endif // transportelement_h

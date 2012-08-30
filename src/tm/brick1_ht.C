@@ -85,17 +85,6 @@ Brick1_ht :: computeGaussPoints()
     }
 }
 
-void
-Brick1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
-{
-    if ( emode == HeatTransferEM ) {
-        answer.setValues(1, T_f);
-    } else if ( emode == HeatMass1TransferEM ) {
-        answer.setValues(2, T_f, C_1);
-    } else {
-        _error("Unknown ElementMode");
-    }
-}
 
 IRResultType
 Brick1_ht :: initializeFrom(InputRecord *ir)
@@ -140,7 +129,8 @@ Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-IntegrationRule *Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
+IntegrationRule *
+Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
@@ -149,39 +139,14 @@ IntegrationRule *Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 }
 
 
-double Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+double
+Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
     weight = gp->giveWeight();
     volume = determinant * weight;
     return volume;
-}
-
-
-void
-Brick1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
-    } else if ( emode == HeatMass1TransferEM ) {
-        FloatArray subAnswer;
-        int i;
-
-        for ( i = 1; i <= 2; i++ ) {
-            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
-            if ( subAnswer.isNotEmpty() ) {
-                if ( answer.isEmpty() ) {
-                    answer.resize(16);
-                    answer.zero();
-                }
-
-                this->assembleLocalContribution(answer, subAnswer, 2, i, 1.0);
-            }
-        }
-    } else {
-        _error("Unknown ElementMode");
-    }
 }
 
 

@@ -54,7 +54,6 @@ public:
     Brick1_ht(int n, Domain *d);
     virtual ~Brick1_ht();
 
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
     // definition
@@ -62,7 +61,6 @@ public:
     virtual classType giveClassID() const { return Brick1_htClass; }
 
     virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
 

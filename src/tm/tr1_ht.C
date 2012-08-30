@@ -63,15 +63,6 @@ Tr1_ht :: ~Tr1_ht()
 // Destructor
 { }
 
-FEInterpolation *Tr1_ht :: giveInterpolation(DofIDItem id)
-{
-    if (id == T_f) {
-        return &this->interp;
-    } else {
-        return NULL;
-    }
-}
-
 
 void
 Tr1_ht :: computeGaussPoints()
@@ -90,19 +81,6 @@ Tr1_ht :: computeGaussPoints()
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, mmode);
-    }
-}
-
-
-void
-Tr1_ht :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
-{
-    if ( emode == HeatTransferEM ) {
-        answer.setValues(1, T_f);
-    } else if ( emode == HeatMass1TransferEM ) {
-        answer.setValues(2, T_f, C_1);
-    } else {
-        _error("Unknown ElementMode");
     }
 }
 
@@ -146,31 +124,6 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return determinant *thick *gp->giveWeight();
 }
 
-
-void
-Tr1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
-{
-    if ( emode == HeatTransferEM ) {
-        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
-    } else if ( emode == HeatMass1TransferEM ) {
-        FloatArray subAnswer;
-        int i;
-
-        for ( i = 1; i <= 2; i++ ) {
-            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
-            if ( subAnswer.isNotEmpty() ) {
-                if ( answer.isEmpty() ) {
-                    answer.resize(2);
-                    answer.zero();
-                }
-
-                this->assembleLocalContribution(answer, subAnswer, 2, i, 1.0);
-            }
-        }
-    } else {
-        _error("Unknown ElementMode");
-    }
-}
 
 Interface *
 Tr1_ht :: giveInterface(InterfaceType interface)
