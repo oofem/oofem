@@ -295,7 +295,7 @@ TransportElement :: computeSurfIpGlobalCoords(FloatArray &answer, const FloatArr
 int
 TransportElement :: giveApproxOrder(int unknownIndx)
 {
-    this->giveInterpolation()->giveInterpolationOrder();
+    return this->giveInterpolation()->giveInterpolationOrder();
 }
 
 void
@@ -352,7 +352,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // // load vector is then transformed to coordinate system in each node.
     // // (should be global coordinate system, but there may be defined
     // //  different coordinate system in each node)
-    int i, j, igp, k, nLoads;
+    int i, igp, k, nLoads;
     double dV;
     bcGeomType ltype;
     Load *load;

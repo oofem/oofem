@@ -69,15 +69,6 @@ IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void Tr1Darcy :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-{
-    FloatMatrix tempMatrix;
-    FloatArray *lcoords = gp->giveCoordinates();
-    this->interpolation_lin.evaldNdx( tempMatrix, * lcoords, FEIElementGeometryWrapper(this) );
-    answer.beTranspositionOf(tempMatrix);
-    return;
-};
-
 void Tr1Darcy :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {

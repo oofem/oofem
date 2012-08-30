@@ -52,17 +52,11 @@ protected:
 
 public:
 
-    virtual void computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *); // Empty function. Temporary workaround.
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) { }; // Empty function. Temporary workaround.
-    virtual void computeNmatrixAt(FloatMatrix &n, FloatArray *)  { return; }; // Empty function. Temporary workaround.
-    virtual void computeEgdeNAt(FloatArray &n, GaussPoint *gp) { return; }; // Empty function. Temporary workaround.
-    virtual void giveEdgeDofMapping(IntArray &mask, int iEdge) { return; }; // Empty function. Temporary workaround.
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge) { }; // Empty function. Temporary workaround.
-    virtual int giveApproxOrder(int unknownIndx) { return 0; }; // Empty function. Temporary workaround.	virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode) {};
-
     Tr1Darcy(int, Domain *);
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
+    
+    virtual FEInterpolation *giveInterpolation() { return &interpolation_lin; }
 
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
@@ -71,6 +65,8 @@ public:
     virtual void computeLoadVector(FloatArray &answer, TimeStep *atTime);
     virtual void computeGaussPoints();
     virtual int computeNumberOfDofs(EquationID ut);
+
+    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) { }; // Empty function. Temporary workaround.
 
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
     void computeInternalForcesVector(FloatArray &answer, TimeStep *atTime);

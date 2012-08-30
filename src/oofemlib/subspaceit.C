@@ -127,12 +127,7 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     //
     nd = nn / nc;
     nc1 = nc - 1;
-    /*
-     * w = new FloatArray (nn);
-     * d = new FloatArray (nc);
-     * tt = new FloatArray (nn);
-     * rtolv= new FloatArray (nc);
-     */
+
     w.resize(nn);
     w.zero();
     d.resize(nc);
@@ -164,10 +159,6 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     //
     // create work arrays
     //
-    /*
-     * r     = new FloatMatrix(nn,nc);
-     * eigv  = new FloatArray (nc);
-     */
     r.resize(nn, nc);
     r.zero();
     eigv.resize(nc);
@@ -278,8 +269,6 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
             for ( k = 1; k <= nn; k++ ) {
                 r.at(k, j) = temp.at(k);             // (r=zbar)
             }
-
-            //delete temp;
         }                       // label 160
 
         br.symmetrized();
@@ -376,11 +365,8 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
          */
 
 
-
-        // mtd ->giveComponent (EigenValues,&eigv) ;
-        // mtd ->giveComponent (EigenVectors,&vec);
         //
-        // sorting eigenvalues acording to their values
+        // sorting eigenvalues according to their values
         //
         do {
             is = 0; // label 350
@@ -481,12 +467,8 @@ label400:
         }
     }
 
-    //delete r;
-    //delete eigv;
     solved = 1;
     return NM_Success;
-
-    ;
 }
 
 IRResultType
