@@ -498,7 +498,7 @@ def check_results (context, tolerance):
             err = float(rec[-1])
         if (abs(err) > float(tolerance)):
             if (success): print header # print header before reporting error for the first time
-            print "\tError when checking rule %d: err = %g, value is %g and should be %g" % (irec, err, float(rec[-1]) ,float(context.recVal[irec]))
+            print "\tError when checking rule %d: err = %g, value is %g and should be %g" % (irec, err, float(context.recVal[irec]), float(rec[-1]))
             # print rec, recVal
             success = 0
 
