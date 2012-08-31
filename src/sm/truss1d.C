@@ -505,7 +505,7 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
                                                                 coordType ct, nodalValContainerType &list,
                                                                 InternalStateType type, TimeStep *tStep)
 {
-    double vars;
+    int vars;
     FloatArray lcoords, n;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
         lcoords = coords;

@@ -456,7 +456,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
             triangle->at(6) = output.trianglelist[i*output.numberofcorners + 4];
         }
         triangles.put(i+1, triangle);
-        t_markers.at(i+1) = round(output.triangleattributelist[i]);
+        t_markers.at(i+1) = (int)round(output.triangleattributelist[i]);
     }
 
     // A somewhat annoying missing feature of triangle, it won't make the segments quadratic.

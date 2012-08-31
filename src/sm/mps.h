@@ -231,7 +231,7 @@ protected:
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step
     /// option = 2 ... average value
-    double computePsiR(GaussPoint *gp, TimeStep *atTime, double option);
+    double computePsiR(GaussPoint *gp, TimeStep *atTime, int option);
 
     /// Evaluation of the factor transforming real time to reduced time (effect on the evolution of microprestress)
     double computePsiS(GaussPoint *gp, TimeStep *atTime);

@@ -78,6 +78,23 @@ TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
 
 
 void
+TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+{
+    if ( eid == EID_ConservationEquation ) {
+        if ( emode == HeatTransferEM ) {
+            answer.setValues(1, T_f);
+        } else if ( emode == HeatMass1TransferEM ) {
+            answer.setValues(2, T_f, C_1);
+        } else {
+            _error("Unknown ElementMode");
+        }
+    } else {
+        answer.resize(0);
+    }
+}
+
+
+void
 TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
                                              CharType mtrx, TimeStep *tStep)
 //
@@ -94,23 +111,6 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->computeIntSourceLHSMatrix(answer, tStep);
     } else {
         _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
-    }
-}
-
-
-void
-TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
-{
-    if ( eid == EID_ConservationEquation ) {
-        if ( emode == HeatTransferEM ) {
-            answer.setValues(1, T_f);
-        } else if ( emode == HeatMass1TransferEM ) {
-            answer.setValues(2, T_f, C_1);
-        } else {
-            _error("Unknown ElementMode");
-        }
-    } else {
-        answer.resize(0);
     }
 }
 
@@ -146,20 +146,20 @@ TransportElement :: checkConsistency()
         result = 0;
     }
 
-    /*
-     * if (!this->giveCrossSection()->testCrossSectionExtension(CS_TransportCapability)) {
-     * this->warning("checkConsistency : cross-section without support for transport problems", 1);
-     * result =0;
-     * }
-     */
+#if 0
+     if (!this->giveCrossSection()->testCrossSectionExtension(CS_TransportCapability)) {
+        _warning("checkConsistency : cross-section without support for transport problems", 1);
+        result =0;
+     }
+#endif
     return result;
 }
 
 void
-TransportElement :: printOutputAt(FILE *file, TimeStep *stepN)
+TransportElement :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    Element :: printOutputAt(file, stepN);
+    Element :: printOutputAt(file, tStep);
 }
 
 void
@@ -355,17 +355,16 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, i
 
         db.beProductOf(d, b);
         answer.plusProductSymmUpper(b, db, dV);
-        //answer.plusProductUnsym(b,db,dV) ;
     }
 
     answer.symmetrized();
 }
 
 void
-TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode, int indx)
+TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode, int indx)
 {
     // Computes numerically the generator Rhs vector of the receiver due to the generator
-    //  at stepN.
+    //  at tStep.
     // // load is first transformed to local cs.
     // // load vector is then transformed to coordinate system in each node.
     // // (should be global coordinate system, but there may be defined
@@ -393,7 +392,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
                 this->computeNAt( n, *gp->giveCoordinates() );
                 dV  = this->computeVolumeAround(gp);
                 this->computeGlobalCoordinates( globalIPcoords, * gp->giveCoordinates() );
-                load->computeValueAt(val, atTime, globalIPcoords, mode);
+                load->computeValueAt(val, tStep, globalIPcoords, mode);
 
                 helpLoadVector.add(val.at(indx) * dV, n);
             }
@@ -408,7 +407,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
             gp  = iRule->getIntegrationPoint(igp);
             this->computeNAt( n, *gp->giveCoordinates() );
             dV  = this->computeVolumeAround(gp);
-            mat->computeInternalSourceVector(val, gp, atTime, mode);
+            mat->computeInternalSourceVector(val, gp, tStep, mode);
             
             helpLoadVector.add(val.at(indx) * dV, n);
         }
@@ -419,15 +418,15 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 
 
 void
-TransportElement :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTime, ValueModeType mode)
+TransportElement :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
     if ( emode == HeatTransferEM ) {
-        this->computeInternalSourceRhsSubVectorAt(answer, atTime, mode, 1);
+        this->computeInternalSourceRhsSubVectorAt(answer, tStep, mode, 1);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatArray subAnswer;
 
         for (int i = 1; i <= 2; i++ ) {
-            this->computeInternalSourceRhsSubVectorAt(subAnswer, atTime, mode, i);
+            this->computeInternalSourceRhsSubVectorAt(subAnswer, tStep, mode, i);
             if ( subAnswer.isNotEmpty() ) {
                 if ( answer.isEmpty() ) {
                     answer.resize(2*subAnswer.giveSize());
@@ -818,16 +817,16 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
 }
 
 void
-TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     FloatArray r, br;
     FloatMatrix b, d;
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
+    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     this->computeGradientMatrixAt(b, gp);
 
     if ( emode == HeatTransferEM ) {
-        this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, stepN);
+        this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, tStep);
         br.beProductOf(b, r);
         answer.beProductOf(d, br);
     } else if ( emode == HeatMass1TransferEM ) {
@@ -838,10 +837,10 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *st
         r_w.resize(r.giveSize() / 2);
         r_w.zero();
 
-        this->computeConstitutiveMatrixAt(d_hh, Conductivity_hh, gp, stepN);
-        this->computeConstitutiveMatrixAt(d_hw, Conductivity_hw, gp, stepN);
-        this->computeConstitutiveMatrixAt(d_wh, Conductivity_wh, gp, stepN);
-        this->computeConstitutiveMatrixAt(d_ww, Conductivity_ww, gp, stepN);
+        this->computeConstitutiveMatrixAt(d_hh, Conductivity_hh, gp, tStep);
+        this->computeConstitutiveMatrixAt(d_hw, Conductivity_hw, gp, tStep);
+        this->computeConstitutiveMatrixAt(d_wh, Conductivity_wh, gp, tStep);
+        this->computeConstitutiveMatrixAt(d_ww, Conductivity_ww, gp, tStep);
         d.resize( 2 * d_hh.giveNumberOfRows(), 2 * d_hh.giveNumberOfColumns() );
         d.zero();
 
@@ -866,25 +865,34 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *st
 
 
 void
-TransportElement :: updateInternalState(TimeStep *stepN)
+TransportElement :: updateInternalState(TimeStep *tStep)
 // Updates the receiver at the end of a solution step
 {
-    int i, j;
     IntegrationRule *iRule;
-    FloatArray stateVector, r, br;
-    FloatMatrix n, b, d;
+    FloatArray stateVector, r;
+    FloatArray gradient, flux;
+    FloatMatrix n, B;
     TransportMaterial *mat = ( ( TransportMaterial * ) this->giveMaterial() );
     GaussPoint *gp;
-
+    
+    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     // force updating ip values
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for (int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for (int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
+            
+            ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
             this->computeNmatrixAt( n, *gp->giveCoordinates() );
-            this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
             stateVector.beProductOf(n, r);
-            mat->updateInternalState(stateVector, gp, stepN);
+            mat->updateInternalState(stateVector, gp, tStep);
+
+             ///@todo We need to sort out multiple materials for coupled (heat+mass) problems
+#if 0
+            this->computeGradientMatrixAt( B, *gp->giveCoordinates() );
+            gradient.beProductOf(B, r);
+            mat->giveFluxVector(flux, gp, gradient, tStep);
+#endif
         }
     }
 }
@@ -892,7 +900,7 @@ TransportElement :: updateInternalState(TimeStep *stepN)
 int
 TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                           FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                          TimeStep *atTime)
+                                                          TimeStep *tStep)
 {
     int indx;
     FloatArray elemvector, f, lc;
@@ -901,7 +909,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
     // determine element dof ids
     this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, atTime, elemvector);
+    this->computeVectorOf(pf, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix
@@ -933,14 +941,14 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
 #ifdef __OOFEG
 int
 TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                            int node, TimeStep *atTime)
+                                            int node, TimeStep *tStep)
 {
     Node *n = this->giveNode(node);
     if ( type == IST_Temperature ) {
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(T_f) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
             return 1;
         } else {
             return 0;
@@ -949,13 +957,13 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
         int dofindx;
         if ( ( dofindx = n->findDofWithDofId(C_1) ) ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, atTime);
+            answer.at(1) = n->giveDof(dofindx)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
             return 1;
         } else {
             return 0;
         }
     } else {
-        return Element :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+        return Element :: giveInternalStateAtNode(answer, type, mode, node, tStep);
     }
 }
 

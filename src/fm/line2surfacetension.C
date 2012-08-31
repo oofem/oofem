@@ -223,8 +223,8 @@ int Line2SurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Valu
         TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
 {
     FloatArray lcoords, closest;
-    int ok = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
-    if (!ok) {
+    double dist = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
+    if (dist < 0) {
         answer.resize(0);
         return false;
     }

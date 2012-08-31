@@ -502,7 +502,7 @@ MPSMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
     deltaT = atTime->giveTimeIncrement();
 
     if ( this->CoupledAnalysis == MPS ) {
-        deltaT *=  0.5 * ( this->computePsiR(gp, atTime, 0.) + this->computePsiR(gp, atTime, 1.) );
+        deltaT *=  0.5 * ( this->computePsiR(gp, atTime, 0) + this->computePsiR(gp, atTime, 1) );
     }
 
     tauMu = this->giveCharTime(Mu);
@@ -656,12 +656,12 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
         } else if ( this->CoupledAnalysis == MPS ) {
             // TRAPEZOIDAL INTEGRATION RULE
             if ( atTime->isTheFirstStep() ) {
-                etaR = this->giveInitViscosity(atTime) /  this->computePsiR(gp, atTime, 0.);
+                etaR = this->giveInitViscosity(atTime) /  this->computePsiR(gp, atTime, 0);
             } else {
-                etaR = status->giveFlowTermViscosity() /  this->computePsiR(gp, atTime, 0.);
+                etaR = status->giveFlowTermViscosity() /  this->computePsiR(gp, atTime, 0);
             }
 
-            dEtaR =  eta /  this->computePsiR(gp, atTime, 1.) - etaR;
+            dEtaR =  eta /  this->computePsiR(gp, atTime, 1) - etaR;
 
             if (  fabs(dEtaR) > 1.e-4 * etaR ) {
                 L = log(1 + dEtaR / etaR);
@@ -674,9 +674,9 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
 
             // MIDPOINT INTEGRATION RULE
             // if ( atTime->isTheFirstStep() ) {
-            //   reducedAnswer.times( dt * 2. * this->computePsiR(gp, atTime, 2.) / ( eta + this->giveInitViscosity(atTime) ) );
+            //   reducedAnswer.times( dt * 2. * this->computePsiR(gp, atTime, 2) / ( eta + this->giveInitViscosity(atTime) ) );
             // } else {
-            //   reducedAnswer.times( dt * 2. * this->computePsiR(gp, atTime, 2.) / ( eta + status->giveFlowTermViscosity() ) );
+            //   reducedAnswer.times( dt * 2. * this->computePsiR(gp, atTime, 2) / ( eta + status->giveFlowTermViscosity() ) );
             // }
             // MIDPOINT INTEGRATION RULE
         } else {
@@ -874,7 +874,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *atTime, int option)
 }
 
 double
-MPSMaterial :: computePsiR(GaussPoint *gp, TimeStep *atTime, double option)
+MPSMaterial :: computePsiR(GaussPoint *gp, TimeStep *atTime, int option)
 {
     double T, H;
     T = this->giveTemperature(gp, atTime, option);

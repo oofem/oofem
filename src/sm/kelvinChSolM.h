@@ -104,8 +104,8 @@ protected:
     virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) = 0;
 
     /// factors for exponential algorithm
-    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, double Mu);
-    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, double Mu);
+    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
+    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

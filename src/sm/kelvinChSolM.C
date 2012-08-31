@@ -128,7 +128,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
 }
 
 double
-KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
+KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
 {
     double betaMu;
     double deltaT;
@@ -147,7 +147,7 @@ KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, doub
 }
 
 double
-KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
+KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
 {
     double lambdaMu;
     double deltaT;

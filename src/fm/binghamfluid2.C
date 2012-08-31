@@ -732,7 +732,8 @@ BinghamFluidMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint
 {
     BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(aGaussPoint) );
     if (type == IST_DeviatoricStressMeasure) {
-        return status->giveDevStressMagnitude();
+        answer.setValues(1, status->giveDevStressMagnitude());
+        return 1;
     } else {
         return FluidDynamicMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
