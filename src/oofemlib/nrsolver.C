@@ -962,6 +962,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         }
         if ( engngModel->giveProblemScale() == macroScale ) {
             OOFEM_LOG_INFO("NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
+        } else {
+            OOFEM_LOG_INFO("  NRSolver:     %-15d %-15e %-15e\n", nite, forceErr, dispErr);
         }
     } // end default case (all dofs conributing)
 

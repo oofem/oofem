@@ -150,8 +150,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving (neq = %d)\n", neq);
-
+    OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 #if 1
     double loadLevel;
