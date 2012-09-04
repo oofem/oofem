@@ -368,6 +368,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     MatSetFromOptions(mtrx);
 
     //The incompatible preallocations are ignored automatically.
+    MatSetUp(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
     MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); ///@todo Not sure about PETSC_DECIDE here.
     //MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() ); // Symmetry should practically never apply here.
@@ -484,6 +485,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         MatSetFromOptions(mtrx);
+        MatSetUp(mtrx);
         MatMPIAIJSetPreallocation(mtrx, 0, d_nnz.givePointer(), 0, o_nnz.givePointer());
         //MatMPIBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer(), onz, onnz );
         //MatMPISBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer(), onz, onnz );
@@ -563,6 +565,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     //MatSetType(mtrx, MATDENSE);
     MatSetFromOptions(mtrx);
 
+    MatSetUp(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
     MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() );
     MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() );
