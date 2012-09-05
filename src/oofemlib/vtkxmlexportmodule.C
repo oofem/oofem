@@ -579,7 +579,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
         this->writeVTKCollection();
     } else
 #endif
-    if ( tStep->giveNumber() > 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
+    if ( !emodel->isParallel() && tStep->giveNumber() > 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
         std::ostringstream pvdEntry;
         pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.pushBack(pvdEntry.str());
