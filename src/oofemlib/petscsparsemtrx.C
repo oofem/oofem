@@ -185,6 +185,7 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
         for ( int i = 0, i2 = r; i < nc; i++, i2 += nr ) {
             aptr [ i2 ] = vals [ i ];
         }
+        MatRestoreRow(globC, r, NULL, NULL, & vals);
     }
 
     MatDestroy(&globB);
@@ -222,6 +223,7 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
         for ( int i = 0; i < nr; i++ ) {
             * aptr++ = vals [ i ];
         }
+        MatRestoreRow(globC, r, NULL, NULL, & vals);
     }
 
     MatDestroy(&globB);

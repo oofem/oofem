@@ -342,8 +342,9 @@ void MixedGradientPressureBC :: computeTangents(
         Ep.at(i) += 1.0;
         Cd.at(i) += 1.0;
     }
+#if 0
     // Makes Ed 4th order deviatoric, in Voigt form (!)
-    /*for (int i = 1; i <= Ed.giveNumberOfColumns(); ++i) {
+    for (int i = 1; i <= Ed.giveNumberOfColumns(); ++i) {
         // Take the mean of the "diagonal" part of each column
         double mean = 0.0;
         for (int j = 1; j <= nsd; ++j) {
@@ -354,12 +355,15 @@ void MixedGradientPressureBC :: computeTangents(
         for (int j = 1; j <= nsd; ++j) {
             Ed.at(i,j) -= mean;
         }
-    }*/
+    }
+#endif
 
     delete Kff;
     delete Kfp;
     delete Kpf;
     delete Kpp;
+    
+    delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
 

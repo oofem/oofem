@@ -46,6 +46,9 @@
 
 #include <sstream>
 
+//#define DEBUG_TANGENT
+#define DEBUG_ERR (1e-6)
+
 namespace oofem {
 
 int FE2FluidMaterial :: n = 1;
@@ -107,7 +110,7 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveDeviatoricTangent();
-#if 0
+#ifdef DEBUG_TANGENT
         // Numerical ATS for debugging
         FloatArray tempStrain(3); tempStrain.zero();
         FloatArray sig, strain, sig11, sig22, sig12;
@@ -132,9 +135,13 @@ void FE2FluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         numericalATS.setColumn(dsig11,1);
         numericalATS.setColumn(dsig22,2);
         numericalATS.setColumn(dsig12,3);
-        printf("Analytical tangent = "); answer.printYourself();
-        printf("Numerical tangent = "); numericalATS.printYourself();
-        OOFEM_ERROR("QUIT");
+        printf("Analytical deviatoric tangent = "); answer.printYourself();
+        printf("Numerical deviatoric tangent = "); numericalATS.printYourself();
+        numericalATS.subtract(answer);
+        double norm = numericalATS.computeFrobeniusNorm();
+        if (norm > answer.computeFrobeniusNorm()*DEBUG_ERR && norm > 0.0) {
+            OOFEM_ERROR("Error in deviatoric tangent");
+        }
 #endif
     } else {
         OOFEM_ERROR("Mode not implemented");
@@ -146,7 +153,7 @@ void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, Mat
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveDeviatoricPressureTangent();
-#if 0
+#ifdef DEBUG_TANGENT
         // Numerical ATS for debugging
         FloatArray strain(3); strain.zero();
         FloatArray sig, sigh;
@@ -157,9 +164,13 @@ void FE2FluidMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, Mat
 
         FloatArray dsigh; dsigh.beDifferenceOf(sigh,sig); dsigh.times(1/h);
 
-        printf("Analytical tangent = "); answer.printYourself();
-        printf("Numerical tangent = "); dsigh.printYourself();
-        OOFEM_ERROR("QUIT");
+        printf("Analytical deviatoric pressure tangent = "); answer.printYourself();
+        printf("Numerical deviatoric pressure tangent = "); dsigh.printYourself();
+        dsigh.subtract(answer);
+        double norm = dsigh.computeNorm();
+        if (norm > answer.computeNorm()*DEBUG_ERR && norm > 0.0) {
+            OOFEM_ERROR("Error in deviatoric pressure tangent");
+        }
 #endif
     } else {
         OOFEM_ERROR("Mode not implemented");
@@ -171,7 +182,7 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveVolumetricDeviatoricTangent();
-#if 0
+#ifdef DEBUG_TANGENT
         // Numerical ATS for debugging
         FloatArray tempStrain(3); tempStrain.zero();
         FloatArray sig, strain;
@@ -191,9 +202,13 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
         dvol.at(2) = (epspvol22 - epspvol)/h;
         dvol.at(3) = (epspvol12 - epspvol)/h;
 
-        printf("Analytical tangent = "); answer.printYourself();
-        printf("Numerical tangent = "); dvol.printYourself();
-        OOFEM_ERROR("QUIT");
+        printf("Analytical volumetric deviatoric tangent = "); answer.printYourself();
+        printf("Numerical volumetric deviatoric tangent = "); dvol.printYourself();
+        dvol.subtract(answer);
+        double norm = dvol.computeNorm();
+        if (norm > answer.computeNorm()*1e-3 && norm > 0.0) {
+            OOFEM_WARNING("Error in volumetric deviatoric tangent");
+        }
 #endif
     } else {
         OOFEM_ERROR("Mode not implemented");
@@ -205,7 +220,7 @@ void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResp
     FE2FluidMaterialStatus *ms = static_cast<FE2FluidMaterialStatus*> (this->giveStatus(gp));
     if ( mode == TangentStiffness ) {
         answer = ms->giveVolumetricPressureTangent();
-#if 0
+#ifdef DEBUG_TANGENT
         // Numerical ATS for debugging
         FloatArray strain(3); strain.zero();
         FloatArray sig;
@@ -217,9 +232,13 @@ void FE2FluidMaterial :: giveVolumetricPressureStiffness(double &answer, MatResp
 
         double dvol = (epspvolh - epspvol)/h;
 
-        printf("Analytical tangent = %e\n", answer);
-        printf("Numerical tangent = %e\n", dvol);
-        OOFEM_ERROR("QUIT");
+        printf("Analytical volumetric pressure tangent = %e\n", answer);
+        printf("Numerical volumetric pressure tangent = %e\n", dvol);
+
+        double norm = fabs(dvol - answer);
+        if (norm > fabs(answer)*DEBUG_ERR && norm > 0.0) {
+            OOFEM_ERROR("Error in volumetric pressure tangent");
+        }
 #endif
     } else {
         OOFEM_ERROR("Mode not implemented");

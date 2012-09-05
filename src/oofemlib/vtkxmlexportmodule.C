@@ -76,6 +76,9 @@ VTKXMLExportModule :: ~VTKXMLExportModule()
     if ( this->smoother ) {
         delete this->smoother;
     }
+    if ( this->primVarSmoother ) {
+        delete this->primVarSmoother;
+    }
 }
 
 
