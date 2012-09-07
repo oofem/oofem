@@ -2163,12 +2163,10 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             int prev_node = ( si > 1 ) ? si - 1 : 3;
             int next_node = ( si < 3 ) ? si + 1 : 1;
 
-            double l = this->giveNode(si)->giveCoordinates()->distance( this->giveNode(next_node)->giveCoordinates() );
             double t = fi.at(si) / ( fi.at(si) - fi.at(next_node) );
             x2 = x1 + t * ( this->giveNode(next_node)->giveCoordinate(1) - this->giveNode(si)->giveCoordinate(1) );
             y2 = y1 + t * ( this->giveNode(next_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );
 
-            l = this->giveNode(si)->giveCoordinates()->distance( this->giveNode(prev_node)->giveCoordinates() );
             t = fi.at(si) / ( fi.at(si) - fi.at(prev_node) );
             x3 = x1 + t * ( this->giveNode(prev_node)->giveCoordinate(1) - this->giveNode(si)->giveCoordinate(1) );
             y3 = y1 + t * ( this->giveNode(prev_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );

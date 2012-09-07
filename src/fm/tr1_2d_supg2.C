@@ -844,10 +844,10 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.resize(6);
     answer.zero();
 
-    int i, l, ip, ifluid, nLoads;
+    int ip, nLoads;
     Load *load;
     bcGeomType ltype;
-    double usum [ 2 ], rho;
+    double rho;
     FloatArray un, n, gVector;
     double u1, u2, dV;
 
@@ -857,17 +857,14 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     // add body load (gravity) termms
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
 
-    usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
-    usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
-
-    nLoads    = this->giveBodyLoadArray()->giveSize();
-    for ( l = 1; l <= nLoads; l++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(l) );
+    nLoads = this->giveBodyLoadArray()->giveSize();
+    for (int i = 1; i <= nLoads; i++ ) {
+        load  = domain->giveLoad( this->bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, atTime, VM_Total);
             if ( gVector.giveSize() ) {
-                for ( ifluid = 0; ifluid < 2; ifluid++ ) {
+                for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
                     for ( ip = 0; ip < integrationRulesArray [ ifluid ]->getNumberOfIntegrationPoints(); ip++ ) {
                         gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
 
@@ -891,17 +888,17 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     // loop over sides
     int n1, n2;
     int lnum, id;
-    double tx, ty, length, nx, ny;
+    double tx, ty, length;
     FloatArray t, coords(1);
     BoundaryLoad *bload;
 
     // loop over boundary load array
-    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-    for ( i = 1; i <= nLoads; i++ ) {
+    nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+    for (int i = 1; i <= nLoads; i++ ) {
+        lnum  = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        id    = boundaryLoadArray.at(i * 2);
+        load  = domain->giveLoad( lnum );
         if ( load->giveBCValType() == ForceLoadBVT ) {
-            lnum  = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-            id    = boundaryLoadArray.at(i * 2);
-
             // integrate tractions
             n1 = id;
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
@@ -909,20 +906,20 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             tx = giveNode(n2)->giveCoordinate(1) - giveNode(n1)->giveCoordinate(1);
             ty = giveNode(n2)->giveCoordinate(2) - giveNode(n1)->giveCoordinate(2);
             length = sqrt(tx * tx + ty * ty);
-            nx = ty / length;
-            ny = -tx / length;
+            //nx = ty / length;
+            //ny = -tx / length;
 
-            bload  = dynamic_cast< BoundaryLoad * >( domain->giveLoad(lnum) );
+            bload  = dynamic_cast< BoundaryLoad * >( load );
             if ( bload ) {
                 bload->computeValueAt(t, atTime, coords, VM_Total);
 
                 // here it is assumed constant traction, one point integration only
                 // n1 (u,v)
-                answer.at( ( n1 - 1 ) * 2 + 1 ) += t.at(1)  * l / 2.;
-                answer.at(n1 * 2)       += t.at(2)  * l / 2.;
+                answer.at( ( n1 - 1 ) * 2 + 1 ) += t.at(1)  * length / 2.;
+                answer.at(n1 * 2)       += t.at(2)  * length / 2.;
                 // n2 (u,v)
-                answer.at( ( n2 - 1 ) * 2 + 1 ) += t.at(1)  * l / 2.;
-                answer.at(n2 * 2)       += t.at(2)  * l / 2.;
+                answer.at( ( n2 - 1 ) * 2 + 1 ) += t.at(1)  * length / 2.;
+                answer.at(n2 * 2)       += t.at(2)  * length / 2.;
 
                 //answer.at(n1)+= (t.at(1)*nx + t.at(2)*ny) * length/2.;
                 //answer.at(n2)+= (t.at(1)*nx + t.at(2)*ny) * length/2.;
@@ -1772,7 +1769,6 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
     FloatArray gc, lc;
     const Vertex *p;
-    double a;
     FEI2dTrLin triaApprox(1, 2);
     FEI2dQuadLin quadApprox(1, 2);
     FEInterpolation *approx = NULL;
@@ -1791,11 +1787,13 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
             _error2("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
+#if 0
         if ( i == 0 ) {
             a = area * this->temp_vof;
         } else {
             a = area * ( 1. - this->temp_vof );
         }
+#endif
 
         if ( c [ i ] ) {
             vcoords [ i ] = new const FloatArray * [ c [ i ] ];
