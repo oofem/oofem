@@ -128,6 +128,12 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
     }
 }
 
+double Tr21Stokes :: computeVolumeAround(GaussPoint *gp)
+{
+    double detJ = fabs(this->interpolation_quad.giveTransformationJacobian(*gp->giveCoordinates(), FEIElementGeometryWrapper(this)));
+    return detJ * gp->giveWeight();
+}
+
 void Tr21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                             TimeStep *tStep)
 {
@@ -400,6 +406,8 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
     switch (it) {
         case NodalAveragingRecoveryModelInterfaceType:
             return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        case ZZNodalRecoveryModelInterfaceType:
+            return static_cast< ZZNodalRecoveryModelInterface * >(this);
         case SpatialLocalizerInterfaceType:
             return static_cast< SpatialLocalizerInterface * >(this);
         case EIPrimaryUnknownMapperInterfaceType:
@@ -527,4 +535,11 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.resize(0);
     }
 }
+
+int Tr21Stokes :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
+}
+
 } // end namespace oofem

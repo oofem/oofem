@@ -39,6 +39,7 @@
 #include "domain.h"
 
 #include "nodalaveragingrecoverymodel.h"
+#include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
 
@@ -56,6 +57,7 @@ class FEI2dTrQuad;
  */
 class Tr21Stokes : public FMElement,
     public NodalAveragingRecoveryModelInterface,
+    public ZZNodalRecoveryModelInterface,
     public SpatialLocalizerInterface,
     public EIPrimaryUnknownMapperInterface
 {
@@ -87,7 +89,10 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual double computeVolumeAround(GaussPoint *gp);
+
     virtual void computeGaussPoints();
+    
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
@@ -137,6 +142,9 @@ public:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 };
 } // end namespace oofem
 #endif // tr21stokes_h
