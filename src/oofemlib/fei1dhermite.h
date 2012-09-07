@@ -50,7 +50,7 @@ protected:
 public:
     FEI1dHermite(int coordIndx) : FEInterpolation1d(2) { cindx = coordIndx; }
 
-    virtual double giveLength(const FEICellGeometry &cellgeo);
+    virtual double giveLength(const FEICellGeometry &cellgeo) const;
 
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

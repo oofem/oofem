@@ -203,7 +203,7 @@ double
 HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
 {
     double answer = 0;
-    FloatArray *vec;
+    FloatArray vec;
 
     if ( ( rmode >= Capacity_ww ) && ( rmode <= Capacity_wh ) ) { // standard HeMoTK values
         answer = HeMoTKMaterial :: giveCharacteristicValue(rmode, gp, atTime);
@@ -214,22 +214,20 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
         if ( !hydrationLHS ) {
             answer = 0;
         } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
-            vec = new FloatArray( ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector() );
+            FloatArray vec( ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector() );
 
-            if ( vec->giveSize() < 2 ) {
-                vec->resize(2);
-                vec->at(2) = 1.0; // saturated if undefined
+            if ( vec.giveSize() < 2 ) {
+                vec.resize(2);
+                vec.at(2) = 1.0; // saturated if undefined
             } else {
-                vec->at(2) = inverse_sorption_isotherm( vec->at(2) ); // compute relative humidity
+                vec.at(2) = inverse_sorption_isotherm( vec.at(2) ); // compute relative humidity
             }
 
-            answer = hydrationModel->giveCharacteristicValue(* vec, rmode, gp, atTime)
+            answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, atTime)
                      / atTime->giveTimeIncrement();
             if ( ( rmode == IntSource_ww ) || ( rmode == IntSource_hw ) ) {
-                answer *= give_dphi_dw( vec->at(2) );
+                answer *= give_dphi_dw( vec.at(2) );
             }
-
-            delete vec;
         }
     } else {
         _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );

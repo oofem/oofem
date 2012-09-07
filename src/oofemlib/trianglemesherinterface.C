@@ -224,8 +224,8 @@ void custom_triangulate(char *triswitches, struct triangulateio *in, struct tria
 {
     struct mesh m;
     struct behavior b;
-    REAL *holearray;
-    REAL *regionarray;
+    //REAL *holearray;
+    //REAL *regionarray;
     triangleinit(&m);
     parsecommandline(1, &triswitches, &b);
     //b.verbose=2;
@@ -269,9 +269,9 @@ void custom_triangulate(char *triswitches, struct triangulateio *in, struct tria
     }
 #endif
     if (b.poly && (m.triangles.items > 0)) {
-        holearray = in->holelist;
+        //holearray = in->holelist;
         m.holes = in->numberofholes;
-        regionarray = in->regionlist;
+        //regionarray = in->regionlist;
         m.regions = in->numberofregions;
         if (!b.refine) {
             /* Only increase quality if the regions are properly defined. */
@@ -590,6 +590,34 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
         double allowed = j*limit/2;
         for (int i = 1; i <= nodes; i++) {
             std::set<int> &elems = connectivity[i-1];
+#if 1
+            if (elems.size() < 2) {
+                // Lone nodes or edges are removed. It is up for discussion whether or not this is a wanted.
+                nodeRemoval.at(i) = true;
+                if (elems.size() == 1) {
+                    int e0 = *elems.begin();
+                    edgeRemoval.at(e0) = true;
+                    // Find the other node and remove segment e0 from it;
+                    int n1 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
+                    connectivity[n1-1].erase(e0);
+                    elems.clear();
+                    /*printf("Removing edge %d and node = %d\n", e0, n1);
+                    while (connectivity[n1-1].size() < 2) {
+                        nodeRemoval.at(n1) = true;
+                        if (connectivity[n1-1].size() == 1) {
+                            e0 = *connectivity[n1-1].begin();
+                            edgeRemoval.at(e0) = true;
+                            connectivity[n1-1].clear();
+                            n1 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
+                            connectivity[n1-1].erase(e0);
+                        } else {
+                            OOFEM_WARNING("HAPPENS ONCE!");
+                            break;
+                        }
+                    }*/
+                }
+            } else 
+#endif
             if (elems.size() == 2) {
                 int e0 = *elems.begin();
                 int e1 = *(++elems.begin());

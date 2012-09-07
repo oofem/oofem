@@ -893,7 +893,6 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
     double rhoTest = 0.;
     double deltaLambdaIncrementNew = 0.;
     double tempKappaPTest = 0.;
-    double deltaKappaP = 0.;
     int iterationCount = 0;
     int negativeRhoFlag = 0;
     StrainVector elasticStrain(matMode);
@@ -1033,7 +1032,6 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
             } else {
                 tempKappaPTest = tempKappaP;
                 tempKappaP += answerIncrement(2);
-                deltaKappaP = tempKappaP - status->giveKappaP();
                 sig += answerIncrement(0);
                 rho += answerIncrement(1);
 

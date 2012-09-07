@@ -50,11 +50,11 @@ SPRNodalRecoveryModel :: ~SPRNodalRecoveryModel()
 int
 SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 {
-    int ireg, nregions = this->giveNumberOfVirtualRegions();
+    int nregions = this->giveNumberOfVirtualRegions();
     int nnodes = domain->giveNumberOfDofManagers();
     int regionValSize;
     int regionDofMans;
-    int i, j, neq, eq, npap, ipap, papNumber;
+    int neq, eq, npap, papNumber;
     IntArray skipRegionMap(nregions), regionRecSize(nregions);
     IntArray regionNodalNumbers(nnodes);
     IntArray patchElems, dofManToDetermine, pap, regionTypes;
@@ -84,7 +84,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 #endif
 
     // loop over regions
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+    for (int ireg = 1; ireg <= nregions; ireg++ ) {
         // skip regions
         if ( skipRegionMap.at(ireg) ) {
             continue;
@@ -107,7 +107,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         this->determinePatchAssemblyPoints(pap, ireg, regType);
 
         npap = pap.giveSize();
-        for ( ipap = 1; ipap <= npap; ipap++ ) {
+        for (int ipap = 1; ipap <= npap; ipap++ ) {
             papNumber = pap.at(ipap);
 
             this->initPatch(patchElems, dofManToDetermine, pap, papNumber, ireg);
@@ -122,7 +122,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 
         // average  recovered values of active region
         bool abortFlag = false;
-        for ( i = 1; i <= nnodes; i++ ) {
+        for (int i = 1; i <= nnodes; i++ ) {
 #ifndef __PARALLEL_MODE
             if ( regionNodalNumbers.at(i) ) {
 #else
@@ -132,7 +132,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 #endif
                 eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
                 if ( dofManPatchCount.at( regionNodalNumbers.at(i) ) ) {
-                    for ( j = 1; j <= regionValSize; j++ ) {
+                    for (int j = 1; j <= regionValSize; j++ ) {
                         dofManValues.at(eq + j) /= dofManPatchCount.at( regionNodalNumbers.at(i) );
                     }
                 } else {
@@ -142,7 +142,9 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                     OOFEM_WARNING4("[%d] SPRNodalRecoveryModel::recoverValues : values of %s in dofmanager %d undetermined",
                                    domain->giveEngngModel()->giveRank(), __InternalStateTypeToString(type), i);
 #endif
-                    dofManValues.at(eq + j) = 0.0;
+                    for (int j = 1; j <= regionValSize; j++ ) {
+                        dofManValues.at(eq + j) = 0.0;
+                    }
                     //abortFlag = true;
                 }
             }

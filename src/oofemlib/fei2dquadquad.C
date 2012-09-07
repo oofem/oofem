@@ -75,7 +75,7 @@ FEI2dQuadQuad :: giveArea(const FEICellGeometry &cellgeo) const
     y78 = node7->at(yind) - node8->at(yind);
 
     double p1 = (x2-x4)*(y1-y3) - (x1-x3)*(y2-y4);
-    double p2 = y1*x85 + y2*x56 + y3*x67 + y4*x78 - x1*y85 - x2*y56 - x3*y67 - x4*x78;
+    double p2 = y1*x85 + y2*x56 + y3*x67 + y4*x78 - x1*y85 - x2*y56 - x3*y67 - x4*y78;
 
     return fabs(p1 + p2*4.0)/6.; // Expression derived with mathematica, but not verified in any computations
 }

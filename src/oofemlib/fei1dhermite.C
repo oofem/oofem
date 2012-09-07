@@ -115,7 +115,7 @@ FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 }
 
 double
-FEI1dHermite :: giveLength(const FEICellGeometry &cellgeo)
+FEI1dHermite :: giveLength(const FEICellGeometry &cellgeo) const
 {
     return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }

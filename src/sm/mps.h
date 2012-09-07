@@ -191,8 +191,8 @@ protected:
 
     virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime);
 
-    virtual double computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu);
-    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *atTime, double Mu);
+    virtual double computeBetaMu(GaussPoint *gp, TimeStep *atTime, int Mu);
+    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu);
 
     /// Evaluation of the flow term viscosity
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime);

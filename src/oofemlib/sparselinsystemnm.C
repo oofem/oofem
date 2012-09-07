@@ -46,7 +46,7 @@ SparseLinearSystemNM :: ~SparseLinearSystemNM()
 
 NM_Status SparseLinearSystemNM :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 {
-    NM_Status status;
+    NM_Status status = NM_None;
     int ncol = A->giveNumberOfRows();
     int nrhs = B.giveNumberOfColumns();
     if (A->giveNumberOfRows() != B.giveNumberOfRows()) {
@@ -56,8 +56,8 @@ NM_Status SparseLinearSystemNM :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatr
     X.resize(ncol,nrhs);
     for (int i = 1; i <= nrhs; ++i ) {
         B.copyColumn(bi, i);
-        status = this->solve(A, &bi, &xi);
-        if (status == NM_NoSuccess) {
+        status &= this->solve(A, &bi, &xi);
+        if (status & NM_NoSuccess) {
             return NM_NoSuccess;
         }
         X.setColumn(xi, i);

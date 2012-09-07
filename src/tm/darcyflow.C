@@ -132,6 +132,10 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 
+    if (status & NM_NoSuccess) {
+        OOFEM_ERROR2("DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber());
+    }
+    
 #define DUMPMATRICES 0
 #if DUMPMATRICES
     FloatMatrix LHS_backup;
@@ -185,11 +189,13 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
 
     DofIDItem type = iDof->giveDofID();
-    if ( ( type == V_u ) ) {
+    if ( type == V_u ) {
         iDof->printSingleOutputAt(stream, atTime, 'u', EID_MomentumBalance, VM_Total, 1);
-    } else if ( ( type == V_v ) ) {
+    } else if ( type == V_v ) {
         iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, 1);
-    } else if ( ( type == P_f ) )    {
+    } else if ( type == V_w ) {
+        iDof->printSingleOutputAt(stream, atTime, 'w', EID_MomentumBalance, VM_Total, 1);
+    } else if ( type == P_f )    {
         iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");
@@ -210,7 +216,7 @@ double DarcyFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, Tim
      * Return value of argument dof
      */
 
-    if ( ( chc==EID_ConservationEquation) or ( chc==EID_MomentumBalance) ) {
+    if ( ( chc==EID_ConservationEquation) || ( chc==EID_MomentumBalance) ) {
         return PressureField->giveUnknownValue(dof, mode, tStep);
     } else {
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");

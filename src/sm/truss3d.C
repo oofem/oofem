@@ -173,7 +173,7 @@ Truss3d :: computeGaussPoints()
 
 
 double
-Truss3d :: computeLength() const
+Truss3d :: computeLength()
 {
     return this->interp.giveLength(FEIElementGeometryWrapper(this));
 }

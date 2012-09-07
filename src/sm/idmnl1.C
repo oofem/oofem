@@ -136,7 +136,6 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev=0.;
-    int n;
     Element *nearElem;
 
     // process the list from the target to the end
@@ -198,7 +197,6 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
             damage = nonlocStatus->giveDamage();
         }
 
-        n = ( ( * pos ).nearGp )->giveElement()->giveNumber();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
         ( * pos ).weight = w;

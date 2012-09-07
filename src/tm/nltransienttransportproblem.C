@@ -183,7 +183,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
-        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep, nite);
+        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep);
         // set-up numerical model
         this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
@@ -404,7 +404,7 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
 
 void
 NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
-                                                            const UnknownNumberingScheme &ns, TimeStep *tStep, int nite)
+                                                            const UnknownNumberingScheme &ns, TimeStep *tStep)
 {
     //
     // Computes right hand side on all nodes

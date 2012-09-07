@@ -492,7 +492,7 @@ MPSMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
 
 
 double
-MPSMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
+MPSMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
 {
     double betaMu;
     double deltaT;
@@ -517,7 +517,7 @@ MPSMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
 }
 
 double
-MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, double Mu)
+MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
 {
     double lambdaMu;
     double deltaT;

@@ -184,7 +184,6 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev;
-    int n;
     Element *nearElem;
 
     // process the list from the target to the end
@@ -234,7 +233,6 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         x = coords.at(1);
         nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
         damage = nonlocStatus->giveTempDamage();
-        n = ( ( * pos ).nearGp )->giveElement()->giveNumber();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
         ( * pos ).weight = w;

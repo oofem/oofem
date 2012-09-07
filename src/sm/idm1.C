@@ -312,10 +312,14 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
             this->computePrincipalValues(principalStress, fullStress, principal_stress);
             // TO BE FINISHED
+            sum = 0.;
+            OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished\n");
 
         } else {
             // elastic energy corresponding to positive part of strain
             // TO BE DONE
+            sum = 0.;
+            OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished\n");
         }
 
         kappa = sqrt( sum / lmat->give('E', gp) );

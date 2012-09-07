@@ -116,7 +116,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
     double epsnew, epsold;
     double epsp, depsp;
     double alpha;
-    double sig, sigp, sigY;
+    double sigp, sigY;
     double gNewton, dgNewton;
 
     TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
@@ -125,7 +125,6 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
     epsold = status->giveStrainVector().at(1);
     epsp = status->givePlasStrainVector().at(1);
     alpha = status->giveAlpha();
-    sig = status->giveStressVector().at(1);
     sigp = E0 * epsnew - ( E0 + Ek ) * epsp;
 
     if ( sigp < 0.0 ) {

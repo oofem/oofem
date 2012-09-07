@@ -258,7 +258,6 @@ public:
     // } end new 5.1.2004
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector
     virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime);
-
     // --- identification and auxiliary functions ---
     virtual const char *giveClassName() const { return "HydrationModel"; }
     virtual classType giveClassID() const { return ( classType ) HydrationModelClass; }

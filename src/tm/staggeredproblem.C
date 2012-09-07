@@ -94,7 +94,7 @@ int
 StaggeredProblem :: instanciateSlaveProblems()
 {
     int i;
-    EngngModel *timeDefProb, *slaveProb;
+    EngngModel *timeDefProb = NULL, *slaveProb;
 
     //first instantiate master problem if defined
     if ( timeDefinedByProb ) {
@@ -110,7 +110,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ].c_str() );
         //the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
-        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb != 0 ? timeDefProb : this);
+        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this);
         emodelList->put(i, slaveProb);
     }
 
