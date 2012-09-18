@@ -39,7 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing implementation of linar hexahedra interpolation class.
+ * Class representing implementation of linear hexahedra interpolation class.
  */
 class FEI3dHexaLin : public FEInterpolation3d
 {
@@ -69,15 +69,13 @@ public:
     //               Domain* d, IntArray& nodes, const FloatArray& lcoords);
     virtual void surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                     const FEICellGeometry &cellgeo);
+    virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveDerivativeKsi(FloatArray &dx, double v, double w);
-    void giveDerivativeEta(FloatArray &dy, double u, double w);
-    void giveDerivativeDzeta(FloatArray &dz, double u, double v);
+    void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 public:
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };

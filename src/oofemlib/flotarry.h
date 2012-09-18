@@ -365,7 +365,7 @@ public:
      * will have this norm equal to 1.0.
      * @return modified receiver
      */
-    void normalize();
+    double normalize();
     /**
      * Computes the norm (or length) of the vector.
      * @return The Euclidean norm of the vector.

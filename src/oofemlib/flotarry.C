@@ -690,7 +690,7 @@ void FloatArray :: times(double factor)
 }
 
 
-void FloatArray :: normalize()
+double FloatArray :: normalize()
 {
     double norm = this->computeNorm();
     if ( norm < 1.e-80 ) {
@@ -698,6 +698,7 @@ void FloatArray :: normalize()
     }
 
     this->times(1. / norm);
+    return norm;
 }
 
 

@@ -53,8 +53,6 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
     answer.at(4) = 4. * l1 * l2;
     answer.at(5) = 4. * l2 * l3;
     answer.at(6) = 4. * l3 * l1;
-
-    return;
 }
 
 void
@@ -223,8 +221,8 @@ FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FE
     answer.resize(3);
 
     n3 = 1. - ksi * ksi;
-    answer.at(1) = ( 1. - ksi ) * 0.5 - 0.5 * n3;
-    answer.at(2) = ( 1. + ksi ) * 0.5 - 0.5 * n3;
+    answer.at(1) = ( 1. - ksi - n3 ) * 0.5;
+    answer.at(2) = ( 1. + ksi - n3 ) * 0.5;
     answer.at(3) = n3;
 }
 
