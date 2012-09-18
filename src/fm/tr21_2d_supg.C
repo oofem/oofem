@@ -1236,42 +1236,41 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 }
 
 
-/*
- * void
- * TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray &fi)
- * {
- * FloatArray Coeff(3), helplcoords(3);
- * double fi1, fi2, fi3, r1, r11, r12;
- *
- * intcoords.resize(2);
- * intcoords.zero();
- *
- * this->velocityInterpolation.computeLocalEdgeMapping(edge, iedge);
- * fi1 = fi.at(edge.at(1));
- * fi2 = fi.at(edge.at(2));
- * fi3 = fi.at(edge.at(3));
- *
- * Coeff.at(1) = fi1 + fi2 - 2 * fi3;
- * Coeff.at(2) = fi2 - fi1;
- * Coeff.at(3) = 2 * fi3;
- *
- * this->computeQuadraticRoots(Coeff, r11, r12);
- *
- * if (r11 > 1.0 || r11 < -1.0){
- *  r1 = r12;
- * }else {
- *  r1 = r11;
- * }
- *
- * helplcoords.zero();
- * helplcoords.at(1) = r1;
- *
- * this->velocityInterpolation.edgeLocal2global(intcoords, iedge, this->giveDomain(), dofManArray,helplcoords , atTime->giveTime());
- *
- * //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveCoordinates(),atTime->giveTime());
- *
- *
- * }*/
+#if 0
+void
+TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray &fi)
+{
+    FloatArray Coeff(3), helplcoords(3);
+    double fi1, fi2, fi3, r1, r11, r12;
+    
+    intcoords.resize(2);
+    intcoords.zero();
+    
+    this->velocityInterpolation.computeLocalEdgeMapping(edge, iedge);
+    fi1 = fi.at(edge.at(1));
+    fi2 = fi.at(edge.at(2));
+    fi3 = fi.at(edge.at(3));
+    
+    Coeff.at(1) = fi1 + fi2 - 2 * fi3;
+    Coeff.at(2) = fi2 - fi1;
+    Coeff.at(3) = 2 * fi3;
+
+    this->computeQuadraticRoots(Coeff, r11, r12);
+
+    if (r11 > 1.0 || r11 < -1.0){
+        r1 = r12;
+    }else {
+        r1 = r11;
+    }
+
+    helplcoords.zero();
+    helplcoords.at(1) = r1;
+
+    this->velocityInterpolation.edgeLocal2global(intcoords, iedge, this->giveDomain(), dofManArray,helplcoords , atTime->giveTime());
+
+    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveCoordinates(),atTime->giveTime());
+}
+#endif
 
 void
 TR21_2D_SUPG :: computeMiddlePointOnParabolicArc(FloatArray &answer, int iedge, FloatArray borderpoints)
@@ -1301,9 +1300,6 @@ TR21_2D_SUPG :: computeMiddlePointOnParabolicArc(FloatArray &answer, int iedge, 
 void
 TR21_2D_SUPG :: computeCenterOf(FloatArray &C, FloatArray c, int dim)
 {
-    //FloatArray C(2);
-
-
     switch ( dim ) {
     case 1:
 

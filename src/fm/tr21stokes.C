@@ -61,7 +61,10 @@ bool Tr21Stokes :: __initialized = Tr21Stokes :: initOrdering();
 Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 6;
-    this->numberOfGaussPoints = 4;
+    if (aDomain->giveEngngModel()->giveProblemScale() == macroScale) // Pick the lowest default value for multiscale computations.
+        this->numberOfGaussPoints = 3;
+    else 
+        this->numberOfGaussPoints = 4;
     this->computeGaussPoints();
 }
 

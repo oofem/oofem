@@ -110,7 +110,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     if (this->giveDomain(1)->giveTopology() && this->meshqualityee) {
         // Check the quality of the deformed mesh.
         double meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
-        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Mesh deformation at %e\n",meshdeformation);
+        if ( this->giveProblemScale() == macroScale ) {
+            OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Mesh deformation at %e\n",meshdeformation);
+        }
         if (this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef) {
             this->giveDomain(1)->giveTopology()->replaceFEMesh();
             OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
@@ -150,7 +152,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
+    if ( this->giveProblemScale() == macroScale ) {
+        OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
+    }
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
 #if 1
     double loadLevel;

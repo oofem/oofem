@@ -251,7 +251,7 @@ NodalAveragingRecoveryModel :: initCommMaps()
                                                    emodel->giveNumberOfProcesses(),
                                                    commMode);
             communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
-            OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps");
+            OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps\n");
             initCommMap = false;
         } else {
             OOFEM_ERROR("NodalAveragingRecoveryModel :: initCommMaps: unsupported comm mode");
