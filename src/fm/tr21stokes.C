@@ -544,5 +544,150 @@ int Tr21Stokes :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }
+void Tr21Stokes :: giveGradP(FloatMatrix &answer, TimeStep * tStep )
+{
+	/*
+	 * Integrate gradient of P over element
+	 */
 
+	answer.resize(2,1);
+	answer.zero();
+
+/*
+	GaussIntegrationRule iRuleEdge(1, this, 1, 1);
+	GaussPoint *gpEdge;
+	FloatArray Normal, N, *lcoords, p;
+	FloatMatrix temp, int_Np_edge;
+
+	iRuleEdge.setUpIntegrationPoints(_Line, this->numberOfGaussPoints, _Unknown);
+
+	this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+
+	answer.resize(2,1);
+	answer.zero();
+
+	for (int i=1; i<=integrationEdges->giveSize(); i++ ) {
+
+		int iEdge = integrationEdges->at(i);
+		givePressureGradientBoundaryIntegral(int_Np_edge, iEdge);
+
+		temp.resize(2,1);
+		temp.zero();
+		if (iEdge==1) {
+			temp.at(1,1)=int_Np_edge.at(1,1)*p.at(1)+int_Np_edge.at(1,2)*p.at(2);
+			temp.at(2,1)=int_Np_edge.at(2,1)*p.at(1)+int_Np_edge.at(2,2)*p.at(2);
+		} else if (iEdge==2) {
+			temp.at(1,1)=int_Np_edge.at(1,1)*p.at(2)+int_Np_edge.at(1,2)*p.at(3);
+			temp.at(2,1)=int_Np_edge.at(2,1)*p.at(2)+int_Np_edge.at(2,2)*p.at(3);
+		} else if (iEdge==3) {
+			temp.at(1,1)=int_Np_edge.at(1,1)*p.at(3)+int_Np_edge.at(1,2)*p.at(1);
+			temp.at(2,1)=int_Np_edge.at(2,1)*p.at(3)+int_Np_edge.at(2,2)*p.at(1);
+		} else {
+			printf ("iEdge != {1,2,3}\n");
+		}
+		answer.add(temp);
+	}
+
+	return;
+*/
+}
+
+void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
+{
+	/*
+	 * Integrate velocity over element
+	 */
+
+	IntegrationRule *iRule = integrationRulesArray [ 0 ];
+	FloatMatrix v, v_gamma, ThisAnswer, boundaryV, Nmatrix;
+	double detJ;
+	FloatArray *lcoords, N;
+	int i, j, k=0;
+	Dof *d;
+	GaussPoint *gp;
+
+	v.resize(12,1);
+	v.zero();
+	boundaryV.resize(2,1);
+
+
+	for (i=1; i<=this->giveNumberOfDofManagers(); i++) {
+		for (j=1; j<=this->giveDofManager(i)->giveNumberOfDofs(); j++) {
+			d = this->giveDofManager(i)->giveDof(j);
+			if ((d->giveDofID()==V_u) || (d->giveDofID()==V_v)) {
+				k=k+1;
+				v.at(k,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+			/*} else	if (d->giveDofID()==A_x) {
+				boundaryV.at(1,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+			} else	if (d->giveDofID()==A_y) {
+				boundaryV.at(2,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);*/
+			}
+		}
+	}
+
+	answer.resize(2,1);
+	answer.zero();
+
+	Nmatrix.resize(2,12);
+
+	for (i=0; i<iRule->getNumberOfIntegrationPoints(); i++) {
+
+		gp = iRule->getIntegrationPoint(i);
+
+		lcoords = gp->giveCoordinates();
+
+		this->interpolation_quad.evalN(N, *lcoords, FEIElementGeometryWrapper(this));
+		detJ = this->interpolation_quad.giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(this));
+
+		N.times(detJ*gp->giveWeight());
+
+		for (j=1; j<=6;j++) {
+			Nmatrix.at(1,j*2-1)=N.at(j);
+			Nmatrix.at(2,j*2)=N.at(j);
+		}
+
+		ThisAnswer.beProductOf(Nmatrix,v);
+		answer.add(ThisAnswer);
+
+	}
+
+}
+
+void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
+{
+
+	IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    GaussPoint *gp;
+    double detJ;
+    FloatArray N, N2, *lcoords;
+    IntArray col;
+    FloatMatrix temp;
+
+    N2.resize(6);	N2.zero();
+    col.resize(2);  col.at(1)=1;  	col.at(2)=2;
+
+    temp.resize(15,2);
+    temp.zero();
+
+    for (int i=0; i<iRule->getNumberOfIntegrationPoints(); i++) {
+    	gp = iRule->getIntegrationPoint(i);
+    	lcoords = gp->giveCoordinates();
+
+    	this->interpolation_quad.evalN(N, *lcoords, FEIElementGeometryWrapper(this));
+    	detJ = this->interpolation_quad.giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(this));
+    	N.times(gp->giveWeight()*detJ);
+    	//N.printYourself();
+    	N2.add(N);
+    }
+
+    for (int i=1; i<=6; i++) {
+    	temp.at(i*2-1, 1)=N2.at(i);
+    	temp.at(i*2, 2)=N2.at(i);
+    }
+
+    answer.resize(17,2);
+    answer.zero();
+    answer.assemble(temp, this->ordering, col);
+
+}
 } // end namespace oofem

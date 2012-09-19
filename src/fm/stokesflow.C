@@ -156,6 +156,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
     }
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
+    this->initMetaStepAttributes( this->giveCurrentMetaStep() );
 #if 1
     double loadLevel;
     int currentIterations;

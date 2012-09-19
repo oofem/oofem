@@ -450,8 +450,9 @@ enum classType {
     WallClockLoadBalancerMonitorClass,
     ParmetisLoadBalancerClass,
 
-    BasicGeometryClass
+    BasicGeometryClass,
 
+    StokesFlowVelocityHomogenizationClass
 
 };
 } // end namespace oofem

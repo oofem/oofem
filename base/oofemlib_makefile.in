@@ -32,7 +32,7 @@ MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oofemlib/iga @OOFEM_DIR@/src/oofemlib/iml @TINYXML_DIR@
 
 ## sources
-srcs0=
+srcs0=rveengngmodel.C
 srcs1=oofeggraphiccontext.C
 srcs2=generalbc.C boundary.C clock.C cltypes.C conTable.C constant.C crosssection.C dictionr.C dof.C domain.C element.C engngm.C femcmpnn.C flotarry.C flotmtrx.C freestor.C error.C logger.C emptycs.C feinterpol.C
 srcs3=gausspnt.C initial.C intarray.C isolinearelasticmaterial.C ldltfact.C linearelasticmaterial.C load.C loadtime.C rowcol.C skylineu.C sparselinsystemnm.C inverseit.C
