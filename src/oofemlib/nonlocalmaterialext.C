@@ -101,7 +101,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+      ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
     dynaList< localIntegrationRecord > *iList;
 
@@ -218,7 +218,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+      ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
     dynaList< localIntegrationRecord > *iList;
 
@@ -304,7 +304,7 @@ dynaList< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+        ( NonlocalMaterialStatusExtensionInterface * )  gp->giveMaterial()->giveStatus(gp) ->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
 
     if ( !statusExt ) {
@@ -322,7 +322,7 @@ void
 NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+      ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
 
     if ( !statusExt ) {

@@ -58,7 +58,7 @@ FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, do
 void
 FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = ((FluidDynamicMaterialStatus*)gp->giveMaterialStatus())->giveDeviatoricStressVector().giveSize();
+    int size = ((FluidDynamicMaterialStatus*)this->giveStatus(gp))->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
     answer.zero();
 }
@@ -67,7 +67,7 @@ FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatR
 void
 FluidDynamicMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = ((FluidDynamicMaterialStatus*)gp->giveMaterialStatus())->giveDeviatoricStressVector().giveSize();
+    int size = ((FluidDynamicMaterialStatus*)this->giveStatus(gp))->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
     answer.zero();
 }

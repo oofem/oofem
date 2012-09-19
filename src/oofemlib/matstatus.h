@@ -35,7 +35,7 @@
 #ifndef matstatus_h
 #define matstatus_h
 
-#include "femcmpnn.h"
+#include "integrationpointstatus.h"
 #include "classtype.h"
 
 namespace oofem {
@@ -83,12 +83,9 @@ class NonlocalMaterialStatusExtension;
  * @note{Materials statuses are attributes of GaussPoints, they are stored in
  * MatStatus variable of GaussPoint class instance.}
  */
-class MaterialStatus : public FEMComponent
+class MaterialStatus : public IntegrationPointStatus
 {
 protected:
-    /// Associated integration point.
-    GaussPoint *gp;
-
 public:
     /**
      * Constructor.
@@ -96,7 +93,7 @@ public:
      * @param d domain to which new status belongs
      * @param g associated integration point
      */
-    MaterialStatus(int n, Domain *d, GaussPoint *g);
+    MaterialStatus(int n, Domain *d, GaussPoint *g) : IntegrationPointStatus (n,d,g) {}
     /// Destructor.
     virtual ~MaterialStatus() { }
     /// Print receiver's output to given stream.

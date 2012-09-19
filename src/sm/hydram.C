@@ -299,7 +299,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
  * Creates the hydration model status if necessary.
  */
 {
-    HydrationModelStatusInterface *hmi = ( HydrationModelStatusInterface * ) gp->giveMaterialStatus()->giveInterface(HydrationModelStatusInterfaceType);
+    HydrationModelStatusInterface *hmi = ( HydrationModelStatusInterface * ) this->giveStatus(gp)->giveInterface(HydrationModelStatusInterfaceType);
     HydrationModelStatus *status = NULL;
     if ( hmi ) {
         status = hmi->giveHydrationModelStatus();

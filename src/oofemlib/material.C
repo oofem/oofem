@@ -248,22 +248,16 @@ Material :: giveStatus(GaussPoint *gp) const
  */
 {
     MaterialStatus *status;
-
-    status = gp->giveMaterialStatus();
+    status = (MaterialStatus*) gp->giveMaterialStatus(this->giveClassID());
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
-
-        if ( this->giveClassID() != gp->giveElement()->giveMaterial()->giveClassID() ) {
-            _warning2( "giveStatus: Created material status at element %d is of different material type",
-                      gp->giveElement()->giveNumber() );
-        }
 
         // if newly created status is null
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status);
+	  gp->setMaterialStatus(status,this->giveClassID());
         }
     }
 

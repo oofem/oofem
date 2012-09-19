@@ -434,7 +434,7 @@ int CemhydMat :: initMaterial(Element *element) {
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 0);
         }
 
-        gp->setMaterialStatus(ms);
+        gp->setMaterialStatus(ms, this->giveClassID());
     }
 
     return 1;

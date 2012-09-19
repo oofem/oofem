@@ -677,13 +677,13 @@ IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status;
 
-    status = gp->giveMaterialStatus();
+    status = (MaterialStatus*)gp->giveMaterialStatus(this->giveClassID());
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
 
         if ( status != NULL ) {
-            gp->setMaterialStatus(status);
+	    gp->setMaterialStatus(status,this->giveClassID());
             this->_generateStatusVariables(gp);
         }
     }

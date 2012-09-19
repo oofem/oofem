@@ -85,15 +85,15 @@ MicroplaneMaterial :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMode
     return _Unknown;
 }
 
-MaterialStatus *
+IntegrationPointStatus *
 MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
 /*
  * returns material status in gp corresponding to specific material class
  */
 {
-    MaterialStatus *status;
+    IntegrationPointStatus *status;
 
-    status = gp->giveMaterialStatus();
+    status = gp->giveMaterialStatus(this->giveClassID());
     if ( status == NULL ) {
         // create a new one
         status = this->CreateMicroplaneStatus(gp);
@@ -101,7 +101,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status);
+	  gp->setMaterialStatus(status, this->giveClassID());
         }
     }
 
@@ -121,7 +121,7 @@ MicroplaneMaterial :: initTempStatus(GaussPoint *gp)
     // init master microplanes
     for ( mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
         mPlane = this->giveMicroplane(mPlaneIndex, gp);
-        status = this->giveMicroplaneStatus(mPlane);
+        status = dynamic_cast<MaterialStatus*>(this->giveMicroplaneStatus(mPlane));
         if ( status ) {
             status->initTempStatus();
         }
@@ -134,7 +134,7 @@ MicroplaneMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussP
     contextIOResultType iores;
     int mPlaneIndex;
     Microplane *mPlane;
-    MaterialStatus *status;
+    IntegrationPointStatus *status;
 
     if ( stream == NULL ) {
         _error("saveContex : can't write into NULL stream");
@@ -169,7 +169,7 @@ MicroplaneMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, Gau
     contextIOResultType iores;
     int mPlaneIndex;
     Microplane *mPlane;
-    MaterialStatus *status;
+    IntegrationPointStatus *status;
 
     // corresponding gp is passed in obj
     if ( gp == NULL ) {

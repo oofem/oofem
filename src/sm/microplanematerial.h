@@ -173,7 +173,7 @@ public:
     virtual const char *giveClassName() const { return "MicroplaneMaterial"; }
     virtual classType giveClassID() const { return MicroplaneMaterialClass; }
 
-    virtual MaterialStatus *giveMicroplaneStatus(GaussPoint *gp);
+    virtual IntegrationPointStatus *giveMicroplaneStatus(GaussPoint *gp);
 
 protected:
     virtual MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) = 0;

@@ -44,6 +44,7 @@ namespace oofem {
  */
 enum classType {
     FEMComponentClass,
+    IntegrationPointStatusClass,
 
     GeneralBoundaryConditionClass,
     ActiveBoundaryConditionClass,

@@ -291,7 +291,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     double Enorm = 0.0, sv = 0.0, answer = 0.0;
     double fmicroplane;
     IntArray mask;
-    FloatArray fullStrain, prevStress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveStressVector();
+    FloatArray fullStrain, prevStress = ( ( StructuralMaterialStatus * ) this->giveStatus(gp))->giveStressVector();
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
 

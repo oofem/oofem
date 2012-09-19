@@ -42,9 +42,10 @@
 #define gausspnt_h
 
 #include "integrationrule.h"
-#include "matstatus.h"
+#include "integrationpointstatus.h"
 #include "element.h"
 #include "materialmode.h"
+#include "tdictionary.h"
 
 namespace oofem {
 class Material;
@@ -110,8 +111,8 @@ protected:
     int numberOfGp;
     /// List of slave integration points.
     GaussPoint **gaussPointArray;
-    /// Material status managed for material model.
-    MaterialStatus *matStatus;
+    //Disctionary of managed MaterialStatuses
+    TDictionary<classType,IntegrationPointStatus> statusDict;
 
 public:
     /**
@@ -157,18 +158,27 @@ public:
     Material *giveMaterial() { return giveElement()->giveMaterial(); }
     /// Returns reference to cross section associated to related element of receiver.
     CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
-    /// Returns reference to associated material status (NULL if not defined).
-    MaterialStatus *giveMaterialStatus() { return matStatus; }
+    /**
+     * Returns reference to associated material status (NULL if not defined).
+     * @param i classID of class requesting associated status
+     */
+    IntegrationPointStatus *giveMaterialStatus(classType i) { 
+	return statusDict.at(i); 
+    }
     /**
      * Sets Material status managed by receiver.
-     * Old status, if exist will be lost.
      * @param ptr Pointer to new status of receiver.
+     * @param i classID of class storing status
      * @return Pointer to new status.
      */
-    MaterialStatus *setMaterialStatus(MaterialStatus *ptr)
+    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr,classType i)
     {
-        delete matStatus;
-        return ( matStatus = ptr );
+      if (this->statusDict.includes(i)) {
+	OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
+      } else {
+	this->statusDict.add(i, ptr);
+	return ptr;
+      }
     }
     /**
      * Returns index-th slave gauss point of receiver.

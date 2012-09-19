@@ -37,7 +37,7 @@
 #include "material.h"
 
 namespace oofem {
-GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)
+  GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
 // Constructor. Creates a Gauss point belonging to element e, with number
 // n, with coordinates a, with weight w.
 {
@@ -45,7 +45,6 @@ GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, Ma
     number       = n;
     coordinates  = a;
     weight       = w;
-    matStatus    = NULL;
     numberOfGp   = 0;
     gaussPointArray = NULL;
     materialMode = mode;
@@ -58,9 +57,6 @@ GaussPoint :: ~GaussPoint()
 // Destructor.
 {
     delete coordinates;
-    if ( matStatus ) {
-        delete matStatus;
-    }
 
     if ( gaussPointArray ) {
         for ( int i = 0; i < numberOfGp; i++ ) {
@@ -82,14 +78,19 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     int i;
     int iruleNumber = 0;
-
+    
     if ( irule ) {
         iruleNumber = irule->giveNumber();
     }
 
     fprintf(File, "  GP %2d.%-2d :", iruleNumber, number);
-    if ( matStatus ) {
-        matStatus->printOutputAt(File, stepN);
+
+    // invoke printOutputAt method for all managed statuses
+    IntegrationPointStatus* status;
+    TDictionaryIterator<classType, IntegrationPointStatus > iterator( &this->statusDict );
+    iterator.initialize( &this->statusDict );
+    while ( ( status = iterator.next() ) ) {
+      status->printOutputAt(File, stepN);
     }
 
     if ( numberOfGp != 0 ) { // layered material

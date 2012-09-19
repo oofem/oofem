@@ -462,8 +462,8 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     int nGP = iRule->getNumberOfIntegrationPoints();
     for ( i = 0; i < nGP; i++ ) {
         GaussPoint *gpi = iRule->getIntegrationPoint(i);
-        StructuralMaterialStatus *matstatus = ( StructuralMaterialStatus * ) gpi->giveMaterialStatus();
-        sumstrain.add( matstatus->giveTempStrainVector() );
+        StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus* >( this->giveMaterial()->giveStatus(gpi));
+	if (matstatus) sumstrain.add( matstatus->giveTempStrainVector() );
     }
 
     StrainVector sumstrainvec(sumstrain, _PlaneStress);

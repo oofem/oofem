@@ -223,12 +223,17 @@ template< class Key, class T >TDictionaryIterator< Key, T > :: TDictionaryIterat
 }
 
 template< class Key, class T >T *TDictionaryIterator< Key, T > :: next() {
-    TPair< Key, T > *ret = curr ? ( curr = curr->giveNext() ) : 0;
+  if (curr) {
+    TPair< Key, T > *ret = curr;
+    curr = curr->giveNext();
     if ( curr == list->last ) {
-        curr = 0;
+      curr = 0;
     }
-
-    return ret ? ret->giveValue() : 0;
+    
+    return ret->giveValue();
+  } else {
+    return 0;
+  }
 }
 } // end namespace oofem
 #endif // tdictionary_h
