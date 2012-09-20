@@ -160,6 +160,8 @@ public:
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates local coordinates from given global ones.
+     * If local coordinates cannot be found (generate elements, or point far outside geometry, 
+     * then the center coordinate will be used as a last resort, and the return value will be zero.
      * @param answer Contains evaluated local coordinates.
      * @param gcoords Array containing global coordinates.
      * @param cellgeo Underlying cell geometry.

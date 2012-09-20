@@ -56,14 +56,6 @@ public:
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-
-protected:
-    /**
-     * Computes the real length of element geometry.
-     * @param cellgeo Cell geometry.
-     * @return Length of cell.
-     */
-    double computeLength(const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif // fei1dlin_h

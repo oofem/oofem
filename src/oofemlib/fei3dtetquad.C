@@ -173,7 +173,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
         //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
-        answer.resize(0);
+        answer.zero();
         return false;
     }
 
@@ -181,16 +181,21 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     answer(0) = lcoords_guess(0);
     answer(1) = lcoords_guess(1);
     answer(2) = lcoords_guess(2);
-    answer(3) = 1.0 - lcoords_guess(0) - lcoords_guess(1) - lcoords_guess(2);
 
-    for (int  i = 0; i < 4; i++ ) {
+    bool inside = true;
+    for (int  i = 0; i < 3; i++ ) {
         if ( answer(i) < ( 0. - POINT_TOL ) ) {
-            return false;
+            answer(i) = 0.;
+            inside = false;
         } else if ( answer(i) > ( 1. + POINT_TOL ) ) {
-            return false;
+            answer(i) = 1.;
+            inside = false;
         }
     }
-    return true;
+    
+    answer(3) = 1.0 - answer(0) - answer(1) - answer(2); // Do this afterwards, since it might get clamped.
+
+    return inside;
 }
 
 

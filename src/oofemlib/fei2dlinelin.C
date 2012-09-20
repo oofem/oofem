@@ -78,8 +78,8 @@ int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, 
     xi = xi*2 - 1;
 
     answer.resize(1);
-    answer(0) = xi;
-    return true;
+    answer(0) = clamp(xi, -1., 1.);
+    return false;
 }
 
 void FEI2dLineLin :: edgeEvaldNds(FloatArray &answer, int iedge,

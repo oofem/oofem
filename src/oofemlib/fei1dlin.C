@@ -42,7 +42,7 @@ namespace oofem {
 double
 FEI1dLin :: giveLength(const FEICellGeometry &cellgeo) const
 {
-    return fabs( cellgeo.giveVertexCoordinates(1)->at(cindx) - cellgeo.giveVertexCoordinates(2)->at(cindx) );
+    return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
 
 void
@@ -58,7 +58,7 @@ FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGe
 void
 FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l = this->computeLength(cellgeo);
+    double l = cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx);
     answer.resize(2, 1);
 
     answer.at(1, 1) = -1.0 / l;
@@ -73,7 +73,7 @@ FEI1dLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FE
 
     this->evalN(n, lcoords, cellgeo);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-                    n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
+                     n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
 }
 
 int
@@ -82,24 +82,18 @@ FEI1dLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEI
     double ksi, x1, x2;
     answer.resize(1);
 
-
     x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
     x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
 
-    answer.at(1) = ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
-    return ( fabs(ksi) <= 1.0 ) ? 1 : 0;
+    ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
+    answer.at(1) = clamp(ksi, -1., 1.);
+    return fabs(ksi) <= 1.0;
 }
 
 double
 FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l = computeLength(cellgeo);
-    return 0.5 * l;
+    return 0.5 * ( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
 
-double
-FEI1dLin :: computeLength(const FEICellGeometry &cellgeo)
-{
-    return ( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
-}
 } // end namespace oofem

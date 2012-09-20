@@ -635,7 +635,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         this->at(1, 1) = 1. / src.at(1, 1);
         return;
     } else if ( nRows == 2 ) {
-        det  = src.at(1, 1) * src.at(2, 2) - src.at(1, 2) * src.at(2, 1);
+        det = src.at(1, 1) * src.at(2, 2) - src.at(1, 2) * src.at(2, 1);
         this->at(1, 1) =  src.at(2, 2) / det;
         this->at(2, 1) = -src.at(2, 1) / det;
         this->at(1, 2) = -src.at(1, 2) / det;

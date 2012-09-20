@@ -87,8 +87,7 @@ FEI3dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     FloatArray n(2);
     ksi = lcoords.at(1);
 
-    answer.resize(0);
-    answer.add( ( 1. - ksi ) * 0.5, *cellgeo.giveVertexCoordinates(1) );
+    answer.beScaled( ( 1. - ksi ) * 0.5, *cellgeo.giveVertexCoordinates(1) );
     answer.add( ( 1. + ksi ) * 0.5, *cellgeo.giveVertexCoordinates(2) );
 }
 
@@ -103,7 +102,8 @@ FEI3dLineLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     double xvec = x.dotProduct(vec);
 
     answer.setValues(1, 2.0 * xvec / l2 - 1.0);
-    return 1;
+    answer.at(1) = clamp(answer.at(1), -1.0, 1.0);
+    return false; // No point to check if point is "inside".
 }
 
 

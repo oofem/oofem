@@ -85,11 +85,11 @@ FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
     l3 = 1.0 - l1 - l2;
 
     answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                    l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
-                    l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
+                     l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
+                     l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
     answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                    l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
-                    l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
+                     l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
+                     l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
 }
 
 #define POINT_TOL 1.e-3
@@ -112,21 +112,23 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
-    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(xind) + ( x2 - x1 ) * coords.at(yind) ) / detJ;
+    //answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(xind) + ( x2 - x1 ) * coords.at(yind) ) / detJ;
 
     // check if point is inside
-    int i;
-    for ( i = 1; i <= 3; i++ ) {
+    bool inside = true;
+    for ( int i = 1; i <= 2; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            answer.at(i) = 0.;
+            inside = false;
+        } else if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
+            answer.at(i) = 1.;
+            inside = false;
         }
     }
+    
+    answer.at(3) = 1. - answer.at(1) - answer.at(2);
 
-    return 1;
+    return inside;
 }
 
 
@@ -246,7 +248,7 @@ FEI2dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cell
 
     dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
     dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
-    return ( sqrt(dx * dx + dy * dy) );
+    return sqrt(dx * dx + dy * dy);
 }
 
 double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const

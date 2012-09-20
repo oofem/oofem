@@ -102,8 +102,9 @@ FEI1dHermite :: global2local(FloatArray &answer, const FloatArray &coords, const
     x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
     x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
 
-    answer.at(1) = ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
-    return ( fabs(ksi) <= 1.0 ) ? 1 : 0;
+    ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
+    answer.at(1) = clamp(ksi, -1., 1.);
+    return fabs(ksi) <= 1.0;
 }
 
 double

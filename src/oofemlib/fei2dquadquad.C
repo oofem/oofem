@@ -83,17 +83,6 @@ FEI2dQuadQuad :: giveArea(const FEICellGeometry &cellgeo) const
 void
 FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    /* Local Node Numbering
-     *
-     *  4----7--- 3
-     *  |         |
-     *  |         |
-     *  8         6
-     *  |         |
-     *  |         |
-     *  1----5----2
-     */
-
     double ksi, eta;
 
     answer.resize(8);
@@ -191,17 +180,23 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
         //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
+        answer.zero();
         return false;
     }
 
-    // check limits for each local coordinate [-1,1] for quadrilaterals. (different for other elements, typically [0,1]).
+    // check limits for each local coordinate [-1,1] for quadrilaterals
+    bool inside = true;
     for (int i = 1; i <= answer.giveSize(); i++ ) {
-        if ( fabs( answer.at(i) ) > ( 1. + POINT_TOL ) ) {
-            return false;
+        if ( answer.at(i) < ( -1. - POINT_TOL ) ) {
+            answer.at(i) = -1.;
+            inside = false;
+        } else if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
+            answer.at(i) = 1.;
+            inside = false;
         }
     }
 
-    return true;
+    return inside;
 }
 
 
@@ -226,8 +221,8 @@ FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const 
     answer.resize(3);
 
     n3 = 1. - ksi * ksi;
-    answer.at(1) = ( 1. - ksi ) * 0.5 - 0.5 * n3;
-    answer.at(2) = ( 1. + ksi ) * 0.5 - 0.5 * n3;
+    answer.at(1) = ( 1. - ksi - n3 ) * 0.5;
+    answer.at(2) = ( 1. + ksi - n3 ) * 0.5;
     answer.at(3) = n3;
 }
 
@@ -249,11 +244,11 @@ FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
-                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
+                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+                     n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
-                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
+                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+                     n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
 }
 
 

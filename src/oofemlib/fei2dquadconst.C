@@ -42,15 +42,15 @@ void
 FEI2dQuadConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1);
-    answer.at(1) = 1;
+    answer.at(1) = 1.;
 }
 
 void
 FEI2dQuadConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(1, 2);
-    answer.at(1, 1) = 0;
-    answer.at(1, 2) = 0;
+    answer.at(1, 1) = 0.;
+    answer.at(1, 2) = 0.;
 }
 
 void
@@ -59,23 +59,21 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
     answer.resize(2);
 
     answer.at(1) = 0.25*( cellgeo.giveVertexCoordinates(1)->at(xind) +
-                    cellgeo.giveVertexCoordinates(2)->at(xind) +
-                    cellgeo.giveVertexCoordinates(3)->at(xind) +
-                    cellgeo.giveVertexCoordinates(4)->at(xind) );
+                          cellgeo.giveVertexCoordinates(2)->at(xind) +
+                          cellgeo.giveVertexCoordinates(3)->at(xind) +
+                          cellgeo.giveVertexCoordinates(4)->at(xind) );
     answer.at(2) = 0.25*( cellgeo.giveVertexCoordinates(1)->at(yind) +
-                    cellgeo.giveVertexCoordinates(2)->at(yind) +
-                    cellgeo.giveVertexCoordinates(3)->at(yind) +
-                    cellgeo.giveVertexCoordinates(4)->at(yind) );
+                          cellgeo.giveVertexCoordinates(2)->at(yind) +
+                          cellgeo.giveVertexCoordinates(3)->at(yind) +
+                          cellgeo.giveVertexCoordinates(4)->at(yind) );
 }
 
 
 int
 FEI2dQuadConst :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(2);
-    answer.at(1)=answer.at(2) = 0.0;
-
-    return 1;
+    OOFEM_ERROR("FEI2dQuadConst :: global2local: not implemented");
+    return false;
 }
 
 
@@ -138,9 +136,6 @@ FEI2dQuadConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 
     edgeNodes.at(1) = aNode;
     edgeNodes.at(2) = bNode;
-
-    //OOFEM_ERROR("FEI2dQuadConst :: computeLocalEdgeMapping: not implemented");
-
 }
 
 double
@@ -149,11 +144,11 @@ FEI2dQuadConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &
     double dx, dy;
     int nodeA, nodeB;
 
-    nodeA   = edgeNodes.at(1);
-    nodeB   = edgeNodes.at(2);
+    nodeA = edgeNodes.at(1);
+    nodeB = edgeNodes.at(2);
 
-    dx      = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    dy      = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
-    return ( sqrt(dx * dx + dy * dy) );
+    dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
+    dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
+    return sqrt(dx * dx + dy * dy);
 }
 } // end namespace oofem

@@ -101,8 +101,8 @@ int FEI2dLineHermite :: global2local(FloatArray &answer, const FloatArray &gcoor
     xi = xi*2.0 - 1.0;
 
     answer.resize(1);
-    answer(0) = xi;
-    return true;
+    answer(0) = clamp(xi, -1., 1.);
+    return false;
 }
 
 void FEI2dLineHermite :: edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

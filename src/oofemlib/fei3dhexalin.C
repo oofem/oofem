@@ -166,7 +166,8 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     do {
         if ( ( ++nite ) > 10 ) {
             // fprintf(stderr, "FEI3dHexaLin :: global2local: no convergence after 10 iterations");
-            return 0;
+            answer.zero();
+            return false;
         }
 
         u = answer.at(1);
@@ -203,17 +204,18 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     } while ( 1 );
 
     // test if inside
+    bool inside = true;
     for ( int i = 1; i <= 3; i++ ) {
         if ( answer.at(i) < ( -1. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            answer.at(i) = -1.;
+            inside = false;
+        } else if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
+            answer.at(i) = 1.;
+            inside = false;
         }
     }
 
-    return 1;
+    return inside;
 }
 
 
@@ -454,8 +456,6 @@ FEI3dHexaLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 {
     FloatMatrix dNduvw, coords;
     this->giveLocalDerivative(dNduvw, lcoords);
-    jacobianMatrix.resize(3, 3);
-    jacobianMatrix.zero();
     coords.resize(3, 8);
     for ( int i = 1; i <= 8; i++ ) {
         coords.setColumn(*cellgeo.giveVertexCoordinates(i), i);

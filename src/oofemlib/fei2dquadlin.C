@@ -73,7 +73,6 @@ FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
 void
 FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    int i;
     FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
     FloatArray nx(4), ny(4);
 
@@ -85,7 +84,7 @@ FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 
     answer.resize(4, 2);
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(i, 1) = nx.at(i) * inv.at(1, 1) + ny.at(i) * inv.at(1, 2);
         answer.at(i, 2) = nx.at(i) * inv.at(2, 1) + ny.at(i) * inv.at(2, 2);
     }
@@ -106,9 +105,9 @@ FEI2dQuadLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
 
     answer.resize(2);
     answer.at(1) = n1 * cellgeo.giveVertexCoordinates(1)->at(xind) + n2 *cellgeo.giveVertexCoordinates(2)->at(xind) +
-                   n3 *cellgeo.giveVertexCoordinates(3)->at(xind) + n4 *cellgeo.giveVertexCoordinates(4)->at(xind);
+                   n3 * cellgeo.giveVertexCoordinates(3)->at(xind) + n4 *cellgeo.giveVertexCoordinates(4)->at(xind);
     answer.at(2) = n1 * cellgeo.giveVertexCoordinates(1)->at(yind) + n2 *cellgeo.giveVertexCoordinates(2)->at(yind) +
-                   n3 *cellgeo.giveVertexCoordinates(3)->at(yind) + n4 *cellgeo.giveVertexCoordinates(4)->at(yind);
+                   n3 * cellgeo.giveVertexCoordinates(3)->at(yind) + n4 *cellgeo.giveVertexCoordinates(4)->at(yind);
 }
 
 #define POINT_TOL 1.e-6
@@ -150,7 +149,8 @@ FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     cubic(0.0, a, b, c, & ksi1, & ksi2, & ksi3, & nroot);
 
     if ( nroot == 0 ) {
-        return 0;
+        answer.zero();
+        return false;
     }
 
     if ( nroot ) {
@@ -223,17 +223,18 @@ FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const
     answer.at(2) = eta1;
 
     // test if inside
+    bool inside = true;
     for ( int i = 1; i <= 2; i++ ) {
         if ( answer.at(i) < ( -1. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            answer.at(i) = -1.;
+            inside = false;
+        } else if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
+            answer.at(i) = 1.;
+            inside = false;
         }
     }
 
-    return 1;
+    return inside;
 }
 
 double
@@ -327,12 +328,12 @@ FEI2dQuadLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
     double dx, dy;
     int nodeA, nodeB;
 
-    nodeA   = edgeNodes.at(1);
-    nodeB   = edgeNodes.at(2);
+    nodeA = edgeNodes.at(1);
+    nodeB = edgeNodes.at(2);
 
-    dx      = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    dy      = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
-    return ( sqrt(dx * dx + dy * dy) );
+    dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
+    dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
+    return sqrt(dx * dx + dy * dy);
 }
 
 void
@@ -340,7 +341,6 @@ FEI2dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 // Computes it if it does not exist yet.
 {
-    int i;
     double ksi, eta, x, y;
     FloatArray nx(4), ny(4);
 
@@ -353,7 +353,7 @@ FEI2dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
     this->giveDerivativeKsi(nx, eta);
     this->giveDerivativeEta(ny, ksi);
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(xind);
         y = cellgeo.giveVertexCoordinates(i)->at(yind);
 

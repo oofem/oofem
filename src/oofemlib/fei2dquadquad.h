@@ -40,6 +40,14 @@
 namespace oofem {
 /**
  * Class representing a 2d quadrilateral with quadratic interpolation based on isoparametric coordinates.
+ * Local Node Numbering
+ * (4)--(7)--(3)
+ *  |         |
+ *  |         |
+ * (8)       (6)
+ *  |         |
+ *  |         |
+ * (1)--(5)--(2)
  */
 class FEI2dQuadQuad : public FEInterpolation2d
 {

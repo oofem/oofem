@@ -77,47 +77,40 @@ FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const F
 int
 FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    double  x1, x2, x3;
-    answer.resize(1);
+    double x1, x2, x3;
     double a,b,c;
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
     x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
     x3 = cellgeo.giveVertexCoordinates(3)->at(cindx);
 
-    a = 1./2.*(x1+x2)-x3;
-    b = 1./2.*(x2-x1);
+    a = 0.5*(x1+x2)-x3;
+    b = 0.5*(x2-x1);
     c = x3 - coords.at(1);
 
+    answer.resize(1);
     if(fabs(a)<10.e-6)
     {
-        double ksi;
-        answer.at(1) = ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
-        return ( fabs(ksi) <= 1.0 ) ? 1 : 0;
+        double ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
+        answer.at(1) = clamp(ksi, -1., 1.);
+        return fabs(ksi) <= 1.0;
     }
     else
     {
-        double ksi1 = (-b+sqrt(b*b-4*a*c))/(2.*a);
-        double ksi2 = (-b-sqrt(b*b-4*a*c))/(2.*a);
+        double ksi1 = (-b+sqrt(b*b-4.*a*c))/(2.*a);
+        double ksi2 = (-b-sqrt(b*b-4.*a*c))/(2.*a);
 
-        if((fabs(ksi1)<=1)&&(fabs(ksi2)<=1))
-        {
-            // _error("FEI1dQuad::global2local:Element is not well defined");
+        if( (fabs(ksi1) <= 1.) && (fabs(ksi2) <= 1.) ) { // Two roots, element must be bad
+            answer.at(1) = 0.;
             return 0;
-        }
-
-        else if (fabs(ksi1)<=1)
-        {
+        } else if ( fabs(ksi1) <= 1. ) {
             answer.at(1) = ksi1;
             return 1;
-        }
-        else if(fabs(ksi2)<=1)
-        {
+        } else if( fabs(ksi2) <= 1. ) {
             answer.at(1) = ksi2;
             return 1;
-        }
-        else
-        {
+        } else {
+            answer.at(1) = 0.;
             return 0;
         }
     }

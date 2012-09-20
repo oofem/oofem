@@ -185,23 +185,28 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
         //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
-        answer.resize(0);
+        answer.setValues(3, 1./3., 1./3., 1./3.);
         return false;
     }
 
     answer.resize(3);
     answer(0) = lcoords_guess(0);
     answer(1) = lcoords_guess(1);
-    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
 
-    for (int  i = 0; i < 3; i++ ) {
+    bool inside = true;
+    for (int  i = 0; i < 2; i++ ) {
         if ( answer(i) < ( 0. - POINT_TOL ) ) {
-            return false;
+            answer(i) = 0.;
+            inside = false;
         } else if ( answer(i) > ( 1. + POINT_TOL ) ) {
-            return false;
+            answer(i) = 1.;
+            inside = false;
         }
     }
-    return true;
+
+    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
+    
+    return inside;
 }
 
 

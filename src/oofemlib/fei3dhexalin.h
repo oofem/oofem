@@ -73,11 +73,11 @@ public:
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
 
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
     void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
-public:
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif //  fei3dhexalin_h

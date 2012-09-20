@@ -115,8 +115,9 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
         }
     }
 
-    answer(0) = min_xi;
-    return true;
+    answer(0) = clamp(min_xi, -1., 1.); // Make sure to only give coordinates within the geometry.
+    
+    return false; // It will never land exactly on the geometry.
 }
 
 void FEI2dLineQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)

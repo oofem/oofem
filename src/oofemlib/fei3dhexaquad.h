@@ -42,11 +42,32 @@
 namespace oofem {
 /**
  * Class representing implementation of quadratic hexahedra interpolation class.
+ *  ***  numbering like T3d  ***            ***  numbering like T3d  ***
+ *  ***  numbering of nodes  ***            ***  numbering of surfs  ***
+ *
+ *              zeta
+ *        1      ^  9         2
+ *         +-----|--+--------+                     +-----------------+
+ *        /|     |          /|                    /|                /|
+ *       / |     |         / |                   / |               / |
+ *    12+  |     o      10+  |                  /  |     1        /  |
+ *     /   |     |       /   |                 /   |             /   |
+ *  4 /  17+  11 |    3 /    +18              /    |       (3)  /    |
+ *   +--------+--------+     |               +-----------------+     |
+ *   |     |     |     |     |               |     |           |     |
+ *   |     |     +-----|--o------> eta       | (6) |           |  4  |
+ *   |     |    /   13 |     |               |     |           |     |
+ *   |   5 +---/----+--|-----+ 6             |     +-----------|-----+
+ * 20+    /   o        +19  /                |    /   5        |    /
+ *   |   /   /         |   /                 |   /             |   /
+ *   |16+   /          |  +14                |  /       (2)    |  /
+ *   | /   /           | /                   | /               | /
+ *   |/   L ksi        |/                    |/                |/
+ *   +--------+--------+                     +-----------------+
+ *  8         15        7
  */
 class FEI3dHexaQuad : public FEInterpolation3d
 {
-protected:
-
 public:
     FEI3dHexaQuad() : FEInterpolation3d(2) { }
 
@@ -71,22 +92,18 @@ public:
 
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    //virtual void surfaceEvaldNdx (FloatMatrix&answer, int isurf,
-    //               const FloatArray& lcoords, const FEICellGeometry& cellgeo);
-    virtual void surfaceLocal2global(FloatArray &answer, int isurf,
-                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                     const FEICellGeometry &cellgeo);
+    virtual double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    //virtual void surfaceEvaldNdx (FloatMatrix&answer, int isurf, const FloatArray& lcoords, const FEICellGeometry& cellgeo);
+    virtual void surfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
     void computeGlobalSurfaceMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
 
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveDerivativeKsi(FloatArray &, double, double, double);
-    void giveDerivativeEta(FloatArray &, double, double, double);
-    void giveDerivativeDzeta(FloatArray &, double, double, double);
-public:
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 };
 } // end namespace oofem
 #endif
