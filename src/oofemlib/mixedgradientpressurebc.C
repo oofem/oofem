@@ -242,12 +242,18 @@ double MixedGradientPressureBC :: domainSize()
 
 void MixedGradientPressureBC :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
 {
+    EngngModel *emodel = this->giveDomain()->giveEngngModel();
+    FloatArray tmp;
     vol = this->giveVolDof()->giveUnknown(eid, VM_Total, tStep);
-    int npeq = this->giveDomain()->giveEngngModel()->giveNumberOfPrescribedDomainEquations(this->giveDomain()->giveNumber(), eid);
+    int npeq = emodel->giveNumberOfPrescribedDomainEquations(this->giveDomain()->giveNumber(), eid);
+    // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    this->domain->giveEngngModel()->assembleVector(sigmaDev, tStep, eid,
-        InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, eid, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    tmp.resize(npeq);
+    tmp.zero();
+    emodel->assembleVector(sigmaDev, tStep, eid, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times(1.0/this->domainSize());
     // Above, full sigma = sigmaDev - p*I is assembled, so to obtain the deviatoric part we add p to the diagonal part.

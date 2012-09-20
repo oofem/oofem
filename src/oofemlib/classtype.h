@@ -222,7 +222,6 @@ enum classType {
     CBSClass,
     SUPGClass,
     StokesFlowClass,
-    StokesFlowStressHomogenizationClass,
     DarcyFlowClass,
 
     NumericalMethodClass,

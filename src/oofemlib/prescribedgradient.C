@@ -42,6 +42,11 @@
 #include "loadtime.h"
 #include "engngm.h"
 #include "node.h"
+#include "usrdefsub.h" // For sparse matrix creation.
+#include "../fm/line2boundaryelement.h"
+
+#include "sparsemtrx.h"
+#include "sparselinsystemnm.h"
 
 namespace oofem {
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
@@ -186,6 +191,108 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
         }
     }
 }
+
+
+double PrescribedGradient :: domainSize()
+{
+    ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually
+    int nsd = this->domain->giveNumberOfSpatialDimensions();
+    double domain_size = 0.0;
+    // This requires the boundary to be consistent and ordered correctly.
+    for (int i = 1; i <= this->domain->giveNumberOfElements(); ++i) {
+        //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
+        ///@todo Support more than 2D
+        Line2BoundaryElement *e = dynamic_cast< Line2BoundaryElement* >(this->domain->giveElement(i));
+        if (e) {
+            domain_size += e->computeNXIntegral();
+        }
+    }
+    if  (domain_size == 0.0) { // No boundary elements? Assume full density;
+        return this->domain->giveArea(); ///@todo Support more than 2D
+    } else {
+        return domain_size/nsd;
+    }
+}
+
+
+void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
+{
+    EngngModel *emodel = this->domain->giveEngngModel();
+    int npeq = emodel->giveNumberOfPrescribedDomainEquations(this->giveDomain()->giveNumber(), eid);
+    FloatArray R_c(npeq), R_ext(npeq);
+
+    R_c.zero();
+    R_ext.zero();
+    emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
+                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+    emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
+                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+    R_c.subtract(R_ext);
+
+    // Condense it;
+    FloatMatrix C;
+    this->updateCoefficientMatrix(C);
+    sigma.beTProductOf(C, R_c);
+    sigma.times(1./this->domainSize());
+    
+}
+
+
+void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep)
+// a = [a_c; a_f];
+// K.a = [R_c,0];
+// [K_cc, K_cf; K_fc, K_ff].[a_c;a_f] = [R_c; 0];
+// a_c = d.[x-x_b] = [x-x_b].d = C.d
+// E = C'.(K_cc - K_cf.K_ff^(-1).K_fc).C
+//   = C'.(K_cc.C - K_cf.(K_ff^(-1).(K_fc.C)))
+//   = C'.(K_cc.C - K_cf.a)
+//   = C'.X
+{
+    // Fetch some information from the engineering model
+    EngngModel *rve = this->giveDomain()->giveEngngModel();
+    ///@todo Get this from engineering model
+    SparseLinearSystemNM *solver = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->domain, this->domain->giveEngngModel());// = rve->giveLinearSolver();
+    SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
+    SparseMtrxType stype = SMT_PetscMtrx;// = rve->giveSparseMatrixType();
+    EModelDefaultEquationNumbering fnum;
+    EModelDefaultPrescribedEquationNumbering pnum;
+
+    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    Kff = CreateUsrDefSparseMtrx(stype);
+    Kfp = CreateUsrDefSparseMtrx(stype);
+    Kpf = CreateUsrDefSparseMtrx(stype);
+    Kpp = CreateUsrDefSparseMtrx(stype);
+    if ( !Kff ) {
+        OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+    }
+    Kff->buildInternalStructure( rve, 1, eid, fnum, fnum );
+    Kfp->buildInternalStructure( rve, 1, eid, fnum, pnum );
+    Kpf->buildInternalStructure( rve, 1, eid, pnum, fnum );
+    Kpp->buildInternalStructure( rve, 1, eid, pnum, pnum );
+    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain );
+    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain );
+    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain );
+    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, pnum, this->domain );
+
+    FloatMatrix C, X, Kpfa, KfpC, a;
+    
+    this->updateCoefficientMatrix(C);
+    Kpf->timesT(C, KfpC);
+    solver->solve(Kff, KfpC, a);
+    Kpp->times(C, X);
+    Kpf->times(a, Kpfa);
+    X.subtract(Kpfa);
+    tangent.beTProductOf(C, X);
+    tangent.times(1./this->domainSize());
+
+    delete Kff;
+    delete Kfp;
+    delete Kpf;
+    delete Kpp;
+    
+    delete solver; ///@todo Remove this when solver is taken from engngmodel
+}
+
 
 IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 {

@@ -56,7 +56,6 @@
 #ifdef __FM_MODULE
  #include "cbs.h"
  #include "stokesflow.h"
- #include "stokesflowstresshomogenization.h"
  #include "stokesflowvelocityhomogenization.h"
  #include "supg.h"
 #endif // __FM_Module
@@ -87,7 +86,6 @@ REGISTER_CLASS(DarcyFlow, "darcyflow", DarcyFlowClass)
 REGISTER_CLASS(CBS, "cbs", CBSClass)
 REGISTER_CLASS(SUPG, "supg", SUPGClass)
 REGISTER_CLASS(StokesFlow, "stokesflow", StokesFlowClass)
-REGISTER_CLASS(StokesFlowStressHomogenization, "stokesflowstresshomogenization", StokesFlowStressHomogenizationClass)
 REGISTER_CLASS(StokesFlowVelocityHomogenization, "stokesflowvelocityhomogenization", StokesFlowVelocityHomogenizationClass)
 #endif //__FM_MODULE
 
