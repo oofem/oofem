@@ -75,7 +75,6 @@ public:
 
     virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
 
-    virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &gcoords) { return false; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
 

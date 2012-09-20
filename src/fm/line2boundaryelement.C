@@ -121,18 +121,6 @@ double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCente
     return c.distance(coords);
 }
 
-double Line2BoundaryElement :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
-{
-    if (!this->computeLocalCoordinates(lcoords, gcoords)) {
-        lcoords.resize(0);
-        closest.resize(0);
-        return -1.0;
-    }
-    // compute local coordinates already gives closest point.
-    this->computeGlobalCoordinates(closest, lcoords);
-    return closest.distance(gcoords);
-}
-
 int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
         TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
 {

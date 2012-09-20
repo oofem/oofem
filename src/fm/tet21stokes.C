@@ -424,17 +424,6 @@ int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTyp
     return true;
 }
 
-double Tet21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
-{
-    bool ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if (!ok) {
-        // To far away to even give a meaningful answer, just take the center.
-        lcoords.setValues(4, 0.3333333, 0.3333333, 0.3333333, 0.3333333);
-    }
-    this->computeGlobalCoordinates(closest, lcoords);
-    return closest.distance(gcoords);
-}
-
 void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer.setValues(4, V_u, V_v, V_w, P_f);

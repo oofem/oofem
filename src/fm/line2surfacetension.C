@@ -201,18 +201,6 @@ void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 #endif
 }
 
-double Line2SurfaceTension :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
-{
-    if (!this->computeLocalCoordinates(lcoords, gcoords)) {
-        lcoords.resize(0);
-        closest.resize(0);
-        return -1.0;
-    }
-    // compute local coordinates already gives closest point.
-    this->computeGlobalCoordinates(closest, lcoords);
-    return closest.distance(gcoords);
-}
-
 double Line2SurfaceTension :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords)
 {
     return this->giveNode(3)->giveCoordinates()->distance(gcoords);

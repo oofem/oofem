@@ -102,7 +102,6 @@ public:
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords) { return false; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
-    virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
         TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer);
