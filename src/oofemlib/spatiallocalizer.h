@@ -96,16 +96,13 @@ public:
 
     /**
      * Gives the closest point on the element.
+     * Default implementation uses the element interpolation.
      * @param[out] lcoords Local coordinates of closest point within the element.
      * @param[out] closest Global coordinates of closest point within the element.
      * @param gcoords Global coordinates.
      * @return Distance between answer and gcoords. Zero if gcoords is within the element, negative if point could not be found.
      */
-    virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
-    {
-        OOFEM_ERROR2("SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint - Not implemented for %s", this->giveClassName());
-        return 0.0;
-    }
+    virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
     //@}
 };
 

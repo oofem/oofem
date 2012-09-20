@@ -456,35 +456,6 @@ int Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType
     return true;
 }
 
-double Tr21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
-{
-    bool ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if (!ok) {
-        if (lcoords.giveSize() == 0) { // To far away to even give a meaningful answer, just take the center.
-            lcoords.setValues(3, 0.333333, 0.333333, 0.333333);
-        } else {
-            // This is not very accurate, only for points pretty close to the surface.
-            // I should be using normals to project it to the surface, but this is OK for points very close to the surface.2
-            double x1, x2;
-            x1 = max(lcoords(0),0.0);
-            x2 = max(lcoords(1),0.0);
-            if ( x2 > 1.0 + x1 ) {
-                x1 = 0.0;
-                x2 = 1.0;
-            } else if ( x2 < -1.0 + x1 ) {
-                x1 = 1.0;
-                x2 = 0.0;
-            } else {
-                x1 = 0.5*(1 + x1 - x2);
-                x2 = 1.0 - x1;
-            }
-            lcoords.setValues(3, x1, x2, 1.0 - x1 - x2);
-        }
-    }
-    this->computeGlobalCoordinates(closest, lcoords);
-    return closest.distance(gcoords);
-}
-
 void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer.setValues(3, V_u, V_v, P_f);

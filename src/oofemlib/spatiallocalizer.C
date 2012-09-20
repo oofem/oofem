@@ -38,6 +38,7 @@
 #include "node.h"
 #include "mathfem.h"
 #include "error.h"
+#include "feinterpol.h"
 
 namespace oofem {
 #define POINT_TOL 1.e-6
@@ -55,6 +56,22 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatAr
         coordinates = element->giveNode(i)->giveCoordinates();
         bb0.beMinOf(bb0, *coordinates);
         bb1.beMaxOf(bb1, *coordinates);
+    }
+}
+
+
+double
+SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
+{
+    Element *e = this->SpatialLocalizerI_giveElement();
+    FEInterpolation *interp = e->giveInterpolation();
+    
+    if ( !interp->global2local(lcoords, gcoords, FEIElementGeometryWrapper(e)) ) { // Outside element
+        interp->local2global(closest, lcoords, FEIElementGeometryWrapper(e));
+        return closest.distance(gcoords);
+    } else {
+        closest = gcoords;
+        return 0.0;
     }
 }
 

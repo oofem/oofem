@@ -148,14 +148,18 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
     } else {
         // Take the minimum of any region
         double mindist = 0.0, distance;
+        oelem = NULL;
         for ( int i = 1; i < regList.giveSize(); ++i ) {
             Element *tmpelem = sl->giveElementClosestToPoint(lcoords, closest, coords, regList.at(i) );
             distance = closest.distance_square(coords);
-            if ( ( tmpelem != NULL &&  distance < mindist ) || i == 1) {
-                mindist = distance;
-                oelem = tmpelem;
-                if (distance == 0.0) {
-                    break;
+            if ( tmpelem != NULL ) {
+                distance = closest.distance_square(coords);
+                if ( distance < mindist || i == 1 ) {
+                    mindist = distance;
+                    oelem = tmpelem;
+                    if (distance == 0.0) {
+                        break;
+                    }
                 }
             }
         }

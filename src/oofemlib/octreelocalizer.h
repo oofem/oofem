@@ -224,14 +224,14 @@ public:
      * Initialize receiver data structure if not done previously.
      * Current implementation calls and returns the buildOctreeDataStructure service response.
      */
-    int init(bool force = false);
+    virtual int init(bool force = false);
 
-    Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
-    GaussPoint *giveClosestIP(const FloatArray &coords, int region);
-    void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
-    void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
+    virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region);
+    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
+    virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
     virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
     virtual classType giveClassID() const { return OctreeSpatialLocalizerClass; }
