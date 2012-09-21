@@ -194,10 +194,17 @@ oofegGraphicContext :: setMaterialModelFilterState(int i, int state)
 void
 oofegGraphicContext :: setElementFilterState(char *initString)
 {
+    ///@todo Anyone who uses OOFEG should check to see if StringReader can be removed in favor of the new OOFEMTXTInputRecord parser (bug ticket 24)
+#if 1
     StringReader reader;
 
     element_filter.clear();
     reader.readRangeList(element_filter, initString, "element_filter");
+#else    
+    OOFEMTXTInputRecord parser(initString);
+    element_filter.clear();
+    parser.giveField(element_filter, IFT_Unknown, "element_filter");
+#endif
 }
 
 int
