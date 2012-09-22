@@ -3,7 +3,7 @@ Test of proper handling of changes of static system during computation
 #
 # supported only by some engng. models
 #
-IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 5. 1. 2. 3. 4. 5.
+IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 5 1. 2. 3. 4. 5.
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 6 nic 0 nltf 5

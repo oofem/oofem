@@ -96,8 +96,6 @@ class IDNLMaterial;
 class StructuralElement : public Element
 {
 protected:
-    /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
-    int activityLtf;
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
     FloatArray *initialDisplacements;
 public:
@@ -296,22 +294,6 @@ public:
      */
     virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime);
     //@}
-
-    /**
-     * @return True, if receiver is activated for given solution step, otherwise false.
-     */
-    bool isActivated(TimeStep *tStep)
-    {
-        if ( activityLtf ) {
-            if ( tStep ) {
-                return ( domain->giveLoadTimeFunction(activityLtf)->evaluate(tStep, VM_Total) > 1.e-3 );
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
 
     // Overloaded methods.
     virtual int adaptiveUpdate(TimeStep *tStep);

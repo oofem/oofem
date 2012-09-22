@@ -52,6 +52,7 @@
 #include "feinterpol1d.h"
 #include "feinterpol2d.h"
 #include "feinterpol3d.h"
+#include "loadtime.h"
 
 #ifndef __MAKEDEPEND
  #include <cstdio>
@@ -64,6 +65,7 @@ Element :: Element(int n, Domain *aDomain) :
     material           = 0;
     numberOfDofMans    = 0;
     numberOfIntegrationRules = 0;
+    activityLtf = 0;
     locationArray      = NULL;
     integrationRulesArray  = NULL;
 }
@@ -605,6 +607,8 @@ Element :: initializeFrom(InputRecord *ir)
     }
 
 #endif
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_Element_activityltf, "activityltf"); // Macro
 
     return IRRT_OK;
 }
@@ -647,6 +651,21 @@ Element :: updateYourself(TimeStep *tStep)
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
 }
+
+bool 
+Element :: isActivated(TimeStep *tStep)
+{
+    if ( activityLtf ) {
+        if ( tStep ) {
+            return ( domain->giveLoadTimeFunction(activityLtf)->evaluate(tStep, VM_Total) > 1.e-3 );
+        } else {
+            return false;
+        }
+    } else {
+        return true;
+    }
+}
+
 
 
 void

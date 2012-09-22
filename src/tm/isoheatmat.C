@@ -80,23 +80,29 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
      * returns constitutive (conductivity) matrix of receiver
      */
     MaterialMode mMode = gp->giveMaterialMode();
+    double cond = this->giveIsotropicConductivity(gp);
+    
+    if ( !isActivated(atTime) ) {
+         //cond *= 1.e-4;
+    }
+    
     switch  ( mMode ) {
     case _1dHeat:
         answer.resize(1, 1);
-        answer.at(1, 1) = conductivity;
+        answer.at(1, 1) = cond;
     case _2dHeat:
         answer.resize(2, 2);
-        answer.at(1, 1) = conductivity;
-        answer.at(2, 2) = conductivity;
+        answer.at(1, 1) = cond;
+        answer.at(2, 2) = cond;
         return;
 
     case _3dHeat:
         answer.resize(3, 3);
-        answer.at(1, 1) = conductivity;
-        answer.at(2, 2) = conductivity;
-        answer.at(3, 3) = conductivity;
+        answer.at(1, 1) = cond;
+        answer.at(2, 2) = cond;
+        answer.at(3, 3) = cond;
         return;
-
+    
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }

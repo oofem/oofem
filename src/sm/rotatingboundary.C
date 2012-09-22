@@ -124,9 +124,6 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    isImposedTimeFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, IFT_BoundaryCondition_IsImposedTimeFunct, "isimposedtimefunction"); // Macro
-
     IR_GIVE_FIELD(ir, axis, IFT_RotatingBoundary_axis, "axis"); // Macro
     axis.normalize();
 
@@ -142,7 +139,6 @@ RotatingBoundary :: giveInputRecordString(std :: string &str, bool keyword)
 
     GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
 
-    sprintf(buff, " isimposedtimefunction %d ", this->isImposedTimeFunction);
     str += buff;
 
     return 1;

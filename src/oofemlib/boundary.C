@@ -49,20 +49,6 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 }
 
 
-bool BoundaryCondition :: isImposed(TimeStep *tStep)
-{
-    // Returns a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
-    // in given time (nonzero indicates imposed b.c.).
-
-    if ( isImposedTimeFunction ) {
-        return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
-    } else {
-        // zero value indicates default behavior -> b.c. is imposed
-        // anytime
-        return true;
-    }
-}
-
 IRResultType
 BoundaryCondition :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
@@ -72,9 +58,6 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     GeneralBoundaryCondition :: initializeFrom(ir);
-
-    isImposedTimeFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, IFT_BoundaryCondition_IsImposedTimeFunct, "isimposedtimefunction"); // Macro
 
     if ( ir->hasField(IFT_BoundaryCondition_PrescribedValue, "prescribedvalue") ) {
         IR_GIVE_FIELD(ir, prescribedValue, IFT_BoundaryCondition_PrescribedValue, "prescribedvalue"); // Macro
@@ -93,8 +76,7 @@ BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
     char buff [ 1024 ];
 
     GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf(buff, " isimposedtimefunction %d prescribedvalue %e",
-            this->isImposedTimeFunction, this->prescribedValue);
+    sprintf(buff, " prescribedvalue %e", this->prescribedValue);
     str += buff;
 
     return 1;

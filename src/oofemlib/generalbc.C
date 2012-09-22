@@ -33,12 +33,15 @@
  */
 
 #include "generalbc.h"
+#include "valuemodetype.h"
 #include "bcvaltype.h"
+#include "loadtime.h"
 
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
 {
     loadTimeFunction = 0;
+    isImposedTimeFunction = 0;
 }
 
 
@@ -71,7 +74,23 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, IFT_GeneralBoundaryCondition_defaultDofs, "defaultdofs"); // Macro
 
+    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, IFT_GeneralBoundaryCondition_IsImposedTimeFunct, "isimposedtimefunction"); // Macro
+    
     return IRRT_OK;
+}
+
+bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
+{
+    // Returns a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
+    // in given time (nonzero indicates imposed b.c.).
+
+    if ( isImposedTimeFunction ) {
+        return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
+    } else {
+        // zero value indicates default behavior -> b.c. is imposed
+        // anytime
+        return true;
+    }
 }
 
 
@@ -82,6 +101,10 @@ GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keywo
 
     FEMComponent :: giveInputRecordString(str, keyword);
     sprintf(buff, " loadtimefunction %d", this->loadTimeFunction);
+    str += buff;
+    
+    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
+    sprintf(buff, " isimposedtimefunction %d ", this->isImposedTimeFunction);
     str += buff;
 
     return 1;

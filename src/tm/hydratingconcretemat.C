@@ -152,7 +152,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
 }
 
 
-double HydratingConcreteMat :: giveConcreteConductivity(GaussPoint *gp)
+double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp)
 {
     HydratingConcreteMatStatus *ms = ( HydratingConcreteMatStatus * ) this->giveStatus(gp);
     double conduct;
@@ -403,7 +403,7 @@ HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
     HydratingConcreteMat *mat = ( HydratingConcreteMat * ) this->gp->giveMaterial();
     TransportMaterialStatus :: printOutputAt(file, atTime);
     fprintf(file, "   status {");
-    fprintf( file, "IntrinsicTime %e  DoH %f HeatPower %f [W/m3 of concrete] conductivity %f  capacity %f  density %f", atTime->giveIntrinsicTime(), this->giveDoHActual(), this->power, mat->giveConcreteConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
+    fprintf( file, "IntrinsicTime %e  DoH %f HeatPower %f [W/m3 of concrete] conductivity %f  capacity %f  density %f", atTime->giveIntrinsicTime(), this->giveDoHActual(), this->power, mat->giveIsotropicConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );
     fprintf(file, "}\n");
 }
 

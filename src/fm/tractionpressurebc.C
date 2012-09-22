@@ -54,21 +54,12 @@ TractionPressureBC :: initializeFrom(InputRecord *ir)
 
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    isImposedTimeFunction = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isImposedTimeFunction, IFT_BoundaryCondition_IsImposedTimeFunct, "isimposedtimefunction"); // Macro
-
     return IRRT_OK;
 }
 
 int
 TractionPressureBC :: giveInputRecordString(std :: string &str, bool keyword)
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-    sprintf(buff, " isimposedtimefunction %d ", this->isImposedTimeFunction);
-    str += buff;
-
     return 1;
 }
 } // end namespace oofem

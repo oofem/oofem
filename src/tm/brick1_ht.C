@@ -92,7 +92,7 @@ Brick1_ht :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->Element :: initializeFrom(ir);
+    this->TransportElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_Brick1_ht_nip, "nip"); // Macro
 

@@ -175,7 +175,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp)
 }
 
 //standard units are [Wm-1K-1]
-double CemhydMat :: giveConcreteConductivity(GaussPoint *gp)
+double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
     double conduct;
@@ -265,34 +265,6 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
     return concreteBulkDensity;
 }
 
-void
-CemhydMat :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
-{
-    MaterialMode mMode = gp->giveMaterialMode();
-    double conduct = giveConcreteConductivity(gp);
-
-    switch  ( mMode ) {
-    case _1dHeat:
-        answer.resize(1, 1);
-        answer.at(1, 1) = conduct;
-    case _2dHeat:
-        answer.resize(2, 2);
-        answer.at(1, 1) = conduct;
-        answer.at(2, 2) = conduct;
-        return;
-
-    case _3dHeat:
-        answer.resize(3, 3);
-        answer.at(1, 1) = conduct;
-        answer.at(2, 2) = conduct;
-        answer.at(3, 3) = conduct;
-        return;
-
-    default:
-        OOFEM_ERROR2( "giveCharacteristicMatrix : unknown mode (%s)\n", __MaterialModeToString(mMode) );
-    }
-}
-
 double
 CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
@@ -355,7 +327,7 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSt
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
         answer.resize(1);
-        answer.at(1) = this->giveConcreteConductivity(aGaussPoint);
+        answer.at(1) = this->giveIsotropicConductivity(aGaussPoint);
         return 1;
     } else if ( type == IST_HeatCapacity ) {
         answer.resize(1);
@@ -14372,7 +14344,7 @@ CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
 
     TransportMaterialStatus :: printOutputAt(file, atTime);
     fprintf(file, "   status {");
-    fprintf( file, "cyc %d  time %e  DoH %f  conductivity %f  capacity %f  density %f", cemhydmat->giveCycleNumber(this->gp), 3600 * cemhydmat->giveTimeOfCycle(this->gp), cemhydmat->giveDoHActual(this->gp), cemhydmat->giveConcreteConductivity(this->gp), cemhydmat->giveConcreteCapacity(this->gp), cemhydmat->giveConcreteDensity(this->gp) );
+    fprintf( file, "cyc %d  time %e  DoH %f  conductivity %f  capacity %f  density %f", cemhydmat->giveCycleNumber(this->gp), 3600 * cemhydmat->giveTimeOfCycle(this->gp), cemhydmat->giveDoHActual(this->gp), cemhydmat->giveIsotropicConductivity(this->gp), cemhydmat->giveConcreteCapacity(this->gp), cemhydmat->giveConcreteDensity(this->gp) );
     if ( ms->Calculate_elastic_homogenization ) {
         fprintf(file, " EVirginPaste %f NuVirginPaste %f EConcrete %f NuConcrete %f", ms->last_values [ 2 ], ms->last_values [ 3 ], ms->last_values [ 4 ], ms->last_values [ 5 ]);
     }

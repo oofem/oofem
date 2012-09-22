@@ -1301,13 +1301,11 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 IRResultType
 StructuralElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     result = Element :: initializeFrom(ir);
 
-    activityLtf = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_StructuralElement_activityltf, "activityltf"); // Macro
     return result;
 }
 

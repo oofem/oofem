@@ -304,11 +304,11 @@ enum InputFieldType {
     IFT_FETISolver_limit,
     IFT_FETISolver_energynormflag,
 
-    IFT_GeneralBoundaryCondition_LoadTimeFunct,
-    IFT_BoundaryCondition_IsImposedTimeFunct,
     IFT_BoundaryCondition_PrescribedValue,
+    IFT_GeneralBoundaryCondition_LoadTimeFunct,
     IFT_GeneralBoundaryCondition_valType,
     IFT_GeneralBoundaryCondition_defaultDofs,
+    IFT_GeneralBoundaryCondition_IsImposedTimeFunct,
     IFT_ActiveBoundaryCondition_elements,
     IFT_ActiveBoundaryCondition_elementSides,
     IFT_ActiveBoundaryCondition_dofManagers,
@@ -403,8 +403,7 @@ enum InputFieldType {
     IFT_Element_globnum,
     IFT_Element_partitions,
     IFT_Element_remote,
-
-    IFT_StructuralElement_activityltf,
+    IFT_Element_activityltf,
 
     IFT_CBSElement_bsides,
     IFT_CBSElement_bcodes,
@@ -782,6 +781,16 @@ enum InputFieldType {
     IFT_DruckerPragerPlasticitySM_lys,
     IFT_DruckerPragerPlasticitySM_yieldtol,
     IFT_DruckerPragerPlasticitySM_newtoniter,
+
+    IFT_DruckerPragerCutMat_alpha,
+    IFT_DruckerPragerCutMat_alphapsi,
+    IFT_DruckerPragerCutMat_h,
+    IFT_DruckerPragerCutMat_sigT,
+    IFT_DruckerPragerCutMat_omegaCrit,
+    IFT_DruckerPragerCutMat_a,
+    IFT_DruckerPragerCutMat_yieldTol,
+    IFT_DruckerPragerCutMat_newtonIter,
+    IFT_DruckerPragerCutMat_tau0,    
 
     IFT_Masonry02_ft0,
     IFT_Masonry02_gfi,

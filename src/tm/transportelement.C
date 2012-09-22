@@ -64,6 +64,18 @@ TransportElement :: ~TransportElement()
 { }
 
 
+IRResultType
+TransportElement :: initializeFrom(InputRecord *ir)
+{
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+    result = Element :: initializeFrom(ir);
+
+    return result;
+}
+
+
 void
 TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
 {
@@ -595,7 +607,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
 
     if ( ( load->giveType() == TransmissionBC ) || ( load->giveType() == ConvectionBC ) ) {
         BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-        if ( edgeLoad->isDofExcluded(indx) ) {
+        if ( edgeLoad->isDofExcluded(indx) || !edgeLoad->isImposed(tStep) ) {
             return;
         }
 
@@ -660,7 +672,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->giveNumberOfDofManagers() );
         answer.zero();
 
-        if ( surfLoad->isDofExcluded(indx) ) {
+        if ( surfLoad->isDofExcluded(indx) || !surfLoad->isImposed(tStep) ) {
             return;
         }
 
@@ -721,7 +733,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
             ltype = load->giveBCGeoType();
             if ( ltype == EdgeLoadBGT ) {
                 BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-                if ( edgeLoad->isDofExcluded(indx) ) {
+                if ( edgeLoad->isDofExcluded(indx) || !edgeLoad->isImposed(tStep) ) {
                     continue;
                 }
 
@@ -739,7 +751,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                     gp  = iRule.getIntegrationPoint(igp);
                     this->computeEgdeNAt(n, *gp->giveCoordinates());
                     dV  = this->computeEdgeVolumeAround(gp, id);
-                    subAnswer.plusDyadSymmUpper(n, n, dV * edgeLoad->giveProperty('a') );
+                    subAnswer.plusDyadSymmUpper(n, n, dV * edgeLoad->giveProperty('a')  );
                 }
 
                 subAnswer.symmetrized();
@@ -753,7 +765,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 FloatMatrix subAnswer;
 
                 BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
-                if ( surfLoad->isDofExcluded(indx) ) {
+                if ( surfLoad->isDofExcluded(indx) || !surfLoad->isImposed(tStep)) {
                     continue;
                 }
 
@@ -980,4 +992,5 @@ TransportElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
         return Element :: giveIntVarCompFullIndx(answer, type);
     }
 }
+
 } // end namespace oofem

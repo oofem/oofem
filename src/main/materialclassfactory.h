@@ -56,7 +56,7 @@
  #include "mazarsmodel.h"
  #include "mazarsmodelnl.h"
  #include "druckerPragerPlasticitySM.h"
- #include "druckerpragermat.h"
+ #include "druckerpragercutmat.h"
  #include "j2mplasticmaterial.h"
  #include "rankinepm.h"
  #include "masonry02.h"
@@ -128,7 +128,7 @@ REGISTER_CLASS(IDNLMaterial, "idmnl1", IDNLMaterialClass)
 REGISTER_CLASS(MazarsNLMaterial, "mazarsmodelnl", MazarsNLMaterialClass)
 REGISTER_CLASS(MazarsMaterial, "mazarsmodel", MazarsMaterialClass)
 REGISTER_CLASS(DruckerPragerPlasticitySM, "druckerprager", DruckerPragerPlasticitySMClass)
-REGISTER_CLASS(DruckerPragerMat, "druckerpragermat", DruckerPragerMatClass)
+REGISTER_CLASS(DruckerPragerCutMat, "druckerpragercutmat", DruckerPragerCutMatClass)
 REGISTER_CLASS(J2MPlasticMaterial, "j2mmat", J2MPlasticMaterialClass)
 REGISTER_CLASS(RankinePlasticMaterial, "rankine", RankinePlasticMaterialClass)
 REGISTER_CLASS(Masonry02, "masonry02", Masonry02Class)

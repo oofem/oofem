@@ -94,14 +94,12 @@ public:
     /// Returns DoH of the closest CEMHYD3D cycle after the target time
     virtual double giveDoHActual(GaussPoint *gp);
     /// Returns concrete heat conductivity depending on chosen type
-    virtual double giveConcreteConductivity(GaussPoint *gp);
+    virtual double giveIsotropicConductivity(GaussPoint *gp);
     /// Returns concrete thermal capacity depending on chosen type
     virtual double giveConcreteCapacity(GaussPoint *gp);
     /// Returns concrete density depending on chosen type
     virtual double giveConcreteDensity(GaussPoint *gp);
 
-    ///compute conductivity matrix. Conductivity can be different in each GP and the function is overloaded here.
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     ///compute heat thermal capacity per volume
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 

@@ -163,7 +163,7 @@ public:
      * @param i classID of class requesting associated status
      */
     IntegrationPointStatus *giveMaterialStatus(classType i) { 
-	return statusDict.at(i); 
+    return statusDict.at(i); 
     }
     /**
      * Sets Material status managed by receiver.
@@ -174,11 +174,10 @@ public:
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr,classType i)
     {
       if (this->statusDict.includes(i)) {
-	OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
-      } else {
-	this->statusDict.add(i, ptr);
-	return ptr;
-      }
+        OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
+      } 
+      this->statusDict.add(i, ptr);
+      return ptr;
     }
     /**
      * Returns index-th slave gauss point of receiver.

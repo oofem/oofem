@@ -70,7 +70,7 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
-    virtual double giveConcreteConductivity(GaussPoint *gp);
+    virtual double giveIsotropicConductivity(GaussPoint *gp);
     virtual double giveConcreteCapacity(GaussPoint *gp);
     virtual double giveConcreteDensity(GaussPoint *gp);
     /// Type of hydration model, e.g. exponential curve, Cervera's model.

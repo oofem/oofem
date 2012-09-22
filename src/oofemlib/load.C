@@ -57,13 +57,17 @@ FloatArray &Load :: giveComponentArray()
 
 void
 Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
-// Returns an array, the force induced at stepN by the receiver.
+// Returns an array, the load induced at stepN by the receiver.
 {
     double factor;
 
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     answer  = this->giveComponentArray();
     answer.times(factor);
+    
+    if ( !isImposed(stepN) ){
+        answer.zero();
+    }
 }
 
 
@@ -120,7 +124,7 @@ Load :: isDofExcluded(int indx)
     if ( ( indx > 0 ) && ( indx <= dofExcludeMask.giveSize() ) ) {
         return dofExcludeMask.at(indx);
     } else {
-        _error("isDofExcluded: dof indx out of range");
+        _error("isDofExcluded: dof index out of range");
     }
 
     return 0;

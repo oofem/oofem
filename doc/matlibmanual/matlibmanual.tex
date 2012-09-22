@@ -264,6 +264,7 @@ Supported modes& 3dMat\\
 \subsection{Plasticity-based material models}
 
 \subsubsection{Drucker-Prager model - DruckerPrager}
+\label{DPmodel}
 The Drucker-Prager plasticity model\footnote{Contributed by Simon Rolshoven, LSC, FENAC, EPFL.} is an isotropic elasto-plastic model based
 on a yield function
 \be
@@ -292,7 +293,7 @@ The flow rule is derived from the plastic potential
 g\left(\bsig\right) = \alphaPsi I_1 + \sqrt{J_2}
 \ee
 where $\alphaPsi$ is the dilatancy coefficient. An associated
-model with $\alpha=\alphaPsi$ would overestimate the dilatancy of
+model with $\alphaPsi=\alpha$ would overestimate the dilatancy of
 concrete, so the dilatancy coefficient is usually chosen smaller than the
 friction coefficient.
 The model is described by the equations
@@ -399,6 +400,7 @@ hardening\\
 &- \param{kc} $\kappa_c$ for the exponential softening law\\
 &- \param{yieldtol} tolerance of the error in the yield criterion, default value
 1.e-14\\
+&- \param{newtonIter} maximum number of iterations in $\lambda$ search, default value 30\\
 Supported modes& 3dMat, PlaneStrain, 3dRotContinuum\\
 \hline
 \end{tabular}
@@ -407,6 +409,92 @@ Supported modes& 3dMat, PlaneStrain, 3dRotContinuum\\
 %\end{center}
 \end{table}
 
+\subsubsection{Drucker-Prager model with tension cut-off and isotropic damage - DruckerPragerCut}
+\label{DPCutmodel}
+The Drucker-Prager plasticity model with tension cut-off is multisurface model, appropriate for cohesive-frictional materials such as concrete loaded both in compression and tension. The plasticity model is formulated for isotropic hardening and enhanced by isotropic damage, which is driven by the cumulative plastic strain. The model can be used only in the small-strain context, with additive split of the strain tensor into the elastic and plastic parts.
+
+The basic equations include the additive decomposition of strain into elastic and plastic parts,
+\begin{equation}
+\veps = \veps_{\rm{e}} + \veps_{\rm{p}},
+\end{equation}
+the stress strain law 
+\begin{equation}
+\vsig = (1-\omega)\bar{\vsig}=(1-\omega)\mbf{D} :(\veps-\veps_{\rm{p}}),
+\end{equation}
+the definition of the yield function in terms of the effective stress,
+\begin{equation}
+f \left(\bar{\vsig},\kappa \right) = \alpha I_1 + \sqrt{J_2} - \tau_Y,
+\end{equation}
+the flow rule
+\begin{equation}
+g \left( \bar{\vsig} \right) = \alphaPsi I_1 + \sqrt{J_2},
+\end{equation}
+the linear hardening law
+\begin{equation}
+\tau_Y(\kappa) = \tau_0 + H\kappa,
+\end{equation}
+where $\tau_0$ represents the initial yield stress under pure shear,
+the damage law
+\begin{equation}
+\label{damagelawDP}
+\omega(\kappa) = \omega_c(1-\mbox{e}^{-a\kappa}),
+\end{equation}
+where $\omega_c$ is critical damage and $a$ is a positive dimensionless parameter.
+More detailed descriptioin of some parameters is in Section~\ref{DPmodel}.
+
+The dilatancy coefficient $\alphaPsi$ controls flow associativeness; if $\alphaPsi=\alpha$, an associate model is recovered, which
+overestimate the dilatancy of concrete. Hence, the dilatancy coefficient is usually chosen smaller, such that $\alphaPsi \leq \alpha$ as the non-associated model.
+
+% The stress-return algorithm is based on the Newton-iteration.
+% In plasticity, this is commonly called Closest-Point-Projection (CPP),
+% and it generally leads to quadratic convergence.
+% The implemented algorithm is convergent in any stress case, but
+% in the vicinity of the vertex region, quadratic convergence might be
+% lost because of insufficient regularity of the yield function.
+% 
+% The algorithmic tangent stiffness matrix is implemented for both the
+% regular case and the vertex region.
+% Generally, the error decreases quadratically (of course only asymptotically).
+% Again, in the vicinity of the vertex region, quadratic convergence
+% might be lost due to insufficient regularity.
+% Furthermore, the tangent stiffness matrix does not always exist for
+% the vertex case. In these cases, the elastic stiffness is used
+% instead.
+% It is generally safer (but slower) to use the elastic stiffness if you
+% encounter any convergence problems, especially if your problem is
+% tension-dominated.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Drucker Prager material with tension cut-off\\
+\hline
+Record Format & \descitem{DruckerPragerCut} \elemparam{num}{in}
+\elemparam{d}{rn} \elemparam{tAlpha}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tau0}{rn} \elemparam{alpha}{rn} [\elemparam{alphaPsi}{rn}] [\elemparam{H}{rn}] [\elemparam{omega\_crit}{rn}] [\elemparam{a}{rn}] [\elemparam{yieldtol}{rn}] [\elemparam{NewtonIter}{in}]\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{E} Young modulus\\
+&- \param{n} Poisson ratio\\
+&- \param{tau0} initial yield stress in shear $\tau_0$\\
+&- \param{alpha} friction coefficient\\
+&- \param{alphaPsi} dilatancy coefficient, equals to \param{alpha} by default\\
+&- \param{H} hardening modulus (can be negative in the case of plastic softening), 0 by default\\ 
+&- \param{omega\_crit} critical damage in damage law (\ref{damagelawDP}), 0 by default\\
+&- \param{a} exponent in damage law (\ref{damagelawDP}), 0 by default\\
+&- \param{yieldtol} tolerance of the error in the yield criterion, default value
+1.e-14\\
+&- \param{newtonIter} maximum number of iterations in $\lambda$ search, default value 30\\
+Supported modes& 1dMat, 3dMat, PlaneStrain\\
+\hline
+\end{tabular}
+\caption{Drucker Prager material with tension cut-off - summary.}
+\label{DP_table}
+%\end{center}
+\end{table}
+
+\clearpage
 \subsubsection{Mises plasticity model with isotropic damage - MisesMat}
 \label{sec:misplast}
 
@@ -468,7 +556,7 @@ The model description and parameters are summarized in Table~\ref{misesMat_table
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & Mises plasticity with isotropic hardening\\
+Description & Mises plasticity model with isotropic hardening\\
 \hline
 Record Format & \descitem{MisesMat}  \elemparam{}{in}
 \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\\

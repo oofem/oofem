@@ -1,7 +1,7 @@
 hydratingConcreteMat02.out
 Test of hydrating concrete material, linear triangluar element with a heat source, transient linear solver, adiabatic conditions, exponential model
 NonStationaryProblem nsteps 30 deltat 3600.0 alpha 0.5 nmodules 0
-#NlTransientTransportProblem nsteps 30 deltat 360.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
+#NlTransientTransportProblem nsteps 30 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 0
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 3 37 39 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -12,15 +12,15 @@ node 3 coords 3  1.0   1.0   0.0 ic 1 1
 tr1ht 1 nodes 3 1 2 3 crossSect 1 mat 1
 SimpleCS 1 thick 0.15
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
-HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 1 Qpot 509. masscement 409. referenceTemperature 25. tau 48600. beta 0.9 dohinf 0.85 activationenergy 38300 castingTime 7200.
+HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 1 Qpot 509. masscement 409. referenceTemperature 25. tau 48600. beta 0.9 dohinf 0.85 activationenergy 38300 castingTime 0.
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 25.0
 InitialCondition 1 Conditions 1 u 25.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-3
 #TIME
-#NODE tStep 7.200000e+04 number 1 dof 1 unknown f value 9.442881e+01
-#NODE tStep 1.044000e+05 number 1 dof 1 unknown f value 1.026160e+02
-#ELEMENT tStep 7.200000e+03 number 1 gp 1 keyword "DoH" component 1 value 0.0
-#ELEMENT tStep 1.044000e+05 number 1 gp 1 keyword "DoH" component 1 value 7.992050e-01
+#NODE tStep 7.200000e+04 number 1 dof 1 unknown f value 97.6606
+#NODE tStep 1.044000e+05 number 1 dof 1 unknown f value 103.274
+#ELEMENT tStep 7.200000e+03 number 1 gp 1 keyword "DoH" component 1 value 0.003218
+#ELEMENT tStep 1.044000e+05 number 1 gp 1 keyword "DoH" component 1 value 0.805516
 #%END_CHECK%

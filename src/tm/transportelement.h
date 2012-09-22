@@ -61,6 +61,7 @@ public:
     TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
     virtual ~TransportElement();
 
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 

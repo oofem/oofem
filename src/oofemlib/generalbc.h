@@ -77,6 +77,10 @@ protected:
     bcValType valType;
     /// Default dofs (for remeshing/adaptivity).
     IntArray defaultDofs;
+    /** Zero by default - the BC is than always imposed. Otherwise the number of associated
+    * load time function. If the load time function returns aero value, the BC is inactive.
+    */
+    int isImposedTimeFunction;
 
 public:
     /**
@@ -105,6 +109,14 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcValType giveBCValType() const { return this->valType; }
+
+    /**
+     * Returns nonzero if receiver representing BC is imposed at given time, otherwise returns zero.
+     * @param tStep Time step representing time when receiver is tested.
+     * @return True if imposed for given time, false otherwise.
+     */
+    virtual bool isImposed(TimeStep *tStep);
+
     /**
      * Array with default dofs which b.c. acts on.
      * @return Array with dof IDs.

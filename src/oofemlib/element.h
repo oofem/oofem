@@ -164,6 +164,9 @@ protected:
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
 
+    /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
+    int activityLtf;
+    
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
@@ -609,6 +612,11 @@ public:
      */
     virtual int checkConsistency() { return 1; }
 
+    /**
+     * @return True, if receiver is activated for given solution step, otherwise false.
+     */
+    virtual bool isActivated(TimeStep *tStep);
+    
     // time step initialization (required for some non-linear solvers)
     /**
      * Initializes receivers state to new time step. It can be used also if

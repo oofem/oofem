@@ -118,7 +118,7 @@ Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, value, IFT_Material_density, "d"); // Macro
     propertyDictionary->add('d', value);
 
-    this->castingTime = -1.e6;
+    this->castingTime = -1.e10;
     IR_GIVE_OPTIONAL_FIELD(ir, castingTime, IFT_Material_castingtime, "castingtime"); // Macro
 
     return IRRT_OK;

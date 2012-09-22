@@ -55,11 +55,11 @@ class Dof;
  * but when associated to BC, the physical meaning of unknown is determined by DOF.
  *
  * Boundary condition can change its value in time using its inherited loadTimeFunction.
- * It can also switch itself on or off depending on nonzero value of newly introduced
+ * It can also switch itself on or off depending on nonzero value of 
  * isImposedTimeFunction load time function. Please note, that previous option must be
  * supported by particular engineering model (because equation renumbering is necessary,
- * and for incremental solution schemes DOFs unknown dictionaries must be used). See particular
- * engineering model documentation for details.
+ * and for incremental solution schemes DOFs unknown dictionaries must be used). See 
+ * particular engineering model documentation for details.
  *
  * The services provided include
  * - Returning a component, i.e., the prescribed value of an unknown
@@ -74,10 +74,7 @@ class BoundaryCondition : public GeneralBoundaryCondition
 protected:
     /// Prescribed value of DOF.
     double prescribedValue;
-
-    /// Load time function indicating if BC is imposed or not.
-    int isImposedTimeFunction;
-
+    
 public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
@@ -85,7 +82,7 @@ public:
      * @param d Domain to which new object will belongs.
      */
     BoundaryCondition(int i, Domain *d) : GeneralBoundaryCondition(i, d)
-    { isImposedTimeFunction = 0; }
+    { }
     /// Destructor
     virtual ~BoundaryCondition() { }
 
@@ -100,12 +97,6 @@ public:
      * @return Prescribed value of unknown or zero if not prescribed.
      */
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
-    /**
-     * Returns nonzero if receiver representing BC is imposed at given time, otherwise returns zero.
-     * @param tStep Time step representing time when receiver is tested.
-     * @return True if imposed for given time, false otherwise.
-     */
-    bool isImposed(TimeStep *tStep);
 
     /**
      * Set prescribed value at the input record string of receiver

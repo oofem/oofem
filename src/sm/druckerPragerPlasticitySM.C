@@ -231,9 +231,9 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     //kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
     // instanciate the variables defined in DruckerPragerPlasticitySM
-    IR_GIVE_FIELD(ir, initialYieldStress, IFT_DruckerPragerPlasticitySM_iys, "iys");
-    IR_GIVE_FIELD(ir, alpha, IFT_DruckerPragerPlasticitySM_alpha, "alpha");
-    IR_GIVE_FIELD(ir, alphaPsi, IFT_DruckerPragerPlasticitySM_alphapsi, "alphapsi");
+    IR_GIVE_FIELD(ir, initialYieldStress, IFT_DruckerPragerPlasticitySM_iys, "iys"); // initial yield stress under pure shear
+    IR_GIVE_FIELD(ir, alpha, IFT_DruckerPragerPlasticitySM_alpha, "alpha"); // friction coefficient
+    IR_GIVE_FIELD(ir, alphaPsi, IFT_DruckerPragerPlasticitySM_alphapsi, "alphapsi"); //dilatancy coefficient
     // this is valid for strain hardening/softening only (not for work hardening/softening)
     kFactor = sqrt(1. / 3. + 2. * alphaPsi * alphaPsi);
 
