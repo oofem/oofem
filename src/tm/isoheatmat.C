@@ -82,9 +82,10 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     double cond = this->giveIsotropicConductivity(gp);
     
-    if ( !isActivated(atTime) ) {
-         //cond *= 1.e-4;
+    /*if ( !isActivated(atTime) ) //element, which is inactive (activityLTF==0), will never go into this function
+         cond = 0.;
     }
+    */
     
     switch  ( mMode ) {
     case _1dHeat:

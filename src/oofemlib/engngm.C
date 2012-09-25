@@ -947,6 +947,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
         }
 
 #endif
+        if ( !element->isActivated(tStep) ) {
+            continue;
+        }
+
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
@@ -977,7 +981,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
                             CharType type, const UnknownNumberingScheme &ns,
                             Domain *domain)
 //
-// assembles matrix answer by  calling
+// assembles matrix answer by calling
 // element(i) -> giveCharacteristicMatrix ( type, tStep );
 // for each element in domain
 // and assembling every contribution to answer
@@ -1006,6 +1010,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
         }
 
 #endif
+        if ( !element->isActivated(tStep) ) {
+            continue;
+        }
+        
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
@@ -1054,6 +1062,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) continue;
 #endif
+        if ( !element->isActivated(tStep) ) {
+            continue;
+        }
+        
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
         if ( mat.isNotEmpty() ) {
             element->giveLocationArray(r_loc, eid, rs);
@@ -1197,8 +1209,11 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
 #endif
+        if ( !element->isActivated(tStep) ) {
+            continue;
+        }
+
         element->giveLocationArray(loc, eid, s);
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
@@ -1240,6 +1255,10 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Eq
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) continue;
 #endif
+        if ( !element->isActivated(tStep) ) {
+            continue;
+        }
+
         element->giveLocationArray( loc, eid, dn );
 
         // Take the tangent from the previous step

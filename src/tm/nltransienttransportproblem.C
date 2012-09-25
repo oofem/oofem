@@ -432,6 +432,10 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
         }
 
 #endif
+        if ( !element->isActivated(tStep) ) {
+            continue;
+        }
+        
         element->giveLocationArray(loc, ut, ns);
 
         element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);

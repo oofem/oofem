@@ -240,6 +240,8 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         this->applyIC(stepWhenIcApply);
 
+        //project initial conditions to have temorary temperature in integration points
+        
         //edge or surface load on elements
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -289,7 +291,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
     solutionVector->resize(neq);
     solutionVector->zero();
-
+    
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling rhs\n");
 #endif
@@ -634,10 +636,17 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         }
     }
 
+    int nelem = domain->giveNumberOfElements();
+    
+    //project initial temperature to integration points
+
+//     for ( j = 1; j <= nelem; j++ ) {
+//         domain->giveElement(j)->updateInternalState(stepWhenIcApply);
+//     }
+
 #ifdef __CEMHYD_MODULE
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
-    int nelem = domain->giveNumberOfElements();
     TransportElement *element;
     CemhydMat *cem;
     for ( j = 1; j <= nelem; j++ ) {

@@ -321,6 +321,11 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     vtkSmartPointer<vtkIdList> elemNodeArray = vtkSmartPointer<vtkIdList>::New();
 #else
     FILE *stream = this->giveOutputStream(tStep);
+    struct tm *current;
+    time_t now;
+    time(&now);
+    current = localtime(&now);
+    fprintf(stream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveIntrinsicTime(), current->tm_year+1900, current->tm_mon+1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
     fprintf(stream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
     fprintf(stream, "<UnstructuredGrid>\n");
 #endif
@@ -582,7 +587,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
         this->writeVTKCollection();
     } else
 #endif
-    if ( !emodel->isParallel() && tStep->giveNumber() > 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
+    if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
         std::ostringstream pvdEntry;
         pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
         this->pvdBuffer.pushBack(pvdEntry.str());
@@ -1352,10 +1357,19 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
 
 void VTKXMLExportModule::writeVTKCollection()
 {
+    struct tm *current;
+    time_t now;
+    time(&now);
+    current = localtime(&now);
+    char buff[1024];
+
     std::string fname = this->emodel->giveOutputBaseFileName() + ".pvd";
 
     std::ofstream outfile(fname.c_str());
 
+    sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year+1900, current->tm_mon+1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
+//     outfile << buff;
+    
     outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
     for (dynaList< std::string >::iterator it = this->pvdBuffer.begin(); it != this->pvdBuffer.end(); ++it) {
         outfile << *it << "\n";

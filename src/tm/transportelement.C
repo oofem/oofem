@@ -873,6 +873,10 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
     }
 
     answer.negated();
+    
+    if ( !isActivated(tStep) ) {
+         answer.zero();
+    }
 }
 
 

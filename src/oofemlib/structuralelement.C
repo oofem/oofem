@@ -646,6 +646,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     answer.zero();
+
     if ( !this->isActivated(tStep) ) {
         return;
     }
@@ -1017,7 +1018,7 @@ StructuralElement :: updateYourself(TimeStep *tStep)
             initialDisplacements = new FloatArray();
         }
 
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, * initialDisplacements);
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, *initialDisplacements);
     }
 }
 

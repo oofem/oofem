@@ -2022,7 +2022,7 @@ a side or a surface number). The entity numbering is element dependent and
 is described in element specific sections. The applied loads must be
 of proper type (boundary load type), otherwise error is generated.
 
-The support for element insertion and removal during the analysis is provided. One can specify optional time function (identified by its id using \param{activityltf} parameter). The nonzero value of this time function indicates, whether the element is active (nonzero value, the default) or inactive (zero value) at particulat solution step. Currently available only for structural elements.
+The support for element insertion and removal during the analysis is provided. One can specify optional time function (identified by its id using \param{activityltf} parameter). The nonzero value of this time function indicates, whether the element is active (nonzero value, the default) or inactive (zero value) at particulat solution step. Tested for structural and transport elements.
 
 Orientation of local coordinates can be specified using \param{lcs} array. This array contains six numbers,
 where the first three numbers represent a directional vector of local
@@ -2225,7 +2225,7 @@ upon when new nodes are created on the boundaries.
 The nonzero value of \param{isImposedTimeFunction} time function
 indicates that given boundary condition is active, zero value
 indicates not active boundary condition in given time (the bc does not
-exist). By default, the boundary condition apply at any time.
+exist). By default, the boundary condition applies at any time.
 
 
 Currently, EntType keyword can be one from
