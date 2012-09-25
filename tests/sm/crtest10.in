@@ -24,13 +24,13 @@ HeavisideLTF 2 origin 400. value 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-12
 ## check nodal values at the end of time interest
-#NODE tStep 1000. number 2 dof 2 unknown d value 3.21091998e-06
-#NODE tStep 1000. number 3 dof 2 unknown d value 6.42183996e-06
+#NODE tStep 1000. number 2 dof 2 unknown d value 3.21111483e-06
+#NODE tStep 1000. number 3 dof 2 unknown d value 6.42222967e-06
 ## check element no. 1 strain vector
-#ELEMENT tStep 1000.  number 1 gp 1 keyword "strains" component 1  value 3.2109e-06
-#ELEMENT tStep 1000.  number 1 gp 1 keyword "stresses" component 1  value 1.3878e-17 
-#ELEMENT tStep 1000.  number 2 gp 1 keyword "strains" component 1  value 3.2109e-06
-#ELEMENT tStep 1000.  number 2 gp 1 keyword "stresses" component 1  value 1.3878e-17
+#ELEMENT tStep 1000.  number 1 gp 1 keyword "strains" component 1  value 3.2111e-06
+#ELEMENT tStep 1000.  number 1 gp 1 keyword "stresses" component 1  value 0.0 
+#ELEMENT tStep 1000.  number 2 gp 1 keyword "strains" component 1  value 3.2111e-06
+#ELEMENT tStep 1000.  number 2 gp 1 keyword "stresses" component 1  value 0.0
 #%END_CHECK%
 #
   dof 2   d  3.21091998e-06

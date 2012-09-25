@@ -292,9 +292,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
         sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
     }
 
-    Einc = 1 / ( q1 * 1.e-6 + sum / v  + 0.5 * ( atTime->giveTimeIncrement() / timeFactor ) / eta );
-
-    return Einc;
+    return 1. / ( q1 * 1.e-6 + sum / v  + 0.5 * ( atTime->giveTimeIncrement() / timeFactor ) / eta );
 }
 
 void

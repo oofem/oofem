@@ -76,7 +76,7 @@ public:
     virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour()   { return 0; }
+    virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "MaxwellChainMaterial"; }
     virtual classType giveClassID() const { return MaxwellChainMaterialClass; }
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -96,6 +96,19 @@ public:
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }
     virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
+    /**
+     * This function computes the moduli of individual Maxwell units
+     * such that the corresponding Dirichlet series gives the best
+     * approximation of the actual relaxation function.
+     *
+     * The optimal moduli are obtained using the least-square method,
+     * i.e. by minimizing the following functional (atTime = t_0):
+     *
+     * @f$ F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mju=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mju}
+     *  - \bar{R}(t_r, t_0) \right]^2 = min @f$
+     *
+     * @param atTime Age of material when load is applied ???
+     */
     virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime);
 
     virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime);

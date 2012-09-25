@@ -298,7 +298,6 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
     /*
      * returns average shrinkage strain vector of cross-section at drying
      */
-
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
     double time = relMatAge + atTime->giveTargetTime() / timeFactor;
     int size = 6;

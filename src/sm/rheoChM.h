@@ -102,8 +102,6 @@ protected:
     double relMatAge;
     /// Poisson's ratio (assumed to be constant, unaffected by creep).
     double nu;
-    /// Incremental modulus (links the stress increment to the strain increment).
-    double Einc;
     /// Time for which the partial moduli of individual units have been evaluated.
     double EparValTime;
 
@@ -208,14 +206,36 @@ protected:
      * If only incremental shrinkage strain formulation is provided, then total shrinkage strain must be tracked
      * in status in order to be able to compute total value.
      */
-    virtual int  hasIncrementalShrinkageFormulation() { return 0; }
+    virtual int hasIncrementalShrinkageFormulation() { return 0; }
 
-    void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps, int fromIncluded = 0);
+    /**
+     * Generates discrete times starting from time "from" to time "to"
+     * uniformly distributed in log time scale.
+     * The time interval (to-from) is divided to nsteps intervals.
+     * We return times starting from ("from" + first increment)
+     * @param from Starting time
+     * @param to End time
+     * @param nsteps Number of discrete steps.
+     */
+    void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps);
     const FloatArray &giveDiscreteTimes();
     /// Evaluation of the creep compliance function.
     virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
 
-    /// Evaluation of the relaxation function at given times.
+    /**
+     * Evaluation of the relaxation function at given times.
+     * This functions solves numerically an integral equation of the form
+     * @f[
+     * \varepsilon(t) = \int_{0}^{t} J(t, \tau) \mathrm{d}\sigma(\tau) + \varepsilon_n(t)
+     * @f]
+     * where @f$ \varepsilon_n(t) @f$ is stress-independent deformation, for the case
+     * where @f$ \varepsilon(t) = 1 @f$ is kept at constant value in time.
+     *
+     * @param t0 Age of material when load is applied.
+     * @param tr Age of material when relaxation has begun ???
+     * @param atTimes At which times the relaxation function will be evaluated.
+     * @warning atTimes should be uniformly distributed in log time scale and relatively dense (100 intervals) in order to achieve a reasonable accuracy.
+     */
     void computeDiscreteRelaxationFunction(FloatArray &answer, GaussPoint *gp,
                                            const FloatArray &atTimes,
                                            double t0, double tr);

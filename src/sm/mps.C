@@ -460,9 +460,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
         _error("giveEModulus - mode is not supported");
     }
 
-    Einc = 1 / ( q1 + 1. / ( EspringVal * v ) + sum  +  Cf );
-
-    return Einc;
+    return 1. / ( q1 + 1. / ( EspringVal * v ) + sum  +  Cf );
 }
 
 
@@ -471,7 +469,6 @@ MPSMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
 // compute the relative volume of the solidified material at given age (in days)
 {
     double m, alpha;
-    double v;     //return value
     double atAge;     // (equivalent age)
 
     // standard values of exponents - empirical constants
@@ -485,9 +482,7 @@ MPSMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
         atAge = computeEquivalentTime(gp, atTime, 0);
     }
 
-    v = 1 / ( alpha + pow(lambda0 / atAge, m) );
-
-    return v;
+    return 1. / ( alpha + pow(lambda0 / atAge, m) );
 }
 
 

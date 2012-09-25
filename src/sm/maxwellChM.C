@@ -50,21 +50,6 @@ void
 MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
                                                 double atTime)
 {
-    /*
-     * This function computes the moduli of individual Maxwell units
-     * such that the corresponding Dirichlet series gives the best
-     * approximation of the actual relaxation function.
-     *
-     * The optimal moduli are obtained using the least-square method,
-     * i.e. by minimizing the following functional (atTime = t_0):
-     *
-     * $$ F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mju=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mju}
-     *  - \bar{R}(t_r, t_0) \right]^2 = min $$
-     *
-     *
-     * INPUTS:
-     * atTime = age of material when load is applied ???
-     */
     int i, j, r, rSize;
     double taui, tauj, sum, tti, ttj, sumRhs;
     FloatArray rhs(this->nUnits), discreteRelaxFunctionVal;
@@ -122,8 +107,6 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
      * This function returns the incremental modulus for the given time increment.
      * The modulus may also depend on the specimen geometry (gp - dependence).
      *
-     * It is stored as "Einc" for further expected requests from other gaussPoints that correspond to the same material.
-     *
      * Note: time -1 refers to the previous time.
      */
     int mu;
@@ -141,12 +124,10 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
         lambdaMu = ( 1.0 - exp(-deltaYmu) ) / deltaYmu;
         Emu      = this->giveEparModulus(mu); // previously updated by updateEparModuli
-
         E += lambdaMu * Emu;
     }
 
-    Einc = E;
-    return Einc;
+    return E;
 }
 
 

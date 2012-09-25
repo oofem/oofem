@@ -49,7 +49,6 @@ RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n,
     nUnits = 0;
     relMatAge = 0.0;
     linearElasticMaterial = NULL;
-    Einc = 0.;
     EparValTime = -1.0;
 }
 
@@ -162,23 +161,6 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
                                                        const FloatArray &atTimes,
                                                        double t0, double tr)
 {
-    /*
-     * This functions solves numerically an integral equation of the form
-     *
-     * \varepsilon(t) = \int{0}{t} J(t, \Tau) d\sigma(\Tau) + \varepsilon_n(t),
-     * (where \varepsilon_n(t) is stress-independent deformation) for the case
-     * where \varepsilon(t) = 1  is kept at constant value in time.
-     *
-     * input variables are:
-     *
-     * t0 - age of material when load is applied.
-     * tr - age of material when relaxation has begun ???
-     * atTimes - at which times the relaxation function will be evaluated.
-     *   WARNING: atTimes should be uniformly distributed in log time scale
-     *            and relatively dense (100 intervals)
-     *            in order to achieve a reasonable accuracy.
-     */
-
     int i, k, size, nsteps, si;
     double taui, tauk, Jtrt0, totalDeltaSigma;
     double sig0;
@@ -227,39 +209,14 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
 
 
 void
-RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to,
-                                          int nsteps,
-                                          int fromIncluded)
+RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps)
 {
-    /*
-     * function generates discrete times starting from time "from" to time "to"
-     * uniformely distributed in log time scale. The time interval (to-from) is
-     * divided to nsteps intervals. if from is wanted to be included in return
-     * array fromIncluded must be set to 1, otherwise we return times starting
-     * from ("from" + first increment);
-     */
-    int size = nsteps + 1;
-    int i, i0 = 1;
-    double help, almostlogZero = -1.0;
-
-    if ( fromIncluded ) {
-        size++;
-        i0 = 2;
-        // ensure that fromIncluded is 1 (and not just different from 0)
-        fromIncluded = 1;
-    }
-
-    answer.resize(size);
+    answer.resize(nsteps);
     answer.zero();
 
-    help = ( log10(to - from) - almostlogZero ) / ( double ) nsteps;
-    for ( i = 0; i <= nsteps; i++ ) {
-        answer.at(i + i0) = pow( 10., ( almostlogZero + help * i ) ) + from;
-        OOFEM_LOG_INFO( "DiscreteTimes.at %d %15.15g \n", i, answer.at(i + i0) );
-    }
-
-    if ( fromIncluded ) {
-        answer.at(1) = from;
+    double help = log(to/from) / nsteps;
+    for ( int i = 1; i <= nsteps; i++ ) {
+        answer.at(i) = exp( i * help ) * from;
     }
 }
 
@@ -280,7 +237,7 @@ RheoChainMaterial :: giveDiscreteTimes()
     double endTime;
     endTime = this->giveEndOfTimeOfInterest();
 
-    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1, 0);
+    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
     return discreteTimeScale;
 }
 
@@ -365,7 +322,6 @@ RheoChainMaterial :: updateEparModuli(GaussPoint *gp, double atTime)
         } else {
             this->computeCharCoefficients(EparVal, gp, atTime);
         }
-
         EparValTime = atTime;
     }
 }
@@ -623,7 +579,7 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, timeFactor, IFT_RheoChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in days
 
     this->computeCharTimes(); // sets up nUnits variable
-
+    this->giveDiscreteTimes(); // sets up discrete times
     return IRRT_OK;
 }
 

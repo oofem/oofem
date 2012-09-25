@@ -111,54 +111,6 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     }
 }
 
-const FloatArray &
-KelvinChainMaterial :: giveDiscreteTimes()
-{
-    /*
-     * Function returns generated relative time scale (uniformly distributed
-     * in log time scale).
-     * Because of multiple use of these data, once generated, they are
-     * stored
-     */
-    if ( discreteTimeScale.isNotEmpty() ) {
-        return discreteTimeScale;
-    }
-
-    double endTime;
-    endTime = this->giveEndOfTimeOfInterest();
-
-    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1, 0);
-    return discreteTimeScale;
-}
-
-
-void
-KelvinChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to,
-                                            int nsteps,
-                                            int fromIncluded)
-{
-    /*
-     * function generates discrete times starting from time "from" to time "to"
-     * uniformely distributed in log time scale. The time interval (to-from) is
-     * divided to nsteps intervals. if from is wanted to be included in return
-     * array fromIncluded must be set to 1, otherwise we return times starting
-     * from ("from" + first increment);
-     */
-    int size = nsteps + 1;
-    int i;
-    double help;
-
-    answer.resize(size);
-    answer.zero();
-
-    help = ( log10(to) - log10(from) ) / ( double ) ( nsteps );
-    for ( i = 1; i <= nsteps; i++ ) {
-        answer.at(i + 1) = pow( 10., ( i * help + log10(from) ) );
-    }
-
-    answer.at(1) = from;
-}
-
 double
 KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 {
@@ -166,8 +118,6 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
      * This function returns the incremental modulus for the given time increment.
      * Return value is the incremental E modulus of non-aging Kelvin chain without the first unit (elastic spring)
      * The modulus may also depend on the specimen geometry (gp - dependence).
-     *
-     * It is stored as "Einc" for further expected requests from other gaussPoints that correspond to the same material.
      *
      * Note: time -1 refers to the previous time.
      */
@@ -323,7 +273,7 @@ IRResultType
 KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 {
     RheoChainMaterial :: initializeFrom(ir);
-
+    this->giveDiscreteTimes(); // Makes sure the new discrete times are evaluated.
     return IRRT_OK;
 }
 
