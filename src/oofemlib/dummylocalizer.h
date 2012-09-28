@@ -57,7 +57,7 @@ public:
     /// Constructor
     DummySpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d), initialized(false) { }
     /// Destructor
-    ~DummySpatialLocalizer() { this->region_elements.clear(true); }
+    virtual ~DummySpatialLocalizer() { this->region_elements.clear(true); }
 
     virtual int init(bool force = false);
 

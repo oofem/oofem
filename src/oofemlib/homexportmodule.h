@@ -33,6 +33,7 @@
  */
 
 #ifndef homexportmodule_h
+#define homexportmodule_h
 
 #include "exportmodule.h"
 #include "domain.h"
@@ -63,11 +64,11 @@ public:
     /// Constructor. Creates empty Output Manager.
     HOMExportModule(int n, EngngModel *e);
     /// Destructor.
-    ~HOMExportModule();
+    virtual ~HOMExportModule();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    void doOutput(TimeStep *tStep);
-    void initialize();
-    void terminate();
+    virtual void doOutput(TimeStep *tStep);
+    virtual void initialize();
+    virtual void terminate();
     virtual const char *giveClassName() const { return "HOMExportModule"; }
 
 protected:
@@ -77,5 +78,5 @@ protected:
     IntArray matnum;
 };
 } // end namespace oofem
-#define homexportmodule_h
+
 #endif

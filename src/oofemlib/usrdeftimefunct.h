@@ -36,8 +36,6 @@
 #define usrdeftimefunct_h
 
 #include "loadtime.h"
-#include "domain.h"
-#include "parser.h"
 
 namespace oofem {
 
@@ -50,8 +48,6 @@ namespace oofem {
 class UserDefinedLoadTimeFunction : public LoadTimeFunction
 {
 private:
-    /// Parser used to evaluate expressions.
-    Parser myParser;
     /// Expression for the function value.
     std::string ftExpression;
     /// Expression for first time derivative.
@@ -65,15 +61,10 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs..
      */
-    UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d), myParser()
-    { dfdtExpression [ 0 ] = d2fdt2Expression [ 0 ] = '\0'; }
+    UserDefinedLoadTimeFunction(int n, Domain *d);
     /// Destructor.
-    virtual ~UserDefinedLoadTimeFunction()  { }
-
-    virtual double __at(double);
-    virtual double __derAt(double);
-    virtual double __accelAt(double);
-
+    virtual ~UserDefinedLoadTimeFunction() { }
+    
     /**
      * Reads the fields
      * - f(t) (required)
@@ -81,6 +72,11 @@ public:
      * - d2fdt2(t) (optional)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual double __at(double t);
+    virtual double __derAt(double t);
+    virtual double __accelAt(double t);
+
     virtual classType giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
     virtual const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
 };

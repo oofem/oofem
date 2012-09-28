@@ -50,7 +50,7 @@ namespace oofem {
  * Abstract base class representing load time function. Classes derived from Load class typically
  * describe load from spatial point of view. The purpose of introducing load time function is to express
  * variation of some components in time. Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time, @f$y=f(t)@f$.
+ * attribute of one or more loads. Generally load time function is real function of time, @f$ y=f(t) @f$.
  *
  * See TJR Hughes, "The Finite Element Method", p 677.
  */
@@ -68,8 +68,8 @@ protected:
      * In this case, the initial value should be set to the reference temperature, allowing to obtain correct temperate increment in first step.
      */
     double initialValue;
-public:
 
+public:
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
      * @param n Load time function number.

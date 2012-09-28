@@ -342,7 +342,8 @@ Parser :: Token_value Parser :: get_token()
 }
 
 
-Parser :: name *Parser :: look(const char *p, int ins) {
+Parser :: name *Parser :: look(const char *p, int ins)
+{
     int ii = 0;                               // hash
     const char *pp = p;
     while ( * pp ) {
@@ -381,7 +382,8 @@ void Parser :: error(const char *s)
     OOFEM_WARNING2("Parser :: error: %s", s);
 }
 
-double Parser :: eval(const char *string, int &err) {
+double Parser :: eval(const char *string, int &err)
+{
     parsedLine = string;
     double result;
     no_of_errors = 0;
@@ -393,7 +395,8 @@ double Parser :: eval(const char *string, int &err) {
     return result;
 }
 
-void Parser :: reset() {
+void Parser :: reset()
+{
     // empty Parser table
     name *entry, *next;
     for ( int i = 0; i < Parser_TBLSZ; i++ ) {

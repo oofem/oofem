@@ -33,75 +33,11 @@
  */
 
 #include "usrdeftimefunct.h"
-
+#include "parser.h"
 #include <sstream>
 
 namespace oofem {
-double UserDefinedLoadTimeFunction :: __at(double time)
-// Returns the value of the receiver at time 'time'. 'time' should be
-// one of the dates of the receiver (currently there is no interpola-
-// tion between two points).
-{
-    int err;
-    double result;
-
-    std::ostringstream buff;
-    buff << "t=" << time << ";" << ftExpression;
-    result = myParser.eval(buff.str().c_str(), err);
-    if ( err ) {
-        _error("at: parser syntax error");
-    }
-
-    return result;
-}
-
-double UserDefinedLoadTimeFunction :: __derAt(double time)
-// Returns the value of the receiver at time 'time'. 'time' should be
-// one of the dates of the receiver (currently there is no interpola-
-// tion between two points).
-{
-    int err;
-    double result;
-
-    if ( dfdtExpression [ 0 ] == '\0' ) {
-        _error("derAt: derivative not provided");
-        return 0.;
-    }
-
-    std::ostringstream buff;
-    buff << "t=" << time << ";" << dfdtExpression;
-    result = myParser.eval(buff.str().c_str(), err);
-    if ( err ) {
-        _error("derAt: parser syntax error");
-    }
-
-    return result;
-}
-
-
-double UserDefinedLoadTimeFunction :: __accelAt(double time)
-// Returns the value of the receiver at time 'time'. 'time' should be
-// one of the dates of the receiver (currently there is no interpola-
-// tion between two points).
-{
-    int err;
-    double result;
-
-    if ( d2fdt2Expression [ 0 ] == '\0' ) {
-        _error("derAt: derivative not provided");
-        return 0.;
-    }
-
-    std::ostringstream buff;
-    buff << "t=" << time << ";" << d2fdt2Expression;
-    result = myParser.eval(buff.str().c_str(), err);
-    if ( err ) {
-        _error("accelAt: parser syntax error");
-    }
-
-    return result;
-}
-
+UserDefinedLoadTimeFunction :: UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d) { }
 
 IRResultType
 UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
@@ -123,4 +59,64 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+    
+double UserDefinedLoadTimeFunction :: __at(double time)
+{
+    Parser myParser;
+    int err;
+    double result;
+
+    std::ostringstream buff;
+    buff << "t=" << time << ";" << ftExpression;
+    result = myParser.eval(buff.str().c_str(), err);
+    if ( err ) {
+        _error("at: parser syntax error");
+    }
+
+    return result;
+}
+
+double UserDefinedLoadTimeFunction :: __derAt(double time)
+{
+    Parser myParser;
+    int err;
+    double result;
+
+    if ( dfdtExpression.size() == 0 ) {
+        _error("derAt: derivative not provided");
+        return 0.;
+    }
+
+    std::ostringstream buff;
+    buff << "t=" << time << ";" << dfdtExpression;
+    result = myParser.eval(buff.str().c_str(), err);
+    if ( err ) {
+        _error("derAt: parser syntax error");
+    }
+
+    return result;
+}
+
+
+double UserDefinedLoadTimeFunction :: __accelAt(double time)
+{
+    Parser myParser;
+    int err;
+    double result;
+
+    if ( d2fdt2Expression.size() == 0 ) {
+        _error("derAt: derivative not provided");
+        return 0.;
+    }
+
+    std::ostringstream buff;
+    buff << "t=" << time << ";" << d2fdt2Expression;
+    result = myParser.eval(buff.str().c_str(), err);
+    if ( err ) {
+        _error("accelAt: parser syntax error");
+    }
+
+    return result;
+}
+
 } // end namespace oofem
