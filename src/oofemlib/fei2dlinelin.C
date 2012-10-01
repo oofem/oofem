@@ -100,18 +100,12 @@ void FEI2dLineLin :: edgeEvaldNds(FloatArray &answer, int iedge,
     //return J;
 }
 
-void FEI2dLineLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double dx, dy;
-
-    dx = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    dy = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
-
-    double L = sqrt(dx*dx + dy*dy);
-
     normal.resize(2);
-    normal.at(1) = dy/L;
-    normal.at(2) = -dx/L;
+    normal.at(1) = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
+    normal.at(2) = -(cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind));
+    return normal.normalize()*0.5;
 }
 
 double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)

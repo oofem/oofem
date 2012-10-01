@@ -63,11 +63,11 @@ FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     l3 = 1.0 - l1 - l2;
 
     answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                    l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
-                    l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
+                     l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
+                     l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
     answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                    l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
-                    l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
+                     l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
+                     l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
 }
 
 #define POINT_TOL 1.e-3
@@ -133,6 +133,13 @@ FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const F
     answer.at(1) = 1.;
 }
 
+double
+FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+    OOFEM_ERROR("FEI2dTrConst :: edgeEvalNormal - Not applicable to constant interpolation");
+    return 0.;
+}
+
 void
 FEI2dTrConst :: edgeEvaldNds(FloatArray &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -157,15 +164,6 @@ FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
                      n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
 }
-
-double
-FEI2dTrConst :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    return 0.5 * this->edgeComputeLength(edgeNodes, cellgeo);
-}
-
 
 void
 FEI2dTrConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)

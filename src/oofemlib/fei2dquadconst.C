@@ -91,6 +91,13 @@ FEI2dQuadConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const
     OOFEM_ERROR("FEI2dQuadConst :: edgeEvalN: not implemented");
 }
 
+
+double FEI2dQuadConst::edgeEvalNormal(FloatArray& answer, int iedge, const FloatArray& lcoords, const FEICellGeometry& cellgeo)
+{
+    OOFEM_ERROR("FEI2dQuadConst :: edgeEvalNormal: not implemented");
+    return 0.;
+}
+
 void
 FEI2dQuadConst :: edgeEvaldNds(FloatArray &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -104,16 +111,6 @@ FEI2dQuadConst :: edgeLocal2global(FloatArray &answer, int iedge,
 {
     OOFEM_ERROR("FEI2dQuadConst :: edgeLocal2global: not implemented");
 }
-
-
-double
-FEI2dQuadConst :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    return 0.5 * this->edgeComputeLength(edgeNodes, cellgeo);
-}
-
 
 void
 FEI2dQuadConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)

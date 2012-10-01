@@ -197,7 +197,14 @@ public:
      * @param boundary Boundary number.
      */
     virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
-
+    /**
+     * Evaluates the normal on the requested boundary.
+     * @param answer The evaluated normal.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @return The boundary transformation Jacobian.
+     */
+    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.

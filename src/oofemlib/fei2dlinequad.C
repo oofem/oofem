@@ -152,7 +152,7 @@ void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
     //return J;
 }
 
-void FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);
     double dN1dxi = -0.5 + xi;
@@ -169,19 +169,13 @@ void FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatA
                    -dN2dxi*cellgeo.giveVertexCoordinates(2)->at(xind) +
                    -dN3dxi*cellgeo.giveVertexCoordinates(3)->at(xind);
 
-    normal.normalize();
+    return normal.normalize();
 }
 
 void FEI2dLineQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     this->local2global(answer, lcoords, cellgeo);
-}
-
-double FEI2dLineQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-    const FEICellGeometry &cellgeo)
-{
-    return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
 double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)

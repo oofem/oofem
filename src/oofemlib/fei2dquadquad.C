@@ -104,7 +104,6 @@ void
 FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(8, 2);
-    int i;
     FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
     FloatArray dndxi(8), dndeta(8);
 
@@ -114,7 +113,7 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     this->giveDerivativeXi(dndxi, lcoords);
     this->giveDerivativeEta(dndeta, lcoords);
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(i, 1) = dndxi.at(i) * inv.at(1, 1) + dndeta.at(i) * inv.at(1, 2);
         answer.at(i, 2) = dndxi.at(i) * inv.at(2, 1) + dndeta.at(i) * inv.at(2, 2);
     }
@@ -123,14 +122,13 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 void
 FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {
-    int i;
     FloatArray n(8);
     answer.resize(2);
     answer.zero();
 
     this->evalN(n, lcoords, cellgeo);
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
         answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
     }
@@ -283,7 +281,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     edgeNodes.at(3) = cNode;
 }
 
-void FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
@@ -302,38 +300,14 @@ void FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatA
                    dN2dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
                    dN3dxi*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
 
-    normal.normalize();
+    return normal.normalize();
 }
-
-double
-FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    IntArray edgeNodes;
-    double xi = lcoords.at(1);
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    FloatArray dNdxi(3);
-    dNdxi.at(1) = xi-0.5;
-    dNdxi.at(2) = xi+0.5;
-    dNdxi.at(3) = -2*xi;
-
-    FloatArray dxdxi(2);
-    dxdxi.at(1) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
-                  dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
-                  dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
-    dxdxi.at(2) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
-                  dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
-                  dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
-
-    return dxdxi.computeNorm();
-}
-
 
 void
 FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 // Computes it if it does not exist yet.
 {
-    int i;
     double x, y;
     FloatArray dxi, deta;
 
@@ -343,7 +317,7 @@ FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
     this->giveDerivativeXi(dxi, lcoords);
     this->giveDerivativeEta(deta, lcoords);
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(xind);
         y = cellgeo.giveVertexCoordinates(i)->at(yind);
 

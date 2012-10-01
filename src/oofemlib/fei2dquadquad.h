@@ -82,9 +82,7 @@ public:
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo);
-    virtual void edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
 protected:
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);

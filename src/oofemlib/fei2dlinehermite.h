@@ -70,7 +70,7 @@ public:
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
     virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { };
-    virtual void edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvald2Nds2(FloatArray &answer, int iedge,
@@ -78,8 +78,6 @@ public:
 
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) {};
-    virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo) { return 0.0; };
 };
 } // end namespace oofem
 #endif // fei2dlinehermite_h

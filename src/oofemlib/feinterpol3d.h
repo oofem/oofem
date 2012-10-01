@@ -59,6 +59,8 @@ public:
     { this->computeLocalSurfaceMapping(answer, boundary); }
     virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { this->surfaceEvalN(answer, lcoords, cellgeo); }
+    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { return this->surfaceEvalNormal(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { return this->surfaceGiveTransformationJacobian(boundary, lcoords, cellgeo); }
 

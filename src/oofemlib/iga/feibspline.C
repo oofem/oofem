@@ -40,13 +40,11 @@
 namespace oofem {
 BSplineInterpolation :: ~BSplineInterpolation()
 {
-    int i;
-
     delete [] degree;
     delete [] numberOfControlPoints;
     delete [] numberOfKnotSpans;
 
-    for ( i = 0; i < nsd; i++ ) {
+    for ( int i = 0; i < nsd; i++ ) {
         delete [] knotVector [ i ];
     }
 

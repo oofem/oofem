@@ -35,6 +35,8 @@
 #ifndef feinterpol2d_h
 #define feinterpol2d_h
 
+#include "flotarry.h"
+
 #include "feinterpol.h"
 
 namespace oofem {
@@ -59,6 +61,7 @@ public:
 
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)  { this->computeLocalEdgeMapping(answer, boundary); }
     virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { this->edgeEvalN(answer, lcoords, cellgeo); }
+    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeEvalNormal(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo); }
     
     /**@name Edge interpolation services. */
@@ -86,8 +89,7 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEInterpolation2d :: edgeEvalNormal - Not implemented in subclass."); }
+    virtual double edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined).
@@ -110,14 +112,17 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
-     * Evaluates the edge jacobian of transformation between local and global coordinates.
+     * Evaluates the edge Jacobian of transformation between local and global coordinates.
      * @param iedge Determines edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      * @return Determinant of the mapping on the given edge.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo) = 0;
+                                                  const FEICellGeometry &cellgeo) {
+        FloatArray normal;
+        return this->edgeEvalNormal(normal, iedge, lcoords, cellgeo);
+    }
     //@}
 };
 } // end namespace oofem

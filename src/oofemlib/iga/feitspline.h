@@ -63,7 +63,7 @@ protected:
     double *openLocalKnotVector;
 public:
     TSplineInterpolation(int nsd) : BSplineInterpolation(nsd) { }
-    ~TSplineInterpolation();
+    virtual ~TSplineInterpolation();
 
     IRResultType initializeFrom(InputRecord *ir);
     void setNumberOfControlPoints(int num) { this->totalNumberOfControlPoints = num; }
