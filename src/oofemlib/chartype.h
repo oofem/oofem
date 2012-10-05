@@ -92,6 +92,7 @@ namespace oofem {
     ENUM_ITEM(PressureTerm_MC)                                            \
     ENUM_ITEM(BCLhsTerm_MB)                                               \
     ENUM_ITEM(BCLhsPressureTerm_MB)                                       \
+    ENUM_ITEM(BCLhsPressureTerm_MC)                                       \
     ENUM_ITEM(BCRhsTerm_MB)                                               \
     ENUM_ITEM(BCRhsTerm_MC)                                               \
     ENUM_ITEM(AlgorithmicRhsTerm_MB)                                      \
