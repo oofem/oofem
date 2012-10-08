@@ -1012,7 +1012,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 #endif
 
     DofManager *dman;
-    FloatArray iVal;
+    FloatArray iVal, iValLCS;
 
     for ( int inode = 1; inode <= regionDofMans; inode++ ) {
         dman = d->giveNode( mapL2G.at(inode) );
@@ -1026,6 +1026,15 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
             fprintf(stream, "%e ", iVal.at(1) );
 #endif
         } else if ( type == ISVT_VECTOR ) {
+
+	  //rotate back from nodal CS to global CS if applies
+	  if ( (dman->giveClassID() == NodeClass) && d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
+	    iVal.resize(3);
+	    iValLCS = iVal;
+	    iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
+	  }
+	  
+
 #ifdef __VTK_MODULE
             primVarArray->SetTuple3(inode-1, iVal.at(1), iVal.at(2), iVal.at(3));
 #else
