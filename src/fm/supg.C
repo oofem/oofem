@@ -415,7 +415,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     //
     // corrector
     //
-    OOFEM_LOG_INFO("Iteration  IncrSolErr      RelResidErr     AbsResidErr\n_______________________________________________________\n");
+    //OOFEM_LOG_INFO("Iteration  IncrSolErr      RelResidErr     AbsResidErr\n_______________________________________________________\n");
+    OOFEM_LOG_INFO("Iteration  IncrSolErr      RelResidErr     (Rel_MB      ,Rel_MC      ) AbsResidErr\n__________________________________________________________________________________\n");
     do {
         nite++;
         //
@@ -573,11 +574,11 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             _absErrResid = max( _absErrResid, fabs( rhs.at(i) ) );
         }
 
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            OOFEM_LOG_INFO("%-10d       n/a       %-15e %-15e\n", nite, rnorm, _absErrResid);
-        } else {
-            OOFEM_LOG_INFO("%-10d %-15e %-15e (%-15e, %-15e) %-15e\n", nite, err, rnorm, rnorm_mb, rnorm_mc, _absErrResid);
-        }
+        //if ( requiresUnknownsDictionaryUpdate() ) {
+        //    OOFEM_LOG_INFO("%-10d       n/a       %-15e %-15e\n", nite, rnorm, _absErrResid);
+        //} else {
+            OOFEM_LOG_INFO("%-10d %-15e %-15e (%-10e,%-10e) %-15e\n", nite, err, rnorm, rnorm_mb, rnorm_mc, _absErrResid);
+	//}
 
         if ( 0 ) {
             // evaluate element supg and sppg stabilization coeffs
