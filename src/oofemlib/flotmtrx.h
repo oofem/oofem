@@ -248,6 +248,12 @@ public:
      */
     void beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2);
     /**
+     * Assigns the receiver to be a repeated diagonal matrix.
+     * @param n Vector with components which will appear in respective diagonal.
+     * @param nsd Number of spatial dimensions
+     */
+    void beNMatrixOf(const FloatArray &n, int nsd);
+    /**
      * Makes receiver the local coordinate for the given normal.
      * Implemented for 2D and 3D.
      * @param normal Normal (normalized).

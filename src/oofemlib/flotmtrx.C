@@ -109,7 +109,6 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColu
 {
     // copy constructor
     double *P1, *P2;
-    int i;
 
     //this->nRows = src.nRows;
     //this->nColumns = src.nColumns;
@@ -119,7 +118,7 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColu
 
     P1 = values;
     P2 = src.values;
-    for ( i = 0; i < nRows * nColumns; i++ ) {
+    for ( int i = 0; i < nRows * nColumns; i++ ) {
         P1 [ i ] = P2 [ i ];
     }
 }
@@ -129,12 +128,11 @@ FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
     double *P1, *P2;
-    int i;
     this->resize(src.nRows, src.nColumns);
 
     P1 = values;
     P2 = src.values;
-    for ( i = 0; i < nRows * nColumns; i++ ) {
+    for ( int i = 0; i < nRows * nColumns; i++ ) {
         P1 [ i ] = P2 [ i ];
     }
 
@@ -181,7 +179,7 @@ double FloatMatrix :: operator() (int i, int j) const
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
-    int i, j, ii, jj, size;
+    int ii, jj, size;
 
     if ( ( size = src.giveNumberOfRows() ) != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
@@ -191,9 +189,9 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
         OOFEM_ERROR("FloatMatrix :: assemble : 'src' is not sqaure matrix");
     }
 
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         if ( ( ii = loc.at(i) ) ) {
-            for ( j = 1; j <= size; j++ ) {
+            for ( int j = 1; j <= size; j++ ) {
                 if ( ( jj = loc.at(j) ) ) {
                     this->at(ii, jj) += src.at(i, j);
                 }
@@ -205,7 +203,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
 {
-    int i, j, ii, jj;
+    int ii, jj;
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
 
@@ -217,9 +215,9 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
         OOFEM_ERROR("FloatMatrix :: assemble : column dimensions of 'src' and 'colind' mismatch");
     }
 
-    for ( i = 1; i <= nr; i++ ) {
+    for ( int i = 1; i <= nr; i++ ) {
         if ( ( ii = rowind.at(i) ) ) {
-            for ( j = 1; j <= nc; j++ ) {
+            for ( int j = 1; j <= nc; j++ ) {
                 if ( ( jj = colind.at(j) ) ) {
                     this->at(ii, jj) += src.at(i, j);
                 }
@@ -231,13 +229,13 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *colind)
 {
-    int i, j, ii, jj;
+    int ii, jj;
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
 
-    for ( i = 1; i <= nr; i++ ) {
+    for ( int i = 1; i <= nr; i++ ) {
         if ( ( ii = rowind [ i - 1 ] ) ) {
-            for ( j = 1; j <= nc; j++ ) {
+            for ( int j = 1; j <= nc; j++ ) {
                 if ( ( jj = colind [ j - 1 ] ) ) {
                     this->at(ii, jj) += src.at(i, j);
                 }
@@ -250,11 +248,11 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const in
 void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
-    int i, j, nrows = src.giveNumberOfColumns(), ncols = src.giveNumberOfRows();
+    int nrows = src.giveNumberOfColumns(), ncols = src.giveNumberOfRows();
     this->resize(nrows, ncols);
 
-    for ( i = 1; i <= nrows; i++ ) {
-        for ( j = 1; j <= ncols; j++ ) {
+    for ( int i = 1; i <= nrows; i++ ) {
+        for ( int j = 1; j <= ncols; j++ ) {
             this->at(i, j) = src.at(j, i);
         }
     }
@@ -264,7 +262,7 @@ void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix
 {
-    int i, j, k, p;
+    int p;
     double coeff;
 
 #  ifdef DEBUG
@@ -275,10 +273,10 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 
     p = bMatrix.nColumns;
     this->resize(aMatrix.nRows, p);
-    for ( i = 1; i <= aMatrix.nRows; i++ ) {
-        for ( j = 1; j <= p; j++ ) {
+    for ( int i = 1; i <= aMatrix.nRows; i++ ) {
+        for ( int j = 1; j <= p; j++ ) {
             coeff = 0.;
-            for ( k = 1; k <= aMatrix.nColumns; k++ ) {
+            for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
                 coeff += aMatrix.at(i, k) * bMatrix.at(k, j);
             }
 
@@ -290,13 +288,23 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
 // Receiver = vec1 * vec2^T
 {
-    int i, j;
     int n1 = vec1.giveSize();
     int n2 = vec2.giveSize();
     this->resize(n1, n2);
-    for ( i = 1; i <= n1; i++ ) {
-        for ( j = 1; j <= n2; j++ ) {
+    for ( int i = 1; i <= n1; i++ ) {
+        for ( int j = 1; j <= n2; j++ ) {
             this->at(i, j) = vec1.at(i) * vec2.at(j);
+        }
+    }
+}
+
+void FloatMatrix :: beNMatrixOf(const FloatArray &n, int nsd)
+{
+    this->resize(nsd, n.giveSize()*nsd);
+    this->zero();
+    for (int i = 0; i < n.giveSize(); ++i) {
+        for (int j = 0; j < nsd; ++j) {
+            (*this)(j, i*nsd+j) = n(i);
         }
     }
 }
@@ -347,7 +355,7 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
 void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix^T * bMatrix
 {
-    int i, j, k, p;
+    int p;
     double coeff;
 
 #  ifdef DEBUG
@@ -356,12 +364,12 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
     }
 #  endif
 
-    p      = bMatrix.nColumns;
+    p = bMatrix.nColumns;
     this->resize(aMatrix.nColumns, p);
-    for ( i = 1; i <= aMatrix.nColumns; i++ ) {
-        for ( j = 1; j <= p; j++ ) {
+    for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
+        for ( int j = 1; j <= p; j++ ) {
             coeff = 0.;
-            for ( k = 1; k <= aMatrix.nRows; k++ ) {
+            for ( int k = 1; k <= aMatrix.nRows; k++ ) {
                 coeff += aMatrix.at(k, i) * bMatrix.at(k, j);
             }
 
@@ -374,7 +382,7 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix^T
 {
-    int i, j, k, p;
+    int p;
     double coeff;
 
 #  ifdef DEBUG
@@ -385,10 +393,10 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 
     p = bMatrix.nRows;
     this->resize(aMatrix.nRows, p);
-    for ( i = 1; i <= aMatrix.nRows; i++ ) {
-        for ( j = 1; j <= p; j++ ) {
+    for ( int i = 1; i <= aMatrix.nRows; i++ ) {
+        for ( int j = 1; j <= p; j++ ) {
             coeff = 0.;
-            for ( k = 1; k <= aMatrix.nColumns; k++ ) {
+            for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
                 coeff += aMatrix.at(i, k) * bMatrix.at(j, k);
             }
 
@@ -413,9 +421,8 @@ void FloatMatrix :: addSubMatrix(const FloatMatrix &src, int sr, int sc)
     }
 
     // add sub-matrix
-    int i, j;
-    for ( i = 1; i <= srcRows; i++ ) {
-        for ( j = 1; j <= srcCols; j++ ) {
+    for ( int i = 1; i <= srcRows; i++ ) {
+        for ( int j = 1; j <= srcCols; j++ ) {
             this->at(sr + i, sc + j) += src.at(i, j);
         }
     }
@@ -442,14 +449,14 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
 #endif
 
 
-    int i, j, topRm1, topCm1;
+    int topRm1, topCm1;
     topRm1 = topRow - 1;
     topCm1 = topCol - 1;
 
     // allocate return value
     this->resize(bottomRow - topRm1, bottomCol - topCm1);
-    for ( i = topRow; i <= bottomRow; i++ ) {
-        for ( j = topCol; j <= bottomCol; j++ ) {
+    for ( int i = topRow; i <= bottomRow; i++ ) {
+        for ( int j = topCol; j <= bottomCol; j++ ) {
             this->at(i - topRm1, j - topCm1) = src.at(i, j);
         }
     }
@@ -470,8 +477,7 @@ void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
     }
 
     // add sub-matrix
-    int j;
-    for ( j = 1; j <= srcCols; j++ ) {
+    for ( int j = 1; j <= srcCols; j++ ) {
         this->at(sr, sc + j) += src.at(j);
     }
 }
@@ -524,8 +530,7 @@ void FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
     }
 
     // add sub-matrix
-    int j;
-    for ( j = 1; j <= srcCols; j++ ) {
+    for ( int j = 1; j <= srcCols; j++ ) {
         this->at(sr, sc + j) = src.at(j);
     }
 }
@@ -540,7 +545,6 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 // receiver ; the lower half is not modified. Other advantage : it does
 // not compute the transposition of matrix a.
 {
-    int i, j, k;
     double summ;
 
     if ( !this->isNotEmpty() ) {
@@ -548,10 +552,10 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
         zero();
     }
 
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = i; j <= nColumns; j++ ) {
+    for ( int i = 1; i <= nRows; i++ ) {
+        for ( int j = i; j <= nColumns; j++ ) {
             summ = 0.;
-            for ( k = 1; k <= a.nRows; k++ ) {
+            for ( int k = 1; k <= a.nRows; k++ ) {
                 summ += a.at(k, i) * b.at(k, j);
             }
 
@@ -582,7 +586,6 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 // If the receiver has a null size, it is expanded.
 // Advantage : does not compute the transposition of matrix a.
 {
-    int i, j, k;
     double summ;
 
     if ( !this->isNotEmpty() ) {
@@ -590,10 +593,10 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
         zero();
     }
 
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = 1; j <= nColumns; j++ ) {
+    for ( int i = 1; i <= nRows; i++ ) {
+        for ( int j = 1; j <= nColumns; j++ ) {
             summ = 0.;
-            for ( k = 1; k <= a.nRows; k++ ) {
+            for ( int k = 1; k <= a.nRows; k++ ) {
                 summ += a.at(k, i) * b.at(k, j);
             }
 
@@ -691,7 +694,6 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 #else
         // size >3 ... gaussian elimination - slow but safe
         //
-        int i, j, k;
         double piv, linkomb;
         FloatMatrix tmp = src;
         this->zero();
@@ -701,34 +703,34 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         }
 
         // lower triangle elimination by columns
-        for ( i = 1; i < nRows; i++ ) {
+        for ( int i = 1; i < nRows; i++ ) {
             piv = tmp.at(i, i);
             if ( fabs(piv) < 1.e-20 ) {
                 OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", nRows, nColumns);
             }
 
-            for ( j = i + 1; j <= nRows; j++ ) {
+            for ( int j = i + 1; j <= nRows; j++ ) {
                 linkomb = tmp.at(j, i) / tmp.at(i, i);
-                for ( k = i; k <= nRows; k++ ) {
+                for ( int k = i; k <= nRows; k++ ) {
                     tmp.at(j, k) -= tmp.at(i, k) * linkomb;
                 }
 
-                for ( k = 1; k <= nRows; k++ ) {
+                for ( int k = 1; k <= nRows; k++ ) {
                     this->at(j, k) -= this->at(i, k) * linkomb;
                 }
             }
         }
 
         // upper triangle elimination by columns
-        for ( i = nRows; i > 1; i-- ) {
+        for ( int i = nRows; i > 1; i-- ) {
             piv = tmp.at(i, i);
-            for ( j = i - 1; j > 0; j-- ) {
+            for ( int j = i - 1; j > 0; j-- ) {
                 linkomb = tmp.at(j, i) / tmp.at(i, i);
-                for ( k = i; k > 0; k-- ) {
+                for ( int k = i; k > 0; k-- ) {
                     tmp.at(j, k) -= tmp.at(i, k) * linkomb;
                 }
 
-                for ( k = nRows; k > 0; k-- ) {
+                for ( int k = nRows; k > 0; k-- ) {
                     // tmp -> at(j,k)-= tmp  ->at(i,k)*linkomb;
                     this->at(j, k) -= this->at(i, k) * linkomb;
                 }
@@ -736,8 +738,8 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         }
 
         // diagonal scaling
-        for ( i = 1; i <= nRows; i++ ) {
-            for ( j = 1; j <= nRows; j++ ) {
+        for ( int i = 1; i <= nRows; i++ ) {
+            for ( int j = 1; j <= nRows; j++ ) {
                 this->at(i, j) /= tmp.at(i, i);
             }
         }
@@ -759,7 +761,7 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
  * Works only for square matrices.
  */
 {
-    int size, n, i, j, ii, jj;
+    int size, n, ii, jj;
 
     if ( ( n = indx.giveSize() ) == 0 ) {
         this->resize(0, 0);
@@ -776,16 +778,12 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
         OOFEM_ERROR("FloatMatrix::beSubMatrixOf : giveSubMatrix size mismatch");
     }
 
-    for ( size = 0, i = 1; i <= n; i++ ) {
-        if ( indx.at(i) > size ) {
-            size = indx.at(i);
-        }
-    }
+    size = indx.maximum();
 
     this->resize(size, size);
 
-    for ( i = 1; i <= n; i++ ) {
-        for ( j = 1; j <= n; j++ ) {
+    for ( int i = 1; i <= n; i++ ) {
+        for ( int j = 1; j <= n; j++ ) {
             if ( ( ( ii = indx.at(i) ) != 0 ) && ( ( jj = indx.at(j) ) != 0 ) ) {
                 this->at(ii, jj) = src.at(i, j);
             }
@@ -808,7 +806,7 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
  * Works only for square matrices.
  */
 {
-    int tsize, n, i, j, ii, jj;
+    int tsize, n, ii, jj;
 
     if ( ( n = indx.giveSize() ) == 0 ) {
         this->resize(0, 0);
@@ -825,11 +823,7 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : giveSubMatrix size mismatch");
     }
 
-    for ( tsize = 0, i = 1; i <= n; i++ ) {
-        if ( indx.at(i) > tsize ) {
-            tsize = indx.at(i);
-        }
-    }
+    tsize = indx.maximum();
 
     if ( tsize > size ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
@@ -837,8 +831,8 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
 
     this->resize(size, size);
 
-    for ( i = 1; i <= n; i++ ) {
-        for ( j = 1; j <= n; j++ ) {
+    for ( int i = 1; i <= n; i++ ) {
+        for ( int j = 1; j <= n; j++ ) {
             if ( ( ( ii = indx.at(i) ) != 0 ) && ( ( jj = indx.at(j) ) != 0 ) ) {
                 this->at(ii, jj) = src.at(i, j);
             }
@@ -955,7 +949,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
     }
 #else
-    int i, j, k, pivRow;
+    int pivRow;
     double piv, linkomb, help;
     FloatMatrix *mtrx, trans;
     if (transpose) {
@@ -969,11 +963,11 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 
     // initialize answer to be unity matrix;
     // lower triangle elimination by columns
-    for ( i = 1; i < nRows; i++ ) {
+    for ( int i = 1; i < nRows; i++ ) {
         // find the suitable row and pivot
         piv = fabs( mtrx->at(i, i) );
         pivRow = i;
-        for ( j = i + 1; j <= nRows; j++ ) {
+        for ( int j = i + 1; j <= nRows; j++ ) {
             if ( fabs( mtrx->at(j, i) ) > piv ) {
                 pivRow = j;
                 piv = fabs( mtrx->at(j, i) );
@@ -986,7 +980,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 
         // exchange rows
         if ( pivRow != i ) {
-            for ( j = i; j <= nRows; j++ ) {
+            for ( int j = i; j <= nRows; j++ ) {
                 help = mtrx->at(i, j);
                 mtrx->at(i, j) = mtrx->at(pivRow, j);
                 mtrx->at(pivRow, j) = help;
@@ -996,7 +990,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
             answer.at(pivRow) = help;
         }
 
-        for ( j = i + 1; j <= nRows; j++ ) {
+        for ( int j = i + 1; j <= nRows; j++ ) {
             linkomb = mtrx->at(j, i) / mtrx->at(i, i);
             for ( k = i; k <= nRows; k++ ) {
                 this->at(j, k) -= mtrx->at(i, k) * linkomb;
@@ -1007,9 +1001,9 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
     }
 
     // back substitution
-    for ( i = nRows; i >= 1; i-- ) {
+    for ( int i = nRows; i >= 1; i-- ) {
         help = 0.;
-        for ( j = i + 1; j <= nRows; j++ ) {
+        for ( int j = i + 1; j <= nRows; j++ ) {
             help += mtrx->at(i, j) * answer.at(j);
         }
 
@@ -1047,7 +1041,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
     }
 #else
-    int i, j, k, pivRow, nPs;
+    int pivRow, nPs;
     double piv, linkomb, help;
     FloatMatrix *mtrx, trans;
     if (transpose) {
@@ -1061,11 +1055,11 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     answer = b;
     // initialize answer to be unity matrix;
     // lower triangle elimination by columns
-    for ( i = 1; i < nRows; i++ ) {
+    for ( int i = 1; i < nRows; i++ ) {
         // find the suitable row and pivot
         piv = fabs( mtrx->at(i, i) );
         pivRow = i;
-        for ( j = i + 1; j <= nRows; j++ ) {
+        for ( int j = i + 1; j <= nRows; j++ ) {
             if ( fabs( mtrx->at(j, i) ) > piv ) {
                 pivRow = j;
                 piv = fabs( mtrx->at(j, i) );
@@ -1078,13 +1072,13 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 
         // exchange rows
         if ( pivRow != i ) {
-            for ( j = i; j <= nRows; j++ ) {
+            for ( int j = i; j <= nRows; j++ ) {
                 help = mtrx->at(i, j);
                 mtrx->at(i, j) = mtrx->at(pivRow, j);
                 mtrx->at(pivRow, j) = help;
             }
 
-            for ( j = 1; j <= nPs; j++ ) {
+            for ( int j = 1; j <= nPs; j++ ) {
                 help = answer.at(i, j);
                 answer.at(i, j) = answer.at(pivRow, j);
                 answer.at(pivRow, j) = help;
@@ -1095,13 +1089,13 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
             OOFEM_ERROR("FloatMatrix::solveForRhs : cannot solve, zero pivot encountered");
         }
 
-        for ( j = i + 1; j <= nRows; j++ ) {
+        for ( int j = i + 1; j <= nRows; j++ ) {
             linkomb = mtrx->at(j, i) / mtrx->at(i, i);
-            for ( k = i; k <= nRows; k++ ) {
+            for ( int k = i; k <= nRows; k++ ) {
                 mtrx->at(j, k) -= mtrx->at(i, k) * linkomb;
             }
 
-            for ( k = 1; k <= nPs; k++ ) {
+            for ( int k = 1; k <= nPs; k++ ) {
                 answer.at(j, k) -= answer.at(i, k) * linkomb;
             }
         }
@@ -1162,14 +1156,12 @@ void FloatMatrix :: zero() const
 
 void FloatMatrix :: beUnitMatrix()
 {
-    int i;
-
     if ( !this->isSquare() ) {
         OOFEM_ERROR3("FloatMatrix::beUnitMatrix : cannot make unit matrix of %d by %d matrix", nRows, nColumns);
     }
 
     this->zero();
-    for ( i = 1; i <= nRows; i++ ) {
+    for ( int i = 1; i <= nRows; i++ ) {
         this->at(i, i) = 1.0;
     }
 }
@@ -1235,13 +1227,13 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
     this->nRows = rows;
     this->nColumns = columns;
 
-    int ii, jj, i, j;
+    int ii, jj;
 
     ii = min( rows, old.giveNumberOfRows() );
     jj = min( columns, old.giveNumberOfColumns() );
     // copy old values if possible
-    for ( i = 1; i <= ii; i++ ) {
-        for ( j = 1; j <= jj; j++ ) {
+    for ( int i = 1; i <= ii; i++ ) {
+        for ( int j = 1; j <= jj; j++ ) {
             this->at(i, j) = old.at(i, j);
         }
     }
@@ -1295,13 +1287,11 @@ double FloatMatrix :: giveDeterminant() const
 void FloatMatrix :: printYourself() const
 // Prints the receiver on screen.
 {
-    int i, j;
-
     printf("FloatMatrix with dimensions : %d %d\n",
            nRows, nColumns);
     if ( nRows <= 250 && nColumns <= 250 ) {
-        for ( i = 1; i <= nRows; ++i ) {
-            for ( j = 1; j <= nColumns && j <= 50; ++j ) {
+        for ( int i = 1; i <= nRows; ++i ) {
+            for ( int j = 1; j <= nColumns && j <= 50; ++j ) {
                 printf( "%10.3e  ", this->at(i, j) );
             }
 
@@ -1316,11 +1306,9 @@ void FloatMatrix :: printYourself() const
 void FloatMatrix :: pY() const
 // Prints the receiver on screen with higher accuracy than printYourself.
 {
-    int i, j;
-
     printf("[");
-    for ( i = 1; i <= nRows; ++i ) {
-        for ( j = 1; j <= nColumns; ++j ) {
+    for ( int i = 1; i <= nRows; ++i ) {
+        for ( int j = 1; j <= nColumns; ++j ) {
             printf( "%20.15e", this->at(i, j) );
             if ( j < nColumns ) {
                 printf(",");
@@ -1348,8 +1336,6 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r)
 void FloatMatrix :: symmetrized()
 // Initializes the lower half of the receiver to the upper half.
 {
-    int i, j;
-
 #  ifdef DEBUG
     if ( nRows != nColumns ) {
         OOFEM_ERROR("FloatMatrix::symmetrized : cannot symmetrize a non-square matrix");
@@ -1357,8 +1343,8 @@ void FloatMatrix :: symmetrized()
 
 #   endif
 
-    for ( i = 2; i <= nRows; i++ ) {
-        for ( j = 1; j < i; j++ ) {
+    for ( int i = 2; i <= nRows; i++ ) {
+        for ( int j = 1; j < i; j++ ) {
             this->at(i, j) = this->at(j, i);
         }
     }

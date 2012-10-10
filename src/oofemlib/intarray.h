@@ -199,6 +199,11 @@ public:
      */
     int minimum() const;
     /**
+     * Finds the maximum component in the array.
+     * @return Maximum of array or prints error is array is empty.
+     */
+    int maximum() const;
+    /**
      * Checks if sorted receiver contains a given value.
      * @return True if receiver contains given value.
      */

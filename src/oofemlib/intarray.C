@@ -357,7 +357,21 @@ int IntArray :: minimum() const
         }
     }
     return x;
+}
 
+
+int IntArray :: maximum() const
+{
+    if (size == 0) {
+        OOFEM_ERROR("IntArray :: maximum - Empty array.");
+    }
+    int x = values[0];
+    for ( int i = 1; i < size; ++i ) {
+        if (values[i] > x) {
+            x = values[i];
+        }
+    }
+    return x;
 }
 
 
