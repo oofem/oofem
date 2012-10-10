@@ -620,50 +620,58 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     t1 = _t1 / l;
     t2 = _t2 / l;
 
-    answer.at(1, 1) += ( l / 3 ) * beta * d1 * t1 * t1;
-    answer.at(1, 2) += ( l / 3 ) * beta * d1 * t1 * t2;
-    answer.at(2, 1) += ( l / 3 ) * beta * d1 * t1 * t2;
-    answer.at(2, 2) += ( l / 3 ) * beta * d1 * t2 * t2;
+    double t11 = t1*t1;
+    double t12 = t1*t2;
+    double t22 = t2*t2;
+    
+    double d12 = d1*d2;
+    double d13 = d1*d3;
+    double d23 = d2*d3;
 
-    answer.at(1, 3) += ( l / 6 ) * beta * d1 * d2 * t1 * t1;
-    answer.at(1, 4) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
-    answer.at(2, 3) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
-    answer.at(2, 4) += ( l / 6 ) * beta * d1 * d2 * t2 * t2;
+    answer.at(1, 1) = ( l / 3 ) * beta * d1 * t11;
+    answer.at(1, 2) = ( l / 3 ) * beta * d1 * t12;
+    answer.at(2, 1) = ( l / 3 ) * beta * d1 * t12;
+    answer.at(2, 2) = ( l / 3 ) * beta * d1 * t22;
 
-    answer.at(1, 5) += ( l / 6 ) * beta * d1 * d3 * t1 * t1;
-    answer.at(1, 6) += ( l / 6 ) * beta * d1 * d3 * t1 * t2;
-    answer.at(2, 5) += ( l / 6 ) * beta * d1 * d3 * t1 * t2;
-    answer.at(2, 6) += ( l / 6 ) * beta * d1 * d3 * t2 * t2;
+    answer.at(1, 3) = ( l / 6 ) * beta * d12 * t11;
+    answer.at(1, 4) = ( l / 6 ) * beta * d12 * t12;
+    answer.at(2, 3) = ( l / 6 ) * beta * d12 * t12;
+    answer.at(2, 4) = ( l / 6 ) * beta * d12 * t22;
 
-    answer.at(3, 1) += ( l / 6 ) * beta * d1 * d2 * t1 * t1;
-    answer.at(3, 2) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
-    answer.at(4, 1) += ( l / 6 ) * beta * d1 * d2 * t1 * t2;
-    answer.at(4, 2) += ( l / 6 ) * beta * d1 * d2 * t2 * t2;
+    answer.at(1, 5) = ( l / 6 ) * beta * d13 * t11;
+    answer.at(1, 6) = ( l / 6 ) * beta * d13 * t12;
+    answer.at(2, 5) = ( l / 6 ) * beta * d13 * t12;
+    answer.at(2, 6) = ( l / 6 ) * beta * d13 * t22;
 
-    answer.at(3, 3) += ( l / 3 ) * beta * d2 * t1 * t1;
-    answer.at(3, 4) += ( l / 3 ) * beta * d2 * t1 * t2;
-    answer.at(4, 3) += ( l / 3 ) * beta * d2 * t1 * t2;
-    answer.at(4, 4) += ( l / 3 ) * beta * d2 * t2 * t2;
+    answer.at(3, 1) = ( l / 6 ) * beta * d12 * t11;
+    answer.at(3, 2) = ( l / 6 ) * beta * d12 * t12;
+    answer.at(4, 1) = ( l / 6 ) * beta * d12 * t12;
+    answer.at(4, 2) = ( l / 6 ) * beta * d12 * t22;
 
-    answer.at(3, 5) += ( l / 6 ) * beta * d2 * d3 * t1 * t1;
-    answer.at(3, 6) += ( l / 6 ) * beta * d2 * d3 * t1 * t2;
-    answer.at(4, 5) += ( l / 6 ) * beta * d2 * d3 * t1 * t2;
-    answer.at(4, 6) += ( l / 6 ) * beta * d2 * d3 * t2 * t2;
+    answer.at(3, 3) = ( l / 3 ) * beta * d2 * t11;
+    answer.at(3, 4) = ( l / 3 ) * beta * d2 * t12;
+    answer.at(4, 3) = ( l / 3 ) * beta * d2 * t12;
+    answer.at(4, 4) = ( l / 3 ) * beta * d2 * t22;
 
-    answer.at(5, 1) += ( l / 6 ) * beta * d3 * d1 * t1 * t1;
-    answer.at(5, 2) += ( l / 6 ) * beta * d3 * d1 * t1 * t2;
-    answer.at(6, 1) += ( l / 6 ) * beta * d3 * d1 * t1 * t2;
-    answer.at(6, 2) += ( l / 6 ) * beta * d3 * d1 * t2 * t2;
+    answer.at(3, 5) = ( l / 6 ) * beta * d23 * t11;
+    answer.at(3, 6) = ( l / 6 ) * beta * d23 * t12;
+    answer.at(4, 5) = ( l / 6 ) * beta * d23 * t12;
+    answer.at(4, 6) = ( l / 6 ) * beta * d23 * t22;
 
-    answer.at(5, 3) += ( l / 6 ) * beta * d3 * d2 * t1 * t1;
-    answer.at(5, 4) += ( l / 6 ) * beta * d3 * d2 * t1 * t2;
-    answer.at(6, 3) += ( l / 6 ) * beta * d3 * d2 * t1 * t2;
-    answer.at(6, 4) += ( l / 6 ) * beta * d3 * d2 * t2 * t2;
+    answer.at(5, 1) = ( l / 6 ) * beta * d13 * t11;
+    answer.at(5, 2) = ( l / 6 ) * beta * d13 * t12;
+    answer.at(6, 1) = ( l / 6 ) * beta * d13 * t12;
+    answer.at(6, 2) = ( l / 6 ) * beta * d13 * t22;
 
-    answer.at(5, 5) += ( l / 3 ) * beta * d3 * t1 * t1;
-    answer.at(5, 6) += ( l / 3 ) * beta * d3 * t1 * t2;
-    answer.at(6, 5) += ( l / 3 ) * beta * d3 * t1 * t2;
-    answer.at(6, 6) += ( l / 3 ) * beta * d3 * t2 * t2;
+    answer.at(5, 3) = ( l / 6 ) * beta * d23 * t11;
+    answer.at(5, 4) = ( l / 6 ) * beta * d23 * t12;
+    answer.at(6, 3) = ( l / 6 ) * beta * d23 * t12;
+    answer.at(6, 4) = ( l / 6 ) * beta * d23 * t22;
+
+    answer.at(5, 5) = ( l / 3 ) * beta * d3 * t11;
+    answer.at(5, 6) = ( l / 3 ) * beta * d3 * t12;
+    answer.at(6, 5) = ( l / 3 ) * beta * d3 * t12;
+    answer.at(6, 6) = ( l / 3 ) * beta * d3 * t22;
 
     //answer.negated();
 }
@@ -711,50 +719,58 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     n1 = _t2 / l;
     n2 = -_t1 / l;
 
-    answer.at(1, 1) += ( l / 3 ) * ( 1 / alpha ) * d1 * n1 * n1;
-    answer.at(1, 2) += ( l / 3 ) * ( 1 / alpha ) * d1 * n1 * n2;
-    answer.at(2, 1) += ( l / 3 ) * ( 1 / alpha ) * d1 * n1 * n2;
-    answer.at(2, 2) += ( l / 3 ) * ( 1 / alpha ) * d1 * n2 * n2;
+    double n11 = n1*n1;
+    double n12 = n1*n2;
+    double n22 = n2*n2;
+    
+    double d12 = d1*d2;
+    double d13 = d1*d3;
+    double d23 = d2*d3;
 
-    answer.at(1, 3) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n1;
-    answer.at(1, 4) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
-    answer.at(2, 3) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
-    answer.at(2, 4) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n2 * n2;
+    answer.at(1, 1) = ( l / 3 ) * ( 1 / alpha ) * d1 * n11;
+    answer.at(1, 2) = ( l / 3 ) * ( 1 / alpha ) * d1 * n12;
+    answer.at(2, 1) = ( l / 3 ) * ( 1 / alpha ) * d1 * n12;
+    answer.at(2, 2) = ( l / 3 ) * ( 1 / alpha ) * d1 * n22;
 
-    answer.at(1, 5) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n1 * n1;
-    answer.at(1, 6) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n1 * n2;
-    answer.at(2, 5) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n1 * n2;
-    answer.at(2, 6) += ( l / 6 ) * ( 1 / alpha ) * d1 * d3 * n2 * n2;
+    answer.at(1, 3) = ( l / 6 ) * ( 1 / alpha ) * d12 * n11;
+    answer.at(1, 4) = ( l / 6 ) * ( 1 / alpha ) * d12 * n12;
+    answer.at(2, 3) = ( l / 6 ) * ( 1 / alpha ) * d12 * n12;
+    answer.at(2, 4) = ( l / 6 ) * ( 1 / alpha ) * d12 * n22;
 
-    answer.at(3, 1) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n1;
-    answer.at(3, 2) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
-    answer.at(4, 1) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n1 * n2;
-    answer.at(4, 2) += ( l / 6 ) * ( 1 / alpha ) * d1 * d2 * n2 * n2;
+    answer.at(1, 5) = ( l / 6 ) * ( 1 / alpha ) * d13 * n11;
+    answer.at(1, 6) = ( l / 6 ) * ( 1 / alpha ) * d13 * n12;
+    answer.at(2, 5) = ( l / 6 ) * ( 1 / alpha ) * d13 * n12;
+    answer.at(2, 6) = ( l / 6 ) * ( 1 / alpha ) * d13 * n22;
 
-    answer.at(3, 3) += ( l / 3 ) * ( 1 / alpha ) * d2 * n1 * n1;
-    answer.at(3, 4) += ( l / 3 ) * ( 1 / alpha ) * d2 * n1 * n2;
-    answer.at(4, 3) += ( l / 3 ) * ( 1 / alpha ) * d2 * n1 * n2;
-    answer.at(4, 4) += ( l / 3 ) * ( 1 / alpha ) * d2 * n2 * n2;
+    answer.at(3, 1) = ( l / 6 ) * ( 1 / alpha ) * d12 * n11;
+    answer.at(3, 2) = ( l / 6 ) * ( 1 / alpha ) * d12 * n12;
+    answer.at(4, 1) = ( l / 6 ) * ( 1 / alpha ) * d12 * n12;
+    answer.at(4, 2) = ( l / 6 ) * ( 1 / alpha ) * d12 * n22;
 
-    answer.at(3, 5) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n1 * n1;
-    answer.at(3, 6) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n1 * n2;
-    answer.at(4, 5) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n1 * n2;
-    answer.at(4, 6) += ( l / 6 ) * ( 1 / alpha ) * d2 * d3 * n2 * n2;
+    answer.at(3, 3) = ( l / 3 ) * ( 1 / alpha ) * d2 * n11;
+    answer.at(3, 4) = ( l / 3 ) * ( 1 / alpha ) * d2 * n12;
+    answer.at(4, 3) = ( l / 3 ) * ( 1 / alpha ) * d2 * n12;
+    answer.at(4, 4) = ( l / 3 ) * ( 1 / alpha ) * d2 * n22;
 
-    answer.at(5, 1) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n1 * n1;
-    answer.at(5, 2) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n1 * n2;
-    answer.at(6, 1) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n1 * n2;
-    answer.at(6, 2) += ( l / 6 ) * ( 1 / alpha ) * d3 * d1 * n2 * n2;
+    answer.at(3, 5) = ( l / 6 ) * ( 1 / alpha ) * d23 * n11;
+    answer.at(3, 6) = ( l / 6 ) * ( 1 / alpha ) * d23 * n12;
+    answer.at(4, 5) = ( l / 6 ) * ( 1 / alpha ) * d23 * n12;
+    answer.at(4, 6) = ( l / 6 ) * ( 1 / alpha ) * d23 * n22;
 
-    answer.at(5, 3) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n1 * n1;
-    answer.at(5, 4) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n1 * n2;
-    answer.at(6, 3) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n1 * n2;
-    answer.at(6, 4) += ( l / 6 ) * ( 1 / alpha ) * d3 * d2 * n2 * n2;
+    answer.at(5, 1) = ( l / 6 ) * ( 1 / alpha ) * d13 * n11;
+    answer.at(5, 2) = ( l / 6 ) * ( 1 / alpha ) * d13 * n12;
+    answer.at(6, 1) = ( l / 6 ) * ( 1 / alpha ) * d13 * n12;
+    answer.at(6, 2) = ( l / 6 ) * ( 1 / alpha ) * d13 * n22;
 
-    answer.at(5, 5) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n1;
-    answer.at(5, 6) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n2;
-    answer.at(6, 5) += ( l / 3 ) * ( 1 / alpha ) * d3 * n1 * n2;
-    answer.at(6, 6) += ( l / 3 ) * ( 1 / alpha ) * d3 * n2 * n2;
+    answer.at(5, 3) = ( l / 6 ) * ( 1 / alpha ) * d23 * n11;
+    answer.at(5, 4) = ( l / 6 ) * ( 1 / alpha ) * d23 * n12;
+    answer.at(6, 3) = ( l / 6 ) * ( 1 / alpha ) * d23 * n12;
+    answer.at(6, 4) = ( l / 6 ) * ( 1 / alpha ) * d23 * n22;
+
+    answer.at(5, 5) = ( l / 3 ) * ( 1 / alpha ) * d3 * n11;
+    answer.at(5, 6) = ( l / 3 ) * ( 1 / alpha ) * d3 * n12;
+    answer.at(6, 5) = ( l / 3 ) * ( 1 / alpha ) * d3 * n12;
+    answer.at(6, 6) = ( l / 3 ) * ( 1 / alpha ) * d3 * n22;
 
     //answer.negated();
 }
@@ -794,26 +810,26 @@ TR1_2D_SUPG :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *
     n1 = t2 / l;
     n2 = -t1 / l;
 
-    answer.at(1, 1) += ( l / 3 ) * d1 * d1 * n1;
-    answer.at(1, 2) += ( l / 6 ) * d1 * d2 * n1;
-    answer.at(1, 3) += ( l / 6 ) * d1 * d3 * n1;
-    answer.at(2, 1) += ( l / 3 ) * d1 * d1 * n2;
-    answer.at(2, 2) += ( l / 6 ) * d1 * d2 * n2;
-    answer.at(2, 3) += ( l / 6 ) * d1 * d3 * n2;
+    answer.at(1, 1) = ( l / 3 ) * d1 * d1 * n1;
+    answer.at(1, 2) = ( l / 6 ) * d1 * d2 * n1;
+    answer.at(1, 3) = ( l / 6 ) * d1 * d3 * n1;
+    answer.at(2, 1) = ( l / 3 ) * d1 * d1 * n2;
+    answer.at(2, 2) = ( l / 6 ) * d1 * d2 * n2;
+    answer.at(2, 3) = ( l / 6 ) * d1 * d3 * n2;
 
-    answer.at(3, 1) += ( l / 6 ) * d2 * d1 * n1;
-    answer.at(3, 2) += ( l / 3 ) * d2 * d2 * n1;
-    answer.at(3, 3) += ( l / 6 ) * d2 * d3 * n1;
-    answer.at(4, 1) += ( l / 6 ) * d2 * d1 * n2;
-    answer.at(4, 2) += ( l / 3 ) * d2 * d2 * n2;
-    answer.at(4, 3) += ( l / 6 ) * d2 * d3 * n2;
+    answer.at(3, 1) = ( l / 6 ) * d2 * d1 * n1;
+    answer.at(3, 2) = ( l / 3 ) * d2 * d2 * n1;
+    answer.at(3, 3) = ( l / 6 ) * d2 * d3 * n1;
+    answer.at(4, 1) = ( l / 6 ) * d2 * d1 * n2;
+    answer.at(4, 2) = ( l / 3 ) * d2 * d2 * n2;
+    answer.at(4, 3) = ( l / 6 ) * d2 * d3 * n2;
 
-    answer.at(5, 1) += ( l / 6 ) * d3 * d1 * n1;
-    answer.at(5, 2) += ( l / 6 ) * d3 * d2 * n1;
-    answer.at(5, 3) += ( l / 3 ) * d3 * d3 * n1;
-    answer.at(6, 1) += ( l / 6 ) * d3 * d1 * n2;
-    answer.at(6, 2) += ( l / 6 ) * d3 * d2 * n2;
-    answer.at(6, 3) += ( l / 3 ) * d3 * d3 * n2;
+    answer.at(5, 1) = ( l / 6 ) * d3 * d1 * n1;
+    answer.at(5, 2) = ( l / 6 ) * d3 * d2 * n1;
+    answer.at(5, 3) = ( l / 3 ) * d3 * d3 * n1;
+    answer.at(6, 1) = ( l / 6 ) * d3 * d1 * n2;
+    answer.at(6, 2) = ( l / 6 ) * d3 * d2 * n2;
+    answer.at(6, 3) = ( l / 3 ) * d3 * d3 * n2;
 
     answer.negated();
 }
