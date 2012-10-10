@@ -91,7 +91,7 @@ public:
 
     virtual FEInterpolation *giveInterpolation();
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
-    virtual int computeNumberOfDofs(EquationID eid) { return 0; }
+    virtual int computeNumberOfDofs(EquationID eid) { return 6; }
 
     virtual const char *giveClassName() const { return "Line2BoundaryElement"; }
     virtual classType giveClassID() const { return Line2BoundaryElementClass; }

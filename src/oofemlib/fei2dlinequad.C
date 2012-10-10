@@ -122,7 +122,7 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
 
 void FEI2dLineQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
-    edgeNodes.resize(3); edgeNodes.at(1) = 1; edgeNodes.at(2) = 2; edgeNodes.at(2) = 3;
+    edgeNodes.setValues(3,  1, 2, 3);
 }
 
 void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

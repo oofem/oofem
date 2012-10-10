@@ -257,7 +257,7 @@ Material :: giveStatus(GaussPoint *gp) const
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-	  gp->setMaterialStatus(status,this->giveClassID());
+            gp->setMaterialStatus(status,this->giveClassID());
         }
     }
 

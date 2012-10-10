@@ -345,14 +345,13 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 {
     IntArray nodeDofIDMask;
     IntArray nodalArray;
-    int i;
 
     if ( s.isDefault() && this->locationArray ) {
         locationArray = * this->locationArray;
         return;
     } else {
         locationArray.resize(0);
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
+        for ( int i = 1; i <= numberOfDofMans; i++ ) {
             this->giveDofManDofIDMask(i, eid, nodeDofIDMask);
             this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
             locationArray.followedBy(nodalArray);
@@ -369,11 +368,10 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
     IntArray bNodes;
     IntArray nodeDofIDMask;
     IntArray nodalArray;
-    int i;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
     locationArray.resize(0);
-    for ( i = 1; i <= bNodes.giveSize(); i++ ) {
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         this->giveDofManDofIDMask(bNodes.at(i), eid, nodeDofIDMask);
         this->giveDofManager(bNodes.at(i))->giveLocationArray(nodeDofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
@@ -384,8 +382,8 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
 void
 Element :: invalidateLocationArray()
 {
-    // invalitaes current location array in receiver
-    // next call of giveLocationArray() will asemble
+    // invalidates current location array in receiver
+    // next call of giveLocationArray() will assemble
     // new location array
     // used mainly for model supporting dynamic changes of
     // static system
