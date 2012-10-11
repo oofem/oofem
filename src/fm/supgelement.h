@@ -96,6 +96,10 @@ public:
      */
     virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
     /**
+     * Computes Lhs terms due to boundary conditions - pressure.
+     */
+    virtual void computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime);
+    /**
      * Computes SLIC stabilization term for momentum balance equation(s).
      */
     virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime) = 0;
@@ -165,7 +169,16 @@ public:
       _warning("computeOutFlowBCTerm_MB not implemented");
       answer.resize(0,0);
     }
+    
 
+    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer,  Load * load, TimeStep *atTime){
+      _warning("computeHomogenizedReinforceTerm_MB");
+      answer.resize(0,0); 
+    }
+    virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer,  Load * load, TimeStep *atTime){
+      _warning("computeHomogenizedReinforceTerm_MB");
+      answer.resize(0,0); 
+    }
 
 
     /// Computes the critical time increment.

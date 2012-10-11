@@ -453,6 +453,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+	    this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, BCLhsPressureTerm_MC,
+			  EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC,
@@ -1285,6 +1287,9 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         eptr->giveCharacteristicMatrix(m1, AccelerationTerm_MC, tStep);
         eptr->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, v);
         h.beProductOf(m1, v);
+        answer.add(h);
+	eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MC, tStep);
+	h.beProductOf(m1, v);
         answer.add(h);
         // advection N term (nonlinear)
         eptr->giveCharacteristicVector(v, AdvectionTerm_MC, VM_Total, tStep);

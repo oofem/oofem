@@ -56,6 +56,7 @@ enum classType {
     InitialConditionClass,
     NodalLoadClass,
     DeadWeightClass,
+    ReinforcementClass,
     BodyLoadClass,
     StructuralTemperatureLoadClass,
     StructuralEigenstrainLoadClass,

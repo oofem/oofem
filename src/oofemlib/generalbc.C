@@ -36,6 +36,7 @@
 #include "valuemodetype.h"
 #include "bcvaltype.h"
 #include "loadtime.h"
+#include "reinforcement.h"
 
 namespace oofem {
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)

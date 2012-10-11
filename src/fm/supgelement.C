@@ -103,6 +103,8 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
       this->computeBCLhsTerm_MB(answer, tStep);
     } else if ( mtrx == BCLhsPressureTerm_MB ) {
       this->computeBCLhsPressureTerm_MB(answer, tStep);
+    } else if ( mtrx == BCLhsPressureTerm_MC ) {
+      this->computeBCLhsPressureTerm_MC(answer, tStep);
     } else if ( mtrx == LSICStabilizationTerm_MB ) {
       this->computeLSICStabilizationTerm_MB(answer, tStep);
     } else if ( mtrx == StiffnessMatrix) {
@@ -122,6 +124,7 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
         this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
+	this->computeBCLhsPressureTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         //this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
@@ -236,7 +239,6 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     answer.zero();
 
     nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-
     if ( nLoads ) {
         for ( i = 1; i <= nLoads; i++ ) {
             n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
@@ -255,9 +257,21 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
             answer.add(helpMatrix);
         }
+	
     }
-}
+    nLoads    = this->giveBodyLoadArray()->giveSize();
 
+   if ( nLoads ) { 
+     bcGeomType ltype;
+     for ( i = 1; i <= nLoads; i++ ) {
+       load  = domain->giveLoad( bodyLoadArray.at(i) );
+       ltype = load->giveBCGeoType();
+       if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+	 this->computeHomogenizedReinforceTerm_MB(helpMatrix, ( Load * ) load, atTime);
+       }
+     }
+   }
+}
 
 void
 SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
@@ -298,7 +312,34 @@ SUPGElement :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *atTime
     }
 }
 
+void
+SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
+{
+ 
+    int nLoads = 0;
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
+    Load *load;
+    //bcType loadtype;
+    FloatMatrix helpMatrix;
 
+  nLoads    = this->giveBodyLoadArray()->giveSize();
+  answer.resize(pndofs, undofs);
+  answer.zero();
+  helpMatrix.resize(pndofs, undofs);
+  helpMatrix.zero();
+  if ( nLoads ) { 
+    bcGeomType ltype;
+    for ( int i = 1; i <= nLoads; i++ ) {
+      load  = domain->giveLoad( bodyLoadArray.at(i) );
+      ltype = load->giveBCGeoType();
+      if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+	this->computeHomogenizedReinforceTerm_MC(helpMatrix, ( Load * ) load, atTime);
+      }
+      answer.add(helpMatrix);
+    }   
+  }
+}
 
 
 double

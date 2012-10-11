@@ -336,6 +336,10 @@ enum InputFieldType {
     IFT_PointLoad_loadtype,
     IFT_PointLoad_cstype,
 
+    IFT_Reinfocement_porosity,
+    IFT_Reinfocement_permeability,
+    IFT_Reinfocement_shapeFactor,
+
     IFT_SurfaceTensionBoundaryCondition_gamma,
     IFT_SurfaceTensionBoundaryCondition_useTangent,
 

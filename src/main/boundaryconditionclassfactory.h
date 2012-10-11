@@ -53,6 +53,7 @@
 
 #ifdef __FM_MODULE
  #include "tractionpressurebc.h"
+#include "reinforcement.h"
 #endif //__FM_MODULE
 
 REGISTER_CLASS(BoundaryCondition, "boundarycondition", BoundaryConditionClass)
@@ -76,5 +77,6 @@ REGISTER_CLASS(TF1, "tf1", TF1Class)
 #endif //__SM_MODULE
 #ifdef __FM_MODULE
 REGISTER_CLASS(TractionPressureBC, "prescribedtractionpressurebc", TractionPressureBCClass)
+REGISTER_CLASS(Reinforcement, "Reinforcement", ReinforcementClass)
 #endif //__FM_MODULE
 

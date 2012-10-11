@@ -104,6 +104,9 @@ public:
     virtual void computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Load *load, int side, TimeStep *atTime);
     virtual void computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime);
 
+    virtual void computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *load, TimeStep *atTime);
+     virtual void computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *load, TimeStep *atTime);
+
     virtual void updateStabilizationCoeffs(TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 

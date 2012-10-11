@@ -50,6 +50,7 @@
 #include "geotoolbox.h"
 #include "materialinterface.h"
 #include "contextioerr.h"
+#include "reinforcement.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -834,6 +835,54 @@ TR1_2D_SUPG :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *
     answer.negated();
 }
 
+void
+TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *load, TimeStep *atTime)
+{
+  double coeffx, coeffy, usum [ 2 ];
+  FloatArray un;
+  
+  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+
+  
+  usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
+  usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
+  Reinforcement* reinfload  = dynamic_cast< Reinforcement* >(load );
+  double kx = reinfload->givePermeability()->at(1);
+  double ky = reinfload->givePermeability()->at(2);
+  // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+  double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+  coeffx = area * mu_0 / (12.0 * kx);
+  coeffy = area * mu_0 / (12.0 * ky);
+  for( int i = 1; i <= 3; i++){
+    answer.at(2*i-1, 2*i-1) -=  coeffx;
+    answer.at(2*i, 2*i) -= coeffy;
+    for ( int j = 1; j <= 3; j++){
+      answer.at(2*i-1, 2*j-1) -= coeffx * ( 1.0 + 4.0 * t_supg * ( b [ i - 1 ] * usum [ 0 ] + c [ i - 1 ] * usum [ 1 ] ) );
+      answer.at(2*i, 2*j) -= coeffy * ( 1.0 + 4.0 * t_supg * ( b [ i - 1 ] * usum [ 0 ] + c [ i - 1 ] * usum [ 1 ] ) );//pozor na b[i], c[i]!!!
+    }
+  }
+}
+
+void
+TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *load, TimeStep *atTime)
+{
+  double coeffx, coeffy;
+
+  Reinforcement* reinfload  = dynamic_cast< Reinforcement* >(load );
+  double kx = reinfload->givePermeability()->at(1);
+  double ky = reinfload->givePermeability()->at(2);
+  // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+  double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+  double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+  coeffx = area * mu_0 / (3.0 * kx * rho);
+  coeffy = area * mu_0 / (3.0 * ky * rho);
+  for( int i = 1; i <= 3; i++){
+    for ( int j = 1; j <= 3; j++){
+      answer.at(i, 2*j-1) -= coeffx *  t_pspg *  b [ i - 1 ];
+      answer.at(i, 2*j) -= coeffy * t_pspg * c [ i - 1 ];
+    }
+  }
+}
 
 void
 TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
@@ -850,6 +899,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 
     // add body load (gravity) termms
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+
 
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
     usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
@@ -869,6 +919,25 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                 answer.at(6) += coeff * ( gVector.at(2) * ( 1.0 + t_supg * ( b [ 2 ] * usum [ 0 ] + c [ 2 ] * usum [ 1 ] ) ) );
             }
         }
+	if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+	  Reinforcement* load  = dynamic_cast< Reinforcement* >( domain->giveLoad(bodyLoadArray.at(i) ) );
+	  double phi = load->givePorosity();
+	  double alpha = load->giveshapefactor();
+	  double kx = load->givePermeability()->at(1);
+	  double ky = load->givePermeability()->at(2);
+	  double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+	  //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+	  gVector.resize(2);
+	  gVector.at(1) = tau_0 * sqrt(kx * phi) / (kx * alpha);
+	  gVector.at(2) = tau_0 * sqrt(ky * phi) / (ky * alpha);
+	  
+	  answer.at(1) -= area * ( gVector.at(1) * ( 1.0 + t_supg * ( b [ 0 ] * usum [ 0 ] + c [ 0 ] * usum [ 1 ] ) ) );
+	  answer.at(2) -= area * ( gVector.at(2) * ( 1.0 + t_supg * ( b [ 0 ] * usum [ 0 ] + c [ 0 ] * usum [ 1 ] ) ) );
+	  answer.at(3) -= area * ( gVector.at(1) * ( 1.0 + t_supg * ( b [ 1 ] * usum [ 0 ] + c [ 1 ] * usum [ 1 ] ) ) );
+	  answer.at(4) -= area * ( gVector.at(2) * ( 1.0 + t_supg * ( b [ 1 ] * usum [ 0 ] + c [ 1 ] * usum [ 1 ] ) ) );
+	  answer.at(5) -= area * ( gVector.at(1) * ( 1.0 + t_supg * ( b [ 2 ] * usum [ 0 ] + c [ 2 ] * usum [ 1 ] ) ) );
+	  answer.at(6) -= area * ( gVector.at(2) * ( 1.0 + t_supg * ( b [ 2 ] * usum [ 0 ] + c [ 2 ] * usum [ 1 ] ) ) );
+	}
     }
 
     // loop over sides
@@ -917,6 +986,8 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             }
         }
     }
+
+ 
 }
 
 void
@@ -943,6 +1014,23 @@ TR1_2D_SUPG :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
                 answer.at(3) += coeff * ( b [ 2 ] * gVector.at(1) + c [ 2 ] * gVector.at(2) );
             }
         }
+	if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+	  Reinforcement* load  = dynamic_cast< Reinforcement* >( domain->giveLoad(bodyLoadArray.at(i) ) );
+	  double phi = load->givePorosity();
+	  double alpha = load->giveshapefactor();
+	  double kx = load->givePermeability()->at(1);
+	  double ky = load->givePermeability()->at(2);
+	  double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+	  double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+	  //double mu_0 = this->giveMaterial()->give( Viscosity, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+	  gVector.resize(2);
+	  gVector.at(1) = tau_0 * sqrt(kx * phi) / (kx * alpha * rho);
+	  gVector.at(2) = tau_0 * sqrt(ky * phi) / (ky * alpha * rho);
+	  
+	  answer.at(1) -= coeff * ( b [ 0 ] * gVector.at(1) + c [ 0 ] * gVector.at(2) );
+	  answer.at(2) -= coeff * ( b [ 1 ] * gVector.at(1) + c [ 1 ] * gVector.at(2) );
+	  answer.at(3) -= coeff * ( b [ 2 ] * gVector.at(1) + c [ 2 ] * gVector.at(2) );
+	}
     }
 }
 

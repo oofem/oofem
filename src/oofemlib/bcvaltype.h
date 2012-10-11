@@ -46,6 +46,7 @@ enum bcValType {
     VelocityBVT,
     DisplacementBVT,
     EigenstrainBVT,
+    ReinforceBVT,
 };
 } // end namespace oofem
 #endif // bcvaltype_h

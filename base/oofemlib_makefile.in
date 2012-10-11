@@ -34,7 +34,7 @@ VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oof
 ## sources
 srcs0=rveengngmodel.C
 srcs1=oofeggraphiccontext.C
-srcs2=generalbc.C boundary.C clock.C cltypes.C conTable.C constant.C crosssection.C dictionr.C dof.C domain.C element.C engngm.C femcmpnn.C flotarry.C flotmtrx.C freestor.C error.C logger.C emptycs.C feinterpol.C
+srcs2=generalbc.C boundary.C clock.C cltypes.C conTable.C constant.C crosssection.C dictionr.C dof.C domain.C element.C engngm.C femcmpnn.C flotarry.C flotmtrx.C freestor.C error.C logger.C emptycs.C feinterpol.C reinforcement.C
 srcs3=gausspnt.C initial.C intarray.C isolinearelasticmaterial.C ldltfact.C linearelasticmaterial.C load.C loadtime.C rowcol.C skylineu.C sparselinsystemnm.C inverseit.C
 srcs4=material.C mathfem.C matrix.C nlstructuralelement.C node.C nodload.C simplecrosssection.C skyline.C inputrecord.C dynamicinputrecord.C dynamicdatareader.C tokenizer.C strreader.C structuralcrosssection.C structuralelement.C structuralmaterial.C structengngmodel.C
 srcs5=structuralms.C timestep.C dofmanager.C elementside.C elementinternaldofman.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C simpleslavedof.C slavedof.C activedof.C nonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
