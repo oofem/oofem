@@ -698,7 +698,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         FloatMatrix tmp = src;
         this->zero();
         // initialize answer to be unity matrix;
-        for ( i = 1; i <= nRows; i++ ) {
+		for ( int i = 1; i <= nRows; i++ ) {
             this->at(i, i) = 1.0;
         }
 
@@ -992,7 +992,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 
         for ( int j = i + 1; j <= nRows; j++ ) {
             linkomb = mtrx->at(j, i) / mtrx->at(i, i);
-            for ( k = i; k <= nRows; k++ ) {
+            for ( int k = i; k <= nRows; k++ ) {
                 this->at(j, k) -= mtrx->at(i, k) * linkomb;
             }
 
@@ -1102,10 +1102,10 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     }
 
     // back substitution
-    for ( i = nRows; i >= 1; i-- ) {
-        for ( k = 1; k <= nPs; k++ ) {
+    for ( int i = nRows; i >= 1; i-- ) {
+        for ( int k = 1; k <= nPs; k++ ) {
             help = 0.;
-            for ( j = i + 1; j <= nRows; j++ ) {
+            for ( int j = i + 1; j <= nRows; j++ ) {
                 help += mtrx->at(i, j) * answer.at(j, k);
             }
 
