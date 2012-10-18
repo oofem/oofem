@@ -297,6 +297,15 @@ public:
      */
     virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
+     * Boundary version of computeVectorOf.
+     * @param boundary Boundary number.
+     * @param eid Equation ID for unknowns.
+     * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
+     * @param stepN Time step, when vector of unknowns is requested.
+     * @param answer Local vector of unknowns.
+     */
+    virtual void computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
      * and possibly initial condition). Because unknowns are obtained from given field

@@ -91,27 +91,27 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
-    int i, j, k, nDofs, size;
+    int k, nDofs;
     IntArray elementNodeMask;
     FloatMatrix G2L;
     FloatArray vec;
-    answer.resize( size = this->computeNumberOfGlobalDofs(type) );
+    answer.resize( this->computeNumberOfGlobalDofs(type) );
 
     k = 0;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, type, elementNodeMask);
         this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
     }
 
-    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, type, elementNodeMask);
         this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
     }
@@ -123,33 +123,68 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 
 
 void
-Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
-// Total value) of the dofs of the receiver's nodes (in nodal cs).
-// Dofs cointaining expected unknowns (of expected type) are determined
-// using this->GiveNodeDofIDMask function
+// Total value) of the dofs of the callers local cs.
 {
-    int i, j, k, nDofs, size;
+    int k, nDofs;
+    IntArray bNodes;
     IntArray elementNodeMask;
     FloatMatrix G2L;
     FloatArray vec;
-    answer.resize( size = this->computeNumberOfGlobalDofs( field.giveEquationID() ) );
+
+    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
     k = 0;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        this->giveDofManDofIDMask(bNodes.at(i), type, elementNodeMask);
+        k += elementNodeMask.giveSize();
+    }
+    answer.resize(k);
+
+    k = 0;
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        this->giveDofManDofIDMask(bNodes.at(i), type, elementNodeMask);
+        this->giveDofManager(bNodes.at(i))->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+        for ( int j = 1; j <= vec.giveSize(); j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
+    }
+    
+    if (this->computeGtoLRotationMatrix(G2L)) {
+        OOFEM_ERROR("Element :: computeBoundaryVector - Local coordinate system is not implemented yet");
+    }
+}
+
+
+void
+Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+// Forms the vector containing the values of the unknown 'u' (e.g., the
+// Total value) of the dofs of the receiver's nodes (in nodal cs).
+// Dofs containing expected unknowns (of expected type) are determined
+// using this->GiveNodeDofIDMask function
+{
+    int k, nDofs;
+    IntArray elementNodeMask;
+    FloatMatrix G2L;
+    FloatArray vec;
+    answer.resize( this->computeNumberOfGlobalDofs( field.giveEquationID() ) );
+
+    k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
         this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
     }
 
-    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
         this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
     }
