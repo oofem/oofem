@@ -313,9 +313,9 @@ enum InputFieldType {
     IFT_ActiveBoundaryCondition_elementSides,
     IFT_ActiveBoundaryCondition_dofManagers,
 
-    IFT_MixedGradientPressureBC_devGradient,
-    IFT_MixedGradientPressureBC_pressure,
-    IFT_MixedGradientPressureBC_centerCoords,
+    IFT_MixedGradientPressure_devGradient,
+    IFT_MixedGradientPressure_pressure,
+    IFT_MixedGradientPressure_centerCoords,
 
     IFT_StressTensorLoad_stressTensor,
 

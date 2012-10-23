@@ -40,7 +40,8 @@
 #include "constantsurfaceload.h"
 #include "pointload.h"
 #include "prescribedgradient.h"
-#include "mixedgradientpressurebc.h"
+#include "mixedgradientpressuredirichlet.h"
+#include "mixedgradientpressureneumann.h"
 #include "surfacetensionbc.h"
 
 #ifdef __SM_MODULE
@@ -61,7 +62,8 @@ REGISTER_CLASS(DeadWeight, "deadweight", DeadWeightClass)
 REGISTER_CLASS(NodalLoad, "nodalload", NodalLoadClass)
 
 REGISTER_CLASS(PrescribedGradient, "prescribedgradient", PrescribedGradientClass)
-REGISTER_CLASS(MixedGradientPressureBC, "mixedgradientpressure", MixedGradientClass)
+REGISTER_CLASS(MixedGradientPressureDirichlet, "mixedgradientpressuredirichlet", MixedGradientPressureDirichletClass)
+REGISTER_CLASS(MixedGradientPressureNeumann,   "mixedgradientpressureneumann", MixedGradientPressureNeumannClass)
 REGISTER_CLASS(LinearEdgeLoad, "linearedgeload", LinearEdgeLoadClass)
 REGISTER_CLASS(ConstantEdgeLoad, "constantedgeload", ConstantEdgeLoadClass)
 REGISTER_CLASS(ConstantSurfaceLoad, "constantsurfaceload", ConstantSurfaceLoadClass)

@@ -79,7 +79,7 @@ public:
         }
         IR_GIVE_OPTIONAL_FIELD(ir, tempB, IFT_ActiveBoundaryCondition_elementSides, "elementsides");
         for (int i = 0; i < tempB.giveSize()/2; ++i) {
-            this->addElementSide(tempB(i*2+1),tempB(i*2));
+            this->addElementSide(tempB(i*2),tempB(i*2+1));
         }
         IR_GIVE_OPTIONAL_FIELD(ir, tempC, IFT_ActiveBoundaryCondition_dofManagers, "dofmans");
         for (int i = 0; i < tempC.giveSize(); ++i) {

@@ -127,7 +127,7 @@ Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType 
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs of the callers local cs.
 {
-    int k, nDofs;
+    int k;
     IntArray bNodes;
     IntArray elementNodeMask;
     FloatMatrix G2L;

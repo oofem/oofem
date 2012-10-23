@@ -92,7 +92,7 @@ double Line2BoundaryElement :: computeNXIntegral() const
 
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
 {
-    if (eid == EID_MomentumBalance) {
+    if (eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation) {
         nodeDofIDMask.setValues(2, V_u, V_v);
     }
     else {
@@ -115,9 +115,7 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray c;
-    c = *this->giveNode(1)->giveCoordinates();
-    c.add(*this->giveNode(2)->giveCoordinates());
-    c.times(0.5);
+    c = *this->giveNode(3)->giveCoordinates();
     return c.distance(coords);
 }
 
