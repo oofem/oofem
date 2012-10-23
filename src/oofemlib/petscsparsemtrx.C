@@ -264,39 +264,29 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 #endif
     // This should be based on the numberingscheme. Also, geqs seems redundant.
 
-    /*
-     * // This could simplify things.
-     * if (r_s.isPrescribed())
-     *  nRows = geqs = leqs = eModel->giveNumberOfPrescribedEquations(ut);
-     * else
-     *  nRows = geqs = leqs = eModel->giveNumberOfEquations(ut);
-     *
-     * if (c_s.isPrescribed())
-     *  nColumns = eModel->giveNumberOfPrescribedEquations(ut);
-     * else
-     *  nColumns = eModel->giveNumberOfEquations(ut);
-     */
+    // This could simplify things.
+    int npeqs = eModel->giveNumberOfPrescribedEquations(ut);
+    int neqs = eModel->giveNumberOfEquations(ut);
+    nRows = r_s.isDefault() ? neqs : npeqs;
+    nColumns = c_s.isDefault() ? neqs : npeqs;
+
     int totalEquations = eModel->giveNumberOfEquations(ut) + eModel->giveNumberOfPrescribedEquations(ut);
 
     //determine nonzero structure of matrix
-    int i, ii, j, jj, n;
+    int ii, jj;
     Element *elem;
     IntArray r_loc, c_loc;
     std :: vector< std :: set< int > >rows(totalEquations);
     std :: vector< std :: set< int > >rows_sym(totalEquations); // Only the symmetric part
-    nRows = nColumns = 0;
 
     nelem = domain->giveNumberOfElements();
-    for ( n = 1; n <= nelem; n++ ) {
+    for ( int n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
         elem->giveLocationArray(r_loc, ut, r_s);
         elem->giveLocationArray(c_loc, ut, c_s);
-        for ( i = 1; i <= r_loc.giveSize(); i++ ) {
+        for ( int i = 1; i <= r_loc.giveSize(); i++ ) {
             if ( ( ii = r_loc.at(i) ) ) {
-                if ( ii > nRows ) {
-                    nRows = ii;
-                }
-                for ( j = 1; j <= c_loc.giveSize(); j++ ) {
+                for ( int j = 1; j <= c_loc.giveSize(); j++ ) {
                     jj = c_loc.at(j);
                     if ( jj ) {
                         rows [ ii - 1 ].insert(jj - 1);
@@ -307,19 +297,10 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                 }
             }
         }
-        // Column counting should be like this. The matrix should in all reasonable situations get
-        // the full corresponding size, regardless if elements are assembled there.
-        // Mixed matrices like this are not likely used for solving, so a zero row/column is not unreasonable.
-        for ( j = 1; j <= c_loc.giveSize(); j++ ) {
-            if ( (jj = c_loc.at(j)) > nColumns ) {
-                nColumns = jj;
-            }
-        }
     }
-
     // Structure from active boundary conditions.
     AList<IntArray> r_locs, c_locs;
-    for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
+    for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
             ///@todo Deal with the CharType here.
@@ -327,12 +308,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             for (int k = 1; k < r_locs.giveSize(); k++) {
                 IntArray *krloc = r_locs.at(k);
                 IntArray *kcloc = c_locs.at(k);
-                for ( i = 1; i <= r_loc.giveSize(); i++ ) {
+                for ( int i = 1; i <= krloc->giveSize(); i++ ) {
                     if ( ( ii = krloc->at(i) ) ) {
-                        if ( ii > nRows ) {
-                            nRows = ii;
-                        }
-                        for ( j = 1; j <= kcloc->giveSize(); j++ ) {
+                        for ( int j = 1; j <= kcloc->giveSize(); j++ ) {
                             jj = kcloc->at(j);
                             if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
@@ -343,21 +321,15 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                         }
                     }
                 }
-                for ( j = 1; j <= kcloc->giveSize(); j++ ) {
-                    if ( (jj = kcloc->at(j)) > nColumns ) {
-                        nColumns = jj;
-                    }
-                }
             }
         }
     }
-
 
     geqs = leqs = nRows;
 
     IntArray d_nnz(leqs);
     IntArray d_nnz_sym(leqs);
-    for ( i = 0; i < leqs; i++ ) {
+    for ( int i = 0; i < leqs; i++ ) {
         d_nnz(i) = rows [ i ].size();
         d_nnz_sym(i) = rows_sym [ i ].size();
     }
