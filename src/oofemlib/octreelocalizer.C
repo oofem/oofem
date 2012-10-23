@@ -45,20 +45,19 @@
 #include "clock.h"
 
 namespace oofem {
-OctantRec :: OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double size)
+OctantRec :: OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth)
 {
-    int i, j, k;
-
     this->localizer = loc;
     this->parent = parent;
     this->origin = origin;
-    this->size   = size;
+    this->halfWidth = halfWidth;
     this->nodeList = NULL;
     this->elementIPList = NULL;
+    this->depth = parent ? parent->giveCellDepth()+1 : 0;
 
-    for ( i = 0; i <= 1; i++ ) {
-        for ( j = 0; j <= 1; j++ ) {
-            for ( k = 0; k <= 1; k++ ) {
+    for ( int i = 0; i <= 1; i++ ) {
+        for ( int j = 0; j <= 1; j++ ) {
+            for ( int k = 0; k <= 1; k++ ) {
                 this->child [ i ] [ j ] [ k ] = NULL;
             }
         }
@@ -69,10 +68,9 @@ OctantRec :: ~OctantRec()
 {
     // destructor - delete all receivers children recursively
     // delete children first, then itself
-    int i, j, k;
-    for ( i = 0; i <= 1; i++ ) {
-        for ( j = 0; j <= 1; j++ ) {
-            for ( k = 0; k <= 1; k++ ) {
+    for ( int i = 0; i <= 1; i++ ) {
+        for ( int j = 0; j <= 1; j++ ) {
+            for ( int k = 0; k <= 1; k++ ) {
                 if ( this->child [ i ] [ j ] [ k ] ) {
                     delete this->child [ i ] [ j ] [ k ];
                 }
@@ -140,65 +138,28 @@ OctantRec :: giveChild(int xi, int yi, int zi)
 }
 
 
-bool
-OctantRec :: containsPoint(const FloatArray &coords)
-{
-    for ( int i = 1; i <= coords.giveSize(); i++ ) {
-        if ( localizer->giveOctreeMaskValue(i) ) {
-            if ( coords.at(i) < this->origin.at(i) || coords.at(i) > ( this->origin.at(i) + this->size ) ) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-
-bool
-OctantRec :: overlapsBox(const FloatArray &b0, const FloatArray &b1) const
-{
-    for (int i = 1; i <= b0.giveSize(); ++i) {
-        if ( localizer->giveOctreeMaskValue(i) ) {
-            if ( origin.at(i) + size < b0.at(i) || b1.at(i) < origin.at(i) ) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-
 OctantRec :: ChildStatus
 OctantRec :: giveChildContainingPoint(OctantRec **child, const FloatArray &coords)
 {
     IntArray ind(3);
 
-    if ( this->containsPoint(coords) ) {
-        if ( this->isTerminalOctant() ) {
-            * child = NULL;
-            return CS_NoChild;
-        }
-
-        for (int i = 1; i <= coords.giveSize(); i++ ) {
-            if ( localizer->giveOctreeMaskValue(i) && ( coords.at(i) > ( this->origin.at(i) + this->size / 2. ) ) ) {
-                ind.at(i) = 1;
-            } else {
-                ind.at(i) = 0;
-            }
-        }
-
-        * child = this->child [ ind.at(1) ] [ ind.at(2) ] [ ind.at(3) ];
-        return CS_ChildFound;
-    } else {
+    if ( this->isTerminalOctant() ) {
         * child = NULL;
-        return CS_PointOutside;
+        return CS_NoChild;
     }
+
+    for ( int i = 1; i <= coords.giveSize(); ++i ) {
+        ind.at(i) = localizer->giveOctreeMaskValue(i) && coords.at(i) > this->origin.at(i);
+    }
+
+    * child = this->child [ ind.at(1) ] [ ind.at(2) ] [ ind.at(3) ];
+    return CS_ChildFound;
 }
 
 
 bool
-OctantRec :: isTerminalOctant() {
+OctantRec :: isTerminalOctant()
+{
     // This implementation is relying on fact, that child [0][0][0]
     // is created even for all degenerated trees
     if ( this->child [ 0 ] [ 0 ] [ 0 ] ) {
@@ -212,20 +173,17 @@ OctantRec :: isTerminalOctant() {
 void
 OctantRec :: divideLocally(int level, const IntArray &octantMask)
 {
-    int i, j, k;
-
     if ( this->isTerminalOctant() ) {
         // create corresponding child octants
         FloatArray childOrigin(3);
 
-        for ( i = 0; i <= octantMask.at(1); i++ ) {
-            for ( j = 0; j <= octantMask.at(2); j++ ) {
-                for ( k = 0; k <= octantMask.at(3); k++ ) {
-                    childOrigin.at(1) = this->origin.at(1) + i * ( this->size / 2. );
-                    childOrigin.at(2) = this->origin.at(2) + j * ( this->size / 2. );
-                    childOrigin.at(3) = this->origin.at(3) + k * ( this->size / 2. );
-
-                    this->child [ i ] [ j ] [ k ] = new OctantRec(localizer, this, childOrigin, this->size / 2.0);
+        for ( int i = 0; i <= octantMask.at(1); i++ ) {
+            for ( int j = 0; j <= octantMask.at(2); j++ ) {
+                for ( int k = 0; k <= octantMask.at(3); k++ ) {
+                    childOrigin.at(1) = this->origin.at(1) + (i - 0.5) * this->halfWidth * 0.5 * octantMask.at(1);
+                    childOrigin.at(2) = this->origin.at(2) + (j - 0.5) * this->halfWidth * 0.5 * octantMask.at(2);
+                    childOrigin.at(3) = this->origin.at(3) + (k - 0.5) * this->halfWidth * 0.5 * octantMask.at(3);
+                    this->child [ i ] [ j ] [ k ] = new OctantRec(localizer, this, childOrigin, this->halfWidth * 0.5);
                 }
             }
         }
@@ -234,9 +192,9 @@ OctantRec :: divideLocally(int level, const IntArray &octantMask)
     int newLevel = level - 1;
     if ( newLevel > 0 ) {
         // propagate message to children recursively with level param decreased
-        for ( i = 0; i <= octantMask.at(1); i++ ) {
-            for ( j = 0; j <= octantMask.at(2); j++ ) {
-                for ( k = 0; k <= octantMask.at(3); k++ ) {
+        for ( int i = 0; i <= octantMask.at(1); i++ ) {
+            for ( int j = 0; j <= octantMask.at(2); j++ ) {
+                for ( int k = 0; k <= octantMask.at(3); k++ ) {
                     if ( this->child [ i ] [ j ] [ k ] ) {
                         this->child [ i ] [ j ] [ k ]->divideLocally(newLevel, octantMask);
                     }
@@ -250,89 +208,32 @@ OctantRec :: divideLocally(int level, const IntArray &octantMask)
 OctantRec :: BoundingBoxStatus
 OctantRec :: testBoundingBox(const FloatArray &coords, double radius)
 {
-    int i, test = 1, nsd, size = coords.giveSize();
-    double dist;
+    int size = coords.giveSize();
 
-    nsd = localizer->giveOctreeMaskValue(1) + localizer->giveOctreeMaskValue(2) + localizer->giveOctreeMaskValue(3);
-
-    FloatArray cellCenter = this->origin;
-    // first simple test to exclude too far bboxes, but detect precisely the corner bboxes
-    double cellRadius = sqrt( nsd * ( this->size / 2.0 ) * ( this->size / 2. ) );
-    for ( i = 1; i < 4; i++ ) {
-        cellCenter.at(i) += this->size / 2.0;
-    }
-
-    for ( i = 1, dist = 0.0; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         if ( localizer->giveOctreeMaskValue(i) ) {
-            dist += ( cellCenter.at(i) - coords.at(i) ) * ( cellCenter.at(i) - coords.at(i) );
-        }
-    }
-
-    dist = sqrt(dist);
-    if ( dist > ( cellRadius + radius ) ) {
-        return BBS_OutsideCell;
-    }
-
-    int centerInside = this->containsPoint(coords);
-    if ( centerInside ) { // test if whole bbox inside
-        for ( i = 1; i <= size; i++ ) {
-            if ( localizer->giveOctreeMaskValue(i) ) {
-                if ( ( this->origin.at(i) > ( coords.at(i) - radius ) )  ||  ( ( this->origin.at(i) + this->size ) < ( coords.at(i) + radius ) ) ) {
-                    test = 0;
-                }
+            if ( (this->origin.at(i) - this->halfWidth ) > ( coords.at(i) - radius )  ||  ( this->origin.at(i) + this->halfWidth ) < ( coords.at(i) + radius ) ) {
+                return BBS_InsideCell;
             }
         }
-
-        if ( test ) {
-            return BBS_InsideCell;
-        } else {
-            return BBS_ContainsCell;
-        }
-
-        /*
-         * if ((this->origin.at(1) < (coords.at(1)-radius))  &&  ((this->origin.at(1)+this->size) > (coords.at(1)+radius)) &&
-         *  (this->origin.at(2) < (coords.at(2)-radius))  &&  ((this->origin.at(2)+this->size) > (coords.at(2)+radius)) &&
-         *  (this->origin.at(3) < (coords.at(3)-radius))  &&  ((this->origin.at(3)+this->size) > (coords.at(3)+radius)))
-         * return BBS_InsideCell;
-         * else return BBS_ContainsCell;
-         */
-    } else { // BBox center not inside cell, but may hit cell
-        // test if bounding sphere hits boundary surface
-        int inBounds = 1;
-        for ( i = 1; i <= size; i++ ) {
-            if ( localizer->giveOctreeMaskValue(i) && ( fabs( cellCenter.at(i) - coords.at(i) ) > ( this->size / 2. + radius ) ) ) {
-                inBounds = 0;
-            }
-        }
-
-        if ( inBounds ) {
-            return BBS_ContainsCell;
-        }
     }
-
-    return BBS_OutsideCell;
+    return BBS_ContainsCell;
 }
 
 
 OctantRec *
-OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const FloatArray &coords) {
+OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const FloatArray &coords)
+{
     OctantRec :: ChildStatus result;
     OctantRec *currCell = startCell;
-    if ( startCell->containsPoint(coords) ) {
-        // found terminal octant containing node
-        while ( !currCell->isTerminalOctant() ) {
-            result = currCell->giveChildContainingPoint(& currCell, coords);
-            if ( result == OctantRec :: CS_PointOutside ) {
-                _error("findTerminalContaining: internal error - octree inconsistency");
-            }
+    // found terminal octant containing node
+    while ( !currCell->isTerminalOctant() ) {
+        result = currCell->giveChildContainingPoint(& currCell, coords);
+        if ( result == OctantRec :: CS_NoChild ) {
+            _error("findTerminalContaining: internal error - octree inconsistency");
         }
-
-        return currCell;
-    } else {
-        // coords.printYourself();
-        //_error ("findTerminalContaining: start cell not containing the given point");
-        return NULL;
     }
+    return currCell;
 }
 
 
@@ -340,7 +241,7 @@ bool
 OctreeSpatialLocalizer :: buildOctreeDataStructure()
 {
     OOFEM_LOG_INFO("Initializing Octree structure\n");
-    int i, j, init = 1, nnode = this->domain->giveNumberOfDofManagers();
+    int init = 1, nnode = this->domain->giveNumberOfDofManagers();
     double rootSize, resolutionLimit;
     FloatArray minc(3), maxc(3), * coords;
     DofManager *dman;
@@ -359,17 +260,17 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     getUtime(tstart);
 
     // first determine domain extends (bounding box), and check for degenerated domain type
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         dman = domain->giveDofManager(i);
         if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) ) {
             coords = ( ( ( Node * ) dman )->giveCoordinates() );
             if ( init ) {
                 init = 0;
-                for ( j = 1; j <= coords->giveSize(); j++ ) {
+                for ( int j = 1; j <= coords->giveSize(); j++ ) {
                     minc.at(j) = maxc.at(j) = coords->at(j);
                 }
             } else {
-                for ( j = 1; j <= coords->giveSize(); j++ ) {
+                for ( int j = 1; j <= coords->giveSize(); j++ ) {
                     if ( coords->at(j) < minc.at(j) ) {
                         minc.at(j) = coords->at(j);
                     }
@@ -384,13 +285,13 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
 
     // determine root size
     rootSize = 0.0;
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         rootSize = 1.000001 * max( rootSize, maxc.at(i) - minc.at(i) );
     }
 
     // check for degenerated domain
     resolutionLimit = min(1.e-3, rootSize / 1.e6);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( ( maxc.at(i) - minc.at(i) ) > resolutionLimit ) {
             this->octreeMask.at(i) = 1;
         } else {
@@ -399,7 +300,10 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     }
 
     // Create root Octant
-    this->rootCell = new OctantRec(this, NULL, minc, rootSize);
+    FloatArray center = minc;
+    center.add(maxc);
+    center.times(0.5);
+    this->rootCell = new OctantRec(this, NULL, center, rootSize);
 
     // Build octree tree
     if ( nnode > OCTREE_MAX_NODES_LIMIT ) {
@@ -407,7 +311,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     }
 
     // insert domain nodes into tree
-    for ( i = 1; i <= nnode; i++ ) {
+    for ( int i = 1; i <= nnode; i++ ) {
         dman = domain->giveDofManager(i);
         if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) ) {
             coords = ( ( ( Node * ) dman )->giveCoordinates() );
@@ -433,7 +337,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
 {
     // Original implementation
     //
-    int i, j, nip;
+    int nip;
     int nelems = this->domain->giveNumberOfElements();
     Element *ielem;
     IntegrationRule *iRule;
@@ -445,14 +349,14 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
     }
 
     // insert IP records into tree (the tree topology is determined by nodes)
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         // only default IP are taken into account
         ielem = this->giveDomain()->giveElement(i);
         if (ielem->giveNumberOfIntegrationRules() > 0) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
             nip = iRule->getNumberOfIntegrationPoints();
             if ( nip ) {
-                for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
                     jGp = iRule->getIntegrationPoint(j);
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         this->insertIPElementIntoOctree(this->rootCell, i, jGpCoords);
@@ -467,7 +371,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
         // but the element should be present in octree data structure
         // this is needed by some services (giveElementContainingPoint, for example)
         FloatArray *nc;
-        for ( j = 1; j <= ielem->giveNumberOfNodes(); j++ ) {
+        for ( int j = 1; j <= ielem->giveNumberOfNodes(); j++ ) {
             nc = ielem->giveNode(j)->giveCoordinates();
             this->insertIPElementIntoOctree(this->rootCell, i, * nc);
         }
@@ -506,14 +410,11 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
     Element *ielem;
     SpatialLocalizerInterface *interface;
     FloatArray b0, b1;
-    double margin;
 
     this->init();
     if ( this->elementListsInitialized.giveSize() >= region + 1 && this->elementListsInitialized(region) ) {
         return;
     }
-
-    margin = 0.0; ///@todo Something smarter here is necessary.
 
     for ( int i = 1; i <= this->domain->giveNumberOfElements(); i++ ) {
         ielem = this->giveDomain()->giveElement(i);
@@ -521,8 +422,6 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
             interface = ( SpatialLocalizerInterface * ) ielem->giveInterface(SpatialLocalizerInterfaceType);
             if (interface) {
                 interface->SpatialLocalizerI_giveBBox(b0, b1);
-                b0.add(-margin);
-                b1.add(margin);
                 this->insertElementIntoOctree(this->rootCell, region, i, b0, b1);
             }
         }
@@ -534,16 +433,37 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
 void
 OctreeSpatialLocalizer :: insertElementIntoOctree(OctantRec *rootCell, int region, int elemNum, const FloatArray &b0, const FloatArray &b1)
 {
-    if (rootCell->overlapsBox(b0, b1)) {
-        // Check terminal or recurse
-        if ( rootCell->isTerminalOctant() ) {
-            rootCell->addElement( region, elemNum );
+    // Compare the bounding box corners to the center to determine which region is overlaps
+    // Checks: b0 <= center, b1 >= center for each entry.
+    // This is bundled into an array for more convenient code in the loop. 
+    IntArray bbc[2] = { IntArray(3), IntArray(3) };
+    FloatArray origin;
+    rootCell->giveOrigin(origin);
+    for ( int i = 1; i <= b0.giveSize(); i++ ) {
+        if ( this->octreeMask.at(i) ) {
+            bbc[0].at(i) = b0.at(i) <= origin.at(i);
+            bbc[1].at(i) = b1.at(i) >= origin.at(i);
         } else {
-            for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            bbc[0].at(i) = bbc[1].at(i) = true;
+        }
+    }
+    for ( int i = b0.giveSize()+1; i <= 3; i++ ) {
+        bbc[0].at(i) = bbc[1].at(i) = true;
+    }
+    // Check terminal or recurse
+    if ( rootCell->isTerminalOctant() ) {
+        rootCell->addElement( region, elemNum );
+    } else {
+        // The for loops below check if the bounding box overlaps the region before or after the cell center 
+        // e.g. when i = 0, then we check for the children that have x-coordinate <= than root center
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            if ( bbc[i].at(1) ) {
                 for ( int j = 0; j <= octreeMask.at(2); j++ ) {
-                    for ( int k = 0; k <= octreeMask.at(3); k++ ) {
-                        if ( rootCell->giveChild(i, j, k) ) {
-                            this->insertElementIntoOctree( rootCell->giveChild(i, j, k), region, elemNum, b0, b1 );
+                    if ( bbc[j].at(2) ) {
+                        for ( int k = 0; k <= octreeMask.at(3); k++ ) {
+                            if ( bbc[k].at(3) && rootCell->giveChild(i, j, k) ) {
+                                this->insertElementIntoOctree( rootCell->giveChild(i, j, k), region, elemNum, b0, b1 );
+                            }
                         }
                     }
                 }
@@ -556,8 +476,6 @@ OctreeSpatialLocalizer :: insertElementIntoOctree(OctantRec *rootCell, int regio
 void
 OctreeSpatialLocalizer :: insertElementsUsingNodalConnectivitiesIntoOctree(OctantRec *currCell)
 {
-    int i, j, k;
-
     if ( currCell->isTerminalOctant() ) {
         nodeContainerType *cellNodes = currCell->giveNodeList();
         nodeContainerType :: iterator pos;
@@ -570,16 +488,16 @@ OctreeSpatialLocalizer :: insertElementsUsingNodalConnectivitiesIntoOctree(Octan
                 dofmanConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(* pos);
                 if ( dofmanConnectivity ) {
                     size = dofmanConnectivity->giveSize();
-                    for ( i = 1; i <= size; i++ ) {
+                    for ( int i = 1; i <= size; i++ ) {
                         currCell->addElementIP( dofmanConnectivity->at(i) );
                     }
                 }
             }
         }
     } else {
-        for ( i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( k = 0; k <= octreeMask.at(3); k++ ) {
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                     if ( currCell->giveChild(i, j, k) ) {
                         this->insertElementsUsingNodalConnectivitiesIntoOctree( currCell->giveChild(i, j, k) );
                     }
@@ -606,7 +524,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
     // request cell node list
     cellNodeList = currCell->giveNodeList();
     nCellItems = cellNodeList->size();
-    cellDepth  = this->giveCellDepth(currCell);
+    cellDepth  = currCell->giveCellDepth();
     // check for refinement criteria
     // should also include max refinement level criteria
     //
@@ -655,9 +573,6 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, c
 
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, coords);
-    if ( currCell == NULL ) {
-        currCell = rootCell;
-    }
 
     while ( currCell != NULL ) {
         // loop over all elements in currCell, skip search on child cell already scanned
@@ -719,12 +634,11 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
 
         return NULL;
     } else {
-        int i, j, k;
         Element *answer;
         // receiver is not terminal octant -> call same service on childs
-        for ( i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( k = 0; k <= octreeMask.at(3); k++ ) {
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                     if ( cell->giveChild(i, j, k) ) {
                         if ( scannedChild == cell->giveChild(i, j, k) ) {
                             continue;
@@ -756,7 +670,7 @@ Element *
 OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
     Element *ielemptr, *answer = NULL;
-    double currDist, minDist = 1.1 * rootCell->giveSize();
+    double currDist, minDist = 1.1 * rootCell->giveWidth();
     elementContainerType :: iterator pos;
     elementContainerType *elementList;
     OctantRec *currCell;
@@ -766,41 +680,39 @@ OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, cons
 
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, coords);
-    // point may be out of octree
-    if ( currCell != NULL ) {
-        elementList = currCell->giveIPElementList();
-        if ( !elementList->empty() ) {
-            SpatialLocalizerInterface *interface;
 
-            for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-                ielemptr = this->giveDomain()->giveElement(* pos);
+    elementList = currCell->giveIPElementList();
+    if ( !elementList->empty() ) {
+        SpatialLocalizerInterface *interface;
 
-                /* HUHU CHEATING */
+        for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
+            ielemptr = this->giveDomain()->giveElement(* pos);
+
+            /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
-                if ( ielemptr->giveParallelMode() == Element_remote ) {
-                    continue;
-                }
+            if ( ielemptr->giveParallelMode() == Element_remote ) {
+                continue;
+            }
 #endif
 
-                interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
-                if ( interface ) {
-                    if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
-                        continue;
-                    }
-
-                    currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
-                    if ( currDist < minDist ) {
-                        answer = ielemptr;
-                        minDist = currDist;
-                    }
-                } else {
-                    _error("giveElementCloseToPoint: no interface");
+            interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+            if ( interface ) {
+                if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
+                    continue;
                 }
-            }
 
-            if ( minDist == 0.0 || currCell == rootCell ) {
-                return answer;
+                currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
+                if ( currDist < minDist ) {
+                    answer = ielemptr;
+                    minDist = currDist;
+                }
+            } else {
+                _error("giveElementCloseToPoint: no interface");
             }
+        }
+
+        if ( minDist == 0.0 || currCell == rootCell ) {
+            return answer;
         }
     }
 
@@ -856,44 +768,28 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
     FloatArray currLcoords;
     FloatArray currClosest;
     double radius, prevRadius;
-    double minDist = 2 * this->rootCell->giveSize();
+    FloatArray c;
 
+    this->rootCell->giveOrigin(c);
+    // Maximum distance given coordinate and furthest terminal cell ( center_distance + width/2*sqrt(3) )
+    double minDist = c.distance(gcoords) + this->rootCell->giveWidth() * 0.87;
 
     this->initElementDataStructure(region);
 
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, gcoords);
 
-    FloatArray c;
-    this->rootCell->giveOrigin(c);
-    double w = this->rootCell->giveSize();
-
-    if ( currCell == NULL ) { // point may be out of octree, find the closest
-        FloatArray gcoords2 = gcoords;
-        for (int i = 0; i < gcoords2.giveSize(); ++i) {
-            if (gcoords2(i) < c(i)) {
-                gcoords2(i) = c(i);
-            } else if (gcoords2(i) > c(i) + w) {
-                gcoords2(i) = c(i) + w;
-            }
-        }
-        currCell = this->findTerminalContaining(rootCell, gcoords2);
-        if ( currCell == NULL ) {
-            return NULL;
-        }
-    }
-
     // Look in center, then expand.
     this->giveElementClosestToPointWithinOctant(currCell, gcoords, minDist, lcoords, closest, answer, region);
-    prevRadius = 0;
-    radius = currCell->giveSize();
+    prevRadius = 0.;
+    radius = currCell->giveWidth();
     while (radius < minDist) {
         this->giveListOfTerminalCellsInBoundingBox(cellList, gcoords, radius, prevRadius, this->rootCell);
         for (std :: list< OctantRec * > :: iterator it = cellList.begin(); it != cellList.end(); ++it) {
             this->giveElementClosestToPointWithinOctant(*it, gcoords, minDist, lcoords, closest, answer, region);
         }
         prevRadius = radius;
-        radius *= 2;
+        radius *= 2.; // Keep expanding the scope until the radius is larger than the entire root cell, then give up (because we have checked every possible cell)
     }
     return answer;
 }
@@ -984,12 +880,11 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
 
         return;
     } else {
-        int i, j, k;
         OctantRec :: BoundingBoxStatus BBStatus;
 
-        for ( i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( k = 0; k <= octreeMask.at(3); k++ ) {
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                     if ( cell->giveChild(i, j, k) ) {
                         // test if box hits the cell
                         BBStatus = cell->giveChild(i, j, k)->testBoundingBox(coords, minDist);
@@ -1024,7 +919,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
 
     // list of already tested elements
     // elementContainerType visitedElems;
-    minDist = 1.1 * rootCell->giveSize();
+    minDist = 1.1 * rootCell->giveWidth();
     // found terminal octant containing point
     currCell = this->findTerminalContaining(rootCell, coords);
     elementList = currCell->giveIPElementList();
@@ -1099,53 +994,50 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
 
         return nearestGp;
 
-        /*
-         * // found terminal octant containing point
-         * OctantRec* startCell = this->findTerminalContaining (rootCell, coords);
-         * // go up, until cell containing bbox is found
-         * if (startCell != rootCell) {
-         * while (startCell->testBoundingBox (coords, minDist) != OctantRec::BBS_InsideCell) {
-         *  startCell = startCell->giveParent();
-         *  if (startCell == rootCell) break;
-         * }
-         * }
-         *
-         * // loop over all child (if any) and found all nodes meeting the criteria
-         * // this->giveClosestIPWithinOctant (startCell, visitedElems, coords, region, minDist, &nearestGp);
-         * this->giveClosestIPWithinOctant (startCell, coords, region, minDist, &nearestGp);
-         *
-         * return nearestGp;
-         */
+#if 0
+        // found terminal octant containing point
+        OctantRec* startCell = this->findTerminalContaining (rootCell, coords);
+        // go up, until cell containing bbox is found
+        if (startCell != rootCell) {
+            while (startCell->testBoundingBox (coords, minDist) != OctantRec::BBS_InsideCell) {
+                startCell = startCell->giveParent();
+                if (startCell == rootCell) break;
+            }
+        }
+        // loop over all child (if any) and found all nodes meeting the criteria
+        // this->giveClosestIPWithinOctant (startCell, visitedElems, coords, region, minDist, &nearestGp);
+        this->giveClosestIPWithinOctant (startCell, coords, region, minDist, &nearestGp);
+        return nearestGp;
+#endif
 
 
-        /*
-         * set <int> nearElementList;
-         * // find all elements within bbox and find nearest ip
-         * this->giveAllElementsWithIpWithinBox (nearElementList, bborigin, minDist);
-         * // loop over those elements and find nearest ip and return it
-         * // check for region also
-         * if (!nearElementList.empty()) {
-         *
-         *  for (pos=nearElementList.begin(); pos !=  nearElementList.end(); ++pos) {
-         *    ielem = domain->giveElement(*pos);
-         *    //igp   = ipContainer[i].giveGp();
-         *      if (region == ielem->giveRegionNumber()) {
-         *        iRule = ielem->giveDefaultIntegrationRulePtr ();
-         *         for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
-         *          jGp = iRule->getIntegrationPoint(j) ;
-         *          if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
-         *            // compute distance
-         *            dist = coords.distance(jGpCoords);
-         *            if (dist < minDist) {
-         *               minDist   = dist;
-         *              nearestGp = jGp;
-         *            }
-         *     } else _error ("giveClosestIP: computeGlobalCoordinates failed");
-         *        }
-         *      }
-         *    }
-         * }
-         */
+#if 0
+        set <int> nearElementList;
+        // find all elements within bbox and find nearest ip
+        this->giveAllElementsWithIpWithinBox (nearElementList, bborigin, minDist);
+        // loop over those elements and find nearest ip and return it
+        // check for region also
+        if (!nearElementList.empty()) {
+            for (pos=nearElementList.begin(); pos !=  nearElementList.end(); ++pos) {
+                ielem = domain->giveElement(*pos);
+                //igp   = ipContainer[i].giveGp();
+                if (region == ielem->giveRegionNumber()) {
+                    iRule = ielem->giveDefaultIntegrationRulePtr ();
+                    for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
+                        jGp = iRule->getIntegrationPoint(j) ;
+                        if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
+                            // compute distance
+                            dist = coords.distance(jGpCoords);
+                            if (dist < minDist) {
+                                minDist   = dist;
+                                nearestGp = jGp;
+                            }
+                        } else _error ("giveClosestIP: computeGlobalCoordinates failed");
+                    }
+                }
+            }
+        }
+#endif
     } else {
         _error("giveClosestIP: octree inconsistency found");
     }
@@ -1160,7 +1052,6 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                                     int region, double &dist, GaussPoint **answer)
 {
     if ( currentCell->isTerminalOctant() ) {
-        int j;
         double currDist;
         elementContainerType :: iterator pos;
         elementContainerType *elementList;
@@ -1192,7 +1083,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                 // if (!visitedElems.insert(*pos).second) continue;
                 // is one of his ip's  within given bbox -> inset it into elemSet
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( iRule->getIntegrationPoint(j)->giveCoordinates() ) ) ) {
                         currDist = coords.distance(jGpCoords);
                         // multiple insertion are handled by STL set implementation
@@ -1209,12 +1100,11 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
 
         return;
     } else {
-        int i, j, k;
         OctantRec :: BoundingBoxStatus BBStatus;
 
-        for ( i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( k = 0; k <= octreeMask.at(3); k++ ) {
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                     if ( currentCell->giveChild(i, j, k) ) {
                         // test if box hits the cell
                         BBStatus = currentCell->giveChild(i, j, k)->testBoundingBox(coords, dist);
@@ -1262,7 +1152,6 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                                                       const FloatArray &coords, const double radius)
 {
     if ( currentCell->isTerminalOctant() ) {
-        int j;
         double currDist;
         elementContainerType :: iterator pos;
         elementContainerType *elementList;
@@ -1290,7 +1179,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                  */
                 // is one of his ip's  within given bbox -> inset it into elemSet
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( iRule->getIntegrationPoint(j)->giveCoordinates() ) ) ) {
                         currDist = coords.distance(jGpCoords);
                         // multiple insertion are handled by STL set implementation
@@ -1304,13 +1193,12 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
             }
         }
     } else {
-        int i, j, k;
         OctantRec :: BoundingBoxStatus BBStatus;
 
 
-        for ( i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( k = 0; k <= octreeMask.at(3); k++ ) {
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                     if ( currentCell->giveChild(i, j, k) ) {
                         // test if box hits the cell
                         BBStatus = currentCell->giveChild(i, j, k)->testBoundingBox(coords, radius);
@@ -1368,12 +1256,11 @@ OctreeSpatialLocalizer :: giveNodesWithinBox(nodeContainerType &nodeList, Octant
             }
         }
     } else {
-        int i, j, k;
         OctantRec :: BoundingBoxStatus BBStatus;
 
-        for ( i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( k = 0; k <= octreeMask.at(3); k++ ) {
+        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                     if ( currentCell->giveChild(i, j, k) ) {
                         // test if box hits the cell
                         BBStatus = currentCell->giveChild(i, j, k)->testBoundingBox(coords, radius);
@@ -1389,22 +1276,15 @@ OctreeSpatialLocalizer :: giveNodesWithinBox(nodeContainerType &nodeList, Octant
 }
 
 
-int
-OctreeSpatialLocalizer :: giveCellDepth(OctantRec *cell)
-{
-    return ( int ) ( log( this->rootCell->giveSize() / cell->giveSize() ) / M_LN2 );
-}
-
-
 void
 OctreeSpatialLocalizer :: giveMaxTreeDepthFrom(OctantRec *root, int &maxDepth)
 {
-    int i, j, k, depth = this->giveCellDepth(root);
+    int depth = root->giveCellDepth();
     maxDepth = max(maxDepth, depth);
 
-    for ( i = 0; i <= octreeMask.at(1); i++ ) {
-        for ( j = 0; j <= octreeMask.at(2); j++ ) {
-            for ( k = 0; k <= octreeMask.at(3); k++ ) {
+    for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+        for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+            for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                 if ( root->giveChild(i, j, k) ) {
                     this->giveMaxTreeDepthFrom(root->giveChild(i, j, k), maxDepth);
                 }
@@ -1418,7 +1298,6 @@ void
 OctreeSpatialLocalizer :: giveListOfTerminalCellsInBoundingBox(std :: list< OctantRec * > &cellList, const FloatArray &coords,
                                                                double radius, double innerRadius, OctantRec *currentCell)
 {
-    int i, j, k;
     OctantRec :: BoundingBoxStatus BBStatus;
 
     BBStatus = currentCell->testBoundingBox(coords, radius);
@@ -1428,9 +1307,9 @@ OctreeSpatialLocalizer :: giveListOfTerminalCellsInBoundingBox(std :: list< Octa
                 cellList.push_back(currentCell);
             }
         } else {
-            for ( i = 0; i <= octreeMask.at(1); i++ ) {
-                for ( j = 0; j <= octreeMask.at(2); j++ ) {
-                    for ( k = 0; k <= octreeMask.at(3); k++ ) {
+            for ( int i = 0; i <= octreeMask.at(1); i++ ) {
+                for ( int j = 0; j <= octreeMask.at(2); j++ ) {
+                    for ( int k = 0; k <= octreeMask.at(3); k++ ) {
                         if ( currentCell->giveChild(i, j, k) ) {
                             this->giveListOfTerminalCellsInBoundingBox( cellList, coords, radius, innerRadius, currentCell->giveChild(i, j, k) );
                         }

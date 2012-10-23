@@ -66,7 +66,6 @@ class OctreeSpatialLocalizer;
 class OctantRec
 {
 protected:
-
     /// Link to octree class.
     OctreeSpatialLocalizer *localizer;
     /// Link to parent cell record.
@@ -76,7 +75,9 @@ protected:
     /// Octant origin coordinates (lower corner)
     FloatArray origin;
     /// Octant size.
-    double size;
+    double halfWidth;
+    /// Tree depth
+    int depth;
 
     /// Octant node list.
     std :: list< int > *nodeList;
@@ -87,7 +88,7 @@ protected:
 
 public:
     enum BoundingBoxStatus { BBS_OutsideCell, BBS_InsideCell, BBS_ContainsCell };
-    enum ChildStatus { CS_ChildFound, CS_NoChild, CS_PointOutside };
+    enum ChildStatus { CS_ChildFound, CS_NoChild };
 
     /// Constructor.
     OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double size);
@@ -101,22 +102,10 @@ public:
      * @param answer Cell origin.
      */
     void giveOrigin(FloatArray &answer) { answer = this->origin; }
-    /// @return Cell size.
-    double giveSize() { return this->size; }
-    /**
-     * Returns nonzero if octant contains given point.
-     * If not 3-coordinates are given, then missing coordinates are
-     * not included in test.
-     * @param coords Coordinate.
-     */
-    bool containsPoint(const FloatArray &coords);
-    /**
-     * Returns true if octant overlap with given box.
-     * @param b0 Lower coordinate of box.
-     * @param b1 Upper coordinate of box.
-     * @return True if there is any overlap.
-     */
-    bool overlapsBox(const FloatArray &b0, const FloatArray &b1) const;
+    /// @return Half the cell width.
+    double giveWidth() { return 2. * this->halfWidth; }
+    /// @return Depth in the tree for this octant.
+    int giveCellDepth() { return this->depth; }
     /**
      * Gives the Child at given local indices.
      * @param xi First index.
@@ -363,13 +352,6 @@ protected:
      */
     void giveElementClosestToPointWithinOctant(OctantRec *currCell, const FloatArray &gcoords,
             double &minDist, FloatArray &lcoords, FloatArray &closest, Element *&answer, int region);
-    /**
-     * Returns the octree depth for given cell. The depth is not parameter of octree cells, but is
-     * computed from cell size and root cell size.
-     * @param cell Cell to check depth for.
-     * @return Cell depth.
-     */
-    int giveCellDepth(OctantRec *cell);
     /**
      * Determines the max tree depth computed for given tree cell and its children.
      * To obtain total tree depth, root cell should be supplied.
