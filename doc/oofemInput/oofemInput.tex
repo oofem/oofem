@@ -1237,8 +1237,7 @@ ST\_DSS     &4& \\
      These options will override those that are default (PETSC KSPSetFromOptions() routine is called after any other customization
      routines).}
 The \param{stype} allows to select particular iterative solver from IML library, currently supported values are 0 (default) for Conjugate-Gradient solver, 1 for GMRES solver. Parameter \param{lstol} represents the maximum value of residual after the
-final iteration and the \param{lsiter} is maximum number of iteration  for
-iterative solver.
+final iteration and the \param{lsiter} is maximum number of iteration for iterative solver.
 The \param{precondattributes} parameters contains the optional
 preconditioner parameters.
 The \param{lsprecond} parameter determines the type of preconditioner to be
@@ -1746,9 +1745,12 @@ only specific members. Numbers of selected members are then contained
 in \param{dofman\_output} or \param{element\_output} lists
 respectively. The previously selected members can be explicitly
 de-selected by specifying their component numbers in \param{dofman\_except} or
-\param{element\_except} lists.
-
-
+\param{element\_except} lists. A few examples:\\
+\param{dofman\_output} \{1 3\}~~~prints nodes 1,3\\
+\param{dofman\_output} \{(1 3)\}~~~prints nodes 1,2,3\\
+\param{element\_output} \{1 3\}~~~prints elements 1,3\\
+\param{element\_output} \{(1 3)\}~~~prints elements 1,2,3\\
+\param{element\_output} \{(1 3) 5 6\}~~~prints elements 1,2,3,5,6\\
 
 \subsection{Components size record}
 \label{_ComponentsSizeRecord}
@@ -2022,7 +2024,8 @@ a side or a surface number). The entity numbering is element dependent and
 is described in element specific sections. The applied loads must be
 of proper type (boundary load type), otherwise error is generated.
 
-The support for element insertion and removal during the analysis is provided. One can specify optional time function (identified by its id using \param{activityltf} parameter). The nonzero value of this time function indicates, whether the element is active (nonzero value, the default) or inactive (zero value) at particulat solution step. Tested for structural and transport elements.
+The support for element insertion and removal during the analysis is provided. One can specify optional time function (identified by its id using \param{activityltf} parameter). The nonzero value of this time function indicates, whether the element is active (nonzero value, the default) or inactive (zero value) at particulat solution step. Tested for structural and transport elements. This feature allows considering temperature evolution of layered casting of concrete, where certain layers needs to be inactive before they are cast. See a corresponding example in oofem
+tests how to enforce hydrating material model, boundary conditions and element activity acting concurrently.
 
 Orientation of local coordinates can be specified using \param{lcs} array. This array contains six numbers,
 where the first three numbers represent a directional vector of local

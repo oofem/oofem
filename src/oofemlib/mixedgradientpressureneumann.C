@@ -50,6 +50,7 @@
 #include "usrdefsub.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
 #include "../fm/line2boundaryelement.h"
+#include "mathfem.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"

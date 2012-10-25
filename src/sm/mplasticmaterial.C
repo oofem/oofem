@@ -745,7 +745,7 @@ MPlasticMaterial :: computeResidualVector(FloatArray &answer, GaussPoint *gp, co
                                           const FloatArray &strainSpaceHardeningVariables,
                                           std :: vector< FloatArray > &gradientVectorR)
 {
-    /* Computes Residual vector for closes point projection algorithm */
+    /* Computes Residual vector for closest point projection algorithm */
 
     FloatArray oldPlasticStrainVectorR, oldStrainSpaceHardeningVariables;
     int i, j, isize, size;

@@ -75,10 +75,13 @@ protected:
     FloatArray plasticStrainVector;
     FloatArray tempPlasticStrainVector;
 
-    /// Strain space hardening variables.
+    /** 
+    * Strain space hardening variables, e.g. cumulative plastic strain which can be used
+    * in yield stress evaluation or damage.
+    */
     FloatArray strainSpaceHardeningVarsVector;
     FloatArray tempStrainSpaceHardeningVarsVector;
-
+    
     /// Yield function status indicator.
     int state_flag;
     int temp_state_flag;
@@ -113,7 +116,7 @@ public:
     void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
     void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
     void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
-
+    
     int giveStateFlag() { return state_flag; }
     int giveTempStateFlag() { return temp_state_flag; }
     void letTempStateFlagBe(int v) { temp_state_flag = v; }

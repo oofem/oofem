@@ -411,7 +411,10 @@ Supported modes& 3dMat, PlaneStrain, 3dRotContinuum\\
 
 \subsubsection{Drucker-Prager model with tension cut-off and isotropic damage - DruckerPragerCut}
 \label{DPCutmodel}
-The Drucker-Prager plasticity model with tension cut-off is multisurface model, appropriate for cohesive-frictional materials such as concrete loaded both in compression and tension. The plasticity model is formulated for isotropic hardening and enhanced by isotropic damage, which is driven by the cumulative plastic strain. The model can be used only in the small-strain context, with additive split of the strain tensor into the elastic and plastic parts.
+The Drucker-Prager plasticity model with tension cut-off is a multisurface model, appropriate for cohesive-frictional 
+materials such as concrete loaded both in compression and tension. The plasticity model is formulated for isotropic 
+hardening and enhanced by isotropic damage, which is driven by the cumulative plastic strain. The model can be used 
+only in the small-strain context, with additive split of the strain tensor into the elastic and plastic parts.
 
 The basic equations include the additive decomposition of strain into elastic and plastic parts,
 \begin{equation}
@@ -443,7 +446,8 @@ where $\omega_c$ is critical damage and $a$ is a positive dimensionless paramete
 More detailed descriptioin of some parameters is in Section~\ref{DPmodel}.
 
 The dilatancy coefficient $\alphaPsi$ controls flow associativeness; if $\alphaPsi=\alpha$, an associate model is recovered, which
-overestimate the dilatancy of concrete. Hence, the dilatancy coefficient is usually chosen smaller, such that $\alphaPsi \leq \alpha$ as the non-associated model.
+overestimates the dilatancy of concrete. Hence, the dilatancy coefficient is usually chosen smaller, 
+$\alphaPsi \leq \alpha$, and the non-associated model is formulated.
 
 % The stress-return algorithm is based on the Newton-iteration.
 % In plasticity, this is commonly called Closest-Point-Projection (CPP),

@@ -54,7 +54,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         of=open(oofemfile,'w') 
         # read UNV file in FEM object structure
         UNV=UNVParser(unvfile)
-        print 'Parsing unv file ....',
+        print 'Parsing unv file %s' % sys.argv[1],
         FEM=UNV.parse()
         print "done"
 
@@ -70,12 +70,12 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
 
         # read oofem ctrl file
         CTRL=CTRLParser(ctrlfile)
-        print 'Parsing ctrl file ....'
+        print 'Parsing ctrl file %s' % sys.argv[2]
         CTRL.parse(FEM)
         print "done"
         # write files in native oofem format
 
-        print 'Writting oofem file ...'
+        print 'Writing oofem file %s' % sys.argv[3]
         # write oofem header
         of.write(CTRL.header)
 

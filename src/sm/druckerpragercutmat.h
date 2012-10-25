@@ -35,12 +35,7 @@
 #ifndef druckerpragercatmat_h
 #define druckerpragercatmat_h
 
-#include "structuralmaterial.h"
-#include "structuralms.h"
-#include "linearelasticmaterial.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
+#include "mplasticmaterial2.h"
 
 namespace oofem {
 class GaussPoint;
@@ -51,11 +46,11 @@ class Domain;
  * with Drucker-Prager yield condition, tension cut-off, non-associated flow rule,
  * linear isotropic hardening and isotropic damage.
  */
-class DruckerPragerCutMat : public StructuralMaterial
+class DruckerPragerCutMat : public MPlasticMaterial2
 {
 protected:
     /// Reference to the basic elastic material.
-    LinearElasticMaterial *linearElasticMaterial;
+    //LinearElasticMaterial *linearElasticMaterial;
 
     /// Elastic shear modulus.
     double G;
@@ -94,16 +89,12 @@ public:
     DruckerPragerCutMat(int n, Domain *d);
     virtual ~DruckerPragerCutMat();
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
-    double computeDamage(GaussPoint *gp, TimeStep *atTime);
-    double computeDamageParam(double tempKappa);
-    double computeDamageParamPrime(double tempKappa);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
-
     virtual int hasMaterialModeCapability(MaterialMode mode);
-
+    
     virtual IRResultType initializeFrom(InputRecord *ir);
-
+    
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    
     virtual int hasNonLinearBehaviour() { return 1; }
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
@@ -113,116 +104,47 @@ public:
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseForm form, MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual int giveSizeOfFullHardeningVarsVector() { return 4; }
+    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) { return 4; }//cummulative strain = one per each surface
 
 protected:
-    /// Evaluates the stress from Green-Lagrange strain E.
-    void giveRealStressVectorComputedFromStrain(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                                                const FloatArray &E, TimeStep *tStep);
+    virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 3; }//normally one less than number of all conditions
+    
+    virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVariables);
+    
+    virtual void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector, const FloatArray &stressSpaceHardeningVars);
+    
+    /// Computes second derivative of yield/loading function with respect to stress
+    virtual void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables);
+    
+    virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    
+    /// Functions related to hardening
+    virtual int hasHardening() { return 1; }
+        
+    /// Compute dot(kappa_1), dot(kappa_2) etc.
+    virtual void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp, const FloatArray &stress, const FloatArray &dlambda, const FloatArray &dplasticStrain, const IntArray &activeConditionMap);
+    
+    /// Computes the derivative of yield/loading function with respect to kappa_1, kappa_2 etc.
+    virtual void computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables);
 
-    void give3dSSMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseForm form, MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-
+    /// computes mixed derivative of load function with respect to stress and hardening variables
+    virtual void computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables);
+    
+    /// computes dk(i)/dsig(j) gradient matrix
+    virtual void computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda);
+    
+    /// computes dKappa_i/dLambda_j
+    virtual void computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda);
+    
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
-    virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 
-//=============================================================================
-
-
-class DruckerPragerCutMatStatus : public StructuralMaterialStatus
-{
-protected:
-    /// Plastic strain (initial).
-    FloatArray plasticStrain;
-
-    /// Plastic strain (temporary and final after iterations).
-    FloatArray tempPlasticStrain;
-
-    /// Deviatoric trial stress - needed for tangent stiffness.
-    FloatArray trialStressD;
-
-    double trialStressV;
-
-    FloatArray effStress;
-    FloatArray tempEffStress;
-
-    /// Cumulative plastic strain (initial).
-    double kappa;
-
-    /// Cumulative plastic strain (final).
-    double tempKappa;
-
-    double tempDamage, damage;
-    
-    /// Active surface (None, DruckerPrager, Cut-off)
-    int activeSurface;
-
-public:
-    DruckerPragerCutMatStatus(int n, Domain *d, GaussPoint *g);
-    virtual ~DruckerPragerCutMatStatus();
-
-    void givePlasticStrain(FloatArray &answer) { answer = plasticStrain; }
-
-    void giveTrialStressDev(FloatArray &answer) { answer = trialStressD; }
-
-    void giveTrialStressVol(double &answer) { answer = trialStressV; }
-    double giveDamage() { return damage; }
-    double giveTempDamage() { return tempDamage; }
-
-    double giveCumulativePlasticStrain() { return kappa; }
-    double giveTempCumulativePlasticStrain() { return tempKappa; }
-    int giveActiveSurface() { return activeSurface; }
-
-    void giveTempEffectiveStress(FloatArray &answer) { answer = tempEffStress; }
-    void giveEffectiveStress(FloatArray &answer) { answer = effStress; }
-
-    void letTempPlasticStrainBe(FloatArray &values) { tempPlasticStrain = values; }
-
-    void letTrialStressDevBe(FloatArray &values) { trialStressD = values; }
-
-    void letEffectiveStressBe(FloatArray &values) { effStress = values; }
-
-    void letTempEffectiveStressBe(FloatArray &values) { tempEffStress = values; }
-
-    void setTrialStressVol(double value) { trialStressV = value; }
-
-    void setTempCumulativePlasticStrain(double value) { tempKappa = value; }
-
-    void setTempDamage(double value) { tempDamage = value; }
-    
-    void setActiveSurface(int as) { activeSurface = as; }
-
-    const FloatArray *givePlasDef() { return & plasticStrain; }
-
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    virtual void initTempStatus();
-
-    virtual void updateYourself(TimeStep *tStep);
-
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-    virtual const char *giveClassName() const { return "DruckerPragerCutMatStatus"; }
-    virtual classType giveClassID() const { return DruckerPragerCutMatStatusClass; }
-};
 } // end namespace oofem
 #endif // druckerpragercatmat_h

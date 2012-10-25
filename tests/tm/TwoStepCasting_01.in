@@ -21,7 +21,7 @@ OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect 1 nmat 2 nbc 3 nic 2 nltf 3
 node 1 coords 3  0.0   0.0   0.0  ic 1 1
 node 2 coords 3  0.0   0.2   0.0  ic 1 1
-node 3 coords 3  0.4   0.0   0.0  ic 1 1
+node 3 coords 3  0.4   0.0   0.0  ic 1 1 
 node 4 coords 3  0.4   0.2   0.0  ic 1 1
 node 5 coords 3  0.8   0.0   0.0  ic 1 2 bc 1 3
 node 6 coords 3  0.8   0.2   0.0  ic 1 2 bc 1 3

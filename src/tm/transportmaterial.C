@@ -208,7 +208,7 @@ TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussP
         _error2( "Unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
-    if ( type == IST_Temperature || IST_MassConcentration_1 || type == IST_HydrationDegree || type == IST_Humidity || type == IST_Density || type == IST_MaterialNumber || type == IST_ElementNumber || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
+    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_HydrationDegree || type == IST_Humidity || type == IST_Density || type == IST_MaterialNumber || type == IST_ElementNumber || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
         return 1;
     } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow ) {
         return size;

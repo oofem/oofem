@@ -250,7 +250,7 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
 
     MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
 
-huhu:
+huhu: //label for goto
 
     status->givePlasticStrainVector(plasticStrainVectorR);
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
@@ -465,11 +465,11 @@ huhu:
                                 this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                                 fullStressVector.printYourself();
 
-                                _error("Internal Consistency error: all combination of yield functions tryied, no consistent return");
+                                _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
                             }
 
 #else
-                            _error("Internal Consistency error: all combination of yield functions tryied, no consistent return");
+                            _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
 #endif
                         }
 
@@ -761,11 +761,11 @@ huhu:
                             this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                             fullStressVector.printYourself();
 
-                            _error("Internal Consistency error: all combination of yield functions tryied, no consistent return");
+                            _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
                         }
 
 #else
-                        _error("Internal Consistency error: all combination of yield functions tryied, no consistent return");
+                        _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
 #endif
                     }
 
@@ -803,11 +803,11 @@ huhu:
                                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                                     fullStressVector.printYourself();
 
-                                    _error("Internal Consistency error: all combination of yield functions tryied, no consistent return");
+                                    _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
                                 }
 
 #else
-                                _error("Internal Consistency error: all combination of yield functions tryied, no consistent return");
+                                _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
 #endif
                             }
 
@@ -894,7 +894,7 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
         loadGradKVecPtr = & loadGradKVec;
     }
 
-huhu:
+huhu: //label for goto
     status->givePlasticStrainVector(plasticStrainVectorR);
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
 
@@ -2260,24 +2260,30 @@ MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "status { ");
     if ( ( state_flag == MPlasticMaterial2Status :: PM_Yielding ) || ( state_flag == MPlasticMaterial2Status :: PM_Unloading ) ) {
         if ( state_flag == MPlasticMaterial2Status :: PM_Yielding ) {
-            fprintf(file, " Yielding, ");
+            fprintf(file, " Yielding,");
         } else {
-            fprintf(file, " Unloading, ");
+            fprintf(file, " Unloading,");
         }
 
         n = plasticStrainVector.giveSize();
-        fprintf(file, " plastic strains ");
+        fprintf(file, " Plastic strains");
         for ( i = 1; i <= n; i++ ) {
             fprintf( file, " % .4e", plasticStrainVector.at(i) );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
             n = strainSpaceHardeningVarsVector.giveSize();
-            fprintf(file, ", strain space hardening vars ");
+            fprintf(file, " Strain space hardening vars");
             for ( i = 1; i <= n; i++ ) {
                 fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
             }
         }
+        
+        fprintf( file, " ActiveConditionMap" );
+        for ( i = 1; i <= activeConditionMap.giveSize() ; i++ ) {
+            fprintf( file, " %d", activeConditionMap.at(i) );
+        }
+        
     }
 
     fprintf(file, "}\n");
@@ -2320,7 +2326,7 @@ MPlasticMaterial2Status :: updateYourself(TimeStep *atTime)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
-// temporary variables are having values corresponding to newly reched equilibrium.
+// temporary variables are having values corresponding to newly reached equilibrium.
 //
 {
     StructuralMaterialStatus :: updateYourself(atTime);
@@ -2358,7 +2364,7 @@ MPlasticMaterial2Status :: saveContext(DataStream *stream, ContextMode mode, voi
     if ( ( iores = strainSpaceHardeningVarsVector.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
+    
     if ( !stream->write(& state_flag, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }

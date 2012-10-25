@@ -34,8 +34,9 @@
 
 #include "druckerpragercutmat.h"
 #include "isolinearelasticmaterial.h"
+#include "flotmtrx.h"
+#include "flotarry.h"
 #include "gausspnt.h"
-#include "intarray.h"
 #include "stressvector.h"
 #include "strainvector.h"
 #include "mathfem.h"
@@ -44,9 +45,15 @@
 
 namespace oofem {
 // constructor
-DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : StructuralMaterial(n, d)
+DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
+    this->nsurf = 4;
+//     this->rmType = mpm_CuttingPlane;
+    this->rmType = mpm_ClosestPoint;
+    
+    this->plType = nonassociatedPT;// Rankine associated, DP nonassociated
+    
     sigT = 0.;
     H = 0.;
     omegaCrit = 0.;
@@ -65,7 +72,7 @@ DruckerPragerCutMat :: ~DruckerPragerCutMat()
 int
 DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( ( mode == _3dMat ) || ( mode == _1dMat ) || ( mode == _PlaneStrain ) ) {
+    if ( ( mode == _3dMat ) || ( mode == _PlaneStrain ) ) {
         return 1;
     }
 
@@ -84,413 +91,204 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
     G = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveShearModulus();
     K = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveBulkModulus();
 
-    IR_GIVE_FIELD(ir, tau0, IFT_DruckerPragerCutMat_tau0, "tau0"); // initial yield stress under pure shear
-    IR_GIVE_FIELD(ir, alpha, IFT_DruckerPragerCutMat_alpha, "alpha"); // friction coefficient
+    IR_GIVE_FIELD(ir, tau0, IFT_DruckerPragerCutMat_tau0, "tau0"); // initial yield stress under pure shear (DP model)
+    IR_GIVE_FIELD(ir, sigT, IFT_DruckerPragerCutMat_sigT, "sigt"); // uniaxial tensile strength for cut-off, (Rankine plasticity model)
+    IR_GIVE_FIELD(ir, alpha, IFT_DruckerPragerCutMat_alpha, "alpha"); // friction coefficient (DP model)
     alphaPsi=alpha;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaPsi, IFT_DruckerPragerCutMat_alphapsi, "alphapsi"); //dilatancy coefficient
-    IR_GIVE_OPTIONAL_FIELD(ir, H, IFT_DruckerPragerCutMat_h, "h"); // hardening modulus
-    IR_GIVE_OPTIONAL_FIELD(ir, sigT, IFT_DruckerPragerCutMat_sigT, "sigt"); // uniaxial tensile strength for cut-off
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaPsi, IFT_DruckerPragerCutMat_alphapsi, "alphapsi"); //dilatancy coefficient (DP model)
+    IR_GIVE_OPTIONAL_FIELD(ir, H, IFT_DruckerPragerCutMat_h, "h"); // hardening modulus  (DP model)
     IR_GIVE_OPTIONAL_FIELD(ir, omegaCrit, IFT_DruckerPragerCutMat_omegaCrit, "omega_crit"); // critical damage
     IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_DruckerPragerCutMat_a, "a"); // exponent in damage law
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, IFT_DruckerPragerCutMat_yieldTol, "yieldtol"); //tolerance of the error in the yield criterion
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_DruckerPragerCutMat_newtonIter, "yieldtol"); //tolerance of the error in the yield criterion
-    
+    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_DruckerPragerCutMat_newtonIter, "newtoniter"); //Maximum number of iterations in lambda search
     
     return IRRT_OK;
 }
+
 
 // creates a new material status corresponding to this class
 MaterialStatus *
 DruckerPragerCutMat :: CreateStatus(GaussPoint *gp) const
 {
-    DruckerPragerCutMatStatus *status;
-    status = new DruckerPragerCutMatStatus(1, this->giveDomain(), gp);
+    MPlasticMaterial2Status *status;
+    status = new MPlasticMaterial2Status(1, this->giveDomain(), gp);
+    
     return status;
 }
 
-
-// returns the stress vector in 3d stress space
-void
-DruckerPragerCutMat :: giveRealStressVector(FloatArray &answer,
-                                 MatResponseForm form,
-                                 GaussPoint *gp,
-                                 const FloatArray &totalStrain,
-                                 TimeStep *atTime)
+double
+DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVariables)
 {
-    MaterialMode mode = gp->giveMaterialMode();
-
-
-    if ( ( mode == _3dMat ) || ( mode == _1dMat ) || ( mode == _PlaneStrain ) ) {
-        giveRealStressVectorComputedFromStrain(answer, form, gp, totalStrain, atTime);
-    } else {
-        OOFEM_ERROR("MisesMat::giveRealStressVector : unknown material response mode");
+    //strainSpaceHardeningVariables = kappa
+    if (isurf <=3){//Rankine, surfaces 1,2,3
+        FloatArray princStress(3);
+        this->computePrincipalValues(princStress, stressVector, principal_stress);
+        return princStress.at(isurf) - this->sigT;
+    } else {//Drucker-Prager, surface 4
+        double volumetricStress;
+        double DPYieldStressInShear = tau0 + H * strainSpaceHardeningVariables.at(4);
+        double JTwo;
+        MaterialMode mmode = gp->giveMaterialMode();
+        StressVector stressVector1(stressVector, mmode);//convert from array
+        StressVector deviatoricStress(mmode);
+        
+        stressVector1.computeDeviatoricVolumetricSplit(deviatoricStress,volumetricStress);
+        JTwo = deviatoricStress.computeSecondInvariant();
+        return 3.*alpha*volumetricStress + sqrt(JTwo) - DPYieldStressInShear;
     }
-}
-
-// returns the stress vector in 3d stress space
-// computed from the previous plastic strain and current total strain
-void
-DruckerPragerCutMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
-                                                   MatResponseForm form,
-                                                   GaussPoint *gp,
-                                                   const FloatArray &totalStrain,
-                                                   TimeStep *atTime)
-{
-    FloatArray reducedTotalStrainVector;
     
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    MaterialMode mode = gp->giveMaterialMode();
-    this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
-    // subtract stress independent part (temperature etc.)
-    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
-    this->performPlasticityReturn(gp, reducedTotalStrainVector, mode);
-    double omega = computeDamage(gp, atTime);
-    StressVector effStress(mode), totalStress(mode);
-    status->giveTempEffectiveStress(effStress);
-    totalStress = effStress;
-    totalStress.times(1 - omega);
-    answer = totalStress;
-    status->setTempDamage(omega);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    
 }
 
-void DruckerPragerCutMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode)
+//associated and nonassociated flow rule
+void
+DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector, const FloatArray &stressSpaceHardeningVars)
 {
-    double kappa, yieldValue, dKappa;
-    FloatArray reducedStress;
-    FloatArray strain, plStrain;
-    //  MaterialMode mode = gp->giveMaterialMode();
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    StressVector fullStress(mode);
-    this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
-    // get the initial plastic strain and initial kappa from the status
-    status->givePlasticStrain(plStrain);
-    kappa = status->giveCumulativePlasticStrain();
+    FloatArray princStress(3);
+    FloatMatrix t(3, 3);
 
-    // === radial return algorithm ===
-    if ( mode == _1dMat ) {
-        LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        double E = lmat->give('E', gp);
-        /*trial stress*/
-        fullStress.at(1) = E * ( totalStrain.at(1) - plStrain.at(1) );
-        double tauY = tau0 + H * kappa;
-        double trialS = fullStress.at(1);
-        if(trialS > sigT) {//tension cut-off active
-            status->setActiveSurface(1);
-        } else if ( alpha*trialS + fabs(trialS)/sqrt(3.) - tauY > 0 ){//Drucker-Prager model active
-            status->setActiveSurface(2);
-            
-        } else {//elastic
-            status->setActiveSurface(0);
-        }
+    // compute principal stresses and their directions
+    this->computePrincipalValDir(princStress, t, stressVector, principal_stress);
+
+    // derivation through stress transformation matrix. The transformation matrix is stored in t columnwise
+    answer.resize(6);
+    if (isurf <=3){ //Rankine associated
+        answer.at(1) = t.at(1, isurf) * t.at(1, isurf);//xx = 11
+        answer.at(2) = t.at(2, isurf) * t.at(2, isurf);//yy = 22
+        answer.at(3) = t.at(3, isurf) * t.at(3, isurf);//zz = 33
+        answer.at(4) = t.at(2, isurf) * t.at(3, isurf);//yz = 23
+        answer.at(5) = t.at(1, isurf) * t.at(3, isurf);//xz = 13
+        answer.at(6) = t.at(1, isurf) * t.at(2, isurf);//xy = 12
+    } else { //DP nonassociated
+        MaterialMode mmode = gp->giveMaterialMode();
+        StressVector stressVector1(stressVector, mmode);//convert from array
+        StressVector deviatoricStress(mmode);
+        double sqrtJTwo, volumetricStress;
         
+        stressVector1.computeDeviatoricVolumetricSplit(deviatoricStress,volumetricStress);
+        sqrtJTwo = sqrt(deviatoricStress.computeSecondInvariant());
         
+        answer.at(1) = alphaPsi + deviatoricStress.at(1) / 2. / sqrtJTwo;
+        answer.at(2) = alphaPsi + deviatoricStress.at(2) / 2. / sqrtJTwo;
+        answer.at(3) = alphaPsi + deviatoricStress.at(3) / 2. / sqrtJTwo;
+        answer.at(4) = stressVector1.at(4) / sqrtJTwo;
+        answer.at(5) = stressVector1.at(5) / sqrtJTwo;
+        answer.at(6) = stressVector1.at(6) / sqrtJTwo;
+    }
+}
+
+//necesarry only for mpm_ClosestPoint, see Jirasek: Inelastic analysis of structures, pp. 411.
+//Hessian matrix
+void
+DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
+{
+    gradientMatrix.resize(6, 6);
+    gradientMatrix.zero();
+    
+    if ( isurf == 4 ) {
+        int i,j;
+        double c1=0.;
+        MaterialMode mmode = gp->giveMaterialMode();
+        StressVector stressVector1(fullStressVector, mmode);//convert from array
+        StressVector deviatoricStress(mmode);
+        double JTwo, sqrtJTwo, volumetricStress;
         
-        trialS = fabs(trialS);
-        /*yield function*/
-        yieldValue = trialS - tauY;
-        // === radial return algorithm ===
-        if ( yieldValue > 0 ) {
-            dKappa = yieldValue / ( H + E );
-            kappa += dKappa;
-            fullStress.at(1) = fullStress.at(1) - dKappa *E *signum( fullStress.at(1) );
-            plStrain.at(1) = plStrain.at(1) + dKappa *signum( fullStress.at(1) );
+        stressVector1.computeDeviatoricVolumetricSplit(deviatoricStress,volumetricStress);
+        JTwo = deviatoricStress.computeSecondInvariant();
+        sqrtJTwo = sqrt(JTwo);
+        
+        for(i=1; i<=6;i++){
+            for(j=i; j<=6;j++){
+                if( (i==1 && j==1) || (i==2 && j==2) || (i==3 && j==3) ){
+                    c1 = 2/3.;
+                } else if ( (i==4 && j==4) || (i==5 && j==5) || (i==6 && j==6) ){
+                    c1 = 1.;
+                } else if (i<=3 && j<=3){
+                    c1 = -1/3.;
+                } else{
+                    c1=0;
+                }
+                
+                gradientMatrix.at(i, j) = 0.5/JTwo * ( c1*sqrtJTwo - deviatoricStress.at(i)*deviatoricStress.at(j)/2./sqrtJTwo );
+            }
         }
-    } else if ( ( mode == _PlaneStrain ) || ( mode == _3dMat ) ) {
-        // elastic predictor
-        StrainVector elStrain(totalStrain, mode);
-        elStrain.subtract(plStrain);
-        StrainVector elStrainDev(mode);
-        double elStrainVol;
-        elStrain.computeDeviatoricVolumetricSplit(elStrainDev, elStrainVol);
-        StressVector trialStressDev(mode);
-        elStrainDev.applyDeviatoricElasticStiffness(trialStressDev, G);
-        /**************************************************************/
-        double trialStressVol;
-        trialStressVol = 3 * K * elStrainVol;
-        /**************************************************************/
+        gradientMatrix.symmetrized();
+    }
+}
 
-        // store the deviatoric and trial stress (reused by algorithmic stiffness)
-        status->letTrialStressDevBe(trialStressDev);
-        status->setTrialStressVol(trialStressVol);
-        // check the yield condition at the trial state
-        double trialS = trialStressDev.computeStressNorm();
-        double tauY = tau0 + H * kappa;
-        yieldValue = sqrt(3. / 2.) * trialS - tauY;
-        if ( yieldValue > 0. ) {
-            // increment of cumulative plastic strain
-            dKappa = yieldValue / ( H + 3. * G );
-            kappa += dKappa;
-            StrainVector dPlStrain(mode);
-            // the following line is equivalent to multiplication by scaling matrix P
-            trialStressDev.applyDeviatoricElasticCompliance(dPlStrain, 0.5);
-            // increment of plastic strain
-            dPlStrain.times(sqrt(3. / 2.) * dKappa / trialS);
-            plStrain.add(dPlStrain);
-            // scaling of deviatoric trial stress
-            trialStressDev.times(1. - sqrt(6.) * G * dKappa / trialS);
+
+void
+DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
+                                         GaussPoint *gp,
+                                         TimeStep *atTime)
+{  /* Returns elastic moduli in reduced stress-strain space*/
+    //MaterialMode mode = gp->giveMaterialMode();
+    
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
+                                                                    ElasticStiffness,
+                                                                    gp, atTime);
+}
+
+//answer is dkappa (cumulative plastic strain), flow rule
+void DruckerPragerCutMat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp, const FloatArray &stress, const FloatArray &dlambda, const FloatArray &dplasticStrain, const IntArray &activeConditionMap){
+    answer.resize(4);
+    answer.zero();
+    
+    if( dlambda.at(4) > 0. ){
+        answer.at(4) = dlambda.at(4) * sqrt( 1./3. + 2*alphaPsi*alphaPsi );
+    }
+}
+
+// Computes the derivative of yield/loading function with respect to kappa_1, kappa_2 etc.
+void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables){
+    answer.resize( 1 );//1 hardening variable for DP model - kappa
+    answer.zero();
+    
+    if (isurf == 4){
+        answer.at(1) = this->H;
+    }
+}
+
+//necesarry only for mpm_ClosestPoint
+//Computes second mixed derivative of loading function with respect to stress and hardening vars. 
+void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables){
+    gradientMatrix.resize(6, 1);//six stresses and one kappa
+    gradientMatrix.zero();
+}
+
+// computes dKappa_i/dsig_j gradient matrix
+void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda){
+    answer.resize(1, 6);
+    answer.zero();
+}
+
+// computes dKappa_i/dLambda_j for one surface
+void DruckerPragerCutMat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda){
+    int indx;
+    answer.resize(1, actSurf);//actSurf = number of active surfaces
+    answer.zero();
+    
+     if ( ( indx = activeConditionMap.at(4) ) ) {
+        if ( dlambda.at(4) > 0. ) {
+            answer.at(1, indx) = sqrt( 1./3. + 2*alphaPsi*alphaPsi );
         }
-
-        // assemble the stress from the elastically computed volumetric part
-        // and scaled deviatoric part
-
-        double stressVol = 3. * K * elStrainVol;
-        trialStressDev.computeDeviatoricVolumetricSum(fullStress, stressVol);
-    }
-
-    // store the effective stress in status
-    status->letTempEffectiveStressBe(fullStress);
-    // store the plastic strain and cumulative plastic strain
-    status->letTempPlasticStrainBe(plStrain);
-    status->setTempCumulativePlasticStrain(kappa);
-}
-
-
-double
-DruckerPragerCutMat :: computeDamageParam(double tempKappa)
-{
-    double tempDam;
-    if ( tempKappa > 0. ) {
-        tempDam = omegaCrit * ( 1.0 - exp(-a * tempKappa) );
-    } else {
-        tempDam = 0.;
-    }
-
-    return tempDam;
-}
-
-double
-DruckerPragerCutMat :: computeDamageParamPrime(double tempKappa)
-{
-    double tempDam;
-    if ( tempKappa >= 0. ) {
-        tempDam = omegaCrit * a * exp(-a * tempKappa);
-    } else {
-        tempDam = 0.;
-    }
-
-    return tempDam;
-}
-
-
-
-double
-DruckerPragerCutMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
-{
-    double tempKappa, dam;
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    dam = status->giveDamage();
-    computeCumPlastStrain(tempKappa, gp, atTime);
-    double tempDam = computeDamageParam(tempKappa);
-    if ( dam > tempDam ) {
-        tempDam = dam;
-    }
-
-    return tempDam;
-}
-
-
-void DruckerPragerCutMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
-{
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    tempKappa = status->giveTempCumulativePlasticStrain();
-}
-
-void
-DruckerPragerCutMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
-{
-    MaterialMode mMode = gp->giveMaterialMode();
-
-    if ( mMode == _3dMat ) {
-        give3dSSMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
-    } else {
-        OOFEM_ERROR("DruckerPragerCutMat::give3dMaterialStiffnessMatrix : unknown material response mode");
     }
 }
 
-
-// returns the consistent (algorithmic) tangent stiffness matrix
-void
-DruckerPragerCutMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
-                                            MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *atTime)
-{
-    // start from the elastic stiffness
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-    if ( mode != TangentStiffness ) {
-        return;
-    }
-
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    double kappa = status->giveCumulativePlasticStrain();
-    double tempKappa = status->giveTempCumulativePlasticStrain();
-    // increment of cumulative plastic strain as an indicator of plastic loading
-    double dKappa = tempKappa - kappa;
-
-    if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        return;
-    }
-
-    // === plastic loading ===
-
-    // yield stress at the beginning of the step
-    double tauY = tau0 + H * kappa;
-
-    // trial deviatoric stress and its norm
-    StressVector trialStressDev(_3dMat);
-    double trialStressVol;
-    status->giveTrialStressVol(trialStressVol);
-    status->giveTrialStressDev(trialStressDev);
-    double trialS = trialStressDev.computeStressNorm();
-
-    // one correction term
-    FloatMatrix stiffnessCorrection(6, 6);
-    stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
-    double factor = -2. * sqrt(6.) * G * G / trialS;
-    double factor1 = factor * tauY / ( ( H + 3. * G ) * trialS * trialS );
-    stiffnessCorrection.times(factor1);
-    answer.add(stiffnessCorrection);
-
-    // another correction term
-    stiffnessCorrection.bePinvID();
-    double factor2 = factor * dKappa;
-    stiffnessCorrection.times(factor2);
-    answer.add(stiffnessCorrection);
-
-    //influence of damage
-    //    double omega = computeDamageParam(tempKappa);
-    double omega = status->giveTempDamage();
-    answer.times(1. - omega);
-    FloatArray effStress;
-    status->giveTempEffectiveStress(effStress);
-    double omegaPrime = computeDamageParamPrime(tempKappa);
-    double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
-    stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
-    stiffnessCorrection.times(scalar);
-    answer.add(stiffnessCorrection);
-}
-
-void
-DruckerPragerCutMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime)
-{
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-    FloatArray stressVector;
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    double kappa = status->giveCumulativePlasticStrain();
-    // increment of cumulative plastic strain as an indicator of plastic loading
-    double tempKappa = status->giveTempCumulativePlasticStrain();
-    double omega = status->giveTempDamage();
-    double E = answer.at(1, 1);
-    if ( mode != TangentStiffness ) {
-        return;
-    }
-
-
-    if ( ( tempKappa - kappa ) <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        answer.times(1 - omega);
-        return;
-    }
-
-
-    // === plastic loading ===
-    status->giveTempEffectiveStress(stressVector);
-    double stress = stressVector.at(1);
-    answer.resize(1, 1);
-    answer.at(1, 1) = ( 1 - omega ) * E * H / ( E + H ) - computeDamageParamPrime(tempKappa) * E / ( E + H ) * stress * signum(stress);
-}
-
-void
-DruckerPragerCutMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *atTime)
-{
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-    if ( mode != TangentStiffness ) {
-        return;
-    }
-
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(gp);
-    double tempKappa = status->giveTempCumulativePlasticStrain();
-    double kappa = status->giveCumulativePlasticStrain();
-    double dKappa = tempKappa - kappa;
-
-    if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        return;
-    }
-
-    // === plastic loading ===
-    // yield stress at the beginning of the step
-    double tauY = tau0 + H * kappa;
-
-    // trial deviatoric stress and its norm
-    StressVector trialStressDev(_PlaneStrain);
-    double trialStressVol;
-    status->giveTrialStressVol(trialStressVol);
-    status->giveTrialStressDev(trialStressDev);
-    double trialS = trialStressDev.computeStressNorm();
-
-    // one correction term
-    FloatMatrix stiffnessCorrection(4, 4);
-    stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
-    double factor = -2. * sqrt(6.) * G * G / trialS;
-    double factor1 = factor * tauY / ( ( H + 3. * G ) * trialS * trialS );
-    stiffnessCorrection.times(factor1);
-    answer.add(stiffnessCorrection);
-
-    // another correction term
-    stiffnessCorrection.resize(4, 4);
-    stiffnessCorrection.zero();
-    stiffnessCorrection.at(1, 1) = stiffnessCorrection.at(2, 2) = stiffnessCorrection.at(3, 3) = 2. / 3.;
-    stiffnessCorrection.at(1, 2) = stiffnessCorrection.at(1, 3) = stiffnessCorrection.at(2, 1) = -1. / 3.;
-    stiffnessCorrection.at(2, 3) = stiffnessCorrection.at(3, 1) = stiffnessCorrection.at(3, 2) = -1. / 3.;
-    stiffnessCorrection.at(4, 4) = 0.5;
-    double factor2 = factor * dKappa;
-    stiffnessCorrection.times(factor2);
-    answer.add(stiffnessCorrection);
-
-    //influence of damage
-    double omega = status->giveTempDamage();
-    answer.times(1. - omega);
-    FloatArray effStress;
-    status->giveTempEffectiveStress(effStress);
-    double omegaPrime = computeDamageParamPrime(tempKappa);
-    double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
-    stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
-    stiffnessCorrection.times(scalar);
-    answer.add(stiffnessCorrection);
-}
-
-#ifdef __OOFEG
-#endif
 
 int
 DruckerPragerCutMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    DruckerPragerCutMatStatus *status = ( DruckerPragerCutMatStatus * ) this->giveStatus(aGaussPoint);
-    if ( type == IST_PlasticStrainTensor ) {
-        answer  = * status->givePlasDef();
-        return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
+    //MaterialStatus *status = this->giveStatus(aGaussPoint);
+    if ( ( type == IST_DamageScalar ) || (type == IST_DamageTensor ) ) {
         answer.resize(1);
-        answer.at(1) = status->giveCumulativePlasticStrain();
-        return 1;
-    } else if ( ( type == IST_DamageScalar ) || (type == IST_DamageTensor ) ) {
-        answer.resize(1);
-        answer.at(1) = status->giveDamage();
+        answer.zero();
+        //answer.at(1) = status->giveDamage();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return MPlasticMaterial2 :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
 
 
 
@@ -570,158 +368,4 @@ DruckerPragerCutMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
     }
 }
 
-
-
-
-
-
-//=============================================================================
-
-DruckerPragerCutMatStatus :: DruckerPragerCutMatStatus (int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), plasticStrain(), tempPlasticStrain(), trialStressD()
-{
-    damage = tempDamage = 0.;
-    kappa = tempKappa = 0.;
-    effStress.resize(6);
-    tempEffStress.resize(6);
-}
-
-DruckerPragerCutMatStatus :: ~DruckerPragerCutMatStatus ()
-{ }
-
-void
-DruckerPragerCutMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
-{
-    //int i, n;
-
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
-
-    fprintf(file, "status { ");
-    /*
-     * // this would not be correct, since the status is already updated and kappa is now the "final" value
-     * if ( tempKappa > kappa ) {
-     * fprintf(file, " Yielding, ");
-     * } else {
-     * fprintf(file, " Unloading, ");
-     * }
-     */
-
-    /*********************************************************************************/
-
-    fprintf(file, "damage %.4e", tempDamage);
-
-    /********************************************************************************/
-    /*
-     * // print the plastic strain
-     *  n = plasticStrain.giveSize();
-     *  fprintf(file, " plastic_strains ");
-     *  for ( i = 1; i <= n; i++ ) {
-     *      fprintf( file, " % .4e", plasticStrain.at(i) );
-     *  }
-     */
-    // print the cumulative plastic strain
-    fprintf(file, ", kappa ");
-    fprintf(file, " % .4e", kappa);
-
-    fprintf(file, "}\n");
- 
-    fprintf(file, "}\n");
-}
-
-
-// initializes temporary variables based on their values at the previous equlibrium state
-void DruckerPragerCutMatStatus :: initTempStatus()
-{
-    StructuralMaterialStatus :: initTempStatus();
-
-    if ( plasticStrain.giveSize() == 0 ) {
-        plasticStrain.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
-        plasticStrain.zero();
-    }
-
-    tempDamage = damage;
-    tempPlasticStrain = plasticStrain;
-    tempKappa = kappa;
-    trialStressD.resize(0); // to indicate that it is not defined yet
-}
-
-
-// updates internal variables when equilibrium is reached
-void
-DruckerPragerCutMatStatus :: updateYourself(TimeStep *atTime)
-{
-    StructuralMaterialStatus :: updateYourself(atTime);
-
-    plasticStrain = tempPlasticStrain;
-    kappa = tempKappa;
-    damage = tempDamage;
-    trialStressD.resize(0); // to indicate that it is not defined any more
-
-}
-
-
-// saves full information stored in this status
-// temporary variables are NOT stored
-contextIOResultType
-DruckerPragerCutMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
-{
-    contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
-
-    // write plastic strain (vector)
-    if ( ( iores = plasticStrain.storeYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write cumulative plastic strain (scalar)
-    if ( !stream->write(& kappa, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    // write damage (scalar)
-    if ( !stream->write(& damage, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    return CIO_OK;
-}
-
-
-
-contextIOResultType
-DruckerPragerCutMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
-{
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read plastic strain (vector)
-    if ( ( iores = plasticStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read cumulative plastic strain (scalar)
-    if ( !stream->read(& kappa, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    // read damage (scalar)
-    if ( !stream->read(& damage, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    return CIO_OK; // return succes
-}
 } // end namespace oofem

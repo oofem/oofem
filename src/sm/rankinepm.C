@@ -86,13 +86,14 @@ RankinePlasticMaterial :: computeStressGradientVector(FloatArray &answer, functT
     // compute principal stresses and their directions
     this->computePrincipalValDir(princStress, t, stressVector, principal_stress);
 
+    //derivation through stress transformation. The transformation matrix is stored in t.
     answer.resize(6);
-    answer.at(1) = t.at(1, isurf) * t.at(1, isurf);
-    answer.at(2) = t.at(2, isurf) * t.at(2, isurf);
-    answer.at(3) = t.at(3, isurf) * t.at(3, isurf);
-    answer.at(4) = t.at(2, isurf) * t.at(3, isurf);
-    answer.at(5) = t.at(1, isurf) * t.at(3, isurf);
-    answer.at(6) = t.at(1, isurf) * t.at(2, isurf);
+    answer.at(1) = t.at(1, isurf) * t.at(1, isurf);//xx = 11
+    answer.at(2) = t.at(2, isurf) * t.at(2, isurf);//yy = 22
+    answer.at(3) = t.at(3, isurf) * t.at(3, isurf);//zz = 33
+    answer.at(4) = t.at(2, isurf) * t.at(3, isurf);//yz = 23
+    answer.at(5) = t.at(1, isurf) * t.at(3, isurf);//xz = 13
+    answer.at(6) = t.at(1, isurf) * t.at(2, isurf);//xy = 12
 
     //crossSection->giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }

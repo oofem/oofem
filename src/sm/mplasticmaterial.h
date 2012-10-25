@@ -259,7 +259,7 @@ protected:
     //virtual void compute3dElasticModuli(FloatMatrix& answer, GaussPoint *gp,
     //                                    TimeStep *atTime) = 0;
 
-    // next functions overloaded rom structural material level
+    // next functions overloaded from structural material level
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
                                           MatResponseForm, MatResponseMode,
                                           GaussPoint * gp,
