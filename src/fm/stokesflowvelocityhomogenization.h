@@ -33,8 +33,8 @@
  */
 
 
-#ifndef STOKESFLOWCARL_H_
-#define STOKESFLOWCARL_H_
+#ifndef stokesflowvelocityhomogenization_h
+#define stokesflowvelocityhomogenization_h
 
 #include "stokesflow.h"
 #include "rveengngmodel.h"
@@ -45,53 +45,44 @@
 namespace oofem
 {
 /**
- * Class for using the stokesflow class as an rve/constitutive model.
+ * Class for using the stokes flow class as an rve/constitutive model.
  *
  * @author Carl Sandström
  *
- * */
+ */
 class StokesFlowVelocityHomogenization : public StokesFlow, public rveEngngModel
 {
 protected:
     double areaOfDomain;
     double areaOfRVE;
-public:
 
+public:
     StokesFlowVelocityHomogenization(int i, EngngModel *_master = NULL);
     virtual ~StokesFlowVelocityHomogenization();
 
-    void solveYourselfAt(TimeStep *tStep);
+    virtual void solveYourselfAt(TimeStep *tStep);
 
     void handlePrescribedValues();
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
 
     /** Compute area of domain (excludes holes)*/
     double giveAreaOfDomain();
 
     /** Compute area of domain (includes holes)*/
     double giveAreaOfRVE();
-    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
 
-    const char *giveClassName() const { return "StokesFlowVelocityHomogenization"; }
-    classType giveClassID() const { return StokesFlowVelocityHomogenizationClass; }
+    virtual const char *giveClassName() const { return "StokesFlowVelocityHomogenization"; }
+    virtual classType giveClassID() const { return StokesFlowVelocityHomogenizationClass; }
 
     void updateC();
 
     void computeTangent(FloatMatrix &answer, TimeStep *atTime);
-    virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
 
     virtual void rveSetBoundaryConditions(int type, FloatArray value);
     virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *atTime);
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
-#endif
-
 private:
-
     /** Computes the mean velocity and pressure gradient */
     void getMeans(FloatArray &gradP, FloatArray &v, TimeStep *atTime);
 };
 }
-#endif /* STOKESFLOWCARL_H_ */
+#endif // stokesflowvelocityhomogenization_h
