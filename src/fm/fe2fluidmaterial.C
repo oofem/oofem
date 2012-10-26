@@ -201,13 +201,15 @@ void FE2FluidMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, M
         dvol.at(1) = (epspvol11 - epspvol)/h;
         dvol.at(2) = (epspvol22 - epspvol)/h;
         dvol.at(3) = (epspvol12 - epspvol)/h;
+        dvol.at(1) += 1.0;
+        dvol.at(2) += 1.0;
 
         printf("Analytical volumetric deviatoric tangent = "); answer.printYourself();
         printf("Numerical volumetric deviatoric tangent = "); dvol.printYourself();
         dvol.subtract(answer);
         double norm = dvol.computeNorm();
-        if (norm > answer.computeNorm()*1e-3 && norm > 0.0) {
-            OOFEM_WARNING("Error in volumetric deviatoric tangent");
+        if (norm > answer.computeNorm()*DEBUG_ERR && norm > 0.0) {
+            OOFEM_ERROR("Error in volumetric deviatoric tangent");
         }
 #endif
     } else {
@@ -308,15 +310,6 @@ int FE2FluidMaterial :: checkConsistency()
 FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile) :
             FluidDynamicMaterialStatus(n, d, gp)
 {
-//     MaterialMode mmode = gp->giveMaterialMode();
-//     int size = 0;
-//
-//     if (mmode == _2dFlow) {
-//         size = 3;
-//     } else {
-//         OOFEM_ERROR("FE2FluidMaterialStatus: unsupported material mode");
-//     }
-
     //this->strainVector.resize(size);
     //this->strainVector.zero();
     //this->tempStrainVector = this->strainVector;

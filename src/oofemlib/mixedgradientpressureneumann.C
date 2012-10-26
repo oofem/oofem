@@ -647,6 +647,7 @@ void MixedGradientPressureNeumann :: computeTangents(
         }
     }
     e_p /= rve_size;
+    e_d.times(1./rve_size);
 
     // Now we need to express the tangents in the normal cartesian coordinate system (as opposed to the deviatoric base we use during computations
     Cp = e_p; // Scalar components are of course the same

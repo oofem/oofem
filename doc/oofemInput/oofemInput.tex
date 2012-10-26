@@ -2265,7 +2265,7 @@ It is also convenient to use when one wants to test a arbitrary specimen for she
 \item Mixed prescribed gradient / pressure boundary condition (Active Dirichlet type)
 
   \begin{record}[0.9\textwidth]
-    \recentry{\entKeywordInst{MixedGradientPressure}}{\field{devGradient}{ra}}
+    \recentry{\entKeywordInst{MixedGradientPressureDirichlet}}{\field{devGradient}{ra}}
     \recentry{}{\field{pressure}{rn}}
     \recentry{}{\optField{cCoords}{ra}}
   \end{record}
@@ -2278,6 +2278,20 @@ This unknown is in a way related to the applied pressure.
 This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. 
 It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
 
+\item Mixed prescribed gradient / pressure boundary condition (Neumann type)
+
+  \begin{record}[0.9\textwidth]
+    \recentry{\entKeywordInst{MixedGradientPressureNeumann}}{\field{devGradient}{ra}}
+    \recentry{}{\field{pressure}{rn}}
+    \recentry{}{\field{elementsides}{ia}}
+  \end{record}
+
+  Prescribes a constant (unknown) stress tensor along the specified boundaries.
+Additional unknowns appears, $\boldsymbol{\sigma}_{\mathrm{dev}}$, which is handled by the boundary condition itself (no control from the input file).
+The input devGradient is weakly fulfilled (homogenized over the elementsides). As with the the Dirichlet type, the volumetric gradient is free.
+This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. In that case, the element sides should cover the entire RVE boundary.
+It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
+Symmetry is not assumed, so rigid body rotations are removed, but translations need to be prescribed separately.
 
 \item Nodal fluxes (loads)
 
