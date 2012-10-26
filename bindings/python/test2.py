@@ -12,6 +12,7 @@ problem = oofemlib.linearStatic(nSteps=3, outFile="test2.out")
 # domain (if no engngModel specified to domain, it is asigned to the last one created)
 domain = oofemlib.domain(1, 1, problem, oofemlib.domainType._2dBeamMode, tstep_all=True, dofman_all=True, element_all=True)
 problem.setDomain(1, domain)
+vtkxmlModule = oofemlib.vtkxml(1,problem,tstep_all=True,vars=[1,4],primvars=[1])
 
 
 # time functions (time functions parameter f(t) has to be written as f_t - due to the parenthesis, otherwise all kw keys match oofem input file ones)

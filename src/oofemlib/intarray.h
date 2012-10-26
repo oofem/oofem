@@ -341,7 +341,6 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__(int i, int val) { this->at(i+1) = val; }
     int __getitem__(int i) { return this->at(i+1); }
-    IntArray copy() { IntArray result = *this; return result; }
     void beCopyOf(IntArray &src) { this->operator=(src); }
 #endif
 };

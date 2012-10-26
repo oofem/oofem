@@ -1117,6 +1117,15 @@ enum InputFieldType {
     IFT_LatticeDamage2d_ec,
     IFT_LatticeDamage2d_paramDuct,
 
+	 IFT_DustMaterial_alpha,
+	 IFT_DustMaterial_beta,
+	 IFT_DustMaterial_lambda,
+	 IFT_DustMaterial_theta,
+	 IFT_DustMaterial_ft,
+	 IFT_DustMaterial_hardeningType,
+	 IFT_DustMaterial_mHard,
+	 IFT_DustMaterial_rEllipse,
+
     IFT_LsMasterMat_slaveMat,
 
     IFT_ConcreteDPMnlMaterial_r,

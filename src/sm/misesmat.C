@@ -57,7 +57,9 @@ MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
 
 // destructor
 MisesMat :: ~MisesMat()
-{ }
+{
+    delete linearElasticMaterial;
+}
 
 // specifies whether a given material mode is supported by this model
 int

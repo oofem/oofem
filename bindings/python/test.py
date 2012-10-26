@@ -11,12 +11,16 @@ a[0]=10.0;
 print a[1], a[2];
 a.printYourself();
 
-c = oofemlib.FloatMatrix(2,2);
-c.beUnitMatrix();
-c[0,1]=1.0;
+c = oofemlib.FloatArray(a)
+print c[1], c[2];
 c.printYourself();
 
-b.beProductOf(c,a);
+d = oofemlib.FloatMatrix(2,2);
+d.beUnitMatrix();
+d[0,1]=1.0;
+d.printYourself();
+
+b.beProductOf(d,a);
 b.printYourself();
 
 b.resize(4);

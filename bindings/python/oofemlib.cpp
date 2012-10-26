@@ -56,6 +56,7 @@ namespace bp = boost::python;
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
+#include "usrdefsub.h"
 
 
 namespace oofem {
@@ -127,7 +128,6 @@ void pyclass_FloatArray()
         .def("__getitem__", &FloatArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
         .def("__setitem__", &FloatArray::__setitem__, "Coefficient access function. Provides 0-based indexing access")
         .def("beCopyOf", &FloatArray::beCopyOf, "Modifies receiver to become copy of given parameter")
-        .def("copy", &FloatArray::copy, return_value_policy<return_by_value>(), "returns deep copy or receiver")
         ;
 }
 
@@ -180,7 +180,6 @@ void pyclass_FloatMatrix()
         .def("__setitem__", &FloatMatrix::__setitem__, "Coefficient access function. Implements 0-based indexing")
         .def("__getitem__", &FloatMatrix::__getitem__, "Coefficient access function. Implements 0-based indexing")
         .def("beCopyOf", &FloatMatrix::beCopyOf, "Modifies receiver to become copy of given parameter")
-        .def("copy", &FloatMatrix::copy, return_value_policy<return_by_value>(), "returns deep copy or receiver")
         ;
 }
 
@@ -208,7 +207,6 @@ void pyclass_IntArray()
         .def("__getitem__", &IntArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
         .def("__setitem__", &IntArray::__setitem__, "Coefficient access function. Provides 0-based indexing access")
         .def("beCopyOf", &IntArray::beCopyOf, "Modifies receiver to become copy of given parameter")
-        .def("copy", &IntArray::copy, return_value_policy<return_by_value>(), "returns deep copy or receiver")
         ;
 }
 
@@ -1227,7 +1225,8 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(dict &kw) {
         "  if key.lower()=='number' or key.lower()=='domain': continue\n" // do not include "number" and "domain" kws
         "  if key=='f_t': key='f(t)'\n" // handle f(t) loadTimeFunction field name
         "  ret += ' %s'%key\n" // add key
-        "  if isinstance(val,(int,float,str)): ret += ' %s'%val\n" // add val if it is int, float or str
+        "  if val is True: pass\n" // e.g. tstep_all=True will produce only 'step_all'
+        "  elif isinstance(val,(int,float,str)): ret += ' %s'%val\n" // add val if it is int, float or str
         "  elif isinstance(val,(list,tuple)):\n" // if val is tuple or list
         "    ret += ' %d'%len(val)\n" // add its length first
         "    for v in val:\n" // and then its values
@@ -1494,6 +1493,28 @@ object peakFunction(tuple args, dict kw) { return CreateLoadTimeFunctionOfType("
 
 
 
+/*****************************************************
+* ExportModule
+*****************************************************/
+object exportModule(tuple args, dict kw) {
+    string aClass = extract<string>(args[0])();
+    int number =     len(args)>1? extract<int>(args[1])() : 0;
+    EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
+    ExportModule *module = CreateUsrDefExportModuleOfType(aClass.c_str(),number,engngm);
+    if (module==NULL) { LOG_ERROR(oofem_errLogger,"exportModule: wrong input data"); }
+    OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    module->initializeFrom(&ir);
+    return object(ptr(module));
+}
+
+object CreateExportModuleOfType(const char* type, tuple args, dict kw) {
+    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+    return exportModule(args, kw);
+}
+object vtkxml(tuple args, dict kw) { return CreateExportModuleOfType("vtkxml",args,kw); }
+
+
+
 
 
 
@@ -1592,5 +1613,7 @@ BOOST_PYTHON_MODULE (oofemlib)
     def("loadTimeFunction", raw_function(loadTimeFunction,1));
     def("peakFunction", raw_function(peakFunction,0));
 
+    def("exportModule", raw_function(exportModule,1));
+    def("vtkxml", raw_function(vtkxml,0));
 }
 } // end namespace oofem

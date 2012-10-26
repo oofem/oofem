@@ -315,6 +315,7 @@ enum classType {
     LatticeDamage2dClass,
     IsoInterfaceDamageMaterialClass,
     CebFipSlip90MaterialClass,
+	 DustMaterialClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -374,6 +375,7 @@ enum classType {
     FE2FluidMaterialStatusClass,
     ConcreteDPM2StatusClass,
     LatticeDamage2dStatusClass,
+	 DustMaterialStatusClass,
 
 
     FluidDynamicMaterialClass,

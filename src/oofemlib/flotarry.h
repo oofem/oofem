@@ -414,7 +414,6 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__(int i, double val) { this->at(i+1) = val; }
     double __getitem__(int i) { return this->at(i+1); }
-    FloatArray copy() { FloatArray result = *this; return result; }
     void beCopyOf(FloatArray &src) { this->operator=(src); }
 #endif
 };
