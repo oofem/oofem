@@ -91,10 +91,10 @@ public:
     enum ChildStatus { CS_ChildFound, CS_NoChild };
 
     /// Constructor.
-    OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double size);
+    OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth);
     /// Destructor.
     ~OctantRec();
-
+    
     /// @return Reference to parent; NULL if root.
     OctantRec *giveParent() { return this->parent; }
     /**
@@ -170,6 +170,8 @@ public:
         if ( nodeList ) { delete nodeList; }
         nodeList = NULL;
     }
+    /// Recursively prints structure.
+    void printYourself();
 };
 
 

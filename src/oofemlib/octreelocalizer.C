@@ -180,9 +180,9 @@ OctantRec :: divideLocally(int level, const IntArray &octantMask)
         for ( int i = 0; i <= octantMask.at(1); i++ ) {
             for ( int j = 0; j <= octantMask.at(2); j++ ) {
                 for ( int k = 0; k <= octantMask.at(3); k++ ) {
-                    childOrigin.at(1) = this->origin.at(1) + (i - 0.5) * this->halfWidth * 0.5 * octantMask.at(1);
-                    childOrigin.at(2) = this->origin.at(2) + (j - 0.5) * this->halfWidth * 0.5 * octantMask.at(2);
-                    childOrigin.at(3) = this->origin.at(3) + (k - 0.5) * this->halfWidth * 0.5 * octantMask.at(3);
+                    childOrigin.at(1) = this->origin.at(1) + (i - 0.5) * this->halfWidth * octantMask.at(1);
+                    childOrigin.at(2) = this->origin.at(2) + (j - 0.5) * this->halfWidth * octantMask.at(2);
+                    childOrigin.at(3) = this->origin.at(3) + (k - 0.5) * this->halfWidth * octantMask.at(3);
                     this->child [ i ] [ j ] [ k ] = new OctantRec(localizer, this, childOrigin, this->halfWidth * 0.5);
                 }
             }
@@ -209,15 +209,51 @@ OctantRec :: BoundingBoxStatus
 OctantRec :: testBoundingBox(const FloatArray &coords, double radius)
 {
     int size = coords.giveSize();
+    double bb0, bb1;
+    double oct0, oct1;
+    bool bbInside = true;
 
     for ( int i = 1; i <= size; i++ ) {
         if ( localizer->giveOctreeMaskValue(i) ) {
-            if ( (this->origin.at(i) - this->halfWidth ) > ( coords.at(i) - radius )  ||  ( this->origin.at(i) + this->halfWidth ) < ( coords.at(i) + radius ) ) {
-                return BBS_InsideCell;
+            bb0 = coords.at(i) - radius;
+            bb1 = coords.at(i) + radius;
+            oct0 = this->origin.at(i) - this->halfWidth;
+            oct1 = this->origin.at(i) + this->halfWidth;
+            
+            if ( oct1 < bb0 || oct0 > bb1 ) { // Then its definitely outside, no need to go on
+                return BBS_OutsideCell;
+            }
+            // Other cases; We first check if bb is completely inside the cell, in every spatial dimension
+            bbInside = bbInside && oct0 < bb0 && oct1 > bb1;
+        }
+    }
+    return bbInside ? BBS_InsideCell : BBS_ContainsCell;
+}
+
+
+void OctantRec :: printYourself()
+{
+    if (this->isTerminalOctant()) {
+        printf(" center = {%e, %e, %e} size = %f, nodes = %d, elem_ips = %d\n", 
+                this->origin.at(1), this->origin.at(2), this->origin.at(3), 
+                this->halfWidth*2., this->nodeList->size(), this->elementIPList->size());
+    } else {
+        if (this->depth == 0) {
+            printf("*ROOTCELL*");
+        }
+        printf("\n");
+        for ( int i = 0; i <= 1; i++ ) {
+            for ( int j = 0; j <= 1; j++ ) {
+                for ( int k = 0; k <= 1; k++ ) {
+                    if ( this->child [ i ] [ j ] [ k ] ) {
+                        for (int q = 0; q < this->depth - 1; q++) printf("  ");
+                        printf("+");
+                        this->child [ i ] [ j ] [ k ]->printYourself();
+                    }
+                }
             }
         }
     }
-    return BBS_ContainsCell;
 }
 
 
@@ -303,7 +339,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     FloatArray center = minc;
     center.add(maxc);
     center.times(0.5);
-    this->rootCell = new OctantRec(this, NULL, center, rootSize);
+    this->rootCell = new OctantRec(this, NULL, center, rootSize*0.5);
 
     // Build octree tree
     if ( nnode > OCTREE_MAX_NODES_LIMIT ) {
@@ -1155,7 +1191,6 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
         double currDist;
         elementContainerType :: iterator pos;
         elementContainerType *elementList;
-        //FloatArray *ipCoords;
         Element *ielem;
         IntegrationRule *iRule;
         FloatArray jGpCoords;
@@ -1172,8 +1207,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                 // ask for element
                 ielem = domain->giveElement(* pos);
 
-                /* HUHU CHEATING
-                 * #ifdef __PARALLEL_MODE
+                /* #ifdef __PARALLEL_MODE
                  *       if(ielem -> giveParallelMode() == Element_remote)continue;
                  *#endif
                  */
