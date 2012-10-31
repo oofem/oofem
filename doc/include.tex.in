@@ -1,0 +1,3 @@
+\newcommand{\oofem}{\htmladdnormallink{OOFEM}{@bp_HOMEPAGE@}\ }
+\newcommand{\oofemlnk}[1]{\htmladdnormallink{#1}{@bp_HOMEPAGE@}\ }
+\newcommand{\bp}{\htmladdnormallink{Bo\v{r}ek Patz\'{a}k}{@bp_HOMEPAGE@}}
