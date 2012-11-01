@@ -168,8 +168,11 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dNv(12);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 12);
+    B.zero();
+    
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    
     FloatArray momentum(12), conservation(3);
     momentum.zero();
     conservation.zero();
