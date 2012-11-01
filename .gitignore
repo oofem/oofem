@@ -1,0 +1,9 @@
+*.[oa]      # ignore any .o and .a files
+*~          # ignore any file ending with tilde
+targets/    # ignore all files under targets dir
+
+makefile
+elixirtest.c
+configure
+config.log
+config.status
