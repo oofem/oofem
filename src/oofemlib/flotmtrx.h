@@ -41,12 +41,15 @@
 #ifndef flotmtrx_h
 #define flotmtrx_h
 
-#include "compiler.h"
 #include "matrix.h"
-#include "freestor.h"
-
 #include "contextioresulttype.h"
 #include "contextmode.h"
+
+#ifdef BOOST_PYTHON
+namespace boost { namespace python { namespace api {
+class object;
+}; }; };
+#endif
 
 namespace oofem {
 class FloatArray;
@@ -92,15 +95,9 @@ public:
      * @param n Number of rows.
      * @param m Requested number of columns.
      */
-    FloatMatrix(int n, int m) : Matrix(n, m) {
-        allocatedSize = n * m;
-        values = allocDouble(n * m);
-    }
+    FloatMatrix(int n, int m);
     /// Creates zero sized matrix.
-    FloatMatrix() : Matrix(0, 0) {
-        allocatedSize = 0;
-        values = NULL;
-    }
+    FloatMatrix();
     /**
      * Constructor. Creates float matrix from float vector. Vector may be stored row wise
      * or column wise, depending on second parameter.
@@ -113,7 +110,7 @@ public:
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &);
     /// Destructor.
-    virtual ~FloatMatrix() { if ( values ) { freeDouble(values); } }
+    virtual ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix & operator=(const FloatMatrix &);
 
@@ -474,14 +471,10 @@ public:
 #endif
 
 #ifdef BOOST_PYTHON
-    void __setitem__ (object t, double val) {
-        this->at(extract<int>(t[0])+1, extract<int>(t[1])+1 ) = val;}
-    double __getitem__ (object t) {
-        return this->at(extract<int>(t[0])+1, extract<int>(t[1])+1 );}
+    void __setitem__ (boost::python::api::object t, double val);
+    double __getitem__ (boost::python::api::object t);
     void beCopyOf(FloatMatrix &src) { this->operator=(src); }
 #endif
-
-protected:
 };
 } // end namespace oofem
 #endif // flotmtrx_h

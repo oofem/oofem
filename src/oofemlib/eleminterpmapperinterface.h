@@ -39,6 +39,7 @@
 #include "interface.h"
 #include "flotarry.h"
 #include "intarray.h"
+#include "error.h"
 
 namespace oofem {
 

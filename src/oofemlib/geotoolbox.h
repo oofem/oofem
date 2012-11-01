@@ -37,6 +37,7 @@
 
 #ifndef __MAKEDEPEND
  #include <list>
+ #include <cstdlib>
 #endif
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

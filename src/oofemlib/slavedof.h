@@ -98,11 +98,7 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    virtual int __giveEquationNumber() const {
-        _error("giveEquationNumber: undefined");
-        return 0;
-    }
-
+    virtual int __giveEquationNumber() const;
     /**
      * Returns equation number corresponding to receiver.
      * Rigid Arm Slave have equation number undefined.
@@ -110,10 +106,7 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    virtual int __givePrescribedEquationNumber() {
-        _error("givePrescribedEquationNumber: undefined");
-        return 0;
-    }
+    virtual int __givePrescribedEquationNumber();
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */

@@ -41,8 +41,6 @@
 #ifndef matrix_h
 #define matrix_h
 
-#include "logger.h"
-
 namespace oofem {
 
 /**
@@ -88,7 +86,7 @@ public:
     /// Tests for empty matrix.
     bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
     /// Prints receiver on stdout. Useful mainly for debugging.
-    virtual void printYourself() const { OOFEM_LOG_INFO("Matrix :: printYourself - Not implemented"); }
+    virtual void printYourself() const;
 };
 } // end namespace oofem
 #endif // matrix_h

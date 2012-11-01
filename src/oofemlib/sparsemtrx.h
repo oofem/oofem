@@ -40,6 +40,7 @@
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "equationid.h"
+#include "error.h"
 #include "sparsemtrxtype.h"
 #include "unknownnumberingscheme.h"
 #include "iml/iml.h"
