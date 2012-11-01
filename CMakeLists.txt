@@ -44,6 +44,7 @@ set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 ######################## Options ######################################
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
+option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
 # Parallell stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -258,6 +259,17 @@ if (USE_SPOOLES)
     set (MODULE_LIST ${MODULE_LIST} SPOOLES)
 endif (USE_SPOOLES)
 
+if (USE_PYTHON_BINDINGS)
+    find_package(Boost COMPONENTS python REQUIRED)
+    find_package(PythonLibs REQUIRED)
+    include_directories (${PYTHON_INCLUDE_DIRS})
+    include_directories (${Boost_INCLUDE_DIRS})
+    include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
+    set (LIBS ${LIBS} oofempy)
+    set (MODULE_LIST ${MODULE_LIST} Python)
+    add_definitions(-DBOOST_PYTHON)
+endif ()
+
 #######################################################################
 ######################## Configuration ################################
 #######################################################################
@@ -304,24 +316,42 @@ endif (USE_TM)
 if (USE_FM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/fm")
 endif (USE_FM)
+if (USE_PYTHON_BINDINGS)
+    add_library(oofempy ${oofem_SOURCE_DIR}/bindings/python/oofemlib.cpp)
+endif ()
 
 # Main targets
-# There should probably be a library + main program.
-add_executable (oofem
-    ${oofem_SOURCE_DIR}/src/main/main.C
+add_library(liboofem
+    # These doesn't really belong in main;
     ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
     ${oofem_SOURCE_DIR}/src/main/classfactory.C
     )
-target_link_libraries (oofem ${LIBS})
-install(TARGETS oofem RUNTIME DESTINATION bin)
+target_link_libraries (liboofem ${LIBS} 
+    )
+if (USE_PYTHON_BINDINGS)
+    target_link_libraries (liboofem ${LIBS} ${PYTHON_LIBRARIES})
+    target_link_libraries (liboofem ${LIBS} ${Boost_LIBRARIES})
+endif ()
+set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
+
+add_executable (oofem
+    ${oofem_SOURCE_DIR}/src/main/main.C
+    )
+target_link_libraries (oofem ${LIBS} liboofem)
+
+install(TARGETS oofem
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    )
 
 if (USE_OOFEG)
     add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
-    target_link_libraries (oofeg ${LIBS})
-    install(TARGETS oofeg RUNTIME DESTINATION bin)
+    target_link_libraries (oofeg liboofem)
+    install(TARGETS oofeg 
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        )
 endif ()
-
-# With install paths
 
 #######################################################################
 ######################## Documentation ################################
