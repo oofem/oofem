@@ -85,6 +85,9 @@ protected:
     /// Yield function status indicator.
     int state_flag;
     int temp_state_flag;
+    
+    /// Isotropic damage variables
+    float damage, tempDamage;
 
     /// Consistency parameter values (needed for algorithmic stiffness).
     FloatArray gamma, tempGamma;
@@ -116,6 +119,10 @@ public:
     void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
     void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
     void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
+    
+    void letTempDamageBe(const double v) {tempDamage = v; }
+    double giveDamage() { return damage; }
+    double giveTempDamage() { return tempDamage; }
     
     int giveStateFlag() { return state_flag; }
     int giveTempStateFlag() { return temp_state_flag; }
@@ -207,6 +214,8 @@ public:
 
     virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
+
+    virtual double computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);

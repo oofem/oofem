@@ -1044,14 +1044,9 @@ The node numbering is anti-clockwise
 
 \elemkeyword{Tr1ht}\\
 \descitem{Parameters} none.\\
-\descitem{Unknowns}
-Single dof (T\_f temperature) is  required in each node.
-
-\descitem{Approximation} Linear approximation of temperature.
-
-\descitem{Integration}
-Integration using one point gauss integration formula.
-
+\descitem{Unknowns} Single dof (T\_f temperature) is  required in each node.\\
+\descitem{Approximation} Linear approximation of temperature.\\
+\descitem{Integration} Integration using one point gauss integration formula.\\
 \descitem{Loads} Body loads are supported. Boundary loads are
 supported and are computed  using numerical integration. The side numbering is
 following. Each i-th element side begins in i-th element node and
@@ -1075,7 +1070,24 @@ problems. The element description is
 similar to Tr1ht element, see section \ref{Tr1ht}.
 
 \subsection{3D Elements}
-\subsubsection{Brick1ht element}
+\subsubsection{Tetrah1ht - tetrahedral 3D element}
+Represents isoparametric four-node tetrahedral element. Each node has 1 degree of freedom.
+The same numbering convection is adopted as in mechanics, see Fig.~\ref{lintetrahedron_fig}.
+
+\elemkeyword{Tetrah1ht}\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Unknowns} Single dof (T\_f - temperature) is required in each node.\\
+\descitem{Approximation} Linear approximation of temperature using linear volume coordinates.\\
+\descitem{Integration}
+Integration using gauss integration formula
+in 1 (the default), or 4 integration points. The default number of
+integration point used can be overloaded using \param{NIP} parameter.\\
+\descitem{Loads} Body loads are supported. Boundary loads are
+supported and computed using numerical integration. The side and
+surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.
+
+
+\subsubsection{Brick1ht - hexahedral 3D element}
 \label{Brick1ht}
 Represents isoparametric eight-node brick/hexahedron finite element for
 heat transfer problems. Each node has 1 degrees of freedom.
@@ -1105,7 +1117,7 @@ integration point used can be overloaded using \param{NIP} parameter.
 supported and computed using numerical integration. The side and
 surface numbering is shown in fig. (\ref{Brick1htfig})).
 
-\subsubsection{Brick1hmt element}
+\subsubsection{Brick1hmt - hexahedral 3D element}
 Represents isoparametric eight-node quadrilateral finite element for
 heat and mass (one constituent) transfer problems. 
 Two dofs (T\_f - temperature and C\_1 - concentration) are required in
