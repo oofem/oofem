@@ -265,7 +265,6 @@ if (USE_PYTHON_BINDINGS)
     include_directories (${PYTHON_INCLUDE_DIRS})
     include_directories (${Boost_INCLUDE_DIRS})
     include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
-    set (LIBS ${LIBS} oofempy)
     set (MODULE_LIST ${MODULE_LIST} Python)
     add_definitions(-DBOOST_PYTHON)
 endif ()
