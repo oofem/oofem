@@ -313,7 +313,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             }
 
             // Reshape the vector
-            for ( int j = 0; j < 6; j++ ) {
+            for ( int j = 0; j < 3; j++ ) {
                 f(2 * j)     += N(j) * t(0) * dS;
                 f(2 * j + 1) += N(j) * t(1) * dS;
             }
