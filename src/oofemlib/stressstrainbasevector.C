@@ -51,7 +51,7 @@ StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, MaterialMode m) : FloatArray(src)
 {
     if ( this->giveReducedSize(m) != src.giveSize() ) {
-        OOFEM_ERROR("StressStrainBaseVector::StressStrainBaseVector: size mismatch");
+        OOFEM_ERROR4("StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), this->giveReducedSize(m));
     }
 
     this->mode = m;

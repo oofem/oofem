@@ -49,8 +49,8 @@ DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : MPlasticMaterial2
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 4;
-//     this->rmType = mpm_CuttingPlane;
-    this->rmType = mpm_ClosestPoint;
+    this->rmType = mpm_CuttingPlane;
+//     this->rmType = mpm_ClosestPoint;
     
     this->plType = nonassociatedPT;// Rankine associated, DP nonassociated
     
@@ -128,7 +128,8 @@ DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const Floa
         double volumetricStress;
         double DPYieldStressInShear = tau0 + H * strainSpaceHardeningVariables.at(4);
         double JTwo;
-        MaterialMode mmode = gp->giveMaterialMode();
+        //MaterialMode mmode = gp->giveMaterialMode();
+        MaterialMode mmode = _3dMat;
         StressVector stressVector1(stressVector, mmode);//convert from array
         StressVector deviatoricStress(mmode);
         
@@ -160,7 +161,8 @@ DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType
         answer.at(5) = t.at(1, isurf) * t.at(3, isurf);//xz = 13
         answer.at(6) = t.at(1, isurf) * t.at(2, isurf);//xy = 12
     } else { //DP nonassociated
-        MaterialMode mmode = gp->giveMaterialMode();
+        //MaterialMode mmode = gp->giveMaterialMode();
+        MaterialMode mmode = _3dMat;
         StressVector stressVector1(stressVector, mmode);//convert from array
         StressVector deviatoricStress(mmode);
         double sqrtJTwo, volumetricStress;
@@ -182,13 +184,24 @@ DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType
 void
 DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
 {
-    gradientMatrix.resize(6, 6);
+    switch (gp->giveMaterialMode()) {
+    case _3dMat:
+        gradientMatrix.resize(6, 6);
+        break;
+    case _PlaneStrain:
+        gradientMatrix.resize(4, 4);
+        break;
+    default:
+        OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString(gp->giveMaterialMode()) );
+    }
+    
     gradientMatrix.zero();
     
     if ( isurf == 4 ) {
         int i,j;
         double c1=0.;
-        MaterialMode mmode = gp->giveMaterialMode();
+        //MaterialMode mmode = gp->giveMaterialMode();
+        MaterialMode mmode = _3dMat;
         StressVector stressVector1(fullStressVector, mmode);//convert from array
         StressVector deviatoricStress(mmode);
         double JTwo, sqrtJTwo, volumetricStress;
@@ -197,22 +210,43 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
         JTwo = deviatoricStress.computeSecondInvariant();
         sqrtJTwo = sqrt(JTwo);
         
-        for(i=1; i<=6;i++){
-            for(j=i; j<=6;j++){
-                if( (i==1 && j==1) || (i==2 && j==2) || (i==3 && j==3) ){
-                    c1 = 2/3.;
-                } else if ( (i==4 && j==4) || (i==5 && j==5) || (i==6 && j==6) ){
-                    c1 = 1.;
-                } else if (i<=3 && j<=3){
-                    c1 = -1/3.;
-                } else{
-                    c1=0;
+        if (gp->giveMaterialMode() == _3dMat){
+            for(i=1; i<=6;i++){
+                for(j=i; j<=6;j++){
+                    if( (i==1 && j==1) || (i==2 && j==2) || (i==3 && j==3) ){
+                        c1 = 2/3.;
+                    } else if ( (i==4 && j==4) || (i==5 && j==5) || (i==6 && j==6) ){
+                        c1 = 1.;
+                    } else if (i<=3 && j<=3){
+                        c1 = -1/3.;
+                    } else{
+                        c1=0;
+                    }
+                    gradientMatrix.at(i, j) = 0.5/JTwo * ( c1*sqrtJTwo - deviatoricStress.at(i)*deviatoricStress.at(j)/2./sqrtJTwo );
                 }
-                
-                gradientMatrix.at(i, j) = 0.5/JTwo * ( c1*sqrtJTwo - deviatoricStress.at(i)*deviatoricStress.at(j)/2./sqrtJTwo );
             }
+            gradientMatrix.symmetrized();
+        } else if (gp->giveMaterialMode() == _PlaneStrain){
+            for(i=1; i<=4;i++){
+                for(j=i; j<=4;j++){
+                    if( (i==1 && j==1) || (i==2 && j==2) || (i==3 && j==3) ){
+                        c1 = 2/3.;
+                    } else if ( (i==4 && j==4)){
+                        c1 = 1.;
+                    } else if (i<=3 && j<=3){
+                        c1 = -1/3.;
+                    } else{
+                        c1=0;
+                    }
+                    gradientMatrix.at(i, j) = 0.5/JTwo * ( c1*sqrtJTwo - deviatoricStress.at(i)*deviatoricStress.at(j)/2./sqrtJTwo );
+                }
+            }
+            gradientMatrix.symmetrized();
+        } else {
+            OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString(gp->giveMaterialMode()) );
         }
-        gradientMatrix.symmetrized();
+        
+        
     }
 }
 
@@ -252,13 +286,15 @@ void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType
 //necesarry only for mpm_ClosestPoint
 //Computes second mixed derivative of loading function with respect to stress and hardening vars. 
 void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables){
-    gradientMatrix.resize(6, 1);//six stresses and one kappa
+    int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    gradientMatrix.resize(size, 1);//six stresses in 3D and one kappa
     gradientMatrix.zero();
 }
 
 // computes dKappa_i/dsig_j gradient matrix
 void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda){
-    answer.resize(1, 6);
+    int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    answer.resize(1, size);
     answer.zero();
 }
 

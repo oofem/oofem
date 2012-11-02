@@ -60,8 +60,6 @@ protected:
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;
 
-    SparseMtrxType sparseMtrxType;
-
     /// Initial time from which the computation runs. Default is zero.
     double initT;
     double deltaT;

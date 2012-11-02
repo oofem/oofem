@@ -147,8 +147,6 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
      * stress return algorithm
      */
 
-    //if (0) this->cuttingPlaneReturn (fullStressVector, activeConditionMap, gamma, form, gp, totalStrain, atTime);
-    //else this->closestPointReturn (fullStressVector, activeConditionMap, gamma, form, gp, totalStrain, atTime);
     if ( rmType == mpm_ClosestPoint ) {
         this->closestPointReturn(fullStressVector, activeConditionMap, gamma, form, gp, strainVectorR,
                                  plasticStrainVectorR, strainSpaceHardeningVariables, atTime);
@@ -156,10 +154,16 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
         this->cuttingPlaneReturn(fullStressVector, activeConditionMap, gamma, form, gp, strainVectorR,
                                  plasticStrainVectorR, strainSpaceHardeningVariables, atTime);
     }
-
-
+        
     status->letTempStrainVectorBe(totalStrain);
     crossSection->giveReducedCharacteristicVector(helpVec, gp, fullStressVector);
+    
+    //perform isotropic damage on effective stress
+    double omega = computeDamage(gp, strainSpaceHardeningVariables, atTime);
+    status->letTempDamageBe(omega);
+    helpVec.times(1.-omega);
+    //end of damage part
+    
     status->letTempStressVectorBe(helpVec);
 
     status->letTempPlasticStrainVectorBe(plasticStrainVectorR);
@@ -197,6 +201,11 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
         crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
         return;
     }
+}
+
+double
+MPlasticMaterial2 :: computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime){
+   
 }
 
 
@@ -2246,6 +2255,7 @@ MPlasticMaterial2Status :: MPlasticMaterial2Status(int n, Domain *d, GaussPoint 
 {
     state_flag = temp_state_flag = MPlasticMaterial2Status :: PM_Elastic;
     gamma = tempGamma = 0.;
+    damage = tempDamage = 0.;
 }
 
 MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
