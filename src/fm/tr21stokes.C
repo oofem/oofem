@@ -290,7 +290,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         GaussPoint *gp;
-        FloatArray N, t, f(6), f2(6);
+        FloatArray N, t, f(6);
         IntArray edge_mapping;
 
         f.zero();

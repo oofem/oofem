@@ -146,8 +146,8 @@ public:
     virtual void computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime);
 
     //virtual int giveNumberOfDofs() { return 1; }
-    virtual int giveNumberOfInternalDofManagers() {return 1;}
-    virtual DofManager *giveInternalDofManager(int i) const ;
+    virtual int giveNumberOfInternalDofManagers() const { return 1; }
+    virtual DofManager *giveInternalDofManager(int i) const;
 
     virtual void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const;
 
