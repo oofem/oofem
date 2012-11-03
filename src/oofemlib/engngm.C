@@ -847,6 +847,7 @@ void
 EngngModel :: terminate(TimeStep *stepN)
 {
     this->doStepOutput(stepN);
+    fflush(this->giveOutputStream());
     this->saveStepContext(stepN);
 }
 
@@ -1838,7 +1839,6 @@ EngngModel :: terminateAnalysis()
     this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
     fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", nhrs, nmin, nsec);
     LOG_FORCED_MSG(oofem_logger, "User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-
     exportModuleManager->terminate();
 }
 

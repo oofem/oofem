@@ -285,7 +285,7 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
         stepN->setNumber(i);
         exportModuleManager->doOutput(stepN);
     }
-
+    fflush(this->giveOutputStream());
     this->saveStepContext(stepN);
 }
 

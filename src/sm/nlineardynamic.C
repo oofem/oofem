@@ -335,6 +335,7 @@ void
 NonLinearDynamic :: terminate(TimeStep *tStep) {
     this->doStepOutput(tStep);
     this->printReactionForces(tStep, 1);
+    fflush(this->giveOutputStream());
     this->saveStepContext(tStep);
 }
 
