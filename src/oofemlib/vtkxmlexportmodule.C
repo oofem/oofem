@@ -816,7 +816,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
     }
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
-        if ( valID == IST_DisplacementVector ) {
+        if ( valID == IST_DisplacementVector ) { ///@todo Why does this code exists here? DisplacementVector isn't a internal variable. And if its really desired, then why the special treatment for just displacements?
             iVal.resize(3);
             val = & iVal;
             for ( j = 1; j <= 3; j++ ) {
