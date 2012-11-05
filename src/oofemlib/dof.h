@@ -304,10 +304,6 @@ public:
      */
     char *giveDofIDName(char *s);
     /**
-     * @return Type of unknown related to receiver. (e.g., displacement).
-     */
-    UnknownType giveUnknownType();
-    /**
      * Tests if receiver is primary DOF. Dof is primary if it possess or directly represent
      * certain DOF. If it is linked somehow (rigid arm, doubled node) to other DOF(s) then it is not
      * primary DOF.
