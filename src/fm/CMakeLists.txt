@@ -20,6 +20,7 @@ set (fm_element
     quad10_2d_supg.C
     tr21stokes.C
     tet21stokes.C
+    tr1bubblestokes.C
     linesurfacetension.C
     line2surfacetension.C
     line2boundaryelement.C
