@@ -181,8 +181,8 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
             dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
         }
         // Bubble contribution;
-        dNv(6) = B(0,6) = B(2,7) = dN(0,0)*N(1)*N(2) + N(0)*dN(1,0)*N(2) + N(0)*N(1)*dN(2,0);
-        dNv(7) = B(1,7) = B(2,6) = dN(0,1)*N(1)*N(2) + N(0)*dN(1,1)*N(2) + N(0)*N(1)*dN(2,1);
+        dNv(6) = B(0,6) = B(2,7) = 27. * ( dN(0,0)*N(1)*N(2) + N(0)*dN(1,0)*N(2) + N(0)*N(1)*dN(2,0) ) ;
+        dNv(7) = B(1,7) = B(2,6) = 27. * ( dN(0,1)*N(1)*N(2) + N(0)*dN(1,1)*N(2) + N(0)*N(1)*dN(2,1) ) ;
 
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
@@ -325,11 +325,12 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
     FloatMatrix B(3, 8), EdB, K(8,8), G, Dp, DvT, C, Ed, dN, GT;
-    FloatArray *lcoords, dN_V(8), N, Ep, Cd, tmpA, tmpB;
+    FloatArray *lcoords, dNv(8), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     K.zero();
     G.zero();
+    B.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
@@ -342,12 +343,12 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
         for ( int j = 0, k = 0; j < 3; j++, k += 2 ) {
-            dN_V(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
+            dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
+            dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
         }
         // Bubble contribution;
-        dN_V(6) = B(0,6) = B(2,7) = dN(0,0)*N(1)*N(2) + N(0)*dN(1,0)*N(2) + N(0)*N(1)*dN(2,0);
-        dN_V(7) = B(1,7) = B(2,6) = dN(0,1)*N(1)*N(2) + N(0)*dN(1,1)*N(2) + N(0)*N(1)*dN(2,1);
+        dNv(6) = B(0,6) = B(2,7) = 27. * ( dN(0,0)*N(1)*N(2) + N(0)*dN(1,0)*N(2) + N(0)*N(1)*dN(2,0) );
+        dNv(7) = B(1,7) = B(2,6) = 27. * ( dN(0,1)*N(1)*N(2) + N(0)*dN(1,1)*N(2) + N(0)*N(1)*dN(2,1) );
 
         // Computing the internal forces should have been done first.
         mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
@@ -357,7 +358,7 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
         EdB.beProductOf(Ed,B);
         K.plusProductSymmUpper(B, EdB, dA);
-        G.plusDyadUnsym(dN_V, N, -dA);
+        G.plusDyadUnsym(dNv, N, -dA);
         C.plusDyadSymmUpper(N, N, Cp*dA);
 
         tmpA.beTProductOf(B, Ep);
