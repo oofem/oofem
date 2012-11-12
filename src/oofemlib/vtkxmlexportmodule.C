@@ -67,7 +67,7 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 {
     primVarSmoother = NULL;
     smoother = NULL;
-    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);//position of yz, xx, yy, zz, yz, xz, xy in tensor 
+    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);//position of xx, yy, zz, yz, xz, xy in tensor 
 }
 
 
