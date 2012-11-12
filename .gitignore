@@ -4,11 +4,21 @@
 *~
 # ignore all files under targets dir
 targets/
+
+# test results
 *.out
+*.vtu
+*.pvd
+
+# documentation aux-files.
+*.aux
+*.log
+*.toc
+*.lof
+*kdev*
 
 makefile
 elixirtest.c
 configure
 config.log
 config.status
-
