@@ -121,6 +121,7 @@ enum classType {
     Tr21StokesElementClass,
     Tet21StokesElementClass,
     Tr1BubbleStokesElementClass,
+    Tet1BubbleStokesElementClass,
     LineSurfaceTensionElementClass,
     Line2SurfaceTensionElementClass,
 
