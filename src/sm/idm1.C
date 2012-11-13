@@ -97,7 +97,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     RandomMaterialExtensionInterface :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
-    checkSnapBack = 1;//check by default
+    checkSnapBack = 1; //check by default
     IR_GIVE_OPTIONAL_FIELD(ir, checkSnapBack, IFT_IsotropicDamageMaterial1_checkSnapBack, "checksnapback");     // Macro
 
     // specify the type of formula for equivalent strain
@@ -122,10 +122,11 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     // specify the type of formula for damage evolution law
     IR_GIVE_OPTIONAL_FIELD(ir, damageLaw, IFT_IsotropicDamageMaterial1_softeningtype, "damlaw");
     if ( damageLaw != 7 ) {
-      IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0");
+        IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0");
     }
+
     //applies only in this class
-    if ( (giveClassID() == IsotropicDamageMaterial1Class) ||   (giveClassID() == IDNLMaterialClass) ) {
+    if ( ( giveClassID() == IsotropicDamageMaterial1Class ) ||   ( giveClassID() == IDNLMaterialClass ) ) {
         switch ( damageLaw ) {
         case 0:     // exponential softening - default
             if ( ir->hasField(IFT_IsotropicDamageMaterial1_wf, "wf") ) {
@@ -201,15 +202,19 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     }
 
     if ( ( softType == ST_Exponential_Cohesive_Crack ) || ( softType == ST_Linear_Cohesive_Crack ) || ( softType == ST_BiLinear_Cohesive_Crack ) ) {
-      int ecsm = 0;
-      IR_GIVE_OPTIONAL_FIELD(ir, ecsm, IFT_IsotropicDamageMaterial1_md, "ecsm");
-      switch ( ecsm ) {
-      case 1: ecsMethod = ECSM_SquareRootOfArea; break;
-      case 2: ecsMethod = ECSM_ProjectionCentered; break;
-      case 3: ecsMethod = ECSM_Oliver1; break;
-      case 4: ecsMethod = ECSM_Oliver1modified; break;
-      default: ecsMethod = ECSM_Projection;
-      }
+        int ecsm = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, ecsm, IFT_IsotropicDamageMaterial1_md, "ecsm");
+        switch ( ecsm ) {
+        case 1: ecsMethod = ECSM_SquareRootOfArea;
+            break;
+        case 2: ecsMethod = ECSM_ProjectionCentered;
+            break;
+        case 3: ecsMethod = ECSM_Oliver1;
+            break;
+        case 4: ecsMethod = ECSM_Oliver1modified;
+            break;
+        default: ecsMethod = ECSM_Projection;
+        }
     }
 
     this->mapper.initializeFrom(ir);
@@ -283,19 +288,20 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             if ( principalStress.at(i) > 0.0 ) {
                 if ( this->equivStrainType == EST_Rankine_Smooth ) {
                     sum += principalStress.at(i) * principalStress.at(i);
-                } else if ( sum < principalStress.at(i) )   {
+                } else if ( sum < principalStress.at(i) ) {
                     sum = principalStress.at(i);
                 }
             } else if ( sum < principalStress.at(i) ) {
                 sum = principalStress.at(i);
             }
         }
+
         if ( this->equivStrainType == EST_Rankine_Smooth ) {
             sum = sqrt(sum);
         }
-        kappa = sum / lmat->give('E', gp);
 
-    } else if ( ( this->equivStrainType == EST_ElasticEnergy ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStrain ) ){
+        kappa = sum / lmat->give('E', gp);
+    } else if ( ( this->equivStrainType == EST_ElasticEnergy ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStrain ) ) {
         // equivalent strain expressions based on elastic energy
         FloatMatrix de;
         FloatArray stress;
@@ -314,7 +320,6 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             // TO BE FINISHED
             sum = 0.;
             OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished\n");
-
         } else {
             // elastic energy corresponding to positive part of strain
             // TO BE DONE
@@ -404,12 +409,14 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
                 } else {
                     OOFEM_WARNING2("Gf unsupported for softening type softType = %d", softType);
                 }
-                if ( checkSnapBack ) { 
+
+                if ( checkSnapBack ) {
                     OOFEM_ERROR4("Material number %d, decrease e0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, minGf);
                 }
             }
-            if ( checkSnapBack ) {//given fracturing strain 
-                    OOFEM_ERROR4("Material number %d, increase ef %f to minimum e0 %f", this->giveNumber(), ef, e0);
+
+            if ( checkSnapBack ) { //given fracturing strain
+                OOFEM_ERROR4("Material number %d, increase ef %f to minimum e0 %f", this->giveNumber(), ef, e0);
             }
         }
 
@@ -467,19 +474,18 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
         if ( omega > 1.0 ) {
             OOFEM_WARNING2("computeDamageParam: damage parameter is %f, which is greater than 1, snap-back problems", omega);
             omega = maxOmega;
-            if ( checkSnapBack ){
+            if ( checkSnapBack ) {
                 OOFEM_ERROR1("\n");
             }
         }
-        
+
         if ( omega < 0.0 ) {
             OOFEM_WARNING2("computeDamageParam: damage parameter is %f, which is smaller than 0, snap-back problems", omega);
             omega = 0.0;
-            if ( checkSnapBack ){
+            if ( checkSnapBack ) {
                 OOFEM_ERROR1("\n");
             }
         }
-        
     }
 }
 double
@@ -585,23 +591,25 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         // find index with minimal value but non-zero for plane-stress condition - this is the crack direction
         indx = 1;
         for ( i = 2; i <= 3; i++ ) {
-            if ( principalStrains.at(i) < principalStrains.at(indx) && fabs(principalStrains.at(i))>1.e-10 ) {
+            if ( principalStrains.at(i) < principalStrains.at(indx) && fabs( principalStrains.at(i) ) > 1.e-10 ) {
                 indx = i;
             }
         }
+
         for ( i = 1; i <= 3; i++ ) {
             crackVect.at(i) = principalDir.at(i, indx);
         }
+
         status->setCrackVector(crackVect);
 
-	if ( isCrackBandApproachUsed() ){ // le needed only if the crack band approach is used
-        // old approach (default projection method)
-        // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-        // new approach, with choice of method
-        le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
-        // remember le in corresponding status
-        status->setLe(le);
-	}
+        if ( isCrackBandApproachUsed() ) { // le needed only if the crack band approach is used
+            // old approach (default projection method)
+            // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+            // new approach, with choice of method
+            le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
+            // remember le in corresponding status
+            status->setLe(le);
+        }
 
         // compute and store the crack angle (just for postprocessing)
         double ca = 3.1415926 / 2.;
@@ -610,22 +618,22 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         status->setCrackAngle(ca);
-        
-        
-        
+
+
+
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
-            OOFEM_WARNING6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le );
-            if ( checkSnapBack ){
+            OOFEM_WARNING6("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
+            if ( checkSnapBack ) {
                 OOFEM_ERROR1("\n");
             }
         } else if ( wf == 0. && e0 >= ef ) {
-            OOFEM_WARNING5("Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel());
-            if ( checkSnapBack ){
+            OOFEM_WARNING5( "Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel() );
+            if ( checkSnapBack ) {
                 OOFEM_ERROR1("\n");
             }
         } else if ( ef == 0. && e0 * le >= wf ) {
-            OOFEM_WARNING5("Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le,gp->giveElement()->giveLabel());
-            if ( checkSnapBack ){
+            OOFEM_WARNING5( "Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le, gp->giveElement()->giveLabel() );
+            if ( checkSnapBack ) {
                 OOFEM_ERROR1("\n");
             }
         }
@@ -679,13 +687,13 @@ IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status;
 
-    status = (MaterialStatus*)gp->giveMaterialStatus(this->giveClassID());
+    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveClassID() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
 
         if ( status != NULL ) {
-	    gp->setMaterialStatus(status,this->giveClassID());
+            gp->setMaterialStatus( status, this->giveClassID() );
             this->_generateStatusVariables(gp);
         }
     }
