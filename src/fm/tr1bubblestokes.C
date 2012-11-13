@@ -57,7 +57,7 @@ bool Tr1BubbleStokes :: __initialized = Tr1BubbleStokes :: initOrdering();
 Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 3;
-    this->numberOfGaussPoints = 4;
+    this->numberOfGaussPoints = 7;
     this->computeGaussPoints();
     
     this->bubble = new ElementDofManager(1, aDomain, this);
@@ -142,7 +142,6 @@ void Tr1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType mt
 void Tr1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
                                             CharType mtrx, TimeStep *tStep)
 {
-    // Compute characteristic matrix for this element. The only option is the stiffness matrix...
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
@@ -385,6 +384,7 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     answer.resize(11, 11);
     answer.zero();
     answer.assemble(temp, this->ordering);
+    temp.printYourself();
 }
 
 FEInterpolation *Tr1BubbleStokes :: giveInterpolation()

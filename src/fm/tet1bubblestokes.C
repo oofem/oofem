@@ -58,7 +58,7 @@ bool Tet1BubbleStokes :: __initialized = Tet1BubbleStokes :: initOrdering();
 Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 4;
-    this->numberOfGaussPoints = 15;
+    this->numberOfGaussPoints = 24;
     this->computeGaussPoints();
     
     this->bubble = new ElementDofManager(1, aDomain, this);
@@ -455,6 +455,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     answer.zero();
     answer.assemble(temp, this->ordering);
 
+    printf("KK = "); temp.printYourself();
 #if 0
         
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs;
