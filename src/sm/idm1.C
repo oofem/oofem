@@ -362,7 +362,7 @@ IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, cons
 {
     if ( this->softType == ST_Disable_Damage ) { //dummy material with no damage
         omega = 0.;
-    } else if ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->give(gf_ID, gp) != 0. ) { // adjustment of softening law according to the element size, given crack opening or fracture energy
+    } else if ( isCrackBandApproachUsed() ) { // adjustment of softening law according to the element size, given crack opening or fracture energy
         computeDamageParamForCohesiveCrack(omega, kappa, gp);
     } else { // no adjustment according to element size, given fracturing strain
         omega = damageFunction(kappa, gp);
@@ -594,12 +594,14 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
         status->setCrackVector(crackVect);
 
+	if ( isCrackBandApproachUsed() ){ // le needed only if the crack band approach is used
         // old approach (default projection method)
         // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
         // new approach, with choice of method
         le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
         // remember le in corresponding status
         status->setLe(le);
+	}
 
         // compute and store the crack angle (just for postprocessing)
         double ca = 3.1415926 / 2.;
