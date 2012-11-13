@@ -1648,6 +1648,7 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints,
 {
     // int         i,j,k;
     // double      weight;
+    double a, b, c, w;
     FloatArray *coord1;
 
     switch ( nPoints ) {
@@ -1666,29 +1667,32 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints,
 
         * arry  = new GaussPoint * [ nPoints ];
 
+        a = (5. + 3.*sqrt(5.))/20.;
+        b = (5. - sqrt(5.))/20.;
+        w = 1. / 4.;
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.58541020;
-        coord1->at(2)    = 0.13819660;
-        coord1->at(3)    = 0.13819660;
-        ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, 1. / 4., mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.13819660;
-        coord1->at(2)    = 0.58541020;
-        coord1->at(3)    = 0.13819660;
-        ( * arry ) [ 1 ]        = new GaussPoint(this, 1, coord1, 1. / 4., mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 1 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.13819660;
-        coord1->at(2)    = 0.13819660;
-        coord1->at(3)    = 0.58541020;
-        ( * arry ) [ 2 ]        = new GaussPoint(this, 1, coord1, 1. / 4., mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 2 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.13819660;
-        coord1->at(2)    = 0.13819660;
-        coord1->at(3)    = 0.13819660;
-        ( * arry ) [ 3 ]        = new GaussPoint(this, 1, coord1, 1. / 4., mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 3 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         break;
 
@@ -1703,204 +1707,391 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra(int nPoints,
         coord1->at(3)    = 0.25;
         ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, -4. / 5., mode);
 
+        a = 1. / 2.;
+        b = 1. / 6.;
+        w = 9. / 20.;
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.5;
-        coord1->at(2)    = 1. / 6.;
-        coord1->at(3)    = 1. / 6.;
-        ( * arry ) [ 1 ]        = new GaussPoint(this, 1, coord1, 9. / 20., mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 1 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 6.;
-        coord1->at(2)    = 0.5;
-        coord1->at(3)    = 1. / 6.;
-        ( * arry ) [ 2 ]        = new GaussPoint(this, 1, coord1, 9. / 20., mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 2 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 6.;
-        coord1->at(2)    = 1. / 6.;
-        coord1->at(3)    = 0.5;
-        ( * arry ) [ 3 ]        = new GaussPoint(this, 1, coord1, 9. / 20., mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 3 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 6.;
-        coord1->at(2)    = 1. / 6.;
-        coord1->at(3)    = 1. / 6.;
-        ( * arry ) [ 4 ]        = new GaussPoint(this, 1, coord1, 9. / 20., mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 4 ]        = new GaussPoint(this, 1, coord1, w, mode);
 
         break;
 
     case 11:
-
+        // exact x^4
         * arry  = new GaussPoint * [ nPoints ];
 
+        a = 1. / 4.;
+        w = -148. / 1875.;
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.25;
-        coord1->at(2)    = 0.25;
-        coord1->at(3)    = 0.25;
-        ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, -0.0789333333333333, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = a;
+        coord1->at(3)    = a;
+        ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, w, mode);
+
+        a = 5./70.;
+        b = 11./14.;
+        w = 343. / 7500.;
+        coord1 = new FloatArray(3);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = a;
+        ( * arry ) [ 1 ]        = new GaussPoint(this, 2, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.785714285714286;
-        coord1->at(2)    = 0.071428571428571;
-        coord1->at(3)    = 0.071428571428571;
-        ( * arry ) [ 1 ]        = new GaussPoint(this, 2, coord1, 0.04573333333333333, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 2 ]        = new GaussPoint(this, 3, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.071428571428571;
-        coord1->at(2)    = 0.785714285714286;
-        coord1->at(3)    = 0.071428571428571;
-        ( * arry ) [ 2 ]        = new GaussPoint(this, 3, coord1, 0.04573333333333333, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 3 ]        = new GaussPoint(this, 4, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.071428571428571;
-        coord1->at(2)    = 0.071428571428571;
-        coord1->at(3)    = 0.785714285714286;
-        ( * arry ) [ 3 ]        = new GaussPoint(this, 4, coord1, 0.04573333333333333, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = a;
+        coord1->at(3)    = a;
+        ( * arry ) [ 4 ]        = new GaussPoint(this, 5, coord1, w, mode);
+
+        a = (1. + sqrt(5./14.)) / 4.;
+        b = (1. - sqrt(5./14.)) / 4.;
+        w = 56. / 375.;
+        coord1 = new FloatArray(3);
+        coord1->at(1)    = a;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 5 ]        = new GaussPoint(this, 6, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.071428571428571;
-        coord1->at(2)    = 0.071428571428571;
-        coord1->at(3)    = 0.071428571428571;
-        ( * arry ) [ 4 ]        = new GaussPoint(this, 5, coord1, 0.04573333333333333, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 6 ]        = new GaussPoint(this, 7, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.399403576166799;
-        coord1->at(2)    = 0.399403576166799;
-        coord1->at(3)    = 0.100596423833201;
-        ( * arry ) [ 5 ]        = new GaussPoint(this, 6, coord1, 0.1493333333333333, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 7 ]        = new GaussPoint(this, 8, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.399403576166799;
-        coord1->at(2)    = 0.100596423833201;
-        coord1->at(3)    = 0.399403576166799;
-        ( * arry ) [ 6 ]        = new GaussPoint(this, 7, coord1, 0.1493333333333333, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = a;
+        ( * arry ) [ 8 ]        = new GaussPoint(this, 9, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.399403576166799;
-        coord1->at(2)    = 0.100596423833201;
-        coord1->at(3)    = 0.100596423833201;
-        ( * arry ) [ 7 ]        = new GaussPoint(this, 8, coord1, 0.1493333333333333, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 9 ]        = new GaussPoint(this, 10, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.100596423833201;
-        coord1->at(2)    = 0.399403576166799;
-        coord1->at(3)    = 0.399403576166799;
-        ( * arry ) [ 8 ]        = new GaussPoint(this, 9, coord1, 0.1493333333333333, mode);
-
-        coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.100596423833201;
-        coord1->at(2)    = 0.399403576166799;
-        coord1->at(3)    = 0.100596423833201;
-        ( * arry ) [ 9 ]        = new GaussPoint(this, 10, coord1, 0.1493333333333333, mode);
-
-        coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.100596423833201;
-        coord1->at(2)    = 0.100596423833201;
-        coord1->at(3)    = 0.399403576166799;
-        ( * arry ) [ 10 ]        = new GaussPoint(this, 11, coord1, 0.1493333333333333, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 10 ]        = new GaussPoint(this, 11, coord1, w, mode);
 
         break;
 
     case 15:
-
+        // Derived by Patrick Keast, MODERATE-DEGREE TETRAHEDRAL QUADRATURE FORMULAS
+        // exact for x^5
         * arry  = new GaussPoint * [ nPoints ];
 
+        a = 1. / 4.;
+        w = 0.18170206858253401538;
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.25;
-        coord1->at(2)    = 0.25;
-        coord1->at(3)    = 0.25;
-        ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, 0.18170206858253401538, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = a;
+        coord1->at(3)    = a;
+        ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, w, mode);
+
+        a = 0.0;
+        b = 1. / 3.;
+        w = 0.03616071428571600299;
+        coord1 = new FloatArray(3);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 1 ]        = new GaussPoint(this, 2, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.0;
-        coord1->at(2)    = 1. / 3.;
-        coord1->at(3)    = 1. / 3.;
-        ( * arry ) [ 1 ]        = new GaussPoint(this, 2, coord1, 0.03616071428571600299, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 2 ]        = new GaussPoint(this, 3, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 3.;
-        coord1->at(2)    = 0.0;
-        coord1->at(3)    = 1. / 3.;
-        ( * arry ) [ 2 ]        = new GaussPoint(this, 3, coord1, 0.03616071428571600299, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 3 ]        = new GaussPoint(this, 4, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 3.;
-        coord1->at(2)    = 1. / 3.;
-        coord1->at(3)    = 0.0;
-        ( * arry ) [ 3 ]        = new GaussPoint(this, 4, coord1, 0.03616071428571600299, mode);
-
-        coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 3.;
-        coord1->at(2)    = 1. / 3.;
-        coord1->at(3)    = 1. / 3.;
-        ( * arry ) [ 4 ]        = new GaussPoint(this, 5, coord1, 0.03616071428571600299, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 4 ]        = new GaussPoint(this, 5, coord1, w, mode);
 
         ////////////// 
+        a = 8. / 11.;
+        b = 1. / 11.;
+        w = 0.06987149451617399865;
+        coord1 = new FloatArray(3);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 5 ]        = new GaussPoint(this, 6, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 8. / 11.;
-        coord1->at(2)    = 1. / 11.;
-        coord1->at(3)    = 1. / 11.;
-        ( * arry ) [ 5 ]        = new GaussPoint(this, 6, coord1, 0.06987149451617399865, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 6 ]        = new GaussPoint(this, 7, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 11.;
-        coord1->at(2)    = 8. / 11.;
-        coord1->at(3)    = 1. / 11.;
-        ( * arry ) [ 6 ]        = new GaussPoint(this, 7, coord1, 0.06987149451617399865, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 7 ]        = new GaussPoint(this, 8, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 11.;
-        coord1->at(2)    = 1. / 11.;
-        coord1->at(3)    = 8. / 11.;
-        ( * arry ) [ 7 ]        = new GaussPoint(this, 8, coord1, 0.06987149451617399865, mode);
-
-        coord1 = new FloatArray(3);
-        coord1->at(1)    = 1. / 11.;
-        coord1->at(2)    = 1. / 11.;
-        coord1->at(3)    = 1. / 11.;
-        ( * arry ) [ 8 ]        = new GaussPoint(this, 9, coord1, 0.06987149451617399865, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 8 ]        = new GaussPoint(this, 9, coord1, w, mode);
 
         ////////////// 
+        a = 0.066550153573664;
+        b = 0.433449846426336;
+        w = 0.06569484936831598842;
+        coord1 = new FloatArray(3);
+        coord1->at(1)    = a;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 9 ]        = new GaussPoint(this, 10, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.066550153573664;
-        coord1->at(2)    = 0.066550153573664;
-        coord1->at(3)    = 0.433449846426336;
-        ( * arry ) [ 9 ]        = new GaussPoint(this, 10, coord1, 0.06569484936831598842, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 10 ]        = new GaussPoint(this, 11, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.066550153573664;
-        coord1->at(2)    = 0.433449846426336;
-        coord1->at(3)    = 0.066550153573664;
-        ( * arry ) [ 10 ]        = new GaussPoint(this, 11, coord1, 0.06569484936831598842, mode);
+        coord1->at(1)    = a;
+        coord1->at(2)    = b;
+        coord1->at(3)    = b;
+        ( * arry ) [ 11 ]        = new GaussPoint(this, 12, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.066550153573664;
-        coord1->at(2)    = 0.433449846426336;
-        coord1->at(3)    = 0.433449846426336;
-        ( * arry ) [ 11 ]        = new GaussPoint(this, 12, coord1, 0.06569484936831598842, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = a;
+        ( * arry ) [ 12 ]        = new GaussPoint(this, 13, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.433449846426336;
-        coord1->at(2)    = 0.066550153573664;
-        coord1->at(3)    = 0.066550153573664;
-        ( * arry ) [ 12 ]        = new GaussPoint(this, 13, coord1, 0.06569484936831598842, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = a;
+        coord1->at(3)    = b;
+        ( * arry ) [ 13 ]        = new GaussPoint(this, 14, coord1, w, mode);
 
         coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.433449846426336;
-        coord1->at(2)    = 0.066550153573664;
-        coord1->at(3)    = 0.433449846426336;
-        ( * arry ) [ 13 ]        = new GaussPoint(this, 14, coord1, 0.06569484936831598842, mode);
-
-        coord1 = new FloatArray(3);
-        coord1->at(1)    = 0.433449846426336;
-        coord1->at(2)    = 0.433449846426336;
-        coord1->at(3)    = 0.066550153573664;
-        ( * arry ) [ 14 ]        = new GaussPoint(this, 15, coord1, 0.06569484936831598842, mode);
+        coord1->at(1)    = b;
+        coord1->at(2)    = b;
+        coord1->at(3)    = a;
+        ( * arry ) [ 14 ]        = new GaussPoint(this, 15, coord1, w, mode);
 
         break;
 
+    case 24:
+        // Derived by Patrick Keast, MODERATE-DEGREE TETRAHEDRAL QUADRATURE FORMULAS
+        // See also: Monomial cubature rules since “Stroud”: a compilation
+        // Exact for x^6
+        * arry  = new GaussPoint * [ nPoints ];
+
+        a = 0.214602871259151684;
+        b = 0.356191386222544953;
+        w = 0.039922750258167869;
+        coord1 = new FloatArray(3);
+        coord1->at(1) = a;
+        coord1->at(2) = b;
+        coord1->at(3) = b;
+        ( * arry ) [ 0 ] = new GaussPoint(this, 1, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = a;
+        coord1->at(3) = b;
+        ( * arry ) [ 1 ] = new GaussPoint(this, 2, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = b;
+        coord1->at(3) = a;
+        ( * arry ) [ 2 ] = new GaussPoint(this, 3, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = b;
+        coord1->at(3) = b;
+        ( * arry ) [ 3 ] = new GaussPoint(this, 4, coord1, w, mode);
+        
+        a = 0.877978124396165982;
+        b = 0.406739585346113397;
+        w = 0.010077211055320657;
+        coord1 = new FloatArray(3);
+        coord1->at(1) = a;
+        coord1->at(2) = b;
+        coord1->at(3) = b;
+        ( * arry ) [ 4 ] = new GaussPoint(this, 5, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = a;
+        coord1->at(3) = b;
+        ( * arry ) [ 5 ] = new GaussPoint(this, 6, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = b;
+        coord1->at(3) = a;
+        ( * arry ) [ 6 ] = new GaussPoint(this, 7, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = b;
+        coord1->at(3) = b;
+        ( * arry ) [ 7 ] = new GaussPoint(this, 8, coord1, w, mode);
+
+        a = 0.329863295731730594;
+        b = 0.322337890142275646;
+        w = 0.055357181543654391;
+        coord1 = new FloatArray(3);
+        coord1->at(1) = a;
+        coord1->at(2) = b;
+        coord1->at(3) = b;
+        ( * arry ) [ 8 ] = new GaussPoint(this, 9, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = a;
+        coord1->at(3) = b;
+        ( * arry ) [ 9 ] = new GaussPoint(this, 10, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = b;
+        coord1->at(3) = a;
+        ( * arry ) [ 10 ] = new GaussPoint(this, 11, coord1, w, mode);
+        
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = b;
+        coord1->at(3) = b;
+        ( * arry ) [ 11 ] = new GaussPoint(this, 12, coord1, w, mode);
+
+        a = 0.603005664791649076;
+        b = 0.269672331458315867;
+        c = 0.636610018750175299;
+        w = 0.048214285714285696;
+        // 12 permuations follows here, a, b, c
+        coord1 = new FloatArray(3);
+        coord1->at(1) = a;
+        coord1->at(2) = b;
+        coord1->at(3) = c;
+        ( * arry ) [ 12 ] = new GaussPoint(this, 13, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = a;
+        coord1->at(3) = c;
+        ( * arry ) [ 13 ] = new GaussPoint(this, 14, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = a;
+        coord1->at(2) = c;
+        coord1->at(3) = b;
+        ( * arry ) [ 14 ] = new GaussPoint(this, 15, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = c;
+        coord1->at(3) = a;
+        ( * arry ) [ 15 ] = new GaussPoint(this, 16, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = c;
+        coord1->at(2) = a;
+        coord1->at(3) = b;
+        ( * arry ) [ 16 ] = new GaussPoint(this, 17, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = c;
+        coord1->at(2) = b;
+        coord1->at(3) = a;
+        ( * arry ) [ 17 ] = new GaussPoint(this, 18, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = a;
+        coord1->at(2) = c;
+        coord1->at(3) = c;
+        ( * arry ) [ 18 ] = new GaussPoint(this, 19, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = b;
+        coord1->at(2) = c;
+        coord1->at(3) = c;
+        ( * arry ) [ 19 ] = new GaussPoint(this, 20, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = c;
+        coord1->at(2) = a;
+        coord1->at(3) = c;
+        ( * arry ) [ 20 ] = new GaussPoint(this, 21, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = c;
+        coord1->at(2) = b;
+        coord1->at(3) = c;
+        ( * arry ) [ 21 ] = new GaussPoint(this, 22, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = c;
+        coord1->at(2) = c;
+        coord1->at(3) = a;
+        ( * arry ) [ 22 ] = new GaussPoint(this, 23, coord1, w, mode);
+
+        coord1 = new FloatArray(3);
+        coord1->at(1) = c;
+        coord1->at(2) = c;
+        coord1->at(3) = b;
+        ( * arry ) [ 23 ] = new GaussPoint(this, 24, coord1, w, mode);
+
+        break;
+        
     default:
         OOFEM_ERROR2("SetUpPointsOnTetrahedra: unsupported number of IPs (%d)", nPoints);
     }
@@ -1970,6 +2161,18 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
 
         if ( approxOrder <= 3 ) {
             return 5;
+        }
+
+        if ( approxOrder <= 4 ) {
+            return 11; // unsure
+        }
+
+        if ( approxOrder <= 5 ) {
+            return 15;
+        }
+
+        if ( approxOrder <= 6 ) {
+            return 24;
         }
 
         return -1;
