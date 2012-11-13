@@ -384,7 +384,6 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     answer.resize(11, 11);
     answer.zero();
     answer.assemble(temp, this->ordering);
-    temp.printYourself();
 }
 
 FEInterpolation *Tr1BubbleStokes :: giveInterpolation()

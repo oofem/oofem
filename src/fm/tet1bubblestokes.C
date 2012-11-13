@@ -184,9 +184,9 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
             dNv(k + 2) = B(2, k + 2) = B(3, k + 1) = B(4, k + 0) = dN(j, 2);
         }
         // Bubble contribution;
-        dNv(12) = B(0,12) = B(4,14) = B(5,13) = 256. * ( dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0) );
-        dNv(13) = B(1,13) = B(3,14) = B(5,12) = 256. * ( dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1) );
-        dNv(14) = B(2,14) = B(3,13) = B(4,12) = 256. * ( dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2) );
+        dNv(12) = B(0,12) = B(4,14) = B(5,13) = dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0);
+        dNv(13) = B(1,13) = B(3,14) = B(5,12) = dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1);
+        dNv(14) = B(2,14) = B(3,13) = B(4,12) = dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2);
         
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
@@ -415,9 +415,9 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
             dNv(k + 2) = B(2, k + 2) = B(3, k + 1) = B(4, k + 0) = dN(j, 2);
         }
         // Bubble contribution;
-        dNv(12) = B(0,12) = B(4,14) = B(5,13) = 256. * ( dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0) );
-        dNv(13) = B(1,13) = B(3,14) = B(5,12) = 256. * ( dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1) );
-        dNv(14) = B(2,14) = B(3,13) = B(4,12) = 256. * ( dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2) );
+        dNv(12) = B(0,12) = B(4,14) = B(5,13) = dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0);
+        dNv(13) = B(1,13) = B(3,14) = B(5,12) = dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1);
+        dNv(14) = B(2,14) = B(3,13) = B(4,12) = dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2);
 
         // Computing the internal forces should have been done first.
         mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
@@ -454,134 +454,6 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     answer.resize(19, 19);
     answer.zero();
     answer.assemble(temp, this->ordering);
-
-    printf("KK = "); temp.printYourself();
-#if 0
-        
-    FloatArray a_pressure, a_velocity, devStress, epsp, BTs;
-    double r_vol, pressure;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
-    FloatArray momentum(15), conservation(4);
-
-    momentum.zero();
-    conservation.zero();
-    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        FloatArray *lcoords = gp->giveCoordinates();
-
-        double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
-        this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
-        this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
-        double dV = detJ * gp->giveWeight();
-
-        for ( int j = 0, k = 0; j < 4; j++, k += 3 ) {
-            dNv(k + 0) = B(0, k + 0) = B(4, k + 2) = B(5, k + 1) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(3, k + 2) = B(5, k + 0) = dN(j, 1);
-            dNv(k + 2) = B(2, k + 2) = B(3, k + 1) = B(4, k + 0) = dN(j, 2);
-        }
-        // Bubble contribution;
-        dNv(12) = B(0,12) = B(4,14) = B(5,13) = 256. * ( dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0) );
-        dNv(13) = B(1,13) = B(3,14) = B(5,12) = 256. * ( dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1) );
-        dNv(14) = B(2,14) = B(3,13) = B(4,12) = 256. * ( dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2) );
-
-        pressure = N.dotProduct(a_pressure);
-        epsp.beProductOf(B, a_velocity);
-        mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-        BTs.beTProductOf(B, devStress);
-
-        momentum.add(dV, BTs);
-        momentum.add(-pressure*dV, dNv);
-        conservation.add(r_vol*dV, N);
-    }
-
-    double h = 1.0;
-    FloatMatrix Kn(15,15), GTDvTn(4,15), GDpn(15,4), Cn(4,4);
-    FloatArray momentumh(15), conservationh(4);
-    FloatArray a_velocityh, a_pressureh;
-
-    for ( int q = 1; q <= 19; q++) {
-        a_velocityh = a_velocity;
-        a_pressureh = a_pressure;
-        if (q <= 15) {
-            a_velocityh.at(q) += h;
-        } else {
-            a_pressureh.at(q-15) += h;
-        }
-        momentumh.zero();
-        conservationh.zero();
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule->getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveCoordinates();
-
-            double detJ = fabs(this->interp.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this)));
-            this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
-            this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
-            double dV = detJ * gp->giveWeight();
-
-            for ( int j = 0, k = 0; j < 4; j++, k += 3 ) {
-                dNv(k + 0) = B(0, k + 0) = B(4, k + 2) = B(5, k + 1) = dN(j, 0);
-                dNv(k + 1) = B(1, k + 1) = B(3, k + 2) = B(5, k + 0) = dN(j, 1);
-                dNv(k + 2) = B(2, k + 2) = B(3, k + 1) = B(4, k + 0) = dN(j, 2);
-            }
-            // Bubble contribution;
-            dNv(12) = B(0,12) = B(4,14) = B(5,13) = 256. * ( dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0) );
-            dNv(13) = B(1,13) = B(3,14) = B(5,12) = 256. * ( dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1) );
-            dNv(14) = B(2,14) = B(3,13) = B(4,12) = 256. * ( dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2) );
-
-            pressure = N.dotProduct(a_pressureh);
-            epsp.beProductOf(B, a_velocityh);
-
-            mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
-            BTs.beTProductOf(B, devStress);
-
-            momentumh.add(dV, BTs);
-            momentumh.add(-pressure*dV, dNv);
-            conservationh.add(r_vol*dV, N);
-        }
-        momentumh.subtract(momentum); momentumh.times(1.0/h);
-        conservationh.subtract(conservation); conservationh.times(1.0/h);
-        
-        if (q <= 15) {
-            Kn.setColumn(momentumh, q);
-            GTDvTn.setColumn(conservationh, q);
-        } else {
-            GDpn.setColumn(momentumh,q-15);
-            Cn.setColumn(conservationh,q-15);
-        }
-    }
-
-    double Kerr, GDperr, GTDvTerr, Cerr;
-    FloatMatrix GDp, GTDvT;
-    GDp = G; GDp.add(Dp);
-    GTDvT = GT; GTDvT.add(DvT);
-    
-    FloatMatrix dK, dGDp, dGTDvT, dC;
-    dK = Kn; dK.subtract(K);
-    dC = Cn; dC.subtract(C);
-    dGDp = GDpn; dGDp.subtract(GDp);
-    dGTDvT = GTDvTn; dGTDvT.subtract(GTDvT);
-
-    Kerr = dK.computeFrobeniusNorm() / K.computeFrobeniusNorm();
-    Cerr = dC.computeFrobeniusNorm() / C.computeFrobeniusNorm();
-    GDperr = dGDp.computeFrobeniusNorm() / GDp.computeFrobeniusNorm();
-    GTDvTerr = dGTDvT.computeFrobeniusNorm() / GTDvT.computeFrobeniusNorm();
-    
-    if (Kerr > 1e-6 || /*Cerr > 1e-6 ||*/ GDperr > 1e-6 || GTDvTerr > 1e-6) {
-        printf("K = "); K.printYourself();
-        printf("Kn = "); Kn.printYourself();
-        printf("C = "); C.printYourself();
-        printf("Cn = "); Cn.printYourself();
-        printf("GDp = "); GDp.printYourself();
-        printf("GDpn = "); GDpn.printYourself();
-        printf("GTDvT = "); GTDvT.printYourself();
-        printf("GTDvTn = "); GTDvTn.printYourself();
-        printf("*************************************************************************** errors = %e, %e, %e, %e\n", Kerr, Cerr, GDperr, GTDvTerr);
-        OOFEM_ERROR("Tangent error...\n");
-    }
-#endif
-
-
 }
 
 FEInterpolation *Tet1BubbleStokes :: giveInterpolation()
