@@ -324,7 +324,6 @@ void Tet1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load
                 f(3 * j + 1) += N(j) * t(1) * dS;
                 f(3 * j + 2) += N(j) * t(2) * dS;
             }
-            printf("bonk\n");
         }
 
         answer.assemble(f, this->edge_ordering [ iEdge - 1 ]);
