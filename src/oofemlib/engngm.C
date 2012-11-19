@@ -42,7 +42,7 @@
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
-#include "oofemdef.h"
+#include "oofemcfg.h"
 #include "clock.h"
 #include "dofmanager.h"
 #include "node.h"

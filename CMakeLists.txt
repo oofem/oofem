@@ -354,9 +354,7 @@ add_library (liboofem
 target_link_libraries (liboofem ${LIBS} ${EXT_LIBS})
 set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
 
-add_executable (oofem
-    ${oofem_SOURCE_DIR}/src/main/main.C
-    )
+add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
 target_link_libraries (oofem ${LIBS} liboofem ${EXT_LIBS})
 
 install (TARGETS oofem

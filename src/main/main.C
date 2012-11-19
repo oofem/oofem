@@ -36,15 +36,13 @@
 //  Solves finite element problems.
 //
 
-#ifndef __OOFEG
-
 #include "engngm.h"
 #include "freestor.h"
 #include "compiler.h"
 
 #include "oofemtxtdatareader.h"
 #include "util.h"
-#include "oofemdef.h"
+#include "oofemcfg.h"
 #include "usrdefsub.h"
 #include "error.h"
 #include "logger.h"
@@ -364,5 +362,3 @@ void oofem_debug(EngngModel *emodel)
     //exit(1);
 #endif
 }
-
-#endif
