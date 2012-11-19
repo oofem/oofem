@@ -21,9 +21,9 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
 # Default is debug build
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Debug)
-endif(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE)
+	set (CMAKE_BUILD_TYPE Debug)
+endif ()
 
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
@@ -39,6 +39,8 @@ set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)
 set (MPI_DIR CACHE PATH "Manual MPI directory")
 set (IML_DIR CACHE PATH "Manual IML++ directory")
 set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
+set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
+set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 
 #######################################################################
 ######################## Options ######################################
@@ -67,14 +69,10 @@ option (USE_FM "Enable fluid mechanics module" ON)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 
-if (USE_OOFEG)
-    add_definitions (-D__OOFEG)
-endif (USE_OOFEG)
-
 if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
     set (USE_MPI ON)
-endif (USE_PARALLEL)
+endif ()
 
 #######################################################################
 ######################## Internal libraries ###########################
@@ -92,7 +90,7 @@ if (USE_FM)
     add_definitions (-D__FM_MODULE)
     set (LIBS ${LIBS} fm)
     set (MODULE_LIST ${MODULE_LIST} fm)
-endif (USE_FM)
+endif ()
 
 if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm")
@@ -103,66 +101,90 @@ if (USE_TM)
     if (USE_CEMHYD)
         add_definitions (-D__CEMHYD_MODULE)
         set (USE_TINYXML ON)
-    endif (USE_CEMHYD)
-endif (USE_TM)
+    endif ()
+endif ()
 
 if (USE_SM)
     include_directories ("${oofem_SOURCE_DIR}/src/sm")
     add_definitions (-D__SM_MODULE)
     set (LIBS ${LIBS} sm)
     set (MODULE_LIST ${MODULE_LIST} sm)
-endif (USE_SM)
+endif ()
 
-set (LIBS ${LIBS} oofemlib)
+set (LIBS ${LIBS} core) # core == src/oofemlib (TODO: rename the folder?)
 
 if (USE_DSS)
     include_directories ("${oofem_SOURCE_DIR}/src/dss")
     add_definitions (-D__DSS_MODULE)
     set (LIBS ${LIBS} dss)
     set (MODULE_LIST ${MODULE_LIST} dss)
-endif (USE_DSS)
+endif ()
 
 if (USE_OPENMP)
     include (FindOpenMP)
-    if(OPENMP_FOUND)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-    endif()
-endif (USE_OPENMP)
+    if (OPENMP_FOUND)
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+        set (MODULE_LIST ${MODULE_LIST} openmp)
+    endif ()
+endif ()
+
+if (USE_OOFEG)
+    add_definitions (-D__OOFEG)
+
+    # Necessary X11 stuff;
+    find_package (X11 REQUIRED)
+    find_library (XAW_LIB Xaw)
+    # Krysls libraries:
+    find_library (ELIXIR_LIB elixir PATH "${ELIXIR_DIR}/src")
+    find_library (ESI_LIB esi PATH "${ELIXIR_DIR}/src")
+    if (${ELIXIR_LIB} STREQUAL "ELIXIR_LIB-NOTFOUND")
+        message (FATAL_ERROR "Elixir library not found (required for OOFEG)")
+    endif ()
+    find_library (CKIT_LIB ckit PATH "${CKIT_DIR}/src")
+    if (${CKIT_LIB} STREQUAL "CKIT_LIB-NOTFOUND")
+        message (FATAL_ERROR "Ckit library not found (required for OOFEG)")
+    endif ()
+    include_directories ("${ELIXIR_DIR}/include")
+    include_directories ("${CKIT_DIR}/include")
+
+    set (LIBS ${LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${XAW_LIB})
+    set (MODULE_LIST ${MODULE_LIST} oofeg)
+endif ()
 
 #######################################################################
 ######################## External libaries ############################
 #######################################################################
 if (USE_LAPACK)
     find_package (LAPACK REQUIRED)
-    set (LIBS ${LIBS} ${LAPACK_LIBRARIES})
+    set (EXT_LIBS ${EXT_LIBS} ${LAPACK_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} lapack)
     add_definitions (-D__LAPACK_MODULE)
-endif (USE_LAPACK)
+endif ()
 
 if (USE_VTK)
-    find_package(VTK REQUIRED)
+    find_package (VTK REQUIRED)
     include (${VTK_USE_FILE}) # Sets necessary includes_directories
     add_definitions (-D__VTK_MODULE)
     #include_directories (${VTK_INCLUDE_DIRS})
-    set (LIBS ${LIBS} ${VTK_LIBRARIES})
+    set (EXT_LIBS ${EXT_LIBS} ${VTK_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} parmetis)
-endif (USE_VTK)
+endif ()
 
 if (USE_PARMETIS)
     if (PARMETIS_DIR)
-        find_library (PARMETIS_LIB  NAMES parmetis PATH "${PARMETIS_DIR}/lib")
+        find_library (PARMETIS_LIB parmetis PATH "${PARMETIS_DIR}/lib")
         include_directories ("${PARMETIS_DIR}/include")
     endif ()
     if (${PARMETIS_LIB} STREQUAL "parmetis-NOTFOUND")
         message (FATAL_ERROR "Parmetis library not found")
     endif ()
-    set (LIBS ${LIBS} parmetis)
+    set (EXT_LIBS ${EXT_LIBS} parmetis)
     set (MODULE_LIST ${MODULE_LIST} parmetis)
     set (USE_MPI ON)
     add_definitions (-D__PARMETIS_MODULE)
-endif (USE_PARMETIS)
+endif ()
 
 if (USE_SLEPC)
     if (SLEPC_DIR)
@@ -171,51 +193,51 @@ if (USE_SLEPC)
     else ()
         find_library (SLEPC_LIBS NAMES slepc)
     endif ()
-    if (${SLEPC_LIB} STREQUAL "slepc-NOTFOUND")
+    if (${SLEPC_LIBS} STREQUAL "slepc-NOTFOUND")
         message (FATAL_ERROR "SLEPc library not found")
     endif ()
-    set (LIBS ${LIBS} ${SLEPC_LIBS})
+    set (EXT_LIBS ${EXT_LIBS} ${SLEPC_LIBS})
     set (MODULE_LIST ${MODULE_LIST} slepc)
     set (USE_PETSC ON)
     add_definitions (-D__SLEPC_MODULE)
-endif (USE_SLEPC)
+endif ()
 
 if (USE_PETSC)
     find_package (PETSc REQUIRED HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/conf")
     include_directories ("${MY_PETSC_DIR}/include" "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/include" ${PETSC_INCLUDE_PATH})
-    set (LIBS ${LIBS} ${PETSC_PACKAGE_LIBS} "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/libpetsc.so")
+    set (EXT_LIBS ${EXT_LIBS} ${PETSC_PACKAGE_LIBS} "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/libpetsc.so")
     set (MODULE_LIST ${MODULE_LIST} PETSc)
     set (USE_MPI ON)
     add_definitions (-D__PETSC_MODULE)
-endif (USE_PETSC)
+endif ()
 
 if (USE_MPI)
     if (MPI_DIR)
         include_directories ("${MPI_DIR}/include")
         link_directories ("${MPI_DIR}/lib")
-        set (LIBS ${LIBS} mpi_cxx)
+        set (EXT_LIBS ${EXT_LIBS} mpi_cxx)
     else ()
         include (FindMPI)
         find_package (MPI REQUIRED)
         set (CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILES_FLAGS} ${MPI_COMPILE_FLAGS})
         set (CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
-        add_definitions(-DMPICH_IGNORE_CXX_SEEK)
+        add_definitions (-DMPICH_IGNORE_CXX_SEEK)
         include_directories (${MPI_INCLUDE_PATH})
-        set (LIBS ${LIBS} ${MPI_LIBRARIES})
+        set (EXT_LIBS ${EXT_LIBS} ${MPI_LIBRARIES})
     endif (MPI_DIR)
     set (MODULE_LIST ${MODULE_LIST} MPI)
     # Compile and link flags?
-endif (USE_MPI)
+endif ()
 
 if (USE_TRIANGLE)
     find_library (TRIANGLE_LIB triangle DOC "Triangle (library)")
-    if (${TRIANGLE_LIB} STREQUAL "triangle-NOTFOUND")
-        message (FATAL_ERROR "Triangle not found")
+    if (${TRIANGLE_LIB} STREQUAL "TRIANGLE_LIB-NOTFOUND")
+        message (FATAL_ERROR "Triangle library not found")
     endif ()
     add_definitions (-D__TRIANGLE_MODULE)
-    set (LIBS ${LIBS} ${TRIANGLE_LIB})
+    set (EXT_LIBS ${EXT_LIBS} ${TRIANGLE_LIB})
     set (MODULE_LIST ${MODULE_LIST} Triangle)
-endif (USE_TRIANGLE)
+endif ()
 
 if (USE_TINYXML)
     find_library (TINYXML_LIB tinyxml DOC "TinyXML library")
@@ -223,9 +245,9 @@ if (USE_TINYXML)
         message (FATAL_ERROR "TinyXML not found")
     endif ()
     add_definitions (-D__TINYXML_MODULE -DTIXML_USE_STL)
-    set (LIBS ${LIBS} ${TINYXML_LIB})
+    set (EXT_LIBS ${EXT_LIBS} ${TINYXML_LIB})
     set (MODULE_LIST ${MODULE_LIST} TinyXML)
-endif (USE_TINYXML)
+endif ()
 
 if (USE_IML)
     if (IML_DIR)
@@ -242,11 +264,11 @@ if (USE_IML)
     endif ()
     add_definitions (-D__IML_MODULE)
     set (MODULE_LIST ${MODULE_LIST} iml++)
-endif (USE_IML)
+endif ()
 
 if (USE_SPOOLES)
     if (SPOOLES_DIR)
-        find_library (SPOOLES_LIB spooles DOC "SPOOLES library" PATH "${SPOOLES_DIR/lib")
+        find_library (SPOOLES_LIB spooles DOC "SPOOLES library" PATH "${SPOOLES_DIR}/lib")
         include_directories ("${SPOOLES_DIR}/include")
     else ()
         find_library (SPOOLES_LIB spooles DOC "SPOOLES library")
@@ -255,9 +277,9 @@ if (USE_SPOOLES)
         message (FATAL_ERROR "SPOOLES not found")
     endif ()
     add_definitions (-D__SPOOLES_MODULE)
-    set (LIBS ${LIBS} ${SPOOLES_LIB})
+    set (EXT_LIBS ${EXT_LIBS} ${SPOOLES_LIB})
     set (MODULE_LIST ${MODULE_LIST} SPOOLES)
-endif (USE_SPOOLES)
+endif ()
 
 if (USE_PYTHON_BINDINGS)
     find_package(Boost COMPONENTS python REQUIRED)
@@ -265,9 +287,12 @@ if (USE_PYTHON_BINDINGS)
     include_directories (${PYTHON_INCLUDE_DIRS})
     include_directories (${Boost_INCLUDE_DIRS})
     include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
+    set (LIBS ${LIBS} oofempy)
+    set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} Python)
     add_definitions(-DBOOST_PYTHON)
 endif ()
+
 
 #######################################################################
 ######################## Configuration ################################
@@ -305,47 +330,43 @@ configure_file (
 add_subdirectory ("${oofem_SOURCE_DIR}/src/oofemlib")
 if (USE_DSS)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/dss")
-endif (USE_DSS)
+endif ()
 if (USE_SM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/sm")
-endif (USE_SM)
+endif ()
 if (USE_TM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/tm")
-endif (USE_TM)
+endif ()
 if (USE_FM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/fm")
-endif (USE_FM)
+endif ()
 if (USE_PYTHON_BINDINGS)
     add_library(oofempy ${oofem_SOURCE_DIR}/bindings/python/oofemlib.cpp)
 endif ()
 
+# TODO: proper lib+main split. (goal: make a single liboofem.* + linked oofem executable)
 # Main targets
-add_library(liboofem
+add_library (liboofem
     # These doesn't really belong in main;
     ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
     ${oofem_SOURCE_DIR}/src/main/classfactory.C
     )
-target_link_libraries (liboofem ${LIBS} 
-    )
-if (USE_PYTHON_BINDINGS)
-    target_link_libraries (liboofem ${LIBS} ${PYTHON_LIBRARIES})
-    target_link_libraries (liboofem ${LIBS} ${Boost_LIBRARIES})
-endif ()
+target_link_libraries (liboofem ${LIBS} ${EXT_LIBS})
 set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
 
 add_executable (oofem
     ${oofem_SOURCE_DIR}/src/main/main.C
     )
-target_link_libraries (oofem ${LIBS} liboofem)
+target_link_libraries (oofem ${LIBS} liboofem ${EXT_LIBS})
 
-install(TARGETS oofem
+install (TARGETS oofem
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     )
 
 if (USE_OOFEG)
     add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
-    target_link_libraries (oofeg liboofem)
+    target_link_libraries (oofeg ${LIBS} liboofem ${EXT_LIBS})
     install(TARGETS oofeg 
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
@@ -355,7 +376,6 @@ endif ()
 #######################################################################
 ######################## Documentation ################################
 #######################################################################
-# Not done yet, and i'm not sure if it's suitable.
 find_package (Doxygen)
 if (DOXYGEN_FOUND)
     set (DOXYGEN_INPUT ${oofem_BINARY_DIR}/doxygen.cfg)
@@ -382,22 +402,21 @@ configure_file (
     "${oofem_SOURCE_DIR}/doc/include.tex.in"
     "${oofem_BINARY_DIR}")
 
+# TODO: Manuals not done yet
 add_custom_target (
     elementlibmanual
-    COMMAND pdflatex elgmentlibmanual --output=${oofem_BINARY_DIR}/doc/
+    COMMAND pdflatex elementlibmanual --output=${oofem_BINARY_DIR}/doc/
     COMMAND pdflatex elementlibmanual --output=${oofem_BINARY_DIR}/doc/
     #COMMAND tex4ht elementlibmanual --output=${oofem_BINARY_DIR}/doc/
     WORKING_DIRECTORY ${oofem_SOURCE_DIR}/doc/elementlibmanual/
     )
 
-#add_custom_command(documentation command "cd doc; make pdf")
-#add_custom_command(documentation command "cd doc/elementlibmanual; make pdf")
-
 #######################################################################
 ######################## Tests ########################################
 #######################################################################
 # This isn't perfect/elegant, partly due to the how tests work.
-# TODO: Would like to run oofem from the binary dir
+# TODO: Would like to run oofem from the binary dir (avoids creating *.out files in the source dir)
+# unfortunately, that doesn't work for some tests that require sub-files using relative paths.
 # TODO: Inconsistent naming of parallel tests are cumbersome. Trivial to fix.
 enable_testing ()
 include (CTest)
@@ -495,16 +514,16 @@ if (WIN32)
     set(CPACK_GENERATOR "ZIP")
 else ()
     set (CPACK_GENERATOR "TGZ;DEB")
-endif (WIN32)
+endif ()
 
 ### source package (type "make source_package" to produce a zip)
-set(CPACK_SOURCE_GENERATOR "ZIP")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "oofem-${CPACK_PACKAGE_VERSION}")
-set(CPACK_SOURCE_IGNORE_FILES "*~;~$;[.]sw$;/[.]svn/;/[.]git/;.gitignore;/build/;tags;cscope.*;*.out")
+set (CPACK_SOURCE_GENERATOR "ZIP")
+set (CPACK_SOURCE_PACKAGE_FILE_NAME "oofem-${CPACK_PACKAGE_VERSION}")
+set (CPACK_SOURCE_IGNORE_FILES "*~;~$;[.]sw$;/[.]svn/;/[.]git/;.gitignore;/build/;tags;cscope.*;*.out")
 
 ### deb package options
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Mikael Öhman <micketeer@gmail.com>")
-set(CPACK_DEBIAN_PACKAGE_SECTION "Mathematics")
+set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Mikael Öhman <micketeer@gmail.com>")
+set (CPACK_DEBIAN_PACKAGE_SECTION "Mathematics")
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 else ()
@@ -517,4 +536,4 @@ set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
 set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}+sid1")
 
-include(CPack)
+include (CPack)

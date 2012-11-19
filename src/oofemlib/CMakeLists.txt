@@ -222,7 +222,7 @@ set (oofemlib_bc
     surfacetensionbc.C
     )
 
-add_library(oofemlib
+add_library(core
     ${oofemlib_iml} # TODO: Make this optional
     ${oofemlib_unsorted}
     ${oofemlib_oofeg}
