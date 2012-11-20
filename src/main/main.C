@@ -362,3 +362,11 @@ void oofem_debug(EngngModel *emodel)
     //exit(1);
 #endif
 }
+
+// Empty functions just so that we can link to the library even with oofeg compilation.
+#ifdef __OOFEG
+void ESICustomize(Widget parent_pane) { }
+oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
+EView *myview;
+void deleteLayerGraphics(int iLayer) { }
+#endif
