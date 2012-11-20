@@ -4,7 +4,6 @@ include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
-include (FindPythonInterp)
 
 project (oofem)
 set (oofem_VERSION_MAJOR 2)
@@ -153,6 +152,10 @@ if (USE_OOFEG)
     set (MODULE_LIST ${MODULE_LIST} oofeg)
 endif ()
 
+if (BUILD_TESTING)
+    find_package(PythonInterp)
+endif ()
+
 #######################################################################
 ######################## External libaries ############################
 #######################################################################
@@ -282,8 +285,11 @@ if (USE_SPOOLES)
 endif ()
 
 if (USE_PYTHON_BINDINGS)
-    find_package(Boost COMPONENTS python REQUIRED)
-    find_package(PythonLibs REQUIRED)
+    # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
+    find_package(PythonInterp)
+    find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
+    # and we have to make sure we find the same boost library ABI
+    find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
     include_directories (${Boost_INCLUDE_DIRS})
     include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
