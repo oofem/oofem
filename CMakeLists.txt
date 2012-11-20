@@ -84,10 +84,12 @@ include_directories ("${oofem_SOURCE_DIR}/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
+set (LIBS ${LIBS} $<TARGET_OBJECTS:core>) # Definitely not optional.
+
 if (USE_FM)
     include_directories ("${oofem_SOURCE_DIR}/src/fm")
     add_definitions (-D__FM_MODULE)
-    set (LIBS ${LIBS} fm)
+    set (LIBS ${LIBS} $<TARGET_OBJECTS:fm>)
     set (MODULE_LIST ${MODULE_LIST} fm)
 endif ()
 
@@ -95,7 +97,7 @@ if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm")
     include_directories ("${oofem_SOURCE_DIR}/src/tm/cemhyd")
     add_definitions (-D__TM_MODULE)
-    set (LIBS ${LIBS} tm)
+    set (LIBS ${LIBS} $<TARGET_OBJECTS:tm>)
     set (MODULE_LIST ${MODULE_LIST} tm)
     if (USE_CEMHYD)
         add_definitions (-D__CEMHYD_MODULE)
@@ -106,16 +108,14 @@ endif ()
 if (USE_SM)
     include_directories ("${oofem_SOURCE_DIR}/src/sm")
     add_definitions (-D__SM_MODULE)
-    set (LIBS ${LIBS} sm)
+    set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
     set (MODULE_LIST ${MODULE_LIST} sm)
 endif ()
-
-set (LIBS ${LIBS} core) # core == src/oofemlib (TODO: rename the folder?)
 
 if (USE_DSS)
     include_directories ("${oofem_SOURCE_DIR}/src/dss")
     add_definitions (-D__DSS_MODULE)
-    set (LIBS ${LIBS} dss)
+    set (LIBS ${LIBS} $<TARGET_OBJECTS:dss>)
     set (MODULE_LIST ${MODULE_LIST} dss)
 endif ()
 
@@ -148,7 +148,7 @@ if (USE_OOFEG)
     include_directories ("${ELIXIR_DIR}/include")
     include_directories ("${CKIT_DIR}/include")
 
-    set (LIBS ${LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${XAW_LIB})
+    set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${XAW_LIB})
     set (MODULE_LIST ${MODULE_LIST} oofeg)
 endif ()
 
@@ -285,7 +285,7 @@ endif ()
 
 if (USE_PYTHON_BINDINGS)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    find_package(PythonInterp)
+    find_package(PythonInterp 3 REQUIRED)
     find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
     find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
@@ -356,8 +356,9 @@ add_library (liboofem
     ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
     ${oofem_SOURCE_DIR}/src/main/classfactory.C
     ${oofempy}
+    ${LIBS} 
     )
-target_link_libraries (liboofem ${LIBS} ${EXT_LIBS})
+target_link_libraries (liboofem ${EXT_LIBS})
 set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
 
 add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
@@ -420,7 +421,6 @@ add_custom_target (
 # This isn't perfect/elegant, partly due to the how tests work.
 # TODO: Would like to run oofem from the binary dir (avoids creating *.out files in the source dir)
 # unfortunately, that doesn't work for some tests that require sub-files using relative paths.
-# TODO: Inconsistent naming of parallel tests are cumbersome. Trivial to fix.
 enable_testing ()
 include (CTest)
 
@@ -451,8 +451,6 @@ exit(0)
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
-    set (parallel_tests 4test bar barnl brazil brazil3d dyn_bar01 dyn_bar02 dyn_bar03)
-    #file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     add_test (NAME 4test_test COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd} -ksp_rtol 1.e-15" "p")
     add_test (NAME bar_test COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
     add_test (NAME barnl_test COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
@@ -461,9 +459,11 @@ if (USE_PARALLEL)
     add_test (NAME dyn_bar01_test COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
     add_test (NAME dyn_bar02_test COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
     add_test (NAME dyn_bar03_test COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
-    # The tests requires different commands, and the files and named inconsistently. Some slight changes to naming could change this.
+    # TODO: The tests requires different commands, and the files and named inconsistently. Some slight changes to naming could change this.
+    # The flags are a bit trickier. It needs to be built into the input file.
+    #file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     #foreach (case ${parallel_tests})
-    #    add_test (${case}_test ${test_cmd} ${case}.oofem.in ${par_DIR}/${case} ${oofem_cmd} "p")
+    #    add_test (${case}_test ${test_cmd} ${case}.oofem.in ${par_dir}/${case} ${oofem_cmd} "p")
     #endforeach (case)
 
 else () # Non-parallel test cases
@@ -471,7 +471,6 @@ else () # Non-parallel test cases
     file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
     file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
     file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
-    #file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/partests/" "${oofem_TEST_DIR}/tm/*.in") # should run the parallel tests as well.
     foreach (case ${sm_tests})
         add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/sm ${oofem_cmd} "s")
     endforeach (case)
@@ -512,7 +511,7 @@ set (CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 set (CPACK_PACKAGE_EXECUTABLES "oofem")
 set (CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR})
 
-### generators (TODO: Not sure if we need to specify this)
+### default generators
 if (WIN32)
     set(CPACK_GENERATOR "ZIP")
 else ()

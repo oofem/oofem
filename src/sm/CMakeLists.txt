@@ -172,7 +172,7 @@ set (sm
     )
 
 add_library(sm
-    STATIC
+    OBJECT
     ${sm}
     )
 

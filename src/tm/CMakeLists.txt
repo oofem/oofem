@@ -47,6 +47,6 @@ set (tm
     )
 
 add_library (tm
-    STATIC
+    OBJECT
     ${tm}
     )

@@ -244,6 +244,6 @@ set (core
     )
 
 add_library (core
-    STATIC
+    OBJECT
     ${core}
     )

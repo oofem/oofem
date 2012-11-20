@@ -63,6 +63,6 @@ set (fm
     )
 
 add_library (fm
-    STATIC
+    OBJECT
     ${fm}
     )
