@@ -2,7 +2,7 @@ if (USE_CEMHYD)
     set (tm_cemhyd
         cemhyd/cemhydmat.C
         )
-endif (USE_CEMHYD)
+endif ()
 
 set (tm_emodel 
     stationarytransportproblem.C
@@ -37,11 +37,16 @@ set (tm_material
     anisomassmat.C
     )
 
-add_library(tm
+set (tm
     ${tm_emodel}
     ${tm_element}
     ${tm_material}
     ${tm_status}
     ${tm_new}
     ${tm_cemhyd}
+    )
+
+add_library (tm
+    STATIC
+    ${tm}
     )

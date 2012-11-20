@@ -51,7 +51,7 @@ set (fm_levelset
     fastmarchingmethod.C
     )
 
-add_library(fm
+set (fm
     ${fm_emodel}
     ${fm_element}
     ${fm_material}
@@ -60,4 +60,9 @@ add_library(fm
     ${fm_interface}
     ${fm_levelset}
     ${fm_new}
+    )
+
+add_library (fm
+    STATIC
+    ${fm}
     )

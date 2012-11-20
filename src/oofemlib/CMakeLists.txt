@@ -1,8 +1,5 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/xfem)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/iga)
-
 # Much to organize
-set (oofemlib_unsorted
+set (core_unsorted
     femcmpnn.C domain.C timestep.C metastep.C gausspnt.C
     cltypes.C clock.C dictionr.C freestor.C
     conTable.C compiler.C error.C mathfem.C logger.C util.C
@@ -36,22 +33,22 @@ set (oofemlib_unsorted
 #oofegutils
 #structeigenstrainload
 
-set (oofemlib_iml
+set (core_iml
     iml/dyncomprow.C iml/dyncompcol.C iml/symcompcol.C iml/compcol.C
     iml/precond.C iml/voidprecond.C iml/icprecond.C iml/iluprecond.C iml/ilucomprowprecond.C iml/diagpre.C
     iml/imlsolver.C
     )
 
-set (oofemlib_oofeg oofeggraphiccontext.C)
+set (core_oofeg oofeggraphiccontext.C)
 
-set (oofemlib_nodalrecovery
+set (core_nodalrecovery
     nodalrecoverymodel.C
     zznodalrecoverymodel.C
     nodalaveragingrecoverymodel.C
     sprnodalrecoverymodel.C
     )
 
-set (oofemlib_dofs
+set (core_dofs
     dof.C
     masterdof.C
     simpleslavedof.C
@@ -59,7 +56,7 @@ set (oofemlib_dofs
     activedof.C
     )
 
-set (oofemlib_nm
+set (core_nm
     sparselinsystemnm.C
     nrsolver.C
     nrsolver2.C
@@ -70,7 +67,7 @@ set (oofemlib_nm
     petscsolver.C
     )
 
-set (oofemlib_fields
+set (core_fields
     fieldmanager.C
     field.C
     primaryfield.C
@@ -79,7 +76,7 @@ set (oofemlib_fields
     dofdistributedprimaryfield.C
     )
 
-set (oofemlib_ltf
+set (core_ltf
     loadtime.C
     constant.C
     heavisideltf.C
@@ -90,18 +87,18 @@ set (oofemlib_ltf
     usrdeftimefunct.C
     )
 
-set (oofemlib_cs
+set (core_cs
     crosssection.C
     emptycs.C
     simplecrosssection.C
     structuralcrosssection.C
     )
 
-set (oofemlib_td
+set (core_td
     #particletopologydescription.C
     )
 
-set (oofemlib_dofman
+set (core_dofman
     dofmanager.C
     node.C
     slavenode.C
@@ -111,14 +108,14 @@ set (oofemlib_dofman
     elementside.C
     )
 
-set (oofemlib_material
+set (core_material
     material.C
     structuralmaterial.C
     isolinearelasticmaterial.C
     linearelasticmaterial.C
     )
 
-set (oofemlib_export
+set (core_export
     outputmanager.C
     exportmodule.C
     exportmodulemanager.C
@@ -127,7 +124,7 @@ set (oofemlib_export
     homexportmodule.C
     )
 
-set (oofemlib_iga
+set (core_iga
     iga/iga.C
     iga/feibspline.C
     iga/feinurbs.C
@@ -138,7 +135,7 @@ set (oofemlib_iga
     iga/igaelements.C
     )
 
-set (oofemlib_arrays
+set (core_arrays
     intarray.C
     flotarry.C
     stressstrainbasevector.C
@@ -149,18 +146,18 @@ set (oofemlib_arrays
     petscsparsemtrx.C
     )
 
-set (oofemlib_engng
+set (core_engng
     engngm.C
     structengngmodel.C
     )
 
-set (oofemlib_element
+set (core_element
     element.C
     structuralelement.C
     nlstructuralelement.C
     )
 
-set (oofemlib_fei
+set (core_fei
     feinterpol.C
     fei1dlin.C
     fei1dquad.C
@@ -180,7 +177,7 @@ set (oofemlib_fei
     fei3dhexaquad.C
     )
 
-set (oofemlib_xfem
+set (core_xfem
     xfem/delaunay.C
     xfem/xfemelementinterface.C
     xfem/enrichmentfunction.C
@@ -190,7 +187,7 @@ set (oofemlib_xfem
     xfem/patchintegrationrule.C
     )
 
-set (oofemlib_parallel
+set (core_parallel
     communicator.C
     processcomm.C
     problemcomm.C
@@ -204,7 +201,7 @@ set (oofemlib_parallel
     nonlocalmatwtp.C
     )
 
-set (oofemlib_bc
+set (core_bc
     generalbc.C
     boundary.C
     prescribedgradient.C
@@ -222,26 +219,31 @@ set (oofemlib_bc
     surfacetensionbc.C
     )
 
-add_library(core
-    ${oofemlib_iml} # TODO: Make this optional
-    ${oofemlib_unsorted}
-    ${oofemlib_oofeg}
-    ${oofemlib_nodalrecovery}
-    ${oofemlib_dofs}
-    ${oofemlib_nm}
-    ${oofemlib_td}
-    ${oofemlib_fields}
-    ${oofemlib_dofman}
-    ${oofemlib_material}
-    ${oofemlib_export}
-    ${oofemlib_ltf}
-    ${oofemlib_cs}
-    ${oofemlib_arrays}
-    ${oofemlib_engng}
-    ${oofemlib_element}
-    ${oofemlib_fei}
-    ${oofemlib_xfem}
-    ${oofemlib_parallel}
-    ${oofemlib_bc}
-    ${oofemlib_iga}
+set (core
+    ${core_iml} # TODO: Make this optional
+    ${core_unsorted}
+    ${core_oofeg}
+    ${core_nodalrecovery}
+    ${core_dofs}
+    ${core_nm}
+    ${core_td}
+    ${core_fields}
+    ${core_dofman}
+    ${core_material}
+    ${core_export}
+    ${core_ltf}
+    ${core_cs}
+    ${core_arrays}
+    ${core_engng}
+    ${core_element}
+    ${core_fei}
+    ${core_xfem}
+    ${core_parallel}
+    ${core_bc}
+    ${core_iga}
+    )
+
+add_library (core
+    STATIC
+    ${core}
     )

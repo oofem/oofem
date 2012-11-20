@@ -153,7 +153,7 @@ set (sm_obsolete
     rankinepm.C
     )
 
-add_library(sm
+set (sm
     ${sm_element}
     ${sm_crosssection}
     ${sm_loads}
@@ -169,6 +169,11 @@ add_library(sm
     ${sm_parallel}
     ${sm_obsolete}
     ${sm_new}
+    )
+
+add_library(sm
+    STATIC
+    ${sm}
     )
 
 # Not included:

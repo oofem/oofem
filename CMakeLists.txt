@@ -14,7 +14,7 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "2012")
 set (oofem_EMAIL "info@oofem.org")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -fPIE")
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
@@ -170,7 +170,6 @@ if (USE_VTK)
     find_package (VTK REQUIRED)
     include (${VTK_USE_FILE}) # Sets necessary includes_directories
     add_definitions (-D__VTK_MODULE)
-    #include_directories (${VTK_INCLUDE_DIRS})
     set (EXT_LIBS ${EXT_LIBS} ${VTK_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} parmetis)
 endif ()
@@ -288,12 +287,10 @@ if (USE_PYTHON_BINDINGS)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
     find_package(PythonInterp)
     find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
-    # and we have to make sure we find the same boost library ABI
     find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
     include_directories (${Boost_INCLUDE_DIRS})
     include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
-    set (LIBS ${LIBS} oofempy)
     set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} Python)
     add_definitions(-DBOOST_PYTHON)
@@ -346,34 +343,36 @@ endif ()
 if (USE_FM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/fm")
 endif ()
+set (oofempy)
 if (USE_PYTHON_BINDINGS)
-    add_library(oofempy ${oofem_SOURCE_DIR}/bindings/python/oofemlib.cpp)
+    set (oofempy ${oofem_SOURCE_DIR}/bindings/python/oofemlib.cpp)
 endif ()
 
-# TODO: proper lib+main split. (goal: make a single liboofem.* + linked oofem executable)
+# TODO: static libraries (merge lib[fm|tm|sm|core].a + classfactories into liboofem.a
 # Main targets
 add_library (liboofem
+    SHARED
     # These doesn't really belong in main;
     ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
     ${oofem_SOURCE_DIR}/src/main/classfactory.C
+    ${oofempy}
     )
 target_link_libraries (liboofem ${LIBS} ${EXT_LIBS})
 set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
 
 add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-target_link_libraries (oofem ${LIBS} liboofem ${EXT_LIBS})
+target_link_libraries (oofem liboofem)
 
-install (TARGETS oofem
+install (TARGETS oofem liboofem
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     )
 
 if (USE_OOFEG)
     add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
-    target_link_libraries (oofeg ${LIBS} liboofem ${EXT_LIBS})
+    target_link_libraries (oofeg liboofem)
     install(TARGETS oofeg 
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
         )
 endif ()
 
@@ -523,7 +522,7 @@ endif ()
 ### source package (type "make source_package" to produce a zip)
 set (CPACK_SOURCE_GENERATOR "ZIP")
 set (CPACK_SOURCE_PACKAGE_FILE_NAME "oofem-${CPACK_PACKAGE_VERSION}")
-set (CPACK_SOURCE_IGNORE_FILES "*~;~$;[.]sw$;/[.]svn/;/[.]git/;.gitignore;/build/;tags;cscope.*;*.out")
+set (CPACK_SOURCE_IGNORE_FILES "[.]*~;~$;[.]sw$;/[.]svn/;/[.]git/;.gitignore;/build/;tags;cscope.*;[.]*.out")
 
 ### deb package options
 set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Mikael Öhman <micketeer@gmail.com>")
