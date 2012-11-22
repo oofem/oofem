@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.8) # >= 2.8.8 necessary for $<TARGET_OBJECTS:objlib>
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
@@ -47,6 +47,7 @@ set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
+option (USE_SHARED_LIB "Use shared library (necessary for python bindings)" ON)
 # Parallell stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
@@ -285,7 +286,7 @@ endif ()
 
 if (USE_PYTHON_BINDINGS)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    find_package(PythonInterp 3 REQUIRED)
+    find_package(PythonInterp REQUIRED)
     find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
     find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
@@ -348,7 +349,6 @@ if (USE_PYTHON_BINDINGS)
     set (oofempy ${oofem_SOURCE_DIR}/bindings/python/oofemlib.cpp)
 endif ()
 
-# TODO: static libraries (merge lib[fm|tm|sm|core].a + classfactories into liboofem.a
 # Main targets
 add_library (liboofem
     SHARED
@@ -360,21 +360,42 @@ add_library (liboofem
     )
 target_link_libraries (liboofem ${EXT_LIBS})
 set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
+if (USE_SHARED_LIB)
+    install (TARGETS liboofem DESTINATION lib)
+endif ()
 
-add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-target_link_libraries (oofem liboofem)
-
-install (TARGETS oofem liboofem
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
+# Optional static lib (only compiled and installed if explicitly called):
+add_library (liboofem_static
+    STATIC
+    EXCLUDE_FROM_ALL
+    # These doesn't really belong in main;
+    ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
+    ${oofem_SOURCE_DIR}/src/main/classfactory.C
+    ${oofempy}
+    ${LIBS} 
     )
+target_link_libraries (liboofem_static ${EXT_LIBS})
+set_target_properties (liboofem_static PROPERTIES OUTPUT_NAME oofem)
+install (TARGETS liboofem_static DESTINATION lib OPTIONAL)
+
+# OOFEM target;
+add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
+if (USE_SHARED_LIB)
+    target_link_libraries (oofem liboofem)
+else ()
+    target_link_libraries (oofem liboofem_static)
+endif ()
+install (TARGETS oofem DESTINATION bin)
 
 if (USE_OOFEG)
+    #  OOFEG target:
     add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
-    target_link_libraries (oofeg liboofem)
-    install(TARGETS oofeg 
-        RUNTIME DESTINATION bin
-        )
+    if (USE_SHARED_LIB)
+        target_link_libraries (oofeg liboofem)
+    else ()
+        target_link_libraries (oofeg liboofem_static)
+    endif ()
+    install(TARGETS oofeg DESTINATION bin)
 endif ()
 
 #######################################################################
