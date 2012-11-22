@@ -47,7 +47,8 @@ set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
-option (USE_SHARED_LIB "Use shared library (necessary for python bindings)" ON)
+option (USE_SHARED_LIB "Build shared library" ON)
+option (USE_STATIC_LIB "Build static library" OFF)
 # Parallell stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
@@ -350,37 +351,40 @@ if (USE_PYTHON_BINDINGS)
 endif ()
 
 # Main targets
-add_library (liboofem
-    SHARED
-    # These doesn't really belong in main;
-    ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
-    ${oofem_SOURCE_DIR}/src/main/classfactory.C
-    ${oofempy}
-    ${LIBS} 
-    )
-target_link_libraries (liboofem ${EXT_LIBS})
-set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
 if (USE_SHARED_LIB)
+    add_library (liboofem
+        SHARED
+        # These doesn't really belong in main;
+        ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
+        ${oofem_SOURCE_DIR}/src/main/classfactory.C
+        ${oofempy}
+        ${LIBS} 
+        )
+    target_link_libraries (liboofem ${EXT_LIBS})
+    set_target_properties (liboofem PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem DESTINATION lib)
+else ()
+    set (USE_STATIC_LIB ON)
 endif ()
 
 # Optional static lib (only compiled and installed if explicitly called):
-add_library (liboofem_static
-    STATIC
-    EXCLUDE_FROM_ALL
-    # These doesn't really belong in main;
-    ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
-    ${oofem_SOURCE_DIR}/src/main/classfactory.C
-    ${oofempy}
-    ${LIBS} 
-    )
-target_link_libraries (liboofem_static ${EXT_LIBS})
-set_target_properties (liboofem_static PROPERTIES OUTPUT_NAME oofem)
-install (TARGETS liboofem_static DESTINATION lib OPTIONAL)
+if (USE_STATIC_LIB)
+    add_library (liboofem_static
+        STATIC
+        # These doesn't really belong in main;
+        ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
+        ${oofem_SOURCE_DIR}/src/main/classfactory.C
+        ${oofempy}
+        ${LIBS} 
+        )
+    target_link_libraries (liboofem_static ${EXT_LIBS})
+    set_target_properties (liboofem_static PROPERTIES OUTPUT_NAME oofem)
+    install (TARGETS liboofem_static DESTINATION lib)
+endif ()
 
 # OOFEM target;
 add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-if (USE_SHARED_LIB)
+if (USE_SHARED_LIB) # Prefer dynamic lib if available.
     target_link_libraries (oofem liboofem)
 else ()
     target_link_libraries (oofem liboofem_static)
