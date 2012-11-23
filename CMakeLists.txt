@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.8) # >= 2.8.8 necessary for $<TARGET_OBJECTS:objlib>
+cmake_minimum_required (VERSION 2.8) # >= 2.8.8 necessary for $<TARGET_OBJECTS:objlib>
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
@@ -16,7 +16,6 @@ set (oofem_EMAIL "info@oofem.org")
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-#set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -fPIE")
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
 # Default is debug build
@@ -47,8 +46,10 @@ set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
-option (USE_SHARED_LIB "Build shared library" ON)
-option (USE_STATIC_LIB "Build static library" OFF)
+if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
+    option (USE_SHARED_LIB "Build shared library" ON)
+    option (USE_STATIC_LIB "Build static library" OFF)
+endif ()
 # Parallell stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
@@ -86,12 +87,20 @@ include_directories ("${oofem_SOURCE_DIR}/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
-set (LIBS ${LIBS} $<TARGET_OBJECTS:core>) # Definitely not optional.
+if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+    set (LIBS ${LIBS} core)
+else ()
+    set (LIBS ${LIBS} $<TARGET_OBJECTS:core>)
+endif ()
 
 if (USE_FM)
     include_directories ("${oofem_SOURCE_DIR}/src/fm")
     add_definitions (-D__FM_MODULE)
-    set (LIBS ${LIBS} $<TARGET_OBJECTS:fm>)
+    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+        set (LIBS ${LIBS} fm)
+    else ()
+        set (LIBS ${LIBS} $<TARGET_OBJECTS:fm>)
+    endif ()
     set (MODULE_LIST ${MODULE_LIST} fm)
 endif ()
 
@@ -99,7 +108,11 @@ if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm")
     include_directories ("${oofem_SOURCE_DIR}/src/tm/cemhyd")
     add_definitions (-D__TM_MODULE)
-    set (LIBS ${LIBS} $<TARGET_OBJECTS:tm>)
+    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+        set (LIBS ${LIBS} tm)
+    else ()
+        set (LIBS ${LIBS} $<TARGET_OBJECTS:tm>)
+    endif ()
     set (MODULE_LIST ${MODULE_LIST} tm)
     if (USE_CEMHYD)
         add_definitions (-D__CEMHYD_MODULE)
@@ -110,14 +123,22 @@ endif ()
 if (USE_SM)
     include_directories ("${oofem_SOURCE_DIR}/src/sm")
     add_definitions (-D__SM_MODULE)
-    set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
+    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+        set (LIBS ${LIBS} sm)
+    else ()
+        set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
+    endif ()
     set (MODULE_LIST ${MODULE_LIST} sm)
 endif ()
 
 if (USE_DSS)
     include_directories ("${oofem_SOURCE_DIR}/src/dss")
     add_definitions (-D__DSS_MODULE)
-    set (LIBS ${LIBS} $<TARGET_OBJECTS:dss>)
+    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+        set (LIBS ${LIBS} dss)
+    else ()
+        set (LIBS ${LIBS} $<TARGET_OBJECTS:dss>)
+    endif ()
     set (MODULE_LIST ${MODULE_LIST} dss)
 endif ()
 
@@ -332,6 +353,11 @@ configure_file (
 ######################## Targets ######################################
 #######################################################################
 # Subtargets
+if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+    set (LIB_TYPE STATIC)
+else ()
+    set (LIB_TYPE OBJECT)
+endif ()
 add_subdirectory ("${oofem_SOURCE_DIR}/src/oofemlib")
 if (USE_DSS)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/dss")
@@ -351,6 +377,9 @@ if (USE_PYTHON_BINDINGS)
 endif ()
 
 # Main targets
+if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+    set (USE_SHARED_LIB OFF)
+endif ()
 if (USE_SHARED_LIB)
     add_library (liboofem
         SHARED
@@ -369,15 +398,26 @@ endif ()
 
 # Optional static lib (only compiled and installed if explicitly called):
 if (USE_STATIC_LIB)
-    add_library (liboofem_static
-        STATIC
-        # These doesn't really belong in main;
-        ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
-        ${oofem_SOURCE_DIR}/src/main/classfactory.C
-        ${oofempy}
-        ${LIBS} 
-        )
-    target_link_libraries (liboofem_static ${EXT_LIBS})
+    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+        add_library (liboofem_static
+            STATIC
+            # These doesn't really belong in main;
+            ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
+            ${oofem_SOURCE_DIR}/src/main/classfactory.C
+            ${oofempy}
+            )
+        target_link_libraries (liboofem_static ${LIBS} ${LIBS} ${EXT_LIBS})
+    else ()
+        add_library (liboofem_static
+            STATIC
+            # These doesn't really belong in main;
+            ${oofem_SOURCE_DIR}/src/main/usrdefsub.C
+            ${oofem_SOURCE_DIR}/src/main/classfactory.C
+            ${oofempy}
+            ${LIBS} 
+            )
+        target_link_libraries (liboofem_static ${EXT_LIBS})
+    endif ()
     set_target_properties (liboofem_static PROPERTIES OUTPUT_NAME oofem)
     install (TARGETS liboofem_static DESTINATION lib)
 endif ()
@@ -387,7 +427,11 @@ add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
     target_link_libraries (oofem liboofem)
 else ()
-    target_link_libraries (oofem liboofem_static)
+    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
+        target_link_libraries (oofem ${LIBS} liboofem_static ${LIBS} ${LIBS}) # Cyclic dependencies.
+    else ()
+        target_link_libraries (oofem liboofem_static)
+    endif ()
 endif ()
 install (TARGETS oofem DESTINATION bin)
 
@@ -397,7 +441,7 @@ if (USE_OOFEG)
     if (USE_SHARED_LIB)
         target_link_libraries (oofeg liboofem)
     else ()
-        target_link_libraries (oofeg liboofem_static)
+        target_link_libraries (oofeg liboofem_static liboofem_static)
     endif ()
     install(TARGETS oofeg DESTINATION bin)
 endif ()

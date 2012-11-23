@@ -17,6 +17,6 @@ set (dss
     )
 
 add_library (dss
-    OBJECT
+    ${LIB_TYPE}
     ${dss}
     )
