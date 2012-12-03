@@ -50,18 +50,25 @@ namespace oofem {
  */
 class DustMaterialStatus : public StructuralMaterialStatus
 {
+public:
+    enum stateFlagValues { DM_Elastic, DM_Unloading, DM_Yielding1, DM_Yielding2, DM_Yielding3 };
+
 protected:
-	/// Volumetric plastic strain
-	double volumetricPlasticStrain;
-	double tempVolumetricPlasticStrain;
+    /// Deviatoric of plastic strain
+    StrainVector plasticStrain;
+    StrainVector tempPlasticStrain;
 
-	/// Deviatoric of plastic strain
-    StrainVector plasticStrainDeviator;
-    StrainVector tempPlasticStrainDeviator;
-	 double q;
-	 double tempQ;
+    double q;
+    double tempQ;
+    double mVol;
 
+    double bulkModulus;
+    double shearModulus;
+    double youngsModulus;
 
+    /// Indicates the state (i.e. elastic, yielding, vertex, unloading) of the Gauss point
+    int stateFlag;
+    int tempStateFlag;
 
 public:
     /// Constructor
@@ -79,65 +86,31 @@ public:
 
     virtual const char *giveClassName() const { return "DustMaterialStatus"; }
     virtual classType giveClassID() const { return DustMaterialStatusClass; }
-    /**
-     * Get the full plastic strain vector from the material status.
-     * @param answer Plastic strain vector.
-     */
-    void  giveFullPlasticStrainVector(StrainVector &answer) const
-    {
-        StrainVector plasticStrainVector(_3dMat);
-        plasticStrainDeviator.computeDeviatoricVolumetricSum(plasticStrainVector,
-                                                             volumetricPlasticStrain);
-        plasticStrainVector.convertToFullForm(answer);
-    }
-    /**
-     * Get the plastic strain deviator from the material status.
-     * @param answer Plastic strain deviator.
-     */
-    void givePlasticStrainDeviator(StrainVector &answer) const { answer = plasticStrainDeviator; }
-    /**
-     * Get the volumetric plastic strain from the material status.
-     * @return Volumetric plastic strain.
-     */
-    double giveVolumetricPlasticStrain() const { return volumetricPlasticStrain; }
-	 double giveQ() const { return q; }
 
-    /**
-     * Get the temp value of the full plastic strain vector from the material status.
-     * @param answer Temp value of plastic strain vector.
-     */
-    void giveTempPlasticStrainVector(StrainVector &answer) const
-    {
-        tempPlasticStrainDeviator.computeDeviatoricVolumetricSum(answer,
-                                                                 tempVolumetricPlasticStrain);
-    }
-    /**
-     * Get the temp value of the plastic strain deviator from the material status.
-     * @param answer Temp value of plastic strain deviator.
-     */
-    void giveTempPlasticStrainDeviator(StrainVector &answer) const { answer = tempPlasticStrainDeviator; }
-    /**
-     * Get the temp value of the volumetric strain deviator from the material status.
-     * @return Temp value of volumetric plastic strain
-     */
-    double giveTempVolumetricPlasticStrain() const { return tempVolumetricPlasticStrain; }
-    /**
-     * Get the temp value of the hardening variable from the material status.
-     * @return Temp value of hardening variable kappa.
-     */
-	  double giveTempQ() const { return tempQ; }
+    void givePlasticStrain(StrainVector &answer) const { answer = plasticStrain; }
+	 double giveVolumetricPlasticStrain() const { return plasticStrain.computeVolumetricPart(); }
+    double giveQ() const { return q; }
+    int giveStateFlag() const { return stateFlag; }
 
-    /**
-     * Assign the temp value of deviatoric plastic strain.
-     * @param v New temp value of deviatoric plastic strain.
-     */
-    void letTempPlasticStrainDeviatorBe(const StrainVector &v) { tempPlasticStrainDeviator = v; }
-    /**
-     * Assign the temp value of volumetric plastic strain.
-     * @param v New temp value of volumetric plastic strain.
-     */
-    void letTempVolumetricPlasticStrainBe(double v) { tempVolumetricPlasticStrain = v; }
-	 void letTempQBe(double q) { tempQ = q; }
+    void giveTempPlasticStrain(StrainVector &answer) const { answer = tempPlasticStrain; }
+    double giveTempQ() const { return tempQ; }
+    int giveTempStateFlag() const { return tempStateFlag; }
+
+    void letTempPlasticStrainBe(const StrainVector &v) { tempPlasticStrain = v; }
+    void letTempQBe(double v) { tempQ = v; }
+    void letTempStateFlagBe(int v) { tempStateFlag = v; }
+
+    void letPlasticStrainBe(const StrainVector &v) { plasticStrain = v; }
+    void letQBe(double v) { q = v; }
+
+    void setBulkModulus(double m) { bulkModulus = m; }
+    void setShearModulus(double m) { shearModulus = m; }
+    void setYoungsModulus(double m) { youngsModulus = m; }
+    double giveBulkModulus() { return bulkModulus; }
+    double giveShearModulus() { return shearModulus; }
+    double giveYoungsModulus() { return youngsModulus; }
+
+    void setMVol(double m) { mVol = m; }
 };
 
 /**
@@ -148,18 +121,49 @@ class DustMaterial : public StructuralMaterial
 {
 protected:
     IsotropicLinearElasticMaterial *LEMaterial;
-	 double bulkModulus;
-	 double shearModulus;
 
-	 double alpha;
-	 double beta;
-	 double lambda;
-	 double theta;
-	 double ft;
-	 double rEllipse;
-	 int hardeningType;
-	 double mHard;
-	   
+    double alpha;
+    double beta;
+    double lambda;
+    double theta;
+    double ft;
+    double rEll;
+    int hardeningType;
+    double mStiff;
+    double x0;
+    double q0;
+    double wHard;
+    double dHard;
+    double newtonTol;
+    int newtonIter;
+
+    double fFe(double i1);
+    double fFeDI1(double i1);
+    double fFeDI1DI1(double i1);
+    double fFc(double rho, double i1, double q);
+    double fX(double q);
+    double fXdQ(double q);
+    double yieldf1(double rho, double i1);
+    double yieldf2(double rho, double i1, double q);
+    double yieldf3(double i1);
+    void solveQ0(double &q0);
+    void computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp);
+    void performStressReturn(GaussPoint *gp, StrainVector strain);
+    void fM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void fM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void fM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    double fH(double q, double tempQ);
+    double fHdq(double tempQ);
+    double fI1(double q, double tempQ, double i1, double bulkModulus);
+    double fI1DQ(double tempQ, double bulkModulus);
+    void performF1return(double i1, double rho, GaussPoint *gp);
+    void performF2return(double i1, double rho, GaussPoint *gp);
+    void computeQFromPlastVolEps(double &answer, double q, double volumetricPlasticStrain);
+    double dGamma2(double tempQ, double q, double i1, double bulkModulus);
+    double dGamma2DQ(double tempQ, double q, double i1, double bulkModulus);
+    double fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus);
+    double fTempR2Dq(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus);
+
 public:
     /// Constructor
     DustMaterial(int n, Domain *d);
@@ -180,6 +184,8 @@ public:
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
                                        MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual int setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type);
 
     virtual int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
@@ -204,12 +210,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-	 double functionFe(double i1);
-	 double functionFc(double sn, double i1, double q);
-	 double functionX(double q);
-	 double yieldFunction1(double sn, double i1);
-	 double yieldFunction2(double sn, double i1, double q);
-	 double yieldFunction3(double i1);
+    double giveQ0() { return q0; }
 };
 } // end namespace oofem
 #endif // dustmat_h

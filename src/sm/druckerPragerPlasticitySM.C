@@ -607,6 +607,11 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
         break;
 
+    case SecantStiffness:
+        LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
+        break;
+
+
     case TangentStiffness:
         switch ( ( ( DruckerPragerPlasticitySMStatus * ) ( this->giveStatus(gp) ) )
                 ->giveTempStateFlag() ) {

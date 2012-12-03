@@ -344,4 +344,21 @@ StressStrainBaseVector :: transformTo(StressStrainBaseVector &answer, const Floa
     // convert back to reduced form
     answer.convertFromFullForm( fullAnswer, this->giveStressStrainMode() );
 }
+
+double
+StressStrainBaseVector :: computeVolumetricPart() const
+{
+    MaterialMode myMode = this->giveStressStrainMode();
+
+    if ( myMode == _1dMat ) {
+        // 1D model
+        OOFEM_ERROR("StressStrainBaseVector::computeVolumetricPart: No Split for 1D!");
+    } else if ( myMode == _PlaneStress ) {
+        // plane stress problem
+        OOFEM_ERROR("StressStrainBaseVector::computeVolumetricPart: No Split for plane stress!");
+    } else {
+        // 3d, plane strain or axisymmetric problem
+        return ( this->at(1) + this->at(2) + this->at(3) ) / 3.0;
+    }
+}
 } // end namespace oofem

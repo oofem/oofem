@@ -1123,8 +1123,13 @@ enum InputFieldType {
 	 IFT_DustMaterial_theta,
 	 IFT_DustMaterial_ft,
 	 IFT_DustMaterial_hardeningType,
-	 IFT_DustMaterial_mHard,
-	 IFT_DustMaterial_rEllipse,
+	 IFT_DustMaterial_mStiff,
+	 IFT_DustMaterial_rEll,
+    IFT_DustMaterial_x0,
+    IFT_DustMaterial_newtonTol,
+	 IFT_DustMaterial_newtonIter,
+	 IFT_DustMaterial_wHard,
+	 IFT_DustMaterial_dHard,
 
     IFT_LsMasterMat_slaveMat,
 
