@@ -679,17 +679,17 @@ DustMaterial :: functionXDQ(double q)
 }
 
 void
-DustMaterial :: solveQ0(double &q0)
+DustMaterial :: solveQ0(double &answer)
 {
     double fx, dfx;
     int i;
     for (i=0; i<newtonIter; i++) {
-        fx = -x0 + q0 - rEll*(alpha -      lambda*exp(beta*q0) - theta*q0);
-        dfx =       1 - rEll*(      - beta*lambda*exp(beta*q0) - theta);
-        q0 -= fx/dfx;
-        if (  fabs(fx/dfx/q0) < newtonTol ) {
-            //OOFEM_LOG_DEBUG("  DustMaterial: q0 = %e, solved in %d iters\n",q0,i+1);
-            if (q0 >= 0) { OOFEM_ERROR("internal parameter q has to be negative\n"); }
+        fx = -x0 + answer - rEll*(alpha -      lambda*exp(beta*answer) - theta*answer);
+        dfx =       1 - rEll*(      - beta*lambda*exp(beta*answer) - theta);
+        answer -= fx/dfx;
+        if (  fabs(fx/dfx/answer) < newtonTol ) {
+            //OOFEM_LOG_DEBUG("  DustMaterial: answer = %e, solved in %d iters\n",answer,i+1);
+            if (answer >= 0) { OOFEM_ERROR("internal parameter q has to be negative\n"); }
             return;
         }
     }
