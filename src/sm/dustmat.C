@@ -120,17 +120,6 @@ DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, ", q  % .4e", q);
 
     fprintf(file, "}\n");
-
-    double epsv;
-    StrainVector epsd = plasticStrain;
-    plasticStrain.computeDeviatoricVolumetricSplit(epsd,epsv);
-    fprintf(file, "volPlStrain %.4e\n",epsv);
-    fprintf(file, "       mVol %.4e\n",mVol);
-    fprintf(file, "devPlStrain",epsv);
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( file, " % .4e", epsd.at(i) );
-    }
-    fprintf(file, "\n");
 }
 
 contextIOResultType
@@ -317,17 +306,17 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
     double i1 = 3*volumetricStress;
     double f1, f2, f3, q, tempQ;
     q = tempQ = status->giveQ();
-    f1 = yieldf1(rho, i1);
-    f2 = yieldf2(rho, i1, q);
-    f3 = yieldf3(i1);
+    f1 = yieldFunction1(rho, i1);
+    f2 = yieldFunction2(rho, i1, q);
+    f3 = yieldFunction3(i1);
 
     // actual stress return
     double lambda = 0.;
     StrainVector m(mode);
     m.zero();
-    double feft = fFe(ft);
+    double feft = functionFe(ft);
     double auxModulus = 2*shearModulus/(9*bulkModulus);
-    double temp = feft - auxModulus*(i1-ft)/fFeDI1(ft);
+    double temp = feft - auxModulus*(i1-ft)/functionFeDI1(ft);
 
     OOFEM_LOG_DEBUG("i1 %e rho %e\n",i1,rho);
 
@@ -335,19 +324,19 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
         status->letTempStateFlagBe(DustMaterialStatus::DM_Yielding1);
         performF1return(i1,rho,gp);
         tempQ = status->giveTempQ();
-        lambda = (rho - fFe(fI1(q,tempQ,i1,bulkModulus))) / (2*shearModulus);
-        //fM1(m,stressDeviator,rho,i1,tempQ);
-        fM1(m,stressDeviator,rho,i1,q);
+        lambda = (rho - functionFe(functionI1(q,tempQ,i1,bulkModulus))) / (2*shearModulus);
+        //computePlastStrainDirM1(m,stressDeviator,rho,i1,tempQ);
+        computePlastStrainDirM1(m,stressDeviator,rho,i1,q);
     } else if (f2 > 0 && i1 < q) { // yield function 2
         status->letTempStateFlagBe(DustMaterialStatus::DM_Yielding2);
         performF2return(i1,rho,gp);
         tempQ = status->giveTempQ();
-        lambda = dGamma2(tempQ,q,i1,bulkModulus);
-        fM2(m,stressDeviator,rho,i1,tempQ);
+        lambda = computeDeltaGamma2(tempQ,q,i1,bulkModulus);
+        computePlastStrainDirM2(m,stressDeviator,rho,i1,tempQ);
     } else if (f3 > 0 && rho < temp) { // yield function 3
         status->letTempStateFlagBe(DustMaterialStatus::DM_Yielding3);
-        double fFeFt = fFe(ft);
-        double fFeDqFt = fFeDI1(ft);
+        double fFeFt = functionFe(ft);
+        double fFeDqFt = functionFeDI1(ft);
         double b = fFeFt - 2*shearModulus/(9*bulkModulus)*(i1-ft) - (1+fFeDqFt)*rho;
         double c = -fFeFt/(9*bulkModulus)*(i1-ft);
         lambda = 1/(4*shearModulus)*(-b+sqrt(b*b-8*shearModulus*c));
@@ -361,7 +350,7 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
            computeQFromPlastVolEps(tempQ,q,deltaVolumetricPlasticStrain);
         }
         status->letTempQBe(tempQ);
-        fM3(m,stressDeviator,rho,i1,tempQ);
+        computePlastStrainDirM3(m,stressDeviator,rho,i1,tempQ);
     } else { // elastic case
         int stateFlag = status->giveStateFlag();
         bool willBeElastic = stateFlag == DustMaterialStatus::DM_Unloading || stateFlag == DustMaterialStatus::DM_Elastic;
@@ -378,7 +367,6 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
     double mVol;
     StrainVector mDeviator(mode);
     m.computeDeviatoricVolumetricSplit(mDeviator,mVol);
-    status->setMVol(mVol);
     i1 -= 3*bulkModulus*mVol;
     volumetricStress = i1/3.;
     mDeviator.times(-2*shearModulus);
@@ -413,17 +401,17 @@ DustMaterial :: performF1return(double i1, double rho, GaussPoint *gp)
     int positiveFlag = 0;
     
     for (i=0; i<newtonIter; i++) {
-        vfI1 = fI1(q,tempQ,i1,bulkModulus);
-        vfI1DQ = fI1DQ(tempQ,bulkModulus);
+        vfI1 = functionI1(q,tempQ,i1,bulkModulus);
+        vfI1DQ = functionI1DQ(tempQ,bulkModulus);
         a = (vfI1-tempQ)/(ft-tempQ);
-        b = fFeDI1(vfI1);
-        c = rho - fFe(vfI1);
+        b = functionFeDI1(vfI1);
+        c = rho - functionFe(vfI1);
         da = ((vfI1DQ-1)*(ft-tempQ) + (vfI1-tempQ)) / ((ft-tempQ)*(ft-tempQ));
-        db = fFeDI1DI1(vfI1)*vfI1DQ;
-        dc = -fFeDI1(vfI1)*vfI1DQ;
+        db = functionFeDI1DI1(vfI1)*vfI1DQ;
+        dc = -functionFeDI1(vfI1)*vfI1DQ;
         d = da*b*c + a*db*c + a*b*dc;
-        fx  = -3*bulkModulus*fH(q,tempQ) - m*a*b*c;
-        dfx = -3*bulkModulus*fHdq(tempQ) - m*d;
+        fx  = -3*bulkModulus*functionH(q,tempQ) - m*a*b*c;
+        dfx = -3*bulkModulus*functionHDQ(tempQ) - m*d;
         tempQ -= fx/dfx;
         OOFEM_LOG_DEBUG("  q %e fx %e  dfx %e  answer %e\n",q,fx,dfx,tempQ);
         if (tempQ >= 0) {
@@ -458,8 +446,8 @@ DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
     int i;
     double fx,dfx;
     for (i=0; i<newtonIter; i++) {
-        fx = i1 - 3*bulkModulus*fH(q,qLeft) - qLeft;
-        dfx =   - 3*bulkModulus*fHdq(qLeft) - 1;
+        fx = i1 - 3*bulkModulus*functionH(q,qLeft) - qLeft;
+        dfx =   - 3*bulkModulus*functionHDQ(qLeft) - 1;
         qLeft -= fx/dfx;
         if (  fabs(fx/dfx/q0) < newtonTol ) {
             break;
@@ -493,8 +481,8 @@ DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVo
     double fx, dfx;
     int i;
     for (i=0; i<=newtonIter; i++) {
-        fx = fH(q,answer) - deltaVolumetricPlasticStrain;
-        dfx = fHdq(answer);
+        fx = functionH(q,answer) - deltaVolumetricPlasticStrain;
+        dfx = functionHDQ(answer);
         answer -= fx/dfx;
         //OOFEM_LOG_DEBUG("  q %e fx %e  dfx %e  answer %e\n",q,fx,dfx,answer);
         if (  fabs(fx/dfx/answer) < newtonTol ) {
@@ -638,54 +626,54 @@ DustMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 double
-DustMaterial :: fFe(double i1)
+DustMaterial :: functionFe(double i1)
 {
     return alpha - lambda*exp(beta*i1) - theta*i1;
 }
 
 double
-DustMaterial :: fFeDI1(double i1)
+DustMaterial :: functionFeDI1(double i1)
 {
     return -lambda*beta*exp(beta*i1) - theta;
 }
 
 double
-DustMaterial :: fFeDI1DI1(double i1)
+DustMaterial :: functionFeDI1DI1(double i1)
 {
     return -lambda*beta*beta*exp(beta*i1);
 }
 
 double
-DustMaterial :: fFc(double rho, double i1, double q)
+DustMaterial :: functionFc(double rho, double i1, double q)
 {
     return sqrt(rho*rho + 1/rEll/rEll*(q-i1)*(q-i1));
 }
 
 double
-DustMaterial :: yieldf1(double rho, double i1) {
-    return rho - fFe(i1);
+DustMaterial :: yieldFunction1(double rho, double i1) {
+    return rho - functionFe(i1);
 }
 
 double
-DustMaterial :: yieldf2(double rho, double i1, double q)
+DustMaterial :: yieldFunction2(double rho, double i1, double q)
 {
-    return fFc(rho,i1,q) - fFe(q);
+    return functionFc(rho,i1,q) - functionFe(q);
 }
 
 double
-DustMaterial :: yieldf3(double i1)
+DustMaterial :: yieldFunction3(double i1)
 {
     return i1 - ft;
 }
 
 double
-DustMaterial :: fX(double q)
+DustMaterial :: functionX(double q)
 {
     return q - rEll*(alpha - lambda*exp(beta*q) - theta*q);
 }
 
 double
-DustMaterial :: fXdQ(double q)
+DustMaterial :: functionXDQ(double q)
 {
     return 1 - rEll*( -lambda*beta*exp(beta*q) - theta);
 }
@@ -731,7 +719,7 @@ DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &she
 }
 
 void
-DustMaterial :: fM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
+DustMaterial :: computePlastStrainDirM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
 {
     //answer = stressDeviator;
     for (int i=1; i<=6; i++) {
@@ -745,13 +733,13 @@ DustMaterial :: fM1(StrainVector &answer, const StressVector &stressDeviator, do
 }
 
 void
-DustMaterial :: fM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
+DustMaterial :: computePlastStrainDirM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
 {
     //answer = stressDeviator;
     for (int i=1; i<=6; i++) {
         answer.at(i) = stressDeviator.at(i);
     }
-    double fc = fFc(rho,i1,q);
+    double fc = functionFc(rho,i1,q);
     answer.times(1/fc);
     double temp = (q - i1) / (rEll*rEll*fc);
     answer.at(1) -= temp;
@@ -760,14 +748,14 @@ DustMaterial :: fM2(StrainVector &answer, const StressVector &stressDeviator, do
 }
 
 void
-DustMaterial :: fM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
+DustMaterial :: computePlastStrainDirM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
 {
     //answer = stressDeviator;
     for (int i=1; i<=6; i++) {
         answer.at(i) = stressDeviator.at(i);
     }
-    double feft = fFe(ft);
-    double dfeft = fFeDI1(ft);
+    double feft = functionFe(ft);
+    double dfeft = functionFeDI1(ft);
     answer.times(1/feft);
     double temp = 1 - (1 + dfeft)*rho/feft;
     answer.at(1) += temp;
@@ -776,10 +764,10 @@ DustMaterial :: fM3(StrainVector &answer, const StressVector &stressDeviator, do
 }
 
 double
-DustMaterial :: fH(double q, double tempQ)
+DustMaterial :: functionH(double q, double tempQ)
 {
-    double xq = fX(q);
-    double xtq = fX(tempQ);
+    double xq = functionX(q);
+    double xtq = functionX(tempQ);
     switch (hardeningType) {
         case 1:
             return wHard*(exp(dHard*xtq)-exp(dHard*xq));
@@ -789,10 +777,10 @@ DustMaterial :: fH(double q, double tempQ)
 }
 
 double
-DustMaterial :: fHdq(double tempQ)
+DustMaterial :: functionHDQ(double tempQ)
 {
-    double xtq = fX(tempQ);
-    double dxtq = fXdQ(tempQ);
+    double xtq = functionX(tempQ);
+    double dxtq = functionXDQ(tempQ);
     switch (hardeningType) {
         case 1:
             return wHard*dHard*exp(dHard*xtq)*dHard*dxtq;
@@ -802,31 +790,31 @@ DustMaterial :: fHdq(double tempQ)
 }
 
 double 
-DustMaterial :: fI1(double q, double tempQ, double i1, double bulkModulus)
+DustMaterial :: functionI1(double q, double tempQ, double i1, double bulkModulus)
 {
-    return i1 - 3*bulkModulus*fH(q,tempQ);
+    return i1 - 3*bulkModulus*functionH(q,tempQ);
 }
 
 double 
-DustMaterial :: fI1DQ(double tempQ, double bulkModulus)
+DustMaterial :: functionI1DQ(double tempQ, double bulkModulus)
 {
-    return -3*bulkModulus*fHdq(tempQ);
+    return -3*bulkModulus*functionHDQ(tempQ);
 }
 
 double
-DustMaterial :: dGamma2(double tempQ, double q, double i1, double bulkModulus)
+DustMaterial :: computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus)
 {
-    double vfH = fH(q,tempQ);
-    return rEll*rEll*fFe(tempQ)*vfH / (3*(i1-3*bulkModulus*vfH-tempQ));
+    double vfH = functionH(q,tempQ);
+    return rEll*rEll*functionFe(tempQ)*vfH / (3*(i1-3*bulkModulus*vfH-tempQ));
 }
 
 double
-DustMaterial :: dGamma2DQ(double tempQ, double q, double i1, double bulkModulus)
+DustMaterial :: computeDeltaGamma2DQ(double tempQ, double q, double i1, double bulkModulus)
 {
-    double vfH = fH(q,tempQ);
-    double vdfH = fHdq(tempQ);
-    double vfEq = fFe(tempQ);
-    double vdfEq = fFeDI1(tempQ);
+    double vfH = functionH(q,tempQ);
+    double vdfH = functionHDQ(tempQ);
+    double vfEq = functionFe(tempQ);
+    double vdfEq = functionFeDI1(tempQ);
     double frac1 = rEll*rEll*vfEq*vfH;
     double dfrac1 = rEll*rEll*(vdfEq*vfH + vfEq*vdfH);
     double frac2 = 3*(i1-3*bulkModulus*vfH-tempQ);
@@ -837,30 +825,13 @@ DustMaterial :: dGamma2DQ(double tempQ, double q, double i1, double bulkModulus)
 double
 DustMaterial :: fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus)
 {
-    double vfEq = fFe(tempQ);
-    double dgq = dGamma2(tempQ,q,i1,bulkModulus);
+    double vfEq = functionFe(tempQ);
+    double dgq = computeDeltaGamma2(tempQ,q,i1,bulkModulus);
     double frac = (vfEq+2*shearModulus*dgq);
     double a = rho*vfEq/frac;
     frac = (rEll*rEll*vfEq+9*bulkModulus*dgq);
     double b = (tempQ-i1)*rEll*vfEq/frac;
     return a*a + b*b - vfEq*vfEq;
-}
-
-double
-DustMaterial :: fTempR2Dq(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus)
-{
-    double vfEq = fFe(tempQ);
-    double vdfEq = fFeDI1(tempQ);
-    double dgq = dGamma2(tempQ,q,i1,bulkModulus);
-    double ddgq = dGamma2DQ(tempQ,q,i1,bulkModulus);
-    double frac2 = (vfEq+2*shearModulus*dgq);
-    double a = rho*vfEq/frac2;
-    double da = (rho*vdfEq*frac2 - rho*vfEq*(vdfEq+2*shearModulus*ddgq))/frac2/frac2;
-    double frac1 = (tempQ-i1)*rEll*vfEq;
-    frac2 = (rEll*rEll*vfEq+9*bulkModulus*dgq);
-    double b = frac1/frac2;
-    double db = ((rEll*vfEq + tempQ*rEll*vdfEq - i1*rEll*vdfEq)*frac2 - (frac1*(rEll*rEll*vdfEq + 9*bulkModulus*ddgq)) )/frac2/frac2;
-    return 2*a*da + 2*b*db - 2*vfEq*vdfEq;
 }
 
 } // end namespace oofem

@@ -44,26 +44,39 @@
 #include "isolinearelasticmaterial.h"
 
 namespace oofem {
+
+
 /**
- * This class implements TODO
+ * This class implements material status for dust material model
+ * @see DustMaterial
  * @author Jan Stransky
  */
 class DustMaterialStatus : public StructuralMaterialStatus
 {
 public:
-    enum stateFlagValues { DM_Elastic, DM_Unloading, DM_Yielding1, DM_Yielding2, DM_Yielding3 };
+    /// Values of history variable stateFlag
+    enum stateFlagValues {
+        DM_Elastic,
+        DM_Unloading,
+        DM_Yielding1,
+        DM_Yielding2,
+        DM_Yielding3
+    };
 
 protected:
-    /// Deviatoric of plastic strain
+    /// Plastic strain
     StrainVector plasticStrain;
     StrainVector tempPlasticStrain;
 
+    /// Hardening parameter q
     double q;
     double tempQ;
-    double mVol;
 
+    /// Actual bulk modulus
     double bulkModulus;
+    /// Actual shear modulus
     double shearModulus;
+    /// Actual Young's modulus
     double youngsModulus;
 
     /// Indicates the state (i.e. elastic, yielding, vertex, unloading) of the Gauss point
@@ -87,82 +100,185 @@ public:
     virtual const char *giveClassName() const { return "DustMaterialStatus"; }
     virtual classType giveClassID() const { return DustMaterialStatusClass; }
 
+    /**
+     * Get the full plastic strain vector from the material status.
+     * @param answer Plastic strain.
+     */
     void givePlasticStrain(StrainVector &answer) const { answer = plasticStrain; }
+    /**
+     * Get the full plastic strain vector from the material status.
+     * @return Volumetric part of plastic strain.
+     */
 	 double giveVolumetricPlasticStrain() const { return plasticStrain.computeVolumetricPart(); }
+    /**
+     * Get the value of hardening variable q from the material status.
+     * @return Hardenenig variable q
+     */
     double giveQ() const { return q; }
+    /**
+     * Get the state flag from the material status.
+     * @return State flag (i.e. elastic, unloading, yielding, vertex case yielding)
+     */
     int giveStateFlag() const { return stateFlag; }
 
+    /**
+     * Get the temp value of the full plastic strain vector from the material status.
+     * @param answer Temp value of plastic strain vector.
+     */
     void giveTempPlasticStrain(StrainVector &answer) const { answer = tempPlasticStrain; }
+    /**
+     * Get the temp value of the hardening variable q from the material status.
+     * @return Temp value of hardening variable kappaP.
+     */
     double giveTempQ() const { return tempQ; }
+    /**
+     * Get the temp value of the state flag from the material status.
+     * @return The temp value of the state flag.
+     */
     int giveTempStateFlag() const { return tempStateFlag; }
 
+    /**
+     * Assign the temp value of plastic strain.
+     * @param v New temp value o plastic strain.
+     */
     void letTempPlasticStrainBe(const StrainVector &v) { tempPlasticStrain = v; }
+    /**
+     * Assign the temp value of variable q
+     * @param v New temp value of variable q
+     */
     void letTempQBe(double v) { tempQ = v; }
+    /**
+     * Assign the temp value of the state flag.
+     * @param v New temp value of the state flag.
+     */
     void letTempStateFlagBe(int v) { tempStateFlag = v; }
 
+    /**
+     * Assign the value of plastic strain.
+     * @param v New value of plastic strain.
+     */
     void letPlasticStrainBe(const StrainVector &v) { plasticStrain = v; }
+    /**
+     * Assign the value of variable q
+     * @param v New value of variable q
+     */
     void letQBe(double v) { q = v; }
 
+    /**
+     * Assign the value of actual bulk modulus of the status
+     * @param v New value of bulk modulus
+     */
     void setBulkModulus(double m) { bulkModulus = m; }
+    /**
+     * Assign the value of actual shear modulus of the status
+     * @param v New value of shear modulus
+     */
     void setShearModulus(double m) { shearModulus = m; }
+    /**
+     * Assign the value of actual Young's modulus of the status
+     * @param v New value of Young's modulus
+     */
     void setYoungsModulus(double m) { youngsModulus = m; }
+    /**
+     * Get the value of actual bulk modulus of the status
+     * @return Value of bulk modulus
+     */
     double giveBulkModulus() { return bulkModulus; }
+    /**
+     * Get the value of actual shear modulus of the status
+     * @return Value of shear modulus
+     */
     double giveShearModulus() { return shearModulus; }
+    /**
+     * Get the value of actual Young's modulus of the status
+     * @return Value of Young's modulus
+     */
     double giveYoungsModulus() { return youngsModulus; }
 
-    void setMVol(double m) { mVol = m; }
 };
 
 /**
- * This class implements TODO
+ * This class implements nonassociated multisurface plasticity model.
+ * Yield function depends on I1 and J2 invariants of stress tensor and
+ * internal variable q.
+ * The plasticity surface consists of three surfaces.
+ * Shear dominant surface (f1) is non linear Drucker Prager cone.
+ * Compressive dominant part (f2) is elliptic cap over the cone.
+ * Tension dominant part (f3) is plane, cutting the cone perpendicularly to
+ * hydrostatic axis.
+ * f1 and f3 are constant. The position of f2 surface is determined by internal
+ * variable q. During plastic yielding f1 or f3 (shear or tension dominant state),
+ * q is increasing and the admissible elastic domain is shrinking. During
+ * f2 plastic yielding (compressive dominant), the parameter q is decreasing and the
+ * admissible elastic domain is becoming larger.
+ *
+ * This model is described in PhD thesis of Tobias Erhard
+ * Strategien zur numerischen Modellierung transierten Impaktvorgange bei nichtlinearem Materialverhalten
+ * Universitat Stuttgart 2004
+ *
  * @author Jan Stransky
  */
 class DustMaterial : public StructuralMaterial
 {
 protected:
+    /// Pointer for linear elastic material
     IsotropicLinearElasticMaterial *LEMaterial;
 
+    /// Parameter determining shape of yield surface
     double alpha;
+    /// Parameter determining shape of yield surface
     double beta;
+    /// Parameter determining shape of yield surface
     double lambda;
+    /// Parameter determining shape of yield surface
     double theta;
+    /// Parameter determining shape of yield surface (param T in original publication)
     double ft;
+    /// Parameter determining shape of yield surface (param R in original publication)
     double rEll;
+    /// Parameter determining hardenenig type
     int hardeningType;
+    /// Parameter increasing stiffness (parameter M in original publication)
     double mStiff;
+    /// Parameter determining shape of yield surface (param X0 in original publication)
     double x0;
+    /// Parameter determining shape of yield surface
     double q0;
+    /// Parameter determining hardenenig law (parameter W in original publication)
     double wHard;
+    /// Parameter determining hardenenig law (parameter D in original publication)
     double dHard;
+    /// Tollerance for iterative methods
     double newtonTol;
+    /// Maximum number of iterations for iterative methods
     int newtonIter;
 
-    double fFe(double i1);
-    double fFeDI1(double i1);
-    double fFeDI1DI1(double i1);
-    double fFc(double rho, double i1, double q);
-    double fX(double q);
-    double fXdQ(double q);
-    double yieldf1(double rho, double i1);
-    double yieldf2(double rho, double i1, double q);
-    double yieldf3(double i1);
+    double functionFe(double i1);
+    double functionFeDI1(double i1);
+    double functionFeDI1DI1(double i1);
+    double functionFc(double rho, double i1, double q);
+    double functionX(double q);
+    double functionXDQ(double q);
+    double yieldFunction1(double rho, double i1);
+    double yieldFunction2(double rho, double i1, double q);
+    double yieldFunction3(double i1);
     void solveQ0(double &q0);
     void computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp);
     void performStressReturn(GaussPoint *gp, StrainVector strain);
-    void fM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
-    void fM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
-    void fM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
-    double fH(double q, double tempQ);
-    double fHdq(double tempQ);
-    double fI1(double q, double tempQ, double i1, double bulkModulus);
-    double fI1DQ(double tempQ, double bulkModulus);
+    void computePlastStrainDirM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void computePlastStrainDirM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    void computePlastStrainDirM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    double functionH(double q, double tempQ);
+    double functionHDQ(double tempQ);
+    double functionI1(double q, double tempQ, double i1, double bulkModulus);
+    double functionI1DQ(double tempQ, double bulkModulus);
     void performF1return(double i1, double rho, GaussPoint *gp);
     void performF2return(double i1, double rho, GaussPoint *gp);
     void computeQFromPlastVolEps(double &answer, double q, double volumetricPlasticStrain);
-    double dGamma2(double tempQ, double q, double i1, double bulkModulus);
-    double dGamma2DQ(double tempQ, double q, double i1, double bulkModulus);
+    double computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus);
+    double computeDeltaGamma2DQ(double tempQ, double q, double i1, double bulkModulus);
+	 // 7.38
     double fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus);
-    double fTempR2Dq(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus);
 
 public:
     /// Constructor
