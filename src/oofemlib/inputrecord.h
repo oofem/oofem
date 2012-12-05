@@ -37,10 +37,8 @@
 
 #include "dynalist.h"
 
-#ifndef __MAKEDEPEND
- #include <vector>
- #include <string>
-#endif
+#include <vector>
+#include <string>
 
 namespace oofem {
 class IntArray;
