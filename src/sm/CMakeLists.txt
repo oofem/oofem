@@ -16,12 +16,12 @@ set (sm_element
     cct3d.C
     trplanrot3d.C
     lumpedmasselement.C
-    tr_shell01.C
     springelement.C
     qtrplstrgrad.C
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
+	tr_dirshell.C
     )
 
 set (sm_crosssection

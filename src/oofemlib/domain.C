@@ -906,6 +906,8 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.setValues(3, V_u, V_v, P_f);
     }  else if ( dType == _3dIncompressibleFlow ) {
         defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
+	}  else if ( dType == _3dDirShellMode ) {
+        defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, w_u, w_v, w_w, gam);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
     }
@@ -925,7 +927,7 @@ Domain :: giveNumberOfSpatialDimensions()
 
     if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _3dAxisymmMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode ) {
         return 2;
-    } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode ) {
+    } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode || dType == _3dDirShellMode ) {
         return 3;
     } else {
         return 0;
@@ -968,7 +970,9 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _2dIncompressibleFlow;
     } else if ( !strncasecmp(typeName, "3dincompflow", 12) ) {
         dType = _3dIncompressibleFlow;
-    } else if  ( !strncasecmp(typeName, "3d", 2) ) {
+	} else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
+        dType = _3dDirShellMode;
+	} else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
         _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);

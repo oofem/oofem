@@ -54,8 +54,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(Theta_1, 11) /* CBS integration constant)*/ \
     ENUM_ITEM_WITH_VALUE(Theta_2, 12) /* CBS integration constant)*/ \
     ENUM_ITEM_WITH_VALUE(PrescribedTractionPressure, 13) /* CBS prescribed pressure due to applied traction)*/ \
-    ENUM_ITEM_WITH_VALUE(InternalForcesEBENorm, 14) /* Norm of nodal internal forces evaluated on element by element basis*/
-
+    ENUM_ITEM_WITH_VALUE(InternalForcesEBENorm, 14)  /* Norm of nodal internal forces evaluated on element by element basis*/ \
+    ENUM_ITEM_WITH_VALUE(DirectorField, 15) /* Vector field */
 /**
  * Type representing particular unknown (its physical meaning).
  */
