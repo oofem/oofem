@@ -172,6 +172,7 @@ set (core_fei
     fei2dquadquad.C
     fei3dlinelin.C
     fei3dtrlin.C
+	fei3dtrquad.C
     fei3dtetquad.C
     fei3dhexalin.C
     fei3dhexaquad.C
@@ -214,6 +215,7 @@ set (core_bc
     linearedgeload.C
     constantedgeload.C
     constantsurfaceload.C
+	constantpressureload.C
     nodload.C
     reinforcement.C
     surfacetensionbc.C
