@@ -304,6 +304,14 @@ public:
      */
     void addSubVectorRow(const FloatArray &src, int sr, int sc);
     /**
+     * Adds given vector to receiver starting at given position.
+     * @param src Source matrix.
+     * @param sr Starting row position.
+     * @param sc Starting column position.
+     */
+    void addSubVectorCol(const FloatArray &src, int sr, int sc);
+
+    /**
      * Copy (set) given vector to receiver row sr, starting at column sc.
      * @param src Source matrix.
      * @param sr Starting row position.
@@ -459,6 +467,14 @@ public:
      * @return Pointer to the values of the matrix.
      */
     double *givePointer()  const { return values; }
+
+    /**
+     * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
+	 * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
+	 * If size(aArray) = 6, a symmetric matrix will be created.
+	 * @param aArray Array to transform.
+     */
+    void beMatrixForm(const FloatArray &aArray);
 
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);

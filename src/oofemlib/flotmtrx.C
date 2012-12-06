@@ -512,6 +512,27 @@ void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 }
 
 
+void FloatMatrix :: addSubVectorCol(const FloatArray &src, int sr, int sc)
+{
+    sr--;
+
+    int srcRows = src.giveSize();
+
+    int nr = sr + srcRows;
+    int nc = sc;
+
+    if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
+        this->resizeWithData( max(this->giveNumberOfRows(), nr), max(this->giveNumberOfColumns(), nc) );
+    }
+
+    // add sub-matrix
+    for ( int j = 1; j <= srcRows; j++ ) {
+        this->at(sr + j, sc) += src.at(j);
+    }
+}
+
+
+
 void FloatMatrix :: setColumn(const FloatArray &src, int c)
 {
     int nr = src.giveSize();
@@ -1493,6 +1514,27 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
     FloatMatrix inv;
     inv.beInverseOf(*this);
     return 1.0/(inv.computeNorm(p)*anorm);
+}
+
+void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
+{
+	// Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+#  ifdef DEBUG
+	if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
+        OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
+    }
+#  endif
+	this->resize(3,3);
+	if( aArray.giveSize() == 9 ){
+		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
+		this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8);	this->at(2,1) = aArray.at(9);
+	}
+	else if( aArray.giveSize() == 6 ){
+		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
+		this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5);	this->at(2,1) = aArray.at(6);
+	}
 }
 
 #if 0
