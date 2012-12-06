@@ -38,6 +38,7 @@
 #include "linearedgeload.h"
 #include "constantedgeload.h"
 #include "constantsurfaceload.h"
+#include "constantpressureload.h"
 #include "pointload.h"
 #include "prescribedgradient.h"
 #include "mixedgradientpressuredirichlet.h"
@@ -67,6 +68,7 @@ REGISTER_CLASS(MixedGradientPressureNeumann,   "mixedgradientpressureneumann", M
 REGISTER_CLASS(LinearEdgeLoad, "linearedgeload", LinearEdgeLoadClass)
 REGISTER_CLASS(ConstantEdgeLoad, "constantedgeload", ConstantEdgeLoadClass)
 REGISTER_CLASS(ConstantSurfaceLoad, "constantsurfaceload", ConstantSurfaceLoadClass)
+REGISTER_CLASS(ConstantPressureLoad, "constantpressureload", ConstantPressureLoadClass)
 REGISTER_CLASS(PointLoad, "pointload", PointLoadClass)
 REGISTER_CLASS(SurfaceTensionBoundaryCondition, "surfacetension", SurfaceTensionBoundaryConditionClass)
 
