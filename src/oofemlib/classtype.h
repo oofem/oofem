@@ -66,6 +66,7 @@ enum classType {
     LinearEdgeLoadClass,
     ConstantEdgeLoadClass,
     ConstantSurfaceLoadClass,
+    ConstantPressureLoadClass,
     PointLoadClass,
     UserDefinedTemperatureFieldClass,
     RotatingBoundaryClass,
@@ -157,7 +158,6 @@ enum classType {
     Q4AxisymmClass,
     L4AxisymmClass,
     RerShellClass,
-    TR_SHELL01Class,
     PPdeElementClass,
     LTrElementPPDEClass,
     Beam2dClass,
@@ -190,6 +190,7 @@ enum classType {
     LatticeStructuralElementClass,
     Lattice2dClass,
     LatticeMaterialStatusClass,
+    TrDirShellClass,
 
     MacroLSpaceClass,
     MicroMaterialClass,

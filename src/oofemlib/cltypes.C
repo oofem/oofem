@@ -33,6 +33,7 @@
  */
 
 #include "error.h"
+#include "compiler.h"
 #include "chartype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
