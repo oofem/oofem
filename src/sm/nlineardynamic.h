@@ -76,6 +76,7 @@ class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
     SparseMtrx *stiffnessMatrix;
+	SparseMtrx *effectiveMassMatrix;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
@@ -86,9 +87,9 @@ protected:
     double eta, delta;
     double a0, a1, a2, a3, a4, a5, a6, a7;
 
-    FloatArray velocityVector, accelerationVector, previousLoadVector;
+    FloatArray velocityVector, accelerationVector, previousAccelerationVector, previousVelocityVector, previousLoadVector;
     FloatArray help, rhs, rhs2, previousInternalForces;
-    FloatArray previousIncrementOfDisplacement;
+    FloatArray previousIncrementOfDisplacement, previousPreviousTotalDisplacement;
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
     FloatArray internalForces;
 
@@ -108,6 +109,7 @@ protected:
     NM_Status numMetStatus;
     /// Numerical method used to solve the problem.
     SparseNonLinearSystemNM *nMethod;
+	SparseLinearSystemNM *nMethodLin;
     /// Intrinsic time increment.
     double deltaT;
 

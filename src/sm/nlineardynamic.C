@@ -69,6 +69,7 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     initFlag = commInitFlag = 1;
 
     stiffnessMatrix  = NULL;
+	effectiveMassMatrix  = NULL;
     nMethod          = NULL;
 
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
@@ -107,13 +108,17 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
         if ( nMethod->giveClassID() == NRSolverClass ) {
             nMethod->reinitialize();
             return nMethod;
-        } else {
+		}else {
             delete nMethod;
         }
     }
-
-    nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-    nMethod = nm;
+    
+    if( this->initialTimeDiscretization == TD_Explicit ){
+        nMethodLin = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    }else{
+        nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+        nMethod = nm;
+    }
 
     return nm;
 }
@@ -185,6 +190,9 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO( "Selecting Two-point Backward Euler method\n" );
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_INFO( "Selecting Three-point Backward Euler metod\n" );
+    } else if ( initialTimeDiscretization == TD_Explicit ) {
+        OOFEM_LOG_INFO( "Selecting Central difference method (explicit without stiffness matrix)\n" );
+        gamma = 0.5; beta = 0.0; // Default central difference parameters.
     } else {
         _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
@@ -359,7 +367,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         a4 = ( gamma / beta ) - 1;
         a5 = deltaT / 2 * ( gamma / beta - 2 );
         a6 = 0;
-    } else if ( ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) || ( tStep->giveNumber() == giveNumberOfFirstStep() ) ) {
+    //} else if ( ( tStep->giveTimeDiscretization() == TD_TwoPointBackward ) || ( tStep->giveNumber() == giveNumberOfFirstStep() ) ) {
+    } else if (  tStep->giveTimeDiscretization() == TD_TwoPointBackward   )  {
         if ( tStep->giveTimeDiscretization() != TD_ThreePointBackward ) {
             OOFEM_LOG_DEBUG("Solving using Backward Euler method\n");
         } else {
@@ -381,9 +390,19 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         a4 = 0;
         a5 = 0;
         a6 = 1 / ( 2 * deltaT );
+    } else if ( tStep->giveTimeDiscretization() == TD_Explicit ) {
+        OOFEM_LOG_DEBUG("Solving using central difference method (explicit without stiffness matrix)\n" );
+        a0 = 1 / dt2 ;
+        a1 = 1 / ( 2 * deltaT );
+        a2 = 2 * a0;
+        a3 = 1 / a2;
+        a4 = 0;
+        a5 = 0;
+        a6 = 0;
     } else {
         _error("NonLinearDynamic: Time-stepping scheme not found!\n")
     }
+     
 
     if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         // Initialization
@@ -391,6 +410,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         previousIncrementOfDisplacement.zero();
         previousTotalDisplacement.resize(neq);
         previousTotalDisplacement.zero();
+        previousPreviousTotalDisplacement.resize(neq);
+        previousPreviousTotalDisplacement.zero();
         totalDisplacement.resize(neq);
         totalDisplacement.zero();
         previousInternalForces.resize(neq);
@@ -401,6 +422,10 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         velocityVector.zero();
         accelerationVector.resize(neq);
         accelerationVector.zero();
+        previousAccelerationVector.resize(neq);
+        previousAccelerationVector.zero();
+		previousVelocityVector.resize(neq);
+        previousVelocityVector.zero();
 
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
@@ -426,8 +451,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                 jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     incrementOfDisplacement.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
-                    velocityVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply);
-                    accelerationVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, stepWhenIcApply);
+                    totalDisplacement.at(jj)       = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply); // Want displacement vector instead of increment
+					velocityVector.at(jj)          = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply);
+                    accelerationVector.at(jj)      = iDof->giveUnknown(EID_MomentumBalance, VM_Acceleration, stepWhenIcApply);
+					previousVelocityVector.at(jj)  = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply); // this is what is given by ic, not velocityvector
+					previousTotalDisplacement.at(jj)       = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
                 }
             }
         }
@@ -435,25 +463,40 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         incrementOfDisplacement.resize(neq);
         incrementOfDisplacement.zero();
     }
-
+	
     if ( initFlag ) {
         // First assemble problem at current time step.
         // Option to take into account initial conditions.
-        if ( !stiffnessMatrix ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-        }
+		if ( tStep->giveTimeDiscretization() != TD_Explicit ){ 
+			if ( !stiffnessMatrix ) {
+				stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+			}
 
-        if ( stiffnessMatrix == NULL ) {
-            _error("proceedStep: sparse matrix creation failed");
-        }
+			if ( stiffnessMatrix == NULL ) {
+				_error("proceedStep: sparse matrix creation failed");
+			}
 
-        if ( nonlocalStiffnessFlag ) {
-            if ( !stiffnessMatrix->isAsymmetric() ) {
-                _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
-            }
-        }
+			if ( nonlocalStiffnessFlag ) {
+				if ( !stiffnessMatrix->isAsymmetric() ) {
+					_error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+				}
+			}
 
-        stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+			stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+
+		}else{
+
+			if ( !effectiveMassMatrix ) {
+				effectiveMassMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+			}
+
+			if ( effectiveMassMatrix == NULL ) {
+				_error("proceedStep: sparse matrix creation failed");
+			}
+
+			effectiveMassMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+
+		}
         // Initialize vectors
         help.resize(neq);
         rhs.resize(neq);
@@ -463,10 +506,47 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         rhs.zero();
         rhs2.zero();
 
+
+		if ( tStep->giveTimeDiscretization() != TD_Explicit ){ 
+		// Initial guess in iterations?? I need to do a Taylor expansion backward to estimate x(-1) = x(0) - dt*v(0) + a3*a(0)
         previousTotalDisplacement.resize(neq);
         for ( int i = 1; i <= neq; i++ ) {
             previousTotalDisplacement.at(i) = totalDisplacement.at(i);
+			previousPreviousTotalDisplacement.at(i) = totalDisplacement.at(i); // temporary!! replace with proper initialization!
         }
+		}else{
+			
+			this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
+                                                  refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
+			effectiveMassMatrix->zero();
+			this->assemble(effectiveMassMatrix, tStep, EID_MomentumBalance, MassMatrix,
+				           EModelDefaultEquationNumbering(), this->giveDomain(di)); // store mass matrix in effectivemassmatrix
+			
+			this->giveInternalForces(previousInternalForces, true, 1, tStep);
+
+			for ( int i = 1; i <= neq; i++ ) {
+               rhs.at(i) = incrementalLoadVector.at(i) - previousInternalForces.at(i);
+            }
+			
+			NM_Status s = nMethodLin->solve(effectiveMassMatrix, & rhs, & previousAccelerationVector);
+			
+			for ( int i = 1; i <= neq; i++ ) {
+               previousPreviousTotalDisplacement.at(i) = previousTotalDisplacement.at(i) - deltaT * previousVelocityVector.at(i) + a3 * previousAccelerationVector.at(i);
+            }
+			/*
+			FloatArray ap(3);  ap.at(1)=previousAccelerationVector.at(15-6); ap.at(2)=previousAccelerationVector.at(16-6); ap.at(3)=previousAccelerationVector.at(17-6);
+			FloatArray vp(3);  vp.at(1)=previousVelocityVector.at(15-6); vp.at(2)=previousVelocityVector.at(16-6); vp.at(3)=previousVelocityVector.at(17-6);
+			FloatArray xp(3);  xp.at(1)=previousTotalDisplacement.at(15-6); xp.at(2)=previousTotalDisplacement.at(16-6); xp.at(3)=previousTotalDisplacement.at(17-6);
+	        printf("\n ap at node 3 \n");
+			ap.printYourself();
+			printf("\n vp at node 3 \n");
+			vp.printYourself();
+			printf("\n xp at node 3 \n");
+			xp.printYourself();
+			*/
+			effectiveMassMatrix->zero();
+
+		}
         initFlag = 0;
     }
 
@@ -478,33 +558,56 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
                                                   refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
 
-    // Assembling the effective load vector
-    for ( int i = 1; i <= neq; i++ ) {
-        help.at(i) = a2 * velocityVector.at(i) + a3 * accelerationVector.at(i)
-            + eta * ( a4 * velocityVector.at(i)
-                      + a5 * accelerationVector.at(i)
-                      + a6 * previousIncrementOfDisplacement.at(i) );
-    }
 
-    this->timesMtrx(help, rhs, MassMatrix, this->giveDomain(di), tStep);
+     if( this->initialTimeDiscretization != TD_Explicit ){
+        // Assembling the effective load vector
+        for ( int i = 1; i <= neq; i++ ) {
+            help.at(i) = a2 * velocityVector.at(i) + a3 * accelerationVector.at(i)
+                + eta * ( a4 * velocityVector.at(i)
+                          + a5 * accelerationVector.at(i)
+                          + a6 * previousIncrementOfDisplacement.at(i) );
+        }
 
-    if ( delta != 0 ) {
-        for ( int i = 1; i <= neq; i++ ) {
-            help.at(i) = delta * ( a4 * velocityVector.at(i)
-                                   + a5 * accelerationVector.at(i)
-                                   + a6 * previousIncrementOfDisplacement.at(i) );
+        this->timesMtrx(help, rhs, MassMatrix, this->giveDomain(di), tStep);
+
+        if ( delta != 0 ) {
+            for ( int i = 1; i <= neq; i++ ) {
+                help.at(i) = delta * ( a4 * velocityVector.at(i)
+                                       + a5 * accelerationVector.at(i)
+                                       + a6 * previousIncrementOfDisplacement.at(i) );
+            }
+            this->timesMtrx(help, rhs2, StiffnessMatrix, this->giveDomain(di), tStep);
+            help.zero();
+            for ( int i = 1; i <= neq; i++ ) {
+                rhs.at(i) += rhs2.at(i);
+            }
+			
         }
-        this->timesMtrx(help, rhs2, StiffnessMatrix, this->giveDomain(di), tStep);
-        help.zero();
+     }else{ 
+		 // Assembling the effective load vector (f_eff) for explicit solution M_eff * a = f_eff 
         for ( int i = 1; i <= neq; i++ ) {
-            rhs.at(i) += rhs2.at(i);
+			help.at(i) = a2 * previousTotalDisplacement.at(i) - (a0 - a1*eta) * previousPreviousTotalDisplacement.at(i); // a2*u(n) - (a0-a1*eta)*u(n-1) (last term assumes C=eta*M)
         }
-    }
+        this->timesMtrx(help, rhs, MassMatrix, this->giveDomain(di), tStep);
+    /*
+	FloatArray xforce(3);  xforce.at(1)=rhs.at(15-6); xforce.at(2)=rhs.at(16-6); xforce.at(3)=rhs.at(17-6);
+	printf("\n rhs at node 3 \n");
+	xforce.printYourself();
+	FloatArray xpp(3);  xpp.at(1)=previousPreviousTotalDisplacement.at(15-6); xpp.at(2)=previousPreviousTotalDisplacement.at(16-6); xpp.at(3)=previousPreviousTotalDisplacement.at(17-6);
+	printf("\n xpp at node 3 \n");
+	xpp.printYourself();
+	*/
+     }
+    
+
 
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += incrementalLoadVector.at(i) - previousInternalForces.at(i);
         totalDisplacement.at(i) = previousTotalDisplacement.at(i);
     }
+	//FloatArray xforce(3);  xforce.at(1)=rhs.at(15-6); xforce.at(2)=rhs.at(16-6); xforce.at(3)=rhs.at(17-6);
+	//printf("\n rhs at node 3 \n");
+	//xforce.printYourself();
 
     //
     // Set-up numerical model.
@@ -514,6 +617,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     //
     // Call numerical model to solve problem.
     //
+  if( this->initialTimeDiscretization != TD_Explicit ){
     double loadLevel = 1.0;
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & rhs, & initialLoadVector,
@@ -526,6 +630,27 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     }
 
     OOFEM_LOG_INFO("Equilibrium reached in %d iterations\n", currentIterations);
+
+  }else{// Explicit part
+	this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di)); 
+	//effectiveMassMatrix->printYourself();
+	//totalDisplacement.printYourself();
+	NM_Status s = nMethodLin->solve(effectiveMassMatrix, & rhs, & totalDisplacement);
+	
+
+	//printf("\n rhs \n");
+	//rhs.printYourself();
+	//printf("\n totalDisplacement \n");
+	//totalDisplacement.printYourself();
+	FloatArray x(3);  x.at(1)=totalDisplacement.at(15-6); x.at(2)=totalDisplacement.at(16-6); x.at(3)=totalDisplacement.at(17-6);
+	//printf("\n x at node 3 \n");
+	//x.printYourself();
+
+    if ( !(s & NM_Success) ) {
+        OOFEM_ERROR("No success in solving system.");
+    }
+
+  }
 }
 
 
@@ -551,6 +676,18 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
         answer.add(charMtrx);
 
         return;
+	}else if( type == EffectiveMassMatrix ) {
+        Element *element;
+        FloatMatrix charMtrx;
+        element = domain->giveElement(num);		
+		element->giveCharacteristicMatrix(answer, MassMatrix, tStep);
+        answer.times(this->a0 + this->eta * this->a1);
+	}else if( type == MassMatrix ) {
+        Element *element;
+        FloatMatrix charMtrx;
+        element = domain->giveElement(num);		
+		element->giveCharacteristicMatrix(answer, MassMatrix, tStep);
+        answer.times( 1.0 + this->eta );
     } else {
         StructuralEngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
     }
@@ -564,18 +701,26 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i)                             = velocityVector.at(i);
         rhs2.at(i)                            = accelerationVector.at(i);
+		if( this->initialTimeDiscretization != TD_Explicit ){
+			accelerationVector.at(i)              = a0 * incrementOfDisplacement.at(i)
+				- a2 * rhs.at(i) - a3 * rhs2.at(i);
 
-        accelerationVector.at(i)              = a0 * incrementOfDisplacement.at(i)
-            - a2 * rhs.at(i) - a3 * rhs2.at(i);
+			velocityVector.at(i)                  = a1 * incrementOfDisplacement.at(i)
+				- a4 * rhs.at(i) - a5 * rhs2.at(i) - a6 * previousIncrementOfDisplacement.at(i);
+		}else{
+			accelerationVector.at(i) = a0 * ( totalDisplacement.at(i) - previousPreviousTotalDisplacement.at(i) ) ;
 
-        velocityVector.at(i)                  = a1 * incrementOfDisplacement.at(i)
-            - a4 * rhs.at(i) - a5 * rhs2.at(i) - a6 * previousIncrementOfDisplacement.at(i);
-
-        previousIncrementOfDisplacement.at(i) = totalDisplacement.at(i) - previousTotalDisplacement.at(i);
-        previousTotalDisplacement.at(i)       = totalDisplacement.at(i);
+			velocityVector.at(i)     = a1 * ( totalDisplacement.at(i) - 2.0 * previousTotalDisplacement.at(i) + previousPreviousTotalDisplacement.at(i) );
+		}
+        previousIncrementOfDisplacement.at(i)   = totalDisplacement.at(i) - previousTotalDisplacement.at(i);
+		previousPreviousTotalDisplacement.at(i) = previousTotalDisplacement.at(i);
+        previousTotalDisplacement.at(i)         = totalDisplacement.at(i);
     }
-
+	//previousIncrementOfDisplacement.printYourself();
+	//previousPreviousTotalDisplacement.printYourself();
+	//previousTotalDisplacement.printYourself();
     this->giveInternalForces(previousInternalForces, true, 1, stepN);
+	//previousInternalForces.printYourself();
 
     // The following line is potentially serious performance leak.
     // The numerical method may compute their internal forces - thus causing
@@ -599,13 +744,19 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
     case NonLinearLhs:
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Updating nonlinear LHS\n");
-#endif
-        stiffnessMatrix->zero();
-#ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
-                       EModelDefaultEquationNumbering(), d);
+		if( this->initialTimeDiscretization != TD_Explicit ){ 
+			stiffnessMatrix->zero();
+			this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+				           EModelDefaultEquationNumbering(), d);
+		}else{
+			effectiveMassMatrix->zero();
+			this->assemble(effectiveMassMatrix, tStep, EID_MomentumBalance, EffectiveMassMatrix,
+				           EModelDefaultEquationNumbering(), d);
+		}
+
+
         break;
     case InternalRhs:
 #ifdef VERBOSE
@@ -658,9 +809,9 @@ NonLinearDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
     fprintf(File, "Equilibrium reached in %d iterations\n\n", currentIterations);
 
-
-    nMethod->printState(File);
-
+	if( this->initialTimeDiscretization != TD_Explicit ){ 
+		nMethod->printState(File);
+	}
     this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, stepN);
     this->giveDomain(1)->giveOutputManager()->doElementOutput(File, stepN);
 }
