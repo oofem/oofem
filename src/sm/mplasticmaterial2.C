@@ -205,7 +205,7 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
 
 double
 MPlasticMaterial2 :: computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *atTime){
-   
+   return 0.;
 }
 
 

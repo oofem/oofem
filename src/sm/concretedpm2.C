@@ -1561,7 +1561,7 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
         normOfResiduals = residualsNorm.computeNorm();
 
-        if ( std::isnan(normOfResiduals) ) {
+        if ( isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return 0.;
         }
