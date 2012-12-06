@@ -608,7 +608,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
 
     for ( i = 1; i <= n; i++ ) {
         type = ( UnknownType ) primaryVarsToExport.at(i);
-        if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
+        if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
         } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == TemperatureVector ) ) {
@@ -981,7 +981,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     Domain *d = emodel->giveDomain(1);
     InternalStateValueType type = ISVT_UNDEFINED;
 
-    if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
+    if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) || ( valID == DirectorField ) ) {
         type = ISVT_VECTOR;
     } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == TemperatureVector ) ) {
         type = ISVT_SCALAR;
@@ -1093,6 +1093,18 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
         eid = EID_ConservationEquation;
         iState = IST_Pressure;
         answer.resize(1);
+    } else if ( type == DirectorField ) {
+        
+        for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( ( id == w_u ) || ( id == w_v ) || ( id == w_w )  ) {
+                dofIDMask.followedBy(id);
+            }
+            //eid = EID_ConservationEquation;
+            //iState = IST_DirectorField;
+            answer.resize(3);
+        }
+        iState = IST_DirectorField;
     } else {
         OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(type) );
     }
@@ -1101,7 +1113,19 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
     answer.zero();
 
     for (int j = 1; j <= size; j++ ) {
-        if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
+        if ( iState == IST_DirectorField ) {
+            indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) );
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
+            
+            this->givePrimVarSmoother()->recoverValues(iState, tStep); // recover values if not done before
+            this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), ireg);
+            if ( size == recoveredVal->giveSize() ) {
+                answer.at(j) = recoveredVal->at(j);
+            } else {
+                OOFEM_WARNING2("VTKXMLExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", type);
+                answer.at(j) = 0.0;
+            }
+        } else if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
             // primary variable available directly in DOF-manager
             answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
         } else if ( iState != IST_Undefined ) {
