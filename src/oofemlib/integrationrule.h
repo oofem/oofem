@@ -268,11 +268,26 @@ protected:
      */
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
+     * Sets up receiver's  integration points on wedge (volume coords) integration domain.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
+     * @returns Number of integration points.
+     */
+    virtual int SetUpPointsOnWedge(int, MaterialMode mode, GaussPoint ***gp) { return 0; }    
+
+    /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).
      */
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
                                             const FloatArray **coords) { return 0; }
+
+    public:
+    /**
+     * 
+     */
+    virtual int SetUpPointsOnWedge2(int, int, MaterialMode mode) { return 0; }    
+    virtual int SetUpPointsOnLine2(int, MaterialMode mode) { return 0; }    
 };
 } // end namespace oofem
 #endif // integrationrule_h

@@ -330,6 +330,9 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
     case _Tetrahedra:
         return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, matMode, & gaussPointArray) );
 
+    case _Wedge:
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnWedge(nPoints, matMode, & gaussPointArray) );
+
     default:
         OOFEM_ERROR("IntegrationRule::setUpIntegrationPoints - unknown mode");
     }
