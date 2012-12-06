@@ -42,6 +42,8 @@
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "sparsemtrx.h"
+#include "usrdefsub.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -74,7 +76,14 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 //     - SolutionOfLinearEquations
 
 {
-    return NULL;  // Not necessary here - Diagonal matrix and simple inversion is used.
+    //return NULL;  // Not necessary here - Diagonal matrix and simple inversion is used.
+    if ( nMethod ) {
+        return nMethod;
+    }
+
+    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+
+    return nMethod;
 }
 
 IRResultType
@@ -491,10 +500,17 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    for ( i = 1; i <= neq; i++ ) {
+//     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
+//    if ( !(s & NM_Success) ) {
+//        OOFEM_ERROR("nldeidynamic :: solverYourselfAt - No success in solving system. Ma=f");
+//    }
+
+
+     for ( i = 1; i <= neq; i++ ) {
         prevIncrOfDisplacement = previousIncrementOfDisplacementVector.at(i);
         incrOfDisplacement = loadVector.at(i) /
                              ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
+        
         accelerationVector.at(i) = ( incrOfDisplacement - prevIncrOfDisplacement ) / ( deltaT * deltaT );
         velocityVector.at(i)     = ( incrOfDisplacement + prevIncrOfDisplacement ) / ( 2. * deltaT );
         previousIncrementOfDisplacementVector.at(i) = incrOfDisplacement;

@@ -40,6 +40,9 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+#include "sparselinsystemnm.h"
+#include "sparsemtrxtype.h"
+
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
@@ -117,6 +120,11 @@ protected:
     double pyEstimate;
     /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
+    
+    SparseMtrx * massMatrixConsistent;
+    LinSystSolverType solverType;
+    SparseMtrxType sparseMtrxType;
+    SparseLinearSystemNM *nMethod;
 
 public:
     NlDEIDynamic(int i, EngngModel *_master = NULL);
@@ -169,6 +177,7 @@ protected:
      * @param solution Step.
      */
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
+    void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);
 
 #ifdef __PARALLEL_MODE
 public:
