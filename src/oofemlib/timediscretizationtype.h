@@ -43,6 +43,7 @@ namespace oofem {
         TD_TwoPointBackward    =  1, ///< Two-point Backward Euler method
         TD_Newmark             =  2, ///< Newmark-beta method
         TD_Wilson              =  3, ///< Wilson-theta method
+        TD_Explicit            =  4, ///< Central difference
     };
 } // end namespace oofem
 #endif // timediscretizationtype_h
