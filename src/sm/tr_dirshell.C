@@ -267,7 +267,7 @@ void
 TrDirShell :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &genEps)
 {
 	FloatArray lcoords = *gp->giveCoordinates();
-	double zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;;
+	double zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
 	
 	FloatArray dxdxi, dxdxi1, dxdxi2, m, dmdxi, dmdxi1, dmdxi2, dgamdxi,  test;
     double dgamdxi1, dgamdxi2, gam;
@@ -289,9 +289,9 @@ TrDirShell :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray 
 void
 TrDirShell :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep)
 {
-	double zeta, gam;
+	double zeta=0.0, gam;
 	FloatArray lcoords = *gp->giveCoordinates();
-	zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;;
+	//zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
 	FloatArray a;
 	FloatMatrix B;
     IntArray edgeNodes;
@@ -557,7 +557,7 @@ TrDirShell :: edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li ,
    B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
 */
 {
-	answer.resize(7, 21); answer.zero();
+	answer.resize(11, 21); answer.zero();
     FloatArray lcoords = *gp->giveCoordinates();
 	FloatArray N, dNdxi;
 	//FloatMatrix dNdxi;
@@ -610,7 +610,7 @@ TrDirShell :: computeGaussPoints()
         
         int nPointsTri = 6;
         int nPointsThickness = 3;
-        int nPointsEdge = 2;
+        int nPointsEdge = 1;
         integrationRulesArray = new IntegrationRule * [ 3 ];
         // Midplane and thickness
 		integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
@@ -698,28 +698,16 @@ TrDirShell :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
         FloatArray g1, g2, g3, S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
         double gam, dg1, dg2;
 
-
 		this->computeBmatrixAt(gp, B);
-        //this->giveGeneralizedStrainAt(gp, temp1, temp1, dm1, dm2, m, dg1, dg2, gam, tStep,solVec);
-        FloatArray genEps;	      // generalized strain
+        FloatArray genEps;	      
 		genEps.beProductOf(B,solVec); // [dxdxi, dmdxi, m, dgamdxi, gam]^T
-		//FloatArray dxdxi, dmdxi, dgamdxi;
         this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dg1, dg2, gam);
-		//dm1.setValues( 3, genEps.at(7) , genEps.at(8) , genEps.at(9)  );
-		//dm2.setValues( 3, genEps.at(10), genEps.at(11), genEps.at(12) );
-		//  m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
-		//dg1 = genEps.at(16);
-		//dg2 = genEps.at(17);
-		//gam = genEps.at(18);
 
-        //------
-
-
-    // material stiffness
+        // Material stiffness
         FloatMatrix A[3][3];
         TrDirShell :: computeLinearizedStiffness(gp, tStep, S1g, S2g, S3g, A, genEps);
         
-     // Tangent stiffness
+        // Tangent stiffness
         FloatArray   f4(3), f5(3), f3[2],temp(3), t1(3), t2(3), t3(3);
         FloatMatrix F1[3], F1T[2], F2, F2T, F2f5, temp3(3,3);
 
@@ -1710,13 +1698,10 @@ TrDirShell :: computeTractionForce(FloatArray &answer, const int iedge, Boundary
     IntegrationRule *iRule = integrationRulesArray [2]; // rule #3 for edge integration of distributed loads given in [*/m]
 	GaussPoint *gp;
 
-    FloatMatrix N;
+    FloatMatrix N, Q;
     FloatArray g1, g2, g3, FT, fT(7), m, aVec, a, T(3), M, G1, components, lcoords;
     double dA, gam;
     answer.resize(21); answer.zero();
-    //this->edgeGiveUpdatedSolutionVector(aVec, iedge, tStep);
-    
-    //double zeta = 0.0; // z-level where the distributed load is applied
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         
@@ -1725,22 +1710,31 @@ TrDirShell :: computeTractionForce(FloatArray &answer, const int iedge, Boundary
     
         edgeLoad->computeValueAt(components,tStep, lcoords, VM_Total);
         this->edgeComputeNmatrixAt(gp, N);
-       /*  gam = 0.0;
-        this->edgeEvalInitialCovarBaseVectorsAt(gp,iedge, G1, M); // m=g3
+        this->edgeEvalCovarBaseVectorsAt(gp, iedge, g2, g3, tStep);
+        g2.normalize();
+        g3.normalize();
+        g1.beVectorProductOf(g2,g3);  g1.normalize();
+        this->giveCoordTransMatrix(Q, g1, g2, g3);
+        g2.beVectorProductOf(g1,g3);  g2.normalize();
         
-        double fac1 = zeta + 0.5*zeta*zeta*gam;
-        double fac2 = 0.5*zeta*zeta;
-      */
-       
-        fT = components;
-
+        FloatArray c1(3), c2(3), t1, t2; 
+        //components.printYourself();
+        c1.at(1) = components.at(1); c1.at(2) = components.at(2); c1.at(3) = components.at(3);
+        c2.at(1) = components.at(4); c2.at(2) = components.at(5); c2.at(3) = components.at(6);
+        t1.beTProductOf(Q,c1);
+        t2.beTProductOf(Q,c2);
+        fT.at(1) = t1.at(1); fT.at(2) = t1.at(2); fT.at(3) = t1.at(3);
+        fT.at(4) = t2.at(1); fT.at(5) = t2.at(2); fT.at(6) = t2.at(3);
+        fT.at(7) = components.at(7);
+        
+        //fT = components;
         dA = this->edgeComputeAreaAround(gp, iedge) ; 
         FT.beTProductOf(N,fT);
         FT.times(dA);
         answer.add(FT);
 
     }
-
+    //answer.printYourself();
 }
 
 void
@@ -2041,7 +2035,7 @@ TrDirShell :: computeVolumeAround(GaussPoint *gp){
 	this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
 	temp.beVectorProductOf(G1, G2);
 	detJ = temp.dotProduct(G3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
-    return detJ * gp->giveWeight() ;
+    return detJ * gp->giveWeight();
 }
 
 double 
