@@ -47,7 +47,7 @@ option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
-    option (USE_SHARED_LIB "Build shared library" ON)
+    option (USE_SHARED_LIB "Build shared library" OFF)
     option (USE_STATIC_LIB "Build static library" OFF)
 endif ()
 # Parallell stuff
