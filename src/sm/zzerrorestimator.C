@@ -63,7 +63,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     int ielem, nelems = this->domain->giveNumberOfElements();
     ZZErrorEstimatorInterface *interface;
     double sNorm;
-    InternalStateType type = IST_StressTensor;
+    InternalStateType type = IStype;
 
     if ( mode == temporaryEM ) {
         type = IST_StressTensorTemp;                  // _error ("estimateError: temporaryEM mode not supported");
@@ -251,8 +251,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     double dV;
 
     nDofMans = elem->giveNumberOfDofManagers();
-    size = ( ( StructuralMaterial * ) elem->giveMaterial() )->
-           giveSizeOfReducedStressStrainVector( iRule->getIntegrationPoint(0)->giveMaterialMode() );
+    size = elem->giveIPValueSize(type, iRule->getIntegrationPoint(0));
     nodalRecoveredStreses.resize(nDofMans, size);
     // assemble nodal recovered stresses
     for ( i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
@@ -272,20 +271,15 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
-            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, IST_StressTensor);
+	    diff.zero();
+	    this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= nDofMans; k++ ) {
                     diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
 
-            if ( type == IST_StressTensor ) {
-                sig = ( ( StructuralMaterialStatus * ) elem->giveMaterial()->giveStatus(gp) )->giveStressVector();
-            } else if ( type == IST_StressTensorTemp ) {
-                sig = ( ( StructuralMaterialStatus * ) elem->giveMaterial()->giveStatus(gp) )->giveTempStressVector();
-            } else {
-                OOFEM_ERROR("ZZErrorEstimatorI_computeElementContributions: unsuported InternalStateType");
-            }
+	    elem->giveIPValue(sig, gp, type, tStep);
 
             diff.subtract(sig);
 
@@ -299,7 +293,8 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
-            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, IST_StressTensor);
+	    diff.zero();
+            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
             ( ( StructuralMaterial * ) elem->giveMaterial() )
             ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness,
                                                  gp, tStep);
@@ -309,14 +304,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                 }
             }
 
-            if ( type == IST_StressTensor ) {
-                sig = ( ( StructuralMaterialStatus * ) elem->giveMaterial()->giveStatus(gp) )->giveStressVector();
-            } else if ( type == IST_StressTensorTemp ) {
-                sig = ( ( StructuralMaterialStatus * ) elem->giveMaterial()->giveStatus(gp) )->giveTempStressVector();
-            } else {
-                OOFEM_ERROR("ZZErrorEstimatorI_computeElementContributions: unsuported InternalStateType");
-            }
-
+	    elem->giveIPValue(sig, gp, type, tStep);
             diff.subtract(sig);
 
             help.beProductOf(DInv, diff);

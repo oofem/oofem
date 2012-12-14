@@ -565,7 +565,7 @@ public:
      */
     virtual double computeDuctilityMeasure(const double sig,
                                            const double rho,
-					   const double theta);
+                                           const double theta);
 
 
     /**

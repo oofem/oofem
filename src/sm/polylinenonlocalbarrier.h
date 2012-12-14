@@ -83,6 +83,18 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
+    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance);
+
+    /**
+     * This function computes the length of the normal to the line defined by 2 vertices that passes through
+     * the given Gauss Point. If the intersection point lies outside the line segment the minimum of the
+     * distances between the Gauss Point and the two vertices is returned
+     * @param coordsA Coordinates of the ith vertex of the polyline
+     * @param coordsB Coordinates of the (i+1)th vertex of the polyline
+     * @param coordsGP Coordinates of the Gauss Point whose nonlocal interactions domain is modified based on the distance based averaging
+     */
+    double giveDistancePointLine(const FloatArray &coordsA, const FloatArray &coordsB, const FloatArray &coordsGP);
+
     virtual const char *giveClassName() const { return "PolylineNonlocalBarrier"; }
     virtual classType giveClassID() const { return PolylineNonlocalBarrierClass; }
 };

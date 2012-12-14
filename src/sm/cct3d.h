@@ -85,8 +85,6 @@ protected:
                                      double &y1, double &y2, double &y3,
                                      double *z = NULL);
 
-    GaussPoint *giveMiddleGaussPoint();
-
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);

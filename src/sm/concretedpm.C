@@ -60,6 +60,7 @@ ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     epsloc = -1.; // negative value means that it has not been set yet
 #endif
+    le = 0.;
 }
 
 ConcreteDPMStatus :: ~ConcreteDPMStatus()
@@ -531,7 +532,7 @@ double ConcreteDPM :: computeDamage(const StrainVector &strain, GaussPoint *gp, 
         tempKappaD = equivStrain;
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
         if ( ( href <= 0. ) || ( status->giveEpsLoc() >= 0. ) ) {
-	  // evaluate and store the effective element size (if not known yet)
+            // evaluate and store the effective element size (if not known yet)
             this->initDamaged(tempKappaD, strain, gp);
         }
 
@@ -609,7 +610,7 @@ ConcreteDPM :: computeInverseDamage(double dam, GaussPoint *gp)
             le = gp->giveElement()->computeMeanSize();
         }
 
-        status->setLe(helem);
+        status->setLe(le);
     }
 
     double answer = -( this->ef / le ) * log(1. - dam) - dam * ft / eM;
@@ -629,58 +630,59 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
         int nite = 0;
         double R, Lhs, aux, aux1;
 
-	double h = status->giveLe(); // effective element size
+        double h = status->giveLe(); // effective element size
 
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
-	// the procedure is different before and after localization
+        // the procedure is different before and after localization
         double epsloc = status->giveEpsLoc();
         if ( ( href <= 0. ) || ( epsloc < 0. ) ) { // before localization, the reference element size href is used (but only if it is really specified by the user)
-	  if ( href > 0. ) {
-	    h = href; // reference element size
-	  }
+            if ( href > 0. ) {
+                h = href; // reference element size
+            }
+
 #endif
-	  // standard damage evaluation procedure
-	  aux1 = ( ft / eM ) * h / ef;
-	  if ( aux1 > 1 ) {
+        // standard damage evaluation procedure
+        aux1 = ( ft / eM ) * h / ef;
+        if ( aux1 > 1 ) {
             printf("computeDamageParam: ft=%g, E=%g, wf=%g, hmax=E*wf/ft=%g, h=%g\n", ft, eM, ef, eM * ef / ft, h);
             _error("computeDamageParam: element too large");
-	  }
-	  do {
+        }
+
+        do {
             nite++;
             aux = exp(-h * ( omega * ft / eM + kappa ) / ef);
             R = 1. - omega - aux;
             Lhs = -1. + aux1 * aux;
             omega -= R / Lhs;
             if ( nite > 40 ) {
-	      _error("computeDamageParam: algorithm not converging");
+                _error("computeDamageParam: algorithm not converging");
             }
-	  }
-	  while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
+        } while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
 
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
-	} else   { // after localization, more complicated formula
-	  if ( helem > 0. ) {
+    } else {       // after localization, more complicated formula
+        if ( helem > 0. ) {
             h = helem; // predefined element size
-	  } else {
+        } else {
             h = status->giveLe(); // effective element size
-	  }
+        }
 
-	  aux1 = ( ft / eM ) * h / ef;
-	  do {
+        aux1 = ( ft / eM ) * h / ef;
+        do {
             nite++;
             aux = exp(-( ( href - h ) * epsloc + h * ( omega * ft / eM + kappa ) ) / ef);
             R = 1. - omega - aux;
             Lhs = -1. + aux1 * aux;
             omega -= R / Lhs;
             if ( nite > 40 ) {
-	      printf("computeDamageParam: algorithm not converging (part 2)");
+                printf("computeDamageParam: algorithm not converging (part 2)");
             }
-	  } 
-	  while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
-	}
+        } while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
+    }
+
 #endif
         if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-	  _error2("computeDamageParam: internal error, omega = %g", omega);
+            _error2("computeDamageParam: internal error, omega = %g", omega);
         }
     }
 
@@ -704,36 +706,37 @@ ConcreteDPM :: initDamaged(double kappaD,
     ConcreteDPMStatus *status = giveStatus(gp);
 
     if ( helem > 0. ) {
-      status->setLe(helem);
+        status->setLe(helem);
     } else if ( status->giveDamage() == 0. ) {
-      strain.computePrincipalValDir(principalStrains, principalDir);
-      // find index of max positive principal strain
-      for ( i = 2; i <= 3; i++ ) {
-        if ( principalStrains.at(i) > principalStrains.at(indx) ) {
-	  indx = i;
+        strain.computePrincipalValDir(principalStrains, principalDir);
+        // find index of max positive principal strain
+        for ( i = 2; i <= 3; i++ ) {
+            if ( principalStrains.at(i) > principalStrains.at(indx) ) {
+                indx = i;
+            }
         }
-      }
 
-      for ( i = 1; i <= 3; i++ ) {
-        crackPlaneNormal.at(i) = principalDir.at(i, indx);
-      }
+        for ( i = 1; i <= 3; i++ ) {
+            crackPlaneNormal.at(i) = principalDir.at(i, indx);
+        }
 
-    // Warning: This would give the element size divided by the number of Gauss points
-    // le = gp->giveElement()->giveCharacteristicLenght (gp, crackPlaneNormal);
+        // Warning: This would give the element size divided by the number of Gauss points
+        // le = gp->giveElement()->giveCharacteristicLenght (gp, crackPlaneNormal);
 
-    // this gives the projected element size
-    le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
-    if ( le == 0. ) {
-      le = gp->giveElement()->computeMeanSize();
-    }
-    // store le in the corresponding status
-    status->setLe(le);
+        // this gives the projected element size
+        le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
+        if ( le == 0. ) {
+            le = gp->giveElement()->computeMeanSize();
+        }
+
+        // store le in the corresponding status
+        status->setLe(le);
     } else if ( status->giveLe() == 0. ) {
-      // this happens if the status is initialized from a file
-      // with nonzero damage
-      // le determined as square root of element area or cube root of el. volume
-      le = gp->giveElement()->computeMeanSize();
-      status->setLe(le);
+        // this happens if the status is initialized from a file
+        // with nonzero damage
+        // le determined as square root of element area or cube root of el. volume
+        le = gp->giveElement()->computeMeanSize();
+        status->setLe(le);
     }
 }
 
@@ -1405,7 +1408,7 @@ ConcreteDPM :: computeDDKappaDDeltaLambdaDKappa(const double sig,
 double
 ConcreteDPM :: computeDuctilityMeasure(const double sig,
                                        const double rho,
-				       const double theta)
+                                       const double theta)
 {
     double thetaConst = pow(2. * cos(theta), 2.);
     double ductilityMeasure;
@@ -1964,8 +1967,8 @@ ConcreteDPM :: giveIPValueSize(InternalStateType type,
                                GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
-      //return 6;       
-	return this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        //return 6;
+        return this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
     } else if ( ( type == IST_CumPlasticStrain ) || ( type == IST_CumPlasticStrain_2 ) || ( type == IST_VolumetricPlasticStrain ) || ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DamageTensorTemp ) ) {
         return 1;
     } else {
@@ -1980,17 +1983,17 @@ ConcreteDPM :: giveIntVarCompFullIndx(IntArray &answer,
 {
     switch ( type ) {
     case IST_PlasticStrainTensor:
-      this->giveStressStrainMask(answer, FullForm, mmode);
-      /*
-        answer.resize(6);
-        answer.zero();
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-        answer.at(5) = 5;
-        answer.at(6) = 6;
-      */
+        this->giveStressStrainMask(answer, FullForm, mmode);
+        /*
+         * answer.resize(6);
+         * answer.zero();
+         * answer.at(1) = 1;
+         * answer.at(2) = 2;
+         * answer.at(3) = 3;
+         * answer.at(4) = 4;
+         * answer.at(5) = 5;
+         * answer.at(6) = 6;
+         */
         return 1;
 
     case IST_DamageTensor:

@@ -68,7 +68,7 @@ public:
 
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, NonlocalMaterialExtensionInterface *nei);
-
+    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance) { return maxPossibleDistance; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual const char *giveClassName() const { return "SymmetryBarrier"; }

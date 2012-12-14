@@ -284,10 +284,9 @@ CCTPlate :: initializeFrom(InputRecord *ir)
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_CCTPlate_nip, "nip"); // Macro
-    if ( numberOfGaussPoints != 1 ) {
-        numberOfGaussPoints = 1;
-    }
-
+    //if ( numberOfGaussPoints != 1 ) {
+    //    numberOfGaussPoints = 1;
+    //}
     this->computeGaussPoints();
     return IRRT_OK;
 }
@@ -366,7 +365,12 @@ CCTPlate :: giveInterface(InterfaceType interface)
         return ( NodalAveragingRecoveryModelInterface * ) this;
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
+    } else if ( interface == ZZErrorEstimatorInterfaceType ) {
+        return ( ZZErrorEstimatorInterface * ) this;
+    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
+        return ( ZZRemeshingCriteriaInterface * ) this;
     }
+
 
     return NULL;
 }
@@ -428,8 +432,7 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
         return 1;
     } else {
-        answer.resize(0);
-        return 0;
+      return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
     }
 }
 
@@ -441,6 +444,8 @@ CCTPlate :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
     if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
         return 5;
+    } else if ((type == IST_ErrorIndicatorLevel) || (type == IST_InternalStressError)) {
+      return 1;
     }
 
     return 0;
@@ -456,17 +461,20 @@ CCTPlate :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answ
 {
     FloatArray n;
 
-    if ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) {
-        this->interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-        answer.resize(1, 3);
-        answer.zero();
-        answer.at(1) = n.at(1);
-        answer.at(2) = n.at(2);
-        answer.at(3) = n.at(3);
-    } else {
-        return;
-    }
+    this->interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.resize(3);
+    answer.zero();
+    answer.at(1) = n.at(1);
+    answer.at(2) = n.at(2);
+    answer.at(3) = n.at(3);
 }
+
+double 
+CCTPlate::ZZRemeshingCriteriaI_giveCharacteristicSize() 
+{
+  return sqrt(this->computeArea() * 2.0);
+}
+
 
 
 //

@@ -52,7 +52,7 @@ DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp) :
     plasticStrain( gp->giveMaterialMode() ),
     tempPlasticStrain( gp->giveMaterialMode() )
 {
-    q = ( (DustMaterial*) gp->giveMaterial() )->giveQ0();
+    q = ( ( DustMaterial * ) gp->giveMaterial() )->giveQ0();
 }
 
 DustMaterialStatus :: ~DustMaterialStatus()
@@ -63,7 +63,6 @@ DustMaterialStatus :: initTempStatus()
 {
     // Call the function of the parent class to initialize the variables defined there.
     StructuralMaterialStatus :: initTempStatus();
-    // tempVal = val
     tempPlasticStrain = plasticStrain;
     tempQ = q;
     tempStateFlag = stateFlag;
@@ -72,9 +71,8 @@ DustMaterialStatus :: initTempStatus()
 void
 DustMaterialStatus :: updateYourself(TimeStep *atTime)
 {
-    // Call corresponding function of the parent class to update variables defined there.
+    // Call the corresponding function of the parent class to update variables defined there.
     StructuralMaterialStatus :: updateYourself(atTime);
-    // val = tempVal
     plasticStrain = tempPlasticStrain;
     q = tempQ;
     stateFlag = tempStateFlag;
@@ -83,7 +81,7 @@ DustMaterialStatus :: updateYourself(TimeStep *atTime)
 void
 DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    // Call corresponding function of the parent class to print variables defined there.
+    // Call the corresponding function of the parent class to print variables defined there.
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "\tstatus { ");
@@ -206,14 +204,42 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, IFT_DustMaterial_newtonIter, "newtoniter");
 
     // check parameters admissibility
-    if (ft < 0) { OOFEM_ERROR("parameter 'ft' must be positive") };
-    if (x0 < 0) { OOFEM_ERROR("parameter 'x0' must be positive") };
-    if (rEll < 0) { OOFEM_ERROR("parameter 'rEll' must be positive") };
-    if (theta < 0) { OOFEM_ERROR("parameter 'theta' must be positive") };
-    if (beta < 0) { OOFEM_ERROR("parameter 'beta' must be positive") };
-    if (lambda < 0) { OOFEM_ERROR("parameter 'lambda' must be positive") };
-    if (alpha < lambda) { OOFEM_ERROR("parameter 'alpha' must be greater than parameter 'lambda'") };
-    x0 = -x0; // compressive strength is negative, althought on input it is positive number
+    if ( ft < 0 ) {
+        OOFEM_ERROR("parameter 'ft' must be positive")
+    }
+
+    ;
+    if ( x0 < 0 ) {
+        OOFEM_ERROR("parameter 'x0' must be positive")
+    }
+
+    ;
+    if ( rEll < 0 ) {
+        OOFEM_ERROR("parameter 'rEll' must be positive")
+    }
+
+    ;
+    if ( theta < 0 ) {
+        OOFEM_ERROR("parameter 'theta' must be positive")
+    }
+
+    ;
+    if ( beta < 0 ) {
+        OOFEM_ERROR("parameter 'beta' must be positive")
+    }
+
+    ;
+    if ( lambda < 0 ) {
+        OOFEM_ERROR("parameter 'lambda' must be positive")
+    }
+
+    ;
+    if ( alpha < lambda ) {
+        OOFEM_ERROR("parameter 'alpha' must be greater than parameter 'lambda'")
+    }
+
+    ;
+    x0 = -x0; // compressive strength is negative, although on input it is a positive number
 
     hardeningType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, hardeningType, IFT_DustMaterial_hardeningType, "ht");
@@ -238,16 +264,16 @@ DustMaterial :: hasMaterialModeCapability(MaterialMode mMode)
 
 void
 DustMaterial :: giveRealStressVector(FloatArray &answer,
-                                                  MatResponseForm form,
-                                                  GaussPoint *gp,
-                                                  const FloatArray &totalStrain,
-                                                  TimeStep *atTime)
+                                     MatResponseForm form,
+                                     GaussPoint *gp,
+                                     const FloatArray &totalStrain,
+                                     TimeStep *atTime)
 {
     FloatArray strainVectorR;
 
-    DustMaterialStatus *status = ( DustMaterialStatus * ) ( this->giveStatus(gp) );
+    DustMaterialStatus *status = ( DustMaterialStatus * )( this->giveStatus(gp) );
 
-    // Initialize temp variables for this gauss point
+    // Initialize temp variables for this Gauss point
     this->initTempStatus(gp);
 
     // subtract stress-independent part of strain
@@ -260,11 +286,11 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
     // copy total strain vector to the temp status
     status->letTempStrainVectorBe(totalStrain);
 
-    // give back correct form of stressVector to giveRealStressVector
+    // pass the correct form of stressVector to giveRealStressVector
     if ( form == ReducedForm ) {
         answer = status->giveTempStressVector();
     } else {
-        ( ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() ) )
+        ( ( StructuralCrossSection * )( gp->giveElement()->giveCrossSection() ) )
         ->giveFullCharacteristicVector( answer, gp, status->giveTempStressVector() );
     }
 }
@@ -272,11 +298,11 @@ DustMaterial :: giveRealStressVector(FloatArray &answer,
 void
 DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
 {
-    DustMaterialStatus *status = (DustMaterialStatus*) giveStatus(gp);
+    DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
 
     // compute total strain components
-    StrainVector strainDeviator( mode );
+    StrainVector strainDeviator(mode);
     double volumetricStrain;
     strain.computeDeviatoricVolumetricSplit(strainDeviator, volumetricStrain);
 
@@ -290,20 +316,16 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
     StrainVector elasticStrainDeviator = strainDeviator;
     elasticStrainDeviator.subtract(plasticStrainDeviator);
 
-    //strain.printYourself();
-    //strainDeviator.printYourself();
-    //OOFEM_LOG_DEBUG("%e\n",volumetricStrain)
-
     // compute trial stresses
     double bulkModulus, shearModulus;
     computeAndSetBulkAndShearModuli(bulkModulus, shearModulus, gp);
     double volumetricStress = 3. * bulkModulus * volumetricElasticStrain;
-    StressVector stressDeviator( mode);
+    StressVector stressDeviator(mode);
     elasticStrainDeviator.applyDeviatoricElasticStiffness(stressDeviator, shearModulus);
 
     // norm of trial stress deviator
     double rho = stressDeviator.computeSecondCoordinate();
-    double i1 = 3*volumetricStress;
+    double i1 = 3 * volumetricStress;
     double f1, f2, f3, q, tempQ;
     q = tempQ = status->giveQ();
     f1 = yieldFunction1(rho, i1);
@@ -315,71 +337,66 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
     StrainVector m(mode);
     m.zero();
     double feft = functionFe(ft);
-    double auxModulus = 2*shearModulus/(9*bulkModulus);
-    double temp = feft - auxModulus*(i1-ft)/functionFeDI1(ft);
+    double auxModulus = 2 * shearModulus / ( 9 * bulkModulus );
+    double temp = feft - auxModulus * ( i1 - ft ) / functionFeDI1(ft);
 
-    OOFEM_LOG_DEBUG("i1 %e rho %e\n",i1,rho);
-
-    if (f1 > 0 && i1 >= q && rho >= temp) { // yield function 1
-        status->letTempStateFlagBe(DustMaterialStatus::DM_Yielding1);
-        performF1return(i1,rho,gp);
+    if ( f1 > 0 && i1 >= q && rho >= temp ) { // yield function 1
+        status->letTempStateFlagBe(DustMaterialStatus :: DM_Yielding1);
+        performF1return(i1, rho, gp);
         tempQ = status->giveTempQ();
-        lambda = (rho - functionFe(functionI1(q,tempQ,i1,bulkModulus))) / (2*shearModulus);
-        //computePlastStrainDirM1(m,stressDeviator,rho,i1,tempQ);
-        computePlastStrainDirM1(m,stressDeviator,rho,i1,q);
-    } else if (f2 > 0 && i1 < q) { // yield function 2
-        status->letTempStateFlagBe(DustMaterialStatus::DM_Yielding2);
-        performF2return(i1,rho,gp);
+        lambda = ( rho - functionFe( functionI1(q, tempQ, i1, bulkModulus) ) ) / ( 2 * shearModulus );
+        computePlastStrainDirM1(m, stressDeviator, rho, i1, q);
+    } else if ( f2 > 0 && i1 < q ) { // yield function 2
+        status->letTempStateFlagBe(DustMaterialStatus :: DM_Yielding2);
+        performF2return(i1, rho, gp);
         tempQ = status->giveTempQ();
-        lambda = computeDeltaGamma2(tempQ,q,i1,bulkModulus);
-        computePlastStrainDirM2(m,stressDeviator,rho,i1,tempQ);
-    } else if (f3 > 0 && rho < temp) { // yield function 3
-        status->letTempStateFlagBe(DustMaterialStatus::DM_Yielding3);
+        lambda = computeDeltaGamma2(tempQ, q, i1, bulkModulus);
+        computePlastStrainDirM2(m, stressDeviator, rho, i1, tempQ);
+    } else if ( f3 > 0 && rho < temp ) { // yield function 3
+        status->letTempStateFlagBe(DustMaterialStatus :: DM_Yielding3);
         double fFeFt = functionFe(ft);
         double fFeDqFt = functionFeDI1(ft);
-        double b = fFeFt - 2*shearModulus/(9*bulkModulus)*(i1-ft) - (1+fFeDqFt)*rho;
-        double c = -fFeFt/(9*bulkModulus)*(i1-ft);
-        lambda = 1/(4*shearModulus)*(-b+sqrt(b*b-8*shearModulus*c));
-        double deltaVolumetricPlasticStrain = 3*(1-(1+fFeDqFt)*rho/fFeFt)*lambda;
-        if (volumetricPlasticStrain + deltaVolumetricPlasticStrain < -.5*wHard) {
-            //OOFEM_LOG_DEBUG("dVolEpsPl: before %e",deltaVolumetricPlasticStrain);
-            deltaVolumetricPlasticStrain = -.5*wHard - volumetricPlasticStrain;
-            //OOFEM_LOG_DEBUG(" after %e\n",deltaVolumetricPlasticStrain);
+        double b = fFeFt - 2 * shearModulus / ( 9 * bulkModulus ) * ( i1 - ft ) - ( 1 + fFeDqFt ) * rho;
+        double c = -fFeFt / ( 9 * bulkModulus ) * ( i1 - ft );
+        lambda = 1 / ( 4 * shearModulus ) * ( -b + sqrt(b * b - 8 * shearModulus * c) );
+        double deltaVolumetricPlasticStrain = 3 * ( 1 - ( 1 + fFeDqFt ) * rho / fFeFt ) * lambda;
+        if ( volumetricPlasticStrain + deltaVolumetricPlasticStrain < -.5 * wHard ) {
+            deltaVolumetricPlasticStrain = -.5 * wHard - volumetricPlasticStrain;
         }
-        if (q <= 0.0) {
-           computeQFromPlastVolEps(tempQ,q,deltaVolumetricPlasticStrain);
+
+        if ( q <= 0.0 ) {
+            computeQFromPlastVolEps(tempQ, q, deltaVolumetricPlasticStrain);
         }
+
         status->letTempQBe(tempQ);
-        computePlastStrainDirM3(m,stressDeviator,rho,i1,tempQ);
+        computePlastStrainDirM3(m, stressDeviator, rho, i1, tempQ);
     } else { // elastic case
         int stateFlag = status->giveStateFlag();
-        bool willBeElastic = stateFlag == DustMaterialStatus::DM_Unloading || stateFlag == DustMaterialStatus::DM_Elastic;
-        status->letTempStateFlagBe( willBeElastic? DustMaterialStatus::DM_Elastic : DustMaterialStatus::DM_Unloading );
+        if ( ( stateFlag == DustMaterialStatus :: DM_Unloading ) || ( stateFlag == DustMaterialStatus :: DM_Elastic ) ) {
+            status->letTempStateFlagBe(DustMaterialStatus :: DM_Elastic);
+        } else {
+            status->letTempStateFlagBe(DustMaterialStatus :: DM_Unloading);
+        }
     }
 
-    if (lambda<0) { OOFEM_ERROR("TODO"); }
+    if ( lambda < 0 ) {
+        OOFEM_ERROR("TODO");
+    }
 
     // compute correct stress
     m.times(lambda);
-    //m.printYourself();
     plasticStrain.add(m);
-    //m.printYourself();
     double mVol;
     StrainVector mDeviator(mode);
-    m.computeDeviatoricVolumetricSplit(mDeviator,mVol);
-    i1 -= 3*bulkModulus*mVol;
-    volumetricStress = i1/3.;
-    mDeviator.times(-2*shearModulus);
+    m.computeDeviatoricVolumetricSplit(mDeviator, mVol);
+    i1 -= 3 * bulkModulus * mVol;
+    volumetricStress = i1 / 3.;
+    mDeviator.times(-2 * shearModulus);
     stressDeviator.add(mDeviator);
 
     // compute full stresses from deviatoric and volumetric part and store them
-    StressVector stress( mode );
+    StressVector stress(mode);
     stressDeviator.computeDeviatoricVolumetricSum(stress, volumetricStress);
-#ifdef DEBUG
-    //strain.printYourself();
-    //stress.printYourself();
-    //printf("\n");
-#endif
     status->letTempStressVectorBe(stress);
 
     // compute and update plastic strain and q
@@ -389,148 +406,152 @@ DustMaterial :: performStressReturn(GaussPoint *gp, StrainVector strain)
 void
 DustMaterial :: performF1return(double i1, double rho, GaussPoint *gp)
 {
-    DustMaterialStatus *status = (DustMaterialStatus*) giveStatus(gp);
+    DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     double bulkModulus = status->giveBulkModulus();
     double shearModulus = status->giveShearModulus();
     double q = status->giveQ();
     double tempQ = status->giveTempQ();
     double fx, dfx;
     int i;
-    double m = 9*bulkModulus/(2*shearModulus);
+    double m = 9 * bulkModulus / ( 2 * shearModulus );
     double vfI1, vfI1DQ, a, b, c, d, da, db, dc;
     int positiveFlag = 0;
-    
-    for (i=0; i<newtonIter; i++) {
-        vfI1 = functionI1(q,tempQ,i1,bulkModulus);
-        vfI1DQ = functionI1DQ(tempQ,bulkModulus);
-        a = (vfI1-tempQ)/(ft-tempQ);
+
+    for ( i = 0; i < newtonIter; i++ ) {
+        vfI1 = functionI1(q, tempQ, i1, bulkModulus);
+        vfI1DQ = functionI1DQ(tempQ, bulkModulus);
+        a = ( vfI1 - tempQ ) / ( ft - tempQ );
         b = functionFeDI1(vfI1);
         c = rho - functionFe(vfI1);
-        da = ((vfI1DQ-1)*(ft-tempQ) + (vfI1-tempQ)) / ((ft-tempQ)*(ft-tempQ));
-        db = functionFeDI1DI1(vfI1)*vfI1DQ;
-        dc = -functionFeDI1(vfI1)*vfI1DQ;
-        d = da*b*c + a*db*c + a*b*dc;
-        fx  = -3*bulkModulus*functionH(q,tempQ) - m*a*b*c;
-        dfx = -3*bulkModulus*functionHDQ(tempQ) - m*d;
-        tempQ -= fx/dfx;
-        OOFEM_LOG_DEBUG("  q %e fx %e  dfx %e  answer %e\n",q,fx,dfx,tempQ);
-        if (tempQ >= 0) {
-            if (positiveFlag >= 1) {
+        da = ( ( vfI1DQ - 1 ) * ( ft - tempQ ) + ( vfI1 - tempQ ) ) / ( ( ft - tempQ ) * ( ft - tempQ ) );
+        db = functionFeDI1DI1(vfI1) * vfI1DQ;
+        dc = -functionFeDI1(vfI1) * vfI1DQ;
+        d = da * b * c + a * db * c + a * b * dc;
+        fx  = -3 *bulkModulus *functionH(q, tempQ) - m * a * b * c;
+        dfx = -3 *bulkModulus *functionHDQ(tempQ) - m * d;
+        tempQ -= fx / dfx;
+        if ( tempQ >= 0 ) {
+            if ( positiveFlag >= 1 ) {
                 status->letTempQBe(0.0);
                 return;
             }
+
             tempQ = 0;
             positiveFlag += 1;
         }
-        if ( fabs(fx/dfx/tempQ) < newtonTol ) {
+
+        if ( fabs(fx / dfx / tempQ) < newtonTol ) {
             status->letTempQBe(tempQ);
             return;
         }
     }
-    //
-    OOFEM_LOG_DEBUG("  i1 %e rho %e  bulkM %e  shearM %e\n",i1,rho,bulkModulus,shearModulus);
+
+    OOFEM_LOG_DEBUG("  i1 %e rho %e  bulkM %e  shearM %e\n", i1, rho, bulkModulus, shearModulus);
     OOFEM_ERROR("performF1return: Newton's method did not converge\n");
 }
 
 void
 DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
 {
-    DustMaterialStatus *status = (DustMaterialStatus*) giveStatus(gp);
+    DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     double bulkModulus = status->giveBulkModulus();
     double shearModulus = status->giveShearModulus();
     double q = status->giveQ();
     double qRight = q;
     double qLeft = q;
-    double tempQ = .5*(qLeft+qRight);
+    double tempQ = .5 * ( qLeft + qRight );
     double fqRight, fqLeft, fq;
     int i;
-    double fx,dfx;
-    for (i=0; i<newtonIter; i++) {
-        fx = i1 - 3*bulkModulus*functionH(q,qLeft) - qLeft;
-        dfx =   - 3*bulkModulus*functionHDQ(qLeft) - 1;
-        qLeft -= fx/dfx;
-        if (  fabs(fx/dfx/q0) < newtonTol ) {
+    double fx, dfx;
+    for ( i = 0; i < newtonIter; i++ ) {
+        fx = i1 - 3 *bulkModulus *functionH(q, qLeft) - qLeft;
+        dfx =   -3 *bulkModulus *functionHDQ(qLeft) - 1;
+        qLeft -= fx / dfx;
+        if (  fabs(fx / dfx / q0) < newtonTol ) {
             break;
         }
     }
-    for (i=0; i<newtonIter; i++) {
-        fq = fTempR2(tempQ,q,i1,rho,bulkModulus,shearModulus);
-        if (fabs((qRight-qLeft)/qRight) < newtonTol) {
+
+    for ( i = 0; i < newtonIter; i++ ) {
+        fq = fTempR2(tempQ, q, i1, rho, bulkModulus, shearModulus);
+        if ( fabs( ( qRight - qLeft ) / qRight ) < newtonTol ) {
             status->letTempQBe(tempQ);
             return;
         }
-        fqRight = fTempR2(qRight,q,i1,rho,bulkModulus,shearModulus);
-        fqLeft = fTempR2(qLeft,q,i1,rho,bulkModulus,shearModulus);
-        if (fq > 0) {
+
+        fqRight = fTempR2(qRight, q, i1, rho, bulkModulus, shearModulus);
+        fqLeft = fTempR2(qLeft, q, i1, rho, bulkModulus, shearModulus);
+        if ( fq > 0 ) {
             qRight = tempQ;
         } else {
             qLeft = tempQ;
         }
-        tempQ = .5*(qLeft + qRight);
+
+        tempQ = .5 * ( qLeft + qRight );
     }
+
     OOFEM_ERROR("performF2return: bisection method did not converge\n");
 }
 
 void
 DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVolumetricPlasticStrain)
 {
-    if (q >=0.) {
+    if ( q >= 0. ) {
         answer = 0.;
         return;
     }
+
     double fx, dfx;
     int i;
-    for (i=0; i<=newtonIter; i++) {
-        fx = functionH(q,answer) - deltaVolumetricPlasticStrain;
+    for ( i = 0; i <= newtonIter; i++ ) {
+        fx = functionH(q, answer) - deltaVolumetricPlasticStrain;
         dfx = functionHDQ(answer);
-        answer -= fx/dfx;
-        //OOFEM_LOG_DEBUG("  q %e fx %e  dfx %e  answer %e\n",q,fx,dfx,answer);
-        if (  fabs(fx/dfx/answer) < newtonTol ) {
-            //OOFEM_LOG_DEBUG("  DustMaterial: q = %e, solved in %d iters\n",answer,i+1);
-            if (answer>0) { answer = 0.; }
+        answer -= fx / dfx;
+        if (  fabs(fx / dfx / answer) < newtonTol ) {
+            if ( answer > 0 ) {
+                answer = 0.;
+            }
+
             return;
         }
     }
-    OOFEM_LOG_DEBUG("  dVolEpsPl: %e\n",deltaVolumetricPlasticStrain);
+
+    OOFEM_LOG_DEBUG("  dVolEpsPl: %e\n", deltaVolumetricPlasticStrain);
     OOFEM_ERROR("computeQFromPlastVolEps: Newton's method did not converge\n");
 }
 
 void
 DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseForm form,
-                                                           MatResponseMode mode,
-                                                           GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                              MatResponseForm form,
+                                              MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 {
-    DustMaterialStatus *status = (DustMaterialStatus*) giveStatus(gp);
+    DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     double ym0 = LEMaterial->giveYoungsModulus();
     double ym = status->giveYoungsModulus();
-    double coeff = status->giveVolumetricPlasticStrain()<0? ym/ym0 : 1.0;
-    if ( mode == ElasticStiffness) {
+    double coeff = status->giveVolumetricPlasticStrain() < 0 ? ym / ym0 : 1.0;
+    if ( mode == ElasticStiffness ) {
         LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
         answer.times(coeff);
-    } else if (mode == SecantStiffness || mode == TangentStiffness) {
+    } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
         LEMaterial->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
         answer.times(coeff);
     } else {
         _error("Unsupported MatResponseMode\n");
     }
-#ifdef DEBUG
-    //printf("coeff %e\n",coeff);
-    //answer.printYourself();
-#endif
 }
 
 int
 DustMaterial :: setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type)
 {
     DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
-    if (type == IST_PlasticStrainTensor) {
-        StrainVector plasticStrain = StrainVector(value, gp->giveMaterialMode());
+    if ( type == IST_PlasticStrainTensor ) {
+        StrainVector plasticStrain = StrainVector( value, gp->giveMaterialMode() );
         status->letPlasticStrainBe(plasticStrain);
         return 1;
-    } else if (type == IST_StressCapPos) {
-        status->letQBe(value.at(1));
+    } else if ( type == IST_StressCapPos ) {
+        status->letQBe( value.at(1) );
         return 1;
     } else {
         return StructuralMaterial :: setIPValue(value, gp, type);
@@ -539,27 +560,29 @@ DustMaterial :: setIPValue(const FloatArray value, GaussPoint *gp, InternalState
 
 int
 DustMaterial :: giveIPValue(FloatArray &answer,
-                                         GaussPoint *gp,
-                                         InternalStateType type,
-                                         TimeStep *atTime)
+                            GaussPoint *gp,
+                            InternalStateType type,
+                            TimeStep *atTime)
 {
     const DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     if ( type == IST_PlasticStrainTensor ||
          type == IST_VolumetricPlasticStrain ||
          type == IST_PrincipalPlasticStrainTensor ) {
-        StrainVector plasticStrain(gp->giveMaterialMode());
+        StrainVector plasticStrain( gp->giveMaterialMode() );
         status->givePlasticStrain(plasticStrain);
-        if ( type == IST_PlasticStrainTensor) {
+        if ( type == IST_PlasticStrainTensor ) {
             answer = plasticStrain;
             return 1;
         }
-        if ( type == IST_PrincipalPlasticStrainTensor) {
+
+        if ( type == IST_PrincipalPlasticStrainTensor ) {
             plasticStrain.computePrincipalValues(answer);
             return 1;
         }
-        StrainVector plasticStrainDeviator(gp->giveMaterialMode());
+
+        StrainVector plasticStrainDeviator( gp->giveMaterialMode() );
         double volumetricPlasticStrain;
-        plasticStrain.computeDeviatoricVolumetricSplit(plasticStrainDeviator,volumetricPlasticStrain);
+        plasticStrain.computeDeviatoricVolumetricSplit(plasticStrainDeviator, volumetricPlasticStrain);
         if ( type == IST_VolumetricPlasticStrain ) {
             answer.resize(1);
             answer.at(1) = volumetricPlasticStrain;
@@ -578,13 +601,13 @@ DustMaterial :: giveIPValue(FloatArray &answer,
 
 int
 DustMaterial :: giveIPValueSize(InternalStateType type,
-                                             GaussPoint *gp)
+                                GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
         return 3;
-    } else if ( type == IST_VolumetricPlasticStrain || type == IST_StressCapPos) {
+    } else if ( type == IST_VolumetricPlasticStrain || type == IST_StressCapPos ) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, gp);
@@ -593,14 +616,13 @@ DustMaterial :: giveIPValueSize(InternalStateType type,
 
 int
 DustMaterial :: giveIntVarCompFullIndx(IntArray &answer,
-                                                    InternalStateType type,
-                                                    MaterialMode mmode)
+                                       InternalStateType type,
+                                       MaterialMode mmode)
 {
     switch ( type ) {
-
-        default:
-            return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-        }
+    default:
+        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+    }
 }
 
 InternalStateValueType
@@ -628,25 +650,25 @@ DustMaterial :: CreateStatus(GaussPoint *gp) const
 double
 DustMaterial :: functionFe(double i1)
 {
-    return alpha - lambda*exp(beta*i1) - theta*i1;
+    return alpha - lambda *exp(beta *i1) - theta * i1;
 }
 
 double
 DustMaterial :: functionFeDI1(double i1)
 {
-    return -lambda*beta*exp(beta*i1) - theta;
+    return -lambda *beta *exp(beta *i1) - theta;
 }
 
 double
 DustMaterial :: functionFeDI1DI1(double i1)
 {
-    return -lambda*beta*beta*exp(beta*i1);
+    return -lambda *beta *beta *exp(beta *i1);
 }
 
 double
 DustMaterial :: functionFc(double rho, double i1, double q)
 {
-    return sqrt(rho*rho + 1/rEll/rEll*(q-i1)*(q-i1));
+    return sqrt( rho * rho + 1 / rEll / rEll * ( q - i1 ) * ( q - i1 ) );
 }
 
 double
@@ -657,7 +679,7 @@ DustMaterial :: yieldFunction1(double rho, double i1) {
 double
 DustMaterial :: yieldFunction2(double rho, double i1, double q)
 {
-    return functionFc(rho,i1,q) - functionFe(q);
+    return functionFc(rho, i1, q) - functionFe(q);
 }
 
 double
@@ -669,13 +691,13 @@ DustMaterial :: yieldFunction3(double i1)
 double
 DustMaterial :: functionX(double q)
 {
-    return q - rEll*(alpha - lambda*exp(beta*q) - theta*q);
+    return q - rEll * ( alpha - lambda * exp(beta * q) - theta * q );
 }
 
 double
 DustMaterial :: functionXDQ(double q)
 {
-    return 1 - rEll*( -lambda*beta*exp(beta*q) - theta);
+    return 1 - rEll * ( -lambda * beta * exp(beta * q) - theta );
 }
 
 void
@@ -683,16 +705,19 @@ DustMaterial :: solveQ0(double &answer)
 {
     double fx, dfx;
     int i;
-    for (i=0; i<newtonIter; i++) {
-        fx = -x0 + answer - rEll*(alpha -      lambda*exp(beta*answer) - theta*answer);
-        dfx =       1 - rEll*(      - beta*lambda*exp(beta*answer) - theta);
-        answer -= fx/dfx;
-        if (  fabs(fx/dfx/answer) < newtonTol ) {
-            //OOFEM_LOG_DEBUG("  DustMaterial: answer = %e, solved in %d iters\n",answer,i+1);
-            if (answer >= 0) { OOFEM_ERROR("internal parameter q has to be negative\n"); }
+    for ( i = 0; i < newtonIter; i++ ) {
+        fx = -x0 + answer - rEll * ( alpha -      lambda * exp(beta * answer) - theta * answer );
+        dfx =       1 - rEll * (      -beta * lambda * exp(beta * answer) - theta );
+        answer -= fx / dfx;
+        if (  fabs(fx / dfx / answer) < newtonTol ) {
+            if ( answer >= 0 ) {
+                OOFEM_ERROR("internal parameter q has to be negative\n");
+            }
+
             return;
         }
     }
+
     OOFEM_ERROR("solveQ0: Newton's method did not converge\n");
 }
 
@@ -701,18 +726,16 @@ DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &she
 {
     double ym = LEMaterial->giveYoungsModulus();
     double nu = LEMaterial->givePoissonsRatio();
-    StrainVector plasticStrain(gp->giveMaterialMode());
-    DustMaterialStatus *status =  (DustMaterialStatus*) giveStatus(gp);
+    StrainVector plasticStrain( gp->giveMaterialMode() );
+    DustMaterialStatus *status =  ( DustMaterialStatus * ) giveStatus(gp);
     status->givePlasticStrain(plasticStrain);
     double volumetricPlasticStrain = plasticStrain.computeVolumetricPart();
-    //
-    if (volumetricPlasticStrain < 0.) {
-        //OOFEM_LOG_DEBUG("vps %e  mstiff %e  young %e\n",volumetricPlasticStrain,mStiff,ym);
+    if ( volumetricPlasticStrain < 0. ) {
         ym -= mStiff * volumetricPlasticStrain;
-        //OOFEM_LOG_DEBUG("young %e\n",ym);
     }
-    bulkModulus = IsotropicLinearElasticMaterial::computeBulkModulusFromYoungAndPoisson(ym,nu);
-    shearModulus = IsotropicLinearElasticMaterial::computeShearModulusFromYoungAndPoisson(ym,nu);
+
+    bulkModulus = IsotropicLinearElasticMaterial :: computeBulkModulusFromYoungAndPoisson(ym, nu);
+    shearModulus = IsotropicLinearElasticMaterial :: computeShearModulusFromYoungAndPoisson(ym, nu);
     status->setBulkModulus(bulkModulus);
     status->setShearModulus(shearModulus);
     status->setYoungsModulus(ym);
@@ -721,46 +744,55 @@ DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &she
 void
 DustMaterial :: computePlastStrainDirM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
 {
-    //answer = stressDeviator;
-    for (int i=1; i<=6; i++) {
-        answer.at(i) = stressDeviator.at(i);
+    if ( ( answer.giveStressStrainMode() == _3dMat ) && ( stressDeviator.giveStressStrainMode() == _3dMat ) ) {
+        for ( int i = 1; i <= 6; i++ ) {
+            answer.at(i) = stressDeviator.at(i) / rho;
+        }
+
+        double temp = ( lambda * beta * exp(beta * i1) + theta ) * ( i1 - q ) / ( ft - q );
+        answer.at(1) += temp;
+        answer.at(2) += temp;
+        answer.at(3) += temp;
+    } else   {
+        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM1\n");
     }
-    answer.times(1/rho);
-    double temp = (lambda*beta*exp(beta*i1)+theta)*(i1-q)/(ft-q);
-    answer.at(1) += temp;
-    answer.at(2) += temp;
-    answer.at(3) += temp;
 }
 
 void
 DustMaterial :: computePlastStrainDirM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
 {
-    //answer = stressDeviator;
-    for (int i=1; i<=6; i++) {
-        answer.at(i) = stressDeviator.at(i);
+    if ( ( answer.giveStressStrainMode() == _3dMat ) && ( stressDeviator.giveStressStrainMode() == _3dMat ) ) {
+        double fc = functionFc(rho, i1, q);
+        for ( int i = 1; i <= 6; i++ ) {
+            answer.at(i) = stressDeviator.at(i) / fc;
+        }
+
+        double temp = ( q - i1 ) / ( rEll * rEll * fc );
+        answer.at(1) -= temp;
+        answer.at(2) -= temp;
+        answer.at(3) -= temp;
+    } else   {
+        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM2\n");
     }
-    double fc = functionFc(rho,i1,q);
-    answer.times(1/fc);
-    double temp = (q - i1) / (rEll*rEll*fc);
-    answer.at(1) -= temp;
-    answer.at(2) -= temp;
-    answer.at(3) -= temp;
 }
 
 void
 DustMaterial :: computePlastStrainDirM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q)
 {
-    //answer = stressDeviator;
-    for (int i=1; i<=6; i++) {
-        answer.at(i) = stressDeviator.at(i);
+    if ( ( answer.giveStressStrainMode() == _3dMat ) && ( stressDeviator.giveStressStrainMode() == _3dMat ) ) {
+        double feft = functionFe(ft);
+        for ( int i = 1; i <= 6; i++ ) {
+            answer.at(i) = stressDeviator.at(i) / feft;
+        }
+
+        double dfeft = functionFeDI1(ft);
+        double temp = 1 - ( 1 + dfeft ) * rho / feft;
+        answer.at(1) += temp;
+        answer.at(2) += temp;
+        answer.at(3) += temp;
+    } else   {
+        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM3\n");
     }
-    double feft = functionFe(ft);
-    double dfeft = functionFeDI1(ft);
-    answer.times(1/feft);
-    double temp = 1 - (1 + dfeft)*rho/feft;
-    answer.at(1) += temp;
-    answer.at(2) += temp;
-    answer.at(3) += temp;
 }
 
 double
@@ -768,11 +800,12 @@ DustMaterial :: functionH(double q, double tempQ)
 {
     double xq = functionX(q);
     double xtq = functionX(tempQ);
-    switch (hardeningType) {
-        case 1:
-            return wHard*(exp(dHard*xtq)-exp(dHard*xq));
-        default: // 0
-            return dHard*wHard*(xtq/(1-dHard*xtq) - xq/(1-dHard*xq));
+    switch ( hardeningType ) {
+    case 1:
+        return wHard * ( exp(dHard * xtq) - exp(dHard * xq) );
+
+    default:     // 0
+        return dHard * wHard * ( xtq / ( 1 - dHard * xtq ) - xq / ( 1 - dHard * xq ) );
     }
 }
 
@@ -781,58 +814,58 @@ DustMaterial :: functionHDQ(double tempQ)
 {
     double xtq = functionX(tempQ);
     double dxtq = functionXDQ(tempQ);
-    switch (hardeningType) {
-        case 1:
-            return wHard*dHard*exp(dHard*xtq)*dHard*dxtq;
-        default: // 0
-            return dHard*wHard*( dxtq*(1-dHard*xtq) - xtq*(-dHard*dxtq) )/(1-dHard*xtq)/(1-dHard*xtq);
+    switch ( hardeningType ) {
+    case 1:
+        return wHard * dHard * exp(dHard * xtq) * dHard * dxtq;
+
+    default:     // 0
+        return dHard * wHard * ( dxtq * ( 1 - dHard * xtq ) - xtq * ( -dHard * dxtq ) ) / ( 1 - dHard * xtq ) / ( 1 - dHard * xtq );
     }
 }
 
-double 
+double
 DustMaterial :: functionI1(double q, double tempQ, double i1, double bulkModulus)
 {
-    return i1 - 3*bulkModulus*functionH(q,tempQ);
+    return i1 - 3 *bulkModulus *functionH(q, tempQ);
 }
 
-double 
+double
 DustMaterial :: functionI1DQ(double tempQ, double bulkModulus)
 {
-    return -3*bulkModulus*functionHDQ(tempQ);
+    return -3 *bulkModulus *functionHDQ(tempQ);
 }
 
 double
 DustMaterial :: computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus)
 {
-    double vfH = functionH(q,tempQ);
-    return rEll*rEll*functionFe(tempQ)*vfH / (3*(i1-3*bulkModulus*vfH-tempQ));
+    double vfH = functionH(q, tempQ);
+    return rEll * rEll * functionFe(tempQ) * vfH / ( 3 * ( i1 - 3 * bulkModulus * vfH - tempQ ) );
 }
 
 double
 DustMaterial :: computeDeltaGamma2DQ(double tempQ, double q, double i1, double bulkModulus)
 {
-    double vfH = functionH(q,tempQ);
+    double vfH = functionH(q, tempQ);
     double vdfH = functionHDQ(tempQ);
     double vfEq = functionFe(tempQ);
     double vdfEq = functionFeDI1(tempQ);
-    double frac1 = rEll*rEll*vfEq*vfH;
-    double dfrac1 = rEll*rEll*(vdfEq*vfH + vfEq*vdfH);
-    double frac2 = 3*(i1-3*bulkModulus*vfH-tempQ);
-    double dfrac2 = 3*( -3*bulkModulus*vdfH-1);
-    return (dfrac1*frac2 - frac1*dfrac2)/frac2/frac2;
+    double frac1 = rEll * rEll * vfEq * vfH;
+    double dfrac1 = rEll * rEll * ( vdfEq * vfH + vfEq * vdfH );
+    double frac2 = 3 * ( i1 - 3 * bulkModulus * vfH - tempQ );
+    double dfrac2 = 3 * ( -3 * bulkModulus * vdfH - 1 );
+    return ( dfrac1 * frac2 - frac1 * dfrac2 ) / frac2 / frac2;
 }
 
 double
 DustMaterial :: fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus)
 {
     double vfEq = functionFe(tempQ);
-    double dgq = computeDeltaGamma2(tempQ,q,i1,bulkModulus);
-    double frac = (vfEq+2*shearModulus*dgq);
-    double a = rho*vfEq/frac;
-    frac = (rEll*rEll*vfEq+9*bulkModulus*dgq);
-    double b = (tempQ-i1)*rEll*vfEq/frac;
-    return a*a + b*b - vfEq*vfEq;
+    double dgq = computeDeltaGamma2(tempQ, q, i1, bulkModulus);
+    double frac = ( vfEq + 2 * shearModulus * dgq );
+    double a = rho * vfEq / frac;
+    frac = ( rEll * rEll * vfEq + 9 * bulkModulus * dgq );
+    double b = ( tempQ - i1 ) * rEll * vfEq / frac;
+    return a * a + b * b - vfEq * vfEq;
 }
-
 } // end namespace oofem
 

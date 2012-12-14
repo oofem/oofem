@@ -35,12 +35,14 @@
 #ifndef cct_h
 #define cct_h
 
+#include "mathfem.h"
 #include "nlstructuralelement.h"
 #include "layeredcrosssection.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "fei2dtrlin.h"
+#include "zzerrorestimator.h"
 
 namespace oofem {
 
@@ -53,7 +55,8 @@ namespace oofem {
  */
 class CCTPlate : public NLStructuralElement,
     public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
+    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
     static FEI2dTrLin interp_lin;
@@ -123,6 +126,15 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return 1; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    // ZZErrorEstimatorInterface
+    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
+    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
+                                                                           InternalStateType type)
+    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
+
+    // ZZRemeshingCriteriaInterface
+    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
+    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
