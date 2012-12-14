@@ -63,8 +63,8 @@ DofManExportModule :: doOutput(TimeStep *tStep)
     }
 
     FILE *stream = this->giveOutputStream(tStep);
-    fprintf(stream, "# DofMan DataFile Version 1.1\n");
-    fprintf( stream, "Output for time %f\n", tStep->giveTargetTime() );
+    fprintf(stream, "%% DofMan DataFile Version 1.1\n");
+    fprintf( stream, "%% Output for time %f\n", tStep->giveTargetTime() );
 
     DofManager *dm;
     double x, y, z, displacement;
