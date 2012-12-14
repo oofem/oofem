@@ -299,6 +299,26 @@ local z axis) and ``width'' (measured in direction of local y axis) cross sectio
 model properties to be defined.\\
 \descitem{Status} Stable, various loadings require further testing.
 
+\subsection{LatticeElements}
+\subsubsection{Lattice2d}
+Represents two-node lattice element. Each node has 3 degrees of freedom.
+The element is defined in x,y plane.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.7\textwidth]{lattice2d.eps}
+\caption{Lattice element. Node numbering, DOF numbering and definition of integration point $C$.}
+ \label{lattice2dfig}
+\end{figure}
+
+\elemkeyword{lattice2d}\\
+\descitem{Parameters} \elemparam{thick}{rn} \elemparam{width}{rn} \elemparam{gpCoords}{ra} \\
+The \param{thick} parameter is the out of plane ($z$-direction) thickness. 
+The \param{width} parameter is the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre. 
+The \param{gpCooords} parameter is an array of the coordinates of the integration point $C$ in the global coordinate system.
+\descitem{Unknowns}
+Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node. 
+
 \subsection{Plane Stress Elements}
 \subsubsection{PlaneStress2d}
 Represents isoparametric four-node quadrilateral plane-stress

@@ -130,7 +130,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStressMeasure, 80) \
     ENUM_ITEM_WITH_VALUE(IST_vonMisesStress, 81) \
     ENUM_ITEM_WITH_VALUE(IST_CrackVector, 82) \
-    ENUM_ITEM_WITH_VALUE(IST_PressureGradient, 83)
+    ENUM_ITEM_WITH_VALUE(IST_PressureGradient, 83)\
+    ENUM_ITEM_WITH_VALUE(IST_DissWork, 84)\
+    ENUM_ITEM_WITH_VALUE(IST_DeltaDissWork, 85)\
+
 
 
 /**

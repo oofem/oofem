@@ -43,7 +43,6 @@
 #endif
 
 namespace oofem {
-
 class IntArray;
 class FloatArray;
 class FloatMatrix;
@@ -761,6 +760,8 @@ enum InputFieldType {
 
     IFT_IDNLMaterial_r,
     IFT_IDNLMaterial_averagingtype,
+    IFT_IDNLMaterial_exp,
+    IFT_IDNLMaterial_rf,
 
     IFT_MazarsMaterial_version,
     IFT_MazarsMaterial_e0,
@@ -794,7 +795,7 @@ enum InputFieldType {
     IFT_DruckerPragerCutMat_a,
     IFT_DruckerPragerCutMat_yieldTol,
     IFT_DruckerPragerCutMat_newtonIter,
-    IFT_DruckerPragerCutMat_tau0,    
+    IFT_DruckerPragerCutMat_tau0,
 
     IFT_Masonry02_ft0,
     IFT_Masonry02_gfi,
@@ -1105,26 +1106,26 @@ enum InputFieldType {
     IFT_LatticeDamage2d_eNormal,
     IFT_LatticeDamage2d_alphaOne,
     IFT_LatticeDamage2d_alphaTwo,
-    IFT_LatticeDamage2d_aSoft,
     IFT_LatticeDamage2d_softeningType,
     IFT_LatticeDamage2d_wf,
     IFT_LatticeDamage2d_wfOne,
     IFT_LatticeDamage2d_localrandomtype,
     IFT_LatticeDamage2d_coefficientOfVariation,
     IFT_LatticeDamage2d_equivType,
-    IFT_LatticeDamage2d_e0,
+    IFT_LatticeDamage2d_e0Mean,
+    IFT_LatticeDamage2d_e0OneMean,
     IFT_LatticeDamage2d_coh,
     IFT_LatticeDamage2d_ec,
     IFT_LatticeDamage2d_paramDuct,
 
-	 IFT_DustMaterial_alpha,
-	 IFT_DustMaterial_beta,
-	 IFT_DustMaterial_lambda,
-	 IFT_DustMaterial_theta,
-	 IFT_DustMaterial_ft,
-	 IFT_DustMaterial_hardeningType,
-	 IFT_DustMaterial_mHard,
-	 IFT_DustMaterial_rEllipse,
+    IFT_DustMaterial_alpha,
+    IFT_DustMaterial_beta,
+    IFT_DustMaterial_lambda,
+    IFT_DustMaterial_theta,
+    IFT_DustMaterial_ft,
+    IFT_DustMaterial_hardeningType,
+    IFT_DustMaterial_mHard,
+    IFT_DustMaterial_rEllipse,
 
     IFT_LsMasterMat_slaveMat,
 
@@ -1151,6 +1152,10 @@ enum InputFieldType {
     IFT_NonlocalMaterialExtensionInterface_m,
     IFT_NonlocalMaterialExtensionInterface_scalingtype,
     IFT_NonlocalMaterialExtensionInterface_averagedquantity,
+    IFT_NonlocalMaterialExtensionInterface_nonlocalvariation,
+    IFT_NonlocalMaterialExtensionInterface_beta,
+    IFT_NonlocalMaterialExtensionInterface_zeta,
+
 
     IFT_SimpleInterfaceMaterial_kn,
     IFT_SimpleInterfaceMaterial_knt,
@@ -1179,7 +1184,7 @@ enum InputFieldType {
     IFT_PiecewiseLinFunction_npoints,
     IFT_PiecewiseLinFunction_t,
     IFT_PiecewiseLinFunction_ft,
-    
+
     IFT_PiecewiseLinFunctionBlock_npoints,
 
     IFT_PeriodicPiecewiseLinFunction_period,
@@ -1395,15 +1400,15 @@ public:
      */
     //@{
     /// Reads the record id field  (type of record) and its corresponding number.
-    virtual IRResultType giveRecordKeywordField(std::string &answer, int &value) = 0;
+    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value) = 0;
     /// Reads the record id field  (type of record).
-    virtual IRResultType giveRecordKeywordField(std::string &answer) = 0;
+    virtual IRResultType giveRecordKeywordField(std :: string &answer) = 0;
     /// Reads the integer field value.
     virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the double field value.
     virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the string field value.
-    virtual IRResultType giveField(std::string &answer, InputFieldType fieldI, const char *idString) = 0;
+    virtual IRResultType giveField(std :: string &answer, InputFieldType fieldI, const char *idString) = 0;
     /// Reads the FloatArray field value.
     virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldI, const char *idString) = 0;
     /// Reads the IntArray field value.
@@ -1411,7 +1416,7 @@ public:
     /// Reads the FloatMatrix field value.
     virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldI, const char *idString) = 0;
     /// Reads the vector of strings.
-    virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the dynaList<Range> field value.
@@ -1432,7 +1437,7 @@ public:
     /// Reads the double field value.
     IRResultType giveOptionalField(double &answer, InputFieldType fieldID, const char *idString);
     /// Reads the string field value.
-    IRResultType giveOptionalField(std::string &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: string &answer, InputFieldType fieldID, const char *idString);
     /// Reads the FloatArray field value.
     IRResultType giveOptionalField(FloatArray &answer, InputFieldType fieldID, const char *idString);
     /// Reads the IntArray field value.
@@ -1440,7 +1445,7 @@ public:
     /// Reads the FloatMatrix field value.
     IRResultType giveOptionalField(FloatMatrix &answer, InputFieldType fieldID, const char *idString);
     /// Reads the vector of strings.
-    IRResultType giveOptionalField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString);
     /// Reads the Dictionary field value.
     IRResultType giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString);
     /// Reads the dynaList<Range> field value.
@@ -1462,9 +1467,9 @@ public:
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
     /// Sets line number from dataReader.
-    void setLineNumber(const int lineNumber) {this->lineNumber = lineNumber; };
-    
-protected:    
+    void setLineNumber(const int lineNumber) { this->lineNumber = lineNumber; };
+
+protected:
     /// Keep track of read line
     int lineNumber;
 };

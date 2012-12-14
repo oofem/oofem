@@ -180,6 +180,9 @@ public:
     /// Returns the crack_flag
     int giveCrackFlag();
 
+    /// Set random e0
+    void setE0(double val) { e0 = val; }
+
     ///Sets the temp crack width
     void setTempCrackWidth(double val);
     //Gives the last equilibrated crack width
@@ -225,6 +228,9 @@ protected:
     /// mean effective strain at peak
     double e0Mean;
 
+    /// mean effective strain at sigma1
+    double e0OneMean;
+
     /**parameter which determines the typ of the softeningFunction
      * 1 = linear softening
      * 2 = bilinear softening
@@ -237,9 +243,6 @@ protected:
 
     /// parameter for the elliptic equivalent strain function
     double ec;
-
-    /// parameter controlling ductility of response in compression
-    double paramDuct;
 
     /// parameter setting ratio of shear and tensile strength
     double coh;
@@ -344,9 +347,6 @@ public:
     /** Reimplemented from RandomMaterialInterface */
     virtual void giveRandomParameters(FloatArray &param);
 
-    /** Compute ductility measure*/
-    double computeDuctilityMeasure(const FloatArray &strain, GaussPoint *gp);
-
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp,  TimeStep *tStep);
 
     /// Creates corresponding status
@@ -371,22 +371,20 @@ protected:
      */
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 
-    
-    virtual int giveIPValue(FloatArray& answer, 
-                            GaussPoint* gp, 
-                            InternalStateType type, 
-                            TimeStep* atTime);
-    
-    virtual int giveIPValueSize(InternalStateType type, 
-                        GaussPoint* gp);
-    
-    virtual int giveIntVarCompFullIndx(IntArray& answer, 
-                                       InternalStateType type, 
+
+    virtual int giveIPValue(FloatArray &answer,
+                            GaussPoint *gp,
+                            InternalStateType type,
+                            TimeStep *atTime);
+
+    virtual int giveIPValueSize(InternalStateType type,
+                                GaussPoint *gp);
+
+    virtual int giveIntVarCompFullIndx(IntArray &answer,
+                                       InternalStateType type,
                                        MaterialMode mmode);
-    
+
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    
-    
 };
 } // end namespace oofem
 #define latticedamage2d_h
