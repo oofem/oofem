@@ -76,6 +76,7 @@ if (USE_PARALLEL)
     set (USE_MPI ON)
 endif ()
 
+
 #######################################################################
 ######################## Internal libraries ###########################
 #######################################################################
@@ -325,6 +326,8 @@ endif ()
 #######################################################################
 site_name (HOST_NAME)
 set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
+set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
+
 check_include_files ("sys/time.h" HAVE_SYS_TIME_H)
 check_include_files ("time.h" HAVE_TIME_H)
 if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
@@ -348,6 +351,7 @@ configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
+
 
 #######################################################################
 ######################## Targets ######################################
@@ -571,7 +575,7 @@ set (CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSI
 
 ### general settings
 set (CPACK_PACKAGE_NAME "oofem")
-set (CPACK_PACKAGE_VENDOR "OOFEM developement team")
+set (CPACK_PACKAGE_VENDOR "OOFEM development team")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Object Oriented Finite Element")
 #set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
 set (CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")
