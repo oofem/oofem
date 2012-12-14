@@ -1208,6 +1208,8 @@ enum InputFieldType {
 
 
     IFT_ErrorEstimator_regionskipmap,
+    IFT_ErrorEstimator_IStype,
+    
 
     IFT_ScalarErrorIndicator_vartype,
 
