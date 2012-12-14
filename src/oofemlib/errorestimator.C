@@ -50,6 +50,10 @@ ErrorEstimator :: initializeFrom(InputRecord *ir)
 
     regionSkipMap.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionSkipMap, IFT_ErrorEstimator_regionskipmap, "regionskipmap"); // Macro
+    this->IStype = IST_StressTensor;
+    int val = (int) this->IStype;
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_ErrorEstimator_IStype, "istype"); // Macro
+    this->IStype = (InternalStateType) val;
 
     return IRRT_OK;
 }
