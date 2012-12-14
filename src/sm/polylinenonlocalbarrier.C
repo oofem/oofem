@@ -166,10 +166,10 @@ PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, cons
         //Return minimum of A-Gauss Point and B-Gauss Point
         if ( lineAGP.computeNorm() < lineBGP.computeNorm() ) {
             return lineAGP.computeNorm();
-        } else  {
+        } else {
             return lineBGP.computeNorm();
         }
-    } else  {
+    } else {
         // Find coordinates of Point P = A + AB*scaleFactor
         lineAB.times(scaleFactor);
         FloatArray coordsP(coordsA);
@@ -179,6 +179,8 @@ PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, cons
         linePGP.subtract(coordsGP);
         return linePGP.computeNorm();
     }
+
+    return 0;
 }
 
 
