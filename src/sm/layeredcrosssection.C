@@ -846,20 +846,20 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         bottom = -midSurfaceZcoordFromBottom;
         top    = totalThick - midSurfaceZcoordFromBottom;
 
-        masterGp->numberOfGp = this->numberOfLayers;
+        masterGp->numberOfGp = this->numberOfLayers;                        // Generalize to multiple integration points per layer
         masterGp->gaussPointArray = new GaussPoint * [ numberOfLayers ];
         currentZTopCoord = -midSurfaceZcoordFromBottom;
         for ( int j = 0; j < numberOfLayers; j++ ) {
             currentZTopCoord += this->layerThicks.at(j + 1);
-            currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0;
+            currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
             zCoord = new FloatArray(3);
             zCoord->zero();
             if ( masterCoords->giveSize() > 0 ) {
-                zCoord->at(1) = masterCoords->at(1);
+                zCoord->at(1) = masterCoords->at(1); // gp x-coord of mid surface
             }
 
             if ( masterCoords->giveSize() > 1 ) {
-                zCoord->at(2) = masterCoords->at(2);
+                zCoord->at(2) = masterCoords->at(2); // gp y-coord of mid surface
             }
 
             zCoord->at(3) = ( 2.0 * ( currentZCoord ) - top - bottom ) / ( top - bottom );
@@ -979,6 +979,8 @@ LayeredCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
     } else if ( masterMode == _2dBeam ) {
         return _2dBeamLayer;
     } else if ( masterMode == _3dShell ) {
+        return _3dShellLayer;
+    } else if ( masterMode == _3dMat ) {
         return _3dShellLayer;
     } else {
         _error("giveCorrespondingSlaveMaterialMode : unsupported mode");
