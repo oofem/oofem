@@ -45,6 +45,7 @@
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
 
+
 namespace oofem {
     FEI2dTrQuad TrDirShell :: interpolation_quad(1, 2);
     FEI3dTrQuad TrDirShell :: interpolation;
@@ -57,7 +58,7 @@ namespace oofem {
 
     FloatMatrix testmatrix(42,42);
 
-TrDirShell :: TrDirShell(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+TrDirShell :: TrDirShell(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface()
 {
 	this->numberOfIntegrationRules = 1;
 	this->numberOfDofMans = 6;
@@ -95,7 +96,7 @@ TrDirShell :: evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, Floa
 	int i;
 	double x, y, z, Mx, My, Mz, zeta;
     FloatArray lcoords = *gp->giveCoordinates();
-	zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;;
+    zeta = giveLocalZetaCoord(gp);
 	FloatArray N, M;
 	FloatMatrix dNdxi, Mmat;
 	
@@ -120,7 +121,6 @@ TrDirShell :: evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, Floa
     }
 	// Out of plane base vector = director
 	this->evalInitialDirectorAt(gp, G3); // G3=M
-	
 }
 
 void 
@@ -128,7 +128,7 @@ TrDirShell :: edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge,
 {
 	double x, y, z, Mx, My, Mz, zeta;
     FloatArray lcoords = *gp->giveCoordinates();
-    zeta = 0.0; //lcoords.at(3);
+    zeta = 0.0; // no variation i z (yet)
 	FloatArray N, M, dNdxi;
 	FloatMatrix Mmat;
 	IntArray edgeNodes;
@@ -142,7 +142,6 @@ TrDirShell :: edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge,
         FloatArray *nodeI = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
 		x = nodeI->at(1); y = nodeI->at(2); z = nodeI->at(3);
 		M = this->giveInitialNodeDirector( edgeNodes.at(i) );
-        
 		Mx = M.at(1); My = M.at(2); Mz = M.at(3);
         G1.at(1) += dNdxi.at(i)*( x + zeta*Mx ); 
 		G1.at(2) += dNdxi.at(i)*( y + zeta*My ); 
@@ -180,13 +179,11 @@ TrDirShell :: giveDualBase(const FloatArray &G1, const FloatArray &G2, const Flo
 	gmat.symmetrized();
 	
 	ginv.beInverseOf(gmat);
-
 	g1.resize(3); g1.zero(); g2.resize(3); g2.zero(); g3.resize(3); g3.zero();
 
 	g1.add(ginv.at(1,1),G1); g1.add(ginv.at(1,2),G2); g1.add(ginv.at(1,3),G3); 
 	g2.add(ginv.at(2,1),G1); g2.add(ginv.at(2,2),G2); g2.add(ginv.at(2,3),G3);
 	g3.add(ginv.at(3,1),G1); g3.add(ginv.at(3,2),G2); g3.add(ginv.at(3,3),G3);
-
 }
 
 void 
@@ -203,7 +200,7 @@ TrDirShell :: evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer)
 	for (int i = 1; i <= 6; i++ ) {
 		answer.add( N.at(i), this->giveInitialNodeDirector(i) ); 
 	}
-
+    
 }
 
 void 
@@ -222,7 +219,6 @@ TrDirShell :: edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, cons
 	for (int i = 1; i <= 3; i++ ) {
         answer.add( N.at(i), this->giveInitialNodeDirector( edgeNodes.at(i) ) ); 
 	}
-
 }
 
 void 
@@ -239,7 +235,7 @@ TrDirShell :: setupInitialNodeDirectors()
 	lcoords.resize(2); G1.resize(3); G2.resize(3); M.resize(3);		
 
     //double thickness = this->giveCrossSection()->give(CS_Thickness);
-    double thickness = 1.;
+    double thickness = 1.0;
 	for (int node = 1; node <= 6; node++ ) {
 
 		this->initialNodeDirectors[node-1].resize(3);
@@ -267,7 +263,7 @@ void
 TrDirShell :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &genEps)
 {
 	FloatArray lcoords = *gp->giveCoordinates();
-	double zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
+	double zeta = giveLocalZetaCoord(gp);
 	
 	FloatArray dxdxi, dxdxi1, dxdxi2, m, dmdxi, dmdxi1, dmdxi2, dgamdxi,  test;
     double dgamdxi1, dgamdxi2, gam;
@@ -283,7 +279,6 @@ TrDirShell :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray 
     g2.add(dxdxi2); g2.add(fac1,dmdxi2); g2.add(fac2*dgamdxi2,m);
     g3.add(fac3,m);
 
-
 }
 
 void
@@ -291,7 +286,6 @@ TrDirShell :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatA
 {
 	double zeta=0.0, gam;
 	FloatArray lcoords = *gp->giveCoordinates();
-	//zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
 	FloatArray a;
 	FloatMatrix B;
     IntArray edgeNodes;
@@ -610,7 +604,7 @@ TrDirShell :: computeGaussPoints()
         
         int nPointsTri = 6;
         int nPointsThickness = 3;
-        int nPointsEdge = 1;
+        int nPointsEdge = 2;
         integrationRulesArray = new IntegrationRule * [ 3 ];
         // Midplane and thickness
 		integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
@@ -626,6 +620,28 @@ TrDirShell :: computeGaussPoints()
     }
 
 }
+
+
+double 
+TrDirShell :: giveLocalZetaCoord(GaussPoint *gp){
+
+    return (*gp->giveCoordinates()).at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5 ;
+    //return (*gp->giveCoordinates()).at(3)  ;
+
+}
+
+
+
+FloatArray 
+TrDirShell :: giveInitialNodeDirector(int i){
+    FloatArray temp;
+    temp = this->initialNodeDirectors[i-1];
+    //temp.times(this->giveCrossSection()->give(CS_Thickness)*0.5);
+    return temp;
+
+}
+
+
 
 void 
 TrDirShell :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1, 
@@ -680,7 +696,7 @@ TrDirShell :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [0];
 
-    double zeta, dV, a, b, c;
+    double dV, a, b, c;
     FloatMatrix B, Bt, BtL, BtLB, L(18,18);
     FloatArray lcoords, BF;
 
@@ -693,7 +709,7 @@ TrDirShell :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
 	for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         lcoords = *gp->giveCoordinates();
-        zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
+        double zeta = giveLocalZetaCoord(gp);
 
         FloatArray g1, g2, g3, S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
         double gam, dg1, dg2;
@@ -724,10 +740,7 @@ TrDirShell :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
         F1T[1].beTranspositionOf(F1[1]);
 
 
-        //f2 = c*A(3,3) + b*dg(alpha)*A(alpha,3)
-        // original
-        //F2.add(c,A[2][2]); temp3.add(dg1,A[0][2]); temp3.add(dg2,A[1][2]); temp3.times(b); F2.add(temp3);
-           
+        //f2 = c*A(3,3) + b*dg(alpha)*A(alpha,3)        
         F2f5.add(dg1,A[0][2]);    F2f5.add(dg2,A[1][2]);    F2f5.times(b);    F2f5.add(c,A[2][2]);
         F2T.beTranspositionOf(F2);
 
@@ -742,12 +755,9 @@ TrDirShell :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
 
         //f4 = b*dm(alpha)*A(alpha,3) + zeta*A(3,3)*m; 
         t1.beTProductOf(A[0][2],dm1); t2.beTProductOf(A[1][2],dm2); t3.beTProductOf(A[2][2],m);
-        //t1.beProductOf(A[0][2],dm1); t2.beProductOf(A[1][2],dm2); t3.beProductOf(A[2][2],m);
         f4.add(b,t1); f4.add(b,t2);  f4.add(zeta,t3);
 
         // f5 = b*F1(alpha)*dm(alpha) + zeta*F2*m + zeta*N3
-        //t1.beProductOf(F1[0],dm1); t2.beProductOf(F1[1],dm2); t3.beProductOf(F2T,m);
-        //t1.beProductOf(F1[0],dm1); t2.beProductOf(F1[1],dm2); t3.beProductOf(F2,m);
         t1.beProductOf(F1T[0],dm1); t2.beProductOf(F1T[1],dm2); t3.beProductOf(F2T,m);
         f5.add(b,t1); f5.add(b,t2); f5.add(zeta,t3); f5.add(zeta,S3g);
 
@@ -802,22 +812,11 @@ TrDirShell :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
 
         // L(3,3) = b*F1(beta)*dgam(beta) + c*F2
         FloatMatrix L33(3,3); L33.zero();
-        //L33.add(c,F2); temp3.add(dg1,F1[0]); temp3.add(dg2,F1[1]); temp3.times(b); L33.add(temp3);
-        //F1[0].printYourself();
-        //F1[1].printYourself();
-        //F2.printYourself();
-        
-        // new
-
         L33.add(c,F2T); temp3.add(dg1,F1T[0]); temp3.add(dg2,F1T[1]); temp3.times(b); L33.add(temp3);
-        //F2T.printYourself();
-        //L33.printYourself();
 
                 
         // L(3,4) = b*( F1(beta)*m + N(beta) )
         FloatMatrix L34(3,2); L34.zero(); 
-        //t1.beProductOf(F1[0],m); t1.add(S1g); t1.times(b); 
-        //t2.beProductOf(F1[1],m); t2.add(S2g); t2.times(b);
         t1.beTProductOf(F1[0],m); t1.add(S1g); t1.times(b); 
         t2.beTProductOf(F1[1],m); t2.add(S2g); t2.times(b);
         L34.addSubVectorCol(t1,1,1); L34.addSubVectorCol(t2,1,2);
@@ -1103,7 +1102,7 @@ TrDirShell :: computeFAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *stepN, F
 
     answer.resize(3,3); answer.zero();
 	answer.add(F1);	answer.add(F2);	answer.add(F3);
-
+   // Gcon3.printYourself();
 }
 
 void
@@ -1125,6 +1124,7 @@ TrDirShell :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *
     answer.at(4) = temp.at(4)*2.0;
     answer.at(5) = temp.at(5)*2.0;
     answer.at(6) = temp.at(6)*2.0;
+    //answer.printYourself();
 }
 
 void
@@ -1149,6 +1149,9 @@ TrDirShell :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussP
     StructuralCrossSection *cs = ( StructuralCrossSection * ) this->giveCrossSection();
 
     this->computeStrainVector(Epsilon, gp, stepN, genEps);
+
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
+    
 
     cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
 }
@@ -1252,6 +1255,7 @@ TrDirShell :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep){
 		answer.at(5+j) += Mi.at(2);
 		answer.at(6+j) += Mi.at(3);
 		//answer.at(7+j) =... gam(t=0)=0 so no update necessary. Well this assumes gam=0 at t=0
+        //Mi.printYourself();
 	}
 
 }
@@ -1344,7 +1348,7 @@ TrDirShell :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
     Material *mat = this->giveMaterial();
     IntegrationRule *iRule = integrationRulesArray [0];
 
-    double zeta, dV;
+    double dV;
     FloatMatrix B, Bt;
     FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, f;
     FloatArray genEps;	      // generalized strain
@@ -1365,6 +1369,13 @@ TrDirShell :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 
     }
   
+
+
+
+    // Layerered cross section
+
+
+
 
     // -----------------------------------
     // Numerical tangent
@@ -1459,7 +1470,7 @@ TrDirShell :: computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, TimeS
         double zeta, fac1, fac2, fac3, gam, dg1, dg2;
 
         lcoords = *gp->giveCoordinates();
-        zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
+        zeta = giveLocalZetaCoord(gp);
 
         this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dg1, dg2, gam);
         
@@ -1715,26 +1726,23 @@ TrDirShell :: computeTractionForce(FloatArray &answer, const int iedge, Boundary
         g3.normalize();
         g1.beVectorProductOf(g2,g3);  g1.normalize();
         this->giveCoordTransMatrix(Q, g1, g2, g3);
-        g2.beVectorProductOf(g1,g3);  g2.normalize();
-        
+             
         FloatArray c1(3), c2(3), t1, t2; 
-        //components.printYourself();
         c1.at(1) = components.at(1); c1.at(2) = components.at(2); c1.at(3) = components.at(3);
         c2.at(1) = components.at(4); c2.at(2) = components.at(5); c2.at(3) = components.at(6);
         t1.beTProductOf(Q,c1);
         t2.beTProductOf(Q,c2);
+        
         fT.at(1) = t1.at(1); fT.at(2) = t1.at(2); fT.at(3) = t1.at(3);
         fT.at(4) = t2.at(1); fT.at(5) = t2.at(2); fT.at(6) = t2.at(3);
         fT.at(7) = components.at(7);
-        
-        //fT = components;
+        fT = components;
         dA = this->edgeComputeAreaAround(gp, iedge) ; 
         FT.beTProductOf(N,fT);
         FT.times(dA);
         answer.add(FT);
 
     }
-    //answer.printYourself();
 }
 
 void
@@ -1750,15 +1758,12 @@ TrDirShell :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
     
     if ( iEdge == 1 ) { // edge between nodes 1-4-2
-        //answer.setValues(21, 1, 2, 3, 4, 5, 6, 7,  22, 23, 24, 25, 26, 27, 28, 8, 9, 10, 11, 12, 13, 14);
         answer.setValues(21, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,  22, 23, 24, 25, 26, 27, 28);
 
     } else if ( iEdge == 2 ) { // edge between nodes 2-5-3
-        //answer.setValues(21, 8, 9, 10, 11, 12, 13, 14, 29, 30, 31, 32, 33, 34, 35,  15, 16, 17, 18, 19, 20, 21);
         answer.setValues(21, 8, 9, 10, 11, 12, 13, 14,  15, 16, 17, 18, 19, 20, 21, 29, 30, 31, 32, 33, 34, 35 );
 
     } else if ( iEdge == 3 ) { // edge between nodes 3-6-1
-        //answer.setValues(21, 15, 16, 17, 18, 19, 20, 21,  36, 37, 38, 39, 40, 41, 42,  1, 2, 3, 4, 5, 6, 7);
         answer.setValues(21, 15, 16, 17, 18, 19, 20, 21,  1, 2, 3, 4, 5, 6, 7,  36, 37, 38, 39, 40, 41, 42);
 
     } else {
@@ -2034,7 +2039,8 @@ TrDirShell :: computeVolumeAround(GaussPoint *gp){
 	double detJ;
 	this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
 	temp.beVectorProductOf(G1, G2);
-	detJ = temp.dotProduct(G3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
+	//detJ = temp.dotProduct(G3)*0.5*2.0; 
+    detJ = temp.dotProduct(G3)*0.5*this->giveCrossSection()->give(CS_Thickness); 
     return detJ * gp->giveWeight();
 }
 
@@ -2053,8 +2059,6 @@ TrDirShell :: edgeComputeAreaAround(GaussPoint *gp, const int iedge){
 	FloatArray G1, G3, temp;
 	double detJ;
 	this->edgeEvalInitialCovarBaseVectorsAt(gp, iedge,G1, G3);
-	//temp.beVectorProductOf(G1, G3);
-    //detJ = temp.computeNorm()* this->giveCrossSection()->give(CS_Thickness)*0.5;
     detJ = G1.computeNorm();
     return detJ * gp->giveWeight() ;
 }
@@ -2086,7 +2090,7 @@ TrDirShell :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
 
         gp = iRule->getIntegrationPoint(i);
         FloatArray lcoords = *gp->giveCoordinates(); 
-        zeta = lcoords.at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
+        zeta = giveLocalZetaCoord(gp);
 
 		this->computeNmatrixAt(gp, N);
 		unknowns.beProductOf(N,a); // [x, m, gam]^T
@@ -2197,6 +2201,7 @@ TrDirShell :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q){
     answer.at(6,4) = Q.at(1,2)*Q.at(2,3) + Q.at(1,3)*Q.at(2,2);
     answer.at(6,5) = Q.at(1,3)*Q.at(2,1) + Q.at(1,1)*Q.at(2,3);
     answer.at(6,6) = Q.at(1,1)*Q.at(2,2) + Q.at(1,2)*Q.at(2,1);
+
 }
 
 
@@ -2221,6 +2226,7 @@ TrDirShell :: computeLinearizedStiffness(GaussPoint *gp, TimeStep *tStep,
     this->computeStressVector(cartStressVector, genEps, gp, tStep);
     this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
     S.beMatrixForm(contravarStressVector);
+
     this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, tStep, genEps);  
     this->evalCovarBaseVectorsAt(gp, g1, g2, g3, tStep, genEps);
 
@@ -2389,7 +2395,9 @@ Interface *TrDirShell :: giveInterface(InterfaceType it)
 {
     switch (it) {
         case NodalAveragingRecoveryModelInterfaceType:
-            return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+            return static_cast< NodalAveragingRecoveryModelInterface * >(this);//c++
+        case LayeredCrossSectionInterfaceType:
+            return ( LayeredCrossSectionInterface * ) this;
         default:
             return StructuralElement :: giveInterface(it);
     }
@@ -2415,7 +2423,7 @@ void TrDirShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 {
     if ( type == IST_DirectorField ) {
         answer.resize(3);
-        answer = this->initialNodeDirectors[node-1];
+        answer = this->giveInitialNodeDirector( node );
         answer.at(1) += this->giveNode(node)->giveDofWithID(w_u)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         answer.at(2) += this->giveNode(node)->giveDofWithID(w_v)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         answer.at(3) += this->giveNode(node)->giveDofWithID(w_w)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
@@ -2424,7 +2432,6 @@ void TrDirShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         answer.resize(0);
     }
 }
-
 
 
 

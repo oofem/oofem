@@ -39,12 +39,14 @@
 
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
+#include "layeredcrosssection.h"
 namespace oofem {
 
 
 class FEI2dTrQuad;
 class FEI3dTrQuad;
 class BoundaryLoad;
+
 /**
  * This class represent a 7 parameter shell element. 
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
@@ -52,7 +54,7 @@ class BoundaryLoad;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-class TrDirShell : public NLStructuralElement, public NodalAveragingRecoveryModelInterface
+class TrDirShell : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface
 {
 protected:
     int numberOfGaussPoints;	
@@ -76,7 +78,8 @@ protected:
 
 	FloatArray initialNodeDirectors[6];
 	void setupInitialNodeDirectors();
-	FloatArray &giveInitialNodeDirector(int i){return this->initialNodeDirectors[i-1];};
+	//FloatArray &giveInitialNodeDirector(int i){return this->initialNodeDirectors[i-1];};
+    FloatArray giveInitialNodeDirector(int i);
 
 
     virtual void TrDirShell :: computeGaussPoints();
@@ -112,6 +115,7 @@ protected:
 	void giveDualBase(const FloatArray &G1, const FloatArray &G2, const FloatArray &G3, FloatArray &g1, FloatArray &g2, FloatArray &g3 );
 	void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
 	void evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
+    double giveLocalZetaCoord(GaussPoint *gp);
 
 	
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
@@ -207,6 +211,10 @@ public:
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
+
+    // layered cross section
+        virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+            GaussPoint *slaveGp, TimeStep *tStep) {};
 
 };
 
