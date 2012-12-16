@@ -46,6 +46,11 @@
 #include "classtype.h"
 #include "freestor.h"
 
+#ifdef BOOST_PYTHON
+#include <boost/python.hpp>
+#include <boost/python/extract.hpp>
+#endif
+
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
 extern "C" {
@@ -76,6 +81,21 @@ extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a,
 #endif
 
 namespace oofem {
+    
+FloatMatrix :: FloatMatrix(int n, int m) : Matrix(n, m)
+{
+    allocatedSize = n * m;
+    values = allocDouble(n * m);
+}
+
+
+FloatMatrix :: FloatMatrix() : Matrix(0, 0)
+{
+    allocatedSize = 0;
+    values = NULL;
+}
+
+
 FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
@@ -122,6 +142,15 @@ FloatMatrix :: FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColu
         P1 [ i ] = P2 [ i ];
     }
 }
+
+
+FloatMatrix :: ~FloatMatrix()
+{
+    if ( values ) {
+        freeDouble(values);
+    }
+}
+
 
 
 FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
@@ -1796,7 +1825,20 @@ FloatMatrix :: givePackSize(CommunicationBuffer &buff)
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, 1) +
            buff.givePackSize(MPI_DOUBLE, nRows * nColumns);
 }
-
-
 #endif
+
+#ifdef BOOST_PYTHON
+void
+FloatMatrix :: __setitem__ (boost::python::api::object t, double val)
+{
+    this->at(boost::python::extract<int>(t[0])+1, boost::python::extract<int>(t[1])+1 ) = val;
+}
+
+double
+FloatMatrix :: __getitem__ (boost::python::api::object t)
+{
+    return this->at(boost::python::extract<int>(t[0])+1, boost::python::extract<int>(t[1])+1 );
+}
+#endif
+
 } // end namespace oofem

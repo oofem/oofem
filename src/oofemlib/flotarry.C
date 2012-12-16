@@ -98,6 +98,13 @@ FloatArray :: FloatArray(const FloatArray &src)
     }
 }
 
+FloatArray :: ~FloatArray()
+{
+    if ( values ) {
+        freeDouble(values);
+    }
+}
+
 FloatArray &
 FloatArray :: operator = ( const FloatArray & src )
 {
@@ -109,6 +116,30 @@ FloatArray :: operator = ( const FloatArray & src )
     }
 
     return * this;
+}
+
+double &
+FloatArray :: operator()(int i)
+{
+#ifdef DEBUG
+    if ( i >= size ) {
+        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+    }
+
+#endif
+    return values [ i ];
+}
+
+const double &
+FloatArray :: operator()(int i) const
+{
+#ifdef DEBUG
+    if ( i >= size ) {
+        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+    }
+
+#endif
+    return values [ i ];
 }
 
 

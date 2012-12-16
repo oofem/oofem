@@ -35,6 +35,7 @@
 #include "slavedof.h"
 #include "domain.h"
 #include "dofmanager.h"
+#include "error.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
@@ -181,6 +182,19 @@ double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep
     return masterUnknowns.dotProduct(t);
 }
 
+
+int SlaveDof :: __giveEquationNumber() const
+{
+    OOFEM_ERROR("SlaveDof :: __giveEquationNumber: undefined");
+    return 0;
+}
+
+
+int SlaveDof :: __givePrescribedEquationNumber()
+{
+    OOFEM_ERROR("SlaveDof :: __givePrescribedEquationNumber: undefined");
+    return 0;
+}
 
 contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

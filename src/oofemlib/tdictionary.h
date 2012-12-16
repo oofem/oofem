@@ -35,7 +35,6 @@
 #ifndef tdictionary_h
 #define tdictionary_h
 
-#include "compiler.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
  #include <cstdlib> // for NULL

@@ -38,6 +38,7 @@
  */
 
 #include "matrix.h"
+#include "logger.h"
 #include "error.h"
 
 namespace oofem {
@@ -59,5 +60,10 @@ void Matrix :: checkBounds(int i, int j) const
     if ( j > nColumns ) {
         OOFEM_ERROR3("Matrix::checkBounds : matrix error on columns : %d > %d", j, nColumns);
     }
+}
+
+void Matrix :: printYourself() const
+{
+    OOFEM_LOG_INFO("Matrix :: printYourself - Not implemented");
 }
 } // end namespace oofem

@@ -41,7 +41,6 @@
 #ifndef intarray_h
 #define intarray_h
 
-#include "freestor.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -84,7 +83,7 @@ public:
     /// Copy constructor. Creates the array from another array.
     IntArray(const IntArray &);
     /// Destructor.
-    ~IntArray() { if ( values ) { freeInt(values); } }
+    ~IntArray();
 
     /// Assignment operator
     IntArray & operator=(const IntArray &);

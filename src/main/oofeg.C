@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/main/src/oofeg.C,v 1.11.4.1 2004/04/05 15:19:41 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -35,10 +34,6 @@
 
 //  MAIN
 //  Solves finite element problems.
-//
-//  The DEBUG option MUST be used (check in file 'debug.def').
-//  See also file 'main2.c'.
-#ifdef __OOFEG
 
 #include "oofemtxtdatareader.h"
 #include "engngm.h"
@@ -58,7 +53,7 @@
 #include "util.h"
 #include "node.h"
 #include "intarray.h"
-#include "oofemdef.h"
+#include "oofemcfg.h"
 #include "errorestimator.h"
 #include "remeshingcrit.h"
 #include "drawmode.h"
@@ -2792,4 +2787,3 @@ void debug_run(Widget w, XtPointer ptr, XtPointer call_data)
     }
 }
 #endif
-#endif // __OOFEG

@@ -168,8 +168,11 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dNv(12);
     double r_vol, pressure;
     FloatMatrix dN, B(3, 12);
+    B.zero();
+    
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    
     FloatArray momentum(12), conservation(3);
     momentum.zero();
     conservation.zero();
@@ -287,7 +290,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         GaussPoint *gp;
-        FloatArray N, t, f(6), f2(6);
+        FloatArray N, t, f(6);
         IntArray edge_mapping;
 
         f.zero();
@@ -310,7 +313,7 @@ void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int 
             }
 
             // Reshape the vector
-            for ( int j = 0; j < 6; j++ ) {
+            for ( int j = 0; j < 3; j++ ) {
                 f(2 * j)     += N(j) * t(0) * dS;
                 f(2 * j + 1) += N(j) * t(1) * dS;
             }

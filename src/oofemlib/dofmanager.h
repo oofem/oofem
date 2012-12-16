@@ -47,6 +47,7 @@
 #include "doftype.h"
 #include "dofiditem.h"
 #include "contextioresulttype.h"
+#include "unknowntype.h"
 
 namespace oofem {
 
@@ -244,7 +245,17 @@ public:
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    PrimaryField &field, ValueModeType mode, TimeStep *stepN);
-
+    /**
+     * Constructs the requested vector by assembling e.g. [D_u, D_v, D_w] or [V_u, V_v, V_w].
+     * If for example D_v or V_w doesn't exist, then zero value is inserted.
+     * @note Error is produced if the unknown type doesn't represent a vector.
+     * @param answer The requested vector.
+     * @param ut The unknown type to assemble.
+     * @param eid Equation that unknowns belong to.
+     * @param mode Value mode (total, incremental, etc.)
+     * @param tStep Time step to evaluate at.
+     */
+    void giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, ValueModeType mode, TimeStep *tStep);
     /**
      * Assembles the vector of prescribed unknowns in nodal c.s for given dofs of receiver.
      * This vector may have size different from number of dofs requested,

@@ -34,6 +34,7 @@
 
 #include "skyline.h"
 #include "flotmtrx.h"
+#include "freestor.h"
 #include "intarray.h"
 #include "domain.h"
 #include "engngm.h"

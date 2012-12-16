@@ -45,23 +45,41 @@
 
 namespace oofem {
 /**
- * This class implements TODO
+ * This class implements material status for dust material model
+ * @see DustMaterial
  * @author Jan Stransky
  */
 class DustMaterialStatus : public StructuralMaterialStatus
 {
+public:
+    /// Values of history variable stateFlag
+    enum stateFlagValues {
+        DM_Elastic,
+        DM_Unloading,
+        DM_Yielding1,
+        DM_Yielding2,
+        DM_Yielding3
+    };
+
 protected:
-	/// Volumetric plastic strain
-	double volumetricPlasticStrain;
-	double tempVolumetricPlasticStrain;
+    /// Plastic strain
+    StrainVector plasticStrain;
+    StrainVector tempPlasticStrain;
 
-	/// Deviatoric of plastic strain
-    StrainVector plasticStrainDeviator;
-    StrainVector tempPlasticStrainDeviator;
-	 double q;
-	 double tempQ;
+    /// Hardening parameter q
+    double q;
+    double tempQ;
 
+    /// Current bulk modulus
+    double bulkModulus;
+    /// Current shear modulus
+    double shearModulus;
+    /// Current Young's modulus
+    double youngsModulus;
 
+    /// Indicates the state (i.e. elastic, yielding, unloading) of the Gauss point
+    int stateFlag;
+    int tempStateFlag;
 
 public:
     /// Constructor
@@ -79,87 +97,315 @@ public:
 
     virtual const char *giveClassName() const { return "DustMaterialStatus"; }
     virtual classType giveClassID() const { return DustMaterialStatusClass; }
+
     /**
      * Get the full plastic strain vector from the material status.
-     * @param answer Plastic strain vector.
+     * @param answer Plastic strain.
      */
-    void  giveFullPlasticStrainVector(StrainVector &answer) const
-    {
-        StrainVector plasticStrainVector(_3dMat);
-        plasticStrainDeviator.computeDeviatoricVolumetricSum(plasticStrainVector,
-                                                             volumetricPlasticStrain);
-        plasticStrainVector.convertToFullForm(answer);
-    }
+    void givePlasticStrain(StrainVector &answer) const { answer = plasticStrain; }
     /**
-     * Get the plastic strain deviator from the material status.
-     * @param answer Plastic strain deviator.
+     * Get the full plastic strain vector from the material status.
+     * @return Volumetric part of plastic strain.
      */
-    void givePlasticStrainDeviator(StrainVector &answer) const { answer = plasticStrainDeviator; }
+    double giveVolumetricPlasticStrain() const { return plasticStrain.computeVolumetricPart(); }
     /**
-     * Get the volumetric plastic strain from the material status.
-     * @return Volumetric plastic strain.
+     * Get the value of hardening variable q from the material status.
+     * @return Hardenenig variable q
      */
-    double giveVolumetricPlasticStrain() const { return volumetricPlasticStrain; }
-	 double giveQ() const { return q; }
+    double giveQ() const { return q; }
+    /**
+     * Get the state flag from the material status.
+     * @return State flag (i.e. elastic, unloading, yielding, vertex case yielding)
+     */
+    int giveStateFlag() const { return stateFlag; }
 
     /**
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrainVector(StrainVector &answer) const
-    {
-        tempPlasticStrainDeviator.computeDeviatoricVolumetricSum(answer,
-                                                                 tempVolumetricPlasticStrain);
-    }
+    void giveTempPlasticStrain(StrainVector &answer) const { answer = tempPlasticStrain; }
     /**
-     * Get the temp value of the plastic strain deviator from the material status.
-     * @param answer Temp value of plastic strain deviator.
+     * Get the temp value of the hardening variable q from the material status.
+     * @return Temp value of hardening variable kappaP.
      */
-    void giveTempPlasticStrainDeviator(StrainVector &answer) const { answer = tempPlasticStrainDeviator; }
+    double giveTempQ() const { return tempQ; }
     /**
-     * Get the temp value of the volumetric strain deviator from the material status.
-     * @return Temp value of volumetric plastic strain
+     * Get the temp value of the state flag from the material status.
+     * @return The temp value of the state flag.
      */
-    double giveTempVolumetricPlasticStrain() const { return tempVolumetricPlasticStrain; }
-    /**
-     * Get the temp value of the hardening variable from the material status.
-     * @return Temp value of hardening variable kappa.
-     */
-	  double giveTempQ() const { return tempQ; }
+    int giveTempStateFlag() const { return tempStateFlag; }
 
     /**
-     * Assign the temp value of deviatoric plastic strain.
-     * @param v New temp value of deviatoric plastic strain.
+     * Assign the temp value of plastic strain.
+     * @param v New temp value o plastic strain.
      */
-    void letTempPlasticStrainDeviatorBe(const StrainVector &v) { tempPlasticStrainDeviator = v; }
+    void letTempPlasticStrainBe(const StrainVector &v) { tempPlasticStrain = v; }
     /**
-     * Assign the temp value of volumetric plastic strain.
-     * @param v New temp value of volumetric plastic strain.
+     * Assign the temp value of variable q
+     * @param v New temp value of variable q
      */
-    void letTempVolumetricPlasticStrainBe(double v) { tempVolumetricPlasticStrain = v; }
-	 void letTempQBe(double q) { tempQ = q; }
+    void letTempQBe(double v) { tempQ = v; }
+    /**
+     * Assign the temp value of the state flag.
+     * @param v New temp value of the state flag.
+     */
+    void letTempStateFlagBe(int v) { tempStateFlag = v; }
+
+    /**
+     * Assign the value of plastic strain.
+     * @param v New value of plastic strain.
+     */
+    void letPlasticStrainBe(const StrainVector &v) { plasticStrain = v; }
+    /**
+     * Assign the value of variable q
+     * @param v New value of variable q
+     */
+    void letQBe(double v) { q = v; }
+
+    /**
+     * Assign the value of actual bulk modulus of the status
+     * @param v New value of bulk modulus
+     */
+    void setBulkModulus(double m) { bulkModulus = m; }
+    /**
+     * Assign the value of actual shear modulus of the status
+     * @param v New value of shear modulus
+     */
+    void setShearModulus(double m) { shearModulus = m; }
+    /**
+     * Assign the value of actual Young's modulus of the status
+     * @param v New value of Young's modulus
+     */
+    void setYoungsModulus(double m) { youngsModulus = m; }
+    /**
+     * Get the value of actual bulk modulus of the status
+     * @return Value of bulk modulus
+     */
+    double giveBulkModulus() { return bulkModulus; }
+    /**
+     * Get the value of actual shear modulus of the status
+     * @return Value of shear modulus
+     */
+    double giveShearModulus() { return shearModulus; }
+    /**
+     * Get the value of actual Young's modulus of the status
+     * @return Value of Young's modulus
+     */
+    double giveYoungsModulus() { return youngsModulus; }
 };
 
 /**
- * This class implements TODO
+ * This class implements nonassociated multisurface plasticity model.
+ * Yield function depends on I1 and J2 invariants of stress tensor and
+ * internal variable q.
+ * The plasticity surface consists of three surfaces.
+ * Shear dominant surface (f1) is non linear Drucker Prager cone.
+ * Compressive dominant part (f2) is elliptic cap over the cone.
+ * Tension dominant part (f3) is plane, cutting the cone perpendicularly to
+ * hydrostatic axis.
+ * f1 and f3 are constant. The position of f2 surface is determined by internal
+ * variable q. During plastic yielding f1 or f3 (shear or tension dominant state),
+ * q is increasing and the admissible elastic domain is shrinking. During
+ * f2 plastic yielding (compressive dominant), the parameter q is decreasing and the
+ * admissible elastic domain is becoming larger.
+ *
+ * This model is described in PhD thesis of Tobias Erhard
+ * Strategien zur numerischen Modellierung transierten Impaktvorgange bei nichtlinearem Materialverhalten
+ * Universitat Stuttgart 2004
+ *
  * @author Jan Stransky
  */
 class DustMaterial : public StructuralMaterial
 {
 protected:
+    /// Pointer for linear elastic material
     IsotropicLinearElasticMaterial *LEMaterial;
-	 double bulkModulus;
-	 double shearModulus;
 
-	 double alpha;
-	 double beta;
-	 double lambda;
-	 double theta;
-	 double ft;
-	 double rEllipse;
-	 int hardeningType;
-	 double mHard;
-	   
+    /// Parameter determining shape of yield surface
+    double alpha;
+    /// Parameter determining shape of yield surface
+    double beta;
+    /// Parameter determining shape of yield surface
+    double lambda;
+    /// Parameter determining shape of yield surface
+    double theta;
+    /// Parameter determining shape of yield surface (param T in original publication)
+    double ft;
+    /// Parameter determining shape of yield surface (param R in original publication)
+    double rEll;
+    /// Parameter determining hardening type
+    int hardeningType;
+    /// Parameter increasing stiffness (parameter M in original publication)
+    double mStiff;
+    /// Parameter determining shape of yield surface (param X0 in original publication)
+    double x0;
+    /// Parameter determining shape of yield surface
+    double q0;
+    /// Parameter determining hardening law (parameter W in original publication)
+    double wHard;
+    /// Parameter determining hardening law (parameter D in original publication)
+    double dHard;
+    /// Tollerance for iterative methods
+    double newtonTol;
+    /// Maximum number of iterations for iterative methods
+    int newtonIter;
+
+    /** Auxiliary equation Fe (7.8)
+     * @param i1 Trace of stress tensor
+     * @return Fe
+     */
+    double functionFe(double i1);
+    /** Derivative by i1 of auxiliary equation (7.8)
+     * @param i1 Trace of stress tensor
+     * @return \partial{Fe}/\partial{i1}
+     */
+    double functionFeDI1(double i1);
+    /** Second derivative by i1 of auxiliary equation (7.8)
+     * @param i1 Trace of stress tensor
+     * @return \partial^2{Fe}/\partial{i1^2}
+     */
+    double functionFeDI1DI1(double i1);
+    /** Auxiliary equation Fc (7.9)
+     * @param i1 Trace of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param q Parameter q
+     * @return Fc
+     */
+    double functionFc(double rho, double i1, double q);
+    /** Auxiliary equation X (7.11)
+     * @param q Parameter q
+     * @return X
+     */
+    double functionX(double q);
+    /** Derivative by q of auxiliary equation X (7.11)
+     * @param q Parameter q
+     * @return \partial{X}/\partial{q}
+     */
+    double functionXDQ(double q);
+    /** Yield function 1 (shear dominant), equation 7.5
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param i1 Trace of stress tensor
+     * @return value
+     */
+    double yieldFunction1(double rho, double i1);
+    /** Yield function 2 (compression dominant), equation 7.6
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param i1 Trace of stress tensor
+     * @param q Parameter q
+     * @return value
+     */
+    double yieldFunction2(double rho, double i1, double q);
+    /** Yield function 3 (tension dominant), equation 7.7
+     * @param i1 Trace of stress tensor
+     * @return value
+     */
+    double yieldFunction3(double i1);
+    /** Solves q0 according to given parameters, equation 7.12
+     * @param answer Result
+     */
+    void solveQ0(double &answer);
+    /** Computes and sets all elastic moduli, with possible stiffening. Equation 7.4
+     * @param bulkModulus Bulk modulus
+     * @param shearModulus Shear modulus
+     * @param gp Gauss point
+     */
+    void computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp);
+    /** Perform stress return and update all internal variables
+     * @param gp Gauss point
+     * @param strain Strain
+     */
+    void performStressReturn(GaussPoint *gp, StrainVector strain);
+    /** Computes direction of plastic yielding m1, equation 7.17
+     * @param answer Result
+     * @param stressDeviator Deviator of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param i1 Trace of stress tensor
+     * @param q Parameter q
+     */
+    void computePlastStrainDirM1(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    /** Computes direction of plastic yielding m2, equation 7.19
+     * @param answer Result
+     * @param stressDeviator Deviator of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param i1 Trace of stress tensor
+     * @param q Parameter q
+     */
+    void computePlastStrainDirM2(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    /** Computes direction of plastic yielding m2, equation 7.18
+     * @param answer Result
+     * @param stressDeviator Deviator of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param i1 Trace of stress tensor
+     * @param q Parameter q
+     */
+    void computePlastStrainDirM3(StrainVector &answer, const StressVector &stressDeviator, double rho, double i1, double q);
+    /** Auxiliary equation H (7.33 or 7.34)
+     * @param q Parameter q from previous step
+     * @param tempQ Parameter tempQ
+     * @return H
+     */
+    double functionH(double q, double tempQ);
+    /** Derivative by tempQ of auxiliary equation H (7.33 or 7.34)
+     * @param tempQ Parameter tempQ
+     * @return \partial{X}/\partial{tempQ}
+     */
+    double functionHDQ(double tempQ);
+    /** Auxiliary equation I1 (7.32)
+     * @param q Parameter q from previous step
+     * @param tempQ Parameter tempQ
+     * @param i1 Trace of stress tensor
+     * @param bulkModulus Bulk modulus
+     * @return I1
+     */
+    double functionI1(double q, double tempQ, double i1, double bulkModulus);
+    /** Derivative by tempQ of auxiliary equation I1 (7.32)
+     * @param tempQ Parameter tempQ
+     * @param bulkModulus Bulk modulus
+     * @return \partial{I1}/\partial{tempQ}
+     */
+    double functionI1DQ(double tempQ, double bulkModulus);
+    /** Performs stress return of case of yield function F1, computes new value of tempQ and sets it to status. Equation 7.31
+     * @param i1 Trace of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param gp Gauss point
+     */
+    void performF1return(double i1, double rho, GaussPoint *gp);
+    /** Performs stress return of case of yield function F2, computes new value of tempQ and sets it to status. Equation 7.38
+     * @param i1 Trace of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param gp Gauss point
+     */
+    void performF2return(double i1, double rho, GaussPoint *gp);
+    /** Computes tempQ from volumetric plastic strain increment, equation 7.44
+     * @param answer Result tempQ
+     * @param q Parameter q from previous step
+     * @param deltaVolumetricPlasticStrain Volumetric plastic strain increment
+     */
+    void computeQFromPlastVolEps(double &answer, double q, double deltaVolumetricPlasticStrain);
+    /** Computed value of plastic multiplier for F2 yield function, equation 7.39
+     * @param tempQ Parameter tempQ
+     * @param q Parameter q from previous step
+     * @param i1 Trace of stress tensor
+     * @param bulkModulus Bulk modulus
+     */
+    double computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus);
+    /** Computed derivative by tempQ of equation 7.39
+     * @param tempQ Parameter tempQ
+     * @param q Parameter q from previous step
+     * @param i1 Trace of stress tensor
+     * @param bulkModulus Bulk modulus
+     */
+    double computeDeltaGamma2DQ(double tempQ, double q, double i1, double bulkModulus);
+    /** equation 7.38
+     * @param tempQ Parameter tempQ
+     * @param q Parameter q from previous step
+     * @param i1 Trace of stress tensor
+     * @param rho Second Haigh-Westergaard coordinate
+     * @param bulkModulus Bulk modulus
+     * @param shearModulus Shear modulus
+     */
+    double fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus);
+
 public:
     /// Constructor
     DustMaterial(int n, Domain *d);
@@ -173,25 +419,27 @@ public:
     virtual classType giveClassID() const { return DustMaterialClass; }
 
     virtual void giveRealStressVector(FloatArray &answer,
-                              MatResponseForm form,
-                              GaussPoint *gp,
-                              const FloatArray &strainVector,
-                              TimeStep *atTime);
+                                      MatResponseForm form,
+                                      GaussPoint *gp,
+                                      const FloatArray &strainVector,
+                                      TimeStep *atTime);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
-                                       MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
+                                               MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
+
+    virtual int setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type);
 
     virtual int giveIPValue(FloatArray &answer,
-                    GaussPoint *gp,
-                    InternalStateType type,
-                    TimeStep *atTime);
+                            GaussPoint *gp,
+                            InternalStateType type,
+                            TimeStep *atTime);
 
     virtual int giveIPValueSize(InternalStateType type,
-                        GaussPoint *gp);
+                                GaussPoint *gp);
 
     virtual int giveIntVarCompFullIndx(IntArray &answer,
-                               InternalStateType type,
-                               MaterialMode mmode);
+                                       InternalStateType type,
+                                       MaterialMode mmode);
 
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
@@ -204,12 +452,7 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-	 double functionFe(double i1);
-	 double functionFc(double sn, double i1, double q);
-	 double functionX(double q);
-	 double yieldFunction1(double sn, double i1);
-	 double yieldFunction2(double sn, double i1, double q);
-	 double yieldFunction3(double i1);
+    double giveQ0() { return q0; }
 };
 } // end namespace oofem
 #endif // dustmat_h

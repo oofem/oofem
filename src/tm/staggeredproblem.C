@@ -344,6 +344,7 @@ StaggeredProblem :: terminate(TimeStep *tStep) {
     for ( int i = 1; i <= nModels; i++ ) {
         this->giveSlaveProblem(i)->terminate(tStep);
     }
+    fflush(this->giveOutputStream());
 }
 
 void

@@ -35,8 +35,6 @@
 #ifndef dynalist_h
 #define dynalist_h
 
-#include "compiler.h"
-
 namespace oofem {
 template< class T >class dynaList;
 template< class T >class dynaListIterator;

@@ -1,0 +1,418 @@
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = OOFEM
+PROJECT_NUMBER         = @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@
+PROJECT_BRIEF          =
+PROJECT_LOGO           =
+OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT@
+
+# If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
+# 4096 sub-directories (in 2 levels) under the output directory of each output
+# format and will distribute the generated files over these directories.
+# Enabling this option can be useful when feeding doxygen a huge amount of
+# source files, where putting all generated files in the same directory would
+# otherwise cause performance problems for the file system.
+
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+ABBREVIATE_BRIEF       =
+ALWAYS_DETAILED_SEC    = NO
+INLINE_INHERITED_MEMB  = NO
+FULL_PATH_NAMES        = NO
+STRIP_FROM_PATH        =
+STRIP_FROM_INC_PATH    =
+SHORT_NAMES            = NO
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = NO
+MULTILINE_CPP_IS_BRIEF = NO
+INHERIT_DOCS           = YES
+SEPARATE_MEMBER_PAGES  = NO
+TAB_SIZE               = 4
+ALIASES                =
+
+# Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C
+# sources only. Doxygen will then generate output that is more tailored for C.
+# For instance, some of the names that are used will be different. The list
+# of all members will be omitted, etc.
+
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
+OPTIMIZE_FOR_FORTRAN   = NO
+OPTIMIZE_OUTPUT_VHDL   = NO
+EXTENSION_MAPPING      =
+
+# If you use STL classes (i.e. std::string, std::vector, etc.) but do not want
+# to include (a tag file for) the STL sources as input, then you should
+# set this tag to YES in order to let doxygen match functions declarations and
+# definitions whose arguments contain STL classes (e.g. func(std::string); v.s.
+# func(std::string) {}). This also makes the inheritance and collaboration
+# diagrams that involve STL classes more complete and accurate.
+
+BUILTIN_STL_SUPPORT    = NO
+CPP_CLI_SUPPORT        = NO
+SIP_SUPPORT            = NO
+IDL_PROPERTY_SUPPORT   = YES
+
+# If member grouping is used in the documentation and the DISTRIBUTE_GROUP_DOC
+# tag is set to YES, then doxygen will reuse the documentation of the first
+# member in the group (if any) for the other members of the group. By default
+# all members of a group must be documented explicitly.
+
+DISTRIBUTE_GROUP_DOC   = NO
+
+# Set the SUBGROUPING tag to YES (the default) to allow class member groups of
+# the same type (for instance a group of public functions) to be put as a
+# subgroup of that type (e.g. under the Public Functions section). Set it to
+# NO to prevent subgrouping. Alternatively, this can be done per class using
+# the \nosubgrouping command.
+
+SUBGROUPING            = YES
+
+# When the INLINE_GROUPED_CLASSES tag is set to YES, classes, structs and
+# unions are shown inside the group in which they are included (e.g. using
+# @ingroup) instead of on a separate page (for HTML and Man pages) or
+# section (for LaTeX and RTF).
+
+INLINE_GROUPED_CLASSES = NO
+TYPEDEF_HIDES_STRUCT   = NO
+SYMBOL_CACHE_SIZE      = 0
+
+#---------------------------------------------------------------------------
+# Build related configuration options
+#---------------------------------------------------------------------------
+
+# If the EXTRACT_ALL tag is set to YES doxygen will assume all entities in
+# documentation are documented, even if no documentation was available.
+# Private class members and static file members will be hidden unless
+# the EXTRACT_PRIVATE and EXTRACT_STATIC tags are set to YES
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_LOCAL_METHODS  = NO
+EXTRACT_ANON_NSPACES   = NO
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+HIDE_FRIEND_COMPOUNDS  = NO
+HIDE_IN_BODY_DOCS      = NO
+2INTERNAL_DOCS          = NO
+CASE_SENSE_NAMES       = YES
+HIDE_SCOPE_NAMES       = NO
+SHOW_INCLUDE_FILES     = YES
+FORCE_LOCAL_INCLUDES   = NO
+INLINE_INFO            = YES
+SORT_MEMBER_DOCS       = YES
+SORT_BRIEF_DOCS        = NO
+SORT_MEMBERS_CTORS_1ST = NO
+SORT_GROUP_NAMES       = NO
+SORT_BY_SCOPE_NAME     = NO
+STRICT_PROTO_MATCHING  = NO
+GENERATE_TODOLIST      = YES
+GENERATE_TESTLIST      = YES
+GENERATE_BUGLIST       = YES
+GENERATE_DEPRECATEDLIST= YES
+ENABLED_SECTIONS       =
+MAX_INITIALIZER_LINES  = 30
+SHOW_USED_FILES        = YES
+SHOW_DIRECTORIES       = NO
+SHOW_FILES             = YES
+SHOW_NAMESPACES        = YES
+FILE_VERSION_FILTER    =
+LAYOUT_FILE            =
+
+#---------------------------------------------------------------------------
+# configuration options related to warning and progress messages
+#---------------------------------------------------------------------------
+QUIET                  = NO
+WARNINGS               = YES
+
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = YES
+WARN_FORMAT            =
+WARN_LOGFILE           = @oofem_BINARY_DIR@/apierrors.txt
+
+#---------------------------------------------------------------------------
+# configuration options related to the input files
+#---------------------------------------------------------------------------
+
+INPUT                  = @oofem_SOURCE_DIR@/doc/refman/mainpage \
+                         @oofem_SOURCE_DIR@/doc/refman/intro \
+                         @oofem_SOURCE_DIR@/src
+INPUT_ENCODING         = UTF-8
+FILE_PATTERNS          = *.h *.C
+RECURSIVE              = YES
+EXCLUDE                = @oofem_SOURCE_DIR@/src/dss
+EXCLUDE_SYMLINKS       = NO
+EXCLUDE_PATTERNS       =
+EXCLUDE_SYMBOLS        =
+EXAMPLE_PATH           =
+EXAMPLE_PATTERNS       =
+EXAMPLE_RECURSIVE      = NO
+IMAGE_PATH             =
+INPUT_FILTER           =
+FILTER_PATTERNS        =
+FILTER_SOURCE_FILES    = NO
+FILTER_SOURCE_PATTERNS =
+
+#---------------------------------------------------------------------------
+# configuration options related to source browsing
+#---------------------------------------------------------------------------
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+REFERENCES_LINK_SOURCE = YES
+USE_HTAGS              = NO
+VERBATIM_HEADERS       = YES
+
+#---------------------------------------------------------------------------
+# configuration options related to the alphabetical class index
+#---------------------------------------------------------------------------
+ALPHABETICAL_INDEX     = YES
+COLS_IN_ALPHA_INDEX    = 4
+IGNORE_PREFIX          =
+
+#---------------------------------------------------------------------------
+# configuration options related to the HTML output
+#---------------------------------------------------------------------------
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            =
+HTML_FILE_EXTENSION    = .html
+HTML_HEADER            =
+HTML_FOOTER            = footer.html
+HTML_STYLESHEET        =
+HTML_EXTRA_FILES       =
+HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 100
+HTML_TIMESTAMP         = YES
+HTML_ALIGN_MEMBERS     = YES
+
+# If the HTML_DYNAMIC_SECTIONS tag is set to YES then the generated HTML
+# documentation will contain sections that can be hidden and shown after the
+# page has loaded. For this to work a browser that supports
+# JavaScript and DHTML is required (for instance Mozilla 1.0+, Firefox
+# Netscape 6.0+, Internet explorer 5.0+, Konqueror, or Safari).
+
+HTML_DYNAMIC_SECTIONS  = YES
+GENERATE_DOCSET        = NO
+DOCSET_FEEDNAME        = "Doxygen generated docs"
+DOCSET_BUNDLE_ID       = org.doxygen.Project
+DOCSET_PUBLISHER_ID    = org.doxygen.Publisher
+DOCSET_PUBLISHER_NAME  = Publisher
+GENERATE_HTMLHELP      = NO
+CHM_FILE               =
+HHC_LOCATION           =
+GENERATE_CHI           = NO
+CHM_INDEX_ENCODING     =
+BINARY_TOC             = NO
+TOC_EXPAND             = NO
+GENERATE_QHP           = NO
+QCH_FILE               =
+QHP_NAMESPACE          = org.doxygen.Project
+QHP_VIRTUAL_FOLDER     = doc
+QHP_CUST_FILTER_NAME   =
+QHP_CUST_FILTER_ATTRS  =
+QHP_SECT_FILTER_ATTRS  =
+QHG_LOCATION           =
+GENERATE_ECLIPSEHELP   = NO
+ECLIPSE_DOC_ID         = org.doxygen.Project
+DISABLE_INDEX          = NO
+ENUM_VALUES_PER_LINE   = 4
+GENERATE_TREEVIEW      = NO
+USE_INLINE_TREES       = NO
+TREEVIEW_WIDTH         = 250
+EXT_LINKS_IN_WINDOW    = NO
+FORMULA_FONTSIZE       = 10
+FORMULA_TRANSPARENT    = YES
+
+# Enable the USE_MATHJAX option to render LaTeX formulas using MathJax
+# (see http://www.mathjax.org) which uses client side Javascript for the
+# rendering instead of using prerendered bitmaps. Use this if you do not
+# have LaTeX installed or if you want to formulas look prettier in the HTML
+# output. When enabled you also need to install MathJax separately and
+# configure the path to it using the MATHJAX_RELPATH option.
+
+USE_MATHJAX            = YES
+MATHJAX_RELPATH        = http://www.mathjax.org/mathjax
+
+# When the SEARCHENGINE tag is enabled doxygen will generate a search box
+# for the HTML output. The underlying search engine uses javascript
+# and DHTML and should work on any modern browser. Note that when using
+# HTML help (GENERATE_HTMLHELP), Qt help (GENERATE_QHP), or docsets
+# (GENERATE_DOCSET) there is already a search function so this one should
+# typically be disabled. For large projects the javascript based search engine
+# can be slow, then enabling SERVER_BASED_SEARCH may provide a better solution.
+
+SEARCHENGINE           = YES
+
+# When the SERVER_BASED_SEARCH tag is enabled the search engine will be
+# implemented using a PHP enabled web server instead of at the web client
+# using Javascript. Doxygen will generate the search PHP script and index
+# file to put on the web server. The advantage of the server
+# based approach is that it scales better to large projects and allows
+# full text search. The disadvantages are that it is more difficult to setup
+# and does not have live searching capabilities.
+
+SERVER_BASED_SEARCH    = NO
+
+#---------------------------------------------------------------------------
+# configuration options related to the LaTeX output
+#---------------------------------------------------------------------------
+
+GENERATE_LATEX         = NO
+LATEX_OUTPUT           =
+LATEX_CMD_NAME         = latex
+MAKEINDEX_CMD_NAME     = makeindex
+COMPACT_LATEX          = YES
+PAPER_TYPE             = a4
+EXTRA_PACKAGES         = amsmath,mathtools,microtype
+LATEX_HEADER           =
+LATEX_FOOTER           =
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
+LATEX_BATCHMODE        = YES
+LATEX_HIDE_INDICES     = NO
+LATEX_SOURCE_CODE      = NO
+
+#---------------------------------------------------------------------------
+# configuration options related to the RTF output
+#---------------------------------------------------------------------------
+
+GENERATE_RTF           = NO
+RTF_OUTPUT             =
+COMPACT_RTF            = NO
+RTF_HYPERLINKS         = NO
+RTF_STYLESHEET_FILE    =
+RTF_EXTENSIONS_FILE    =
+
+#---------------------------------------------------------------------------
+# configuration options related to the man page output
+#---------------------------------------------------------------------------
+
+GENERATE_MAN           = NO
+MAN_OUTPUT             =
+MAN_EXTENSION          =
+MAN_LINKS              = NO
+
+#---------------------------------------------------------------------------
+# configuration options related to the XML output
+#---------------------------------------------------------------------------
+
+GENERATE_XML           = NO
+XML_OUTPUT             = xml
+XML_SCHEMA             =
+XML_DTD                =
+XML_PROGRAMLISTING     = YES
+
+#---------------------------------------------------------------------------
+# configuration options for the AutoGen Definitions output
+#---------------------------------------------------------------------------
+
+GENERATE_AUTOGEN_DEF   = NO
+
+#---------------------------------------------------------------------------
+# configuration options related to the Perl module output
+#---------------------------------------------------------------------------
+
+GENERATE_PERLMOD       = NO
+PERLMOD_LATEX          = NO
+PERLMOD_PRETTY         = YES
+PERLMOD_MAKEVAR_PREFIX =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the preprocessor
+#---------------------------------------------------------------------------
+
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = NO
+EXPAND_ONLY_PREDEF     = NO
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           =
+INCLUDE_FILE_PATTERNS  =
+
+# The PREDEFINED tag can be used to specify one or more macro names that
+# are defined before the preprocessor is started (similar to the -D option of
+# gcc). The argument of the tag is a list of macros of the form: name
+# or name=definition (no spaces). If the definition and the = are
+# omitted =1 is assumed. To prevent a macro definition from being
+# undefined via #undef or recursively expanded use the := operator
+# instead of the = operator.
+
+PREDEFINED             = __PARALLEL_MODE \
+                         __USE_MPI \
+                         __FM_MODULE \
+                         __SM_MODULE \
+                         __TM_MODULE \
+                         __SPOOLES_MODULE \
+                         __DSS_MODULE \
+                         __IML_MODULE \
+                         __PARMETIS_MODULE \
+                         __SLEPC_MODULE \
+                         __PETSC_MODULE \
+                         __OOFEG
+
+EXPAND_AS_DEFINED      =
+SKIP_FUNCTION_MACROS   = YES
+
+#---------------------------------------------------------------------------
+# Configuration::additions related to external references
+#---------------------------------------------------------------------------
+
+TAGFILES               =
+GENERATE_TAGFILE       =
+ALLEXTERNALS           = NO
+EXTERNAL_GROUPS        = YES
+PERL_PATH              =
+
+#---------------------------------------------------------------------------
+# Configuration options related to the dot tool
+#---------------------------------------------------------------------------
+
+CLASS_DIAGRAMS         = YES
+MSCGEN_PATH            =
+HIDE_UNDOC_RELATIONS   = YES
+HAVE_DOT               = YES
+INTERACTIVE_SVG        = YES
+DOT_NUM_THREADS        = 2
+DOT_FONTNAME           =
+DOT_FONTSIZE           = 10
+DOT_FONTPATH           =
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+GROUP_GRAPHS           = YES
+UML_LOOK               = NO
+TEMPLATE_RELATIONS     = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+GRAPHICAL_HIERARCHY    = NO
+DIRECTORY_GRAPH        = YES
+
+# The DOT_IMAGE_FORMAT tag can be used to set the image format of the images
+# generated by dot. Possible values are svg, png, jpg, or gif.
+# If left blank png will be used.
+
+DOT_IMAGE_FORMAT       = svg
+DOT_PATH               =
+DOTFILE_DIRS           =
+MSCFILE_DIRS           =
+DOT_GRAPH_MAX_NODES    = 50
+MAX_DOT_GRAPH_DEPTH    = 0
+DOT_TRANSPARENT        = NO
+
+# Set the DOT_MULTI_TARGETS tag to YES allow dot to generate multiple output
+# files in one run (i.e. multiple -o and -T options on the command line). This
+# makes dot run faster, but since only newer versions of dot (>1.8.10)
+# support this, this feature is disabled by default.
+
+DOT_MULTI_TARGETS      = NO
+GENERATE_LEGEND        = YES
+DOT_CLEANUP            = YES

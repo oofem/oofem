@@ -122,6 +122,18 @@ public:
      */
     virtual double giveUpdatedCoordinate(int ic, TimeStep *tStep,
                                                EquationID type, double scale = 1.);
+    /**
+     * Returns updated coordinate of receiver. Return value is computed
+     * as coordinate + scale * displacement, where corresponding displacement is obtained
+     * from corresponding nodal DOF.
+     * Local coordinate system is taken into account and the answer is given in global coordinates.
+     * @param answer Updated coordinate.
+     * @param ic Index of coordinate.
+     * @param tStep Time step for the displacement.
+     * @param type Equation ID for displacement of node.
+     * @param scale Scaling of displacement.
+     */
+    virtual void giveUpdatedCoordinates(FloatArray &answer, TimeStep *tStep, EquationID type, double scale = 1.);
 
     // local coordinate system
     /// Returns nonzero if node has prescribed local coordinate system.

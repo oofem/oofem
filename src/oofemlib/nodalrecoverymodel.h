@@ -35,8 +35,6 @@
 #ifndef nodalrecoverymodel_h
 #define nodalrecoverymodel_h
 
-#include "compiler.h"
-
 #include "tdictionary.h"
 #include "intarray.h"
 #include "flotarry.h"

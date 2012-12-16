@@ -172,7 +172,6 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
         lcoords_guess.add(delta);
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
-        //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
         answer.zero();
         return false;
     }

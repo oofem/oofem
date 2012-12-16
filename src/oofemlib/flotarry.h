@@ -41,12 +41,8 @@
 #ifndef flotarry_h
 #define flotarry_h
 
-#include "freestor.h"
-#include "compiler.h"
-
 #include "contextioresulttype.h"
 #include "contextmode.h"
-#include "error.h"
 #include "iml/iml.h"
 
 namespace oofem {
@@ -108,14 +104,10 @@ public:
      */
     FloatArray(const FloatArray &x);
     /// Destructor.
-    virtual ~FloatArray() {
-        if ( values ) {
-            freeDouble(values);
-        }
-    }
+    virtual ~FloatArray();
 
     /// Assignment operator
-    FloatArray &operator=(const FloatArray &);   // assignment: cleanup and copy
+    FloatArray &operator=(const FloatArray &);
 
     /// Sets values in array. Convenient for writing small specific vectors.
     void setValues(int n, ...);
@@ -146,31 +138,13 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    double &operator()(int i)
-    {
-#ifdef DEBUG
-        if ( i >= size ) {
-            OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
-        }
-
-#endif
-        return values [ i ];
-    }
+    double &operator()(int i);
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    const double &operator()(int i) const
-    {
-#ifdef DEBUG
-        if ( i >= size ) {
-            OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
-        }
-
-#endif
-        return values [ i ];
-    }
+    const double &operator()(int i) const;
 
     /** Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension

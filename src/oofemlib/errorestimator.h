@@ -48,6 +48,7 @@
 #include "classtype.h"
 #include "errorestimatortype.h"
 #include "intarray.h"
+#include "internalstatetype.h"
 
 namespace oofem {
 class Domain;
@@ -84,6 +85,8 @@ protected:
     IntArray regionSkipMap;
     /// Number of skipped elements.
     int skippedNelems;
+    /// Internal state type of variable to get internal forces
+    InternalStateType IStype;
 
 public:
     /// Constructor
