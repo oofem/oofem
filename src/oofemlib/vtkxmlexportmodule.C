@@ -410,6 +410,10 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     continue;                                  // composite cells exported individually
                 }
 
+                if ( !elem-> isActivated(tStep) ) {                  //skip inactivated elements
+                    continue;
+                }
+                
 #ifdef __PARALLEL_MODE
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
@@ -713,6 +717,10 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
             continue;                                    // composite cells exported individually
         }
 
+        if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {                  //skip inactivated elements
+            continue;
+        }
+        
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
@@ -1198,7 +1206,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             elem = d->giveElement(ielem);
 
             if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
-                    || this->isElementComposite(elem) ) { // composite cells exported individually
+                    || this->isElementComposite(elem) || !elem-> isActivated(tStep) ) { // composite cells exported individually
                 continue;
             }
 
@@ -1301,7 +1309,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
-                    || this->isElementComposite(elem) ) { // composite cells exported individually
+                    || this->isElementComposite(elem) || !elem-> isActivated(tStep) ) { // composite cells exported individually
                 continue;
             }
 #ifdef __PARALLEL_MODE
