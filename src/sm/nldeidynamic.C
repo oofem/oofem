@@ -860,6 +860,7 @@ NlDEIDynamic :: terminate(TimeStep *tStep)
 {
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
+    fflush(this->giveOutputStream());
 }
 
 

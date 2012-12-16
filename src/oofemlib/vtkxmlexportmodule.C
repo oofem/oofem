@@ -67,7 +67,7 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 {
     primVarSmoother = NULL;
     smoother = NULL;
-    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);//position of yz, xx, yy, zz, yz, xz, xy in tensor 
+    redToFull.setValues(6, 1, 5, 9, 6, 3, 2);//position of xx, yy, zz, yz, xz, xy in tensor 
 }
 
 
@@ -824,7 +824,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
     }
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
-        if ( valID == IST_DisplacementVector ) {
+        if ( valID == IST_DisplacementVector ) { ///@todo Why does this code exists here? DisplacementVector isn't a internal variable. And if its really desired, then why the special treatment for just displacements?
             iVal.resize(3);
             val = & iVal;
             for ( j = 1; j <= 3; j++ ) {

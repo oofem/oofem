@@ -1,0 +1,67 @@
+#define PRG_VERSION "OOFEM version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
+#define OOFEG_VERSION "OOFEG version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
+#define OOFEM_COPYRIGHT "Copyright (C) 1994-2011 Borek Patzak"
+
+#define PRG_HEADER_SM "\
+____________________________________________________\n\
+           OOFEM - Finite Element Solver            \n\
+        Copyright (C) 1994-2012 Borek Patzak        \n\
+____________________________________________________\n"
+
+#define PRG_HEADER "\
+############################################################## www.oofem.org ###\n\
+       ####    ####   ######  ######  #    #\n\
+     #    #  #    #  #       #       ##  ##\n\
+    #    #  #    #  #####   #####   # ## #\n\
+   #    #  #    #  #       #       #    #\n\
+  #    #  #    #  #       #       #    #   OOFEM ver. @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@\n\
+  ####    ####   #       ######  #    #    Copyright (C) 1994-2012 Borek Patzak\n\
+################################################################################\n\n"
+
+#define HOST_TYPE "@HOST_TYPE@"
+#define HOST_NAME "@HOST_NAME@"
+#define MODULE_LIST "@MODULE_LIST@"
+
+/* Headers */
+/* Define if #include<sys/time.h> exist */
+#cmakedefine HAVE_SYS_TIME_H
+
+/* Define if strings.h defined */
+#cmakedefine HAVE_STRINGS_H
+
+/* Define if unistd.h defined */
+#cmakedefine HAVE_UNISTD_H
+
+/* Define if program may include both 'time.h' and 'sys/time.h' */
+#cmakedefine TIME_WITH_SYS_TIME
+
+/* Symbols */
+/* Define if access is defined */
+#cmakedefine HAVE_ACCESS
+
+/* Define if strncasecmp is defined */
+#cmakedefine HAVE_STRNCASECMP
+
+/* Define if nearest is defined */
+#cmakedefine HAVE_NEAREST
+
+/* Define if cbrt is defined */
+#cmakedefine HAVE_CBRT
+
+/* Define if isnan is defined */
+#cmakedefine HAVE_ISNAN
+
+/* Variables */
+/* Define if M_PI constant is defined */
+#cmakedefine HAVE_M_PI
+
+/* Define if M_LN2 constant is defined */
+#cmakedefine HAVE_M_LN2
+
+/* Other */
+/* Define if __VA_ARGS__ macro is supported by preprocessor */
+#cmakedefine HAVE_MACRO_VA_ARGS
+
+/* Define to support arbitrary compoment labels */
+#cmakedefine __ENABLE_COMPONENT_LABELS
+

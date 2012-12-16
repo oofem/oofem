@@ -89,7 +89,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    int j, size;
+    int size;
     FloatArray triplets;
 
 #  ifdef VERBOSE
@@ -120,7 +120,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
         double n1 = 0.0, n2 = 0.0;
         localCoordinateSystem = new FloatMatrix(3, 3);
 
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             localCoordinateSystem->at(1, j) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
             localCoordinateSystem->at(2, j) = triplets.at(j + 3);
@@ -133,7 +133,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
             _error("instanciateFrom : lcs input error");
         }
 
-        for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
+        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
             localCoordinateSystem->at(1, j) /= n1;
             localCoordinateSystem->at(2, j) /= n2;
         }
@@ -157,7 +157,7 @@ void
 Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-    int i, n, nLoads;
+    int n, nLoads;
     NodalLoad *loadN;
     FloatArray contribution;
     IntArray dofIDarry(0);
@@ -169,7 +169,7 @@ Node :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType m
     } else {
         answer.resize(0);
         nLoads = loadArray.giveSize();       // the node may be subjected
-        for ( i = 1; i <= nLoads; i++ ) {     // to more than one load
+        for ( int i = 1; i <= nLoads; i++ ) {     // to more than one load
             n     = loadArray.at(i);
             loadN = dynamic_cast< NodalLoad * >( domain->giveLoad(n) );
             if ( !loadN ) {
@@ -197,13 +197,12 @@ void
 Node :: printYourself()
 // Prints the receiver on screen.
 {
-    int i;
     double x, y;
 
     x = this->giveCoordinate(1);
     y = this->giveCoordinate(2);
     printf("Node %d    coord : x %f  y %f\n", number, x, y);
-    for ( i = 0; i < numberOfDofs; i++ ) {
+    for ( int i = 0; i < numberOfDofs; i++ ) {
         if ( dofArray [ i ] ) {
             dofArray [ i ]->printYourself();
         } else {
@@ -220,13 +219,13 @@ void
 Node :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    int i, ic;
+    int ic;
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     double dt = tStep->giveTimeIncrement();
 
-    for ( i = 1; i <= numberOfDofs; i++ ) {
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( mode == AL ) { // updated Lagrange
             ic = domain->giveCorrespondingCoordinateIndex(i);
             if ( ic != 0 ) {
@@ -247,23 +246,21 @@ double
 Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double scale)
 //
 // returns coordinate + scale * displacement
-// displacement is of updMode (UpdateMode) type
 //
 {
-    int i, j;
-    FloatMatrix *T;
-
+#ifdef DEBUG
     if ( ( ic < 1 ) || ( ic > 3 ) ) {
         _error("giveUpdatedCoordinate: Can't return non-existing coordinate (index not in range 1..3)");
         return 0.;
     }
+#endif
 
     if ( tStep->isTheCurrentTimeStep() ) {
         double coordinate = this->giveCoordinate(ic);
         if ( !this->hasLocalCS() ) {
             // this has no local cs.
-            for ( i = 1; i <= numberOfDofs; i++ ) {
-                j = domain->giveCorrespondingCoordinateIndex(i);
+            for ( int i = 1; i <= numberOfDofs; i++ ) {
+                int j = domain->giveCorrespondingCoordinateIndex(i);
                 if ( ( j != 0 ) && ( j == ic ) ) {
                     coordinate +=
                         scale * this->giveDof(i)->giveUnknown(type, VM_Total, tStep);
@@ -276,22 +273,20 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double s
             // We must perform transformation of displacements DOFs
             // in to global c.s and then to add them to global coordinates.
             //
-            T = this->giveLocalCoordinateTriplet();
-            FloatArray displacements(3);
-            for ( i = 1; i <= 3; i++ ) {
-                displacements.at(i) = 0.;
-            }
+            FloatMatrix *T = this->giveLocalCoordinateTriplet();
+            FloatArray displacements(T->giveNumberOfRows());
+            displacements.zero();
 
-            for ( i = 1; i <= numberOfDofs; i++ ) {
-                j = domain->giveCorrespondingCoordinateIndex(i);
-                if ( j ) { // && (this->giveDof(i)->giveUnknownType()==DisplacementVector))
+            for ( int i = 1; i <= numberOfDofs; i++ ) {
+                int j = domain->giveCorrespondingCoordinateIndex(i);
+                if ( j != 0 ) { // && (this->giveDof(i)->giveUnknownType()==DisplacementVector))
                     displacements.at(j) = scale * this->giveDof(i)->
                                           giveUnknown(type, VM_Total, tStep);
                 }
             }
 
             // perform transformation for desired displacement
-            for ( i = 1; i <= 3; i++ ) {
+            for ( int i = 1; i <= 3; i++ ) {
                 coordinate += displacements.at(i) * T->at(i, ic);
             }
         }
@@ -304,6 +299,24 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, double s
     return 0.;
 }
 
+
+void
+Node :: giveUpdatedCoordinates(FloatArray &coord, TimeStep *tStep, EquationID type, double scale)
+//
+// returns coordinate + scale * displacement
+//
+{
+    if ( tStep->isTheCurrentTimeStep() ) {
+        FloatArray vec;
+        coord = this->coordinates;
+        this->giveUnknownVectorOfType(vec, DisplacementVector, VM_Total, tStep);
+        for (int i = 1; i <= coord.giveSize(); i++) {
+            coord.at(i) += scale * vec.at(i);
+        }
+    }
+}
+
+
 int
 Node :: checkConsistency()
 {
@@ -314,11 +327,11 @@ Node :: checkConsistency()
      */
     int result = 1;
     int ndofs = this->giveNumberOfDofs();
-    int i, nslaves = 0;
+    int nslaves = 0;
 
     result = result && DofManager :: checkConsistency();
 
-    for ( i = 1; i <= ndofs; i++ ) {
+    for ( int i = 1; i <= ndofs; i++ ) {
         if ( this->giveDof(i)->giveClassID() == SimpleSlaveDofClass ) {
             nslaves++;
         }
@@ -334,7 +347,7 @@ Node :: checkConsistency()
     Dof *idof;
     Node *masterNode;
 
-    for ( i = 1; i <= ndofs; i++ ) {
+    for ( int i = 1; i <= ndofs; i++ ) {
         if ( ( idof = this->giveDof(i) )->giveClassID() == SimpleSlaveDofClass ) {
             alreadyFound  = 0;
             master = ( ( SimpleSlaveDof * ) idof )->giveMasterDofManagerNum();
@@ -373,27 +386,26 @@ Node :: hasSameLCS(Node *remote)
     FloatMatrix *thisLcs, *masterLcs;
     thisLcs = this->giveLocalCoordinateTriplet();
     masterLcs = remote->giveLocalCoordinateTriplet();
-    int k, l;
 
     if ( ( this->hasLocalCS() ) && ( remote->hasLocalCS() ) ) {
-        for ( k = 1; k <= 3; k++ ) {
-            for ( l = 1; l <= 3; l++ ) {
+        for ( int k = 1; k <= 3; k++ ) {
+            for ( int l = 1; l <= 3; l++ ) {
                 if ( fabs( thisLcs->at(k, l) - masterLcs->at(k, l) ) > 1.e-4 ) {
                     return false;
                 }
             }
         }
     } else if ( this->hasLocalCS() ) {
-        for ( k = 1; k <= 3; k++ ) {
-            for ( l = 1; l <= 3; l++ ) {
+        for ( int k = 1; k <= 3; k++ ) {
+            for ( int l = 1; l <= 3; l++ ) {
                 if ( fabs( thisLcs->at(k, l) - ( k == l ) ) > 1.e-4 ) {
                     return false;
                 }
             }
         }
     } else if ( remote->hasLocalCS() ) {
-        for ( k = 1; k <= 3; k++ ) {
-            for ( l = 1; l <= 3; l++ ) {
+        for ( int k = 1; k <= 3; k++ ) {
+            for ( int l = 1; l <= 3; l++ ) {
                 if ( fabs( masterLcs->at(k, l) - ( k == l ) ) > 1.e-4 ) {
                     return false;
                 }

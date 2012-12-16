@@ -184,6 +184,9 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
     // loop over elements and check if implement interface
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
+        if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {  //skip inactivated elements
+            continue;
+        }
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;

@@ -85,6 +85,14 @@ IntArray :: IntArray(const IntArray &src)
 }
 
 
+IntArray :: ~IntArray()
+{
+    if ( values ) {
+        freeInt(values);
+    }
+}
+
+
 IntArray &IntArray :: operator = ( const IntArray & src )
 {
     // assignment: cleanup and copy

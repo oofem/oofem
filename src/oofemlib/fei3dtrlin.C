@@ -174,7 +174,7 @@ FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 double
 FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double volume, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
+    double detJ, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 
     x1 = cellgeo.giveVertexCoordinates(1)->at(1);
     x2 = cellgeo.giveVertexCoordinates(2)->at(1);
@@ -191,15 +191,15 @@ FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICel
     z3 = cellgeo.giveVertexCoordinates(3)->at(3);
     z4 = cellgeo.giveVertexCoordinates(4)->at(3);
 
-    volume = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
-              ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-              ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) ) / 6.;
+    detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
+             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
-    if ( volume <= 0.0 ) {
+    if ( detJ <= 0.0 ) {
         OOFEM_ERROR("FEI3dTrLin :: giveTransformationJacobian: negative volume encountered");
     }
 
-    return volume;
+    return detJ;
 }
 
 

@@ -399,17 +399,4 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-GaussPoint *
-CCTPlate3d :: giveMiddleGaussPoint()
-// return gausspoint with local coordinates (0.333,0.333,0.333)
-{
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-
-    if ( ( fabs(gp->giveCoordinate(1) - 0.333333333333) > 0.00000000001 ) ||
-        ( fabs(gp->giveCoordinate(2) - 0.333333333333) > 0.00000000001 ) ) {
-        _error("the gausspoint has not local coordinate (0.333,0.333,0.333)");
-    }
-
-    return gp;
-}
 } // end namespace oofem

@@ -144,6 +144,28 @@ public:
      */
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
+    /**
+     * Computes bulk modulus from given Young's modulus and Poisson's ratio
+     * @param young Young's modulus
+     * @param nu Poisson's ratio
+     * @return bulk modulus (K = E/(3*(1-2*nu))
+     */
+    static double computeBulkModulusFromYoungAndPoisson(double young, double nu)
+    {
+        return young / ( 3. * ( 1. - 2. * nu ) );
+    }
+
+    /**
+     * Computes shear modulus from given Young's modulus and Poisson's ratio
+     * @param E Young's modulus
+     * @param nu Poisson's ratio
+     * @return shear modulus (G = E/(2*(1+nu))
+     */
+    static double computeShearModulusFromYoungAndPoisson(double young, double nu)
+    {
+        return young / ( 2. * ( 1. + nu ) );
+    }
+
 protected:
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,
                                   MatResponseForm, MatResponseMode, GaussPoint * gp,

@@ -43,6 +43,7 @@ namespace oofem {
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
  * integration rule type (rule for integration in 1d, 2d, 3d) and required accuracy.
+ * The positions and weights are determined by the minimum required of points to integrate a polynomial exactly (while the points are strictly within the domain)
  * 
  * Tasks:
  * - Returning number of integration points used
@@ -72,13 +73,7 @@ public:
     virtual const char *giveClassName() const { return "GaussIntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-    /**
-     * Returns requred number of integration points to exactly integrate
-     * polynomial of order approxOrder on given domain.
-     * When approxOrder is too large and is not supported by implementation
-     * method returns -1.
-     */
-    int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
+    virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
 protected:
     virtual int SetUpPointsOnLine(int, MaterialMode, GaussPoint * * *);

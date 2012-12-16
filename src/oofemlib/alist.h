@@ -35,7 +35,6 @@
 #ifndef alist_h
 #define alist_h
 
-#include "compiler.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
  #include <cstddef>
@@ -43,15 +42,10 @@
 
 
 namespace oofem {
-class FEMComponent;
 
 /**
  * Class implementing generic list (or more precisely array).
  * It maintains the array of generic pointers to objects of type T using 1-based numbering.
- * Since the generic pointer to FEMComponent can point to
- * any derived class instance, this class can be used as list or array containing
- * elements, nodes, materials, loads or load-time functions, which are represented by classes
- * derived from base FEMComponent.
  *
  * This class maintains only the links (pointers) to particular objects, objects themselfs are not contained within
  * this array. They have to be created outside (in memory, usually on heap) and then their pointers can be added to

@@ -36,6 +36,8 @@
 #define tr_shell01_h
 
 #include "structuralelement.h"
+#include "zznodalrecoverymodel.h"
+#include "zzerrorestimator.h"
 
 #include "cct3d.h"
 #include "trplanrot3d.h"
@@ -49,7 +51,8 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-class TR_SHELL01 : public StructuralElement
+  class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, 
+    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
     /// Pointer to plate element.
@@ -69,7 +72,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { plate->giveDofManDofIDMask(inode, ut, answer); }
-
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
     // definition & identification
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
     virtual classType giveClassID() const { return TR_SHELL01Class; }
@@ -77,21 +80,51 @@ public:
 
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    //virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawScalar(oofegGraphicContext &context);
     //void drawInternalState(oofegGraphicContext &);
 #endif
-
+    // the membrane and plate irules are same (chacked in initializeFrom)
+    virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule();}
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() {return plate->giveDefaultIntegrationRulePtr();}
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode() { return _Unknown; }
+
+    virtual Interface *giveInterface(InterfaceType it);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type);
+
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep);
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+                                                   InternalStateType type, TimeStep *tStep);
+    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
+    // ZZErrorEstimatorInterface
+    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
+    virtual void ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(FloatArray &answer, GaussPoint *gp,
+                                                                           InternalStateType type)
+    { ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(answer, gp, type); }
+
+    // ZZRemeshingCriteriaInterface
+    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
+    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
+
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)

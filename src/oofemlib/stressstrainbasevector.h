@@ -122,6 +122,13 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
+     /**
+     * Computes principal values and directions of receiver vector.
+     * @param answer Computed principal values (sorted).
+     * @param dir Principal directions (stored column wise).
+     */
+    double computeVolumetricPart() const;
+
 protected:
     /**
      * Returns the reduced size of stress/strain vector for given material mode

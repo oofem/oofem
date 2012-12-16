@@ -92,15 +92,15 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
 // Total value) of the dofs of the callers local cs.
 {
     int k, nDofs;
-    IntArray elementNodeMask;
+    IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
     answer.resize( this->computeNumberOfGlobalDofs(type) );
 
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, type, elementNodeMask);
-        this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+        this->giveDofManDofIDMask(i, type, dofIDMask);
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -108,8 +108,8 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-        this->giveInternalDofManDofIDMask(i, type, elementNodeMask);
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+        this->giveInternalDofManDofIDMask(i, type, dofIDMask);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -129,7 +129,7 @@ Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType 
 {
     int k;
     IntArray bNodes;
-    IntArray elementNodeMask;
+    IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
 
@@ -137,15 +137,15 @@ Element :: computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType 
 
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-        this->giveDofManDofIDMask(bNodes.at(i), type, elementNodeMask);
-        k += elementNodeMask.giveSize();
+        this->giveDofManDofIDMask(bNodes.at(i), type, dofIDMask);
+        k += dofIDMask.giveSize();
     }
     answer.resize(k);
 
     k = 0;
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-        this->giveDofManDofIDMask(bNodes.at(i), type, elementNodeMask);
-        this->giveDofManager(bNodes.at(i))->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+        this->giveDofManDofIDMask(bNodes.at(i), type, dofIDMask);
+        this->giveDofManager(bNodes.at(i))->giveUnknownVector(vec, dofIDMask, type, u, stepN);
         for ( int j = 1; j <= vec.giveSize(); j++ ) {
             answer.at(++k) = vec.at(j);
         }
@@ -165,15 +165,15 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
 // using this->GiveNodeDofIDMask function
 {
     int k, nDofs;
-    IntArray elementNodeMask;
+    IntArray dofIDMask;
     FloatMatrix G2L;
     FloatArray vec;
     answer.resize( this->computeNumberOfGlobalDofs( field.giveEquationID() ) );
 
     k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
-        this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
+        this->giveDofManDofIDMask(i, field.giveEquationID(), dofIDMask);
+        this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, stepN);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -181,8 +181,8 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-        this->giveInternalDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
+        this->giveInternalDofManDofIDMask(i, field.giveEquationID(), dofIDMask);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, stepN);
         nDofs = vec.giveSize();
         for ( int j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -202,7 +202,7 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
 // nodes. Puts 0 at each free dof.
 {
     int i, j, k, size, nDofs;
-    IntArray elementNodeMask, dofMask;
+    IntArray dofIDMask, dofMask;
     FloatMatrix G2L;
     FloatArray vec;
 
@@ -210,8 +210,8 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
 
     k = 0;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, ut, elementNodeMask);
-        this->giveDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
+        this->giveDofManDofIDMask(i, ut, dofIDMask);
+        this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, stepN);
         nDofs = vec.giveSize();
         for ( j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -219,8 +219,8 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
     }
 
     for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-        this->giveInternalDofManDofIDMask(i, ut, elementNodeMask);
-        this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
+        this->giveInternalDofManDofIDMask(i, ut, dofIDMask);
+        this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, stepN);
         nDofs = vec.giveSize();
         for ( j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
@@ -378,17 +378,21 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
-    IntArray nodeDofIDMask;
-    IntArray nodalArray;
-
     if ( s.isDefault() && this->locationArray ) {
         locationArray = * this->locationArray;
         return;
     } else {
+        IntArray dofIDMask;
+        IntArray nodalArray;
         locationArray.resize(0);
-        for ( int i = 1; i <= numberOfDofMans; i++ ) {
-            this->giveDofManDofIDMask(i, eid, nodeDofIDMask);
-            this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
+        for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+            this->giveDofManDofIDMask(i, eid, dofIDMask);
+            this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
+            locationArray.followedBy(nodalArray);
+        }
+        for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+            this->giveInternalDofManDofIDMask(i, eid, dofIDMask);
+            this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
             locationArray.followedBy(nodalArray);
         }
     }
@@ -401,14 +405,14 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
 // simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
 {
     IntArray bNodes;
-    IntArray nodeDofIDMask;
+    IntArray dofIDMask;
     IntArray nodalArray;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
     locationArray.resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-        this->giveDofManDofIDMask(bNodes.at(i), eid, nodeDofIDMask);
-        this->giveDofManager(bNodes.at(i))->giveLocationArray(nodeDofIDMask, nodalArray, s);
+        this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
+        this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
     }
 }

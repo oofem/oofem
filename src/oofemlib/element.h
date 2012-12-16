@@ -227,7 +227,7 @@ public:
     /**
      * @return Number of internal DOF managers of element.
      */
-    virtual int giveNumberOfInternalDofManagers() { return 0; }
+    virtual int giveNumberOfInternalDofManagers() const { return 0; }
     /**
      * Returns i-th internal element dof manager of the receiver
      * @param i Internal number of DOF.
@@ -679,7 +679,7 @@ public:
      * @param i Index of integration rule.
      * @return Requested integration rule.
      */
-    IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
+    virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
     /**
      * Tests if the element implements required extension. ElementExtension type defines
      * the list of all available element extensions.

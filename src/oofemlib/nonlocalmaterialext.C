@@ -73,6 +73,11 @@ NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain 
     weightFun = WFT_Unknown;
     scaling = ST_Unknown;
     averagedVar = AVT_Unknown;
+
+    cl0 = 0.;
+    beta = 0.;
+    zeta = 0.;
+    nlvar = NLVT_Standard;
 }
 
 void
@@ -101,7 +106,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-      ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
+        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
     dynaList< localIntegrationRecord > *iList;
 
@@ -132,6 +137,15 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
     }
+
+    //If nonlocal variation is set to the distance-based approach, a new nonlocal radius
+    // is calculated as a function of the distance from the gausspoint to the nonlocal boundaries
+    if ( nlvar == NLVT_DistanceBased ) {
+        //      cl=cl0;
+        cl = giveDistanceBasedInteractionRadius(gpCoords);
+        suprad = evaluateSupportRadius();
+    }
+
 
     // ask domain spatial localizer for list of elements with IP within this zone
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
@@ -218,7 +232,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-      ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
+        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
     dynaList< localIntegrationRecord > *iList;
 
@@ -249,6 +263,14 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         int _e, _size = contributingElems->giveSize();
         if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
             OOFEM_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+        }
+
+        //If nonlocal variation is set to the distance-based approach calculates  new nonlocal radius
+        // based on the distance from the nonlocal boundaries
+        if ( nlvar == NLVT_DistanceBased ) {
+            cl = cl0;
+            cl = giveDistanceBasedInteractionRadius(gpCoords);
+            suprad = evaluateSupportRadius();
         }
 
         // initialize iList
@@ -304,7 +326,7 @@ dynaList< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * )  gp->giveMaterial()->giveStatus(gp) ->
+        ( NonlocalMaterialStatusExtensionInterface * )  gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
 
     if ( !statusExt ) {
@@ -322,7 +344,7 @@ void
 NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-      ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
+        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
 
     if ( !statusExt ) {
@@ -484,11 +506,11 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, wft, IFT_NonlocalMaterialExtensionInterface_wft, "wft");
     if ( wft == 2 ) {
         weightFun = WFT_Gauss;
-    } else if ( wft == 3 )    {
+    } else if ( wft == 3 ) {
         weightFun = WFT_Green;
-    } else if ( wft == 4 )    {
+    } else if ( wft == 4 ) {
         weightFun = WFT_Uniform;
-    } else if ( wft == 5 )    {
+    } else if ( wft == 5 ) {
         weightFun = WFT_UniformOverElement;
     } else {
         weightFun = WFT_Bell; // default
@@ -516,7 +538,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, st, IFT_NonlocalMaterialExtensionInterface_scalingtype, "scaling");
     if ( st == 2 ) {
         scaling = ST_Noscaling;
-    } else if ( st == 3 )    {
+    } else if ( st == 3 ) {
         scaling = ST_Borino;
     } else {
         scaling = ST_Standard; // default
@@ -529,6 +551,19 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
         averagedVar = AVT_Compliance;
     } else {
         averagedVar = AVT_EqStrain; // default
+    }
+
+    //Read the nonlocal variation type (default is zero)
+    cl0 = cl;
+    int nlvariation = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, nlvariation, IFT_NonlocalMaterialExtensionInterface_nonlocalvariation, "nlvariation");
+    if ( nlvariation == 1 ) {
+        nlvar = NLVT_DistanceBased;
+        IR_GIVE_FIELD(ir, beta, IFT_NonlocalMaterialExtensionInterface_beta, "beta");
+        IR_GIVE_FIELD(ir, zeta, IFT_NonlocalMaterialExtensionInterface_zeta, "zeta");
+    } else if ( nlvariation == 2 ) {
+        nlvar = NLVT_StressBased;
+        IR_GIVE_FIELD(ir, beta, IFT_NonlocalMaterialExtensionInterface_beta, "beta");
     }
 
     return IRRT_OK;
@@ -600,6 +635,23 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
     }
 }
 
+
+double
+NonlocalMaterialExtensionInterface :: giveDistanceBasedInteractionRadius(const FloatArray &gpCoords)
+{
+    double distance = zeta * cl0; // Initially distance from the boundary is set to the maximum value
+    double temp;
+    int ib, nbarrier = domain->giveNumberOfNonlocalBarriers();
+    for ( ib = 1; ib <= nbarrier; ib++ ) { //Loop over all the nonlocal barriers to find minimum distance from the boundary
+        temp = domain->giveNonlocalBarrier(ib)->calculateMinimumDistanceFromBoundary(gpCoords, zeta * cl0);
+        if ( distance > temp ) { //Check to find minimum distance from boundary from all nonlocal boundaries
+            distance = temp;
+        }
+    }
+
+    //Calculate interaction radius based on the minimum distance from the nonlocal boundaries
+    return ( ( 1 - beta ) / ( zeta * cl0 ) * distance + beta ) * cl0;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 NonlocalMaterialStatusExtensionInterface :: NonlocalMaterialStatusExtensionInterface() : Interface(), integrationDomainList()

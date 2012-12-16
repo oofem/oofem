@@ -237,15 +237,13 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
         }
     } else {
-        int i, k, indx;
         IntArray dofArray, mstrEqNmbrs;
 
         this->giveDofArray(dofIDArry, dofArray);
         locationArray.resize( giveNumberOfPrimaryMasterDofs(dofArray) );
 
-        for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
-            indx = dofArray.at(i);
-            this->giveDof(indx)->giveEquationNumbers(mstrEqNmbrs, s);
+        for ( int k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
+            this->giveDof(dofArray.at(i))->giveEquationNumbers(mstrEqNmbrs, s);
             locationArray.copySubVector(mstrEqNmbrs, k);
             k += mstrEqNmbrs.giveSize();
         }
@@ -277,12 +275,12 @@ void DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) con
 // In dofIDArray are stored DofID's of requsted DOFs in receiver.
 // The DofID's are determining the physical meaning of particular DOFs
 {
-    int i, size;
+    int size;
     // prevents some size problem when connecting different elements with
     // different number of dofs
     size = dofIDArry.giveSize();
     answer.resize(size);
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         if ( ( answer.at(i) = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
             _error("giveDofArray : incompatible dof requested");
         }
@@ -294,8 +292,7 @@ int DofManager :: findDofWithDofId(DofIDItem dofID) const
 {
     // finds index of DOF in receivers node with dofID
     // if such DOF does not exists, returns zero value
-    int i;
-    for ( i = 1; i <= numberOfDofs; i++ ) {
+    for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( this->giveDof(i)->giveDofID() == dofID ) {
             return i;
         }
@@ -315,10 +312,9 @@ int DofManager :: giveNumberOfDofs() const
 
 void DofManager :: setNumberOfDofs(int _ndofs)
 {
-    int i;
     if ( _ndofs != this->giveNumberOfDofs() ) {
         if ( dofArray ) {
-            i = numberOfDofs;
+            int i = numberOfDofs;
             if ( numberOfDofs ) {
                 while ( i-- ) {
                     delete dofArray [ i ];
@@ -329,7 +325,7 @@ void DofManager :: setNumberOfDofs(int _ndofs)
         }
 
         dofArray = new Dof * [ _ndofs ];
-        for ( i = 0; i < _ndofs; i++ ) {
+        for ( int i = 0; i < _ndofs; i++ ) {
             dofArray [ i ] = NULL;
         }
 
@@ -352,9 +348,9 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
         return dofArray.giveSize();
     }
 
-    int i, answer = 0;
+    int answer = 0;
 
-    for ( i = 1; i <= dofArray.giveSize(); i++ ) {
+    for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
         answer += this->giveDof( dofArray.at(i) )->giveNumberOfPrimaryMasterDofs();
     }
 
@@ -805,6 +801,52 @@ void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArra
     if (this->computeL2GTransformation(L2G, dofIDArry)) {
         answer.rotatedWith(L2G, 'n');
     }
+}
+
+
+void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, ValueModeType mode, TimeStep *tStep)
+{
+    int k = 1;
+    FloatArray localVector(3);
+    IntArray dofIDArry(3);
+    
+
+    // This is a bit cumbersome. I first construct the local vector, which might have a odd order, e.g [D_w, D_u], which is later added to the global vector "answer"
+    // I also store the dof id's, so that I can construct the local 2 global transformation afterwards (if its necessary). / Mikael
+    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
+        Dof *d = this->giveDof(i);
+        double val = d->giveUnknown(EID_MomentumBalance, mode, tStep);
+        if (ut == DisplacementVector || ut == EigenVector) { // Just treat eigenvectors as displacement vectors (they are redundant)
+            if      (d->giveDofID() == D_u) { dofIDArry.at(k) = D_u; localVector.at(k) = val; k++; }
+            else if (d->giveDofID() == D_v) { dofIDArry.at(k) = D_v; localVector.at(k) = val; k++; }
+            else if (d->giveDofID() == D_w) { dofIDArry.at(k) = D_w; localVector.at(k) = val; k++; }
+        } else if (ut == VelocityVector) {
+            if      (d->giveDofID() == V_u) { dofIDArry.at(k) = V_u; localVector.at(k) = val; k++; }
+            else if (d->giveDofID() == V_v) { dofIDArry.at(k) = V_v; localVector.at(k) = val; k++; }
+            else if (d->giveDofID() == V_w) { dofIDArry.at(k) = V_w; localVector.at(k) = val; k++; }
+        } else {
+            OOFEM_ERROR2("DofManager :: giveUnknownVectorOfType - Can't produce vector for unknown type: %d", ut);
+        }
+    }
+
+    FloatMatrix L2G;
+    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+        // Transform to global c.s.
+        answer.beProductOf(L2G, localVector);
+    } else {
+        // No local c.s, just copy the values to respective index;
+        answer.resize(3);
+        answer.zero();
+        for ( int i = 1; i <= k; i++ ) {
+            if ( dofIDArry.at(i) == D_u || dofIDArry.at(i) == V_u )
+                answer.at(1) = localVector.at(i);
+            else if ( dofIDArry.at(i) == D_v || dofIDArry.at(i) == V_v )
+                answer.at(2) = localVector.at(i);
+            else if ( dofIDArry.at(i) == D_w || dofIDArry.at(i) == V_w )
+                answer.at(3) = localVector.at(i);
+        }
+    }
+    
 }
 
 

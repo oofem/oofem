@@ -44,6 +44,8 @@
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
+#include "stressvector.h"
+#include "strainvector.h"
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
@@ -95,7 +97,7 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 
     // compute and store the local variable to be averaged
     // (typically the local equivalent strain)
-
+    nlstatus->letTempStrainVectorBe(SDstrainVector);
     this->computeLocalEquivalentStrain(equivStrain, SDstrainVector, gp, atTime);
 
     // nonstandard formulation based on averaging of compliance parameter gamma
@@ -135,7 +137,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     elem->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
     double xtarget = coords.at(1);
 
-    double w, wsum = 0., x, xprev, damage, damageprev=0.;
+    double w, wsum = 0., x, xprev, damage, damageprev = 0.;
     Element *nearElem;
 
     // process the list from the target to the end
@@ -261,6 +263,85 @@ IDNLMaterial :: computeDistanceModifier(double damage)
 }
 
 void
+IDNLMaterial :: computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoint *gp, double &flag)
+{
+    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    MaterialMode matMode;
+    matMode = gp->giveMaterialMode();
+    if ( ( matMode == _3dMat ) || ( matMode == _1dMat ) ) { //Check if the stress-based approach can be applied
+        _error("computeAngleAndSigmaRatio: 3D or 1D realisation for Stress-based averaging not supported");
+    }
+
+    //Get the temporary strain vector
+    FloatArray strainFloatArray;
+    strainFloatArray = status->giveTempStrainVector();
+    //Check if strain vector is zero. In this case this function is not going to modify nonlocal radius
+    if ( strainFloatArray.computeNorm() == 0 ) {
+        flag = 0;
+        return;
+    }
+
+    //Convert the FloatArray to StrainVector
+    StrainVector strain(strainFloatArray, matMode);
+    //Compute effective Stress tensor
+    StressVector effectiveStress(matMode);
+    const double E = this->giveLinearElasticMaterial()->give('E', gp);
+    const double nu = this->giveLinearElasticMaterial()->give('n', gp);
+    strain.applyElasticStiffness(effectiveStress, E, nu);
+    //Compute principal values and eigenvectors of effective stress tensor
+    FloatArray principalStress;
+    FloatMatrix princDir;
+    effectiveStress.computePrincipalValDir(principalStress, princDir);
+    //Calculate angle and ratio according to the cases
+    //compute angle of the first eigenvector
+    if ( princDir.at(1, 1) == 0. ) { //Check if angle = 90 degrees
+        angle = 3.141592 / 2;
+    } else  {
+        angle = atan( princDir.at(2, 1) / princDir.at(1, 1) );
+    }
+
+    if ( principalStress.at(2) < 0. && principalStress.at(1) < 0. ) { //Check limit case both eigenvalues negative
+        angle = 0.; //Set angle equal to 0
+        ratio = 1.; //Set ratio equal to 1
+    } else if ( principalStress.at(2) < 0. )      { //Check if only one eigenvalue is positive
+        ratio = 0.; //Set ratio equal to 0
+    } else  {
+        ratio = principalStress.at(2) / principalStress.at(1); //compute ratio
+    }
+}
+
+double
+IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoint *gp, GaussPoint *jGp, double &weight)
+{
+    //Compute Distance between source and receiver point
+    FloatArray gpCoords, jGpCoords;
+    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) );
+    jGp->giveElement()->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) );
+    FloatArray distance(jGpCoords); // Line End jGP Point
+    distance.subtract(gpCoords); // Line Begin gP Point
+    if ( distance.computeNorm() == 0 ) { //Check if source and receiver point coincide
+        return weight;
+    }
+
+    //Compute Rotation matrix Distance by angle
+    FloatMatrix rotation(2, 2);
+    rotation.at(1, 1) = cos(angle);
+    rotation.at(1, 2) = -sin(angle);
+    rotation.at(2, 1) = sin(angle);
+    rotation.at(2, 2) = cos(angle);
+    //Rotate distance vector
+    FloatArray distanceRotated(distance);
+    distanceRotated.rotatedWith(rotation, 't'); // Operation distanceRotated= rotation^T *distance
+    // Compute axis of ellipse and scale/stretch weak axis so that ellipse is converted to circle
+    double gamma = this->beta + ( 1. - beta ) * pow(ratio, 2);
+    distanceRotated.at(2) = distanceRotated.at(2) / gamma;
+    //Get new weight
+    double updatedWeight = this->computeWeightFunction( distanceRotated.computeNorm() );
+    updatedWeight = updatedWeight * jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
+    return updatedWeight;
+}
+
+void
 IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     double nonlocalContribution, nonlocalEquivalentStrain = 0.0;
@@ -275,12 +356,35 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
     dynaList< localIntegrationRecord > :: iterator pos;
 
+    double sigmaRatio = 0.; //ratio sigma2/sigma 1used for stress-based averaging
+    double eigenVectorAngle = 0.; //angle betwen the first eigenvector and the x-axis used for stress-based averaging
+    double updatedIntegrationVolume = 0.; //new integration volume. Sum of all new weights used for stress-based averaging
+    //Flag to deactivate stress-based nonlocal averaging for zero stress states.
+    // When flag=0 no Stress-based averaging takes place.
+    // When flag=1  Stress-based averaging takes place.
+    double flag = 1;
+    //Check if Stress based averaging is enforced and calculate the angle of the first eigenvector and the sigmaratio
+    if ( this->nlvar == NLVT_StressBased ) {
+        computeAngleAndSigmaRatio(eigenVectorAngle, sigmaRatio, gp, flag);
+    }
+
+    //Loop over all Gauss Points which are in gp's integration domain
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
-        nonlocalContribution *= ( * pos ).weight;
+        if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
+            double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, ( * pos ).nearGp, ( * pos ).weight); //Compute New Weight
+            updatedIntegrationVolume +=  stressBasedWeight;
+            nonlocalContribution *= stressBasedWeight;
+        } else  {
+            nonlocalContribution *= ( * pos ).weight;
+        }
 
         nonlocalEquivalentStrain += nonlocalContribution;
+    }
+
+    if ( this->nlvar == NLVT_StressBased && flag == 1 ) { // Nonlocal weights are modified in stress-based averaging. Thus the integration volume needs to be modified
+        status->setIntegrationScale(updatedIntegrationVolume);
     }
 
     if ( scaling == ST_Standard ) { // standard rescaling
@@ -441,7 +545,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * )( ( * pos ).nearGp )->giveMaterial();
+        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
             rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
             coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / status->giveIntegrationScale();
@@ -519,7 +623,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     dynaList< localIntegrationRecord > :: iterator pos;
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * )( ( * pos ).nearGp )->giveMaterial();
+        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
             ( ( * pos ).nearGp )->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
         }
@@ -578,7 +682,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     int nrows, nsize, i, j;
     double sum, f, equivStrain;
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * )( gp->giveElement() );
+    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
     FloatMatrix b, de;
     FloatArray stress, strain;
 
@@ -658,7 +762,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    StructuralElement *elem = ( StructuralElement * )( gp->giveElement() );
+    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 

@@ -432,6 +432,7 @@ void LinearStability :: terminate(TimeStep *stepN)
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
 #  endif
+    fflush(this->giveOutputStream());
     // save context if required
     this->saveStepContext(stepN);
 }

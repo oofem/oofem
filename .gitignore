@@ -1,6 +1,21 @@
-*.[oa]      # ignore any .o and .a files
-*~          # ignore any file ending with tilde
-targets/    # ignore all files under targets dir
+# ignore any .o and .a files
+*.[oa]
+# ignore any file ending with tilde
+*~
+# ignore all files under targets dir
+targets/
+
+# test results
+*.out
+*.vtu
+*.pvd
+
+# documentation aux-files.
+*.aux
+*.log
+*.toc
+*.lof
+*kdev*
 
 makefile
 elixirtest.c

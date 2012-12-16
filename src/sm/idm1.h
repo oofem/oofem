@@ -203,6 +203,7 @@ public:
      */
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
 
+    bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->gf != 0. ); }
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
     /**

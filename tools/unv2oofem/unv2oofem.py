@@ -158,6 +158,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                     #print newList
                                     elem.oofem_bLoads+=newList
                                     print "Boundary load found for element %d " % elem.id
+                                    #print bel.name, elem.id, elem.oofem_bLoads
                             if(success==0):
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
