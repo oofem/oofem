@@ -56,13 +56,9 @@ TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 IRResultType
 TR_SHELL01 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     // proc tady neni return = this...   ??? termitovo
     this->StructuralElement :: initializeFrom(ir);
 
-    int val = -1;
     /*
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_nip, "nip"); // Macro
     if ( val != -1 ) {
@@ -79,6 +75,7 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     //
     plate->initializeFrom(ir);
     membrane->initializeFrom(ir);
+
     // check the compatibility of irules of plate and membrane
     if (plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints()) {
       OOFEM_ERROR ("TR_SHELL01: incompatible integration rules detected");

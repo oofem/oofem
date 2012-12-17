@@ -636,15 +636,16 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         }
     }
 
-    int nelem = domain->giveNumberOfElements();
     
     //project initial temperature to integration points
 
-//     for ( j = 1; j <= nelem; j++ ) {
-//         domain->giveElement(j)->updateInternalState(stepWhenIcApply);
-//     }
+    //     for ( j = 1; j <= nelem; j++ ) {
+    //         domain->giveElement(j)->updateInternalState(stepWhenIcApply);
+    //     }
 
 #ifdef __CEMHYD_MODULE
+    int nelem = domain->giveNumberOfElements();
+
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
     TransportElement *element;
