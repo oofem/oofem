@@ -116,6 +116,10 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(force, stepN, mode);
+    // transform from global to element local c.s
+    if ( this->computeLoadGToLRotationMtrx(T) ) {
+      force.rotatedWith(T, 'n');
+    }
     //force.times( this->giveMaterial()->give('d') );
 
     answer.resize(0);
