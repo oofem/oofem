@@ -514,10 +514,13 @@ os.chdir(sys.argv[2])
 if sys.argv[4] == 'p':
     files = glob.glob(sys.argv[1]+'.[0-9]*')
     mpicommand = 'mpirun -np '+str(len(files)) + ' '
+    parallel = ' -p'
 else:
     files = [sys.argv[1]]
     mpicommand = ''
-if os.system(mpicommand + sys.argv[3] +' -f '+sys.argv[1]+' -l 2'):
+    parallel = ''
+print('Running: ' + mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2')
+if os.system(mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2'):
     exit(1)
 else:
     for f in files:
