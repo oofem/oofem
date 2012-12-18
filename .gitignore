@@ -9,6 +9,7 @@ targets/
 *.out
 *.vtu
 *.pvd
+*.out.*
 
 # documentation aux-files.
 *.aux
