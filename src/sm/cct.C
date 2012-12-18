@@ -567,6 +567,141 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     answer.at(5) = masterGpStrain.at(4);
 }
 
+// Edge load support
+void
+CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
+{
+    int i,j;
+    FloatArray n;
+
+    this->interp_lin.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    double b,c, n12;
+    if (iedge == 1) {
+      i=1; j=2;
+    } else if (iedge == 2) {
+      i=2; j=3;
+    } else {
+      i=3; j=1;
+    }
+
+    n12 = 0.5 * n.at(1)*n.at(2);
+    b = this->giveNode(i)->giveCoordinate(2) - this->giveNode(j)->giveCoordinate(2);
+    c = this->giveNode(j)->giveCoordinate(1) - this->giveNode(i)->giveCoordinate(1);
+
+
+    answer.resize(3, 6);
+    answer.at(1, 1) = n.at(1);
+    answer.at(1, 2) = n12 * b;
+    answer.at(1, 3) = n12 * c;
+    answer.at(1, 4)  = n.at(2);
+    answer.at(1, 5) = - n12 * b;
+    answer.at(1, 6) = - n12 * c;
+    // 
+    answer.at(2, 2) = answer.at(3, 3) = n.at(1);
+    answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+}
+
+void
+CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+{
+    /*
+     * provides dof mapping of local edge dofs (only nonzero are taken into account)
+     * to global element dofs
+     */
+
+    answer.resize(6);
+    if ( iEdge == 1 ) { // edge between nodes 1,2
+        answer.at(1) = 1;
+        answer.at(2) = 2;
+        answer.at(3) = 3;
+        answer.at(4) = 4;
+        answer.at(5) = 5;
+        answer.at(6) = 6;
+    } else if ( iEdge == 2 ) { // edge between nodes 2 3
+        answer.at(1) = 4;
+        answer.at(2) = 5;
+        answer.at(3) = 6;
+        answer.at(4) = 7;
+        answer.at(5) = 8;
+        answer.at(6) = 9;
+    } else if ( iEdge == 3 ) { // edge between nodes 3 1
+        answer.at(1) = 7;
+        answer.at(2) = 8;
+        answer.at(3) = 9;
+        answer.at(4) = 1;
+        answer.at(5) = 2;
+        answer.at(6) = 3;
+    } else {
+        _error("giveEdgeDofMapping: wrong edge number");
+    }
+}
+
+double
+CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+{
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ *gp->giveWeight();
+}
+
+
+void
+CCTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+}
+
+
+int
+CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+{
+    // returns transformation matrix from
+    // edge local coordinate system
+    // to element local c.s
+    // (same as global c.s in this case)
+    //
+    // i.e. f(element local) = T * f(edge local)
+    //
+    double dx, dy, length;
+    Node *nodeA, *nodeB;
+    int aNode = 0, bNode = 0;
+
+    answer.resize(3, 3);
+    answer.zero();
+
+    if ( iEdge == 1 ) { // edge between nodes 1 2
+        aNode = 1;
+        bNode = 2;
+    } else if ( iEdge == 2 ) { // edge between nodes 2 3
+        aNode = 2;
+        bNode = 3;
+    } else if ( iEdge == 3 ) { // edge between nodes 2 3
+        aNode = 3;
+        bNode = 1;
+    } else {
+        _error("computeEdgeVolumeAround: wrong egde number");
+    }
+
+    nodeA   = this->giveNode(aNode);
+    nodeB   = this->giveNode(bNode);
+
+    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+    length = sqrt(dx * dx + dy * dy);
+
+    answer.at(1, 1) = 1.0;
+    answer.at(2, 2) = dx / length;
+    answer.at(2, 3) = -dy / length;
+    answer.at(3, 2) = dy / length;
+    answer.at(3, 3) = dx / length;
+
+    return 1;
+}
+
+
+
+
+
 
 //
 // io routines

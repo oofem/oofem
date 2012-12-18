@@ -152,7 +152,7 @@ TrPlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
     this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );

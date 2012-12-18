@@ -407,7 +407,7 @@ L4Axisymm :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 
 
 void
-L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      * computes interpolation matrix for element edge.

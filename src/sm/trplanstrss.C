@@ -303,7 +303,7 @@ TrPlaneStress2d :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+TrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
     this->interp.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );

@@ -795,7 +795,7 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
 
 
 void
-LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

@@ -574,7 +574,7 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, 
 }
 
 void
-QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

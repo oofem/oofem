@@ -74,6 +74,8 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() { return _Triangle; }
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
+    virtual int giveApproxOrder() { return 2; }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 protected:
     virtual void computeGaussPoints();
@@ -84,6 +86,18 @@ protected:
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
                                      double *z = NULL);
+
+
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
+    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.resize(0); }
+    //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.resize(0); }
+    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
 public:
     // definition & identification

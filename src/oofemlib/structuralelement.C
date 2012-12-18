@@ -201,7 +201,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
         for ( i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule.getIntegrationPoint(i);
-            this->computeEgdeNMatrixAt(n, gp);
+            this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
