@@ -37,9 +37,7 @@
 #include "error.h"
 #include "oofem_limits.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
+#include <cstdarg>
 
 namespace oofem {
 void PrimaryUnknownMapper :: error(const char *file, int line, const char *format, ...) const

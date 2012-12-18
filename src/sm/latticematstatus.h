@@ -35,30 +35,24 @@
 #ifndef latticematstatus_h
 #define latticematstatus_h
 
-#ifndef __MAKEDEPEND
-
-#endif
 #include "structuralms.h"
 #include "classtype.h"
 
+namespace oofem {
 
 class GaussPoint;
 class Dictionary;
 class Domain;
 class NonlocalMaterialStatusExtension;
-
-namespace oofem {
+	
 /**
  * This class implements a base lattice material status.
- * In this class services are defined that are usef by other 
+ * In this class services are defined that are used by other 
  * lattice material statuses.
  */
 class LatticeMaterialStatus : public StructuralMaterialStatus
 {
-protected:
-
 public:
-
     LatticeMaterialStatus(int n, Domain *d, GaussPoint *g);
     /// Destructor.
     virtual ~LatticeMaterialStatus() { }

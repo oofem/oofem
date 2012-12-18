@@ -38,10 +38,8 @@
 #include "inputrecord.h"
 #include "datareader.h"
 
-#ifndef __MAKEDEPEND
- #include <cstring>
- #include <iostream>
-#endif
+#include <cstring>
+#include <iostream>
 
 namespace oofem {
 char *giveLineFromInput(FILE *inputStream, char *line, int len)

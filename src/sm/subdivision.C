@@ -49,10 +49,8 @@
 #include "crosssection.h"
 #include "loadtime.h"
 
-#ifndef __MAKEDEPEND
- #include <queue>
- #include <set>
-#endif
+#include <queue>
+#include <set>
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

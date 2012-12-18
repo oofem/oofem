@@ -32,13 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #ifdef __PARALLEL_MODE
 
-#ifndef __MAKEDEPEND
- #include <list>
- #include <algorithm>
-#endif
+#include <list>
+#include <algorithm>
 
 #include "compiler.h"
 #include "dyncombuff.h"

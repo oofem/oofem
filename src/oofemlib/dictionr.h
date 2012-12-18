@@ -37,14 +37,11 @@
 
 #include "compiler.h"
 #include "pair.h"
-
 #include "error.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-#ifndef __MAKEDEPEND
- #include <string>
-#endif
+#include <string>
 
 namespace oofem {
 class DataStream;

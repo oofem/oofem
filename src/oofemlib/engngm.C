@@ -65,26 +65,23 @@
  #include "cemhydmat.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
- #include <cstdarg>
+#include <cstdio>
+#include <cstdarg>
 // include unistd.h; needed for access
- #ifdef HAVE_UNISTD_H
-  #include <unistd.h>
- #elif _MSC_VER
-  #include <io.h>
- #endif
+#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+#elif _MSC_VER
+ #include <io.h>
+#endif
+
+#ifdef TIME_REPORT
+#include <ctime>
 #endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
-#ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
-#endif
 
 namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()

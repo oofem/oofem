@@ -36,9 +36,7 @@
 #define domaintransactionmanager_h
 
 #ifdef __PARALLEL_MODE
- #ifndef __MAKEDEPEND
-  #include <map>
- #endif
+ #include <map>
 
 namespace oofem {
 class FEMComponent;

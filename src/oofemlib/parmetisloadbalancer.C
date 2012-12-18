@@ -41,14 +41,11 @@
 #include "dofmanager.h"
 #include "conTable.h"
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <set>
-#endif
-
-
 #include "parallel.h"
 #include "processcomm.h"
 #include "communicator.h"
+
+#include <set>
 
 namespace oofem {
 //#define ParmetisLoadBalancer_DEBUG_PRINT

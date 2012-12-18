@@ -54,26 +54,20 @@
 #endif
 
 #ifdef __PETSC_MODULE
- #ifndef __MAKEDEPEND
-  #include "petsc.h"
- #endif
+ #include <petsc.h>
 #endif
 
 #ifdef __SLEPC_MODULE
- #ifndef __MAKEDEPEND
-  #include "slepceps.h"
- #endif
+ #include <slepceps.h>
 #endif
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
- #include <new>
- #include <sstream>
+#include <cstdio>
+#include <cstring>
+#include <new>
+#include <sstream>
 // For passing PETSc/SLEPc arguments.
- #include <fstream>
- #include <iterator>
-#endif
+#include <fstream>
+#include <iterator>
 
 #include "classfactory.h"
 
@@ -346,10 +340,9 @@ void oofem_finalize_modules() {
 #endif
 }
 
-#ifndef __MAKEDEPEND
- #include "loadbalancer.h"
- #include "iga.h"
-#endif
+#include "loadbalancer.h"
+#include "iga.h"
+
 void oofem_debug(EngngModel *emodel)
 {
     //FloatMatrix k;

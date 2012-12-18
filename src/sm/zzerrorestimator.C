@@ -47,9 +47,8 @@
 #include "structuralms.h"
 #include "integrationrule.h"
 #include "conTable.h"
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+
+#include <vector>
 
 namespace oofem {
 #ifdef EXPERIMENT

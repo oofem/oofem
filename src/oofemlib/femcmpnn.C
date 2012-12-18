@@ -44,9 +44,8 @@
 #include "oofem_limits.h"
 #include "contextioerr.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
+#include <cstdarg>
+
 
 namespace oofem {
 contextIOResultType

@@ -32,11 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
- #include <cstdlib>
- #include <set>
-#endif
+#include <cstdio>
+#include <cstdlib>
+#include <set>
 
 #include "freestor.h"
 #include "domain.h"

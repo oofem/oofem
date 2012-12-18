@@ -41,9 +41,7 @@
 #ifndef femcmpnn_h
 #define femcmpnn_h
 
-#ifndef __MAKEDEPEND
- #include <string>
-#endif
+#include <string>
 
 #include "error.h"
 #include "interfacetype.h"

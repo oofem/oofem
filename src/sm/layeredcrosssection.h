@@ -36,16 +36,12 @@
 #define layeredcrosssection_h
 
 #include "structuralcrosssection.h"
-#include "structuralmaterial.h"
-#include "element.h"
-#include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "interface.h"
 
 namespace oofem {
-class GaussPoint;
-class LayeredCrossSectionModelInterface;
+class StructuralMaterial;
 
 /**
  * This class implements a layered cross section in a finite element problem. A cross
@@ -59,18 +55,18 @@ class LayeredCrossSectionModelInterface;
  *
  * It uses master - slave GaussPoint approach, where master gp has more slaves gp.
  * slave gp represent for each layer material point. It's coordinate sections
- * contains z-coordinate (-1,1) from mid-section. the slaves are manageg completely
+ * contains z-coordinate (-1,1) from mid-section. the slaves are manage completely
  * ( created, saved their context.,,,) from this class. Master gp only deletes
  * slaves in destructor.
  *
  * Tasks:
- * - Returning standard material stiffness marices (like 3dstress-strain, 2d plane ,
- *   plate, 3dbeam, 2d beam ..) according to current state determined by parametr
- *   StressMode by calling gp->material->GiveMaterialStiffnessMatrix (....) and by
- *   possible modifiing returned matrix. (for example in layerde mode aproach
- *   each layer  is asked for 3dMatrialStiffnes and this is integrated for example
- *   over thickness for plate bending broblems)
- * - Returning RealStress state in gauss point and for given Stress mode.
+ * - Returning standard material stiffness matrices (like 3d stress-strain, 2d plane ,
+ *   plate, 3d beam, 2d beam ..) according to current state determined by parameter
+ *   StressMode by calling material and by
+ *   possible modifying returned matrix (for example in layered mode approach
+ *   each layer is asked for 3dMaterialStiffness and this is integrated for example
+ *   over thickness for plate bending problems).
+ * - Returning RealStress state in Gauss point and for given Stress mode.
  * - Returning a properties of cross section like thickness or area.
  */
 class LayeredCrossSection : public StructuralCrossSection

@@ -35,9 +35,7 @@
 #include "tokenizer.h"
 #include "error.h"
 
-#ifndef __MAKEDEPEND
- #include <cctype>
-#endif
+#include <cctype>
 
 namespace oofem {
 Tokenizer :: Tokenizer(char separator)

@@ -35,8 +35,8 @@
 #ifndef tokenizer_h
 #define tokenizer_h
 
-#include "stdio.h"
-#include "string.h"
+#include <cstdio>
+#include <string.h>
 
 #define MAX_LINE_LENGTH 1024
 #define MAX_TOKEN_LENGTH 80

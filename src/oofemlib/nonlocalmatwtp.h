@@ -38,12 +38,11 @@
 #ifdef __PARALLEL_MODE
 
  #include "loadbalancer.h"
- #ifndef __MAKEDEPEND
-  #include <map>
-  #include <list>
-  #include <vector>
-  #include <set>
- #endif
+
+ #include <map>
+ #include <list>
+ #include <vector>
+ #include <set>
 
 namespace oofem {
 /**

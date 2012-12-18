@@ -39,9 +39,7 @@
 
  #include "parallel.h"
  #include "combuff.h"
- #ifndef __MAKEDEPEND
-  #include <list>
- #endif
+ #include <list>
 
 namespace oofem {
 class IntArray;

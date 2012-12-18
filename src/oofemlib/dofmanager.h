@@ -35,9 +35,7 @@
 #ifndef dofmanager_h
 #define dofmanager_h
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
-#endif
+#include <cstdio>
 
 #include "alist.h"
 #include "femcmpnn.h"

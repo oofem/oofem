@@ -36,11 +36,9 @@
 #include "error.h"
 #include "mathfem.h"
 
-#ifndef __MAKEDEPEND
- #include <cctype>
- #include <cstdlib>
- #include <cstring>
-#endif
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
 
 namespace oofem {
 double Parser :: expr(bool get)

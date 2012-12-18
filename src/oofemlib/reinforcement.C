@@ -41,14 +41,10 @@
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "timestep.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
+
+#include <cstdlib>
 
 namespace oofem {
-
-
-
 
 IRResultType
 Reinforcement :: initializeFrom(InputRecord *ir)
@@ -66,8 +62,5 @@ Reinforcement :: initializeFrom(InputRecord *ir)
     
     return IRRT_OK;
 }
-
-
-
 
 } // end namespace oofem

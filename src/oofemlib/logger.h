@@ -35,16 +35,13 @@
 #ifndef logger_h
 #define logger_h
 
+#include "oofemcfg.h"
+
 #ifdef __PARALLEL_MODE
- #ifndef __MAKEDEPEND
-  #include <mpi.h>
- #endif
+ #include <mpi.h>
 #endif
 
-#include "oofemcfg.h"
-#ifndef __MAKEDEPEND
- #include <cstdio>
-#endif
+#include <cstdio>
 
 namespace oofem {
 class Logger

@@ -40,12 +40,10 @@
 #include "statecountertype.h"
 #include "intarray.h"
 
-#ifndef __MAKEDEPEND
- #include <map>
- #ifdef __PARALLEL_MODE
-  #include <list>
-  #include "entityrenumberingscheme.h"
- #endif
+#include <map>
+#ifdef __PARALLEL_MODE
+ #include <list>
+ #include "entityrenumberingscheme.h"
 #endif
 
 #ifdef __OOFEG

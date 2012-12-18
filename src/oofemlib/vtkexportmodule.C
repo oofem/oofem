@@ -59,9 +59,7 @@
 #include "material.h"
 #include "usrdefsub.h"
 
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+#include <vector>
 
 namespace oofem {
 VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()

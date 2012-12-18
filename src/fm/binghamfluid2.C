@@ -40,11 +40,9 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 #include "contextioerr.h"
 
+#include <cstdlib>
 
 namespace oofem {
 #define BINGHAM_ALT 1

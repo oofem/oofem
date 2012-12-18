@@ -35,10 +35,8 @@
 #include "buffereddatareader.h"
 #include "error.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
- #include <cctype>
-#endif
+#include <cstdio>
+#include <cctype>
 
 namespace oofem {
 BufferedDataReader :: BufferedDataReader()

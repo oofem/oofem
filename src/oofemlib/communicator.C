@@ -34,17 +34,14 @@
 
 #ifdef __PARALLEL_MODE
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
 #include "communicator.h"
 #include "intarray.h"
 #include "oofem_limits.h"
 
+#include <cstdarg>
+
 #ifdef __USE_MPI
- #ifndef __MAKEDEPEND
-  #include "mpi.h"
- #endif
+ #include <mpi.h>
 #endif
 
 namespace oofem {

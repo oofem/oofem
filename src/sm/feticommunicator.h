@@ -40,9 +40,8 @@
 #include "communicator.h"
 #include "fetiboundarydofman.h"
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+
+#include <vector>
 
 using namespace std;
 

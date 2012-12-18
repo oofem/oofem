@@ -18,10 +18,7 @@
 
 #include <iostream>
 #include <fstream>
-
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
+#include <cstdio>
 
 namespace oofem {
 

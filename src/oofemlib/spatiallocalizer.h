@@ -37,13 +37,11 @@
 
 #include "femcmpnn.h"
 #include "compiler.h"
-
 #include "interface.h"
 #include "logger.h"
-#ifndef __MAKEDEPEND
- #include <set>
- #include <list>
-#endif
+
+#include <set>
+#include <list>
 
 namespace oofem {
 class Domain;

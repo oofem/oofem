@@ -47,9 +47,8 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "rcm2.h"
- #ifndef __MAKEDEPEND
-  #include <Etetrawd.h>
- #endif
+
+ #include <Etetrawd.h>
 #endif
 
 namespace oofem {

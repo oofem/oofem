@@ -38,9 +38,8 @@
 #include "oofem_limits.h"
 #include "range.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
+#include <cstdarg>
+
 
 namespace oofem {
 ExportModule :: ExportModule(int n, EngngModel *e) : tsteps_out(), domainMask()
