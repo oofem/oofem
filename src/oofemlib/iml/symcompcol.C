@@ -74,9 +74,8 @@
 #include "engngm.h"
 #include "domain.h"
 #include "element.h"
-#ifndef __MAKEDEPEND
- #include <set>
-#endif
+
+#include <set>
 
 namespace oofem {
 SymCompCol :: SymCompCol(void) : CompCol()

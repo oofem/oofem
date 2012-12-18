@@ -44,9 +44,7 @@
  #include "combuff.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
-#endif
+#include <cstdio>
 
 namespace oofem {
 class Domain;

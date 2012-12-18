@@ -37,9 +37,8 @@
 #include "structuralelement.h"
 #include "materialinterface.h"
 #include "gausspnt.h"
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+
+#include <vector>
 
 namespace oofem {
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions

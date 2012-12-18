@@ -33,11 +33,10 @@
  */
 
 #include "classfactory.h"
-#ifndef __MAKEDEPEND
- #include <string.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
+
+#include <cstring>
+#ifdef HAVE_STRINGS_H
+ #include <strings.h>
 #endif
 
 #define REGISTER_CLASS(_class, name, id)

@@ -50,9 +50,7 @@
 #include "field.h"
 #include "equationid.h"
 
-#ifndef __MAKEDEPEND
- #include <cstring>
-#endif
+#include <cstring>
 
 namespace oofem {
 

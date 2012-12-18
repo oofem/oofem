@@ -44,10 +44,8 @@
 #include "intarray.h"
 #include "generalbc.h"
 
-#ifndef __MAKEDEPEND
- #include <time.h>
- #include <set>
-#endif
+#include <ctime>
+#include <set>
 
 namespace oofem {
 SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTable()

@@ -35,9 +35,7 @@
 #include "logger.h"
 #include "error.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
+#include <cstdarg>
 
 #ifdef __GNUC__
 #include <cxxabi.h>

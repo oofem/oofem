@@ -39,10 +39,8 @@
  #include "loadbalancer.h"
 
  #ifdef __PARMETIS_MODULE
-  #ifndef __MAKEDEPEND
-   #include "parmetis.h"
-   #include <vector>
-  #endif
+  #include <parmetis.h>
+  #include <vector>
  #endif
 
 namespace oofem {

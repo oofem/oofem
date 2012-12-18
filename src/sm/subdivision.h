@@ -43,10 +43,9 @@
 #include "dofmanager.h"
 #include "conTable.h"
 #include "processcomm.h"
-#ifndef __MAKEDEPEND
- #include <queue>
- #include <list>
-#endif
+
+#include <queue>
+#include <list>
 
 namespace oofem {
 // increase the number of at once allocated fields if the fine (multilevel) subdivision

@@ -38,9 +38,7 @@
 
  #include "sparsemtrx.h"
 
- #ifndef __MAKEDEPEND
-  #include <petscksp.h>
- #endif
+ #include <petscksp.h>
 
 namespace oofem {
 /**

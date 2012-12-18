@@ -35,7 +35,7 @@
 #include "localgaussianrandomgenerator.h"
 #include "mathfem.h"
 
-#include <time.h>
+#include <ctime>
 
 namespace oofem {
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)

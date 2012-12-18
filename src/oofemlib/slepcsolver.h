@@ -39,22 +39,15 @@
 #include "sparsemtrx.h"
 #include "flotarry.h"
 
-#ifdef __PETSC_MODULE
- #ifndef __MAKEDEPEND
-  #include "petscsparsemtrx.h"
- #endif
-#endif
-
 #ifdef __SLEPC_MODULE
- #ifndef __MAKEDEPEND
-  #include "slepceps.h"
- #endif
+ #include <slepceps.h>
 #endif
 
 namespace oofem {
 class Domain;
 class EngngModel;
 class FloatMatrix;
+class PetscSparseMtrx;
 
 class SLEPcSolver : public SparseGeneralEigenValueSystemNM
 {

@@ -52,9 +52,7 @@
 
 #ifdef __USE_MPI
 // if MPI used, include headers
- #ifndef __MAKEDEPEND
-  #include <mpi.h>
- #endif
+ #include <mpi.h>
 #endif
 
 namespace oofem {

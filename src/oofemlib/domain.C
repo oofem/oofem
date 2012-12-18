@@ -70,10 +70,8 @@
  #include "domaintransactionmanager.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
- #include <cstring>
-#endif
+#include <cstdarg>
+#include <cstring>
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()

@@ -44,22 +44,15 @@
 
 #ifndef _MSC_VER // If no Microsoft C
 
- #ifndef __MAKEDEPEND
-  #ifdef TIME_WITH_SYS_TIME
-   # include <sys/time.h>
-   # include <time.h>
-  #else
-   # ifdef HAVE_SYS_TIME_H
-    #  include <sys/time.h>
-   # else
-    #  include <time.h>
-   # endif
-  #endif
- #endif
-
-// for getrusage - user time reporting
- #ifndef __MAKEDEPEND
-  #include <sys/resource.h>
+ #ifdef TIME_WITH_SYS_TIME
+  # include <sys/time.h>
+  # include <ctime>
+ #else
+  # ifdef HAVE_SYS_TIME_H
+   #  include <sys/time.h>
+  # else
+   #  include <ctime>
+  # endif
  #endif
 
 /*
@@ -73,9 +66,7 @@
  #define OOFEM_USEC_LIM 1000000
 
 #else // _MSC_VER active
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
+ #include <ctime>
 
 /// Structure used to measure user time.
 struct timeval

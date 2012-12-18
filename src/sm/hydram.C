@@ -31,9 +31,7 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
-#endif
+#include <cstdio>
 
 namespace oofem {
 // ======= class HydrationModelStatus implementation =======

@@ -36,9 +36,7 @@
 #include "compiler.h"
 
 #ifndef HAVE_STRNCASECMP
- #ifndef __MAKEDEPEND
-  #include <cstring>
- #endif
+ #include <cstring>
 
 int strncasecmp(const char *s1, const char *s2, int count) {
     return _strnicmp(s1, s2, count);

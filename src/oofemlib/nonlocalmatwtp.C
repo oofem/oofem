@@ -42,9 +42,8 @@
 #include "datastream.h"
 #include "domaintransactionmanager.h"
 #include "usrdefsub.h"
-#ifndef __MAKEDEPEND
- #include <set>
-#endif
+
+#include <set>
 
 namespace oofem {
 #define NonlocalMaterialWTP_DEBUG_PRINT 0

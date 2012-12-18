@@ -44,11 +44,9 @@
 #include "material.h"
 #include "usrdefsub.h"
 
-#ifndef __MAKEDEPEND
- #include <string>
- #include <sstream>
- #include <fstream>
-#endif
+#include <string>
+#include <sstream>
+#include <fstream>
 
 #ifdef __VTK_MODULE
  #include <vtkPoints.h>

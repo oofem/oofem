@@ -47,9 +47,7 @@
 #include "mathfem.h"
 #include "freestor.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
+#include <cstdarg>
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"

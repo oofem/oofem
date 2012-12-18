@@ -35,9 +35,7 @@
 #ifndef dof_h
 #define dof_h
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
-#endif
+#include <cstdio>
 
 #include "flotarry.h"
 #include "intarray.h"

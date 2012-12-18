@@ -35,10 +35,8 @@
 #ifndef calmls_h
 #define calmls_h
 
-#ifndef __MAKEDEPEND
- #include <set>
- #include <vector>
-#endif
+#include <set>
+#include <vector>
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"

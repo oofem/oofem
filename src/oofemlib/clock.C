@@ -34,7 +34,11 @@
 
 #include "clock.h"
 #include "compiler.h"
+
 #ifndef _MSC_VER
+
+ // for getrusage - user time reporting
+ #include <sys/resource.h>
 
 namespace oofem {
 void getUtime(oofem_timeval &answer)

@@ -35,9 +35,7 @@
 #ifndef entityrenumberingscheme_h
 #define entityrenumberingscheme_h
 
-#ifndef __MAKEDEPEND
- #include <map>
-#endif
+#include <map>
 
 
 namespace oofem {

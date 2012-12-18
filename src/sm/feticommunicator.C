@@ -40,9 +40,7 @@
 #include "dofmanager.h"
 
 #ifdef __USE_MPI
- #ifndef __MAKEDEPEND
-  #include "mpi.h"
- #endif
+ #include <mpi.h>
 #endif
 
 namespace oofem {

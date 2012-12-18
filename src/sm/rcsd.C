@@ -42,9 +42,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
-#ifndef __MAKEDEPEND
- #include <cstring>
-#endif
+#include <cstring>
 
 namespace oofem {
 RCSDMaterial :: RCSDMaterial(int n, Domain *d) : RCM2Material(n, d)

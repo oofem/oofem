@@ -42,10 +42,7 @@
 #include "domain.h"
 #include "engngm.h"
 
-#ifndef __MAKEDEPEND
- #include <cassert>
-#endif
-
+#include <cassert>
 
 namespace oofem {
 GPInitModule :: GPInitModule(int n, EngngModel *e) : InitModule(n, e)

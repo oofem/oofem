@@ -42,9 +42,7 @@
 #include "mathfem.h"
 #include "verbose.h"
 
-#ifndef __MAKEDEPEND
- #include <climits>
-#endif
+#include <climits>
 
 #ifdef TIME_REPORT
  #include "clock.h"

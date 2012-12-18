@@ -53,11 +53,11 @@
 #include "adaptnlinearstatic.h"
 #include "verbose.h"
 #include "datastream.h"
-#ifndef __MAKEDEPEND
- #include <vector>
- #include <string>
-#endif
 #include "contextioerr.h"
+
+#include <vector>
+#include <string>
+
 
 namespace oofem {
 //#define STIFFNESS_TYPE       TangentStiffnessMatrix

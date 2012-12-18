@@ -47,11 +47,11 @@
  #pragma once
 #endif // _MSC_VER > 1000
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <string.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstdio>
+#include <ctime>
+#include <cstring>
 
 #ifndef min
  #define min(a, b) ( ( a ) < ( b ) ? ( a ) : ( b ) )

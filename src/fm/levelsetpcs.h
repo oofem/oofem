@@ -39,9 +39,7 @@
 #include "geotoolbox.h"
 #include "interface.h"
 
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+#include <vector>
 
 namespace oofem {
 #define LevelSetPCS_CACHE_ELEMENT_VOF 0

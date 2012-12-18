@@ -35,10 +35,9 @@
 #ifndef geotoolbox_h
 #define geotoolbox_h
 
-#ifndef __MAKEDEPEND
- #include <list>
- #include <cstdlib>
-#endif
+#include <list>
+#include <cstdlib>
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif

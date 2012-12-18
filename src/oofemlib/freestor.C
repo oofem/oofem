@@ -35,9 +35,7 @@
 #include "freestor.h"
 #include "error.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdlib>
-#endif
+#include <cstdlib>
 
 namespace oofem {
 double *allocDouble(int n)

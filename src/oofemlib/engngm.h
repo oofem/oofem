@@ -72,9 +72,7 @@
  #include "oofeggraphiccontext.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <string>
-#endif
+#include <string>
 
 
 namespace oofem {

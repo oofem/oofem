@@ -40,9 +40,7 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 
-#ifndef __MAKEDEPEND
- #include <cstring>
-#endif
+#include <cstring>
 
 namespace oofem {
 #define rcm_STRESSRELERROR 1.e-5

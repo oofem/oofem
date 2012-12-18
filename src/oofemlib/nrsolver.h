@@ -40,10 +40,9 @@
 #ifndef nrsolver_h
 #define nrsolver_h
 
-#ifndef __MAKEDEPEND
- #include <set>
- #include <vector>
-#endif
+#include <set>
+#include <vector>
+
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
@@ -51,9 +50,7 @@
 
 #include "linesearch.h"
 #ifdef __PETSC_MODULE
- #ifndef __MAKEDEPEND
-  #include "petscksp.h"
- #endif
+ #include <petscksp.h>
 #endif
 
 namespace oofem {
