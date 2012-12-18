@@ -77,7 +77,7 @@ class NonlocalMaterialStatusExtension;
  * Tasks:
  * This is abstract class - only basic functionality is supported like:
  * - storing and restoring status on tape
- * - printingYourself()
+ * - printYourself()
  * - updating Yourself after a new equilibrium state has been reached.
  *
  * @note{Materials statuses are attributes of GaussPoints, they are stored in
@@ -85,7 +85,6 @@ class NonlocalMaterialStatusExtension;
  */
 class MaterialStatus : public IntegrationPointStatus
 {
-protected:
 public:
     /**
      * Constructor.
