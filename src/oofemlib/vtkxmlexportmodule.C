@@ -1077,12 +1077,17 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
 
     dofIDMask.resize(0);
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
+        dofIDMask.setValues(3, (int)Undef, (int) Undef, (int) Undef);
         for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-            id = dman->giveDof(j)->giveDofID();
-            if ( ( id == V_u ) || ( id == D_u ) || ( id == V_v ) || ( id == D_v ) || ( id == V_w ) || ( id == D_w ) ) {
-                dofIDMask.followedBy(id);
-            }
-        }
+	  id = dman->giveDof(j)->giveDofID();
+	  if ( ( id == V_u ) || ( id == D_u ) ) {
+	    dofIDMask.at(1) = id;
+	  } else if ( ( id == V_v ) || ( id == D_v ) ) {
+	    dofIDMask.at(2) = id;
+	  } else if ( ( id == V_w ) || ( id == D_w ) ) {
+	    dofIDMask.at(3) = id;
+	  }
+	}
         answer.resize(3);
     } else if ( type == FluxVector ) {
         dofIDMask.followedBy(C_1);
@@ -1107,7 +1112,10 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
     answer.zero();
 
     for (int j = 1; j <= size; j++ ) {
-        if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
+        id = (DofIDItem)dofIDMask.at(j);
+	if ( id == Undef ) {
+	    answer.at(j) = 0.0;
+	} else if ( ( indx = dman->findDofWithDofId( id ) ) ) {
             // primary variable available directly in DOF-manager
             answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
         } else if ( iState != IST_Undefined ) {
