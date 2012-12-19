@@ -32,6 +32,7 @@ endif ()
 ######################## Custom paths #################################
 #######################################################################
 set (SLEPC_DIR CACHE PATH "Manual SLEPc directory")
+set (X11_DIR CACHE PATH "Manual X11 directory")
 set (MY_PETSC_DIR CACHE PATH "Manual PETSc directory")
 set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
 set (MPI_DIR CACHE PATH "Manual MPI directory")
@@ -157,8 +158,15 @@ if (USE_OOFEG)
     add_definitions (-D__OOFEG)
 
     # Necessary X11 stuff;
-    find_package (X11 REQUIRED)
-    find_library (XAW_LIB Xaw)
+    if (X11_DIR)
+        set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${X11_DIR})
+        find_package (X11 REQUIRED PATHS ${X11_DIR})
+        find_library (XAW_LIB Xaw PATHS ${X11_DIR})
+    else ()
+        find_package (X11 REQUIRED)
+        find_library (XAW_LIB Xaw)
+    endif ()
+
     # Krysls libraries:
     find_library (ELIXIR_LIB elixir PATH "${ELIXIR_DIR}/src")
     find_library (ESI_LIB esi PATH "${ELIXIR_DIR}/src")
@@ -172,7 +180,7 @@ if (USE_OOFEG)
     include_directories ("${ELIXIR_DIR}/include")
     include_directories ("${CKIT_DIR}/include")
 
-    set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${XAW_LIB})
+    set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${X11_Xmu_LIB} ${X11_Xt_LIB} ${XAW_LIB})
     set (MODULE_LIST ${MODULE_LIST} oofeg)
 endif ()
 
