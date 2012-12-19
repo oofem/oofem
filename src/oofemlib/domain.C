@@ -836,6 +836,15 @@ Domain :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+void
+Domain :: postInitialize()
+{
+    for (int i = 1; i <= this->elementList->giveSize(); i++) {
+        Element *e = this->elementList->at(i);
+        e->postInitialize();
+    }
+}
+
 
 void
 Domain :: error(const char *file, int line, const char *format, ...)
