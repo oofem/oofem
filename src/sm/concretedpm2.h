@@ -787,7 +787,7 @@ public:
      */
     virtual double computeDuctilityMeasure(const double sig,
                                            const double rho,
-					   const double theta);
+                                           const double theta);
 
 
     /// Compute the first derivative of the ductility measure with respect to the invariants sig and rho based on the stress state and the hardening parameter.

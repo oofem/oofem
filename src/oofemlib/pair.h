@@ -60,11 +60,7 @@ private:
 
 public:
     /// Constructor - creates the new Pair with given key k and value v.
-    Pair(int k, double v) {
-        key = k;
-        value = v;
-        next = NULL;
-    }
+    Pair(int k, double v): key(k), value(v), next(NULL) { }
     /// Destructor
     ~Pair() { }
 

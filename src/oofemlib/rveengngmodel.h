@@ -42,26 +42,26 @@ namespace oofem {
 
 /**
  * The rveEngngModel is an abstract class introducing functions for setting boundary conditions on an RVE and computing characteristic data.
- * This class is used when creating an enineering model with RVE capabilities
+ * This class is used when creating an engineering model with RVE capabilities
  *
  * @author Carl Sandström
  */
 class rveEngngModel
 {
 public:
-	/** Abstract method for setting boundary condition on RVE.
-	 *   @param type specifies the type of boundary contition. type are defines in classes which inherit rveEngngModel
-	 *   @param value includes data for the boundary condition.
-	 */
-	virtual void rveSetBoundaryConditions(int type, FloatArray value)=0;
-	/**
-	 * Abstract method for computing data on the RVE.
-	 *  @param type specifies the data requested. The type is defined in classes which inherit rveEngngModel
-	 *  @param input the value pertinent to the boundary condition
-	 *  @param answer the response produced by the specified boundary conditions
-	 *  @param atTime Pertinent timestep
-	 */
-	virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *atTime)=0;
+    /** Abstract method for setting boundary condition on RVE.
+    *   @param type specifies the type of boundary contition. type are defines in classes which inherit rveEngngModel
+    *   @param value includes data for the boundary condition.
+    */
+    virtual void rveSetBoundaryConditions(int type, FloatArray value)=0;
+    /**
+    * Abstract method for computing data on the RVE.
+    *  @param type specifies the data requested. The type is defined in classes which inherit rveEngngModel
+    *  @param input the value pertinent to the boundary condition
+    *  @param answer the response produced by the specified boundary conditions
+    *  @param atTime Pertinent timestep
+    */
+    virtual void rveGiveCharacteristicData(int type, void *value, void *answer, TimeStep *atTime)=0;
 };
 
 }

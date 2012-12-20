@@ -80,9 +80,9 @@ public:
      * Constructor, creates (n,m) sparse matrix. Due to sparsity character of matrix,
      * not all coefficient are physically stored (in general, zero members are omitted).
      */
-    SparseMtrx(int n, int m) : Matrix(n, m) { version = 0; }
+    SparseMtrx(int n, int m) : Matrix(n, m), version(0) { }
     /// Constructor
-    SparseMtrx() : Matrix() { version = 0; }
+    SparseMtrx() : Matrix(), version(0) { }
 
     /// Return receiver version.
     SparseMtrxVersionType giveVersion() { return this->version; }

@@ -378,7 +378,7 @@ main(int argc, char *argv[])
 
     ESIBuildInterface(mask, argc, argv);
     myview  =  ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("OOFEG"), 
-			     const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+                             const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                              const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
@@ -2535,7 +2535,7 @@ oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
     view = ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("SimpleXF"), 
-			 const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+                         const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                          const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
     EMAttachView(ESIModel(), view);

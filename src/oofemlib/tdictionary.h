@@ -65,11 +65,7 @@ protected:
     /// Link to next TPair.
     TPair< Key, T > *next;
 public:
-    TPair(Key k, T *d) {
-        key = k;
-        data = d;
-        next = NULL;
-    }
+    TPair(Key k, T *d): key(k), data(d), next(NULL) { }
     ~TPair() { delete data; }
 
     void append(TPair< Key, T > *p) { next = p; }

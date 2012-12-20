@@ -540,7 +540,7 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 int
-DustMaterial :: setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type)
+DustMaterial :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type)
 {
     DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     if ( type == IST_PlasticStrainTensor ) {

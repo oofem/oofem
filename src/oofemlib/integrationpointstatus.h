@@ -65,7 +65,7 @@ public:
      * @param d domain to which new status belongs
      * @param g associated integration point
      */
-    IntegrationPointStatus(int n, Domain *d, GaussPoint *g) : FEMComponent (n,d) {this->gp = g;}
+    IntegrationPointStatus(int n, Domain *d, GaussPoint *g) : FEMComponent (n,d), gp(g) { }
     /// Destructor.
     virtual ~IntegrationPointStatus() { }
     /// Print receiver's output to given stream.

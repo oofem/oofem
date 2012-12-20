@@ -44,7 +44,7 @@ class GaussPoint;
 class Dictionary;
 class Domain;
 class NonlocalMaterialStatusExtension;
-	
+
 /**
  * This class implements a base lattice material status.
  * In this class services are defined that are used by other 

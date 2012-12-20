@@ -87,16 +87,16 @@ StokesFlowVelocityHomogenization :: handlePrescribedValues()
     this->giveAreaOfDomain();
 
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-        //		if (CarlTr *ThisElement = dynamic_cast<CarlTr *> ( this->giveDomain(1)->giveElement(i) ) ) {
-        //
-        //			ThisElement = (CarlTr *)this->giveDomain(1)->giveElement(i);
-        //			ThisElement->numberOfElementsOnDomain = this->giveDomain(1)->giveNumberOfElements();
-        //			ThisElement->totalAreaOfDomain = this->giveAreaOfDomain();
-        //			ThisElement->specialUnknowns = & (this->SpecialUnknowns);
-        //			DofMan = (Node *) ThisElement->giveDofManager(7);
-        //			this->prescribedType = ThisElement->prescribedType;
-        //
-        //		}
+#if 0
+        if (CarlTr *ThisElement = dynamic_cast<CarlTr *> ( this->giveDomain(1)->giveElement(i) ) ) {
+            ThisElement = (CarlTr *)this->giveDomain(1)->giveElement(i);
+            ThisElement->numberOfElementsOnDomain = this->giveDomain(1)->giveNumberOfElements();
+            ThisElement->totalAreaOfDomain = this->giveAreaOfDomain();
+            ThisElement->specialUnknowns = & (this->SpecialUnknowns);
+            DofMan = (Node *) ThisElement->giveDofManager(7);
+            this->prescribedType = ThisElement->prescribedType;
+        }
+#endif
     }
 }
 
@@ -214,7 +214,7 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
 
         break;
     }
-    case 2:	{
+    case 2: {
         FloatMatrix K;
 
         this->computeTangent(K, atTime);

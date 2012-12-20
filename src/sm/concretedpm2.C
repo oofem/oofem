@@ -1421,7 +1421,7 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
 double
 ConcreteDPM2 :: computeDuctilityMeasure(const double sig,
                                         const double rho,
-					const double theta)
+                                        const double theta)
 {
     double thetaConst = pow(2. * cos(theta), 2.);
     double ductilityMeasure;

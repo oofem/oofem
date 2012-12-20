@@ -111,11 +111,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain *d) : FEMComponent(n, d)
-    {
-        propertyDictionary = new Dictionary();
-        this->castingTime = -1;
-    }
+    Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(new Dictionary()), castingTime(-1.) { }
     /// Destructor.
     virtual ~Material() { delete propertyDictionary; }
 
@@ -214,7 +210,7 @@ public:
      * @param type Determines the type of internal variable.
      * @returns Nonzero if ok, zero if var not supported.
      */
-    virtual int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
+    virtual int setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type)
     { return 0; }
     /**
      * Returns the integration point corresponding value in Reduced form.

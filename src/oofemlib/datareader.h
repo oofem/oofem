@@ -58,7 +58,7 @@ public:
         IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec
     };
 
-    DataReader() { }
+    DataReader() : lineNumber(0) { }
     virtual ~DataReader() { }
 
     /**

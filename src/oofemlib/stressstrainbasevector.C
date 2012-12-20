@@ -353,11 +353,11 @@ StressStrainBaseVector :: computeVolumetricPart() const
     if ( myMode == _1dMat ) {
         // 1D model
         OOFEM_ERROR("StressStrainBaseVector::computeVolumetricPart: No Split for 1D!");
-	return 0.0;
+        return 0.0;
     } else if ( myMode == _PlaneStress ) {
         // plane stress problem
         OOFEM_ERROR("StressStrainBaseVector::computeVolumetricPart: No Split for plane stress!");
-	return 0.0;
+        return 0.0;
     } else {
         // 3d, plane strain or axisymmetric problem
         return ( this->at(1) + this->at(2) + this->at(3) ) / 3.0;

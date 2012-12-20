@@ -88,9 +88,9 @@ public:
     virtual ~Tr21Stokes();
 
     // ** To be removed
-	void giveGradP(FloatMatrix &answer, TimeStep * tStep );
-	void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep );
-	void giveElementFMatrix(FloatMatrix &answer);
+    void giveGradP(FloatMatrix &answer, TimeStep * tStep );
+    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep );
+    void giveElementFMatrix(FloatMatrix &answer);
     // **
 
     virtual IRResultType initializeFrom(InputRecord *ir);

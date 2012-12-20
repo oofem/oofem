@@ -99,7 +99,6 @@ class TimeStep;
 class BoundaryLoad : public Load
 {
 public:
-
     /**
      * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
      * (indicates that load given in global coordinate system) or BL_LocalMode
@@ -134,10 +133,7 @@ public:
      * @param i Load number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain *d) : Load(i, d) {
-        nDofs = 0;
-        coordSystemType = BL_GlobalMode;
-    }
+    BoundaryLoad(int i, Domain *d) : Load(i, d), nDofs(0), coordSystemType(BL_GlobalMode) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     /**

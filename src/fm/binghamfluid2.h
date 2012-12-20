@@ -72,8 +72,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-	virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-	virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     double giveTempDevStressMagnitude() const { return temp_devStressMagnitude; }
     double giveTempDevStrainMagnitude() const { return temp_devStrainMagnitude; }
@@ -133,11 +133,11 @@ public:
                                                TimeStep * tStep);
 
     virtual double give(int aProperty, GaussPoint *gp);
-	virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-	virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
-	virtual classType giveClassID() const { return BinghamFluidMaterial2Class; }
+    virtual const char *giveClassName() const { return "BinghamFluidMaterial2"; }
+    virtual classType giveClassID() const { return BinghamFluidMaterial2Class; }
     virtual int checkConsistency();
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

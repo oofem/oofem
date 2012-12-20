@@ -427,7 +427,7 @@ public:
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form,
                                                MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type);
+    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
 
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,

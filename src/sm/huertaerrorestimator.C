@@ -3260,16 +3260,16 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
             uNorm += tmpVector.dotProduct(coarseVector);
 
 #ifdef PRINT_FINE_ERROR
-			double pEnorm = coeff * coeff * elementNorm + patchNorm - 2.0 * coeff * mixedNorm;
+            double pEnorm = coeff * coeff * elementNorm + patchNorm - 2.0 * coeff * mixedNorm;
             if ( exactFlag == false ) {
                 OOFEM_LOG_DEBUG("%5d: %3d  %15.8e %15.8e  %15.8e\n",
-								elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm);
+                                elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm);
             }
 
  #ifdef EXACT_ERROR
             else {
                 OOFEM_LOG_DEBUG( "%5d: %3d  %15.8e %15.8e  %15.8e  %15.8e\n",
-								 elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm, exactFineError.at(++finePos) );
+                                elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm, exactFineError.at(++finePos) );
             }
  #endif
 #endif

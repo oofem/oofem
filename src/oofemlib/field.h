@@ -81,7 +81,7 @@ public:
     /**
      * Constructor. Creates a field of given type associated to given domain.
      */
-    Field(FieldType b) { type = b; }
+    Field(FieldType b): type(b) { }
     virtual ~Field() { }
     /**
      * Evaluates the field at given point.

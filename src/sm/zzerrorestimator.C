@@ -272,15 +272,15 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
-	    diff.zero();
-	    this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
+            diff.zero();
+            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= nDofMans; k++ ) {
                     diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
 
-	    elem->giveIPValue(sig, gp, type, tStep);
+            elem->giveIPValue(sig, gp, type, tStep);
 
             diff.subtract(sig);
 
@@ -294,7 +294,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
-	    diff.zero();
+            diff.zero();
             this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
             ( ( StructuralMaterial * ) elem->giveMaterial() )
             ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness,
@@ -305,7 +305,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                 }
             }
 
-	    elem->giveIPValue(sig, gp, type, tStep);
+            elem->giveIPValue(sig, gp, type, tStep);
             diff.subtract(sig);
 
             help.beProductOf(DInv, diff);

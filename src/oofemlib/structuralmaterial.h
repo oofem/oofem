@@ -282,7 +282,7 @@ public:
      * @param type Determines the type of internal variable.
      * @returns Nonzero if ok, zero if var not supported.
      */
-    virtual int setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type);
+    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
     /**
      * Returns the integration point corresponding value in Reduced form.
      * @param answer Contain corresponding ip value, zero sized if not available.

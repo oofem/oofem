@@ -57,16 +57,13 @@ protected:
 
 public:
     /// Constructor, creates zero sized matrix.
-    Matrix() { nRows = nColumns = 0; }
+    Matrix(): nRows(0), nColumns(0) { }
     /**
      * Constructor, creates zero matrix, with given size.
      * @param n Number of rows.
      * @param m Number of rows.
      */
-    Matrix(int n, int m)  {
-        nRows = n;
-        nColumns = m;
-    }
+    Matrix(int n, int m): nRows(n), nColumns(m)  { }
     /// Destructor.
     virtual ~Matrix() { }
 

@@ -1033,13 +1033,12 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 #endif
         } else if ( type == ISVT_VECTOR ) {
 
-	  //rotate back from nodal CS to global CS if applies
-	  if ( (dman->giveClassID() == NodeClass) && d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
-	    iVal.resize(3);
-	    iValLCS = iVal;
-	    iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
-	  }
-	  
+            //rotate back from nodal CS to global CS if applies
+            if ( (dman->giveClassID() == NodeClass) && d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
+                iVal.resize(3);
+                iValLCS = iVal;
+                iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
+            }
 
 #ifdef __VTK_MODULE
             primVarArray->SetTuple3(inode-1, iVal.at(1), iVal.at(2), iVal.at(3));
@@ -1079,15 +1078,15 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
         dofIDMask.setValues(3, (int)Undef, (int) Undef, (int) Undef);
         for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-	  id = dman->giveDof(j)->giveDofID();
-	  if ( ( id == V_u ) || ( id == D_u ) ) {
-	    dofIDMask.at(1) = id;
-	  } else if ( ( id == V_v ) || ( id == D_v ) ) {
-	    dofIDMask.at(2) = id;
-	  } else if ( ( id == V_w ) || ( id == D_w ) ) {
-	    dofIDMask.at(3) = id;
-	  }
-	}
+            id = dman->giveDof(j)->giveDofID();
+            if ( ( id == V_u ) || ( id == D_u ) ) {
+                dofIDMask.at(1) = id;
+            } else if ( ( id == V_v ) || ( id == D_v ) ) {
+                dofIDMask.at(2) = id;
+            } else if ( ( id == V_w ) || ( id == D_w ) ) {
+                dofIDMask.at(3) = id;
+            }
+        }
         answer.resize(3);
     } else if ( type == FluxVector ) {
         dofIDMask.followedBy(C_1);
@@ -1113,9 +1112,9 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
 
     for (int j = 1; j <= size; j++ ) {
         id = (DofIDItem)dofIDMask.at(j);
-	if ( id == Undef ) {
-	    answer.at(j) = 0.0;
-	} else if ( ( indx = dman->findDofWithDofId( id ) ) ) {
+        if ( id == Undef ) {
+            answer.at(j) = 0.0;
+        } else if ( ( indx = dman->findDofWithDofId( id ) ) ) {
             // primary variable available directly in DOF-manager
             answer.at(j) = dman->giveDof(indx)->giveUnknown(eid, VM_Total, tStep);
         } else if ( iState != IST_Undefined ) {
@@ -1327,10 +1326,10 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             answer.resize(0);
             iRule = elem->giveDefaultIntegrationRulePtr();
             if (iRule) {
-				MaterialMode mmode = _Unknown;
+                MaterialMode mmode = _Unknown;
                 for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
-					mmode = gp->giveMaterialMode();
+                    mmode = gp->giveMaterialMode();
                     elem->giveIPValue(temp, gp, type, tStep);
                     gptot += gp->giveWeight();
                     answer.add(gp->giveWeight(), temp);

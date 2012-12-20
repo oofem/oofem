@@ -727,7 +727,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         FloatMatrix tmp = src;
         this->zero();
         // initialize answer to be unity matrix;
-		for ( int i = 1; i <= nRows; i++ ) {
+        for ( int i = 1; i <= nRows; i++ ) {
             this->at(i, i) = 1.0;
         }
 

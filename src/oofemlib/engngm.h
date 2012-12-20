@@ -113,9 +113,9 @@ class EngngModelContext
 protected:
     /// Common fieldManager providing shared field register for the problem.
     FieldManager fieldManager;
-public:
 
-    EngngModelContext() { }
+public:
+    EngngModelContext(): fieldManager() { }
     FieldManager *giveFieldManager() { return & ( this->fieldManager ); }
 };
 

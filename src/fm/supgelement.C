@@ -47,7 +47,7 @@
 
 namespace oofem {
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
-    FMElement(n, aDomain)
+    FMElement(n, aDomain), t_supg(0), t_pspg(0), t_lsic(0)
 { }
 
 
@@ -124,7 +124,7 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);
         this->computeBCLhsTerm_MB(h, tStep); answer.assemble(h, vloc);
         this->computeBCLhsPressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);
-	this->computeBCLhsPressureTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
+        this->computeBCLhsPressureTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);
         //this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
@@ -257,20 +257,19 @@ SUPGElement :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
             answer.add(helpMatrix);
         }
-	
     }
     nLoads    = this->giveBodyLoadArray()->giveSize();
 
-   if ( nLoads ) { 
-     bcGeomType ltype;
-     for ( i = 1; i <= nLoads; i++ ) {
-       load  = domain->giveLoad( bodyLoadArray.at(i) );
-       ltype = load->giveBCGeoType();
-       if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-	 this->computeHomogenizedReinforceTerm_MB(helpMatrix, ( Load * ) load, atTime);
-       }
-     }
-   }
+    if ( nLoads ) { 
+        bcGeomType ltype;
+        for ( i = 1; i <= nLoads; i++ ) {
+            load  = domain->giveLoad( bodyLoadArray.at(i) );
+            ltype = load->giveBCGeoType();
+            if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+                this->computeHomogenizedReinforceTerm_MB(helpMatrix, ( Load * ) load, atTime);
+            }
+        }
+    }
 }
 
 void
@@ -323,22 +322,22 @@ SUPGElement :: computeBCLhsPressureTerm_MC(FloatMatrix &answer, TimeStep *atTime
     //bcType loadtype;
     FloatMatrix helpMatrix;
 
-  nLoads    = this->giveBodyLoadArray()->giveSize();
-  answer.resize(pndofs, undofs);
-  answer.zero();
-  helpMatrix.resize(pndofs, undofs);
-  helpMatrix.zero();
-  if ( nLoads ) { 
-    bcGeomType ltype;
-    for ( int i = 1; i <= nLoads; i++ ) {
-      load  = domain->giveLoad( bodyLoadArray.at(i) );
-      ltype = load->giveBCGeoType();
-      if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
-	this->computeHomogenizedReinforceTerm_MC(helpMatrix, ( Load * ) load, atTime);
-      }
-      answer.add(helpMatrix);
-    }   
-  }
+    nLoads    = this->giveBodyLoadArray()->giveSize();
+    answer.resize(pndofs, undofs);
+    answer.zero();
+    helpMatrix.resize(pndofs, undofs);
+    helpMatrix.zero();
+    if ( nLoads ) { 
+        bcGeomType ltype;
+        for ( int i = 1; i <= nLoads; i++ ) {
+            load  = domain->giveLoad( bodyLoadArray.at(i) );
+            ltype = load->giveBCGeoType();
+            if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ReinforceBVT ) ) {
+                this->computeHomogenizedReinforceTerm_MC(helpMatrix, ( Load * ) load, atTime);
+            }
+            answer.add(helpMatrix);
+        }   
+    }
 }
 
 
