@@ -85,6 +85,8 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     oldSmoother = this->domain->giveSmoother();
     this->domain->setSmoother(rm, 0); // do not delete old one
 
+    // set recovery mode
+    rm->setRecoveryMode(-1, IntArray());
     // recover nodal values
     rm->recoverValues(type, tStep);
 
@@ -333,11 +335,16 @@ ZZRemeshingCriteria :: giveRequiredDofManDensity(int num, TimeStep *tStep, int r
 
     this->estimateMeshDensities(tStep);
     size = this->nodalDensities.at(num);
-    size = max(minElemSize, size);
-    if ( relative ) {
+    if (size >= 0) {
+      size = max(minElemSize, size);
+      if ( relative ) {
         return size / this->giveDofManDensity(num);
-    } else {
+      } else {
         return size;
+      }
+    } else {
+      // size negative -> marks undetermined size
+      return size;
     }
 }
 
@@ -474,6 +481,7 @@ double
 ZZRemeshingCriteria :: giveDofManDensity(int num)
 {
     int i, isize;
+    bool init = false;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
     ZZRemeshingCriteriaInterface *interface;
@@ -502,14 +510,17 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     for ( i = 1; i <= isize; i++ ) {
         interface = ( ZZRemeshingCriteriaInterface * )
                     domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType);
-        if ( !interface ) {
-            _error("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
-        }
-
-        density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+        if ( interface ) {
+	  init = true;
+	  density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+	}
     }
-
-    density /= isize;
+    if (init) {
+      density /= isize;
+    } else {
+      // the nodal mesh density could not be determined
+      density = -1;
+    }
 
     return density;
 }

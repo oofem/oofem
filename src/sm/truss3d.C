@@ -69,7 +69,7 @@ Truss3d :: giveInterface(InterfaceType interface)
         return ( NodalAveragingRecoveryModelInterface * ) this;
     }
 
-    OOFEM_LOG_INFO("Interface on Truss3d element not supported");
+    //OOFEM_LOG_INFO("Interface on Truss3d element not supported");
     return NULL;
 }
 
