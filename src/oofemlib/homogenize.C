@@ -40,7 +40,8 @@ Homogenize :: Homogenize()
 { }
 
 //parallel configuration of Voigt
-void Homogenize :: voigt(FloatMatrix &PhaseMatrix) {
+void Homogenize :: voigt(FloatMatrix &PhaseMatrix)
+{
     double k, mu;
     double volTot = 0.;
     int r;
@@ -62,7 +63,8 @@ void Homogenize :: voigt(FloatMatrix &PhaseMatrix) {
 
 
 //serial configuration of Reuss
-void Homogenize :: reuss(FloatMatrix &PhaseMatrix) {
+void Homogenize :: reuss(FloatMatrix &PhaseMatrix)
+{
     double k, mu;
     int r;
     int NumPhases = PhaseMatrix.giveNumberOfRows();
@@ -90,7 +92,8 @@ void Homogenize :: reuss(FloatMatrix &PhaseMatrix) {
  * Implementation according to J.G. Berryman: Mixture Theories for Rock Properties, Physics and Phase Relations,
  * A Handbook of Physical Constants, Am. Geophys, 1995 or download directly from the web
  */
-void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix) {
+void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix)
+{
     int phase, i, r;
     int phaseMuMin, phaseMuMax;
     int counter = 0;
@@ -173,7 +176,8 @@ void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix) {
  * refRow is the reference phase of this scheme (0 is the first phase)
  * for derivation see Bernard et al.: A multiscale micromechanics-hydration model... CCR,pp. 1293-1309, 2003
  */
-void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow) {
+void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
+{
     double f_r, E_r, nu_r, k_r, mu_r;
     double f_m, E_m, nu_m, k_m, mu_m;
     double fr_tot = 0.;
@@ -247,7 +251,8 @@ void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow) {
 }
 
 // for derivation see Bernard et al.:A multiscale micromechanics-hydration model... CCR,pp. 1293-1309, 2003
-void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix) {
+void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
+{
     double f_r, E_r, nu_r, k_r, mu_r;
     double k_SCS, mu_SCS, nom_k_SCS, denom_k_SCS, nom_mu_SCS, denom_mu_SCS;
     double fr_tot;
@@ -351,7 +356,8 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix) {
  * The bulk modulus of this scheme coincides with HS bound. This is not true for shear modulus, see Christensen: Two Theoretical Elasticity Micromechanics Models, Journal of Elasticity 50: 15–25, 1998.
  */
 
-void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix) {
+void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
+{
     int i, j, phi;
     int NumPhases = PhaseMatrix.giveNumberOfRows() + 1; //need to extend for an equivalent homogeneous medium
     FloatMatrix PhaseMatrix1;
@@ -401,7 +407,7 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix) {
         Jinv.beInverseOf(J);
         //calculate J_{phi}
         fillJ(J, r(phi), mu, k, phi);
-        //calulate N^{phi}=J_{phi+1}^{-1}*J_{phi}
+        //calculate N^{phi}=J_{phi+1}^{-1}*J_{phi}
         N.beProductOf(Jinv, J);
         //calculate a part of Q^{phi}
         Q.beProductOf(N, Nhelp);
@@ -602,7 +608,8 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix) {
 }
 
 /*Hirsh model as a combination of Voigt and Reuss (parameter chi)*/
-void Homogenize :: hirsch(FloatMatrix &PhaseMatrix, double chi) {
+void Homogenize :: hirsch(FloatMatrix &PhaseMatrix, double chi)
+{
     double k_Voigt, mu_Voigt, k_Reuss, mu_Reuss;
     voigt(PhaseMatrix);
     k_Voigt = k_hmg;
@@ -638,7 +645,8 @@ void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
 }
 
 
-void Homogenize :: counto(FloatMatrix &PhaseMatrix) {
+void Homogenize :: counto(FloatMatrix &PhaseMatrix)
+{
     double f_i, E_i, nu_i, f_m, E_m, nu_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
         OOFEM_ERROR1("Only two phases are allowed\n");
@@ -661,7 +669,8 @@ void Homogenize :: counto(FloatMatrix &PhaseMatrix) {
 /* Kuster-Toksoz model from Monteiro: Elastic Moduli Lightweight Aggregate Model,
  * Cement and Concrete Research, 1995, No.2, pp. 276-280.
  */
-void Homogenize :: kusterToksoz(FloatMatrix &PhaseMatrix) {
+void Homogenize :: kusterToksoz(FloatMatrix &PhaseMatrix)
+{
     double k_KT, mu_KT, nom, denom;
     double f_i, E_i, nu_i, k_i, mu_i, f_m, E_m, nu_m, mu_m, k_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
@@ -721,7 +730,8 @@ double Homogenize :: zeta(double k, double mu) {
 }
 
 //Auxiliary function for Hashin-Shtrikman-Walpole shear bounds
-double Homogenize :: gamma(FloatMatrix &SortedPhaseMatrix, double zeta) {
+double Homogenize :: gamma(FloatMatrix &SortedPhaseMatrix, double zeta)
+{
     double gamma = 0;
     int r;
     int NumPhases = SortedPhaseMatrix.giveNumberOfRows();
@@ -735,7 +745,8 @@ double Homogenize :: gamma(FloatMatrix &SortedPhaseMatrix, double zeta) {
     return gamma;
 }
 
-void Homogenize :: checkVolFraction(FloatMatrix &PhaseMatrix) {
+void Homogenize :: checkVolFraction(FloatMatrix &PhaseMatrix)
+{
     double volTot = 0.;
     int NumPhases = PhaseMatrix.giveNumberOfRows();
     int r;
@@ -749,7 +760,8 @@ void Homogenize :: checkVolFraction(FloatMatrix &PhaseMatrix) {
 }
 
 //help function for filling the J matrix
-void Homogenize :: fillJ(FloatMatrix &J, double r, const FloatArray &mu, const FloatArray &k, int phase) {
+void Homogenize :: fillJ(FloatMatrix &J, double r, const FloatArray &mu, const FloatArray &k, int phase)
+{
     J(0, 0) = r;
     J(0, 1) = 1. / ( pow(r, 2.) );
     J(1, 0) = 3 * k(phase);
@@ -757,7 +769,8 @@ void Homogenize :: fillJ(FloatMatrix &J, double r, const FloatArray &mu, const F
 }
 
 //help function for filling the L matrix
-void Homogenize :: fillL(FloatMatrix &L, double r, const FloatArray &mu, const FloatArray &k, int phase) {
+void Homogenize :: fillL(FloatMatrix &L, double r, const FloatArray &mu, const FloatArray &k, int phase)
+{
     double mu_l = mu(phase);
     double k_l = k(phase);
     double nu_l = ( 3. * k_l - 2. * mu_l ) / ( 6. * k_l + 2. * mu_l ); //OK

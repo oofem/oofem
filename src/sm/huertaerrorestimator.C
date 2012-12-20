@@ -3211,7 +3211,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         }
     } else if ( this->normType == HuertaErrorEstimator :: EnergyNorm ) {
         FloatArray tmpVector;
-        double eEnorm, pEnorm;
 
 #ifdef PRINT_FINE_ERROR
         OOFEM_LOG_DEBUG("\n");
@@ -3257,30 +3256,20 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 
             eNorm += ( 1.0 + coeff * coeff ) * elementNorm + patchNorm - 2.0 * coeff * mixedNorm;
 
-            eEnorm = elementNorm;
-            pEnorm = coeff * coeff * elementNorm + patchNorm - 2.0 * coeff * mixedNorm;
-            /*
-             * elementVector.times(coeff);
-             * patchVector.subtract(elementVector);
-             * elementVector.times(1.0/coeff);
-             *
-             * tmpVector.beProductOf(mat, patchVector);
-             * pEnorm = dotProduct(tmpVector.givePointer(), patchVector.givePointer(), patchVector.giveSize());
-             * eEnorm = dotProduct(tmpVector.givePointer(), elementVector.givePointer(), elementVector.giveSize());
-             */
             tmpVector.beProductOf(mat, coarseVector);
             uNorm += tmpVector.dotProduct(coarseVector);
 
 #ifdef PRINT_FINE_ERROR
+			double pEnorm = coeff * coeff * elementNorm + patchNorm - 2.0 * coeff * mixedNorm;
             if ( exactFlag == false ) {
                 OOFEM_LOG_DEBUG("%5d: %3d  %15.8e %15.8e  %15.8e\n",
-                                elemId, ielem, eEnorm, pEnorm, eEnorm + pEnorm);
+								elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm);
             }
 
  #ifdef EXACT_ERROR
             else {
                 OOFEM_LOG_DEBUG( "%5d: %3d  %15.8e %15.8e  %15.8e  %15.8e\n",
-                                elemId, ielem, eEnorm, pEnorm, eEnorm + pEnorm, exactFineError.at(++finePos) );
+								 elemId, ielem, elementNorm, pEnorm, elementNorm + pEnorm, exactFineError.at(++finePos) );
             }
  #endif
 #endif
@@ -3736,7 +3725,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     Element *element;
     RefinedElement *refinedElement;
     HuertaErrorEstimatorInterface *interface;
-    EngngModel *problem, *refinedProblem;
+    EngngModel *refinedProblem;
     int localNodeId, localElemId, localBcId, localLtf;
     int mats, csects, loads, ltfuncs, nlbarriers;
     int inode, idof, dofs, pos, elemId, ielem, elems, size;
@@ -3762,8 +3751,6 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #endif
 
     elems = domain->giveNumberOfElements();
-
-    problem = domain->giveEngngModel();
 
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();

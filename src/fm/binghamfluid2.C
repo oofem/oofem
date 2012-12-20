@@ -156,9 +156,9 @@ BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-    if ( ( aProperty == Viscosity ) ) {
+    if ( aProperty == Viscosity ) {
         return mu_0;
-    } else if ( ( aProperty == YieldStress ) ) {
+    } else if ( aProperty == YieldStress ) {
         return tau_0;
     } else {
         return FluidDynamicMaterial :: give(aProperty, gp);
@@ -235,7 +235,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         answer.zero();
 
         double dgde1, dgde2, dgde3, dgde4;
-        double dmudg, mu, c23, c43;
+        double dmudg, mu;
 
         if ( 0 ) {
             _nu = computeActualViscosity(tau_0, gamma);
@@ -254,8 +254,6 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
             answer.at(3, 3) = _nu;
             return;
         } else { // tangent stiffness
-            c43 = 4. / 3.;
-            c23 = 2. / 3.;
 
             if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
                 dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
@@ -300,7 +298,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 
 
         double dgde1, dgde2, dgde3, dgde4;
-        double dmudg, mu, c23, c43;
+        double dmudg, mu;
 
         if ( 0 ) {
             _nu = computeActualViscosity(tau_0, gamma);
@@ -319,8 +317,6 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
             answer.at(4, 4) = _nu;
             return;
         } else { // tangent stiffness
-            c43 = 4. / 3.;
-            c23 = 2. / 3.;
 
             if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
                 dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
@@ -372,12 +368,8 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         answer.resize(6, 6);
         answer.zero();
 
-	int i;
 	FloatArray dgde (6);
-        double dmudg, mu, c23, c43;
-
-	c43 = 4. / 3.;
-	c23 = 2. / 3.;
+	double dmudg, mu;
 
 	if ( gamma < BINGHAM_MIN_SHEAR_RATE ) {
 	  dmudg = 0.0;
@@ -396,7 +388,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 	  dgde.at(6) = 1.0 * epsd.at(6) / gamma;
 	}
 
-	for (i=1;i<=6;i++) {
+	for (int i=1; i<=6; i++) {
 	  answer.at(1,i) = fabs( 2.0 * epsd.at(1) * dmudg * dgde.at(i) );
 	  answer.at(2,i) = fabs( 2.0 * epsd.at(2) * dmudg * dgde.at(i) );
 	  answer.at(3,i) = fabs( 2.0 * epsd.at(3) * dmudg * dgde.at(i) );

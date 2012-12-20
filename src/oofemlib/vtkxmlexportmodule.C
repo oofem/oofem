@@ -1327,14 +1327,16 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             answer.resize(0);
             iRule = elem->giveDefaultIntegrationRulePtr();
             if (iRule) {
+				MaterialMode mmode = _Unknown;
                 for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); ++i) {
                     gp = iRule->getIntegrationPoint(i);
+					mmode = gp->giveMaterialMode();
                     elem->giveIPValue(temp, gp, type, tStep);
                     gptot += gp->giveWeight();
                     answer.add(gp->giveWeight(), temp);
                 }
-                answer.times(1/gptot);
-                elem->giveMaterial()->giveIntVarCompFullIndx(redIndx, type, gp->giveMaterialMode());
+                answer.times(1./gptot);
+                elem->giveMaterial()->giveIntVarCompFullIndx(redIndx, type, mmode);
             }
             // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
             if ( reshape && answer.giveSize() != 9) { // If it has 9 components, then it is assumed to be proper already.

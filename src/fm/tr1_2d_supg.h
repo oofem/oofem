@@ -147,7 +147,7 @@ public:
     virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag);
     virtual Element *giveElement() { return this; }
     virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
-    virtual double  computeVolumeAround(GaussPoint *aGaussPoint);
+    virtual double computeVolumeAround(GaussPoint *aGaussPoint);
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep);
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);

@@ -3571,6 +3571,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
             node->setNumberOfDofs(ndofs);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
+			dof = NULL;
             for ( idof = 1; idof <= ndofs; idof++ ) {
                 idofPtr = parentNodePtr->giveDof(idof);
                 if ( idofPtr->giveClassID() == MasterDofClass ) {

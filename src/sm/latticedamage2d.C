@@ -680,15 +680,15 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
         answer.resize(1);
         answer.at(1) = status->giveCrackFlag();
         return 1;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();
         return 1;
-    } else if ( ( type == IST_DissWork ) ) {
+    } else if ( type == IST_DissWork ) {
         answer.resize(1);
         answer.at(1) = status->giveDissipation();
         return 1;
-    } else if ( ( type == IST_DeltaDissWork ) ) {
+    } else if ( type == IST_DeltaDissWork ) {
         answer.resize(1);
         answer.at(1) = status->giveDeltaDissipation();
         return 1;
@@ -701,7 +701,7 @@ int
 LatticeDamage2d :: giveIPValueSize(InternalStateType type,
                                    GaussPoint *gp)
 {
-    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DamageTensor || type == IST_DissWork || type == IST_DeltaDissWork ) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, gp);
@@ -712,11 +712,11 @@ int
 LatticeDamage2d :: giveIntVarCompFullIndx(IntArray &answer,
                                           InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer.zero();
         answer.at(1) = 1;
@@ -729,9 +729,9 @@ LatticeDamage2d :: giveIntVarCompFullIndx(IntArray &answer,
 InternalStateValueType
 LatticeDamage2d :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
         return ISVT_SCALAR;
-    } else if ( ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageTensor ) {
         return ISVT_TENSOR_S3;
     } else {
         return StructuralMaterial :: giveIPValueType(type);

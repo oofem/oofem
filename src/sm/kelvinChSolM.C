@@ -88,7 +88,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatRespons
     int mu;
     double betaMu;
     double v;
-    FloatArray *sigmaVMu, reducedAnswer, help;
+    FloatArray *sigmaVMu = NULL, reducedAnswer, help;
     FloatMatrix C;
     KelvinChainSolidMaterialStatus *status = ( KelvinChainSolidMaterialStatus * ) this->giveStatus(gp);
 

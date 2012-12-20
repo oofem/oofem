@@ -234,7 +234,7 @@ OctantRec :: testBoundingBox(const FloatArray &coords, double radius)
 void OctantRec :: printYourself()
 {
     if (this->isTerminalOctant()) {
-        printf(" center = {%e, %e, %e} size = %f, nodes = %d, elem_ips = %d\n", 
+        printf(" center = {%e, %e, %e} size = %f, nodes = %lu, elem_ips = %lu\n", 
                 this->origin.at(1), this->origin.at(2), this->origin.at(3), 
                 this->halfWidth*2., this->nodeList->size(), this->elementIPList->size());
     } else {
