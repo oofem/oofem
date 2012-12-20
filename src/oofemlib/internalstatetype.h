@@ -133,8 +133,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_PressureGradient, 83) \
     ENUM_ITEM_WITH_VALUE(IST_DissWork, 84)\
     ENUM_ITEM_WITH_VALUE(IST_DeltaDissWork, 85)\
-    ENUM_ITEM_WITH_VALUE(IST_StressCapPos, 86)
-
+    ENUM_ITEM_WITH_VALUE(IST_StressCapPos, 86)\
+    ENUM_ITEM_WITH_VALUE(IST_DirectorField, 87)
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
