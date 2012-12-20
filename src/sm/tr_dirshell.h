@@ -35,11 +35,12 @@
 #ifndef trdirshell_h
 #define trdirshell_h
 
-#include "cct.h"
 
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
+
+#include "nlstructuralelement.h"
 namespace oofem {
 
 
@@ -101,6 +102,8 @@ protected:
     void edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &G1, FloatArray &G3);
 
     virtual double computeVolumeAround(GaussPoint *gp);
+    virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
+    virtual double computeThicknessAroundLayer(GaussPoint *gp, int layer);
     virtual double computeAreaAround(GaussPoint *gp);
 
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
@@ -116,6 +119,7 @@ protected:
 	void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
 	void evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
     double giveLocalZetaCoord(GaussPoint *gp);
+    double giveLayerZetaCoord(GaussPoint *gp, int layer);
 
 	
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
@@ -140,11 +144,11 @@ protected:
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1, 
          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
     void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, TimeStep *tStep, FloatArray &solVec);
-    void computeStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, TimeStep *stepN );
+    void computeStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN );
 
 
 
-    void computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
+    void computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
 
 
 public:
@@ -195,7 +199,7 @@ public:
 
     void giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q);
 
-    void computeLinearizedStiffness(GaussPoint *gp, TimeStep *tStep,
+    void computeLinearizedStiffness(GaussPoint *gp,  Material *mat, TimeStep *tStep,
                 FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A[3][3], FloatArray &solVec);
     
 
