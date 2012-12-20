@@ -40,14 +40,12 @@
 #include "dynalist.h"
 #include "range.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdlib>
- #include <cstdio>
- #include <cstring>
- #include <cctype>
- #include <ostream>
- #include <sstream>
-#endif
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+#include <cctype>
+#include <ostream>
+#include <sstream>
 
 namespace oofem {
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), record()

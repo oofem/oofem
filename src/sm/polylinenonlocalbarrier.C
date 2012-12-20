@@ -120,6 +120,70 @@ PolylineNonlocalBarrier :: isActivated(const FloatArray &c1, const FloatArray &c
     return false;
 }
 
+double
+PolylineNonlocalBarrier :: calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance)
+{
+    double min = maxPossibleDistance;
+    double tempDistance;
+    //Loop over all linear sections forming the nonlocal boundary to find the minimum distance
+    for ( int i = 1; i < vertexNodes.giveSize(); i++ ) {
+        //Get the coordinates of the vertices
+        FloatArray coordsA(coords);
+        FloatArray coordsB(coords);
+        for ( int j = 1; j <= coords.giveSize(); j++ ) {
+            coordsA.at(j) =  domain->giveNode( vertexNodes.at(i) )->giveCoordinate(j);
+            coordsB.at(j) = domain->giveNode( vertexNodes.at(i + 1) )->giveCoordinate(j);
+        }
+
+        //Get the distance from the line segment described by the vertices
+        tempDistance = giveDistancePointLine(coordsA, coordsB, coords);
+        if ( min > tempDistance ) { //Check if it is smaller than the minimum value
+            min = tempDistance;
+        }
+    }
+
+    return min;
+}
+
+double
+PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, const FloatArray &coordsB, const FloatArray &coordsGP)
+{
+    FloatArray lineAGP(coordsGP); //Line start A, Line End Gauss Point
+    lineAGP.subtract(coordsA);
+    FloatArray lineAB(coordsB); //Line Start A, Line End B
+    lineAB.subtract(coordsA);
+
+    if ( lineAB.computeNorm() == 0. ) { //Check if A,B coincide
+        return lineAGP.computeNorm();
+    }
+
+    //Since vectors AB and AP are collinear and have the same direction: AP=scaleFactor*AB
+    double scaleFactor;
+    scaleFactor = ( lineAGP.dotProduct(lineAB) ) / lineAB.computeSquaredNorm();
+    if ( scaleFactor < 0. || scaleFactor > 1. ) { //Check if P is outside line segment AB
+        FloatArray lineBGP(coordsGP); //Line start B, Line End Gauss Point
+        lineBGP.subtract(coordsB);
+        //Return minimum of A-Gauss Point and B-Gauss Point
+        if ( lineAGP.computeNorm() < lineBGP.computeNorm() ) {
+            return lineAGP.computeNorm();
+        } else {
+            return lineBGP.computeNorm();
+        }
+    } else {
+        // Find coordinates of Point P = A + AB*scaleFactor
+        lineAB.times(scaleFactor);
+        FloatArray coordsP(coordsA);
+        coordsP.add(lineAB);
+        //Calculate distance from Point P to Gauss Point
+        FloatArray linePGP(coordsP); //Line start P, Line End Gauss Point
+        linePGP.subtract(coordsGP);
+        return linePGP.computeNorm();
+    }
+
+    return 0;
+}
+
+
 IRResultType
 PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
 {

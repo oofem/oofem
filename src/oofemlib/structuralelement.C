@@ -116,6 +116,10 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(force, stepN, mode);
+    // transform from global to element local c.s
+    if ( this->computeLoadGToLRotationMtrx(T) ) {
+      force.rotatedWith(T, 'n');
+    }
     //force.times( this->giveMaterial()->give('d') );
 
     answer.resize(0);
@@ -197,7 +201,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
         for ( i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule.getIntegrationPoint(i);
-            this->computeEgdeNMatrixAt(n, gp);
+            this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {

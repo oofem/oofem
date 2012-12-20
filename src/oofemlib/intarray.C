@@ -44,9 +44,7 @@
 #include "datastream.h"
 #include "classtype.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
-#endif
+#include <cstdarg>
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"

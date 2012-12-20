@@ -297,7 +297,7 @@ LIBeam2d :: initializeFrom(InputRecord *ir)
 
 
 void
-LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

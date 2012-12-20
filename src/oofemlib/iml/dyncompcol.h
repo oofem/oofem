@@ -51,9 +51,7 @@ namespace oofem {
 
 
 #ifdef DynCompCol_USE_STL_SETS
- #ifndef __MAKEDEPEND
-  #include <map>
- #endif
+ #include <map>
 #endif
 /**
  * Implementation of sparse matrix stored in compressed column storage.

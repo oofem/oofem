@@ -40,12 +40,10 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-
 #include "structuralms.h"
-#ifndef __MAKEDEPEND
- #include <vector>
- #include <set>
-#endif
+
+#include <vector>
+#include <set>
 
 namespace oofem {
 class GaussPoint;

@@ -36,9 +36,8 @@
 #define alist_h
 
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <cstddef>
-#endif
+
+#include <cstddef>
 
 
 namespace oofem {
@@ -47,14 +46,14 @@ namespace oofem {
  * Class implementing generic list (or more precisely array).
  * It maintains the array of generic pointers to objects of type T using 1-based numbering.
  *
- * This class maintains only the links (pointers) to particular objects, objects themselfs are not contained within
+ * This class maintains only the links (pointers) to particular objects, objects themselves are not contained within
  * this array. They have to be created outside (in memory, usually on heap) and then their pointers can be added to
  * array. This is sometimes called non-intrusive approach. When destructor is called, the linked objects
  * are <em>deleted</em>. To prevent the deletion, objects should be unlinked before deconstructor is called.
  *
  * The links to particular objects in array are stored in pointer array, therefore the access to particular
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
- * existing pointer table must be transfered) and is recommended to set size of the array to the final size.
+ * existing pointer table must be transferred) and is recommended to set size of the array to the final size.
  */
 template< class T >class AList
 {
@@ -104,7 +103,7 @@ public:
     void printYourself() const;
     /**
      * Stores anObject at position i.
-     * Enlarges the receiver if too small and delates the old value if it exists.
+     * Enlarges the receiver if too small and deletes the old value if it exists.
      * @param i Index to put object
      * @param anObject Object to put as position i.
      */

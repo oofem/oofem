@@ -51,6 +51,7 @@
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
+
 #include "cemhydmat.h"
 #include "homogenize.h"
 
@@ -59,9 +60,6 @@
  #include "flotmtrx.h"
  #include "gausspnt.h"
  #include "oofem_limits.h"
- #ifndef __MAKEDEPEND
-  #include <cstdlib>
- #endif
 #endif
 
 namespace oofem {

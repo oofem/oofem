@@ -679,7 +679,7 @@ public:
      * @param i Index of integration rule.
      * @return Requested integration rule.
      */
-    IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
+    virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
     /**
      * Tests if the element implements required extension. ElementExtension type defines
      * the list of all available element extensions.

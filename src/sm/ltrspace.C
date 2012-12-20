@@ -47,9 +47,8 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "rcm2.h"
- #ifndef __MAKEDEPEND
-  #include <Etetrawd.h>
- #endif
+
+ #include <Etetrawd.h>
 #endif
 
 namespace oofem {
@@ -795,7 +794,7 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
 
 
 void
-LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

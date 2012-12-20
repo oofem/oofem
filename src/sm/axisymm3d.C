@@ -436,7 +436,7 @@ Axisymm3d :: SPRNodalRecoveryMI_givePatchType()
 
 
 void
-Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

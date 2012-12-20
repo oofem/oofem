@@ -32,6 +32,7 @@ endif ()
 ######################## Custom paths #################################
 #######################################################################
 set (SLEPC_DIR CACHE PATH "Manual SLEPc directory")
+set (X11_DIR CACHE PATH "Manual X11 directory")
 set (MY_PETSC_DIR CACHE PATH "Manual PETSc directory")
 set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
 set (MPI_DIR CACHE PATH "Manual MPI directory")
@@ -47,7 +48,7 @@ option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
 option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
-    option (USE_SHARED_LIB "Build shared library" ON)
+    option (USE_SHARED_LIB "Build shared library" OFF)
     option (USE_STATIC_LIB "Build static library" OFF)
 endif ()
 # Parallell stuff
@@ -75,6 +76,7 @@ if (USE_PARALLEL)
     add_definitions (-D__PARALLEL_MODE)
     set (USE_MPI ON)
 endif ()
+
 
 #######################################################################
 ######################## Internal libraries ###########################
@@ -156,8 +158,15 @@ if (USE_OOFEG)
     add_definitions (-D__OOFEG)
 
     # Necessary X11 stuff;
-    find_package (X11 REQUIRED)
-    find_library (XAW_LIB Xaw)
+    if (X11_DIR)
+        set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${X11_DIR})
+        find_package (X11 REQUIRED PATHS ${X11_DIR})
+        find_library (XAW_LIB Xaw PATHS ${X11_DIR})
+    else ()
+        find_package (X11 REQUIRED)
+        find_library (XAW_LIB Xaw)
+    endif ()
+
     # Krysls libraries:
     find_library (ELIXIR_LIB elixir PATH "${ELIXIR_DIR}/src")
     find_library (ESI_LIB esi PATH "${ELIXIR_DIR}/src")
@@ -171,7 +180,7 @@ if (USE_OOFEG)
     include_directories ("${ELIXIR_DIR}/include")
     include_directories ("${CKIT_DIR}/include")
 
-    set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${XAW_LIB})
+    set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${X11_Xmu_LIB} ${X11_Xt_LIB} ${XAW_LIB})
     set (MODULE_LIST ${MODULE_LIST} oofeg)
 endif ()
 
@@ -202,7 +211,7 @@ if (USE_PARMETIS)
         find_library (PARMETIS_LIB parmetis PATH "${PARMETIS_DIR}/lib")
         include_directories ("${PARMETIS_DIR}/include")
     endif ()
-    if (${PARMETIS_LIB} STREQUAL "parmetis-NOTFOUND")
+    if (${PARMETIS_LIB} STREQUAL "PARMETIS_LIB-NOTFOUND")
         message (FATAL_ERROR "Parmetis library not found")
     endif ()
     set (EXT_LIBS ${EXT_LIBS} parmetis)
@@ -213,12 +222,12 @@ endif ()
 
 if (USE_SLEPC)
     if (SLEPC_DIR)
-        find_library (SLEPC_LIBS NAMES slepc PATH "${SLEPC_DIR}/lib")
+        find_library (SLEPC_LIBS slepc PATH "${SLEPC_DIR}/lib")
         include_directories ("${SLEPC_DIR}/include")
     else ()
-        find_library (SLEPC_LIBS NAMES slepc)
+        find_library (SLEPC_LIBS slepc)
     endif ()
-    if (${SLEPC_LIBS} STREQUAL "slepc-NOTFOUND")
+    if (${SLEPC_LIBS} STREQUAL "SLEPC_LIBS-NOTFOUND")
         message (FATAL_ERROR "SLEPc library not found")
     endif ()
     set (EXT_LIBS ${EXT_LIBS} ${SLEPC_LIBS})
@@ -230,7 +239,11 @@ endif ()
 if (USE_PETSC)
     find_package (PETSc REQUIRED HINTS "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/conf")
     include_directories ("${MY_PETSC_DIR}/include" "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/include" ${PETSC_INCLUDE_PATH})
-    set (EXT_LIBS ${EXT_LIBS} ${PETSC_PACKAGE_LIBS} "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/libpetsc.so")
+    find_library (PETSC_LIB petsc PATH "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/") 
+    if (${PETSC_LIB} STREQUAL "PETSC_LIB-NOTFOUND")
+        message (FATAL_ERROR "PETSc library not found")
+    endif ()
+    set (EXT_LIBS ${EXT_LIBS} ${PETSC_LIB} ${PETSC_PACKAGE_LIBS})
     set (MODULE_LIST ${MODULE_LIST} PETSc)
     set (USE_MPI ON)
     add_definitions (-D__PETSC_MODULE)
@@ -266,7 +279,7 @@ endif ()
 
 if (USE_TINYXML)
     find_library (TINYXML_LIB tinyxml DOC "TinyXML library")
-    if (${TINYXML_LIB} STREQUAL "tinyxml-NOTFOUND")
+    if (${TINYXML_LIB} STREQUAL "TINYXML_LIB-NOTFOUND")
         message (FATAL_ERROR "TinyXML not found")
     endif ()
     add_definitions (-D__TINYXML_MODULE -DTIXML_USE_STL)
@@ -298,7 +311,7 @@ if (USE_SPOOLES)
     else ()
         find_library (SPOOLES_LIB spooles DOC "SPOOLES library")
     endif ()
-    if (${SPOOLES_LIB} STREQUAL "spooles-NOTFOUND")
+    if (${SPOOLES_LIB} STREQUAL "SPOOLES_LIB-NOTFOUND")
         message (FATAL_ERROR "SPOOLES not found")
     endif ()
     add_definitions (-D__SPOOLES_MODULE)
@@ -325,6 +338,8 @@ endif ()
 #######################################################################
 site_name (HOST_NAME)
 set (HOST_TYPE "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}") # This should be renamed TARGET_TYPE.
+set (BUILDNAME "OOFEM(${MODULE_LIST})-${HOST_TYPE}-${HOST_NAME}")
+
 check_include_files ("sys/time.h" HAVE_SYS_TIME_H)
 check_include_files ("time.h" HAVE_TIME_H)
 if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
@@ -348,6 +363,7 @@ configure_file (
   "${oofem_SOURCE_DIR}/src/oofemcfg.h.in"
   "${oofem_BINARY_DIR}/oofemcfg.h"
   )
+
 
 #######################################################################
 ######################## Targets ######################################
@@ -506,10 +522,13 @@ os.chdir(sys.argv[2])
 if sys.argv[4] == 'p':
     files = glob.glob(sys.argv[1]+'.[0-9]*')
     mpicommand = 'mpirun -np '+str(len(files)) + ' '
+    parallel = ' -p'
 else:
     files = [sys.argv[1]]
     mpicommand = ''
-if os.system(mpicommand + sys.argv[3] +' -f '+sys.argv[1]+' -l 2'):
+    parallel = ''
+print('Running: ' + mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2')
+if os.system(mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2'):
     exit(1)
 else:
     for f in files:
@@ -520,14 +539,17 @@ exit(0)
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
-    add_test (NAME 4test_test COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd} -ksp_rtol 1.e-15" "p")
-    add_test (NAME bar_test COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
-    add_test (NAME barnl_test COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
-    add_test (NAME brazil_test COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME brazil3d_test COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd} -ksp_rtol 1.e-15 -ksp_type cg" "p")
-    add_test (NAME dyn_bar01_test COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
-    add_test (NAME dyn_bar02_test COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
-    add_test (NAME dyn_bar03_test COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
+    add_test (NAME 4test_test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd} -ksp_rtol 1.e-15" "p")
+    add_test (NAME bar_test_np4 COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
+    add_test (NAME barnl_test_np4 COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
+    add_test (NAME barnl_test_np2 COMMAND ${test_cmd} barnl2.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
+    add_test (NAME brazil_test_np2 COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
+    add_test (NAME brazil_test_np4 COMMAND ${test_cmd} brazil_2d_nl4.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
+    add_test (NAME brazil_test_np7 COMMAND ${test_cmd} brazil_2d_nl7.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
+    add_test (NAME brazil3d_test_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd} -ksp_rtol 1.e-15 -ksp_type cg" "p")
+    add_test (NAME dyn_bar01_test_np2 COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
+    add_test (NAME dyn_bar02_test_np2 COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
+    add_test (NAME dyn_bar03_test_np2 COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
     # TODO: The tests requires different commands, and the files and named inconsistently. Some slight changes to naming could change this.
     # The flags are a bit trickier. It needs to be built into the input file.
     #file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
@@ -571,7 +593,7 @@ set (CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSI
 
 ### general settings
 set (CPACK_PACKAGE_NAME "oofem")
-set (CPACK_PACKAGE_VENDOR "OOFEM developement team")
+set (CPACK_PACKAGE_VENDOR "OOFEM development team")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Object Oriented Finite Element")
 #set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README")
 set (CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README")

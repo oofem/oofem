@@ -42,11 +42,8 @@
 #include "error.h"
 #include "compiler.h"
 
-#ifndef __MAKEDEPEND
- #include <cmath>
- #include <cfloat> // For _isnan
-#endif
-#include "error.h"
+#include <cmath>
+#include <cfloat> // For _isnan
 
 namespace oofem {
 

@@ -81,8 +81,6 @@ protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
     virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
-    GaussPoint *giveMiddleGaussPoint();
-
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);

@@ -36,9 +36,8 @@
 #define tdictionary_h
 
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <cstdlib> // for NULL
-#endif
+
+#include <cstdlib> // for NULL
 
 namespace oofem {
 template< class Key, class T >class TDictionaryIterator;

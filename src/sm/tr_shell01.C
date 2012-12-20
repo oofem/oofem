@@ -33,6 +33,8 @@
  */
 
 #include "tr_shell01.h"
+#include "fei2dtrlin.h"
+#include "contextioerr.h"
 
 #ifdef __OOFEG
  #include "node.h"
@@ -54,27 +56,31 @@ TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 IRResultType
 TR_SHELL01 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     // proc tady neni return = this...   ??? termitovo
     this->StructuralElement :: initializeFrom(ir);
 
-    int val = -1;
+    /*
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_nip, "nip"); // Macro
     if ( val != -1 ) {
         _error("key word NIP is not allowed for element TR_SHELL01");
     }
 
+
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_TrPlaneStrRot_niprot, "niprot"); // Macro
     if ( val != -1 ) {
         _error("key word NIProt is not allowed for element TR_SHELL01");
     }
+    */
 
     //
     plate->initializeFrom(ir);
     membrane->initializeFrom(ir);
 
+    // check the compatibility of irules of plate and membrane
+    if (plate->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints()) {
+      OOFEM_ERROR ("TR_SHELL01: incompatible integration rules detected");
+    }
+    
     return IRRT_OK;
 }
 
@@ -85,10 +91,21 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 // returns characteristics vector of receiver accordind to mtrx
 //
 {
-    FloatArray aux;
+  FloatArray aux;
+  FloatMatrix R;
 
     plate->giveCharacteristicVector(answer, mtrx, mode, tStep);
+    if ( answer.isNotEmpty() ) {
+      if (plate->giveRotationMatrix(R, EID_MomentumBalance)) {
+	answer.rotatedWith(R, 't');
+      }
+    }
     membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
+    if ( aux.isNotEmpty() ) {
+      if (membrane->giveRotationMatrix(R, EID_MomentumBalance)) {
+	aux.rotatedWith(R, 't');
+      }
+    }
 
     answer.add(aux);
 }
@@ -99,10 +116,17 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-    FloatMatrix aux;
+  FloatMatrix aux, R;
 
     plate->giveCharacteristicMatrix(answer, mtrx, tStep);
+    if (plate->giveRotationMatrix(R, EID_MomentumBalance)) {
+      answer.rotatedWith(R);
+    }
+
     membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
+    if (membrane->giveRotationMatrix(R, EID_MomentumBalance)) {
+     aux.rotatedWith(R);
+    }
 
     answer.add(aux);
 }
@@ -126,47 +150,220 @@ TR_SHELL01 :: updateYourself(TimeStep *tStep)
 }
 
 
+Interface *
+TR_SHELL01 :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return ( NodalAveragingRecoveryModelInterface * ) this;
+    } else if ( interface == ZZErrorEstimatorInterfaceType ) {
+        return ( ZZErrorEstimatorInterface * ) this;
+    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
+        return ( ZZRemeshingCriteriaInterface * ) this;
+    }
+
+
+    return NULL;
+}
+
+double
+TR_SHELL01 :: computeVolumeAround(GaussPoint *gp) 
+{
+  return plate->computeVolumeAround(gp);
+}
+
+int
+TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+{
+    if ( type == IST_ShellForceMomentumTensor ) {
+      FloatArray aux;
+      // gp is from plate part (the plate irule is used as default rule for this master element)
+      GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+      
+      plate->giveIPValue(answer, gp, IST_ShellForceMomentumTensor, atTime);
+      membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, atTime);
+      answer.add(aux);
+      return 1;
+    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+      FloatArray aux;
+      GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+
+      plate->giveIPValue(answer, gp, IST_ShellStrainCurvatureTensor, atTime);
+      membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, atTime);
+      answer.add(aux);
+
+      return 1;
+    } else {
+      return StructuralElement::giveIPValue(answer, gp, type, atTime);
+    }
+}
+
+
+int
+TR_SHELL01 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
+{
+  if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
+    return 12;
+  } else if ((type == IST_ErrorIndicatorLevel) || (type == IST_InternalStressError)) {
+    return 1;
+  } else {
+    return StructuralElement::giveIPValueSize(type, gp);
+  }
+}
+
+
+int
+TR_SHELL01 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
+{
+  if ( ( type == IST_ShellForceMomentumTensor || type == IST_ShellStrainCurvatureTensor ) ) {
+    answer.resize(12);
+    for (int i=1; i<=12; i++) answer.at(i)=i;
+    return 1;
+  } else {
+    return StructuralElement::giveIntVarCompFullIndx(answer, type);
+  }
+}
+
+
+//
+// The element interface required by ZZNodalRecoveryModel
+//
+int
+TR_SHELL01 :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+
+  return giveIPValueSize (type, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0));
+}
+
+
+void
+TR_SHELL01 :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type)
+// evaluates N matrix (interpolation estimated stress matrix)
+// according to Zienkiewicz & Zhu paper
+// N(nsigma, nsigma*nnodes)
+// Definition : sigmaVector = N * nodalSigmaVector
+{
+    FloatArray n;
+    FEI2dTrLin interp_lin(1, 2);
+    interp_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(3);
+    answer.zero();
+    answer.at(1) = n.at(1);
+    answer.at(2) = n.at(2);
+    answer.at(3) = n.at(3);
+}
+
+double 
+TR_SHELL01::ZZRemeshingCriteriaI_giveCharacteristicSize() 
+{
+  return sqrt(plate->computeArea() * 2.0);
+}
+
+
+
+//
+// The element interface required by NodalAveragingRecoveryModel
+//
+void
+TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                       InternalStateType type, TimeStep *tStep)
+{
+  this->giveIPValue(answer, NULL, type, tStep);
+}
+
+
+void
+TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+                                                      InternalStateType type, TimeStep *tStep)
+{
+  answer.resize(0);
+}
+
+
+
+
+
 void
 TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     FloatArray v, aux;
-    GaussPoint *plateGP    = plate->giveMiddleGaussPoint();
-    GaussPoint *membraneGP = membrane->giveMiddleGaussPoint();
-
-
+    GaussPoint *gp, *membraneGP;
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 #else
     fprintf(file, "element %d :\n", number);
 #endif
 
-    fprintf(file, "  GP %2d.%-2d :", 1, 1);
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+      gp  = iRule->getIntegrationPoint(i);
+      fprintf(file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber());
+      membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber()-1);
+      // Strain - Curvature
+      plate->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
+      membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
+      v.add(aux);
 
-    // Strain - Curvature
-    plate->giveIPValue(v, plateGP, IST_ShellStrainCurvatureTensor, tStep);
-    membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
-    v.add(aux);
-
-    fprintf(file, "  strains ");
-    fprintf( file,
-            " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-            v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-            v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
-
-    // Strain - Curvature
-    plate->giveIPValue(v, plateGP, IST_ShellForceMomentumTensor, tStep);
-    membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
-    v.add(aux);
-
-    fprintf(file, "\n              stresses");
-    fprintf( file,
-            " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-            v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-            v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
-
-    fprintf(file, "\n");
+      fprintf(file, "  strains ");
+      fprintf( file,
+	       " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+	       v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+	       v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+      
+      // Strain - Curvature
+      plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
+      membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
+      v.add(aux);
+      
+      fprintf(file, "\n              stresses");
+      fprintf( file,
+	       " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+	       v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+	       v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+      
+      fprintf(file, "\n");
+    }
 }
+
+
+
+contextIOResultType
+TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+  contextIOResultType iores;
+  if ( ( iores =  StructuralElement::saveContext (stream, mode, obj) ) != CIO_OK ) {
+    THROW_CIOERR(iores);
+  }
+  if ( ( iores =  this->plate->saveContext(stream, mode, obj) ) != CIO_OK ) { 
+    THROW_CIOERR(iores);
+  }
+    if ( ( iores = this->membrane->saveContext(stream, mode, obj) ) != CIO_OK ) {;
+    THROW_CIOERR(iores);
+  }
+  return iores;
+}
+
+contextIOResultType
+TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+  contextIOResultType iores;
+  if ( ( iores =  StructuralElement::restoreContext (stream, mode, obj) ) != CIO_OK ) {;
+    THROW_CIOERR(iores);
+  }
+    if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
+     THROW_CIOERR(iores);
+  }
+   if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {;
+    THROW_CIOERR(iores);
+  }
+  return iores;
+}
+
+
+
 
 
 //
@@ -244,76 +441,64 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     }
 }
 
-// void
-// CCTPlate  :: drawScalar(oofegGraphicContext &context)
-// {
-//   int i, indx, result = 0;
-//   WCRec p [ 3 ];
-//   GraphicObj *tr;
-//   TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-//   FloatArray v1, v2, v3;
-//   double s [ 3 ], defScale;
-//   IntArray map;
-//
-//   if ( !context.testElementGraphicActivity(this) ) {
-//     return;
-//   }
-//
-//   if ( !this->giveMaterial()->isActivated(tStep) ) {
-//     return;
-//   }
-//
-//   if ( context.giveIntVarMode() == ISM_recovered ) {
-//     result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-//     result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-//     result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-//   } else if ( context.giveIntVarMode() == ISM_local ) {
-//     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-//     result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
-//     v2 = v1;
-//     v3 = v1;
-//     result *= 3;
-//   }
-//
-//   if ( result != 3 ) {
-//     return;
-//   }
-//
-//   this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-//
-//   if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-//     return;
-//   }
-//
-//   s [ 0 ] = v1.at(indx);
-//   s [ 1 ] = v2.at(indx);
-//   s [ 2 ] = v3.at(indx);
-//
-//   EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-//
-//   if ( context.getScalarAlgo() == SA_ISO_SURF ) {
-//     for ( i = 0; i < 3; i++ ) {
-//       if ( context.getInternalVarsDefGeoFlag() ) {
-//  // use deformed geometry
-//  defScale = context.getDefScale();
-//  p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-//  p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-//  p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
-//       } else {
-//  p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-//  p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-//  p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
-//       }
-//     }
-//
-//     //EASValsSetColor(gc.getYieldPlotColor(ratio));
-//     context.updateFringeTableMinMax(s, 3);
-//     tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
-//     EGWithMaskChangeAttributes(LAYER_MASK, tr);
-//     EMAddGraphicsToModel(ESIModel(), tr);
-//   }
-// }
-//
+void
+TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
+{
+  int i, indx, result = 0;
+  WCRec p [ 3 ];
+  GraphicObj *tr;
+  TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+  FloatArray v1, v2, v3;
+  double s [ 3 ], defScale;
+  IntArray map;
+  if ( !context.testElementGraphicActivity(this) ) {
+    return;
+  }
+  
+  if ( !this->giveMaterial()->isActivated(tStep) ) {
+    return;
+  }
+
+  if ( context.giveIntVarMode() == ISM_recovered ) {
+    result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
+    result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
+    result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
+  } else if ( context.giveIntVarMode() == ISM_local ) {
+    return;
+  }
+
+  result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+  
+  if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    return;
+  }
+
+  s [ 0 ] = v1.at(indx);
+  s [ 1 ] = v2.at(indx);
+  s [ 2 ] = v3.at(indx);
+  EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+  if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    for ( i = 0; i < 3; i++ ) {
+      if ( context.getInternalVarsDefGeoFlag() ) {
+	// use deformed geometry
+	defScale = context.getDefScale();
+	p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+	p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+	p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+      } else {
+	p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+	p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+	p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+      }
+    }
+    //     //EASValsSetColor(gc.getYieldPlotColor(ratio));
+    context.updateFringeTableMinMax(s, 3);
+    tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
+    EGWithMaskChangeAttributes(LAYER_MASK, tr);
+    EMAddGraphicsToModel(ESIModel(), tr);
+  }
+}
+
 /*
  * void
  * CCTPlate  :: drawInternalState (oofegGraphicContext & gc)

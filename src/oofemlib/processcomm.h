@@ -44,9 +44,7 @@
  #include "flotmtrx.h"
  #include "flotarry.h"
 
- #ifndef __MAKEDEPEND
-  #include <mpi.h>
- #endif
+ #include <mpi.h>
 
 namespace oofem {
 /**

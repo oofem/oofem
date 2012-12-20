@@ -108,10 +108,12 @@ gp_re = re.compile(r"""
 gpstress_re = re.compile (r"""[ ]stresses\s*([\s+-e\d]+)""",re.X)
 gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
 gpstatus_re = re.compile (r"""status\s.*""", re.X)
+gpDamage_re = re.compile (r"""damage\s*([\s+-e\d]+)""",re.X)
 gpstate_re = re.compile (r"""state\s*([\s+-e\d]+)""",re.X)
 gpflow_re = re.compile (r"""flow\s*([\s+-e\d]+)""",re.X)
 gpDoH_re = re.compile (r"""DoH\s*([\s+-e\d]+)""",re.X)
 gpHeatPower_re = re.compile (r"""HeatPower\s*([\s+-e\d]+)""",re.X)
+
 
 beamrec_re  = re.compile (r"""
         displacements|forces
@@ -146,7 +148,7 @@ loadlevel_re = re.compile (r"""
 include_re = re.compile (r"""
         ^\#(INCLUDE|include)\s+
         ([\w\.]+)
-	\s*
+        \s*
         """, re.X)
 
 # returns the value corresponding to given keyword and record
@@ -399,6 +401,12 @@ def match_gpsubrec (context, aline):
         check_element_rec (context, 'status', aline)
         if debug: print "     status rec %s" % aline
         return 1
+    #get omega (damage)
+    ppmatch = gpDamage_re.search(aline)
+    if ppmatch:
+        check_element_rec (context, 'damage', aline)
+        if debug: print "     damage rec %s" % aline
+        return 1
     #state variables in transport problems
     ppmatch = gpstate_re.search(aline)
     if ppmatch:
@@ -437,7 +445,7 @@ def match_singlegprec (context, line):
             if match:
                 return line;
             result = match_gpsubrec (context, line)
-            if not result == 1 :
+            if result != 1 :
                 return line
     return line
 
@@ -605,7 +613,7 @@ def process_file (infilename, parentfilename):
 
     if begin==0:
         print "No extrator records found"
-	return 2
+        return 2
 
     end=0
     userrec = []
@@ -616,13 +624,12 @@ def process_file (infilename, parentfilename):
             #print "Processing include ", match.group(2)
             recursion_level = recursion_level+1
             if (recursion_level < 2):
-
                 result=result+process_file (match.group(2), context.infilename)
                 context.userrec.append (('include',result)) #remember result
-		recursion_level = recursion_level-1
+                recursion_level = recursion_level-1
             else:
                 print "Allowed recursion level reached, file:",match.group(2)
-		return 2
+                return 2
 
         match = parse_input_rec (context, line)
         if match:
@@ -635,7 +642,7 @@ def process_file (infilename, parentfilename):
 
     if not end:
         print "No end record found"
-	return 2
+        return 2
 
     if debug: print userrec
     context.infile.close()
@@ -661,7 +668,7 @@ def process_file (infilename, parentfilename):
         return result+check_results(context, tolerance)
     elif mode =='e':
         print_step_results(context)
-	return 0
+        return 0
 
 
 

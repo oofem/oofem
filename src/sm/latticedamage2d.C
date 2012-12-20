@@ -95,6 +95,8 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, wf, IFT_LatticeDamage2d_wf, "wf"); // Macro
         wfOne = 0.15 * wf;
         IR_GIVE_OPTIONAL_FIELD(ir, wfOne, IFT_LatticeDamage2d_wfOne, "wf1"); // Macro
+        e0OneMean = 0.3 * e0Mean;
+        IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, IFT_LatticeDamage2d_e0OneMean, "e01"); // Macro
     } else {
         _error("Unknown softening type");
     }
@@ -107,14 +109,12 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     }
 
     int equivType = 0;
-    paramDuct = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, equivType, IFT_LatticeDamage2d_equivType, "equivtype"); // Macro
     e0Mean = 0;
-    IR_GIVE_FIELD(ir, e0Mean, IFT_LatticeDamage2d_e0, "e0"); // Macro
+    IR_GIVE_FIELD(ir, e0Mean, IFT_LatticeDamage2d_e0Mean, "e0"); // Macro
 
     IR_GIVE_FIELD(ir, coh, IFT_LatticeDamage2d_coh, "coh"); // Macro
     IR_GIVE_FIELD(ir, ec, IFT_LatticeDamage2d_ec, "ec"); // Macro
-    IR_GIVE_FIELD(ir, paramDuct, IFT_LatticeDamage2d_paramDuct, "duct"); // Macro
 
     return IRRT_OK;
 }
@@ -268,18 +268,6 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
 }
 
 
-double
-LatticeDamage2d :: computeDuctilityMeasure(const FloatArray &strain, GaussPoint *gp)
-{
-    double ductilityMeasure = 1.;
-    if ( strain.at(1) < 0 ) {
-        ductilityMeasure = sqrt( pow(strain.at(1), 2.) * pow(this->paramDuct, 2.) / pow(this->ec, 2.) + pow(strain.at(2), 2.) ) /
-                           sqrt( pow(strain.at(1), 2.) + pow(strain.at(2), 2.) );
-    }
-
-    return ductilityMeasure;
-}
-
 MaterialStatus *
 LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 {
@@ -292,13 +280,13 @@ LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status;
 
-    status = (MaterialStatus*)gp->giveMaterialStatus(this->giveClassID());
+    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveClassID() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
 
         if ( status != NULL ) {
-            gp->setMaterialStatus(status, this->giveClassID());
+            gp->setMaterialStatus( status, this->giveClassID() );
             this->_generateStatusVariables(gp);
         }
     }
@@ -322,11 +310,8 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 {
     LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
 
-    if ( gp->giveElement()->giveNumber() == 3299 ) {
-        printf("Debug\n");
-    }
-
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
+    status->setE0(e0);
 
     FloatArray strainVector, reducedStrain, reducedStrainOld;
 
@@ -685,48 +670,71 @@ LatticeDamage2d :: giveFullCharacteristicVector(FloatArray &answer,
 }
 
 int
-LatticeDamage2d::giveIPValue(FloatArray& answer,
-                         GaussPoint* gp,
-                         InternalStateType type,
-                         TimeStep* atTime)
+LatticeDamage2d :: giveIPValue(FloatArray &answer,
+                               GaussPoint *gp,
+                               InternalStateType type,
+                               TimeStep *atTime)
 {
-    LatticeDamage2dStatus *status = (LatticeDamage2dStatus*) this -> giveStatus (gp);
-    if (type == IST_CrackStatuses){
+    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    if ( type == IST_CrackStatuses ) {
         answer.resize(1);
-        answer(0) = status->giveCrackFlag();
+        answer.at(1) = status->giveCrackFlag();
         return 1;
+    } else if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) ) {
+        answer.resize(1);
+        answer.at(1) = status->giveDamage();
+        return 1;
+    } else if ( ( type == IST_DissWork ) ) {
+        answer.resize(1);
+        answer.at(1) = status->giveDissipation();
+        return 1;
+    } else if ( ( type == IST_DeltaDissWork ) ) {
+        answer.resize(1);
+        answer.at(1) = status->giveDeltaDissipation();
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
-    else return StructuralMaterial::giveIPValue(answer, gp, type, atTime);
 }
 
 int
-LatticeDamage2d::giveIPValueSize(InternalStateType type,
-                              GaussPoint* gp)
+LatticeDamage2d :: giveIPValueSize(InternalStateType type,
+                                   GaussPoint *gp)
 {
-    if (type == IST_CrackStatuses) return 1;
-    else return StructuralMaterial::giveIPValueSize (type, gp);
+    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValueSize(type, gp);
+    }
 }
 
 int
-LatticeDamage2d::giveIntVarCompFullIndx(IntArray& answer,
-                                    InternalStateType type, MaterialMode mmode)
+LatticeDamage2d :: giveIntVarCompFullIndx(IntArray &answer,
+                                          InternalStateType type, MaterialMode mmode)
 {
-    if(type == IST_CrackStatuses) {
-        answer.resize (1);
+    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+        answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else
-        return StructuralMaterial::giveIntVarCompFullIndx (answer, type, mmode);
+    } else if ( ( type == IST_DamageTensor ) ) {
+        answer.resize(6);
+        answer.zero();
+        answer.at(1) = 1;
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+    }
 }
 
 InternalStateValueType
-LatticeDamage2d::giveIPValueType (InternalStateType type)
+LatticeDamage2d :: giveIPValueType(InternalStateType type)
 {
-    if(type==IST_CrackStatuses) {
+    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
         return ISVT_SCALAR;
-    }
-    else{
-        return StructuralMaterial::giveIPValueType (type);
+    } else if ( ( type == IST_DamageTensor ) ) {
+        return ISVT_TENSOR_S3;
+    } else {
+        return StructuralMaterial :: giveIPValueType(type);
     }
 }
 

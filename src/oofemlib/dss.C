@@ -42,9 +42,8 @@
  #include "element.h"
  #include "dofmanager.h"
  #include "DSSolver.h"
- #ifndef __MAKEDEPEND
-  #include <set>
- #endif
+
+ #include <set>
 
 namespace oofem {
 DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()

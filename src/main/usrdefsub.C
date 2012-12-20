@@ -35,13 +35,11 @@
 #include "usrdefsub.h"
 #include "classfactory.h"
 #include "compiler.h" // to supply missing strncasecmp on some platforms
-#ifndef __MAKEDEPEND
- #include <string.h>
- #ifdef HAVE_STRINGS_H
-  #include <strings.h>
- #endif
-#endif
 
+#include <cstring>
+#ifdef HAVE_STRINGS_H
+ #include <strings.h>
+#endif
 
 // __OOFEMLIB_MODULE
 #include "node.h"

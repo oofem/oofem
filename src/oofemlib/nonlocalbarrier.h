@@ -86,9 +86,17 @@ public:
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) = 0;
 
+    /**
+     * Abstract method calculating the minimum distance of the Gauss Point
+     * from the nonlocal boundaries
+     * @param coords Coordinates of the Gauss Point
+     * @param maxPossibleDistance Distance from the boundary beyond which the nonlocal radius(as it is interpreted in each weight function) becomes equal to the user-defined
+     * @return the minimum value of the minimum distance from nonlocal boundary and maxPossibleDistance
+     */
+    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance) = 0;
+
     virtual const char *giveClassName() const { return "NonlocalBarrier"; }
     virtual classType giveClassID() const { return NonlocalBarrierClass; }
 };
 } // end namespace oofem
 #endif // nonlocalbarrier_h
-

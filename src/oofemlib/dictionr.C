@@ -39,9 +39,7 @@
 #include "contextioerr.h"
 #include "contextmode.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdlib>
-#endif
+#include <cstdlib>
 
 namespace oofem {
 Dictionary :: ~Dictionary()

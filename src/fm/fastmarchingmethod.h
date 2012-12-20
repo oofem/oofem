@@ -39,11 +39,9 @@
 #include "flotarry.h"
 #include "mathfem.h"
 
-#ifndef __MAKEDEPEND
- #include <vector>
- #include <list>
- #include <queue>
-#endif
+#include <vector>
+#include <list>
+#include <queue>
 
 namespace oofem {
 class Domain;

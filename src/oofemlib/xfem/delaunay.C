@@ -40,10 +40,8 @@
 #include "node.h"
 #include "mathfem.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdlib>
- #include <map>
-#endif
+#include <cstdlib>
+#include <map>
 
 namespace oofem {
 bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3)

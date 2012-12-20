@@ -119,7 +119,7 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "IDNLMaterial"; }
-    virtual classType giveClassID() const { return IDNLMaterialClass;}
+    virtual classType giveClassID() const { return IDNLMaterialClass; }
     virtual const char *giveInputRecordName() const { return "idmnl1"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -127,6 +127,25 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    /**
+     * Function used in the Stress based nonlocal variation.In this function the ratio of the first two
+     * eigenvalues is and the angle of the first eigenvector with respect to the horizontal axis is calculated
+     * @param[out] angle Value of the angle  of the first eigenvector with respect to the x-axis (radians)
+     * @param[out] ratio Value of the ratio of the second over the first eigenvalue of the stress tensor (sigma2/sigma1)
+     * @param gp Gauss Point whose nonlocal interactions domain is modified
+     * @param flag showing whether stress based averaging is activated (flag=1).For zero strain states the stress-based averaging is deactivated (flag=0)
+     */
+    void computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoint *gp, double &flag);
+    /**
+     * Function used to compute the new weight based on stress-based averaging
+     * @param angle Value of the angle  of the first eigenvector with respect to the x-axis (radians)
+     * @param ratio Value of the ratio of the second over the first eigenvalue of the stress tensor (sigma2/sigma1)
+     * @param gp Gauss Point whose nonlocal interactions domain is modified
+     * @param jGp Gauss Point which contributes to the nonlocal interactions domain of gp
+     * @return new weight based on stress-based averaging
+     */
+    double computeStressBasedWeight(double &angle, double &ratio, GaussPoint *gp, GaussPoint *jGp, double &weight);
+
     void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { IsotropicDamageMaterial1 :: computeEquivalentStrain(kappa, strain, gp, tStep); }
 

@@ -44,11 +44,9 @@
 #include "material.h"
 #include "usrdefsub.h"
 
-#ifndef __MAKEDEPEND
- #include <string>
- #include <sstream>
- #include <fstream>
-#endif
+#include <string>
+#include <sstream>
+#include <fstream>
 
 #ifdef __VTK_MODULE
  #include <vtkPoints.h>
@@ -410,6 +408,10 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     continue;                                  // composite cells exported individually
                 }
 
+                if ( !elem-> isActivated(tStep) ) {                  //skip inactivated elements
+                    continue;
+                }
+                
 #ifdef __PARALLEL_MODE
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
@@ -713,6 +715,10 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
             continue;                                    // composite cells exported individually
         }
 
+        if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {                  //skip inactivated elements
+            continue;
+        }
+        
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
@@ -1071,12 +1077,17 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
 
     dofIDMask.resize(0);
     if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
+        dofIDMask.setValues(3, (int)Undef, (int) Undef, (int) Undef);
         for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-            id = dman->giveDof(j)->giveDofID();
-            if ( ( id == V_u ) || ( id == D_u ) || ( id == V_v ) || ( id == D_v ) || ( id == V_w ) || ( id == D_w ) ) {
-                dofIDMask.followedBy(id);
-            }
-        }
+	  id = dman->giveDof(j)->giveDofID();
+	  if ( ( id == V_u ) || ( id == D_u ) ) {
+	    dofIDMask.at(1) = id;
+	  } else if ( ( id == V_v ) || ( id == D_v ) ) {
+	    dofIDMask.at(2) = id;
+	  } else if ( ( id == V_w ) || ( id == D_w ) ) {
+	    dofIDMask.at(3) = id;
+	  }
+	}
         answer.resize(3);
     } else if ( type == FluxVector ) {
         dofIDMask.followedBy(C_1);
@@ -1222,7 +1233,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
             elem = d->giveElement(ielem);
 
             if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
-                    || this->isElementComposite(elem) ) { // composite cells exported individually
+                    || this->isElementComposite(elem) || !elem-> isActivated(tStep) ) { // composite cells exported individually
                 continue;
             }
 
@@ -1325,7 +1336,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region,
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( (( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ))
-                    || this->isElementComposite(elem) ) { // composite cells exported individually
+                    || this->isElementComposite(elem) || !elem-> isActivated(tStep) ) { // composite cells exported individually
                 continue;
             }
 #ifdef __PARALLEL_MODE

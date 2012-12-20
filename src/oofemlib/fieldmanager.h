@@ -36,9 +36,8 @@
 #define fieldmanager_h
 
 #include "field.h"
-#ifndef __MAKEDEPEND
- #include <map>
-#endif
+
+#include <map>
 
 namespace oofem {
 

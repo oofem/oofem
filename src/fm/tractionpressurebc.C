@@ -49,12 +49,7 @@ TractionPressureBC :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    GeneralBoundaryCondition :: initializeFrom(ir);
-
-    return IRRT_OK;
+    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 int

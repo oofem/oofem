@@ -54,9 +54,7 @@
 #include "feinterpol3d.h"
 #include "loadtime.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
-#endif
+#include <cstdio>
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :

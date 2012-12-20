@@ -140,7 +140,7 @@ Quad1PlaneStrain :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
-Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *

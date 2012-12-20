@@ -297,7 +297,7 @@ Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 
 
 void
-Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
+Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /*
      *

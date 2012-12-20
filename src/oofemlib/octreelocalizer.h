@@ -40,10 +40,8 @@
 #include "alist.h"
 #include "intarray.h"
 
-#ifndef __MAKEDEPEND
- #include <set>
- #include <list>
-#endif
+#include <set>
+#include <list>
 
 namespace oofem {
 template <class T> class AList;

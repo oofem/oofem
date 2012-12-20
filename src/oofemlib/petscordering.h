@@ -40,9 +40,8 @@
  #include "appordering.h"
  #include "intarray.h"
  #include "dofmanager.h"
- #ifndef __MAKEDEPEND
-  #include <map>
- #endif
+
+ #include <map>
 
 namespace oofem {
 class PetscOrdering_Base : public ApplicationOrdering

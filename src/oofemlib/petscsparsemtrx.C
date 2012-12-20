@@ -39,12 +39,10 @@
 #include "activebc.h"
 #include "element.h"
 
-#ifndef __MAKEDEPEND
- #include <set>
- #include <vector>
- #include <petscksp.h>
- #include <petscvec.h>
-#endif
+#include <set>
+#include <vector>
+#include <petscksp.h>
+#include <petscvec.h>
 
 namespace oofem {
 SparseMtrx *

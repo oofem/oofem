@@ -42,11 +42,9 @@
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
 
-#ifndef __MAKEDEPEND
- #include <cstring>
- #include <cstdlib>
- #include <cstdarg>
-#endif
+#include <cstring>
+#include <cstdlib>
+#include <cstdarg>
 
 namespace oofem {
 Dof :: Dof(int i, DofManager *aNode, DofIDItem id)

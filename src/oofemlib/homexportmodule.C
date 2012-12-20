@@ -37,9 +37,8 @@
 #include "structuralelement.h"
 #include "materialinterface.h"
 #include "gausspnt.h"
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+
+#include <vector>
 
 namespace oofem {
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
@@ -118,7 +117,8 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     } else {
         StructuralElement *structElem;
         //int nnodes = d->giveNumberOfDofManagers();
-        FloatArray VecStrain, VecStress, VecEigStrain, SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr;
+        FloatArray VecStrain, VecStress, VecEigStrain, SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
+        double sumDamage = 0.;
         //stress and strain vectors are always in global c.s.
         SumStrain.zero(); //xx, yy, zz, yz, zx, xy
         SumStress.zero();
@@ -139,6 +139,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                     //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
+                    elem->giveIPValue(damage, gp, IST_DamageTensor, tStep);
                     elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
@@ -169,7 +170,10 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                     VecStrain.times(dV);
                     VecStress.times(dV);
                     VecEigStrain.times(dV);
-
+                    if(damage.giveSize()){//only for models with damage
+                        sumDamage += damage.at(1)*dV;
+                    }
+                    
                     for ( j = 0; j < 6; j++ ) {
                         index = Mask(j); //indexes in Mask from 1
                         if ( index ) {
@@ -189,10 +193,11 @@ HOMExportModule :: doOutput(TimeStep *tStep)
             }
         }
 
-        //average
+        //averaging
         SumStrain.times(1. / VolTot * this->scale);
         SumEigStrain.times(1. / VolTot * this->scale);
         SumStress.times(1. / VolTot * this->scale);
+        sumDamage *= (1. / VolTot);
         //SumStrain.printYourself();
         //SumEigStrain.printYourself();
         //SumStress.printYourself();
@@ -212,6 +217,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         }
 
         fprintf(this->stream, "Vol %06.5e ", VolTot);
+        fprintf(this->stream, "AvrDamage %06.5e ", sumDamage);
         fprintf(this->stream, "\n");
     }
     fflush(this->stream);

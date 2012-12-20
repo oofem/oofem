@@ -34,10 +34,9 @@
 
 #include "logger.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
- #include <cstdlib>
-#endif
+#include <cstdio>
+#include <cstdlib>
+
 
 namespace oofem {
 /**
@@ -58,9 +57,7 @@ void oofem_exit(int code)
 /*
  * #ifndef HAVE_MACRO_VA_ARGS
  *
- *#ifndef __MAKEDEPEND
  *#include <cstdarg>
- *#endif
  *
  *
  *

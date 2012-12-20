@@ -978,7 +978,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
 
 
 void
-LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

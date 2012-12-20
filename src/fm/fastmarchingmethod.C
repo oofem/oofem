@@ -39,9 +39,7 @@
 #include "element.h"
 #include "conTable.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdlib>
-#endif
+#include <cstdlib>
 
 namespace oofem {
 void

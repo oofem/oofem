@@ -35,9 +35,7 @@
 #ifndef buffereddatareader_h
 #define buffereddatareader_h
 
-#ifndef __MAKEDEPEND
- #include <string>
-#endif
+#include <string>
 
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"

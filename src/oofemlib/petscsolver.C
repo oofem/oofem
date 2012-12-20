@@ -40,12 +40,10 @@
  #include "flotarry.h"
  #include "verbose.h"
 
- #ifndef __MAKEDEPEND
-  #include <petscksp.h>
- #endif
+ #include <petscksp.h>
 
  #define TIME_REPORT
- #ifdef TIME_REPORT
+  #ifdef TIME_REPORT
   #include "clock.h"
  #endif
 

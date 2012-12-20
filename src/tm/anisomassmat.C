@@ -36,9 +36,8 @@
 #include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
+
+#include <cstdlib>
 
 namespace oofem {
 AnisotropicMassTransferMaterialStatus :: AnisotropicMassTransferMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)

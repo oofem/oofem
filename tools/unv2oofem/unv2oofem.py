@@ -116,7 +116,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                     meshElements.append([])
 
         #Assign BoundaryLoads to elements (corresponds to edge and face loads).
-        #We need to loop over all elements and to check whether they have assigned loads. This is time consuming algorithm.
+        #We need to loop over all elements and to check whether they have assigned loads. This is quite time consuming but robust algorithm.
         for belem in FEM.elems:#loop over all elements from unv file
             #resolve element properties
             #for igroup in elem.oofem_groups:#unv element with boundary load is assigned to some ctrl element group
@@ -157,6 +157,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                         newList[2*j+1] = i+1
                                     #print newList
                                     elem.oofem_bLoads+=newList
+                                    print "Boundary load found for element %d " % elem.id
                                     #print bel.name, elem.id, elem.oofem_bLoads
                             if(success==0):
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)

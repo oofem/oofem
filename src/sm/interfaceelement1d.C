@@ -44,9 +44,8 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #ifndef __MAKEDEPEND
-  #include "Emarkwd3d.h"
- #endif
+
+ #include <Emarkwd3d.h>
 #endif
 
 namespace oofem {

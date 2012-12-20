@@ -416,10 +416,11 @@ protected:
      * The edge numbering and local edge coordinate system is element dependent.
      * The integration point is specified using one-dimensional iso coordinates.
      * @param answer Interpolation matrix of edge.
+     * @param iedge Edge number.
      * @param gp Integration point.
      * @todo Should be a FlotArray instead
      */
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
+    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp) { answer.resize(0, 0); }
     /**
      * Computes surface interpolation matrix. Interpolation matrix provide way, how to compute
      * local surface unknowns (nonzero element unknowns on surface) at any integration point of surface, based on

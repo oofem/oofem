@@ -37,16 +37,13 @@
 
 #include "field.h"
 #include "interface.h"
-
 #include "flotarry.h"
 #include "equationid.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-#ifndef __MAKEDEPEND
- #include <vector>
-#endif
+#include <vector>
 
 namespace oofem {
 class PrimaryField;

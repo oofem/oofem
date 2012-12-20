@@ -175,6 +175,31 @@ protected:
     /// Parameter specifying the type of averaged (nonlocal) variable.
     AveragedVarType averagedVar;
 
+    /**
+     * Initial(user defined) characteristic length of the nonlocal model
+     * (its interpretation depends on the weight function)
+     * Is different to cl when a Stress-based or a Distance-based
+     * nonlocal variation is applied
+     */
+    double cl0;
+    /// Type characterizing the Nonlocal variation
+    enum NlVariationType { NLVT_Standard, NLVT_DistanceBased, NLVT_StressBased };
+    ///Parameter specifying the type of nonlocal variation.
+    NlVariationType nlvar;
+    /**
+     * Parameter which multiplied with the interaction radius cl0
+     * gives its minimum allowed value. It is used when a Stress-based
+     * or a Distance-based nonlocal variation is applied
+     */
+    double beta;
+    /**
+     * Parameter used when Distance-based nonlocal variation is applied
+     * When it is multiplied with the interaction radius cl gives the maxinmum
+     * distance of the Gauss Point from the boundary. If the Gauss Point's distance
+     * from the boundary is larger than this value the interaction radius cl is set
+     * to cl0
+     */
+    double zeta;
 
 public:
     /**
@@ -328,6 +353,16 @@ protected:
      * @param jGp Pointer to GP in the PointTable.
      */
     void manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp);
+
+    /**
+     * Provides the distance based interaction radius
+     * This function is called when nlvariation is set to 1.
+     * The function loops over all user defined nonlocal boundaries to
+     * to find minimum distance from the GP. Then calculates interaction radius
+     * @param gp  Gauss Point whose interaction radius is calculated based on the distance-based averaging approach
+     * @return    new interaction radius based on the Distance of the Gauss Point from Nonlocal Boundaries
+     */
+    double giveDistanceBasedInteractionRadius(const FloatArray &gpCoords);
 };
 } // end namespace oofem
 #endif // nonlocalmaterialext_h

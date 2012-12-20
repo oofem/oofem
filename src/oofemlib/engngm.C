@@ -65,26 +65,23 @@
  #include "cemhydmat.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <cstdio>
- #include <cstdarg>
+#include <cstdio>
+#include <cstdarg>
 // include unistd.h; needed for access
- #ifdef HAVE_UNISTD_H
-  #include <unistd.h>
- #elif _MSC_VER
-  #include <io.h>
- #endif
+#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+#elif _MSC_VER
+ #include <io.h>
+#endif
+
+#ifdef TIME_REPORT
+#include <ctime>
 #endif
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
-#ifdef TIME_REPORT
- #ifndef __MAKEDEPEND
-  #include <time.h>
- #endif
-#endif
 
 namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
@@ -139,7 +136,8 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     petscContextList = new AList< PetscContext >(0);
 #endif
 }
-  /*
+
+#if 0
 EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
 // constructor
 {
@@ -185,7 +183,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     petscContextList = new AList< PetscContext >(0);
 #endif
 }
-  */
+#endif
 
 EngngModel ::  ~EngngModel()
 // destructor
@@ -267,7 +265,6 @@ if ( this->parallelFlag ) {
 void
 EngngModel :: Instanciate_init (const char *dataOutputFileName, int ndomains)
 {
-    int i;
     Domain *domain;
 
     this->coreOutputFileName = std::string(dataOutputFileName);
@@ -287,9 +284,9 @@ EngngModel :: Instanciate_init (const char *dataOutputFileName, int ndomains)
     domainNeqs.resize(ndomains);
     domainPrescribedNeqs.resize(ndomains);
     domainList->growTo(ndomains);
-    for ( i = 0; i < ndomains; i++ ) {
-      domain =  new Domain(i + 1, 0, this);
-      domainList->put(i + 1, domain);
+    for ( int i = 1; i <= ndomains; i++ ) {
+      domain =  new Domain(i, 0, this);
+      domainList->put(i, domain);
     }
     this->ndomains = ndomains;
 
@@ -304,8 +301,6 @@ EngngModel :: Instanciate_init (const char *dataOutputFileName, int ndomains)
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
-    
-    int i;
     bool inputReaderFinish = true;
 
     this->Instanciate_init(dataOutputFileName, this->ndomains);
@@ -353,12 +348,12 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     // instantiate xfemmanager
     XfemManager *xm;
     xfemManagerList->growTo(nxfemman);
-    for ( i = 0; i < this->nxfemman; i++ ) {
-        xm =  new XfemManager(this, i + 1);
+    for ( int i = 1; i <= this->nxfemman; i++ ) {
+        xm =  new XfemManager(this, i);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
         // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
         // or we have to make a reference from EnrichmentItem also
-        xfemManagerList->put(i + 1, xm);
+        xfemManagerList->put(i, xm);
         xm->initializeFrom(ir);
         xm->instanciateYourself(dr);
         int last = xm->computeFictPosition();
@@ -427,13 +422,15 @@ EngngModel :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 int
 EngngModel :: instanciateDomains(DataReader *dr)
 {
-    int i, result = 1;
+    int result = 1;
     // read problem domains
-    for ( i = 0; i < this->ndomains; i++ ) {
-        result &= domainList->at(i + 1)->instanciateYourself(dr);
+    for ( int i = 1; i <= this->ndomains; i++ ) {
+        result &= domainList->at(i)->instanciateYourself(dr);
+        domainList->at(i)->postInitialize();
     }
 
     return result;
@@ -443,26 +440,26 @@ EngngModel :: instanciateDomains(DataReader *dr)
 int
 EngngModel :: instanciateMetaSteps(DataReader *dr)
 {
-    int i, result = 1;
+    int result = 1;
     MetaStep *mstep;
 
     // create meta steps
     metaStepList->growTo(nMetaSteps);
-    for ( i = 0; i < this->nMetaSteps; i++ ) {
-        mstep =  new MetaStep(i + 1, this);
-        metaStepList->put(i + 1, mstep);
+    for ( int i = 1; i <= this->nMetaSteps; i++ ) {
+        mstep =  new MetaStep(i, this);
+        metaStepList->put(i, mstep);
     }
 
     // read problem domains
-    for ( i = 0; i < this->nMetaSteps; i++ ) {
-        InputRecord *ir = dr->giveInputRecord(DataReader :: IR_mstepRec, i + 1);
-        result &= metaStepList->at(i + 1)->initializeFrom(ir);
+    for ( int i = 1; i <= this->nMetaSteps; i++ ) {
+        InputRecord *ir = dr->giveInputRecord(DataReader :: IR_mstepRec, i);
+        result &= metaStepList->at(i)->initializeFrom(ir);
     }
 
     // set meta step bounds
     int istep = this->giveNumberOfFirstStep();
-    for ( i = 0; i < this->nMetaSteps; i++ ) {
-        istep = metaStepList->at(i + 1)->setStepBounds(istep);
+    for ( int i = 1; i <= this->nMetaSteps; i++ ) {
+        istep = metaStepList->at(i)->setStepBounds(istep);
     }
 
     this->numberOfSteps = istep - 1;

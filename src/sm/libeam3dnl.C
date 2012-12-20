@@ -501,7 +501,7 @@ LIBeam3dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 
 
 void
-LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaussPoint)
 {
     /*
      *

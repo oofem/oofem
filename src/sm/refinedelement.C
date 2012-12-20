@@ -39,11 +39,9 @@
 #include "mathfem.h"
 #include "oofem_limits.h"
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
- #include <cstdlib> // For abort
- ///@todo Replace abort() with OOFEM_ERROR
-#endif
+#include <cstdarg>
+#include <cstdlib> // For abort
+///@todo Replace abort() with OOFEM_ERROR
 
 namespace oofem {
 RefinedElement :: RefinedElement(Domain *d, int elem, int level) : fineNodeList(0), boundaryFlag()

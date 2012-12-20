@@ -70,10 +70,8 @@
  #include "domaintransactionmanager.h"
 #endif
 
-#ifndef __MAKEDEPEND
- #include <cstdarg>
- #include <cstring>
-#endif
+#include <cstdarg>
+#include <cstring>
 
 namespace oofem {
 Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
@@ -836,6 +834,15 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 
     return 1;
+}
+
+void
+Domain :: postInitialize()
+{
+    for (int i = 1; i <= this->elementList->giveSize(); i++) {
+        Element *e = this->elementList->at(i);
+        e->postInitialize();
+    }
 }
 
 
