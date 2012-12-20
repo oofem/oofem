@@ -491,6 +491,7 @@ enum InputFieldType {
     IFT_LayeredCrossSection_thicks,
     IFT_LayeredCrossSection_widths,
     IFT_LayeredCrossSection_midsurf,
+    IFT_LayeredCrossSection_nintegrationpoints,
 
     IFT_FiberedCrossSection_nfibers,
     IFT_FiberedCrossSection_fibermaterials,

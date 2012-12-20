@@ -75,7 +75,9 @@ protected:
     IntArray layerMaterials; ///< Material of each layer.
     FloatArray layerThicks; ///< Thickness for each layer.
     FloatArray layerWidths; ///< Width for each layer.
+    FloatArray layerMidZ;   ///< z-coord of the mid plane for each layer
     int numberOfLayers;
+    int numberOfIntegrationPoints; ///< num integration points per layer
     double midSurfaceZcoordFromBottom, totalThick;
     double area;
 
@@ -132,6 +134,12 @@ public:
 
     /// Returns the total thickness of all layers.
     double computeIntegralThick();
+    void setupLayerMidPlanes();
+
+    int giveLayerMaterial(int layer){ return this->layerMaterials.at(layer); }
+    double giveLayerMidZ(int layer){ return this->layerMidZ.at(layer); }
+    double giveLayerThickness(int layer){ return this->layerThicks.at(layer); }
+    int giveNumIntegrationPointsInLayer(){ return this->numberOfIntegrationPoints; }
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "LayeredCrossSection"; }
@@ -140,6 +148,7 @@ public:
 
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex);
+    GaussPoint *giveSlaveGaussPointNew(GaussPoint *gp, int slaveIndex);
 
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);

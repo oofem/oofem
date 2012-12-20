@@ -61,6 +61,7 @@ enum CrossSectionProperty {
     CS_SHEAR_AREA_Z,   ///< Shear area in z direction
     CS_TopZCoord,      ///< Top z coordinate
     CS_BottomZCoord,   ///< Bottom z coordinate
+    CS_NumLayers,      ///< Number of layers that makes up the cross section
 };
 
 /**
