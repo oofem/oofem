@@ -53,71 +53,41 @@ class Timer
     bool running;
 
 public:
-    Timer() { initTimer(); }
-    void startTimer() {
-        this->initTimer();
-        oofem :: getTime(start_wtime);
-        oofem :: getUtime(start_utime);
-        running = true;
-    }
-    void stopTimer() {
-        this->pauseTimer();
-        running = false;
-    }
-    void pauseTimer() {
-        oofem :: getTime(end_wtime);
-        oofem :: getUtime(end_utime);
-        running = false;
-        this->updateElapsedTime();
-    }
-    void resumeTimer() {
-        oofem :: getTime(start_wtime);
-        oofem :: getUtime(start_utime);
-        running = true;
-    }
-    void initTimer() {
-        elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0;
-        running = false;
-    }
+    Timer();
+
+    void startTimer();
+    void stopTimer();
+    void pauseTimer();
+    void resumeTimer();
+    void initTimer();
     bool isRunning() { return running; }
 
     /// Returns total user time elapsed in seconds
-    double getUtime() {
-        this->updateElapsedTime();
-        return ( double ) elapsedUTime.tv_sec + ( double ) elapsedUTime.tv_usec / OOFEM_USEC_LIM;
-    }
+    double getUtime();
     /// Returns total elapsed wall clock time in seconds
-    double getWtime() {
-        updateElapsedTime();
-        return ( double ) elapsedWTime.tv_sec + ( double ) elapsedWTime.tv_usec / OOFEM_USEC_LIM;
-    }
+    double getWtime();
 
-    // Converts total seconds into hours, minutes, and seconds.
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
-    // Converts total seconds into hours, minutes, and seconds.
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
+    /**
+     * Converts total seconds into hours, minutes and remaining seconds
+     * @param[out] nhrs Number of hours.
+     * @param[out] nmin Number of minutes.
+     * @param[out] nsec Number of seconds.
+     * @param[in] tsec Total time in seconds.
+     */
+    static void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec);
+    /**
+     * Converts total seconds into hours, minutes and remaining seconds
+     * @param[out] nhrs Number of hours.
+     * @param[out] nmin Number of minutes.
+     * @param[out] nsec Number of seconds.
+     * @param[in] tsec Total time in seconds.
+     */
+    static void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec);
 
     /// Prints receiver state into a string.
-    void toString(char *buff)  { sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() ); }
+    void toString(char *buff);
 
-    void updateElapsedTime()  {
-        if ( running ) {
-            pauseTimer();
-            resumeTimer();
-        }
-
-#ifndef _MSC_VER
-        oofem_timeval etime;
-        timersub(& end_wtime, & start_wtime, & etime);
-        timeradd(& etime, & elapsedWTime, & elapsedWTime);
-
-        timersub(& end_utime, & start_utime, & etime);
-        timeradd(& etime, & elapsedUTime, & elapsedUTime);
-#endif
-
-        start_utime = end_utime;
-        start_wtime = end_wtime;
-    }
+    void updateElapsedTime();
 };
 
 /**
@@ -151,7 +121,7 @@ protected:
 
 public:
     EngngModelTimer() { }
-    virtual ~EngngModelTimer() { }
+    ~EngngModelTimer() { }
 
     /**@name Profiling routines. */
     //@{
@@ -165,16 +135,16 @@ public:
     /**@name Reporting routines. */
     //@{
     /// Returns total user time elapsed.
-    double getUtime(EngngModelTimerType t)  { return timers [ t ].getUtime(); }
+    double getUtime(EngngModelTimerType t);
     /// Returns elapsed wall clock time.
-    double getWtime(EngngModelTimerType t)   { return timers [ t ].getWtime(); }
+    double getWtime(EngngModelTimerType t);
     /// Returns pointer to timer determined by EngngModelTimerType.
     const Timer *getTimer(EngngModelTimerType t)  { return timers + t; }
     /// Converts total seconds into hours, mins, and seconds.
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
+    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const;
+    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const;
     /// Printing & formatting.
-    void toString(EngngModelTimerType t, char *buff) { return timers [ t ].toString(buff); }
+    void toString(EngngModelTimerType t, char *buff);
     //@}
 };
 } // end namespace oofem
