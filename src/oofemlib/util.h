@@ -74,11 +74,5 @@ void giveInputDataFileName(std::string &sdataInputFileName);
  */
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
-/**
- * Static storage for temporary strings to solve compiler warnings about conversion from string constant to char*.
- * @param src Constant data to be copied over.
- * @return Pointer to static array of data, overwritten with src.
- */
-char *oofem_tmpstr(const char *src);
 } // end namespace oofem
 #endif // util_h

@@ -155,7 +155,7 @@ LEPlic :: updatePosition(TimeStep *atTime)
     // to reconstruct interface (normal, constant) on original grid
     this->doInterfaceReconstruction(atTime, false, true);
 #ifdef __OOFEG
-    ESIEventLoop( NO, oofem_tmpstr("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
+    ESIEventLoop( NO, const_cast< char * >("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }

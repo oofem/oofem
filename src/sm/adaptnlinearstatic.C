@@ -104,7 +104,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     this->updateYourself(tStep);
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, oofem_tmpstr("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
 #endif
 
     this->terminate( this->giveCurrentStep() );
@@ -659,7 +659,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
      *************/
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, oofem_tmpstr("AdaptiveRemap: Press Ctrl-p to continue") );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveRemap: Press Ctrl-p to continue") );
 #endif
 
     //

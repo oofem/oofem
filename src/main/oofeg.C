@@ -400,7 +400,7 @@ main(int argc, char *argv[])
     }
 
     if ( oofeg_box_setup ) {
-        oofeg_display_message( oofem_tmpstr(OOFEG_VERSION) );
+        oofeg_display_message( OOFEG_VERSION );
     }
 
     updateISA(gc);

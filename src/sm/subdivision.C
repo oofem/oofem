@@ -3274,7 +3274,7 @@ Subdivision :: RS_Node :: drawGeometry()
     p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
 
     EASValsSetMType(FILLED_CIRCLE_MARKER);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3284,7 +3284,7 @@ Subdivision :: RS_Node :: drawGeometry()
     EMAddGraphicsToModel(ESIModel(), go);
 
     char num [ 6 ];
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3310,9 +3310,9 @@ Subdivision :: RS_Triangle :: drawGeometry()
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -3349,9 +3349,9 @@ Subdivision :: RS_Tetra :: drawGeometry()
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -4247,7 +4247,7 @@ Subdivision :: bisectMesh() {
             mesh->giveElement(ie)->drawGeometry();
         }
 
-        ESIEventLoop( YES, oofem_tmpstr("Subdivision Bisection; Press Ctrl-p to continue") );
+        ESIEventLoop( YES, const_cast< char * >("Subdivision Bisection; Press Ctrl-p to continue") );
  #endif
 #endif
     }
