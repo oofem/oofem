@@ -37,7 +37,8 @@
 
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
-#include "oofem_limits.h"
+
+#include <fstream>
 
 namespace oofem {
 /**
@@ -52,7 +53,7 @@ class OOFEMTXTDataReader : public DataReader
 {
 protected:
     OOFEMTXTInputRecord ir;
-    FILE *inputStream;
+    std::ifstream inputStream;
     std::string dataSourceName;
 
 public:
@@ -61,13 +62,13 @@ public:
     virtual ~OOFEMTXTDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
-    virtual void giveLine(char *line);
+    virtual std::string giveLine();
     virtual void finish();
     virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
 
 protected:
-    void giveLineFromInput(char *line);
-    void giveRawLineFromInput(char *line);
+    void giveLineFromInput(std::string &line);
+    void giveRawLineFromInput(std::string &line);
 };
 } // end namespace oofem
 #endif // oofemtxtdatareader_h

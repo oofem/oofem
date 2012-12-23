@@ -90,8 +90,7 @@ public:
     /// Prints buffer to stdout.
     void printYourself();
 
-    /// Return the whole line
-    virtual void giveLine(char *line);
+    virtual std::string giveLine();
     
     /**
      * Dumps buffer to file.

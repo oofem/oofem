@@ -72,7 +72,7 @@ public:
     /**
      * Reads the whole line
      */
-    virtual void giveLine(char *line) { };
+    virtual std::string giveLine() { return ""; }
     
     /// Return a line number, which is helpful for tracking errors.
     virtual int giveLineNumber() { return lineNumber; };

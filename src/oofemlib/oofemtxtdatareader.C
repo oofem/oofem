@@ -38,10 +38,11 @@
 namespace oofem {
 OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(), ir()
 {
-    if ( ( inputStream = fopen(inputfilename, "r") ) == NULL ) {
+    inputStream.open( inputfilename );
+    if ( !inputStream.is_open() ) {
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
-    dataSourceName = std::string(inputfilename);
+    dataSourceName = inputfilename;
     lineNumber = 0;
 }
 
@@ -53,7 +54,7 @@ OOFEMTXTDataReader :: ~OOFEMTXTDataReader()
 InputRecord *
 OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
+    std::string line;
     if ( typeId == IR_outFileRec ) {
         this->giveRawLineFromInput(line);
     } else {
@@ -66,58 +67,49 @@ OOFEMTXTDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 }
 
 
-void
-OOFEMTXTDataReader :: giveLine(char *line)
+std::string
+OOFEMTXTDataReader :: giveLine()
 {
-  this->giveRawLineFromInput(line);
+    return ir.giveRecordAsString();
 }
 
 void
 OOFEMTXTDataReader :: finish()
 {
-    if ( inputStream ) {
-        fclose(inputStream);
-    }
-
-    inputStream = NULL;
+    if ( inputStream.is_open() )
+        inputStream.close();
 }
 
 void
-OOFEMTXTDataReader :: giveLineFromInput(char *line)
+OOFEMTXTDataReader :: giveLineFromInput(std::string &line)
 {
     // reads one line from inputStream
     // if " detected, start/stop changing to lower case characters
-    char *ptr;
     bool flag = false; //0-tolower, 1-remain with capitals
 
-    giveRawLineFromInput(line);
+    this->giveRawLineFromInput(line);
 
-    for ( ptr = line; * ptr != '\0'; ptr++ ) {
-        if ( * ptr == '"' ) { //do not change to lowercase inside quotation marks
+    for ( std::size_t i = 0; i < line.size(); i++ ) {
+        if ( line[i] == '"' ) { //do not change to lowercase inside quotation marks
             flag = !flag; // switch flag
         }
 
         if ( !flag ) {
-            * ptr = tolower(* ptr); // convert line to lowercase
+            line[i] = tolower(line[i]); // convert line to lowercase
         }
     }
 }
 
 void
-OOFEMTXTDataReader :: giveRawLineFromInput(char *line)
+OOFEMTXTDataReader :: giveRawLineFromInput(std::string &line)
 {
     //
     // reads one line from inputStream - for private use only.
     //
-    int maxchar = OOFEM_MAX_LINE_LENGTH;
-    char *_res;
     do {
         this->lineNumber++;
-        _res = fgets(line, maxchar, inputStream);
-        if ( _res == NULL ) {
-            OOFEM_ERROR2("OOFEMTXTDataReader::giveRawLineFromInput: Premature end of file encountered at line %d", this->giveLineNumber() );
-        }
-    } while ( * line == '#' ); // skip comments
+        std::getline(this->inputStream, line);
+    } while ( line[0] == '#' ); // skip comments
 
 }
 } // end namespace oofem

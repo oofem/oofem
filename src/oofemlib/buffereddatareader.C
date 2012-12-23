@@ -109,10 +109,10 @@ BufferedDataReader :: printYourself()
 }
 
 
-void
-BufferedDataReader :: giveLine(char *line)
+std::string
+BufferedDataReader :: giveLine()
 {
-  this->giveRawLineFromInput(line);
+    return *(this->pos);
 }
 
 void
