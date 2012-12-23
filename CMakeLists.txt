@@ -86,7 +86,6 @@ endif ()
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/xfem")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/iga")
-include_directories ("${oofem_SOURCE_DIR}/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -467,6 +466,27 @@ if (USE_OOFEG)
     endif ()
     install(TARGETS oofeg DESTINATION bin)
 endif ()
+
+# CppCheck target (not built by default)
+add_custom_target(cppcheck)
+set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_custom_command(TARGET cppcheck 
+    COMMAND cppcheck "--xml" "--template=gcc" "--enable=all" 
+    "-I${oofem_BINARY_DIR}/"
+    "-I${oofem_SOURCE_DIR}/src/oofemlib/"
+    "-I${oofem_SOURCE_DIR}/src/sm/"
+    "-I${oofem_SOURCE_DIR}/src/fm/"
+    "-I${oofem_SOURCE_DIR}/src/tm/"
+    "-DDEBUG"
+    ${oofem_SOURCE_DIR}/src/oofemlib/
+    ${oofem_SOURCE_DIR}/src/sm/
+    ${oofem_SOURCE_DIR}/src/fm/
+    ${oofem_SOURCE_DIR}/src/tm/
+    ${oofem_SOURCE_DIR}/src/main/
+    "2>"
+    "cppcheck.xml"
+    COMMENT "Running cppcheck on entire source"
+    )
 
 #######################################################################
 ######################## Documentation ################################

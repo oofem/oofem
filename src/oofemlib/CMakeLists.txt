@@ -1,7 +1,7 @@
 # Much to organize
 set (core_unsorted
     femcmpnn.C domain.C timestep.C metastep.C gausspnt.C
-    cltypes.C clock.C timer.C dictionr.C freestor.C
+    cltypes.C timer.C dictionr.C freestor.C
     conTable.C compiler.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initial.C
     homogenize.C
