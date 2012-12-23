@@ -37,7 +37,6 @@
 #ifdef __PARALLEL_MODE
  #include "inputrecord.h"
  #include "interface.h"
- #include "clock.h"
  #include "alist.h"
  #include "flotarry.h"
  #include "intarray.h"

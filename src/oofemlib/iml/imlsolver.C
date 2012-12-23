@@ -66,7 +66,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSu
  #include "ilucomprowprecond.h"
 
  #ifdef TIME_REPORT
-  #include "clock.h"
+  #include "timer.h"
  #endif
 
 namespace oofem {
@@ -169,9 +169,8 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     this->lhsVersion = A->giveVersion();
 
  #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
  #endif
 
 
@@ -191,9 +190,8 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     }
 
  #ifdef TIME_REPORT
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_INFO( "IMLSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "IMLSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
  #endif
 
 

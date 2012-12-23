@@ -45,7 +45,7 @@
 #include <climits>
 
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 
 namespace oofem {
@@ -480,9 +480,8 @@ SparseMtrx *Skyline :: factorized()
     int i, j, k, aci, aci1, acj, acj1, ack, ack1, ac, acs, acri, acrk, n;
     double s, g;
 #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
 
@@ -542,10 +541,8 @@ SparseMtrx *Skyline :: factorized()
     isFactorized = true;
 
 #ifdef TIME_REPORT
-    //printf ("Skyline info: user time consumed by factorization: %.2lfs\n", (clock()-tstart)/(double)CLOCKS_PER_SEC);
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_DEBUG( "Skyline info: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "Skyline info: user time consumed by factorization: %.2fs\n", timer.getUtime() );
 #endif
 
     // increment version

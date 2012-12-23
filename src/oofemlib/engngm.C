@@ -43,7 +43,7 @@
 #include "metastep.h"
 #include "element.h"
 #include "oofemcfg.h"
-#include "clock.h"
+#include "timer.h"
 #include "dofmanager.h"
 #include "node.h"
 #include "activebc.h"
@@ -67,15 +67,12 @@
 
 #include <cstdio>
 #include <cstdarg>
+#include <ctime>
 // include unistd.h; needed for access
 #ifdef HAVE_UNISTD_H
  #include <unistd.h>
 #elif _MSC_VER
  #include <io.h>
-#endif
-
-#ifdef TIME_REPORT
-#include <ctime>
 #endif
 
 #ifdef __OOFEG
@@ -306,7 +303,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     this->Instanciate_init(dataOutputFileName, this->ndomains);
 
     fprintf(outputStream, "%s", PRG_HEADER);
-    this->startTime = getTime();
+    this->startTime = time(NULL);
     //this->startClock= this-> getClock();
     fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 
@@ -602,11 +599,10 @@ EngngModel :: forceEquationNumbering(int id)
     } else {
         // invoke profile reduction
         int initialProfile, optimalProfile;
-        //clock_t time_0 = this->getClock(), time_1;
-        oofem_timeval tstart;
-        getUtime(tstart);
+        Timer timer;
         OOFEM_LOG_INFO("\nRenumbering DOFs with Sloan's algorithm...\n");
-
+        timer.startTimer();
+        
         SloanGraph graph(domain);
         graph.initialize();
         graph.tryParameters(0, 0);
@@ -617,10 +613,9 @@ EngngModel :: forceEquationNumbering(int id)
         graph.tryParameters(10, 1);
         optimalProfile = graph.giveOptimalProfileSize();
 
-        oofem_timeval ut;
-        getRelativeUtime(ut, tstart);
+        timer.stopTimer();
 
-        OOFEM_LOG_DEBUG("done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+        OOFEM_LOG_DEBUG("Sloan's algorithm done in %.2fs\n", timer.getUtime() );
         OOFEM_LOG_DEBUG("Nominal profile %d (old) %d (new)\n", initialProfile, optimalProfile);
 
         //FILE* renTableFile = fopen ("rentab.dat","w");
@@ -678,9 +673,8 @@ EngngModel :: solveYourself()
     int smstep = 1, sjstep = 1;
     MetaStep *activeMStep;
     FILE *out = this->giveOutputStream();
-    //#ifdef TIME_REPORT
+
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
-    //#endif
 
     if ( this->currentStep ) {
         smstep = this->currentStep->giveMetaStepNumber();
@@ -694,10 +688,10 @@ EngngModel :: solveYourself()
 
         nTimeSteps = activeMStep->giveNumberOfSteps();
         for ( jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
-            //#ifdef TIME_REPORT
+
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-            //#endif
+
             this->giveNextStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
@@ -709,9 +703,9 @@ EngngModel :: solveYourself()
             this->updateYourself( this->giveCurrentStep() );
             this->terminate( this->giveCurrentStep() );
 
-            //#ifdef TIME_REPORT
+
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
-            //this->timer.stopTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+
             double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
@@ -1625,22 +1619,11 @@ EngngModel :: testContextFile(int stepNumber, int stepVersion)
     fname.append(fext);
 
 #ifdef HAVE_ACCESS
-    if ( access(fname.c_str(), R_OK) == 0 ) {
-        return true;
-    } else {
-        return false;
-    }
-
+    return access(fname.c_str(), R_OK) == 0;
 #elif _MSC_VER
-    if ( _access(fname.c_str(), 4) == 0 ) {
-        return true;
-    } else {
-        return false;
-    }
-
+    return _access(fname.c_str(), 4) == 0;
 #else
     return true;
-
 #endif
 }
 
@@ -1819,7 +1802,7 @@ EngngModel :: terminateAnalysis()
     double tsec;
     int nsec = 0, nmin = 0, nhrs = 0;
     FILE *out = this->giveOutputStream();
-    time_t endTime = getTime();
+    time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
 

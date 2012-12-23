@@ -54,6 +54,7 @@
 #include "verbose.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "timer.h"
 
 #include <vector>
 #include <string>
@@ -2938,10 +2939,9 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     IntArray controlNode, controlDof;
 
 #ifdef TIME_INFO
-    oofem_timeval st_total, et_total, st_setup, et_setup, st_init, et_init, st_solve, et_solve, st_error, et_error;
-
-    :: getUtime(st_total);
-    :: getUtime(st_setup);
+    Timer timer;
+    double et_setup, et_init, et_solve, et_error;
+    timer.startTimer();
 #endif
 
     element = domain->giveElement(elemId);
@@ -3060,7 +3060,8 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     setupRefinedProblemEpilog2(ltfuncs);
 
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_setup, st_setup);
+    timer.stopTimer();
+    et_setup = timer.getUtime();
 #endif
 
     dofs = domain->giveDefaultNodeDofIDArry().giveSize();
@@ -3073,13 +3074,14 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #endif
 
 #ifdef TIME_INFO
-    :: getUtime(st_init);
+    timer.startTimer();
 #endif
     refinedReader.rewind();
     refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_init, st_init);
+    timer.stopTimer();
+    et_init = timer.getUtime();
 #endif
 
 #ifdef DEBUG
@@ -3094,7 +3096,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     // when initiating the solution and after the solution
 
 #ifdef TIME_INFO
-    :: getUtime(st_solve);
+    timer.startTimer();
 #endif
     if ( this->mode == HEE_linear ) {
         refinedProblem->solveYourself();
@@ -3108,13 +3110,14 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     }
 
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_solve, st_solve);
+    timer.stopTimer();
+    et_solve = timer.getUtime();
 #endif
 
     //fprintf(stdout, "\n");
 
 #ifdef TIME_INFO
-    :: getUtime(st_error);
+    timer.startTimer();
 #endif
     refinedTStep = refinedProblem->giveCurrentStep();
 
@@ -3343,16 +3346,16 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     this->globalUNorm += uNorm;
 
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_error, st_error);
-    :: getRelativeUtime(et_total, st_total);
+    timer.stopTimer();
+    et_error = timer.getUtime();
 
     OOFEM_LOG_DEBUG( "HEE info: element %d: user time total %.2f s (setup %.2f s, init %.2f s, solve %.2f s, error %.2f s)\n",
-                    elemId,
-                    ( double ) ( et_total.tv_sec + et_total.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_setup.tv_sec + et_setup.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_init.tv_sec + et_init.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_solve.tv_sec + et_solve.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_error.tv_sec + et_error.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                    elemId, 
+                    et_setup + et_init + et_solve + et_error,
+                    et_setup,
+                    et_init,
+                    et_solve,
+                    et_error );
 #endif
 
     delete refinedProblem;
@@ -3382,10 +3385,10 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     IntArray controlNode, controlDof;
 
 #ifdef TIME_INFO
-    oofem_timeval st_total, et_total, st_setup, et_setup, st_init, et_init, st_solve, et_solve, st_error, et_error;
+    Timer timer;
+    double et_setup, et_init, et_solve, et_error;
 
-    :: getUtime(st_total);
-    :: getUtime(st_setup);
+    timer.startTimer();
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -3631,7 +3634,8 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     setupRefinedProblemEpilog2(ltfuncs);
 
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_setup, st_setup);
+    timer.stopTimer();
+    et_setup = timer.getUtime();
 #endif
 
     dofs = domain->giveDefaultNodeDofIDArry().giveSize();
@@ -3644,13 +3648,14 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
 #ifdef TIME_INFO
-    :: getUtime(st_init);
+    timer.startTimer();
 #endif
     refinedReader.rewind();
     refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_init, st_init);
+    timer.stopTimer();
+    et_init = timer.getUtime();
 #endif
 
 #ifdef DEBUG
@@ -3660,7 +3665,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     refinedDomain = refinedProblem->giveDomain(1);
 
 #ifdef TIME_INFO
-    :: getUtime(st_solve);
+    timer.startTimer();
 #endif
     if ( this->mode == HEE_linear ) {
         refinedProblem->solveYourself();
@@ -3674,13 +3679,14 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     }
 
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_solve, st_solve);
+    timer.stopTimer();
+    et_solve = timer.getUtime();
 #endif
 
     //fprintf(stdout, "\n");
 
 #ifdef TIME_INFO
-    :: getUtime(st_error);
+    timer.startTimer();
 #endif
     refinedTStep = refinedProblem->giveCurrentStep();
 
@@ -3696,16 +3702,16 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     }
 
 #ifdef TIME_INFO
-    :: getRelativeUtime(et_error, st_error);
-    :: getRelativeUtime(et_total, st_total);
+    timer.stopTimer();
+    et_error = timer.getUtime();
 
     OOFEM_LOG_DEBUG( "HEE info: patch %d: user time total %.2f s (setup %.2f s, init %.2f s, solve %.2f s, error %.2f s)\n",
                     nodeId,
-                    ( double ) ( et_total.tv_sec + et_total.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_setup.tv_sec + et_setup.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_init.tv_sec + et_init.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_solve.tv_sec + et_solve.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_error.tv_sec + et_error.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                    et_setup + et_init + et_solve + et_error,
+                    et_setup,
+                    et_init,
+                    et_solve,
+                    et_error );
 #endif
 
     delete refinedProblem;
@@ -3741,10 +3747,10 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     IntArray controlNode, controlDof;
 
  #ifdef TIME_INFO
-    oofem_timeval st_total, et_total, st_setup, et_setup, st_init, et_init, st_solve, et_solve, st_error, et_error;
+    Timer timer;
+    double et_setup, et_init, et_solve, et_error;
 
-    :: getUtime(st_total);
-    :: getUtime(st_setup);
+    timer.startTimer();
  #endif
  #ifdef INFO
     OOFEM_LOG_INFO( "Whole 0: estimating error [step number %5d]\n", tStep->giveNumber() );
@@ -3857,7 +3863,8 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     setupRefinedProblemEpilog2(ltfuncs);
 
  #ifdef TIME_INFO
-    :: getRelativeUtime(et_setup, st_setup);
+    timer.stopTimer();
+    et_setup = timer.getUtime();
  #endif
 
     dofs = domain->giveDefaultNodeDofIDArry().giveSize();
@@ -3870,13 +3877,14 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
  #endif
 
  #ifdef TIME_INFO
-    :: getUtime(st_init);
+    timer.startTimer();
  #endif
     refinedReader.rewind();
     refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
  #ifdef TIME_INFO
-    :: getRelativeUtime(et_init, st_init);
+    timer.stopTimer();
+    et_init = timer.getUtime();
  #endif
 
  #ifdef DEBUG
@@ -3889,18 +3897,19 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     // when mapping the coarse solution at first, tstep is NULL and it cannot be accessed;
 
  #ifdef TIME_INFO
-    :: getUtime(st_solve);
+    timer.startTimer();
  #endif
     refinedProblem->solveYourself();
     refinedProblem->terminateAnalysis();
  #ifdef TIME_INFO
-    :: getRelativeUtime(et_solve, st_solve);
+    timer.stopTimer();
+    et_solve = timer.getUtime();
  #endif
 
     //fprintf(stdout, "\n");
 
  #ifdef TIME_INFO
-    :: getUtime(st_error);
+    timer.startTimer();
  #endif
     refinedTStep = refinedProblem->giveCurrentStep();
 
@@ -4068,15 +4077,15 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     }
 
  #ifdef TIME_INFO
-    :: getRelativeUtime(et_error, st_error);
-    :: getRelativeUtime(et_total, st_total);
+    timer.stopTimer();
+    et_error = timer.getUtime();
 
     OOFEM_LOG_DEBUG( "HEE info: whole 0: user time total %.2f s (setup %.2f s, init %.2f s, solve %.2f s, error %.2f s)\n",
-                    ( double ) ( et_total.tv_sec + et_total.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_setup.tv_sec + et_setup.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_init.tv_sec + et_init.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_solve.tv_sec + et_solve.tv_usec / ( double ) OOFEM_USEC_LIM ),
-                    ( double ) ( et_error.tv_sec + et_error.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                    et_setup + et_init + et_solve + et_error,
+                    et_setup,
+                    et_init,
+                    et_solve,
+                    et_error );
  #endif
 
     delete refinedProblem;

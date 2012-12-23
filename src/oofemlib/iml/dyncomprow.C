@@ -44,7 +44,7 @@
 #include "element.h"
 
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 
 namespace oofem {
@@ -299,9 +299,8 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     Element *elem;
 
 #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
     nColumns = nRows = neq;
@@ -358,10 +357,8 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     // increment version
     this->version++;
 #ifdef TIME_REPORT
-    oofem_timeval tfin;
-    getRelativeUtime(tfin, tstart);
-    OOFEM_LOG_DEBUG( "DynCompRow::buildInternalStructure: user time consumed: %.2fs\n",
-                    ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "DynCompRow::buildInternalStructure: user time consumed: %.2fs\n", timer.getUtime() );
 #endif
 
     return true;
@@ -401,7 +398,7 @@ int DynCompRow :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int DynCompRow :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    /// optimized low-end implementation
+    // optimized low-end implementation
     IntArray colsToAdd( rloc.giveSize() );
     int i, ii, ii1, j, jj, jj1, colindx;
     int rsize = rloc.giveSize();
@@ -784,9 +781,8 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
     diag_rowptr_.resize(nRows);
 
 #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
     for ( i = 0; i < nRows; i++ ) { // row loop
@@ -1007,9 +1003,8 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
     }
 
 #ifdef TIME_REPORT
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_DEBUG( "\nILUT(%d,%e): user time consumed by factorization: %.2fs\n", part_fill, drop_tol, ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "\nILUT(%d,%e): user time consumed by factorization: %.2fs\n", part_fill, drop_tol, timer.getUtime() );
 #endif
 
     // increment version

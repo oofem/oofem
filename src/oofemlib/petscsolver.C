@@ -39,13 +39,9 @@
  #include "engngm.h"
  #include "flotarry.h"
  #include "verbose.h"
+ #include "timer.h"
 
  #include <petscksp.h>
-
- #define TIME_REPORT
-  #ifdef TIME_REPORT
-  #include "clock.h"
- #endif
 
 namespace oofem {
 PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
@@ -127,10 +123,8 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
         _error("petsc_solve: PetscSparseMtrx Expected");
     }
 
- #ifdef TIME_REPORT
-    oofem_timeval tstart;
-    getUtime(tstart);
- #endif
+    Timer timer;
+    timer.startTimer();
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      *  Create the linear solver and set various options
@@ -191,12 +185,9 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
         OOFEM_WARNING3("PetscSolver:  Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     }
 
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs\n", timer.getUtime(); );
 
- #ifdef TIME_REPORT
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    //OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
- #endif
     if ( reason < 0 ) {
         return NM_NoSuccess;
     } else {

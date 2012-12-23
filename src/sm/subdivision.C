@@ -48,6 +48,7 @@
 #include "outputmanager.h"
 #include "crosssection.h"
 #include "loadtime.h"
+#include "timer.h"
 
 #include <queue>
 #include <set>
@@ -3390,9 +3391,9 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     Subdivision :: RS_Node *_node;
     Subdivision :: RS_Element *_element;
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
+    Timer timer;
 
-    oofem_timeval st, dt;
-    getUtime(st);
+    timer.startTimer();
 
     if ( this->mesh ) {
         delete mesh;
@@ -3912,13 +3913,14 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
     // copy output manager settings
     ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );
-    getRelativeUtime(dt, st);
+
+    timer.stopTimer();
 #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                   ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                   ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, timer.getUtime() );
 #else
     OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                   nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                   nnodes, eNum, timer.getUtime() );
 #endif
 
 #ifdef __PARALLEL_MODE

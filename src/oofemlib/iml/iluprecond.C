@@ -35,7 +35,7 @@
 #include "verbose.h"
 
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 
 #ifdef DynCompCol_USE_STL_SETS
@@ -59,9 +59,8 @@ void
 CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
 {
 #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
     if ( A.giveType() == SMT_CompCol ) {
@@ -73,9 +72,8 @@ CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
     }
 
 #ifdef TIME_REPORT
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_INFO( "ILUP: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "ILUP: user time consumed by factorization: %.2fs\n", timer.getUtime() );
 #endif
 }
 

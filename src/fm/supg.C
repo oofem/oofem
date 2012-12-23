@@ -51,7 +51,7 @@
 #include "loadtime.h"
 #include "contextioerr.h"
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 
 namespace oofem {
@@ -378,15 +378,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             //if (this->fsflag) updateDofManVals(tStep);
 #ifdef SUPG_IMPLICIT_INTERFACE
  #ifdef TIME_REPORT
-            oofem_timeval tstart;
-            :: getUtime(tstart);
+            Timer timer;
+            timer.startTimer();
  #endif
             materialInterface->updatePosition( this->giveCurrentStep() );
             updateElementsForNewInterfacePosition(tStep);
  #ifdef TIME_REPORT
-            oofem_timeval ut;
-            :: getRelativeUtime(ut, tstart);
-            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+            timer.stopTimer();
+            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime(); );
  #endif
 #else
             //updateElementsForNewInterfacePosition (tStep);
@@ -504,16 +503,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
  #ifdef SUPG_IMPLICIT_INTERFACE
         if ( materialInterface ) {
   #ifdef TIME_REPORT
-            oofem_timeval tstart;
-            :: getUtime(tstart);
+            Timer timer;
+            timer.startTimer();
   #endif
             //if (this->fsflag) updateDofManVals(tStep);
             materialInterface->updatePosition( this->giveCurrentStep() );
             updateElementsForNewInterfacePosition(tStep);
   #ifdef TIME_REPORT
-            oofem_timeval ut;
-            :: getRelativeUtime(ut, tstart);
-            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+            timer.stopTimer();
+            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
   #endif
             //if (this->fsflag) this->updateDofManActivityMap(tStep);
         }
@@ -614,15 +612,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 #ifndef SUPG_IMPLICIT_INTERFACE
     if ( materialInterface ) {
  #ifdef TIME_REPORT
-        oofem_timeval tstart;
-        getUtime(tstart);
+        Timer timer;
+        timer.startTimer();
  #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
         updateElementsForNewInterfacePosition(tStep);
  #ifdef TIME_REPORT
-        oofem_timeval ut;
-        getRelativeUtime(ut, tstart);
-        OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+        timer.stopTimer();
+        OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
  #endif
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
     }

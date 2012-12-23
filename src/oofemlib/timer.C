@@ -33,63 +33,116 @@
  */
 
 #include "timer.h"
+#include "compiler.h"
 #include <cstdio>
 
-namespace oofem {
+#ifndef _MSC_VER
+// for getrusage - user time reporting
+#include <sys/resource.h>
+#ifdef TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <ctime>
+#else
+# ifdef HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <ctime>
+# endif
+#endif
+#else
+#include <ctime>
+#endif
 
-Timer::Timer()
+namespace oofem {
+    
+#ifndef _MSC_VER
+
+void Timer :: getUtime(oofem_timeval &answer)
+{
+    struct rusage rsg;
+    getrusage(RUSAGE_SELF, & rsg);
+    answer.tv_sec  = rsg.ru_utime.tv_sec;
+    answer.tv_usec = rsg.ru_utime.tv_usec;
+}
+
+void Timer :: getTime(oofem_timeval &answer)
+{
+    gettimeofday((timeval*)&answer, NULL);
+}
+
+#else // #ifndef _MSC_VER
+
+void Timer :: getUtime(oofem_timeval &answer)
+{
+    clock_t utime = clock();
+    answer.tv_sec = utime / CLOCKS_PER_SEC;
+    answer.tv_usec = 0;
+}
+
+void Timer :: getTime(oofem_timeval &answer)
+{
+    time_t t;
+    t = time(NULL);
+    answer.tv_sec = ( unsigned long ) t;
+    answer.tv_usec = 0;
+}
+
+#endif
+
+
+Timer :: Timer()
 {
     initTimer();
 }
 
-void Timer::startTimer()
+void Timer :: startTimer()
 {
     this->initTimer();
-    oofem :: getTime(start_wtime);
-    oofem :: getUtime(start_utime);
+    this->getTime(start_wtime);
+    this->getUtime(start_utime);
     running = true;
 }
 
-void Timer::stopTimer()
+void Timer :: stopTimer()
 {
     this->pauseTimer();
     running = false;
 }
 
-void Timer::pauseTimer()
+void Timer :: pauseTimer()
 {
-    oofem :: getTime(end_wtime);
-    oofem :: getUtime(end_utime);
+    this->getTime(end_wtime);
+    this->getUtime(end_utime);
     running = false;
     this->updateElapsedTime();
 }
 
-void Timer::resumeTimer()
+void Timer :: resumeTimer()
 {
-    oofem :: getTime(start_wtime);
-    oofem :: getUtime(start_utime);
+    this->getTime(start_wtime);
+    this->getUtime(start_utime);
     running = true;
 }
 
-void Timer::initTimer()
+void Timer :: initTimer()
 {
     elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0;
     running = false;
 }
 
-double Timer::getUtime()
+double Timer :: getUtime()
 {
     this->updateElapsedTime();
-    return ( double ) elapsedUTime.tv_sec + ( double ) elapsedUTime.tv_usec / OOFEM_USEC_LIM;
+    return ( double ) elapsedUTime.tv_sec + ( double ) elapsedUTime.tv_usec * 1.e-6;
 }
 
-double Timer::getWtime()
+double Timer :: getWtime()
 {
     updateElapsedTime();
-    return ( double ) elapsedWTime.tv_sec + ( double ) elapsedWTime.tv_usec / OOFEM_USEC_LIM;
+    return ( double ) elapsedWTime.tv_sec + ( double ) elapsedWTime.tv_usec * 1.e-6;
 }
 
-void Timer::convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec)
+void Timer :: convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec)
 {
     long int _nsec = tsec;
     if ( _nsec > 60 ) {
@@ -105,17 +158,17 @@ void Timer::convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec)
     nsec = _nsec;
 }
 
-void Timer::convert2HMS(int& nhrs, int& nmin, int& nsec, double tsec)
+void Timer :: convert2HMS(int& nhrs, int& nmin, int& nsec, double tsec)
 {
-    Timer :: convert2HMS(nhrs, nmin, nsec, (long int)tsec);
+    Timer  ::  convert2HMS(nhrs, nmin, nsec, (long int)tsec);
 }
 
-void Timer::toString(char* buff)
+void Timer :: toString(char* buff)
 {
     sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() );
 }
 
-void Timer::updateElapsedTime()
+void Timer :: updateElapsedTime()
 {
     if ( running ) {
         pauseTimer();
@@ -135,27 +188,27 @@ void Timer::updateElapsedTime()
     start_wtime = end_wtime;
 }
 
-double EngngModelTimer::getUtime(EngngModelTimer::EngngModelTimerType t)
+double EngngModelTimer :: getUtime(EngngModelTimer :: EngngModelTimerType t)
 {
     return timers [ t ].getUtime();
 }
 
-double EngngModelTimer::getWtime(EngngModelTimer::EngngModelTimerType t)
+double EngngModelTimer :: getWtime(EngngModelTimer :: EngngModelTimerType t)
 {
     return timers [ t ].getWtime();
 }
 
-void EngngModelTimer::convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec) const
+void EngngModelTimer :: convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec) const
 {
-    Timer :: convert2HMS(nhrs, nmin, nsec, tsec);
+    Timer  ::  convert2HMS(nhrs, nmin, nsec, tsec);
 }
 
-void EngngModelTimer::convert2HMS(int& nhrs, int& nmin, int& nsec, double tsec) const
+void EngngModelTimer :: convert2HMS(int& nhrs, int& nmin, int& nsec, double tsec) const
 {
-    Timer :: convert2HMS(nhrs, nmin, nsec, tsec);
+    Timer  ::  convert2HMS(nhrs, nmin, nsec, tsec);
 }
 
-void EngngModelTimer::toString(EngngModelTimer::EngngModelTimerType t, char* buff)
+void EngngModelTimer :: toString(EngngModelTimer :: EngngModelTimerType t, char* buff)
 {
     return timers [ t ].toString(buff);
 }

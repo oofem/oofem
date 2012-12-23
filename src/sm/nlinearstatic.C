@@ -46,7 +46,7 @@
 #include "outputmanager.h"
 #include "datastream.h"
 #include "usrdefsub.h"
-#include "clock.h"
+#include "timer.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
@@ -845,8 +845,8 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
     LinearStatic :: assemble(answer, tStep, ut, type, s, domain);
@@ -863,10 +863,8 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
     }
 
 #ifdef TIME_REPORT
-    oofem_timeval tfin;
-    getRelativeUtime(tfin, tstart);
-    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n",
-                   ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n", timer.getUtime() );
 #endif
 }
 

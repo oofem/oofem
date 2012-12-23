@@ -52,20 +52,16 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_
 #endif
 
 #ifdef __SPOOLES_MODULE
- #define TIME_REPORT
 
  #include "spoolessolver.h"
  #include "spoolessparsemtrx.h"
  #include "flotarry.h"
  #include "verbose.h"
  #include "oofem_limits.h"
+ #include "timer.h"
 
 // Spooles includes
  #include "spoolesinterface.h"
-
- #ifdef TIME_REPORT
-  #include "clock.h"
- #endif
 
 namespace oofem {
 SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
@@ -84,7 +80,8 @@ SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSy
 }
 
 
-SpoolesSolver :: ~SpoolesSolver() {
+SpoolesSolver :: ~SpoolesSolver()
+{
     if ( msgFileCloseFlag ) {
         fclose(msgFile);
     }
@@ -186,11 +183,8 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         _error("solveYourselfAt: size mismatch");
     }
 
- #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
- #endif
+    Timer timer;
+    timer.startTimer();
 
     if ( A->giveType() != SMT_SpoolesMtrx ) {
         _error("solveYourselfAt: SpoolesSparseMtrx Expected");
@@ -417,11 +411,8 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // DenseMtx_copyRowIntoVector(mtxX, 0, x->givePointer());
 
- #ifdef TIME_REPORT
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_DEBUG( "SpoolesSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
- #endif
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "SpoolesSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
 
     /*
      * -----------

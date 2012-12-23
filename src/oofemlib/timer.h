@@ -35,14 +35,19 @@
 #ifndef timer_h
 #define timer_h
 
-#include "clock.h"
-
 namespace oofem {
+    
 /**
  * Class implementing single timer, providing wall clock and user time capabilities.
  */
 class Timer
 {
+    typedef struct oofem_timeval
+    {
+        unsigned long tv_sec;          ///< Seconds.
+        unsigned long tv_usec;         ///< Microseconds.
+    } oofem_timeval;
+
     /// Wall clock time structures.
     oofem_timeval start_wtime, end_wtime;
     /// User time struct.
@@ -88,6 +93,12 @@ public:
     void toString(char *buff);
 
     void updateElapsedTime();
+
+private:
+    /// Platform independent wrapper for user time
+    void getUtime(oofem_timeval &answer);
+    /// Platform independent wrapper for wall time
+    void getTime(oofem_timeval &answer);
 };
 
 /**
