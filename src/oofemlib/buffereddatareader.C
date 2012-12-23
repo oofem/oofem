@@ -48,7 +48,7 @@ BufferedDataReader :: ~BufferedDataReader()
 InputRecord *
 BufferedDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 {
-    char line [ OOFEM_MAX_LINE_LENGTH + 1 ];
+    std::string line;
     if ( typeId == IR_outFileRec ) {
         this->giveRawLineFromInput(line);
     } else {
@@ -157,29 +157,37 @@ BufferedDataReader :: appendInputString(const char *line)
 
 
 void
-BufferedDataReader :: giveLineFromInput(char *line)
+BufferedDataReader :: giveLineFromInput(std::string &line)
 {
-    char *ptr;
-
-    giveRawLineFromInput(line);
-    // convert line to lowercase
-    for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
-        ;
+    // reads one line from inputStream
+    // if " detected, start/stop changing to lower case characters
+    bool flag = false; //0-tolower, 1-remain with capitals
+    
+    this->giveRawLineFromInput(line);
+    
+    for ( std::size_t i = 0; i < line.size(); i++ ) {
+        if ( line[i] == '"' ) { //do not change to lowercase inside quotation marks
+            flag = !flag; // switch flag
+        }
+        
+        if ( !flag ) {
+            line[i] = tolower(line[i]); // convert line to lowercase
+        }
     }
 }
 
 
 void
-BufferedDataReader :: giveRawLineFromInput(char *line)
+BufferedDataReader :: giveRawLineFromInput(std::string &line)
 {
     do {
         if ( pos == buffer.end() ) {
             OOFEM_ERROR("BufferedDataReader: giveRawLineFromInput: already at the end");
         }
 
-        ( * pos ).copy(line, std :: string :: npos);
+        line = *pos;
         ++pos;
-    } while ( * line == '#' ); // skip comments
+    } while ( line[0] == '#' ); // skip comments
 
 }
 } // end namespace oofem
