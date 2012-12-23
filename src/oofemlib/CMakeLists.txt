@@ -12,12 +12,12 @@ set (core_unsorted
     externalfieldgenerator.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
-    oofemtxtinputrecord.C buffereddatareader.C oofemtxtdatareader.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
     structuralms.C
     nonlocalmaterialext.C randommaterialext.C
-    inputrecord.C tokenizer.C parser.C
+    inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
+    dynamicdatareader.C buffereddatareader.C oofemtxtdatareader.C tokenizer.C parser.C
     spatiallocalizer.C dummylocalizer.C octreelocalizer.C
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C

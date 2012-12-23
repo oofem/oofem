@@ -37,7 +37,7 @@
 #include "lspace.h"
 #include "domain.h"
 #include "usrdefsub.h"
-#include "oofemtxtinputrecord.h"
+#include "dynamicinputrecord.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -164,17 +164,14 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
     LoadTimeFunction *LoadTimeFunct;
-    ///@todo This part should use the DynamicInputRecord instead
-    OOFEMTXTInputRecord *ir = new OOFEMTXTInputRecord();
+    DynamicInputRecord ir_ltf, ir_bc;
     FloatArray n(8), answer, localCoords;
-    char str [ OOFEM_MAX_LINE_LENGTH ];
     double displ;
     FloatArray displ_x(8), displ_y(8), displ_z(8);
-    int i, j;
     int counter;
 
     //dofManArray has the node order as specified in input file
-    for ( i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
+    for ( int i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
         DofMan = microDomain->giveDofManager(i);
         //global displacements
         displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
@@ -187,12 +184,12 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
         microDomain->resizeLoadTimeFunctions(1);
     }
 
-    sprintf(str, "ConstantFunction 1 f(t) 1.0");
-    ir->setRecordString(str);
+    ir_ltf.setRecordKeywordField("constantfunction", 1);
+    ir_ltf.setField(1.0, IFT_LoadTimeFunction_ft);
     if ( ( LoadTimeFunct = CreateUsrDefLoadTimeFunctionOfType("constantfunction", 1, microDomain) ) == NULL ) {
         OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
-    LoadTimeFunct->initializeFrom(ir);
+    LoadTimeFunct->initializeFrom(&ir_ltf);
     microDomain->setLoadTimeFunction(1, LoadTimeFunct);
 
 
@@ -203,34 +200,32 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     microDomain->resizeBoundaryConditions( 3 * microBoundaryNodes.giveSize() ); //from domain.C
 
     counter = 1;
-    for ( i = 1; i <= microDomain->giveNumberOfDofManagers(); i++ ) { //go through all nodes on microDomain
+    for ( int i = 1; i <= microDomain->giveNumberOfDofManagers(); i++ ) { //go through all nodes on microDomain
         DofMan = microDomain->giveDofManager(i);
         if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();
 
-            for ( j = 1; j <= 3; j++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
-                sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %e", counter, displ);
-                //OOFEM_LOG_INFO("%s\n", str);
-                ir->setRecordString(str);
+                ir_bc.setRecordKeywordField("boundarycondition", counter);
+                ir_bc.setField(1, IFT_GeneralBoundaryCondition_LoadTimeFunct);
+                ir_bc.setField(displ, IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = CreateUsrDefBoundaryConditionOfType("boundarycondition", counter, microDomain) ) == NULL ) {
                     OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
                 }
-                GeneralBoundaryCond->initializeFrom(ir);
+                GeneralBoundaryCond->initializeFrom(&ir_bc);
                 microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
                 counter++;
             }
         } else   {
-            for ( j = 1; j <= 3; j++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 DofMan->giveDof(j)->setBcId(0);
             }
         }
     }
-
-    delete ir;
 }
 
 //obtain nodal forces from underlying microScale
@@ -238,7 +233,6 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 //useUpdatedGpRecord=1 is used for printing of reactions
 void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    int i, j, k;
     //StructuralEngngModel *microStructuralEngngModel;
     FloatArray reactions, localCoords, n(8);
     DofManager *DofMan;
@@ -274,12 +268,12 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
          * DofMan = microDomain->giveDofManager(i);
          */
 
-        for ( i = 1; i <= this->microBoundaryDofManager.giveSize() / 3; i++ ) { //Number of DoFManagers stored in triplets
+        for ( int i = 1; i <= this->microBoundaryDofManager.giveSize() / 3; i++ ) { //Number of DoFManagers stored in triplets
             DofMan = microDomain->giveDofManager( this->microBoundaryDofManager.at(3 * i - 2) );
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
-            for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) { //3
+            for ( int j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) { //3
                 reactionForce = reactions.at(3 * i + j - 3);
-                for ( k = 1; k <= 8; k++ ) {
+                for ( int k = 1; k <= 8; k++ ) {
                     answer.at(3 * k + j - 3) += reactionForce * n.at(k);
                 }
             }
@@ -307,10 +301,9 @@ void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coo
 // Updates the receiver at end of time step.
 void MacroLSpace :: updateYourself(TimeStep *tStep)
 {
-    int i;
     FloatArray answer;
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
 
