@@ -39,18 +39,6 @@
 #ifndef _MSC_VER
 // for getrusage - user time reporting
 #include <sys/resource.h>
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <ctime>
-#else
-# ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <ctime>
-# endif
-#endif
-#else
-#include <ctime>
 #endif
 
 namespace oofem {
@@ -67,7 +55,7 @@ void Timer :: getUtime(oofem_timeval &answer)
 
 void Timer :: getTime(oofem_timeval &answer)
 {
-    gettimeofday((timeval*)&answer, NULL);
+    gettimeofday(&answer, NULL);
 }
 
 #else // #ifndef _MSC_VER

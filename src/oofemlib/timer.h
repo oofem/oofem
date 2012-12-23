@@ -35,19 +35,39 @@
 #ifndef timer_h
 #define timer_h
 
+#include "oofemcfg.h"
+
+#ifndef _MSC_VER
+#ifdef TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <ctime>
+#else
+# ifdef HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <ctime>
+# endif
+#endif
+
+#else // _MSC_VER
+#include <ctime>
+typedef struct timeval
+{
+    unsigned long tv_sec;          ///< Seconds.
+    unsigned long tv_usec;         ///< Microseconds.
+} oofem_timeval;
+#endif
+
+typedef timeval oofem_timeval;
+
+
 namespace oofem {
-    
+
 /**
  * Class implementing single timer, providing wall clock and user time capabilities.
  */
 class Timer
 {
-    typedef struct oofem_timeval
-    {
-        unsigned long tv_sec;          ///< Seconds.
-        unsigned long tv_usec;         ///< Microseconds.
-    } oofem_timeval;
-
     /// Wall clock time structures.
     oofem_timeval start_wtime, end_wtime;
     /// User time struct.
