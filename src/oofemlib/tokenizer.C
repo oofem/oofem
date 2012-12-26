@@ -63,14 +63,13 @@ Tokenizer :: readStringToken(std::size_t &pos, const std::string &line)
 std::string
 Tokenizer :: readStructToken(std::size_t &pos, const std::string &line)
 {
-    pos++;
     std::string x = this->readToken(pos, line, '}'); // read everything up to terminating '"' (or to the end of the string)
-    if ( line[pos] == '"' ) {
+    if ( line[pos] == '}' ) {
         pos++;            // check if terminating '"' was found
     } else {
         OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (}) inserted at end of line");
     }
-    return x;
+    return x + '}'; // structs are left with surrounding brackets, unlike strings ""
 }
 
 
@@ -95,7 +94,6 @@ void Tokenizer :: tokenizeLine(const std::string &currentLine)
     char c = 0;
     int nTokens = 0;
 
-    printf("Initial string to tokenize: %s\n", currentLine.c_str());
     while ( bpos < currentLine.size() ) {
 
         c = currentLine[bpos];
