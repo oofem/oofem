@@ -71,11 +71,9 @@ Element :: Element(int n, Domain *aDomain) :
 
 Element :: ~Element()
 {
-    int i;
-
     delete locationArray;
     if ( integrationRulesArray ) {
-        for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
             delete integrationRulesArray [ i ];
         }
 
@@ -659,15 +657,13 @@ Element :: postInitialize()
 void Element :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-    int i;
-
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 #else
     fprintf(file, "element %d :\n", number);
 #endif
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->printOutputAt(file, stepN);
     }
 }
@@ -677,12 +673,10 @@ void
 Element :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    int i;
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
 }
