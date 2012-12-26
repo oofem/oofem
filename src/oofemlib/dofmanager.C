@@ -264,7 +264,9 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(i) );
         }
     } else {
-        giveLocationArray(* giveCompleteGlobalDofIDArray(), locationArray, s);
+        IntArray *dofids = giveCompleteGlobalDofIDArray();
+        giveLocationArray(*dofids, locationArray, s);
+        delete dofids;
     }
 }
 
