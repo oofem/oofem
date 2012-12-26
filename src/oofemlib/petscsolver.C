@@ -186,7 +186,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     }
 
     timer.stopTimer();
-    OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs\n", timer.getUtime(); );
+    OOFEM_LOG_INFO( "PetscSolver:  User time consumed by solution: %.2fs\n", timer.getUtime() );
 
     if ( reason < 0 ) {
         return NM_NoSuccess;
