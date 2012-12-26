@@ -381,7 +381,8 @@ OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, InputFieldType fieldID
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(double &answer, int tokenNumber){
+OOFEMTXTInputRecord :: giveField(double &answer, int tokenNumber)
+{
     if ( scanDouble(tokenizer.giveToken(tokenNumber), answer) == 0 ) {
         OOFEM_ERROR4("Double not found on line %d in token number %d, string %s", this->lineNumber, tokenNumber, this->record.c_str() );
         return IRRT_BAD_FORMAT;
@@ -407,7 +408,7 @@ OOFEMTXTInputRecord :: hasField(InputFieldType fieldID, const char *idString)
 void
 OOFEMTXTInputRecord :: printYourself()
 {
-  printf( "%s", this->record.c_str() );
+    printf("%s", this->record.c_str());
 }
 
 

@@ -55,6 +55,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "timer.h"
+#include "oofem_limits.h"
 
 #include <vector>
 #include <string>
