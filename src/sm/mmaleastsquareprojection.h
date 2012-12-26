@@ -40,7 +40,7 @@
 #include "interface.h"
 #include "compiler.h"
 
-#include "dynalist.h"
+#include <list>
 
 namespace oofem {
 class Domain;
@@ -77,7 +77,7 @@ protected:
     /// If set, then only IP in the same region are taken into account.
     int regionFilter;
     /// List of Gp participating in patch.
-    dynaList< GaussPoint * >patchGPList;
+    std::list< GaussPoint * >patchGPList;
     /// Patch domain.
     Domain *patchDomain;
     /// Type of patch.

@@ -35,7 +35,7 @@
 #ifndef sloangraphnode_h
 #define sloangraphnode_h
 
-#include "dynalist.h"
+#include <list>
 
 namespace oofem {
 class SloanGraph;
@@ -69,7 +69,7 @@ private:
     /// Node priority.
     int Priority;
     /// List of neighbouring nodes (represent graph edges).
-    dynaList< int >neighborList;
+    std::list< int >neighborList;
 
 public:
     /// Creates node belonging to given graph with given old number.
@@ -97,7 +97,7 @@ public:
     /// Returns priority of receiver.
     int givePriority() { return Priority; }
     /// Returns the neighbor list of receiver.
-    dynaList< int > *giveNeighborList()  { return & neighborList; }
+    std::list< int > *giveNeighborList()  { return & neighborList; }
     /// sets new number equal to old one.
     void assignOldNumber() { NumberNew = NumberOld; }
 

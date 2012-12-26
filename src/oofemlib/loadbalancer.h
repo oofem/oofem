@@ -43,7 +43,7 @@
 
 #define __LB_DEBUG
  #ifdef __LB_DEBUG
-  #include "dynalist.h"
+  #include <list>
   #include "range.h"
  #endif
 
@@ -110,7 +110,7 @@ protected:
     int lbstep;
  #ifdef __LB_DEBUG
     /// List of steps with perturbed balancing.
-    dynaList< Range >perturbedSteps;
+    std::list< Range >perturbedSteps;
     /// Perturbing factor.
     double perturbFactor;
     /// list of step at which to performed lb recovery.

@@ -47,6 +47,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <ctime>
 
 #ifdef __VTK_MODULE
  #include <vtkPoints.h>
@@ -128,7 +129,7 @@ VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reduced
 {
     answer.resize(9);
     answer.zero();
-    if (type == ISVT_TENSOR_S3) {
+    if ( type == ISVT_TENSOR_S3 ) {
         for (int i = 1; i <= redIndx.giveSize(); i++) {
             if (redIndx.at(i) > 0) {
                 answer.at(redToFull.at(i)) = reducedForm.at(redIndx.at(i));
@@ -250,7 +251,7 @@ void
 VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
-    int i, nelemNodes;
+    int nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
@@ -260,7 +261,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         ( elemGT == EGT_hexa_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
-        for ( i = 1; i <= nelemNodes; i++ ) {
+        for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(i)->giveNumber() ;
         }
     } else if ( elemGT == EGT_hexa_2 ) {
@@ -269,7 +270,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         };
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
-        for ( i = 1; i <= nelemNodes; i++ ) {
+        for ( int i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
         }
     } else {
@@ -332,18 +333,17 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
     FloatArray *coords;
-    int i, inode;
-    int ielem, nelem = d->giveNumberOfElements();
+    int nelem = d->giveNumberOfElements();
 
     this->giveSmoother(); // make sure smoother is created
 
     // output nodes Region By Region
-    int ireg, nregions = this->smoother->giveNumberOfVirtualRegions();
+    int nregions = this->smoother->giveNumberOfVirtualRegions();
     int regionDofMans, totalcells;
     IntArray mapG2L, mapL2G;
 
     /* loop over regions */
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+    for ( int ireg = 1; ireg <= nregions; ireg++ ) {
         if ( ( ireg > 0 ) && ( this->regionsToSkip.contains(ireg) ) ) {
             continue;
         }
@@ -364,7 +364,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 #endif
 
 #ifdef __VTK_MODULE
-            for ( inode = 1; inode <= regionDofMans; inode++ ) {
+            for ( int inode = 1; inode <= regionDofMans; inode++ ) {
                 coords = d->giveNode(mapL2G.at(inode))->giveCoordinates();
                 int dims = coords->giveSize();
                 nodes->InsertNextPoint(coords->at(1), dims >= 2 ? coords->at(2) : 0.0, dims >= 3 ? coords->at(3) : 0.0);
@@ -374,13 +374,13 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells);
             // export nodes in region as vtk vertices
             fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
-            for ( inode = 1; inode <= regionDofMans; inode++ ) {
+            for ( int inode = 1; inode <= regionDofMans; inode++ ) {
                 coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
-                for ( i = 1; i <= coords->giveSize(); i++ ) {
+                for ( int i = 1; i <= coords->giveSize(); i++ ) {
                     fprintf( stream, "%e ", coords->at(i) );
                 }
 
-                for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
+                for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
                     fprintf(stream, "%e ", 0.0);
                 }
             }
@@ -398,7 +398,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             // output the connectivity data
             fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
 #endif
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+            for ( int ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
                 if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
                     continue;
@@ -425,7 +425,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                 elemNodeArray->Reset();
                 elemNodeArray->SetNumberOfIds(nelemNodes);
 #endif
-                for ( i = 1; i <= nelemNodes; i++ ) {
+                for ( int i = 1; i <= nelemNodes; i++ ) {
 #ifdef __VTK_MODULE
                     elemNodeArray->SetId(i-1, mapG2L.at( cellNodes.at(i) ) - 1);
 #else
@@ -445,7 +445,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             // output the offsets (index of individual element data in connectivity array)
             fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
             int offset = 0;
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+            for ( int ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
                 if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
                     continue;
@@ -465,7 +465,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
             // output cell (element) types
             fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+            for ( int ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
                 if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
                     continue;
@@ -510,7 +510,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
 #if 1
         // loop over region elements with multi-cell geometry
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
 
             if ( this->regionsToSkip.contains( this->smoother->giveElementVirtualRegionNumber(ielem) ) ) {
@@ -584,7 +584,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             }
             pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"" << i << "\" file=\""
                     << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
-            this->pvdBuffer.pushBack(pvdEntry.str());
+            this->pvdBuffer.push_back(pvdEntry.str());
         }
         this->writeVTKCollection();
     } else
@@ -592,7 +592,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
         std::ostringstream pvdEntry;
         pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
-        this->pvdBuffer.pushBack(pvdEntry.str());
+        this->pvdBuffer.push_back(pvdEntry.str());
         this->writeVTKCollection();
     }
 }
@@ -601,14 +601,14 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 void
 VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
 {
-    int i, n;
+    int n;
     std :: string scalars, vectors, tensors;
 
     n = primaryVarsToExport.giveSize();
 
     UnknownType type;
 
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         type = ( UnknownType ) primaryVarsToExport.at(i);
         if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
             vectors += __UnknownTypeToString(type);
@@ -628,7 +628,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
     n = internalVarsToExport.giveSize();
 
     // prepare header
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         isttype = ( InternalStateType ) internalVarsToExport.at(i);
         vtype = giveInternalStateValueType(isttype);
 
@@ -666,13 +666,13 @@ VTKXMLExportModule :: exportIntVars(
 #endif
     IntArray &mapG2L, IntArray &mapL2G, int regionDofMans, int region, TimeStep *tStep)
 {
-    int i, n = internalVarsToExport.giveSize();
+    int n = internalVarsToExport.giveSize();
     InternalStateType isttype;
     InternalStateValueType vtype;
 
     this->giveSmoother()->init(); // Makes sure smoother is up-to-date with potentially new mesh.
     // should be performed over regions
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         isttype = ( InternalStateType ) internalVarsToExport.at(i);
         vtype = giveInternalStateValueType(isttype);
         this->exportIntVarAs(isttype, vtype, mapG2L, mapL2G, regionDofMans, region, stream, tStep);
@@ -693,7 +693,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
     // The i-th value contains the corresponding global node number.
 
 
-    int ielem, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     int elemNodes;
     int elementNode, node;
@@ -705,7 +705,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
     regionDofMans = 0;
     regionSingleCells = 0;
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
         if ( ( reg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != reg ) ) {
             continue;
@@ -744,8 +744,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 
     regionL2GNodalNumbers.resize(regionDofMans);
 
-    int i;
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         if ( regionG2LNodalNumbers.at(i) ) {
             regionG2LNodalNumbers.at(i) = currOffset++;
             regionL2GNodalNumbers.at( regionG2LNodalNumbers.at(i) ) = i;
@@ -1393,9 +1392,9 @@ void VTKXMLExportModule::writeVTKCollection()
 
     sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year+1900, current->tm_mon+1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
 //     outfile << buff;
-    
+
     outfile << "<?xml version=\"1.0\"?>\n<VTKFile type=\"Collection\" version=\"0.1\">\n<Collection>\n";
-    for (dynaList< std::string >::iterator it = this->pvdBuffer.begin(); it != this->pvdBuffer.end(); ++it) {
+    for (std::list< std::string >::iterator it = this->pvdBuffer.begin(); it != this->pvdBuffer.end(); ++it) {
         outfile << *it << "\n";
     }
     outfile << "</Collection>\n</VTKFile>";

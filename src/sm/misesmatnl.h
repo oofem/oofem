@@ -39,8 +39,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#include "dynalist.h"
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "conTable.h"

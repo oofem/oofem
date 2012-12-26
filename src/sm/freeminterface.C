@@ -37,9 +37,10 @@
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "dynalist.h"
 #include "conTable.h"
 #include "mathfem.h"
+
+#include <list>
 
 namespace oofem {
 MesherInterface :: returnCode
@@ -106,27 +107,27 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
 void
 FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *stepN)
 {
-    int i, j, k, neighbour, candidate, found, jelemNodes;
+    int neighbour, candidate, found, jelemNodes;
     int nnodes = d->giveNumberOfDofManagers();
     double dist;
     const IntArray *candidateConnectivity;
     FloatArray *neighbourCoords;
     Element *jelem;
     Node *candNode;
-    dynaList< int >queue;
-    dynaList< int > :: iterator pos;
+    std::list< int >queue;
+    std::list< int > :: iterator pos;
 
 
     // loop over nodes
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         if ( !( ( d->giveDofManager(i)->giveClassID() == NodeClass ) || ( d->giveDofManager(i)->giveClassID() == RigidArmNodeClass ) ) ) {
             continue;
         }
 
         queue.clear();
-        queue.pushFront(i);
+        queue.push_front(i);
 
-        while ( !queue.isEmpty() ) {
+        while ( !queue.empty() ) {
             // extract candidate
             candidate = * ( queue.begin() );
             queue.erase( queue.begin() );
@@ -134,10 +135,10 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
             candNode  = ( Node * ) d->giveDofManager(candidate);
             // find candidate neighbours
             candidateConnectivity = d->giveConnectivityTable()->giveDofManConnectivityArray(candidate);
-            for ( j = 1; j <= candidateConnectivity->giveSize(); j++ ) {
+            for ( int j = 1; j <= candidateConnectivity->giveSize(); j++ ) {
                 jelem = d->giveElement( candidateConnectivity->at(j) );
                 jelemNodes = jelem->giveNumberOfNodes();
-                for ( k = 1; k <= jelemNodes; k++ ) {
+                for ( int k = 1; k <= jelemNodes; k++ ) {
                     neighbour = jelem->giveNode(k)->giveNumber();
                     if ( neighbour == candidate ) {
                         continue;
@@ -161,7 +162,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         }
 
                         if ( !found ) {
-                            queue.pushFront(neighbour);
+                            queue.push_front(neighbour);
                         }
 
                         // end overshoot criteria
@@ -178,7 +179,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         }
 
                         if ( !found ) {
-                            queue.pushFront(neighbour);
+                            queue.push_front(neighbour);
                         }
                     }
                 }

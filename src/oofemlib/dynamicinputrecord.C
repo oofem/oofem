@@ -37,7 +37,6 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "dictionr.h"
-#include "dynalist.h"
 #include "range.h"
 
 namespace oofem {
@@ -174,9 +173,9 @@ IRResultType DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType 
     return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString)
+IRResultType DynamicInputRecord :: giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString)
 {
-    std::map<InputFieldType, dynaList< Range > >::iterator it = this->rangeRecord.find(fieldID);
+    std::map<InputFieldType, std::list< Range > >::iterator it = this->rangeRecord.find(fieldID);
     if (it == this->rangeRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
@@ -254,7 +253,7 @@ void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType field
     this->dictionaryRecord[fieldID] = item;
 }
 
-void DynamicInputRecord :: setField(const dynaList< Range > &item, InputFieldType fieldID)
+void DynamicInputRecord :: setField(const std::list< Range > &item, InputFieldType fieldID)
 {
     this->rangeRecord[fieldID] = item;
 }

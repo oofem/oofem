@@ -62,7 +62,7 @@ protected:
     std::map<InputFieldType, FloatMatrix> matrixRecord;
     std::map<InputFieldType, std::vector< std::string> > stringListRecord;
     std::map<InputFieldType, Dictionary> dictionaryRecord;
-    std::map<InputFieldType, dynaList< Range > > rangeRecord;
+    std::map<InputFieldType, std::list< Range > > rangeRecord;
 
 public:
     /// Constructor. Creates an empty input record.
@@ -87,7 +87,7 @@ public:
     virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(double &answer, int tokenNumber);
     
     virtual bool hasField(InputFieldType fieldID, const char *idString);
@@ -102,7 +102,7 @@ public:
     virtual void setField(const FloatMatrix &item, InputFieldType fieldID);
     virtual void setField(const std::vector< std::string > &item, InputFieldType fieldID);
     virtual void setField(const Dictionary &item, InputFieldType fieldID);
-    virtual void setField(const dynaList< Range > &item, InputFieldType fieldID);
+    virtual void setField(const std::list< Range > &item, InputFieldType fieldID);
 
 };
 } // end namespace oofem

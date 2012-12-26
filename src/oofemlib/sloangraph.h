@@ -39,7 +39,8 @@
 #include "sloanlevelstruct.h"
 #include "intarray.h"
 #include "alist.h"
-#include "dynalist.h"
+
+#include <list>
 
 namespace oofem {
 
@@ -92,7 +93,7 @@ private:
     /// End peripheral node.
     int endNode;
     /// Priority queue of active or preactive nodes.
-    dynaList< int >queue;
+    std::list< int >queue;
     /// Integer distance weight.
     int WeightDistance;
     /// Integer degree weight.
@@ -183,7 +184,7 @@ private:
      * The list of candidates contains only one node of each degree
      * of last level of active spine.
      */
-    void extractCandidates(dynaList< int > &candidates, SloanLevelStructure *Spine);
+    void extractCandidates(std::list< int > &candidates, SloanLevelStructure *Spine);
     /// Initializes statuses and priority of nodes of receiver
     void initStatusAndPriority();
     /// Evaluates the nodal distances from backSpine. The backSpine is generated if not available.

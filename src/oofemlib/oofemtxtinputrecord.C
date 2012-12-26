@@ -37,7 +37,6 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "dictionr.h"
-#include "dynalist.h"
 #include "range.h"
 
 #include <cstdlib>
@@ -340,7 +339,7 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType fieldID, con
 }
 
 IRResultType
-OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, InputFieldType fieldID, const char *idString)
+OOFEMTXTInputRecord :: giveField(std::list< Range > &list, InputFieldType fieldID, const char *idString)
 {
     int li, hi;
     const char *rec;
@@ -359,7 +358,7 @@ OOFEMTXTInputRecord :: giveField(dynaList< Range > &list, InputFieldType fieldID
         // read ranges
         while ( readRange(& rec, li, hi) ) {
             Range range(li, hi);
-            list.pushBack(range);
+            list.push_back(range);
         }
 
         // skip whitespaces after last range

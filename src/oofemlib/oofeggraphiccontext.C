@@ -88,7 +88,8 @@ oofegGraphicContext :: oofegGraphicContext()
 
 
 void
-oofegGraphicContext :: init(EngngModel *d) {
+oofegGraphicContext :: init(EngngModel *d)
+{
     if ( staticVarsInitFlag == 0 ) {
         BOOLEAN suc;
         int i, nmat;

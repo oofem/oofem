@@ -35,9 +35,8 @@
 #ifndef inputrecord_h
 #define inputrecord_h
 
-#include "dynalist.h"
-
 #include <vector>
+#include <list>
 #include <string>
 
 namespace oofem {
@@ -1424,8 +1423,8 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the dynaList<Range> field value.
-    virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
+    /// Reads the std::list<Range> field value.
+    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Returns a double on the position tokenNumber
     virtual IRResultType giveField(double &answer, int tokenNumber) = 0;
     //@}
@@ -1453,8 +1452,8 @@ public:
     IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString);
     /// Reads the Dictionary field value.
     IRResultType giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString);
-    /// Reads the dynaList<Range> field value.
-    IRResultType giveOptionalField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
+    /// Reads the std::list<Range> field value.
+    IRResultType giveOptionalField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.

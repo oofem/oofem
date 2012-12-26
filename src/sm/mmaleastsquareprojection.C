@@ -161,7 +161,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         // not enough points -> take closest point projection
         patchGPList.clear();
         sourceIp = sl->giveClosestIP(coords, region);
-        patchGPList.pushFront(sourceIp);
+        patchGPList.push_front(sourceIp);
         //fprintf(stderr, "MMALeastSquareProjection: too many neighbor search iterations\n");
         //exit (1);
         return;
@@ -229,7 +229,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         }
 
         // remember this ip
-        patchGPList.pushFront(gpList [ minDistIndx - 1 ]);
+        patchGPList.push_front(gpList [ minDistIndx - 1 ]);
         swap = dist.at(i);
         dist.at(i) = dist.at(minDistIndx);
         dist.at(minDistIndx) = swap;
@@ -254,7 +254,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         iRule = element->giveDefaultIntegrationRulePtr();
         nip = iRule->getNumberOfIntegrationPoints();
         for ( i = 0; i < nip; i++ ) {
-            patchGPList.pushFront( iRule->getIntegrationPoint(i) );
+            patchGPList.push_front( iRule->getIntegrationPoint(i) );
         }
     }
 
@@ -286,7 +286,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     rhs.zero();
 
     // determine the value from patch
-    dynaList< GaussPoint * > :: iterator pos;
+    std::list< GaussPoint * > :: iterator pos;
     int size = patchGPList.size();
     if ( size == 1 ) {
         pos = patchGPList.begin();
@@ -295,7 +295,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     } else if ( size < neq ) {
         OOFEM_ERROR("MMALeastSquareProjection::mapVariable internal error");
     } else {
-        dynaList< GaussPoint * > :: iterator pos;
+        std::list< GaussPoint * > :: iterator pos;
 
         for ( pos = patchGPList.begin(); pos != patchGPList.end(); ++pos ) {
             srcgp  = * pos;

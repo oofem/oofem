@@ -37,7 +37,6 @@
 
 #include "inputrecord.h"
 #include "tokenizer.h"
-#include "dynalist.h"
 
 #include <vector>
 
@@ -94,7 +93,7 @@ public:
     virtual IRResultType giveField(FloatMatrix &answer, InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
 
     virtual IRResultType giveField(double &answer, int tokenNumber);
     virtual bool hasField(InputFieldType fieldID, const char *idString);

@@ -77,7 +77,7 @@ public:
     /// Constructor.
     SPRNodalRecoveryModel(Domain *d);
     /// Destructor.
-    ~SPRNodalRecoveryModel();
+    virtual ~SPRNodalRecoveryModel();
 
     int recoverValues(InternalStateType type, TimeStep *tStep);
 

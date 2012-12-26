@@ -43,7 +43,8 @@
 #include "classtype.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "dynalist.h"
+
+#include <list>
 
 namespace oofem {
 class MasterDof;
@@ -103,9 +104,9 @@ protected:
 
     /// DOF-manager containing the unknown deviatoric stress.
     Node *sigmaDev;
-    
+
     /// Element boundaries to integrate over. Boundary number 0 indicates that the element is a boundary element itself.
-    dynaList< std::pair<int,int> > boundaries;
+    std::list< std::pair<int,int> > boundaries;
 
 public:
     /**

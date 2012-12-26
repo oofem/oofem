@@ -248,7 +248,7 @@ void MixedGradientPressureNeumann :: giveLocationArrays(AList<IntArray> &rows, A
     rows.growTo(this->boundaries.size()*2);
     cols.growTo(this->boundaries.size()*2);
     int i = 1;
-    for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
         Element *e = this->giveDomain()->giveElement( (*pos).first );
         int boundary = (*pos).second;
 
@@ -437,7 +437,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
 
         // The second contribution is on the momentumbalance equation; - int delta_v . n dA * p
         FloatArray fe;
-        for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+        for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
             Element *e = this->giveDomain()->giveElement( (*pos).first );
             int boundary = (*pos).second;
             
@@ -461,7 +461,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         // Assemble: int delta_v (x) n dA : E_i s_i
         //           int v (x) n dA : E_i delta_s_i
         norm = 0.;
-        for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+        for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
             Element *e = this->giveDomain()->giveElement( (*pos).first );
             int boundary = (*pos).second;
             
@@ -501,7 +501,7 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
         this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
         this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
         
-        for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+        for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
             Element *e = this->giveDomain()->giveElement( (*pos).first );
             int boundary = (*pos).second;
             
@@ -540,7 +540,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     // Postprocessing; vol = int v . n dA
     FloatArray unknowns, fe;
     vol = 0.;
-    for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
         Element *e = this->giveDomain()->giveElement( (*pos).first );
         int boundary = (*pos).second;
         
@@ -599,7 +599,7 @@ void MixedGradientPressureNeumann :: computeTangents(
     p_pert.zero();
     FloatArray fe;
     IntArray loc;
-    for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
         Element *e = this->giveDomain()->giveElement( (*pos).first );
         int boundary = (*pos).second;
 
@@ -627,7 +627,7 @@ void MixedGradientPressureNeumann :: computeTangents(
     // Post-process the volumetric rate of deformations in the sensitivity fields;
     FloatArray e_d(ndev); e_d.zero();
     double e_p = 0.0;
-    for (dynaList< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
+    for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
         Element *e = this->giveDomain()->giveElement( (*pos).first );
         int boundary = (*pos).second;
     
@@ -707,7 +707,7 @@ int MixedGradientPressureNeumann :: giveInputRecordString(std :: string &str, bo
 
 void MixedGradientPressureNeumann :: addElementSide(int elem, int side)
 {
-    this->boundaries.pushBack(std::pair<int,int>(elem,side));
+    this->boundaries.push_back(std::pair<int,int>(elem,side));
 }
 
 
