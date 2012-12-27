@@ -204,6 +204,7 @@ TimeStep *LinearStability :: giveNextStep()
 
 void LinearStability :: solveYourself()
 {
+    this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     // update state according to new meta step
     this->giveNextStep();
     this->updateAttributes( this->giveCurrentMetaStep() );

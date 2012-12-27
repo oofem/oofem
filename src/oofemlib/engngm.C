@@ -98,6 +98,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     ndomains = 0;
     nMetaSteps = 0;
     nxfemman = 0;
+    profileOpt = 0;
     nonLinFormulation = UNKNOWN;
 
     outputStream          = NULL;

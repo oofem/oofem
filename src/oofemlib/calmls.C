@@ -91,6 +91,8 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
 
     minIterations = 0;
 
+    calm_hpc_init = 0;
+
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
     parallel_context = engngModel->givePetscContext(d->giveNumber(), ut);

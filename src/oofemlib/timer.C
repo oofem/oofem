@@ -42,7 +42,7 @@
 #endif
 
 namespace oofem {
-    
+
 #ifndef _MSC_VER
 
 void Timer :: getUtime(oofem_timeval &answer)

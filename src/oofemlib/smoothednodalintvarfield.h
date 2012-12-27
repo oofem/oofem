@@ -70,7 +70,7 @@ public:
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
     virtual int evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime);
 
-    InternalStateType giveType() { return istType; }
+    InternalStateType giveInternalType() { return istType; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
     virtual const char *giveClassName() const { return "SmoothedNodalInternalVariableField"; }
