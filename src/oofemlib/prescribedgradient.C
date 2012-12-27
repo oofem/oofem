@@ -43,7 +43,9 @@
 #include "engngm.h"
 #include "node.h"
 #include "usrdefsub.h" // For sparse matrix creation.
+#ifdef __TM_MODULE
 #include "../fm/line2boundaryelement.h"
+#endif
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -198,6 +200,7 @@ double PrescribedGradient :: domainSize()
     ///@todo This code is very general, and necessary for all multiscale simulations with pores, so it should be moved into Domain eventually
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
+#ifdef __FM_MODULE
     // This requires the boundary to be consistent and ordered correctly.
     for (int i = 1; i <= this->domain->giveNumberOfElements(); ++i) {
         //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
@@ -207,6 +210,7 @@ double PrescribedGradient :: domainSize()
             domain_size += e->computeNXIntegral();
         }
     }
+#endif
     if  (domain_size == 0.0) { // No boundary elements? Assume full density;
         return this->domain->giveArea(); ///@todo Support more than 2D
     } else {
