@@ -1230,9 +1230,9 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     } else {
         IntArray elemLocArry;
         // create lit of remote elements, contributing to receiver
-        dynaList< localIntegrationRecord > *integrationDomainList;
+        std::list< localIntegrationRecord > *integrationDomainList;
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        dynaList< localIntegrationRecord > :: iterator pos;
+        std::list< localIntegrationRecord > :: iterator pos;
 
         locationArray.resize(0);
         // loop over element IP

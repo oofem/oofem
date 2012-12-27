@@ -37,7 +37,6 @@
 #include "element.h"
 #include "timestep.h"
 #include "integrationrule.h"
-#include "dynalist.h"
 #include "nonlocalmaterialext.h"
 #include "material.h"
 #include "spatiallocalizer.h"
@@ -48,6 +47,8 @@
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
 #endif
+
+#include <list>
 
 namespace oofem {
 // flag forcing the inclusion of all elements with volume inside support of weight function.
@@ -108,7 +109,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     NonlocalMaterialStatusExtensionInterface *statusExt =
         ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
-    dynaList< localIntegrationRecord > *iList;
+    std::list< localIntegrationRecord > *iList;
 
     Element *ielem;
     GaussPoint *jGp;
@@ -126,7 +127,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
      * }
      */
 
-    if ( !statusExt->giveIntegrationDomainList()->isEmpty() ) {
+    if ( !statusExt->giveIntegrationDomainList()->empty() ) {
         return;                                                  // already done
     }
 
@@ -185,7 +186,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
                         ir.nearGp = jGp;  // store gp
                         elemVolume = weight * jGp->giveElement()->computeVolumeAround(jGp);
                         ir.weight = elemVolume; // store gp weight
-                        iList->pushBack(ir); // store own copy in list
+                        iList->push_back(ir); // store own copy in list
                         integrationVolume += elemVolume;
                     }
                 } else {
@@ -234,7 +235,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
         giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
-    dynaList< localIntegrationRecord > *iList;
+    std::list< localIntegrationRecord > *iList;
 
     Element *ielem;
     GaussPoint *jGp;
@@ -296,7 +297,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
                             ir.nearGp = jGp;     // store gp
                             elemVolume = weight * jGp->giveElement()->computeVolumeAround(jGp);
                             ir.weight = elemVolume; // store gp weight
-                            iList->pushBack(ir); // store own copy in list
+                            iList->push_back(ir); // store own copy in list
                             integrationVolume += elemVolume;
                         }
                     } else {
@@ -309,7 +310,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         statusExt->setIntegrationScale(integrationVolume); // remember scaling factor
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
-        dynaList< localIntegrationRecord > :: iterator pos;
+        std::list< localIntegrationRecord > :: iterator pos;
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
         for ( pos = iList->begin(); pos != iList->end(); ++pos ) {
             fprintf(stderr, "%d,%d(%e)", ( * pos ).nearGp->giveElement()->giveGlobalNumber(), ( * pos ).nearGp->giveNumber(), ( * pos ).weight);
@@ -322,7 +323,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 }
 
 
-dynaList< localIntegrationRecord > *
+std::list< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
@@ -333,7 +334,7 @@ NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
     }
 
-    if ( statusExt->giveIntegrationDomainList()->isEmpty() ) {
+    if ( statusExt->giveIntegrationDomainList()->empty() ) {
         this->buildNonlocalPointTable(gp);
     }
 

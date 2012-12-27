@@ -40,7 +40,6 @@
 #include "mathfem.h"
 #include "structuralelement.h"
 #include "sparsemtrx.h"
-#include "dynalist.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
@@ -122,8 +121,8 @@ void
 IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
     IDNLMaterialStatus *nonlocStatus, *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    dynaList< localIntegrationRecord > :: iterator pos, postarget;
+    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
+    std::list< localIntegrationRecord > :: iterator pos, postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -353,8 +352,8 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     // compute nonlocal equivalent strain
     // or nonlocal compliance variable gamma (depending on averagedVar)
 
-    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    std::list< localIntegrationRecord > :: iterator pos;
 
     double sigmaRatio = 0.; //ratio sigma2/sigma 1used for stress-based averaging
     double eigenVectorAngle = 0.; //angle betwen the first eigenvector and the x-axis used for stress-based averaging
@@ -532,8 +531,8 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 {
     double coeff;
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
     IDNLMaterial *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -578,7 +577,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 }
 
-dynaList< localIntegrationRecord > *
+std::list< localIntegrationRecord > *
 IDNLMaterial :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
@@ -620,8 +619,8 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     gp->giveElement()->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
     int n, m, i, j;
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {

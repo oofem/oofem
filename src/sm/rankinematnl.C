@@ -38,7 +38,6 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "sparsemtrx.h"
-#include "dynalist.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
@@ -154,8 +153,8 @@ RankineMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep 
     this->updateDomainBeforeNonlocAverage(atTime);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
-    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
+    std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         nonlocStatus = ( RankineMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
@@ -254,8 +253,8 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 {
     double coeff;
     RankineMatNlStatus *status = ( RankineMatNlStatus * ) this->giveStatus(gp);
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
     RankineMatNl *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -285,7 +284,7 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 }
 
-dynaList< localIntegrationRecord > *
+std::list< localIntegrationRecord > *
 RankineMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     RankineMatNlStatus *status = ( RankineMatNlStatus * ) this->giveStatus(gp);

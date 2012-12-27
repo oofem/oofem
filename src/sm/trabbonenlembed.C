@@ -36,7 +36,6 @@
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "dynalist.h"
 #include "nonlocalmaterialext.h"
 
 #ifdef __OOFEG
@@ -119,8 +118,8 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
 
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         nonlocStatus = ( TrabBoneNLEmbedStatus * ) this->giveStatus( ( * pos ).nearGp );

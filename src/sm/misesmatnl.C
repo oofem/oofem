@@ -39,7 +39,6 @@
 #include "flotarry.h"
 #include "mathfem.h"
 #include "sparsemtrx.h"
-#include "dynalist.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 
@@ -52,17 +51,6 @@
 #endif
 
 namespace oofem {
-double sign(double number)
-{
-    if ( number > 0 ) {
-        return 1;
-    } else if ( number < 0 ) {
-        return -1;
-    } else {
-        return 0;
-    }
-}
-
 
 MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 //
@@ -131,7 +119,7 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, M
     answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
     if ( tempDamage > damage ) {
         this->computeCumPlasticStrain(nlKappa, gp, atTime);
-        answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sign(stress);
+        answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sgn(stress);
     }
 }
 
@@ -168,8 +156,8 @@ void
 MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 {
     MisesMatNlStatus *nonlocStatus, *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
-    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    dynaList< localIntegrationRecord > :: iterator pos, postarget;
+    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
+    std::list< localIntegrationRecord > :: iterator pos, postarget;
 
     // find the current Gauss point (target) in the list of it neighbors
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -272,8 +260,8 @@ MisesMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *a
     this->updateDomainBeforeNonlocAverage(atTime);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
-    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
+    std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
@@ -380,8 +368,8 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
 {
     double coeff;
     MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
     MisesMatNl *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -412,7 +400,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
 }
 
 
-dynaList< localIntegrationRecord > *
+std::list< localIntegrationRecord > *
 MisesMatNl :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
@@ -482,7 +470,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
         status->giveTempEffectiveStress(stress);
         if ( gp->giveMaterialMode() == _1dMat ) {
             nsize = stress.giveSize();
-            double coeff = sign( stress.at(1) ) * E / ( E + H );
+            double coeff = sgn( stress.at(1) ) * E / ( E + H );
             for ( i = 1; i <= ncols; i++ ) {
                 sum = 0.;
                 for ( j = 1; j <= nsize; j++ ) {

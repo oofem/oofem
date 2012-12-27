@@ -36,9 +36,10 @@
 #define nonlocalmaterialext_h
 
 #include "matstatus.h"
-#include "dynalist.h"
 #include "interface.h"
 #include "intarray.h"
+
+#include <list>
 
 namespace oofem {
 //
@@ -78,7 +79,7 @@ class NonlocalMaterialStatusExtensionInterface : public Interface
 {
 protected:
     /// List containing localIntegrationRecord values.
-    dynaList< localIntegrationRecord >integrationDomainList;
+    std::list< localIntegrationRecord >integrationDomainList;
     /// Nonlocal volume of corresponding integration point.
     double integrationScale;
 
@@ -89,18 +90,18 @@ public:
     NonlocalMaterialStatusExtensionInterface();
 
     /// Destructor.
-    ~NonlocalMaterialStatusExtensionInterface();
+    virtual ~NonlocalMaterialStatusExtensionInterface();
 
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
      * references to integration points and their weights that influence the nonlocal average in
      * receiver's associated integration point.
      */
-    dynaList< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
+    std::list< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
     /// Returns associated integration scale.
     double giveIntegrationScale() { return integrationScale; }
     /// Sets associated integration scale.
-    void   setIntegrationScale(double val) { integrationScale = val; }
+    void setIntegrationScale(double val) { integrationScale = val; }
     /// clears the integration list of receiver
     void clear() { integrationDomainList.clear(); }
 };
@@ -253,7 +254,7 @@ public:
      * receiver's associated integration point.
      * Rebuilds the IP list by calling  buildNonlocalPointTable if not available.
      */
-    dynaList< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
+    std::list< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
 
     /**
      * Evaluates the basic nonlocal weight function for a given distance

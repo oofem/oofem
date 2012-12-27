@@ -39,7 +39,6 @@
 #include "flotarry.h"
 #include "mathfem.h"
 #include "sparsemtrx.h"
-#include "dynalist.h"
 #include "nonlocalmaterialext.h"
 
 #ifdef __PARALLEL_MODE
@@ -165,8 +164,8 @@ void
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, GaussPoint *gp, TimeStep *atTime)
 {
     TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
-    dynaList< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
     TrabBoneNL3D *rmat;
 
     double coeff;
@@ -199,7 +198,7 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 }
 
 
-dynaList< localIntegrationRecord > *
+std::list< localIntegrationRecord > *
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp)
 {
     TrabBoneNL3DStatus *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
@@ -352,8 +351,8 @@ TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *a
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
 
-    dynaList< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
-    dynaList< localIntegrationRecord > :: iterator pos;
+    std::list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
+    std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / nlStatus->giveIntegrationScale();
