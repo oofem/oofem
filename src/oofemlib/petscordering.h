@@ -72,7 +72,7 @@ protected:
 
 public:
     PetscNatural2GlobalOrdering();
-    ~PetscNatural2GlobalOrdering() { }
+    virtual ~PetscNatural2GlobalOrdering() { }
 
     void init(EngngModel *, EquationID ut, int di, EquationType et = et_standard);
 
@@ -100,7 +100,7 @@ protected:
 
 public:
     PetscNatural2LocalOrdering();
-    ~PetscNatural2LocalOrdering() { }
+    virtual ~PetscNatural2LocalOrdering() { }
 
     void init(EngngModel *, EquationID ut, int di, EquationType et = et_standard);
 

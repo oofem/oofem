@@ -48,7 +48,7 @@ RankinePlasticMaterial ::        RankinePlasticMaterial(int n, Domain *d) : MPla
     this->rmType = mpm_CuttingPlane;
 }
 
-RankinePlasticMaterial ::       ~RankinePlasticMaterial()
+RankinePlasticMaterial :: ~RankinePlasticMaterial()
 { }
 
 

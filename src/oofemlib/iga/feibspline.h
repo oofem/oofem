@@ -100,7 +100,7 @@ public:
     virtual int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask);
     virtual int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan);
 
-    const char *giveClassName() const { return "BSplineInterpolation"; }
+    virtual const char *giveClassName() const { return "BSplineInterpolation"; }
     virtual bool hasSubPatchFormulation() { return true; }
 
 protected:

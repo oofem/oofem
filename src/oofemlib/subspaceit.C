@@ -64,7 +64,7 @@ SubspaceIteration ::  SubspaceIteration(int i, Domain *d, EngngModel *m) :
 }
 
 
-SubspaceIteration ::  ~SubspaceIteration() {
+SubspaceIteration :: ~SubspaceIteration() {
     //
     // destructor
     //

@@ -155,7 +155,7 @@ protected:
 
 public:
     MPlasticMaterial(int n, Domain *d);
-    ~MPlasticMaterial();
+    virtual ~MPlasticMaterial();
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 1; }

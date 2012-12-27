@@ -97,7 +97,7 @@ public:
     /// Copy constructor
     SymCompCol(const SymCompCol &S);
     /// Destructor
-    ~SymCompCol() { }
+    virtual ~SymCompCol() { }
 
     // Overloaded methods
     SparseMtrx *GiveCopy() const;

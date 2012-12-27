@@ -36,13 +36,15 @@
 
 namespace oofem {
 LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :
-    SparseLinearSystemNM(i, d, m) {
+    SparseLinearSystemNM(i, d, m)
+{
     //
     // constructor
     //
 }
 
-LDLTFactorization ::  ~LDLTFactorization() {
+LDLTFactorization :: ~LDLTFactorization()
+{
     //
     // destructor
     //

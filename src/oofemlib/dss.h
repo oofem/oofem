@@ -88,7 +88,7 @@ public:
     /// Copy constructor
     DSSMatrix(const DSSMatrix &S);
     /// Destructor
-    ~DSSMatrix();
+    virtual ~DSSMatrix();
 
     // Overloaded methods
     SparseMtrx *GiveCopy() const;

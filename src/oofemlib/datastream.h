@@ -109,7 +109,7 @@ public:
     /// Constructor, takes associated stream pointer as parameter
     StringDataStream(std::stringstream *s) { stream = s; }
     /// Destructor (will not close stream!)
-    ~StringDataStream() { }
+    virtual ~StringDataStream() { }
 
     virtual int read(int *data, const unsigned int count)
     { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
@@ -149,7 +149,7 @@ public:
     /// Constructor, takes associated stream pointer as parameter
     FileDataStream(FILE *s) { stream = s; }
     /// Destructor (will not close stream!)
-    ~FileDataStream() { }
+    virtual ~FileDataStream() { }
 
     virtual int read(int *data, const unsigned int count)
     { if ( fread(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
@@ -192,7 +192,7 @@ public:
     /// Constructor, takes associated communication buffer pointer as parameter
     ComBuffDataStream(CommunicationBuffer *b) { buff = b; }
     /// Destructor
-    ~ComBuffDataStream() { }
+    virtual ~ComBuffDataStream() { }
 
     virtual int read(int *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(unsigned long *data, const unsigned int count) { return buff->unpackArray(data, count); }
@@ -222,7 +222,7 @@ public:
     /// Constructor
     ProcessCommDataStream(ProcessCommunicatorBuff *b) { pc = b; }
     /// Destructor
-    ~ProcessCommDataStream() { }
+    virtual ~ProcessCommDataStream() { }
 
     virtual int read(int *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(unsigned long *data, const unsigned int count) { return pc->unpackArray(data, count); }

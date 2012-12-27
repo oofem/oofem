@@ -70,12 +70,11 @@ public:
      * @param d Domain which field belongs to.
      */
     InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain *d);
-    ~InternalVariableField();
+    virtual ~InternalVariableField();
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
     virtual int evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime);
-    
-    InternalStateType giveType() { return type; }
+
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
     virtual const char *giveClassName() const { return "InternalVariableField"; }

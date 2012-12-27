@@ -182,7 +182,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
 }
 #endif
 
-EngngModel ::  ~EngngModel()
+EngngModel :: ~EngngModel()
 // destructor
 {
     if (previousStep == currentStep) {

@@ -49,9 +49,9 @@ class ExportModuleManager : public ModuleManager< ExportModule >
 {
 public:
     ExportModuleManager(EngngModel *emodel);
-    ~ExportModuleManager();
+    virtual ~ExportModuleManager();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     ExportModule *CreateModuleOfType(const char *name, int num, EngngModel *emodel);
 
     /**
@@ -67,7 +67,7 @@ public:
      * Terminates the receiver, the corresponding terminate module services are called.
      */
     void terminate();
-    const char *giveClassName() const { return "ExportModuleManager"; }
+    virtual const char *giveClassName() const { return "ExportModuleManager"; }
 };
 } // end namespace oofem
 #endif // exportmodulemanager_h

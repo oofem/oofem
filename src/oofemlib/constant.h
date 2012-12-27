@@ -56,7 +56,7 @@ public:
      */
     ConstantFunction(int i, Domain *d) : LoadTimeFunction(i, d) { value = 0; }
     /// Destructor.
-    ~ConstantFunction() { }
+    virtual ~ConstantFunction() { }
 
     /// @return Value of receiver.
     double giveValue() { return value; }

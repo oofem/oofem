@@ -61,7 +61,7 @@ public:
      * @param nHist Number of old time steps to store.
      */
     DofDistributedPrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
-    ~DofDistributedPrimaryField();
+    virtual ~DofDistributedPrimaryField();
 
     virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
 

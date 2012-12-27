@@ -208,7 +208,7 @@ public:
      */
     NonlocalMaterialExtensionInterface(Domain *d);
     /// Destructor.
-    ~NonlocalMaterialExtensionInterface() { }
+    virtual ~NonlocalMaterialExtensionInterface() { }
 
 
     /**

@@ -48,7 +48,7 @@ class NURBSInterpolation : public BSplineInterpolation
 {
 public:
     NURBSInterpolation(int nsd) : BSplineInterpolation(nsd) { }
-    ~NURBSInterpolation();
+    virtual ~NURBSInterpolation();
 
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -59,7 +59,7 @@ public:
     }
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    const char *giveClassName() const { return "NURBSInterpolation"; }
+    virtual const char *giveClassName() const { return "NURBSInterpolation"; }
 };
 } // end namespace oofem
 #endif // feinurbs_h

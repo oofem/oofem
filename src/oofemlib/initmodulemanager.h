@@ -51,7 +51,7 @@ class InitModuleManager : public ModuleManager< InitModule >
 {
 public:
     InitModuleManager(EngngModel *emodel);
-    ~InitModuleManager();
+    virtual ~InitModuleManager();
 
     InitModule *CreateModuleOfType(const char *name, int n, EngngModel *emodel);
 
@@ -61,11 +61,9 @@ public:
      */
     void doInit();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    const char *giveClassName() const { return "InitModuleManager"; }
-
-protected:
+    virtual const char *giveClassName() const { return "InitModuleManager"; }
 };
 } // end namespace oofem
 #endif // initmodulemanager_h

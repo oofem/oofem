@@ -43,7 +43,7 @@ namespace oofem {
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) { }
 
-DSSSolver ::  ~DSSSolver() { }
+DSSSolver :: ~DSSSolver() { }
 
 NM_Status
 DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
