@@ -22,7 +22,6 @@ set (core_unsorted
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
     # Deprecated?
-    strreader.C
     spoolessparsemtrx.C
     rowcol.C skyline.C skylineu.C
     ldltfact.C

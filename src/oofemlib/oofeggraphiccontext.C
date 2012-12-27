@@ -41,7 +41,6 @@
 #include "mathfem.h"
 // for Range class definition outputmanager.h included
 #include "outputmanager.h"
-#include "strreader.h"
 #include "util.h"
 
 namespace oofem {
@@ -65,7 +64,7 @@ double oofegGraphicContext :: zprofilescale = 0.0;
 int oofegGraphicContext :: activeEigVal = 1;
 int oofegGraphicContext :: activeYieldStep;
 IntArray oofegGraphicContext :: matRegFilter;
-dynaList< Range >oofegGraphicContext :: element_filter;
+std::list< Range >oofegGraphicContext :: element_filter;
 SmootherType oofegGraphicContext :: smootherType;
 ScalarAlgorithmType oofegGraphicContext :: scalarAlgo = SA_ISO_SURF;
 int oofegGraphicContext :: intVarDefGeoFlag = 0;
@@ -157,10 +156,10 @@ oofegGraphicContext :: testElementGraphicActivity(Element *e)
 {
     int matFilterState = ( this->getMaterialModelFilterState( e->giveMaterial()->giveNumber() ) );
     int elemFiltState = 0;
-    if ( element_filter.isEmpty() ) {
+    if ( element_filter.empty() ) {
         return matFilterState;
     } else {
-        dynaList< Range > :: iterator rangeIter;
+        std::list< Range > :: iterator rangeIter;
         for ( rangeIter = this->element_filter.begin(); rangeIter != this->element_filter.end(); ++rangeIter ) {
             if ( ( * rangeIter ).test( e->giveNumber() ) ) {
                 elemFiltState = 1;
@@ -195,17 +194,9 @@ oofegGraphicContext :: setMaterialModelFilterState(int i, int state)
 void
 oofegGraphicContext :: setElementFilterState(char *initString)
 {
-    ///@todo Anyone who uses OOFEG should check to see if StringReader can be removed in favor of the new OOFEMTXTInputRecord parser (bug ticket 24)
-#if 1
-    StringReader reader;
-
-    element_filter.clear();
-    reader.readRangeList(element_filter, initString, "element_filter");
-#else    
     OOFEMTXTInputRecord parser(initString);
     element_filter.clear();
     parser.giveField(element_filter, IFT_Unknown, "element_filter");
-#endif
 }
 
 int
