@@ -39,6 +39,7 @@
 #include "element.h"
 #include "material.h"
 #include "mathfem.h"
+#include "oofemtxtinputrecord.h"
 // for Range class definition outputmanager.h included
 #include "outputmanager.h"
 #include "util.h"
@@ -94,7 +95,7 @@ oofegGraphicContext :: init(EngngModel *d)
         int i, nmat;
 
         emodel = d;
-        meshFillColor = ColorGetPixelFromString(const_char< char * >("black"), & suc);
+        meshFillColor = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
         edgeColor = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
         deformedElementColor = ColorGetPixelFromString(const_cast< char * >("BlueViolet"), & suc);
         nodeColor  = ColorGetPixelFromString(const_cast< char * >("black"), & suc);
