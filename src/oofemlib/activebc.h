@@ -36,12 +36,13 @@
 #define activebc_h
 
 #include "generalbc.h"
-#include "alist.h"
 #include "intarray.h"
 #include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "error.h"
+
+#include <vector>
 
 namespace oofem {
 class SparseMtrx;
@@ -151,7 +152,7 @@ public:
      * @param c_s Column numbering scheme.
      * @param domain Domain to assemble from.
      */
-    virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
 
 

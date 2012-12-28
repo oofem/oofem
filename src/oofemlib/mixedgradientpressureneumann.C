@@ -49,7 +49,6 @@
 #include "masterdof.h"
 #include "usrdefsub.h" // For sparse matrix creation.
 #include "sparsemtrxtype.h"
-#include "../fm/line2boundaryelement.h"
 #include "mathfem.h"
 
 #include "sparsemtrx.h"
@@ -229,7 +228,7 @@ void MixedGradientPressureNeumann :: setPrescribedDeviatoricGradientFromVoigt(co
 }
 
 
-void MixedGradientPressureNeumann :: giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+void MixedGradientPressureNeumann :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
     if (eid == EID_MomentumBalance_ConservationEquation)
@@ -245,9 +244,9 @@ void MixedGradientPressureNeumann :: giveLocationArrays(AList<IntArray> &rows, A
     this->sigmaDev->giveCompleteLocationArray(sigma_loc_r, r_s);
     this->sigmaDev->giveCompleteLocationArray(sigma_loc_c, c_s);
 
-    rows.growTo(this->boundaries.size()*2);
-    cols.growTo(this->boundaries.size()*2);
-    int i = 1;
+    rows.resize(this->boundaries.size()*2);
+    cols.resize(this->boundaries.size()*2);
+    int i = 0;
     for (std::list< std::pair<int,int> > :: iterator pos = this->boundaries.begin(); pos != this->boundaries.end(); ++pos) {
         Element *e = this->giveDomain()->giveElement( (*pos).first );
         int boundary = (*pos).second;
@@ -255,12 +254,12 @@ void MixedGradientPressureNeumann :: giveLocationArrays(AList<IntArray> &rows, A
         e->giveBoundaryLocationArray(loc_r, boundary, eid, r_s);
         e->giveBoundaryLocationArray(loc_c, boundary, eid, c_s);
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
-        rows.put(i, new IntArray(loc_r));
-        cols.put(i, new IntArray(sigma_loc_c));
+        rows[i] = loc_r;
+        cols[i] = sigma_loc_c;
         i++;
         // and the symmetric part (usually the transpose of above)
-        rows.put(i, new IntArray(sigma_loc_r));
-        cols.put(i, new IntArray(loc_c));
+        rows[i] = sigma_loc_r;
+        cols[i] = loc_c;
         i++;
     }
 }

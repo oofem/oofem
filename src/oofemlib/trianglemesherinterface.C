@@ -388,9 +388,9 @@ namespace oofem {
 
 bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
         const IntArray &outside, const IntArray &inside,
-        AList<FloatArray> &nodes, AList<IntArray> &n_markers,
-        AList<IntArray> &triangles, IntArray &t_markers,
-        AList<IntArray> &segments, IntArray &s_markers) const
+        std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
+        std::vector<IntArray> &triangles, IntArray &t_markers,
+        std::vector<IntArray> &segments, IntArray &s_markers) const
 {
 #ifdef __TRIANGLE_MODULE
     // 1. Fill the struct for triangle;
@@ -432,60 +432,59 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     custom_triangulate (options, &mesh, &output, NULL, outside.givePointer(), inside.givePointer());
 
     // 3. Copy back
-    nodes.growTo(output.numberofpoints);
+    nodes.resize(output.numberofpoints);
     //n_markers.resize(output.numberofpoints);
     for (int i = 0; i < output.numberofpoints; ++i) {
-        FloatArray *node = new FloatArray(2);
-        node->at(1) = output.pointlist[i*2];
-        node->at(2) = output.pointlist[i*2+1];
-        nodes.put(i+1, node);
+        nodes[i].at(1) = output.pointlist[i*2];
+        nodes[i].at(2) = output.pointlist[i*2+1];
         //n_markers(i) = output.pointmarkerlist[i]; // Not enough.
     }
 
-    triangles.growTo(output.numberoftriangles);
+    triangles.resize(output.numberoftriangles);
     t_markers.resize(output.numberoftriangles);
     for (int i = 0; i < output.numberoftriangles; ++i) {
-        IntArray *triangle = new IntArray(output.numberofcorners);
+        IntArray &triangle = triangles[i];
+        triangle.resize(output.numberofcorners);
         for (int j = 0; j < 3; j++) { // First three
-            triangle->at(j+1) = output.trianglelist[i*output.numberofcorners + j];
+            triangle(j+1) = output.trianglelist[i*output.numberofcorners + j];
         }
         // Rearrange the strange ordering of the edge nodes.
         if (output.numberofcorners == 6) {
-            triangle->at(4) = output.trianglelist[i*output.numberofcorners + 5];
-            triangle->at(5) = output.trianglelist[i*output.numberofcorners + 3];
-            triangle->at(6) = output.trianglelist[i*output.numberofcorners + 4];
+            triangle(3) = output.trianglelist[i*output.numberofcorners + 5];
+            triangle(4) = output.trianglelist[i*output.numberofcorners + 3];
+            triangle(5) = output.trianglelist[i*output.numberofcorners + 4];
         }
-        triangles.put(i+1, triangle);
         t_markers.at(i+1) = (int)round(output.triangleattributelist[i]);
     }
 
     // A somewhat annoying missing feature of triangle, it won't make the segments quadratic.
-    std::set<int> *node_triangle;
+    std::set< std::size_t > *node_triangle;
     if (this->quadratic) {
-        node_triangle = new std::set<int>[output.numberofpoints];
-        for (int i = 1; i <= triangles.giveSize(); ++i) {
-            IntArray *triangle = triangles.at(i);
+        node_triangle = new std::set< std::size_t >[output.numberofpoints];
+        for (std::size_t i = 0; i < triangles.size(); ++i) {
+            IntArray &triangle = triangles[i];
             for (int j = 1; j <= 3; ++j) {
-                node_triangle[triangle->at(j)-1].insert(i);
+                node_triangle[triangle.at(j)-1].insert(i);
             }
         }
     }
 
-    segments.growTo(output.numberofsegments);
+    segments.resize(output.numberofsegments);
     s_markers.resize(output.numberofsegments);
     for (int i = 0; i < output.numberofsegments; ++i) {
-        IntArray *segment = this->quadratic ? new IntArray(3) : new IntArray(2);
-        segment->at(1) = output.segmentlist[i*2 + 0];
-        segment->at(2) = output.segmentlist[i*2 + 1];
+        IntArray &segment = segments[i];
+        segment.resize(this->quadratic ? 3:2);
+        segment.at(1) = output.segmentlist[i*2 + 0];
+        segment.at(2) = output.segmentlist[i*2 + 1];
         //segment->at(3) = output.segmentlist[i*3 + 2]; // Quadratic meshes only, not for segments.
         if (this->quadratic) {
             int a, b, c;
-            std::set<int> tris = node_triangle[segment->at(1)-1];
+            std::set< std::size_t > tris = node_triangle[segment.at(1)-1];
             // Now look up any triangle with the other point included.
-            for (std::set<int>::iterator it = tris.begin(); it != tris.end(); ++it) {
-                IntArray *triangle = triangles.at(*it);
-                if ( (b = triangle->findFirstIndexOf(segment->at(2))) > 0) {
-                    a = triangle->findFirstIndexOf(segment->at(1));
+            for (std::set< std::size_t >::iterator it = tris.begin(); it != tris.end(); ++it) {
+                IntArray &triangle = triangles[*it];
+                if ( (b = triangle.findFirstIndexOf(segment.at(2))) > 0) {
+                    a = triangle.findFirstIndexOf(segment.at(1));
                     if (a+b == 3) {
                         c = 4;
                     } else if (a+b == 5) {
@@ -493,12 +492,11 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
                     } else {
                         c = 6;
                     }
-                    segment->at(3) = triangle->at(c);
+                    segment.at(3) = triangle.at(c);
                     break;
                 }
             }
         }
-        segments.put(i+1, segment);
         s_markers.at(i+1) = output.segmentmarkerlist[i];
     }
     if (this->quadratic) {
@@ -537,27 +535,20 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     return true;
 }
 
-void TriangleMesherInterface :: fixNodeMarkers(const AList<FloatArray> &nodes, AList<IntArray> &n_markers,
-        const AList<IntArray> &triangles, const IntArray &t_markers,
-        const AList<IntArray> &segments, const IntArray &s_markers)
+void TriangleMesherInterface :: fixNodeMarkers(const std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
+        const std::vector<IntArray> &triangles, const IntArray &t_markers,
+        const std::vector<IntArray> &segments, const IntArray &s_markers)
 {
-    n_markers.growTo(nodes.giveSize());
-    for (int i = 1; i <= n_markers.giveSize(); ++i) {
-        n_markers.put(i, new IntArray());
-        //n_markers.at(i)->preallocate(nregions);
-        ///@todo Maybe just a suboptimization.
-    }
+    n_markers.resize(nodes.size());
 
-    for (int i = 1; i <= segments.giveSize(); ++i) {
-        IntArray *sn = segments.at(i);
-        for (int j = 1; j <= sn->giveSize(); ++j) {
-            n_markers.at(sn->at(j))->insertSortedOnce(s_markers.at(i));
+    for (std::size_t i = 0; i < segments.size(); ++i) {
+        for (int j = 1; j <= segments[i].giveSize(); ++j) {
+            n_markers[segments[i].at(j)].insertSortedOnce(s_markers.at(i));
         }
     }
-    for (int i = 1; i <= triangles.giveSize(); ++i) {
-        IntArray *tn = triangles.at(i);
-        for (int j = 1; j <= tn->giveSize(); ++j) {
-            n_markers.at(tn->at(j))->insertSortedOnce(t_markers.at(i));
+    for (std::size_t i = 0; i < triangles.size(); ++i) {
+        for (int j = 1; j <= triangles[i].giveSize(); ++j) {
+            n_markers[triangles[i].at(j)].insertSortedOnce(t_markers.at(i));
         }
     }
 }

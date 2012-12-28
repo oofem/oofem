@@ -143,7 +143,7 @@ public:
      * The gradient should be in Voigt notation (only the deviatoric part will be used)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
     virtual void addElementSide(int elem, int side);
     virtual void addElement(int elem);
     void clearElements();
@@ -192,7 +192,7 @@ public:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     
-    virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }

@@ -70,23 +70,21 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void SurfaceTensionBoundaryCondition :: giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                 const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
     if (!this->useTangent || type != TangentStiffnessMatrix)
         return;
 
-    IntArray r_loc, c_loc, dofids;
-    rows.growTo(this->elements.size() + this->sides.size());
-    cols.growTo(this->elements.size() + this->sides.size());
+    IntArray dofids;
+    rows.resize(this->elements.size() + this->sides.size());
+    cols.resize(this->elements.size() + this->sides.size());
 
-    int i = 1;
+    int i = 0;
     for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(*it);
-        e->giveLocationArray(r_loc, eid, r_s);
-        e->giveLocationArray(c_loc, eid, c_s);
-        rows.put(i, new IntArray(r_loc));
-        cols.put(i, new IntArray(c_loc));
+        e->giveLocationArray(rows[i], eid, r_s);
+        e->giveLocationArray(cols[i], eid, c_s);
         i++;
     }
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
@@ -94,10 +92,8 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(AList<IntArray> &rows
         int side = it->second;
         ElementSide *es = e->giveSide(side);
         e->giveDofManDofIDMask(1, eid, dofids); // NOTE! Assumes that the first node contains the relevant dof ID's.
-        es->giveLocationArray(dofids, r_loc, r_s);
-        es->giveLocationArray(dofids, c_loc, c_s);
-        rows.put(i, new IntArray(r_loc));
-        cols.put(i, new IntArray(c_loc));
+        es->giveLocationArray(dofids, rows[i], r_s);
+        es->giveLocationArray(dofids, cols[i], c_s);
         i++;
     }
 }

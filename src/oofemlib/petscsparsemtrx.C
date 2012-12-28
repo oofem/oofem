@@ -297,19 +297,19 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         }
     }
     // Structure from active boundary conditions.
-    AList<IntArray> r_locs, c_locs;
+    std::vector<IntArray> r_locs, c_locs;
     for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
             ///@todo Deal with the CharType here.
             activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s, domain);
-            for (int k = 1; k < r_locs.giveSize(); k++) {
-                IntArray *krloc = r_locs.at(k);
-                IntArray *kcloc = c_locs.at(k);
-                for ( int i = 1; i <= krloc->giveSize(); i++ ) {
-                    if ( ( ii = krloc->at(i) ) ) {
-                        for ( int j = 1; j <= kcloc->giveSize(); j++ ) {
-                            jj = kcloc->at(j);
+            for (std::size_t k = 0; k < r_locs.size(); k++) {
+                IntArray &krloc = r_locs[k];
+                IntArray &kcloc = c_locs[k];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            jj = kcloc.at(j);
                             if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
                                 if ( jj >= ii ) {
@@ -498,18 +498,18 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     }
 
     // Structure from active boundary conditions.
-    AList<IntArray> locs, temp;
+    std::vector<IntArray> locs, temp;
     for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
             ///@todo Deal with the CharType here.
             activebc->giveLocationArrays(locs, temp, ut, TangentStiffnessMatrix, s, s, domain);
-            for (int k = 1; k < locs.giveSize(); k++) {
-                IntArray *kloc = locs.at(k);
-                for ( i = 1; i <= kloc->giveSize(); i++ ) {
-                    if ( ( ii = kloc->at(i) ) ) {
-                        for ( j = 1; j <= kloc->giveSize(); j++ ) {
-                            jj = kloc->at(j);
+            for (std::size_t k = 1; k < locs.size(); k++) {
+                IntArray &kloc = locs[k];
+                for ( i = 1; i <= kloc.giveSize(); i++ ) {
+                    if ( ( ii = kloc.at(i) ) ) {
+                        for ( j = 1; j <= kloc.giveSize(); j++ ) {
+                            jj = kloc.at(j);
                             if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
                                 if ( jj >= ii ) {
