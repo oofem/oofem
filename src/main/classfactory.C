@@ -61,6 +61,9 @@
 #include "initial.h"
 
 namespace oofem {
+
+ClassFactory classFactory;
+
 ClassFactory :: ClassFactory() {
     // register elements
 #undef REGISTER_CLASS

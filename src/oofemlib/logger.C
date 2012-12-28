@@ -134,6 +134,10 @@ namespace oofem {
 #define LOG_ERR_HEADER "_______________________________________________________"
 #define LOG_ERR_TAIL   "_______________________________________________________\a\n"
 
+// Default log output
+Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
+Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
+
 Logger :: Logger(logLevelType level, FILE *stream)
 {
     this->logLevel = level;

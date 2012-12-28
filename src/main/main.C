@@ -83,12 +83,8 @@ void oofem_print_epilog();
 // Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
 
-/* Default oofem loggers */
-Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
-
 /* Global class factory */
-ClassFactory oofem :: classFactory;
+//ClassFactory oofem :: classFactory;
 
 int main(int argc, char *argv[])
 {

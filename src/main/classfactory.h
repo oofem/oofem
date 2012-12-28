@@ -49,8 +49,6 @@
 
 namespace oofem {
 
-extern ClassFactory oofem :: classFactory;
-
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
@@ -368,8 +366,8 @@ public:
      */
     InitialCondition *createInitialCondition(classType type, int num, Domain *d) ;
 
+};
 
-  };
 extern ClassFactory classFactory;
 } // end namespace oofem
 #endif // clasfactort_h

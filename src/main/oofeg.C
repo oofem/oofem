@@ -274,23 +274,15 @@ std::string viewTitle = "";
 oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 EView *myview;
 
-/* Defaul oofem loggers */
-Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
-
-/* Global class factory */
-ClassFactory oofem :: classFactory;
-
 int
 main(int argc, char *argv[])
 {
-    int i;
     int inputFileFlag = 0;
     //int rank=0;
     std :: stringstream inputFileName;
     char buff [ 20 ];
     unsigned long mask = 0;
-    bool parallelFlag;
+    bool parallelFlag = false;
 
 
     // print prg header on stdout
@@ -313,7 +305,7 @@ main(int argc, char *argv[])
     // check for options
     //
     if ( argc != 1 ) {
-        for ( i = 1; i < argc; i++ ) {
+        for ( int i = 1; i < argc; i++ ) {
             if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
                     inputFileName << argv [ i + 1 ];
@@ -395,7 +387,7 @@ main(int argc, char *argv[])
     //problem -> giveEngngModel()->forceEquationNumbering();
 
     // activate some useful layers
-    for ( i = 0; i < OOFEG_LAST_LAYER; i++ ) {
+    for ( int i = 0; i < OOFEG_LAST_LAYER; i++ ) {
         EVSetLayerOnOff(myview, i, 1);
     }
 
