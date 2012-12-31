@@ -128,7 +128,6 @@ TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     double tempDam, tempTSED;
     FloatArray newTotalDef, plasDef;
     FloatArray totalStress;
-    double dt;
     FloatMatrix compliance, elasticity;
 
     this->constructIsoComplTensor(compliance, eps0, nu0);
@@ -139,8 +138,6 @@ TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     this->initGpForNewStep(gp);
 
     performPlasticityReturn(gp, totalStrain);
-
-    dt = atTime->giveTimeIncrement();
 
     tempDam = computeDamage(gp, atTime);
 

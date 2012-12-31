@@ -1453,8 +1453,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 //
 {
     contextIOResultType iores;
-    int serNum, closeFlag = 0, istep, iversion;
-    bool domainUpdated = false;
+    int closeFlag = 0, istep, iversion;
     Domain *domain;
     FILE *file;
 
@@ -1520,11 +1519,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 
     for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
-        serNum = domain->giveSerialNumber();
         domain->restoreContext(stream, mode, obj);
-        if ( serNum != domain->giveSerialNumber() ) {
-            domainUpdated = true;
-        }
     }
 
     // restore nMethod

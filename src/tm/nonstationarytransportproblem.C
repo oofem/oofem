@@ -715,15 +715,11 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int ielem, i;
     int nelem = domain->giveNumberOfElements();
-    double dV;
     TransportElement *element;
     IntegrationRule *iRule;
     GaussPoint *gp;
     FloatArray vecTemperature;
     TransportMaterial *mat;
-
-
-
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = ( TransportElement * ) domain->giveElement(ielem);
@@ -732,7 +728,6 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
             iRule = element->giveDefaultIntegrationRulePtr();
             for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
-                dV  = element->computeVolumeAround(gp);
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
                 //mat->average_temp += vecState.at(1) * dV;

@@ -127,19 +127,18 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
         return;
     }
 
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    //LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
     double paramA = 0.;
     double paramB = 0.;
     double paramC = 0.;
-    double equivStrain;
 
     paramA = 0.5 * ( e0 + ec * e0 );
     paramB = ( coh * e0 ) / sqrt( 1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
     paramC = 0.5 * ( this->ec * e0 - e0 );
 
-    equivStrain = status->giveEquivalentStrain();
+    //double equivStrain = status->giveEquivalentStrain();
     tempEquivStrain =  sqrt( pow(this->alphaOne * strain.at(2) / paramB, 2.) + pow( ( strain.at(1) + paramC ) / paramA, 2. ) ) * paramA - paramC;
 
     return;

@@ -471,12 +471,12 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
     /* returns part of hardening vector corresponding to kinematic hardening */
     if ( this->kinematicHardeningFlag ) {
         IntArray mask;
-        int isize, rSize, i;
+        int isize, i;
 
         answer.resize(6);
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
         isize = mask.giveSize();
-        rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
+        //int rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
         /* kinematic hardening variables are first */
         for ( i = 1; i <= isize; i++ ) {

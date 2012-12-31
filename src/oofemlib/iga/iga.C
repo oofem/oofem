@@ -54,7 +54,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    int indx = 0, ui, vi, wi, i, nsd, numberOfGaussPoints = 1, numberOfKnotSpans=1;
+    int indx = 0, ui, vi, wi, i, nsd, numberOfGaussPoints = 1;
     double du, dv, dw;
     const FloatArray *gpcoords;
     FloatArray newgpcoords;
@@ -74,7 +74,6 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     } else if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
-        numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV;
         const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
         const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
         const FloatArray * knotValuesU = this->giveInterpolation()->giveKnotValues(1);
@@ -116,7 +115,6 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
         int numberOfKnotSpansW = this->giveInterpolation()->giveNumberOfKnotSpans(3);
-        numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV*numberOfKnotSpansW;
         const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
         const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
         const IntArray * knotMultiplicityW = this->giveInterpolation()->giveKnotMultiplicity(3);

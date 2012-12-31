@@ -86,7 +86,7 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     FILE *outStream;
     FloatArray temp, w, d, tt, rtolv, eigv;
     FloatMatrix r;
-    int nn, nd, nc1, i, j, k, l, ij = 0, nite, is;
+    int nn, nc1, i, j, k, ij = 0, nite, is;
     double rt, art, brt, eigvt, dif;
     FloatMatrix ar, br, vec;
 
@@ -125,7 +125,6 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     //
     // creation of initial iteration vectors
     //
-    nd = nn / nc;
     nc1 = nc - 1;
 
     w.resize(nn);
@@ -175,7 +174,6 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
         r.at(i, 1) = tt.at(i);
     }
 
-    l = nn - nd;
     for ( j = 2; j <= nc; j++ ) {
         rt = 0.0;
         for ( i = 1; i <= nn; i++ ) {

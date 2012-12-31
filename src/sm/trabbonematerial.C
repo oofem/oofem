@@ -221,15 +221,12 @@ TrabBoneMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm for
     double epsnew, epsp;
     double dam;
     double sig, sigc;
-    double dt;
 
     TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
 
     this->initGpForNewStep(gp);
 
     performPlasticityReturn(gp, totalStrain);
-
-    dt = atTime->giveTimeIncrement();
 
     epsnew = totalStrain.at(1);
 

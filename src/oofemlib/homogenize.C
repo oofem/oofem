@@ -95,7 +95,6 @@ void Homogenize :: reuss(FloatMatrix &PhaseMatrix)
 void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix)
 {
     int phase, i, r;
-    int phaseMuMin, phaseMuMax;
     int counter = 0;
     int numRows = PhaseMatrix.giveNumberOfRows();
     double k, k_min, mu, mu_phase, muMin, muMax;
@@ -135,12 +134,10 @@ void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix)
     muMax = 0.;
     for ( i = 0; i < numRows; i++ ) {
         if ( SortedPhaseMatrix(i, 2) > muMax ) {
-            phaseMuMax = i;
             muMax = SortedPhaseMatrix(i, 2);
         }
 
         if ( SortedPhaseMatrix(i, 2) < muMin ) {
-            phaseMuMin = i;
             muMin = SortedPhaseMatrix(i, 2);
         }
     }
@@ -179,7 +176,7 @@ void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix)
 void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
 {
     double f_r, E_r, nu_r, k_r, mu_r;
-    double f_m, E_m, nu_m, k_m, mu_m;
+    double E_m, nu_m, k_m, mu_m;
     double fr_tot = 0.;
     double nom_k_MT = 0., denom_k_MT = 0., nom_mu_MT = 0., denom_mu_MT = 0.;
     double k_S_denom = 0., mu_S_denom = 0.;
@@ -193,7 +190,6 @@ void Homogenize :: moriTanaka(FloatMatrix &PhaseMatrix, int refRow)
     checkVolFraction(PhaseMatrix);
 
     //determine matrix parameters
-    f_m = PhaseMatrix(refRow, 0);
     E_m = PhaseMatrix(refRow, 1);
     nu_m = PhaseMatrix(refRow, 2);
 
@@ -624,7 +620,7 @@ void Homogenize :: hirsch(FloatMatrix &PhaseMatrix, double chi)
 
 
 void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
-    double f_i, E_i, nu_i, f_m, E_m, nu_m;
+    double f_i, E_i, f_m, E_m;
 
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
         OOFEM_ERROR1("Only two phases are allowed\n");
@@ -634,10 +630,8 @@ void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
 
     f_i = PhaseMatrix(0, 0);
     E_i = PhaseMatrix(0, 1);
-    nu_i = PhaseMatrix(0, 2);
     f_m = PhaseMatrix(1, 0);
     E_m = PhaseMatrix(1, 1);
-    nu_m = PhaseMatrix(1, 2);
 
     E_hmg = E_i * ( ( f_i * E_i + ( 1 + f_m ) * E_m ) / ( ( 1. + f_m ) * E_i + f_i * E_m ) );
     nu_hmg = 0.2;
@@ -647,16 +641,14 @@ void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
 
 void Homogenize :: counto(FloatMatrix &PhaseMatrix)
 {
-    double f_i, E_i, nu_i, f_m, E_m, nu_m;
+    double E_i, f_m, E_m, nu_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
         OOFEM_ERROR1("Only two phases are allowed\n");
     }
 
     checkVolFraction(PhaseMatrix);
 
-    f_i = PhaseMatrix(0, 0);
     E_i = PhaseMatrix(0, 1);
-    nu_i = PhaseMatrix(0, 2);
     f_m = PhaseMatrix(1, 0);
     E_m = PhaseMatrix(1, 1);
     nu_m = PhaseMatrix(1, 2);

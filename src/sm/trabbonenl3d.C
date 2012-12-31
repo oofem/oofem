@@ -345,7 +345,7 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 void
 TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
 {
-    double nonlocalContribution, nonlocalCumPlastStrain = 0.0, coeff = 0.0;
+    double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
     TrabBoneNL3DStatus *nonlocStatus, *nlStatus = ( TrabBoneNL3DStatus * ) this->giveStatus(gp);
 
     this->buildNonlocalPointTable(gp);
@@ -355,7 +355,7 @@ TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *a
     std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / nlStatus->giveIntegrationScale();
+        //coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / nlStatus->giveIntegrationScale();
 
         nonlocStatus = ( TrabBoneNL3DStatus * ) this->giveStatus( ( * pos ).nearGp );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();

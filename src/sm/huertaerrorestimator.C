@@ -4124,7 +4124,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     InputRecord *ir;
     std :: string str;
     int i, nmstep, nsteps = 0;
-    int ddltf = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, skipUpdate = 0, renumber = 1;
+    int ddltf = 0, ddmSize = 0, ddvSize = 0, hpcSize = 0, hpcwSize = 0, renumber = 1;
     int controlMode = 0, hpcMode = 0, stiffMode = 0, maxIter = 30, reqIter = 3, manrmsteps = 0;
     double rtolv, minStepLength = 0.0, initialStepLength, stepLength, psi = 1.0;
     IntArray ddm, hpc;
@@ -4139,7 +4139,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     skipUpdate = 0;
 #else
     sprintf(line, "/dev/null");
-    skipUpdate = 1;
 #endif
 
     /* sprintf(skipUpdateString, "skipUpdate %d ", skipUpdate); */

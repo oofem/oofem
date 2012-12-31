@@ -324,7 +324,7 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
 void
 TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 {
-    double Re, norm_un, mu, mu_min, nu, norm_N, norm_N_d, norm_M_d, norm_LSIC, t_s1, t_s2, t_s3, rho;
+    double mu, mu_min, norm_N, norm_N_d, norm_M_d, norm_LSIC;
     FloatMatrix dn, N, N_d, M_d, LSIC;
     FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(6), u2(6);
     GaussPoint *gp;
@@ -333,23 +333,16 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
-    rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
     for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
         if ( mu_min > mu ) {
             mu_min = mu;
         }
-
-        nu = mu_min / rho;
     }
-
-    nu = mu_min / rho;
 
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), u);
-
-    norm_un = u.computeNorm();
 
     this->computeAdvectionTerm(N, atTime);
     this->computeAdvectionDeltaTerm(N_d, atTime);
@@ -364,14 +357,6 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     if ( ( norm_N == 0 ) || ( norm_N_d == 0 ) || ( norm_M_d == 0 ) ) {
         t_supg = 0;
     } else {
-        Re = ( norm_un / nu ) * ( norm_N / norm_N_d );
-
-        t_s1 = norm_N / norm_N_d;
-
-        t_s2 = atTime->giveTimeIncrement() * ( norm_N / norm_M_d ) * 0.5;
-
-        t_s3 = t_s1 * Re;
-
         //t_supg =  1. / sqrt( 1. / ( t_s1 * t_s1 ) + 1. / ( t_s2 * t_s2 ) + 1. / ( t_s3 * t_s3 ) );
         t_supg = 0;
     }

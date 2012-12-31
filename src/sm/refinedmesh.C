@@ -122,7 +122,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
     long node, elem, nd, pos = 0, p, number, size;
     long i, j, k, m, n, node1, node2, node3, node4, elem1, elem2;
     long refine_nodes, fine_node_id, refine_node_id;
-    long mesh_edge_id, mesh_face_id, mesh_quad_id, fine_edge_id, fine_quad_id, fine_hexa_id;
+    long mesh_edge_id, fine_edge_id, fine_quad_id, fine_hexa_id;
     long *tmp_array_start [ 4 ], *tmp_array_end [ 4 ];
     long *tmp_array_cen [ 6 ], *tmp_array [ 12 ];
     int swap [ 6 ], flag;
@@ -1348,7 +1348,6 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
 
     /* create mesh faces */
 
-    mesh_face_id = 0;
     mesh_face = mesh_face_array;
 
     fe_tetra = fe_tetra_array;
@@ -1393,7 +1392,6 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
 
     /* create mesh quads */
 
-    mesh_quad_id = 0;
     mesh_quad = mesh_quad_array;
 
     fe_hexa = fe_hexa_array;

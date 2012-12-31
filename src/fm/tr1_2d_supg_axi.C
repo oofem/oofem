@@ -475,12 +475,6 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeSt
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
-    double dudx [ 2 ] [ 2 ];
-
-    dudx [ 0 ] [ 0 ] = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
-    dudx [ 0 ] [ 1 ] = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
-    dudx [ 1 ] [ 0 ] = b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6);
-    dudx [ 1 ] [ 1 ] = c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6);
 
     for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
@@ -549,7 +543,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
     double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
     int ip, i, j;
-    double dV, _r, _mu;
+    double dV, _r;
     GaussPoint *gp;
     FloatMatrix _d, _b, _db;
     //FloatArray eps, stress,u;
@@ -560,7 +554,6 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
         dV = this->computeVolumeAround(gp);
         _r = this->computeRadiusAt(gp);
-        _mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
         this->computeBMtrx(_b, gp);
         ( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, TangentStiffness, gp, atTime);
         _db.beProductOf(_d, _b);
@@ -669,7 +662,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     FloatArray un, gVector;
     GaussPoint *gp;
     FloatArray n(3);
-    double dV, _r, coeff, u, v;
+    double dV, coeff, u, v;
 
     // add body load (gravity) termms
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
@@ -683,7 +676,6 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
                 for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
                     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
                     dV = this->computeVolumeAround(gp);
-                    _r = this->computeRadiusAt(gp);
                     this->computeNVector(n, gp);
                     coeff = rho * dV;
                     u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
@@ -704,7 +696,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
 
     // loop over sides
     int j, n1, n2, code, sid;
-    double tx, ty, l, nx, ny, side_r;
+    double tx, ty, l, side_r;
     //IntArray nodecounter (3);
     for ( j = 1; j <= boundarySides.giveSize(); j++ ) {
         code = boundaryCodes.at(j);
@@ -720,8 +712,6 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             tx = giveNode(n2)->giveCoordinate(1) - giveNode(n1)->giveCoordinate(1);
             ty = giveNode(n2)->giveCoordinate(2) - giveNode(n1)->giveCoordinate(2);
             l = sqrt(tx * tx + ty * ty);
-            nx = ty / l;
-            ny = -tx / l;
             // radius at side center
             side_r = 0.5 * ( giveNode(n2)->giveCoordinate(1) + giveNode(n1)->giveCoordinate(1) );
 
@@ -765,7 +755,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
     bcGeomType ltype;
     FloatArray gVector;
     GaussPoint *gp;
-    double coeff, _r, dV;
+    double coeff, dV;
 
     answer.resize(3);
     answer.zero();
@@ -779,7 +769,6 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
                 for ( ip = 0; ip < integrationRulesArray [ 0 ]->getNumberOfIntegrationPoints(); ip++ ) {
                     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip);
                     dV = this->computeVolumeAround(gp);
-                    _r = this->computeRadiusAt(gp);
                     coeff = t_pspg * dV;
 
                     answer.at(1) += coeff * ( b [ 0 ] * gVector.at(1) + c [ 0 ] * gVector.at(2) );
@@ -838,7 +827,7 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
     //answer.resize(6, 6);
     //answer.zero();
 
-    int node1, node2, node3, i, j, ip;
+    int node1, node2, i, j, ip;
     double l, t1, t2, _t1, _t2, dV;
     double beta;
     GaussPoint *gp;
@@ -850,8 +839,6 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
     beta = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
-
-    node3 = ( node2 == 3 ? 1 : node2 + 1 );
 
     _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
     _t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
@@ -888,7 +875,7 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
     //answer.resize(6, 6);
     //answer.zero();
 
-    int node1, node2, node3, i, j, ip;
+    int node1, node2, i, j, ip;
     double l, n1, n2, _t1, _t2, dV;
     double alpha;
     FloatArray nt(6), n(3);
@@ -900,8 +887,6 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
     alpha = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
-
-    node3 = ( node2 == 3 ? 1 : node2 + 1 );
 
 
     _t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
@@ -940,7 +925,7 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
 void
 TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeStep *atTime)
 {
-    int node1, node2, node3, j, i, ip;
+    int node1, node2, j, i, ip;
     double l, n1, n2, t1, t2, dV;
     FloatArray nt(6), n(3);
     GaussPoint *gp;
@@ -950,9 +935,6 @@ TR1_2D_SUPG_AXI :: computeOutFlowBCTerm_MB(FloatMatrix &answer, int side, TimeSt
     //area
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
-
-    node3 = ( node2 == 3 ? 1 : node2 + 1 );
-
 
     t1 = giveNode(node2)->giveCoordinate(1) - giveNode(node1)->giveCoordinate(1);
     t2 = giveNode(node2)->giveCoordinate(2) - giveNode(node1)->giveCoordinate(2);
@@ -1118,7 +1100,7 @@ void
 TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
 {
     /* UGN-Based Stabilization */
-    double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2, z, Re_ugn;
+    double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2;
     double dscale, uscale, lscale, tscale, dt;
     //bool zeroFlag = false;
     int i, im1;
@@ -1180,8 +1162,6 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
         this->t_supg = 1. / sqrt( 1. / ( t_sugn1 * t_sugn1 ) + 1. / ( t_sugn2 * t_sugn2 ) + 1. / ( t_sugn3 * t_sugn3 ) );
         this->t_pspg = this->t_supg;
 
-        Re_ugn = vnorm * h_ugn / ( 2. * nu );
-        z = ( Re_ugn <= 3. ) ? Re_ugn / 3. : 1.0;
         //this->t_lsic = h_ugn * vnorm * z / 2.0;
         this->t_lsic = 0.0;
     }
@@ -1247,12 +1227,10 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
             int prev_node = ( si > 1 ) ? si - 1 : 3;
             int next_node = ( si < 3 ) ? si + 1 : 1;
 
-            double l = this->giveNode(si)->giveCoordinates()->distance( this->giveNode(next_node)->giveCoordinates() );
             double t = fi.at(si) / ( fi.at(si) - fi.at(next_node) );
             x2 = x1 + t * ( this->giveNode(next_node)->giveCoordinate(1) - this->giveNode(si)->giveCoordinate(1) );
             y2 = y1 + t * ( this->giveNode(next_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );
 
-            l = this->giveNode(si)->giveCoordinates()->distance( this->giveNode(prev_node)->giveCoordinates() );
             t = fi.at(si) / ( fi.at(si) - fi.at(prev_node) );
             x3 = x1 + t * ( this->giveNode(prev_node)->giveCoordinate(1) - this->giveNode(si)->giveCoordinate(1) );
             y3 = y1 + t * ( this->giveNode(prev_node)->giveCoordinate(2) - this->giveNode(si)->giveCoordinate(2) );

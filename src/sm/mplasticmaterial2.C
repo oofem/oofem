@@ -232,12 +232,12 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
     FloatMatrix ks, kl, lmat, rmat, gradientMatrix;
     FloatMatrix gmat;
     IntArray initialConditionMap;
-    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf);
     FloatArray rhs;
     double yieldValue;
     int nIterations = 0;
-    int i, j, strSize, totSize;
+    int i, j, strSize;
     int elastic, restart, actSurf, indx;
     bool yieldConsistency, init = true;
     bool hasHardening = this->hasHardening();
@@ -248,13 +248,9 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
     this->clearPopulationSet();
 
     if ( this->plType == associatedPT ) {
-        yieldGradSigVecPtr = loadGradSigVecPtr = & yieldGradSigVec;
-        yieldGradKVecPtr = loadGradKVecPtr = & yieldGradKVec;
+        loadGradSigVecPtr = & yieldGradSigVec;
     } else {
-        yieldGradSigVecPtr = & yieldGradSigVec;
         loadGradSigVecPtr  = & loadGradSigVec;
-        yieldGradKVecPtr = & yieldGradKVec;
-        loadGradKVecPtr  = & loadGradKVec;
     }
 
     MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
@@ -270,7 +266,6 @@ huhu: //label for goto
     gamma.zero();
 
     strSize = totalStrain.giveSize(); // size of reducedStrain Vector
-    totSize = strSize + strainSpaceHardeningVariables.giveSize();
 
     // compute elastic moduli and its inverse
     this->computeReducedElasticModuli(elasticModuli, gp, atTime);
@@ -882,8 +877,8 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
     FloatMatrix elasticModuli, helpMtrx, helpMtrx2, gmat;
     FloatMatrix kl, ks, lmat, rmat;
     IntArray initialConditionMap;
-    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf);
     FloatArray dgamma(this->nsurf);
     double yieldValue;
     int nIterations = 0;
@@ -894,13 +889,9 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
     MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
 
     if ( this->plType == associatedPT ) {
-        yieldGradSigVecPtr = loadGradSigVecPtr = & yieldGradSigVec;
-        yieldGradKVecPtr = loadGradKVecPtr = & yieldGradKVec;
+        loadGradSigVecPtr = & yieldGradSigVec;
     } else {
-        yieldGradSigVecPtr = & yieldGradSigVec;
         loadGradSigVecPtr  = & loadGradSigVec;
-        yieldGradKVecPtr = & yieldGradKVec;
-        loadGradKVecPtr = & loadGradKVec;
     }
 
 huhu: //label for goto
@@ -1406,8 +1397,8 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix gradientMatrix, gmat, gmatInv, gradMat, helpMtrx, helpMtrx2, answerR;
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf);
     FloatArray helpVector2;
 
     IntArray activeConditionMap, mask;
@@ -1420,13 +1411,9 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
-        yieldGradSigVecPtr = loadGradSigVecPtr = & yieldGradSigVec;
-        yieldGradKVecPtr = loadGradKVecPtr = & yieldGradKVec;
+        loadGradSigVecPtr = & yieldGradSigVec;
     } else {
-        yieldGradSigVecPtr = & yieldGradSigVec;
         loadGradSigVecPtr  = & loadGradSigVec;
-        yieldGradKVecPtr = & yieldGradKVec;
-        loadGradKVecPtr = & loadGradKVec;
     }
 
     // ask for plastic consistency parameter
@@ -1576,8 +1563,8 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix gmat, gmatInv, helpMtrx, helpMtrx2, kl, ks;
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray strainSpaceHardeningVariables, helpVector, helpVector2;
-    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf);
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1590,13 +1577,9 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
-        yieldGradSigVecPtr = loadGradSigVecPtr = & yieldGradSigVec;
-        yieldGradKVecPtr = loadGradKVecPtr = & yieldGradKVec;
+        loadGradSigVecPtr = & yieldGradSigVec;
     } else {
-        yieldGradSigVecPtr = & yieldGradSigVec;
         loadGradSigVecPtr  = & loadGradSigVec;
-        yieldGradKVecPtr = & yieldGradKVec;
-        loadGradKVecPtr = & loadGradKVec;
     }
 
     // ask for plastic consistency parameter
