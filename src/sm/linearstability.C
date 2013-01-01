@@ -44,6 +44,7 @@
 #include "flotarry.h"
 #include "usrdefsub.h"
 #include "datastream.h"
+#include "exportmodulemanager.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -428,6 +429,9 @@ void LinearStability :: terminate(TimeStep *stepN)
             domain->giveDofManager(j)->updateYourself(stepN);
             domain->giveDofManager(j)->printOutputAt(outputStream, stepN);
         }
+    
+        stepN->setNumber( i );
+        exportModuleManager->doOutput(stepN);
     }
 
 #  ifdef VERBOSE
