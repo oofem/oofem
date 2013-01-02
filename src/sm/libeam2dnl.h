@@ -83,6 +83,7 @@ public:
 
     virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _2dBeam; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 protected:
     // edge load support
