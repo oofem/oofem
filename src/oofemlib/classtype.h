@@ -182,6 +182,8 @@ enum classType {
     TrAxisym1_htClass,
     Brick1_htClass,
     Brick1_hmtClass,
+    QBrick1_htClass,
+    QBrick1_hmtClass,
     Tetrah1_htClass,
     Tetrah1_hmtClass,
     PlaneStress2dXfemClass,

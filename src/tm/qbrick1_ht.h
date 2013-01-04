@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef brick1_ht_h
-#define brick1_ht_h
+#ifndef qbrick1_ht_h
+#define qbrick1_ht_h
 
 #include "transportelement.h"
 #include "spatiallocalizer.h"
@@ -41,35 +41,35 @@
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
-#include "fei3dhexalin.h"
+#include "fei3dhexaquad.h"
 
 namespace oofem {
 /**
- * Brick (3d) elements with linear approximation for heat and mass transfer.
+ * Brick (3d) elements with quadratic approximation for heat and mass transfer. Each node has 1 (heat) or 2 (heat+moisture) degrees of freedom.
+ * @author Vit Smilauer
  */
-class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface
+class QBrick1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface
 {
 protected:
-    static FEI3dHexaLin interpolation;
+    static FEI3dHexaQuad interpolation;
     int numberOfGaussPoints;
 
 public:
-    Brick1_ht(int n, Domain *d);
-    virtual ~Brick1_ht();
+    QBrick1_ht(int n, Domain *d);
+    virtual ~ QBrick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
     // definition & identification
-    virtual const char *giveClassName() const { return "Brick1_ht"; }
-    virtual classType giveClassID() const { return Brick1_htClass; }
+    virtual const char *giveClassName() const { return "QBrick1_ht"; }
+    virtual classType giveClassID() const { return QBrick1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 20 : 40; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_2; }
 
     virtual Interface *giveInterface(InterfaceType t);
-    virtual int testElementExtension(ElementExtension ext)
-    { return ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
@@ -79,7 +79,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    
     
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -96,19 +95,20 @@ public:
 
 protected:
     virtual void computeGaussPoints();
+    virtual int giveApproxOrder() { return 2; }
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
 };
 
-class Brick1_hmt : public Brick1_ht
+class QBrick1_hmt : public QBrick1_ht
 {
 public:
-    Brick1_hmt(int n, Domain *d);
+    QBrick1_hmt(int n, Domain *d);
 
-    virtual const char *giveClassName() const { return "Brick1_hmt"; }
-    virtual classType giveClassID() const { return Brick1_hmtClass; }
+    virtual const char *giveClassName() const { return "QBrick1_hmt"; }
+    virtual classType giveClassID() const { return QBrick1_hmtClass; }
 };
 
 } // end namespace oofem
-#endif // brick1_ht_h
+#endif // qbrick1_ht_h

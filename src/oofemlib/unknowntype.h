@@ -46,7 +46,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(FluxVector, 3) \
     ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                     \
     ENUM_ITEM_WITH_VALUE(PressureVector, 5)                     \
-    ENUM_ITEM_WITH_VALUE(TemperatureVector, 6)                  \
+    ENUM_ITEM_WITH_VALUE(Temperature, 6)                  \
     ENUM_ITEM_WITH_VALUE(EigenValue, 7)                         \
     ENUM_ITEM_WITH_VALUE(EigenVector, 8)                        \
     ENUM_ITEM_WITH_VALUE(TotalLoadLevel, 9)                     \

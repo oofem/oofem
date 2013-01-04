@@ -19,6 +19,7 @@ set (tm_element
     quadaxisym1_ht.C
     traxisym1_ht.C
     brick1_ht.C
+    qbrick1_ht.C
     tetrah1_ht.C
     tr1darcy.C
     )

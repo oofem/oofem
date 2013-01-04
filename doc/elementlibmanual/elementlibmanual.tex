@@ -132,7 +132,7 @@ not supported in current implementation.
 
 Two node linear isoparametric truss element for 2D analysis. The
 element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{truss2d.tikz}
@@ -197,7 +197,7 @@ of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end displacement and local end forces are
 printed. 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
    \input{beam2d.tikz}
@@ -255,7 +255,7 @@ x-axis direction vector ($\mbf{a_1}$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
 \item local y-axis is then determined as vector product of local
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
    \input{beam3d.tikz}
@@ -304,10 +304,10 @@ model properties to be defined.\\
 Represents two-node lattice element. Each node has 3 degrees of freedom.
 The element is defined in x,y plane.
 
-\begin{figure}[tb]
+\begin{figure}[htb]
   \centering
-  \includegraphics[width=0.7\textwidth]{lattice2d.eps}
-\caption{Lattice element. Node numbering, DOF numbering and definition of integration point $C$.}
+  \includegraphics[width=0.7\textwidth]{lattice2d.pdf}
+\caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
  \label{lattice2dfig}
 \end{figure}
 
@@ -327,7 +327,7 @@ Structure should be defined in x,y plane.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{planestress2d.tikz}
@@ -378,7 +378,7 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
  \begin{makeimage}
   \input{qplanstrss.tikz}
  \end{makeimage}
- \caption{QPlaneStress element - node numbering.}
+ \caption{QPlaneStress2d element - node numbering.}
  \label{qplanstrssfig}
 \end{figure}
 
@@ -413,7 +413,7 @@ The node numbering is anti-clockwise
  \begin{makeimage}
    \input{trplanstrss.tikz}
  \end{makeimage}
- \caption{TrPlaneStress element - node and side numbering.}
+ \caption{TrPlaneStress2d element - node and side numbering.}
  \label{TrPlanestressfig}
 \end{figure}
 
@@ -511,7 +511,7 @@ Structure should be defined in x,y plane.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{planestress2d.tikz}
@@ -666,7 +666,7 @@ not supported now.\\
 \subsubsection {tr\_shell01 element}
 Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. It comes with complete set of 6 DOFs per node.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trshell_lin.tikz}
@@ -750,12 +750,12 @@ $\gamma_{rz}$) are integrated using one point integration formula.\\
 \label{lspacesect}
 Implementation of Linear 3d  eight - node 
 finite element. Each node has 3 degrees of freedom.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{hexa_lin.tikz}
  \end{makeimage}
- \caption{lspace element (Node numbers in black, side numbers in blue,
+ \caption{LSpace element (Node numbers in black, side numbers in blue,
  and surface numbers in red).}
 \end{figure}
 
@@ -774,21 +774,21 @@ allows to change the integration formula.\\
 \descitem{Status} 
 
 \subsubsection{LSpaceBB element}
-Implementation of 3d brick  eight - node 
+Implementation of 3d brick eight - node 
 linear approximation element with selective integration of deviatoric and volumetric 
 strain contributions (B-bar formulation) for incompressible problems. 
 Features and description identical to conventional lspace element, see section ~\ref{lspacesect}.
 
-\subsubsection{QSpace element}
-Implementation of quadratic 3d  20-node 
+\subsubsection{QSpace element}\label{QSpace_element}
+Implementation of quadratic 3d 20-node 
 finite element. Each node has 3 degrees of freedom.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \raisebox{-0.5\height}{\input{hexa_quad_a.tikz}}
   \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
  \end{makeimage}
- \caption{qspace element.}
+ \caption{QSpace element.}
 \end{figure}
 
 \elemkeyword{qspace}\\
@@ -815,12 +815,12 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
       excluded corner.
 \end{itemize}
  
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{tetrahedra_lin.tikz}
  \end{makeimage}
- \caption{Linear terahedra element. Definition and node numbering convention}
+ \caption{LTRSpace element. Definition and node numbering convention.}
  \label{lintetrahedron_fig}
 \end{figure}
 
@@ -870,12 +870,12 @@ w-displacement) are required in each node, according to element mode.\\
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
  \input{interf2d_quad.tikz}
  \end{makeimage}
- \caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
+ \caption{Interface2dquad element with quadratic interpolation. Definition and node numbering convention}
  \label{interf2d_quad_fig}
 \end{figure}
 
@@ -895,12 +895,12 @@ Full integration of all strain components using four point integration formula.
 Implementation of a three dimensional interface element with linear
 approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared triangular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{interf3d_lin.tikz}
  \end{makeimage}
- \caption{3D interface element with linear interpolation. Definition and node numbering convention}
+ \caption{Interface3dtrlin element with linear interpolation. Definition and node numbering convention}
  \label{interf3d_lin_fig}
 \end{figure}
 
@@ -1009,7 +1009,7 @@ property is requested form cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{planestress2d.tikz}
@@ -1111,17 +1111,17 @@ surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.
 \label{Brick1ht}
 Represents isoparametric eight-node brick/hexahedron finite element for
 heat transfer problems. Each node has 1 degrees of freedom.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{hexa_lin.tikz}
  \end{makeimage}
- \caption{brick element (Node numbers in black, side numbers in blue,
- and surface numbers in red).}
+ \caption{Brick1ht element. Node numbers are in black, side numbers are in blue,
+ and surface numbers are in red.}
  \label{Brick1htfig}
 \end{figure}
 
-\elemkeyword{Brick1ht}\\
+\elemkeyword{Brick1ht - hexahedral 3D element}\\
 \descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
 Single dof (T\_f - temperature) is required in each node.
@@ -1144,6 +1144,28 @@ Two dofs (T\_f - temperature and C\_1 - concentration) are required in
 each node. Linear approximation of temperature and mass concentration.
 Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 %\subsection{Other Elements}
+
+\subsubsection{QBrick1ht - quadratic hexahedral 3D element}\label{QBrick1ht_element}
+Implementation of quadratic 3d 20-node 
+finite element. Each node has 1 degrees of freedom. See section ~\ref{QSpace_element} 
+for node numbering order and order of faces.
+
+\elemkeyword{QBrick1ht}\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Unknowns}
+\descitem{Approximation} Quadratic approximation of temperature and
+geometry.\\
+\param{NIP} number of integration points, possible values are 8, 27 (default) and 64.\\
+\descitem{Features} None.\\
+\descitem{Status} 
+
+\subsubsection{QBrick1hmt - quadratic hexahedral 3D element}
+The same element as QBrick1ht for
+heat and mass (one constituent) transfer problems. 
+Two dofs (T\_f - temperature and C\_1 - concentration) are required in
+each node. Linear approximation of temperature and mass concentration.
+Other features are similar to QBrick1ht element, see section \ref{QBrick1ht_element}.
+
 
 \section{Elements for Fluid Dynamics problems\\(FM Module)}
 \subsection{Stokes' Flow Elements}
@@ -1173,7 +1195,7 @@ approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trplanstrss.tikz}
@@ -1223,7 +1245,7 @@ approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trplanstrss.tikz}
@@ -1306,7 +1328,7 @@ approximation of velocity and pressure fields in 2d-axisymmetric setting. Each n
 of freedoms (two components of velocity and pressure). The y-axis is
 axis of ratational symmetry. The node numbering is anti-clockwise
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trplanstrss.tikz}
@@ -1350,7 +1372,7 @@ incompressible flow analysis using SUPG/PSPG stabilization with equal order
 approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{tetrahedra_lin.tikz}

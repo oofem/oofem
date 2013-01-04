@@ -98,6 +98,7 @@
  #include "quadaxisym1_ht.h"
  #include "traxisym1_ht.h"
  #include "brick1_ht.h"
+ #include "qbrick1_ht.h"
  #include "tetrah1_ht.h"
  #include "tr1darcy.h"
 #endif
@@ -202,6 +203,8 @@ REGISTER_CLASS(QuadAxisym1_ht, "quadaxisym1ht", QuadAxisym1_htClass)
 REGISTER_CLASS(QuadAxisym1_hmt, "quadaxisym1hmt", QuadAxisym1_hmtClass)
 REGISTER_CLASS(Brick1_ht, "brick1ht", Brick1_htClass)
 REGISTER_CLASS(Brick1_hmt, "brick1hmt", Brick1_hmtClass)
+REGISTER_CLASS(QBrick1_ht, "qbrick1ht", QBrick1_htClass)
+REGISTER_CLASS(QBrick1_hmt, "qbrick1hmt", QBrick1_hmtClass)
 REGISTER_CLASS(Tetrah1_ht, "tetrah1ht", Tetrah1_htClass)
 REGISTER_CLASS(Tetrah1_hmt, "tetrah1hmt", Tetrah1_hmtClass)
 REGISTER_CLASS(Tr1_ht, "tr1ht", Tr1_htClass)

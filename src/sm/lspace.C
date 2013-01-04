@@ -315,8 +315,8 @@ LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     int i;
 
-    pap.resize(8);
-    for ( i = 1; i <= 8; i++ ) {
+    pap.resize(numberOfDofMans);
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -328,7 +328,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     int i, found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -337,7 +337,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 

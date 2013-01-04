@@ -457,6 +457,7 @@ enum InputFieldType {
 
     IFT_Quad1_ht_nip,
     IFT_Brick1_ht_nip,
+    IFT_QBrick1_ht_nip,
     IFT_Tetrah1_ht_nip,
 
     IFT_TR12DCBS_vof,

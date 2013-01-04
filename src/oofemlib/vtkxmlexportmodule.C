@@ -613,7 +613,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
         if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == TemperatureVector ) ) {
+        } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -988,7 +988,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 
     if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
         type = ISVT_VECTOR;
-    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == TemperatureVector ) ) {
+    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == Temperature ) ) {
         type = ISVT_SCALAR;
     } else {
         OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
@@ -1092,7 +1092,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
         eid = EID_ConservationEquation;
         iState = IST_MassConcentration_1;
         answer.resize(1);
-    } else if ( type == TemperatureVector ) {
+    } else if ( type == Temperature ) {
         dofIDMask.followedBy(T_f);
         eid = EID_ConservationEquation;
         iState = IST_Temperature;
