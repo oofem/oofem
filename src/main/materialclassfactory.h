@@ -105,6 +105,7 @@
  #include "surfacetensionmaterial.h"
  #include "twofluidmaterial.h"
  #include "binghamfluid2.h"
+ #include "nonlinearfluidmaterial.h"
 #endif // __FM_Module
 
 #ifdef __SM_MODULE
@@ -183,5 +184,6 @@ REGISTER_CLASS(BinghamFluidMaterial2, "binghamfluid2", BinghamFluidMaterial2Clas
 REGISTER_CLASS(BinghamFluidMaterial2, "binghamfluid", BinghamFluidMaterial2Class)
 REGISTER_CLASS(FE2FluidMaterial, "fe2fluidmaterial", FE2FluidMaterialClass)
 REGISTER_CLASS(SurfaceTensionMaterial, "surfacetension", SurfaceTensionMaterialClass)
+REGISTER_CLASS(NonlinearFluidMaterial, "nonlinearfluid", NonlinearFluidMaterialClass)
 #endif // __FM_MODULE
 

@@ -415,6 +415,9 @@ enum InputFieldType {
     IFT_StokesFlow_smtype,
     IFT_StokesFlow_deltat,
 
+    IFT_NonlinearFluidMaterial_alpha,
+    IFT_NonlinearFluidMaterial_C,
+
     IFT_NLStructuralElement_nlgeoflag,
 
     IFT_Axisymm3d_nip,

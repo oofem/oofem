@@ -389,6 +389,8 @@ enum classType {
     BinghamFluidMaterialStatusClass,
     BinghamFluidMaterial2Class,
     TwoFluidMaterialClass,
+    NonlinearFluidMaterialClass,
+    NonlinearFluidMaterialStatusClass,
 
     SurfaceTensionMaterialClass,
     SurfaceTensionMaterialStatusClass,
