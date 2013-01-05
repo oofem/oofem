@@ -43,11 +43,11 @@
 #include "mathfem.h"
 #include "load.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "oofegutils.h"
- #include "conTable.h"
-#endif
+// #ifdef __OOFEG
+//  #include "oofeggraphiccontext.h"
+//  #include "oofegutils.h"
+//  #include "conTable.h"
+// #endif
 
 namespace oofem {
 FEI3dHexaQuad QBrick1_ht :: interpolation;
@@ -242,7 +242,7 @@ QBrick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
 }
 
 
-#ifdef __OOFEG
+// #ifdef __OOFEG
 // void QBrick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
 // {
 //     int i;
@@ -269,11 +269,11 @@ QBrick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
 //     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
 //     EGAttachObject(go, ( EObjectP ) this);
 //     EMAddGraphicsToModel(ESIModel(), go);
-}
+// }
 
 
-void QBrick1_ht :: drawScalar(oofegGraphicContext &context)
-{
+// void QBrick1_ht :: drawScalar(oofegGraphicContext &context)
+// {
 //     int i, indx, result = 0;
 //     WCRec p [ 8 ];
 //     GraphicObj *tr;
@@ -322,7 +322,6 @@ void QBrick1_ht :: drawScalar(oofegGraphicContext &context)
 //         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
 //         EMAddGraphicsToModel(ESIModel(), tr);
 //     }
-}
-
-#endif
+// }
+// #endif
 } // end namespace oofem
