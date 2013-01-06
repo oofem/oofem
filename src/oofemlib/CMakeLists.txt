@@ -10,6 +10,7 @@ set (core_unsorted
     trianglemesherinterface.C
     geotoolbox.C geometry.C
     externalfieldgenerator.C
+    rvematerial.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C

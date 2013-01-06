@@ -36,6 +36,7 @@ set (tm_material
     hydratingconcretemat.C
     nonlinearmassmat.C
     anisomassmat.C
+    rvestokesflow.C
     )
 
 set (tm

@@ -1337,6 +1337,10 @@ enum InputFieldType {
     IFT_IGAElement_NIP,
     IFT_IGAElement_KnotSpanParallelMode,
 
+    IFT_RVEMaterial_bctype,
+    IFT_RVEMaterial_supressoutput,
+
+
     IFT_Unknown
 };
 

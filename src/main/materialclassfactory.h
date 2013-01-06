@@ -97,6 +97,9 @@
  #ifdef __CEMHYD_MODULE
   #include "cemhydmat.h"
  #endif
+ #ifdef __FM_MODULE
+ #include "rvestokesflow.h"
+ #endif
 #endif //__TM_MODULE
 
 #ifdef __FM_MODULE
@@ -172,6 +175,9 @@ REGISTER_CLASS(NonlinearMassTransferMaterial, "nonlinmass", NonlinearMassTransfe
  #ifdef __CEMHYD_MODULE
 REGISTER_CLASS(CemhydMat, "cemhydmat", CemhydMatClass)
  #endif //__CEMHYD_MODULE
+ #ifdef __FM_MODULE
+REGISTER_CLASS(rvestokesflow, "rvestokesflow", RVEStokesFlowClass)
+ #endif
 #endif //__TM_MODULE
 #if defined ( __SM_MODULE ) && defined ( __TM_MODULE )
 REGISTER_CLASS(HydratingIsoHeatMaterial, "hisoheat", HydratingIsoHeatMaterialClass)

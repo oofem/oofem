@@ -463,7 +463,10 @@ enum classType {
 
     BasicGeometryClass,
 
-    StokesFlowVelocityHomogenizationClass
+    StokesFlowVelocityHomogenizationClass,
+    RVEStokesFlowClass,
+    RVEStokesFlowMaterialClass,
+    RVEStokesFlowMaterialStatusClass,
 
 };
 } // end namespace oofem

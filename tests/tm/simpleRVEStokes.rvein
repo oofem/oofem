@@ -1,0 +1,29 @@
+simpleRVEStokes.out
+Test for stokes flow on triangular Taylor-Hood element
+stokesflowvelocityhomogenization nsteps 1 lstype 0  smtype 0  rtolv 0.000010  linesearch 0  maxiter 1000  nmodules 0
+#vtkxml tstep_all domain_all primvars 2 4 5
+domain 2dIncompFlow
+OutputManager tstep_all dofman_all element_all
+ndofman 9       nelem 2       ncrosssect  1 nmat 1 nbc 2         nic 0 nltf 1 
+node 1 coords 3 0.0 0.0 0.0 ndofs 3 DofIDMask 3 7 8 11
+node 2 coords 3 1.0 0.0 0.0 ndofs 3 DofIDMask 3 7 8 11 bc 3 2 2 2
+node 3 coords 3 1.0 1.0 0.0 ndofs 3 DofIDMask 3 7 8 11 bc 3 2 2 2
+node 4 coords 3 0.0 1.0 0.0 ndofs 3 DofIDMask 3 7 8 11
+node 5 coords 3 0.5 0.0 0.0 ndofs 2 DofIDMask 2 7 8 bc 2 2 2
+node 6 coords 3 0.5 0.5 0.0 ndofs 2 DofIDMask 2 7 8
+node 7 coords 3 0.0 0.5 0.0 ndofs 2 DofIDMask 2 7 8 
+node 8 coords 3 1.0 0.5 0.0 ndofs 2 DofIDMask 2 7 8 bc 2 2 2
+node 9 coords 3 0.5 1.0 0.0 ndofs 2 DofIDMask 2 7 8 
+tr21stokes	1	nodes	6	1 2 4 5 6 7 crossSect 1 mat 1 bodyloads 1 1
+tr21stokes	2	nodes	6	2 3 4 8 9 6 crossSect 1 mat 1 bodyloads 1 1
+emptycs 1
+newtonianfluid 1 mu 1.000000  d 1.000000
+deadweight 1 components 2	1.000000	0.000000 loadtimefunction 1
+BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.00000000000000000000
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#NODE tStep 0.00000000e00 number 4 dof 3 unknown p value 3.84726298e-01
+#NODE tStep 0.00000000e00 number 4 dof 2 unknown v value 2.37305213e-01
+#%END_CHECK%
+
