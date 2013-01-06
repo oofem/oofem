@@ -41,11 +41,10 @@
 #include "engngm.h"
 #include "contextioerr.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 int
 NonlinearFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
@@ -92,33 +91,33 @@ NonlinearFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                   TimeStep *atTime)
 {
     if ( mode == MRM_Density ) {
-      return this->give('d',gp);
-    } else if ( mode == MRM_Viscosity )  {
+        return this->give('d', gp);
+    } else if ( mode == MRM_Viscosity ) {
         return this->viscosity;
-    } else                                                              {
+    } else {
         return FluidDynamicMaterial :: giveCharacteristicValue(mode, gp, atTime);
     }
 }
 
 void
 NonlinearFluidMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                       MatResponseForm form,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *atTime)
+                                                   MatResponseForm form,
+                                                   MatResponseMode mode,
+                                                   GaussPoint *gp,
+                                                   TimeStep *atTime)
 {
-	if ( mode == MRM_Viscosity) {
-		this->giveDeviatoricStiffnessMatrix(answer, mode, gp, atTime);
-	}
+    if ( mode == MRM_Viscosity ) {
+        this->giveDeviatoricStiffnessMatrix(answer, mode, gp, atTime);
+    }
 }
 
 double
-NonlinearFluidMaterial :: give(int aProperty, GaussPoint* gp)
+NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp)
 {
     if ( ( aProperty == Viscosity ) ) {
         return viscosity;
     } else {
-      return FluidDynamicMaterial :: give(aProperty,gp);
+        return FluidDynamicMaterial :: give(aProperty, gp);
     }
 }
 
@@ -133,67 +132,64 @@ NonlinearFluidMaterial :: CreateStatus(GaussPoint *gp) const
 void
 NonlinearFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
+    NonlinearFluidMaterialStatus *status = ( ( NonlinearFluidMaterialStatus * ) this->giveStatus(gp) );
 
-	NonlinearFluidMaterialStatus * status = ( (NonlinearFluidMaterialStatus *) this->giveStatus(gp) );
+    status->letTempDeviatoricStrainVectorBe(eps);
 
-	status->letTempDeviatoricStrainVectorBe(eps);
+    double normeps;
 
-	double normeps;
+    normeps = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + 0.5 * ( eps.at(3) * eps.at(3) );
+    normeps = sqrt(normeps);
 
-	normeps=eps.at(1)*eps.at(1)+eps.at(2)*eps.at(2)+0.5*(eps.at(3)*eps.at(3));
-	normeps=sqrt(normeps);
+    answer = eps;
 
-	answer = eps;
+    answer.at(3) *= 0.5;
+    answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps, alpha) ) );
 
-	answer.at(3)*=0.5;
-	answer.times(2.0*viscosity*(1.0+c*pow(normeps,alpha)));
-
-	( ( FluidDynamicMaterialStatus * ) this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
-
+    ( ( FluidDynamicMaterialStatus * ) this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
 }
 
 void
 NonlinearFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,
                                                         TimeStep *atTime)
 {
+    FloatArray eps;
+    double normeps = 0;
 
-	FloatArray eps;
-	double normeps=0;
+    FloatMatrix op, t2;
 
-	FloatMatrix op, t2;
+    NonlinearFluidMaterialStatus *status = ( ( NonlinearFluidMaterialStatus * ) this->giveStatus(gp) );
+    eps = status->giveTempDeviatoricStrainVector();
 
-	NonlinearFluidMaterialStatus * status = ( (NonlinearFluidMaterialStatus *) this->giveStatus(gp) );
-	eps = status->giveTempDeviatoricStrainVector();
+    eps.at(3) *= 0.5;
 
-	eps.at(3)*=0.5;
+    normeps = eps.at(1) * eps.at(1) + eps.at(2) * eps.at(2) + 2 * ( eps.at(3) * eps.at(3) );
+    normeps = sqrt(normeps);
 
-	normeps=eps.at(1)*eps.at(1)+eps.at(2)*eps.at(2)+2*(eps.at(3)*eps.at(3));
-	normeps=sqrt(normeps);
+    op.resize(3, 3);
+    op.beDyadicProductOf(eps, eps);
+    if ( normeps != 0 ) {
+        op.times( 2 * viscosity * c * alpha * pow(normeps, alpha - 2) );
+    } else {
+        op.times(0);
+    }
 
-	op.resize(3,3);
-	op.beDyadicProductOf(eps,eps);
-	if (normeps != 0) {
-		op.times(2*viscosity*c*alpha*pow(normeps,alpha-2));
-	} else {
-		op.times(0);
-	}
+    t2.resize(3, 3);
+    t2.zero();
+    for ( int i = 1; i <= 3; i++ ) {
+        if ( normeps != 0 ) {
+            t2.at(i, i) = 2 * viscosity * ( 1 + c * pow(normeps, alpha) );
+        } else {
+            t2.at(i, i) = 2 * viscosity;
+        }
+    }
 
-	t2.resize(3,3);
-	t2.zero();
-	for (int i=1; i<=3; i++)
-		if (normeps != 0) {
-			t2.at(i,i)=2*viscosity*(1+c*pow(normeps,alpha));
-		} else {
-			t2.at(i,i)=2*viscosity;
-		}
+    t2.at(3, 3) *= 0.5;
 
-	t2.at(3,3)*=0.5;
-
-	answer.resize(3,3);
-	answer.zero();
-	answer.add(op);
-	answer.add(t2);
-
+    answer.resize(3, 3);
+    answer.zero();
+    answer.add(op);
+    answer.add(t2);
 }
 
 int
@@ -211,27 +207,26 @@ NonlinearFluidMaterial :: checkConsistency()
     return 1;
 }
 
-NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus (int n, Domain *d, GaussPoint *g) :
-		FluidDynamicMaterialStatus(n, d, g)
+NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g) :
+    FluidDynamicMaterialStatus(n, d, g)
 {
-	temp_deviatoricStrainVector.resize(3);
-	temp_deviatoricStrainVector.zero();
+    temp_deviatoricStrainVector.resize(3);
+    temp_deviatoricStrainVector.zero();
 }
 
 void
 NonlinearFluidMaterialStatus :: initTempStatus()
 {
-	FluidDynamicMaterialStatus :: initTempStatus();
+    FluidDynamicMaterialStatus :: initTempStatus();
 
-	temp_deviatoricStrainVector = deviatoricStrainVector;
+    temp_deviatoricStrainVector = deviatoricStrainVector;
 }
 
 void
 NonlinearFluidMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-	FluidDynamicMaterialStatus :: updateYourself(tStep);
+    FluidDynamicMaterialStatus :: updateYourself(tStep);
 
     deviatoricStrainVector = temp_deviatoricStrainVector;
 }
-
 } // end namespace oofem

@@ -44,7 +44,6 @@
 #include "matstatus.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -59,7 +58,7 @@ protected:
     FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;  // reduced form
 
 public:
-    NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g) ;
+    NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g);
 
     ~NonlinearFluidMaterialStatus() { }
 
@@ -67,16 +66,12 @@ public:
 
     virtual void updateYourself(TimeStep *);
 
-    const FloatArray &giveDeviatoricStrainVector()         			  { return deviatoricStrainVector; }
-    const FloatArray &giveTempDeviatoricStrainVector()     			  { return temp_deviatoricStrainVector; }
-    void         	 letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    const FloatArray &giveDeviatoricStrainVector()                                { return deviatoricStrainVector; }
+    const FloatArray &giveTempDeviatoricStrainVector()                            { return temp_deviatoricStrainVector; }
+    void  letTempDeviatoricStrainVectorBe(const FloatArray &v)       { temp_deviatoricStrainVector = v; }
 
-    /// Returns "NonlinearFluidMaterialStatus" string - class name of the receiver.
     const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
-
-    /// Returns NonlinearFluidMaterialStatusClass - classType id of receiver.
-    classType                giveClassID() const
-    { return NonlinearFluidMaterialStatusClass; }
+    classType giveClassID() const { return NonlinearFluidMaterialStatusClass; }
 };
 
 /**
@@ -91,12 +86,12 @@ public:
 class NonlinearFluidMaterial : public FluidDynamicMaterial
 {
 protected:
-	/// Viscosity $\mu$ of o material
+    /// Viscosity $\mu$ of o material
     double viscosity;
-    /// Material constant c
-	double c;
-	/// Material constant alpha
-	double alpha;
+    /// Material constant $C$
+    double c;
+    /// Material constant $\alpha$
+    double alpha;
 public:
 
     NonlinearFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
@@ -118,7 +113,7 @@ public:
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
                                                TimeStep * atTime);
 
-    virtual double give(int aProperty, GaussPoint*);
+    virtual double give(int aProperty, GaussPoint *);
 
     IRResultType initializeFrom(InputRecord *ir);
 
@@ -137,6 +132,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // nonlinearfluidmaterial_h
