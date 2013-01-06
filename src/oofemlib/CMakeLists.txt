@@ -11,6 +11,7 @@ set (core_unsorted
     geotoolbox.C geometry.C
     externalfieldgenerator.C
     rvematerial.C
+    weakperiodicbc.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C

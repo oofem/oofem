@@ -1340,6 +1340,8 @@ enum InputFieldType {
     IFT_RVEMaterial_bctype,
     IFT_RVEMaterial_supressoutput,
 
+    IFT_WeakPeriodicBoundaryCondition_order,
+    IFT_WeakPeriodicBoundaryCondition_descritization,
 
     IFT_Unknown
 };

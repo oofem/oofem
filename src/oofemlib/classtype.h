@@ -468,6 +468,8 @@ enum classType {
     RVEStokesFlowMaterialClass,
     RVEStokesFlowMaterialStatusClass,
 
+    WeakPeriodicbcClass
+
 };
 } // end namespace oofem
 #endif // classtype_h
