@@ -37,8 +37,8 @@
 #include "spoolessolver.h"
 #include "petscsolver.h"
 #include "dsssolver.h"
-#ifdef __PARALLEL_MODE
- #include "fetisolver.h"
+#if defined(__PARALLEL_MODE) && defined(__SM_MODULE)
+ #include "../sm/fetisolver.h"
 #endif
 
 
@@ -47,7 +47,7 @@ REGISTER_CLASS(IMLSolver, ST_IML)
 REGISTER_CLASS(SpoolesSolver, ST_Spooles)
 REGISTER_CLASS(PetscSolver, ST_Petsc)
 
-#ifdef __PARALLEL_MODE
+#if defined(__PARALLEL_MODE) && defined(__SM_MODULE)
 REGISTER_CLASS(FETISolver, ST_Feti)
 #endif
 
