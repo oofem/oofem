@@ -44,6 +44,8 @@
 #include "mathfem.h"
 #include "timer.h"
 
+#include <iostream>
+
 namespace oofem {
 OctantRec :: OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth)
 {
@@ -234,9 +236,8 @@ OctantRec :: testBoundingBox(const FloatArray &coords, double radius)
 void OctantRec :: printYourself()
 {
     if (this->isTerminalOctant()) {
-        printf(" center = {%e, %e, %e} size = %f, nodes = %lu, elem_ips = %lu\n", 
-                this->origin.at(1), this->origin.at(2), this->origin.at(3), 
-                this->halfWidth*2., this->nodeList->size(), this->elementIPList->size());
+        std::cout << " center = {" << this->origin.at(1) << "," << this->origin.at(2) << "," << this->origin.at(3)
+            << "} size = " << (this->halfWidth*2.) << " nodes = " << this->nodeList->size() << " elem_ips = " << this->elementIPList->size();
     } else {
         if (this->depth == 0) {
             printf("*ROOTCELL*");

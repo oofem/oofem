@@ -1,3 +1,9 @@
+if (NOT USE_SM)
+    set (tm_hydram
+        ../sm/hydram.C
+        )
+endif ()
+
 if (USE_CEMHYD)
     set (tm_cemhyd
         cemhyd/cemhydmat.C
@@ -46,6 +52,7 @@ set (tm
     ${tm_status}
     ${tm_new}
     ${tm_cemhyd}
+    ${tm_hydram}
     )
 
 add_library (tm

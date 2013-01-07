@@ -34,8 +34,8 @@
 
 #include "simplecrosssection.h"
 #include "emptycs.h"
-#include "layeredcrosssection.h"
-#include "fiberedcs.h"
+#include "../sm/layeredcrosssection.h"
+#include "../sm/fiberedcs.h"
 
 
 

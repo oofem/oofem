@@ -1134,7 +1134,9 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     // Note! For normal master dofs, loc is unique to each node, but there can be slave dofs, so we must keep it shared, unfortunately.
+#ifdef _OPENMP
     #pragma omp parallel for shared(answer) private(node, R, charVec, loc) reduction(+:norm)
+#endif
     for ( int i = 1; i <= nnode; i++ ) {
         node = domain->giveDofManager(i);
         node->computeLoadVectorAt(charVec, tStep, mode);
@@ -1194,7 +1196,9 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
+#ifdef _OPENMP
     #pragma omp parallel for shared(answer) private(element, R, charVec, loc) reduction(+:norm)
+#endif
     for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE

@@ -230,14 +230,14 @@ CCTPlate :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.zero();
 
     answer.at(1, 1) = l1;
-    answer.at(1, 2) = ( l1 * l2 * b3 - l3 * l1 * b2 ) * 0.5;
-    answer.at(1, 3) = ( l1 * l2 * c3 - l3 * l1 * c2 ) * 0.5;
+    answer.at(1, 2) = l1 * ( l2 * b3 - l3 * b2 ) * 0.5;
+    answer.at(1, 3) = l1 * ( l2 * c3 - l3 * c2 ) * 0.5;
     answer.at(1, 4) = l2;
-    answer.at(1, 5) = ( l2 * l3 * b1 - l1 * l2 * b3 ) * 0.5;
-    answer.at(1, 6) = ( l2 * l3 * c1 - l1 * l2 * c3 ) * 0.5;
+    answer.at(1, 5) = l2 * ( l3 * b1 - l1 * b3 ) * 0.5;
+    answer.at(1, 6) = l2 * ( l3 * c1 - l1 * c3 ) * 0.5;
     answer.at(1, 7) = l3;
-    answer.at(1, 8) = ( l3 * l1 * b2 - l2 * l3 * b1 ) * 0.5;
-    answer.at(1, 9) = ( l3 * l1 * c2 - l2 * l3 * c1 ) * 0.5;
+    answer.at(1, 8) = l3 * ( l1 * b2 - l2 * b1 ) * 0.5;
+    answer.at(1, 9) = l3 * ( l1 * c2 - l2 * c1 ) * 0.5;
 
     answer.at(2, 2) = l1;
     answer.at(2, 5) = l2;
@@ -571,23 +571,16 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
 void
 CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    int i,j;
+    IntArray edgeNodes;
     FloatArray n;
+    double b,c, n12;
 
     this->interp_lin.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    double b,c, n12;
-    if (iedge == 1) {
-      i=1; j=2;
-    } else if (iedge == 2) {
-      i=2; j=3;
-    } else {
-      i=3; j=1;
-    }
+    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     n12 = 0.5 * n.at(1)*n.at(2);
-    b = this->giveNode(i)->giveCoordinate(2) - this->giveNode(j)->giveCoordinate(2);
-    c = this->giveNode(j)->giveCoordinate(1) - this->giveNode(i)->giveCoordinate(1);
+    b = this->giveNode(edgeNodes.at(1))->giveCoordinate(2) - this->giveNode(edgeNodes.at(2))->giveCoordinate(2);
+    c = this->giveNode(edgeNodes.at(2))->giveCoordinate(1) - this->giveNode(edgeNodes.at(1))->giveCoordinate(1);
 
 
     answer.resize(3, 6);
@@ -663,30 +656,19 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     // i.e. f(element local) = T * f(edge local)
     //
     double dx, dy, length;
+    IntArray edgeNodes;
     Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
 
     answer.resize(3, 3);
     answer.zero();
 
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-    } else {
-        _error("computeEdgeVolumeAround: wrong egde number");
-    }
+    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
 
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
+    nodeA = this->giveNode(edgeNodes.at(1));
+    nodeB = this->giveNode(edgeNodes.at(2));
 
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+    dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+    dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
 
     answer.at(1, 1) = 1.0;

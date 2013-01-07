@@ -43,7 +43,7 @@
 #include "engngm.h"
 #include "node.h"
 #include "usrdefsub.h" // For sparse matrix creation.
-#ifdef __TM_MODULE
+#ifdef __FM_MODULE
 #include "../fm/line2boundaryelement.h"
 #endif
 

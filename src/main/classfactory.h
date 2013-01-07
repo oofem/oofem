@@ -39,6 +39,8 @@
 #include "domain.h"
 #include "classtype.h"
 #include "sparselinsystemnm.h"
+#include "errorestimator.h"
+#include "sparsemtrx.h"
 #include "compiler.h"
 #include <map>
 #include <string>
