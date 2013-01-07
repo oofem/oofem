@@ -163,7 +163,7 @@ void WeakPeriodicbc :: updateSminmax()
 			smin=std::min(smin, sValue);
 			smax=std::max(smax,sValue);
 		}
-		printf("smin=%f\tsmax=%f\n", smin, smax);
+		//printf("smin=%f\tsmax=%f\n", smin, smax);
 		doUpdateSminmax=false;
 	}
 
@@ -198,14 +198,13 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
 			direction=1;
 		}
 	}
-	printf(" to list %u\n", addToList);
+//	printf(" to list %u\n", addToList);
 	element[addToList].push_back(newElement);
 	side[addToList].push_back(newSide);
 }
 
 void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
-	//	printf("***************** Assemble for bc %u\n", this->giveNumber());
 
 	GaussIntegrationRule *iRule;
 
@@ -221,8 +220,6 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 
 	updateSminmax();
 
-	double sideLength=smax-smin;
-
 	// Assemble each side
 	for (int thisSide=0; thisSide<=1; thisSide++) {
 		giveEdgeNormal(normal, element[thisSide].at(0), side[thisSide].at(0));
@@ -232,11 +229,8 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 			normalSign = 1;
 		}
 
-		//		printf("thisSide=%u, normalSign=%i\n", thisSide, normalSign);
-
 		for (size_t ielement=0; ielement < element[thisSide].size(); ielement++) {	// Loop over each element on this edge
 
-			//			printf(" *** Assemble for element %u\n", ielement);
 			FloatMatrix B, BT;
 
 			thisElement = this->domain->giveElement(element[thisSide].at(ielement));
@@ -255,7 +249,6 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 			periodicDofIDMask.at(1)=dofid;
 
 			thisElement->giveInterpolation()->boundaryGiveNodes(bNodes, side[thisSide].at(ielement));
-			//			bNodes.printYourself();
 
 			sideLocation.resize(0);
 			dofCountOnBoundary=0;
@@ -271,10 +264,9 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 				}
 			}
 
-			//			sideLocation.printYourself();
-
 			B.resize(dofCountOnBoundary,orderOfPolygon+1);
 
+			// Use linear or quadratic interpolation?
 			if (dofCountOnBoundary==2) {
 				interpolation = &interpolation_lin;
 			} else {
@@ -292,63 +284,179 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 
 				FloatArray N;
 
-
 				// Find the value of parameter s which is the vert/horiz distance to 0
 				interpolation->edgeLocal2global(gcoords, side[thisSide].at(ielement), *lcoords, FEIElementGeometryWrapper(thisElement) );
 				// Compute base function values
 				interpolation->boundaryEvalN(N, *lcoords, FEIElementGeometryWrapper(thisElement) );
 				// Compute Jacobian
 				double detJ = fabs(interpolation->edgeGiveTransformationJacobian(side[thisSide].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement)));
-
-				//		        printf("detJ=%f\n", detJ);
 				double s=gcoords.at(direction);
 
 				for (int k=0; k<dofCountOnBoundary; k++) {
 					for (int j=0; j<=orderOfPolygon; j++) {
-						double fVal=0;
-						if (useBasisType==monomial) {
-							fVal=pow(s,j);
-						} else if(useBasisType==trigonometric) {
-							if (j%2==0) { // Even
-								fVal=cos(((double) j)/2*(s*2*3.141593/sideLength));
-//								int temp = (int) ( (double) j) / 2;
-//								printf("Even, s=%f, n=%u\n", s, temp);
-							} else {
-								fVal=sin(((double) j+1)/2*(s*2*3.141593/sideLength));
-//								int temp = (int) ( (double) j + 1) / 2;
-//								printf("Odd, s=%f, n=%u\n", s, temp);
-							}
-						}
+						double fVal=computeBaseFunctionValue(j, s);
 						B.at(k+1, j+1)=B.at(k+1, j+1)+N.at(k+1)*fVal*detJ*normalSign*gp->giveWeight();
 					}
 				}
 			}
-
-			//			printf("Assemble matrix B\n");
-			//			B.printYourself();
-			//			printf("into stiffnessmatrix using sidLocation:\n");
-			//			sideLocation.printYourself();
-			//			printf("and cloc:\n");
-			//			cloc.printYourself();
 
 			answer->assemble(sideLocation, cloc, B);
 			BT.beTranspositionOf(B);
 			answer->assemble(cloc, sideLocation, BT);
 
 			delete iRule;
+
 		}
-
 	}
-	// printf("***************** \n");
+}
 
+double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
+{
+	double fVal;
+	double sideLength=smax-smin;
+
+	if (useBasisType==monomial) {
+		fVal=pow(coordinate,baseID);
+	} else if(useBasisType==trigonometric) {
+		if (baseID%2==0) { // Even
+			fVal=cos(((double) baseID)/2*(coordinate*2*3.141593/sideLength));
+		} else {
+			fVal=sin(((double) baseID+1)/2*(coordinate*2*3.141593/sideLength));
+		}
+	}
+
+	return fVal;
 }
 
 double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
 		CharType type, ValueModeType mode,
 		const UnknownNumberingScheme &s, Domain *domain)
 {
-	//	printf("assembleVector\n");
-	return 0.0;
+	double norm = 0.0;
+
+	// Fetch unknowns of this boundary condition
+	FloatArray gamma;
+	gammaDman->giveUnknownVector(gamma, DofIDList, eid, mode, tStep);
+
+	if (type==InternalForcesVector) {
+
+		GaussIntegrationRule *iRule;
+
+		GaussPoint *gp;
+		FloatArray *lcoords, gcoords, normal;
+		int normalSign, dofCountOnBoundary;
+
+		Element *thisElement;
+
+		FEI2dTrLin interpolation_lin(1, 2);
+		FEI2dTrQuad interpolation_quad(1, 2);
+		FEInterpolation2d *interpolation;
+
+		updateSminmax();
+
+		// Assemble each side
+		for (int thisSide=0; thisSide<=1; thisSide++) {
+			giveEdgeNormal(normal, element[thisSide].at(0), side[thisSide].at(0));
+			if ( (normal.at(1)+normal.at(2)) <= 0.0001 ) { // This is a south or west edge
+				normalSign = -1;
+			} else {
+				normalSign = 1;
+			}
+
+			for (size_t ielement=0; ielement < element[thisSide].size(); ielement++) {	// Loop over each element on this edge
+				FloatMatrix B, BT;
+
+				thisElement = this->domain->giveElement(element[thisSide].at(ielement));
+
+				// Values from solution
+				FloatArray a;
+
+				iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
+				iRule->setUpIntegrationPoints(_Line, 3, _Unknown);
+
+				// Find dofs for this element side
+				IntArray tempSideLocation, sideLocation;
+
+				thisElement->giveBoundaryLocationArray(tempSideLocation, side[thisSide].at(ielement), EID_MomentumBalance, s);
+
+				// Find dofs for this element which should be periodic
+				IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+				periodicDofIDMask.resize(1);
+				periodicDofIDMask.at(1)=dofid;
+
+				thisElement->giveInterpolation()->boundaryGiveNodes(bNodes, side[thisSide].at(ielement));
+
+				sideLocation.resize(0);
+				a.resize(0);
+				dofCountOnBoundary=0;
+				for (int i=1; i<=bNodes.giveSize(); i++) {
+					thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
+
+					for (int j=1; j<=nodeDofIDMask.giveSize(); j++) {
+						if (nodeDofIDMask.at(j)==dofid) {
+							thisElement->giveDofManager(bNodes.at(i))->giveLocationArray(periodicDofIDMask, nodalArray, s);
+							double value=thisElement->giveDofManager(bNodes.at(i))->giveDof(j)->giveUnknown(eid, mode, tStep);
+							sideLocation.followedBy(nodalArray);
+							a.resize(sideLocation.giveSize());
+							a.at(sideLocation.giveSize())=value;
+							dofCountOnBoundary++;
+						}
+					}
+				}
+
+				B.resize(dofCountOnBoundary,orderOfPolygon+1);
+
+				// Use linear or quadratic interpolation?
+				if (dofCountOnBoundary==2) {
+					interpolation = &interpolation_lin;
+				} else {
+					interpolation = &interpolation_quad;
+				}
+
+				IntArray cloc;
+				gammaDman->giveLocationArray(DofIDList, cloc, EModelDefaultEquationNumbering());
+
+				B.zero();
+				for (int i=0; i < iRule->getNumberOfIntegrationPoints(); i++) {
+
+					gp = iRule->getIntegrationPoint(i);
+					lcoords = gp->giveCoordinates();
+
+					FloatArray N;
+
+					// Find the value of parameter s which is the vert/horiz distance to 0
+					interpolation->edgeLocal2global(gcoords, side[thisSide].at(ielement), *lcoords, FEIElementGeometryWrapper(thisElement) );
+					// Compute base function values
+					interpolation->boundaryEvalN(N, *lcoords, FEIElementGeometryWrapper(thisElement) );
+					// Compute Jacobian
+					double detJ = fabs(interpolation->edgeGiveTransformationJacobian(side[thisSide].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement)));
+					double s=gcoords.at(direction);
+
+					for (int k=0; k<dofCountOnBoundary; k++) {
+						for (int j=0; j<=orderOfPolygon; j++) {
+							double fVal=computeBaseFunctionValue(j, s);
+							B.at(k+1, j+1)=B.at(k+1, j+1)+N.at(k+1)*fVal*detJ*normalSign*gp->giveWeight();
+						}
+					}
+				}
+
+				FloatArray myProd, myProdGamma;
+				myProd.beTProductOf(B, a);
+				myProdGamma.beProductOf(B, gamma);
+
+				norm += myProd.computeSquaredNorm();
+				norm += myProdGamma.computeSquaredNorm();
+
+				answer.assemble(myProd, cloc);
+				answer.assemble(myProdGamma, sideLocation);
+
+				delete iRule;
+			}
+
+		}
+	}
+
+	return norm;
 }
 
 int WeakPeriodicbc :: giveNumberOfInternalDofManagers()

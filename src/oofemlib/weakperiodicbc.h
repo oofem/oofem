@@ -44,7 +44,9 @@
 namespace oofem {
 
 enum basisType {monomial=0, trigonometric=1};
-
+/**
+ * Imposes weak periodicity on the dofID of choice. 2D. It is required that the two edges are parallel and either horizontal or vertical.
+ */
 class WeakPeriodicbc : public ActiveBoundaryCondition
 {
 private:
@@ -61,10 +63,10 @@ private:
 	bool doUpdateSminmax;
 
 
-	/** ID of dofs on which weak periodicity is imposed*/
+	/** ID of dofs on which weak periodicity is imposed */
 	int dofid;
 
-	/** sideSign is the sign of the normal for each side  */
+	/** sideSign is the sign of the normal for each side */
 	signed int sideSign[2];
 
 	/** side[] keeps track of which side of the triangle is located along the boundary. element[] keeps track of what element is located along the boundary */
@@ -75,6 +77,8 @@ private:
 	void updateSminmax();
 
 	void updateDirection();
+
+	double computeBaseFunctionValue(int baseID, double coordinate);
 
 	Node *gammaDman;
 	IntArray DofIDList;
