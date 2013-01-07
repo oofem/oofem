@@ -52,10 +52,10 @@ if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version o
     option (USE_SHARED_LIB "Build shared library" OFF)
     option (USE_STATIC_LIB "Build static library" OFF)
 endif ()
-# Parallell stuff
+# Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
-option (USE_OPENMP "Compile with OpenMP support (for parallell assembly)" OFF)
+option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 # Solvers and such
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
