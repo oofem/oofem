@@ -176,7 +176,7 @@ REGISTER_CLASS(NonlinearMassTransferMaterial, "nonlinmass", NonlinearMassTransfe
 REGISTER_CLASS(CemhydMat, "cemhydmat", CemhydMatClass)
  #endif //__CEMHYD_MODULE
  #ifdef __FM_MODULE
-REGISTER_CLASS(rvestokesflow, "rvestokesflow", RVEStokesFlowClass)
+REGISTER_CLASS(RVEStokesFlow, "rvestokesflow", RVEStokesFlowClass)
  #endif
 #endif //__TM_MODULE
 #if defined ( __SM_MODULE ) && defined ( __TM_MODULE )

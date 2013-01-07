@@ -5,61 +5,56 @@
  *      Author: carl
  */
 
-#ifndef RVEMATERIAL_H_
-#define RVEMATERIAL_H_
+#ifndef rvematerial_h
+#define rvematerial_h
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "material.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "oofem_limits.h"
 
-
 namespace oofem {
 
+/**
+ * @author Carl Sandström
+ */
 class RVEMaterial //: virtual public Material
 {
 private:
-	int stdoutFID;
-	fpos_t stdoutPos;
+    int stdoutFID;
+    fpos_t stdoutPos;
 
 protected:
-	/** name of .in file containing the RVE
-	 */
-	std::string rveFilename; //char rveFilename [ MAX_FILENAME_LENGTH ];
+    /// Name of .in file containing the RVE
+    std::string rveFilename;
     std::string rveLogFilename;
-	/** Type of boundary condition.
-	 */
-	int BCType;
+    /// Type of boundary condition.
+    int BCType;
 
 public:
 
-	EngngModel *rve;
+    EngngModel *rve;
 
-	// Constructor
+    // Constructor
     RVEMaterial(int n, Domain *d) { };// : Material(n, d) { };
 
-	// Destructor
-	~RVEMaterial(){ free (rve); };
+    // Destructor
+    virtual ~RVEMaterial() { free (rve); };
 
-	int SupressRVEoutput;
+    int SupressRVEoutput;
 
-	IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
-	//MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    void suppressStdout();
+    void enableStdout();
 
-    	/// Returns class name of the receiver.
-	void suppressStdout();
-	void enableStdout();
-
-   	const char *giveClassName() const { return "RVEMaterial"; };
-    	/// Returns classType id of receiver.
-    classType giveClassID()         const { return MaterialClass; };
-
+    const char *giveClassName() const { return "RVEMaterial"; };
+    classType giveClassID() const { return MaterialClass; };
 };
 
 }
 
-#endif /* RVEMATERIAL_H_ */
+#endif // rvematerial_h

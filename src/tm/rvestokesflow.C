@@ -39,16 +39,16 @@
 #include "rveengngmodel.h"
 #include "engngm.h"
 #include "nummet.h"
-#include "unistd.h"
 #include "contextioerr.h"
 #include "gausspnt.h"
-#include <string.h>
+#include "mathfem.h"
+
+#include <cstring>
 #include <sstream>
-#include <math.h>
 
 namespace oofem {
 
-rvestokesflowMaterialStatus :: rvestokesflowMaterialStatus(int n, Domain *d, GaussPoint *g) :
+RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g) :
     TransportMaterialStatus(n, d, g)
 {
     temp_gradPVector.resize(2);
@@ -63,11 +63,11 @@ rvestokesflowMaterialStatus :: rvestokesflowMaterialStatus(int n, Domain *d, Gau
     solutionVector = new FloatArray;
 }
 
-rvestokesflowMaterialStatus :: ~rvestokesflowMaterialStatus()
+RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
 {}
 
 void
-rvestokesflowMaterialStatus :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
+RVEStokesFlowMaterialStatus :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
 {
     // Fix name for RVE output file and print output
 
@@ -96,7 +96,7 @@ rvestokesflowMaterialStatus :: exportFilter(EngngModel *E, GaussPoint *gp, TimeS
 }
 
 void
-rvestokesflowMaterialStatus :: initTempStatus()
+RVEStokesFlowMaterialStatus :: initTempStatus()
 {
     TransportMaterialStatus :: initTempStatus();
 
@@ -105,7 +105,7 @@ rvestokesflowMaterialStatus :: initTempStatus()
 }
 
 void
-rvestokesflowMaterialStatus :: updateYourself(TimeStep *tStep)
+RVEStokesFlowMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
     gradPVector = temp_gradPVector;
@@ -114,8 +114,8 @@ rvestokesflowMaterialStatus :: updateYourself(TimeStep *tStep)
 
     EngngModel *E;
 
-    rvestokesflow *Mtrl;
-    Mtrl = dynamic_cast< rvestokesflow * >( gp->giveMaterial() );
+    RVEStokesFlow *Mtrl;
+    Mtrl = dynamic_cast< RVEStokesFlow * >( gp->giveMaterial() );
     E = dynamic_cast< EngngModel * >(Mtrl->rve);
 
     Mtrl->suppressStdout();
@@ -125,7 +125,7 @@ rvestokesflowMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-rvestokesflowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RVEStokesFlowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
@@ -145,7 +145,7 @@ rvestokesflowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode,
 
 
 contextIOResultType
-rvestokesflowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
@@ -163,12 +163,12 @@ rvestokesflowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
     return CIO_OK;
 }
 
-rvestokesflow :: rvestokesflow(int n, Domain *d) : RVEMaterial(n, d), TransportMaterial(n, d)
+RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : RVEMaterial(n, d), TransportMaterial(n, d)
 {
 
 }
 
-IRResultType rvestokesflow :: initializeFrom(InputRecord *ir)
+IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
     // this->TransportMaterial :: initializeFrom(ir);
     this->RVEMaterial :: initializeFrom(ir);
@@ -177,10 +177,10 @@ IRResultType rvestokesflow :: initializeFrom(InputRecord *ir)
 }
 
 int
-rvestokesflow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    rvestokesflowMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = ( ( rvestokesflowMaterialStatus * ) this->giveStatus(aGaussPoint) );
+    RVEStokesFlowMaterialStatus *thisMaterialStatus;
+    thisMaterialStatus = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(aGaussPoint) );
     FloatMatrix temp;
     answer.resize(3);
     answer.zero();
@@ -213,17 +213,17 @@ rvestokesflow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Intern
 }
 
 void
-rvestokesflow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
     this->suppressStdout();
 
     OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve);
 
-    rvestokesflowMaterialStatus *status = ( ( rvestokesflowMaterialStatus * ) this->giveStatus(gp) );
+    RVEStokesFlowMaterialStatus *status = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(gp) );
     FloatArray temp = status->giveTempGradP();
 
     if ( temp.giveSize() >= 3 && temp.at(1) == eps.at(1) && temp.at(2) == eps.at(2) ) {
-    	OOFEM_LOG_DEBUG("This pressure gradient has already been evaluated\n");
+        OOFEM_LOG_DEBUG("This pressure gradient has already been evaluated\n");
         answer = status->giveTempVelocityVector();
     } else {
         FloatArray X;
@@ -256,7 +256,7 @@ rvestokesflow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
 }
 
 void
-rvestokesflow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
+RVEStokesFlow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
 {
     // Fix name for RVE output file and print output
 
@@ -278,13 +278,13 @@ rvestokesflow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
 }
 
 void
-rvestokesflow :: giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
+RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode, GaussPoint *gp, TimeStep *atTime)
 {
     this->suppressStdout();
 
     OOFEM_LOG_INFO("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve);
 
-    rvestokesflowMaterialStatus *status = ( ( rvestokesflowMaterialStatus * ) this->giveStatus(gp) );
+    RVEStokesFlowMaterialStatus *status = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(gp) );
 
     answer = status->giveTempTangentMatrix();
     status->letTempTangentMatrixBe(answer);
@@ -295,9 +295,9 @@ rvestokesflow :: giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm 
 }
 
 MaterialStatus *
-rvestokesflow :: CreateStatus(GaussPoint *gp) const
+RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 {
-    return new rvestokesflowMaterialStatus(1, this->giveDomain(), gp);
+    return new RVEStokesFlowMaterialStatus(1, this->giveDomain(), gp);
 }
 
 }
