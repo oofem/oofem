@@ -375,10 +375,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
-        int rank;
         PetscNatural2GlobalOrdering *n2g;
         PetscNatural2LocalOrdering *n2l;
-        rank = eModel->giveRank();
         n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
         n2l = eModel->givePetscContext(di, ut)->giveN2Lmap();
 
@@ -386,7 +384,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         n2g->init(eModel, ut, di);
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
+        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", eModel-giveRank());
  #endif
 
         leqs = n2g->giveNumberOfLocalEqs();

@@ -61,7 +61,7 @@ void
 FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 {
     int i, j, l, maxRec;
-    int globaldofmannum, localNumber, ndofs, npart;
+    int globaldofmannum, localNumber, ndofs;
     int numberOfBoundaryDofMans;
     int source, tag;
     IntArray numberOfPartitionBoundaryDofMans(size);
@@ -223,9 +223,6 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     numberOfEquations = 0;
     numberOfBoundaryDofMans = boundaryDofManList.size();
     for ( i = 1; i <= numberOfBoundaryDofMans; i++ ) {
-        npart = boundaryDofManList [ i - 1 ].giveNumberOfSharedPartitions();
-        ndofs = boundaryDofManList [ i - 1 ].giveNumberOfDofs();
-        //neqs  = npart*ndofs;
         boundaryDofManList [ i - 1 ].setCodeNumbers(numberOfEquations); // updates numberOfEquations
     }
 
