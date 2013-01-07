@@ -42,8 +42,7 @@
 #include "inputrecord.h"
 
 namespace oofem {
-
-enum basisType {monomial=0, trigonometric=1};
+enum basisType { monomial=0, trigonometric=1 };
 /**
  * Imposes weak periodicity on the dofID of choice. 2D. It is required that the two edges are parallel and either horizontal or vertical.
  */
@@ -51,56 +50,55 @@ class WeakPeriodicbc : public ActiveBoundaryCondition
 {
 private:
 
-	basisType useBasisType;
-	int bcID;
-	int orderOfPolygon;
+    basisType useBasisType;
+    int bcID;
+    int orderOfPolygon;
 
-	int direction;
+    int direction;
 
-	int normalDirection;
+    int normalDirection;
 
-	double smax, smin;
-	bool doUpdateSminmax;
+    double smax, smin;
+    bool doUpdateSminmax;
 
 
-	/** ID of dofs on which weak periodicity is imposed */
-	int dofid;
+    /** ID of dofs on which weak periodicity is imposed */
+    int dofid;
 
-	/** sideSign is the sign of the normal for each side */
-	signed int sideSign[2];
+    /** sideSign is the sign of the normal for each side */
+    signed int sideSign [ 2 ];
 
-	/** side[] keeps track of which side of the triangle is located along the boundary. element[] keeps track of what element is located along the boundary */
-	std :: vector <int> side[2], element[2];
+    /** side[] keeps track of which side of the triangle is located along the boundary. element[] keeps track of what element is located along the boundary */
+    std :: vector< int >side [ 2 ], element [ 2 ];
 
-	void giveEdgeNormal(FloatArray &answer, int element, int side);
+    void giveEdgeNormal(FloatArray &answer, int element, int side);
 
-	void updateSminmax();
+    void updateSminmax();
 
-	void updateDirection();
+    void updateDirection();
 
-	double computeBaseFunctionValue(int baseID, double coordinate);
+    double computeBaseFunctionValue(int baseID, double coordinate);
 
-	Node *gammaDman;
-	IntArray DofIDList;
+    Node *gammaDman;
+    IntArray DofIDList;
 
 public:
-	WeakPeriodicbc (int n, Domain *d);
-	~WeakPeriodicbc() { };
+    WeakPeriodicbc(int n, Domain *d);
+    ~WeakPeriodicbc() { };
 
-	IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
-	virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
-	virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s, Domain *domain);
 
-	virtual int giveNumberOfInternalDofManagers();
+    virtual int giveNumberOfInternalDofManagers();
 
     virtual DofManager *giveInternalDofManager(int i);
 
-	void addElementSide(int elem, int side);
+    void addElementSide(int elem, int side);
 };
-
 }
 #endif /* WEAKPERIODICBC_H_ */
