@@ -62,6 +62,11 @@ Quad1_hmt :: Quad1_hmt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
     emode = HeatMass1TransferEM;
 }
 
+Quad1_mt :: Quad1_mt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
+}
+
 Quad1_ht :: ~Quad1_ht()
 // Destructor
 { }
@@ -72,7 +77,7 @@ Quad1_ht :: computeGaussPoints()
 {
     MaterialMode mmode;
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
         mmode = _2dHeat;
     } else {
         mmode = _2dHeMo;

@@ -52,6 +52,11 @@ QuadAxisym1_hmt :: QuadAxisym1_hmt(int n, Domain *aDomain) : QuadAxisym1_ht(n, a
     this->emode = HeatMass1TransferEM; // This could be done in a better way.
 }
 
+QuadAxisym1_mt :: QuadAxisym1_mt(int n, Domain *aDomain) : QuadAxisym1_ht(n, aDomain)
+{
+    this->emode = Mass1TransferEM; 
+}
+
 QuadAxisym1_ht :: ~QuadAxisym1_ht()
 // Destructor
 { }

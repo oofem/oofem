@@ -52,7 +52,7 @@ namespace oofem {
 class TransportElement : public Element, public EIPrimaryFieldInterface
 {
 public:
-    enum ElementMode { HeatTransferEM, HeatMass1TransferEM };
+    enum ElementMode { HeatTransferEM, HeatMass1TransferEM, Mass1TransferEM };
 
 protected:
     ElementMode emode;

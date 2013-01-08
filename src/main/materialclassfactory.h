@@ -88,6 +88,8 @@
 
 #ifdef __TM_MODULE
  #include "isoheatmat.h"
+ #include "isolinmoisturemat.h"
+ #include "bazantnajjarmat.h"
  #include "hemotkmat.h"
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
@@ -165,6 +167,8 @@ REGISTER_CLASS(DustMaterial, "dustmat", DustMaterialClass)
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)
+REGISTER_CLASS(IsotropicLinMoistureTransferMaterial, "isolinmoisturemat", IsotropicLinMoistureTransferMaterialClass)
+REGISTER_CLASS(BazantNajjarMoistureTransferMaterial, "bazantnajjarmoisturemat", BazantNajjarMoistureTransferMaterialClass)
 REGISTER_CLASS(HeMoTKMaterial, "hemotk", HeMoTKMaterialClass)
 REGISTER_CLASS(HydratingConcreteMat, "hydratingconcretemat", HydratingConcreteMatClass)
 REGISTER_CLASS(AnisotropicMassTransferMaterial, "anisomass", AnisotropicMassTransferMaterialClass)

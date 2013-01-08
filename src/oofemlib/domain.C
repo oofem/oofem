@@ -907,6 +907,8 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.setValues(3, D_u, D_v, R_w);
     } else if  ( dType == _HeatTransferMode ) {
         defaultNodeDofIDArry.setValues(1, T_f);
+    } else if  ( dType == _Mass1TransferMode ) {
+        defaultNodeDofIDArry.setValues(1, C_1);
     } else if  ( dType == _HeatMass1Mode ) {
         defaultNodeDofIDArry.setValues(2, T_f, C_1);
     }  else if ( dType == _2dIncompressibleFlow ) {
@@ -967,8 +969,10 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _2dBeamMode;
     } else if  ( !strncasecmp(typeName, "2dlattice", 9) ) {
         dType = _2dLatticeMode;
-    } else if  ( !strncasecmp(typeName, "heattransfer", 11) )   {
+    } else if  ( !strncasecmp(typeName, "heattransfer", 12) )   {
         dType = _HeatTransferMode;
+    } else if  ( !strncasecmp(typeName, "mass1transfer", 13) )   {
+        dType = _Mass1TransferMode;
     } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
     } else if ( !strncasecmp(typeName, "2dincompflow", 12) ) {

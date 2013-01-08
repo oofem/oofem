@@ -32,58 +32,37 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef quadaxisym1_ht_h
-#define quadaxisym1_ht_h
-
-#include "quad1_ht.h"
+#include "isolinmoisturemat.h"
+#include "flotmtrx.h"
+#include "gausspnt.h"
 
 namespace oofem {
-/**
- * Quadratic axisymmetric element with linear approximation for heat transfer.
- * @todo Use the interpolation classes.
- */
-class QuadAxisym1_ht : public Quad1_ht
+IRResultType
+IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-public:
-    QuadAxisym1_ht(int n, Domain *d);
-    virtual ~QuadAxisym1_ht();
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 
-    virtual const char *giveClassName() const { return "QuadAxisym1_ht"; }
-    virtual classType giveClassID() const { return QuadAxisym1_htClass; }
+    IR_GIVE_FIELD(ir, permeability, IFT_IsotropicLinMoistureTransferMaterial_perm, "perm"); // Macro// moisture permeability
+    IR_GIVE_FIELD(ir, moistureCapacity, IFT_IsotropicLinMoistureTransferMaterial_capa, "capa"); // Macro// moisture capacity
 
-protected:
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual double computeRadiusAt(GaussPoint *gp);
-    virtual int giveApproxOrder(int unknownIndx) { return 2; }
-};
+    return IRRT_OK;
+}
 
-/**
- * Same as QuadAxisym1_ht but for heat+mass transfer.
- */
-class QuadAxisym1_hmt : public QuadAxisym1_ht
+
+double
+IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
 {
-public:
-    QuadAxisym1_hmt(int n, Domain *d);
+    return this->moistureCapacity;
+}
 
-    virtual const char *giveClassName() const { return "QuadAxisym1_hmt"; }
-    virtual classType giveClassID() const { return QuadAxisym1_hmtClass; }
-};
-
-
-/**
- * Class for mass transfer.
- */
-class QuadAxisym1_mt: public QuadAxisym1_ht
+double
+IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
 {
-public:
-    QuadAxisym1_mt(int n, Domain *d);
-    virtual const char *giveClassName() const { return "QuadAxisym1_mt"; }
-    virtual classType giveClassID() const { return QuadAxisym1_mtClass; }
-};
-
+    return this->permeability;
+}
 
 
 } // end namespace oofem
-#endif // quadaxisym1_ht_h

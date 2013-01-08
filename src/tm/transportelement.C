@@ -83,6 +83,8 @@ TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
         answer.setValues(1, T_f);
     } else if ( emode == HeatMass1TransferEM ) {
         answer.setValues(2, T_f, C_1);
+    } else if ( emode == Mass1TransferEM ) {
+            answer.setValues(1, C_1);
     } else {
         _error("Unknown ElementMode");
     }
@@ -97,6 +99,8 @@ TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &ans
             answer.setValues(1, T_f);
         } else if ( emode == HeatMass1TransferEM ) {
             answer.setValues(2, T_f, C_1);
+        } else if ( emode == Mass1TransferEM ) {
+            answer.setValues(1, C_1);
         } else {
             _error("Unknown ElementMode");
         }
@@ -180,7 +184,7 @@ TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
     answer.zero();
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
         this->computeCapacitySubMatrix(answer, Capacity, 0, tStep);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
@@ -203,7 +207,7 @@ TransportElement :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMo
 {
     answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
     answer.zero();
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
         this->computeConductivitySubMatrix(answer, 2, 0, Conductivity_hh, tStep);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
@@ -234,7 +238,7 @@ TransportElement :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoo
     FloatArray n;
     this->computeNAt(n, lcoords);
     int q = n.giveSize();    
-    if ( this->emode == HeatTransferEM ) {
+    if ( this->emode == HeatTransferEM  || this->emode == Mass1TransferEM) {
         answer.resize(1, q);
         for (int i = 1; i <= q; i++ ) {
             answer.at(1, i) = n.at(i);
@@ -432,7 +436,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 void
 TransportElement :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         this->computeInternalSourceRhsSubVectorAt(answer, tStep, mode, 1);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatArray subAnswer;
@@ -462,7 +466,7 @@ TransportElement :: computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tSt
         answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
         answer.zero();
 
-        if ( emode == HeatTransferEM ) {
+        if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
             this->computeIntSourceLHSSubMatrix(answer, IntSource, 0, tStep);
         } else if ( emode == HeatMass1TransferEM ) {
             FloatMatrix subAnswer;
@@ -526,7 +530,7 @@ TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, Value
     answer.resize( computeNumberOfDofs(EID_ConservationEquation) );
     answer.zero();
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
         this->computeBCSubVectorAt(answer, tStep, mode, 1);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatArray subAnswer;
@@ -547,7 +551,7 @@ TransportElement :: computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueM
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
         this->computeBCSubMtrxAt(answer, tStep, mode, 1);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
@@ -837,7 +841,7 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     this->computeGradientMatrixAt(b, gp);
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM ||  emode == Mass1TransferEM) {
         this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, tStep);
         br.beProductOf(b, r);
         answer.beProductOf(d, br);

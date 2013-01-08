@@ -101,6 +101,9 @@ protected:
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
 };
 
+/**
+ * Class for heat and mass transfer.
+ */
 class Brick1_hmt : public Brick1_ht
 {
 public:
@@ -109,6 +112,19 @@ public:
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
     virtual classType giveClassID() const { return Brick1_hmtClass; }
 };
+
+/**
+ * Class for mass transfer.
+ */
+class Brick1_mt : public Brick1_ht
+{
+public:
+    Brick1_mt(int n, Domain *d);
+
+    virtual const char *giveClassName() const { return "Brick1_mt"; }
+    virtual classType giveClassID() const { return Brick1_mtClass; }
+};
+
 
 } // end namespace oofem
 #endif // brick1_ht_h

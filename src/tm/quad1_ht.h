@@ -98,5 +98,16 @@ public:
     virtual classType giveClassID() const { return Quad1_hmtClass; }
 };
 
+/**
+ * Class for mass transfer.
+ */
+class Quad1_mt: public Quad1_ht
+{
+public:
+    Quad1_mt(int n, Domain *d);
+    virtual const char *giveClassName() const { return "Quad1_mt"; }
+    virtual classType giveClassID() const { return Quad1_mtClass; }
+};
+
 } // end namespace oofem
 #endif // quad1_ht_h

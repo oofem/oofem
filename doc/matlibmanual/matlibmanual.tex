@@ -3757,6 +3757,77 @@ Supported modes& \_2dHeat\\
 %\end{center}
 \end{table}
 
+
+\subsection{Isotropic linear material for moisture transport - IsoLinMoisture}
+\label{IsoLinMoistureMat}
+Linear isotropic material model for moisture transport problems. The model parameters are summarized
+in table~\ref{IsoLinmoistureMat_table}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Linear isotropic material for moisture transport\\
+\hline
+Record Format & \descitem{IsoLinMoistureMat} \elemparam{num}{in}
+\elemparam{d}{rn} \elemparam{perm}{rn} \elemparam{capa}{rn}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{perm} moisture permeability\\
+&- \param{capa} moisture capacity\\
+Supported modes& \_2dHeat\\
+\hline
+\end{tabular}
+\caption{Linear Isotropic Material for Moisture Transport - summary.}
+\label{IsoLinmoistureMat_table}
+%\end{center}
+\end{table}
+
+\subsection{Isotropic material for moisture transport based on Ba\v{z}ant
+  and Najjar - BazantNajjarMoisture}
+\label{BazantNajjarMoistureMat}
+Nonlinear isotropic material for moisture transport in cementitious
+materials. A detailed description of this material model can be found
+in reference \cite{Bazant:72}. The governing equation was derived
+assuming that the slope of the sorption isotherm is linear, i.e. the
+moisture capacity is constant. This equation reads
+\begin{equation}\label{BNmodel:governing}
+\frac{\partial h}{\partial t} = \nabla \cdot \left( C(h) \nabla h \right)
+\end{equation}
+where $h$ is the relative humidity [-] and $C(h)$ is highly nonlinear
+humidity-dependent diffusivity approximated by
+\begin{equation}\label{BNmodel:diffusivity}
+C (\varphi) = C_1 \left( \alpha_0
++ \frac{1-\alpha_0}{1+\left(\frac{1-h}{1-h_c}\right)^n} \right)
+\end{equation}
+
+The model parameters are summarized in table~\ref{BazantNajjarMoistureMat}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Nonlinear isotropic material for moisture transport\\
+\hline
+Record Format & \descitem{BazantNajjarMoistureMat} \elemparam{num}{in}
+\elemparam{d}{rn} \elemparam{c1}{rn} \elemparam{n}{rn}
+\elemparam{alpha0}{rn} \elemparam{hc}{rn} \optelemparam{capa}{rn}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{c1} moisture diffusivity at full saturation [m$^2$ s$^{-1}$]\\
+&- \param{n} exponent [-]\\
+&- \param{alpha0} ratio between minimum and maximum diffusivity [-]\\
+&- \param{hc} relative humidity at which the diffusivity is exactly
+between its minimum and maximum value\\
+&- \param{capa} moisture capacity (default value is 1.0)\\
+
+Supported modes& \_2dHeat\\
+\hline
+\end{tabular}
+\caption{Nonlinear isotropic material for moisture transport - summary.}
+\label{BazantNajjarMoistureMat}
+%\end{center}
+\end{table}
+
 \subsection{Material for cement hydration - CemhydMat}
 \label{Cemhyd}
 CemhydMat represents a hydrating material based on CEMHYD3D model version 3.0,
@@ -4563,6 +4634,9 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
 
 %\subsection{Other Elements}
 \begin{thebibliography}{99}
+\bibitem{Bazant:72} Z.P.~Ba\v{z}ant, L.J.~Najjar.
+\newblock  Nonlinear water diffusion in nonsaturated concrete.
+\newblock {\em Materials and Structures}, 5:3--20, 1972.
 \bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size Effect in Concrete and Other Quasibrittle  Materials, CRC Press, 1998.
 \bibitem{NISTIR7232} D.P. Bentz: CEMHYD3D: A Three-Dimensional Cement Hydration and Microstructure Development Modeling Package. Version 3.0., NIST Building and Fire Research Laboratory, Gaithersburg, Maryland, Technical report, 2005.
 \bibitem{Cervera:99} M.~Cervera, J.~Oliver, and T.~Prato: Thermo-chemo-mechanical model for concrete. I: Hydration and aging. {\em Journal of Engineering Mechanics ASCE}, 125(9):1018--1027, 1999.

@@ -84,6 +84,9 @@ protected:
      */
     double stepMultiplier;
 
+    /// Specified times where the problem is solved
+    FloatArray discreteTimes;
+
     /// Optional parameter which specify problems to define load time functions
     int timeDefinedByProb;
 
@@ -141,6 +144,11 @@ public:
      * Returns the timestep length for given step number n, initial step is number 0
      */
     double giveDeltaT(int n);
+
+    /**
+     * Returns time for time step number n (array discreteTimes must be specified)
+     */
+    double giveDiscreteTime(int n);
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context);

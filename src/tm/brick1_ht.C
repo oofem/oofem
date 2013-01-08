@@ -62,6 +62,10 @@ Brick1_hmt :: Brick1_hmt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
     emode = HeatMass1TransferEM;
 }
 
+Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
+}
 Brick1_ht :: ~Brick1_ht()
 { }
 
@@ -72,7 +76,7 @@ Brick1_ht :: computeGaussPoints()
 {
     MaterialMode mmode;
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
         mmode = _3dHeat;
     } else {
         mmode = _3dHeMo;

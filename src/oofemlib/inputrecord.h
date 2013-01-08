@@ -196,6 +196,7 @@ enum InputFieldType {
     IFT_NonStationaryTransportProblem_initt,
     IFT_NonStationaryTransportProblem_deltat,
     IFT_NonStationaryTransportProblem_dtf,
+    IFT_NonStationaryTransportProblem_prescribedtimes,
     IFT_NonStationaryTransportProblem_alpha,
     IFT_NonStationaryTransportProblem_lumpedcapa,
     IFT_NonStationaryTransportProblem_changingproblemsize,
@@ -208,6 +209,7 @@ enum InputFieldType {
     IFT_StaggeredProblem_dtf,
     IFT_StaggeredProblem_timeDefinedByProb,
     IFT_StaggeredProblem_stepmultiplier,
+    IFT_StaggeredProblem_prescribedtimes,
     IFT_StaggeredProblem_prob1,
     IFT_StaggeredProblem_prob2,
 
@@ -523,6 +525,15 @@ enum InputFieldType {
     IFT_IsotropicHeatTransferMaterial_k,
     IFT_IsotropicHeatTransferMaterial_c,
 
+    IFT_IsotropicLinMoistureTransferMaterial_perm,
+    IFT_IsotropicLinMoistureTransferMaterial_capa,
+
+    IFT_BazantNajjarMoistureTransferMaterial_c1,
+    IFT_BazantNajjarMoistureTransferMaterial_n,
+    IFT_BazantNajjarMoistureTransferMaterial_alpha0,
+    IFT_BazantNajjarMoistureTransferMaterial_hc,
+    IFT_BazantNajjarMoistureTransferMaterial_capa,
+
     IFT_AnisotropicMassTransferMaterial_c,
     IFT_NonlinearMassTransferMaterial_c,
     IFT_NonlinearMassTransferMaterial_alpha,
@@ -540,20 +551,6 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_chi_eff,
     IFT_HeMoTKMaterial_por,
     IFT_HeMoTKMaterial_rho_gws,
-
-    IFT_HeMoZBMaterial_a_0,
-    IFT_HeMoZBMaterial_nn,
-    IFT_HeMoZBMaterial_phi_c,
-    IFT_HeMoZBMaterial_delta_wet,
-    IFT_HeMoZBMaterial_w_h,
-    IFT_HeMoZBMaterial_n,
-    IFT_HeMoZBMaterial_a,
-    IFT_HeMoZBMaterial_latent,
-    IFT_HeMoZBMaterial_c,
-    IFT_HeMoZBMaterial_rho,
-    IFT_HeMoZBMaterial_chi_eff,
-    IFT_HeMoZBMaterial_por,
-    IFT_HeMoZBMaterial_rho_gws,
 
     IFT_CemhydMatInputFileName,
     IFT_CemhydMat_conductivitytype,

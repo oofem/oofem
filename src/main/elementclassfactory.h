@@ -199,10 +199,13 @@ REGISTER_CLASS(Line2SurfaceTension, "line2surfacetension", Line2SurfaceTensionEl
 #ifdef __TM_MODULE
 REGISTER_CLASS(Quad1_ht, "quad1ht", Quad1_htClass)
 REGISTER_CLASS(Quad1_hmt, "quad1hmt", Quad1_hmtClass)
+REGISTER_CLASS(Quad1_mt, "quad1mt", Quad1_mtClass)
 REGISTER_CLASS(QuadAxisym1_ht, "quadaxisym1ht", QuadAxisym1_htClass)
 REGISTER_CLASS(QuadAxisym1_hmt, "quadaxisym1hmt", QuadAxisym1_hmtClass)
+REGISTER_CLASS(QuadAxisym1_mt, "quadaxisym1mt", QuadAxisym1_mtClass)
 REGISTER_CLASS(Brick1_ht, "brick1ht", Brick1_htClass)
 REGISTER_CLASS(Brick1_hmt, "brick1hmt", Brick1_hmtClass)
+REGISTER_CLASS(Brick1_mt, "brick1mt", Brick1_mtClass)
 REGISTER_CLASS(QBrick1_ht, "qbrick1ht", QBrick1_htClass)
 REGISTER_CLASS(QBrick1_hmt, "qbrick1hmt", QBrick1_hmtClass)
 REGISTER_CLASS(Tetrah1_ht, "tetrah1ht", Tetrah1_htClass)

@@ -101,6 +101,8 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
     } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltatfunction") ){
         IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_dtf, "deltatfunction"); // Macro
+    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ){
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes"); // Macro
     } else {
         OOFEM_ERROR("Time step not defined");
     }
@@ -183,10 +185,26 @@ NonStationaryTransportProblem :: giveDeltaT(int n)
     if ( giveDtTimeFunction() ) {
         return giveDtTimeFunction()->__at(n);
     }
-
+    if ( discreteTimes.giveSize()>0 ) {
+        return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
+    }
     return deltaT;
 }
 
+double 
+NonStationaryTransportProblem :: giveDiscreteTime(int iStep)
+{
+  if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+    return ( discreteTimes.at(iStep) );
+  }
+
+  if ( ( iStep == 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+    return (initT);
+  }
+
+    _error("giveDiscreteTime: invalid iStep");
+    return 0.0;
+}
 
 
 TimeStep *

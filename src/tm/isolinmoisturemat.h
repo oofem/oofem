@@ -32,58 +32,42 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef quadaxisym1_ht_h
-#define quadaxisym1_ht_h
+#ifndef isolinmoisturemat_h
+#define isolinmoisturemat_h
 
-#include "quad1_ht.h"
+#include "isomoisturemat.h"
+#include "flotarry.h"
+#include "flotmtrx.h"
 
 namespace oofem {
 /**
- * Quadratic axisymmetric element with linear approximation for heat transfer.
- * @todo Use the interpolation classes.
+ * This class implements a isotropic moisture tranport material. A material
+ * is an attribute of a domain. It is usually also attribute of many elements.
  */
-class QuadAxisym1_ht : public Quad1_ht
+class IsotropicLinMoistureTransferMaterial : public IsotropicMoistureTransferMaterial
 {
-public:
-    QuadAxisym1_ht(int n, Domain *d);
-    virtual ~QuadAxisym1_ht();
-
-    virtual double computeVolumeAround(GaussPoint *gp);
-
-    virtual const char *giveClassName() const { return "QuadAxisym1_ht"; }
-    virtual classType giveClassID() const { return QuadAxisym1_htClass; }
 
 protected:
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual double computeRadiusAt(GaussPoint *gp);
-    virtual int giveApproxOrder(int unknownIndx) { return 2; }
-};
+  double moistureCapacity;
+  double permeability;
 
-/**
- * Same as QuadAxisym1_ht but for heat+mass transfer.
- */
-class QuadAxisym1_hmt : public QuadAxisym1_ht
-{
 public:
-    QuadAxisym1_hmt(int n, Domain *d);
+    IsotropicLinMoistureTransferMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
+    virtual ~IsotropicLinMoistureTransferMaterial() { }
 
-    virtual const char *giveClassName() const { return "QuadAxisym1_hmt"; }
-    virtual classType giveClassID() const { return QuadAxisym1_hmtClass; }
+    virtual double givePermeability(GaussPoint *gp, TimeStep *atTime);
+    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime);
+
+    virtual const char *giveClassName() const { return "IsotropicLinMoistureTransferMaterial"; }
+    virtual classType giveClassID() const { return IsotropicLinMoistureTransferMaterialClass; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    /*
+    virtual double give(int aProperty, GaussPoint *gp);
+    */
+
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };
-
-
-/**
- * Class for mass transfer.
- */
-class QuadAxisym1_mt: public QuadAxisym1_ht
-{
-public:
-    QuadAxisym1_mt(int n, Domain *d);
-    virtual const char *giveClassName() const { return "QuadAxisym1_mt"; }
-    virtual classType giveClassID() const { return QuadAxisym1_mtClass; }
-};
-
-
-
 } // end namespace oofem
-#endif // quadaxisym1_ht_h
+#endif // isolinmoisturemat_h
