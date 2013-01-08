@@ -320,6 +320,7 @@ enum classType {
     IsoInterfaceDamageMaterialClass,
     CebFipSlip90MaterialClass,
     DustMaterialClass,
+    RVEMaterialClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,

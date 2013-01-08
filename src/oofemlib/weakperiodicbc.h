@@ -44,7 +44,9 @@
 namespace oofem {
 enum basisType { monomial=0, trigonometric=1 };
 /**
- * Imposes weak periodicity on the dofID of choice. 2D. It is required that the two edges are parallel and either horizontal or vertical.
+ * Imposes weak periodicity on the doftype of choice. 2D. It is required that the two edges are parallel and either horizontal or vertical.
+ *
+ * @author Carl Sandström
  */
 class WeakPeriodicbc : public ActiveBoundaryCondition
 {

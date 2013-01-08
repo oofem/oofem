@@ -282,14 +282,14 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm 
 {
     this->suppressStdout();
 
-    OOFEM_LOG_INFO("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve);
+    OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve);
 
     RVEStokesFlowMaterialStatus *status = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(gp) );
 
     answer = status->giveTempTangentMatrix();
     status->letTempTangentMatrixBe(answer);
 
-    OOFEM_LOG_INFO("****** Exit giveDeviatoricStiffnessMatrix **************************************** \n");
+    OOFEM_LOG_DEBUG("****** Exit giveDeviatoricStiffnessMatrix **************************************** \n");
 
     this->enableStdout();
 }

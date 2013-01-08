@@ -1,8 +1,35 @@
 /*
- * RVEMaterial.C
  *
- *  Created on: Mar 26, 2010
- *      Author: carl
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2012   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #include "rvematerial.h"
@@ -11,7 +38,7 @@
 #include "inputrecord.h"
 
 #include <cstdio>
-#include <unistd.h>
+//#include <unistd.h>
 
 namespace oofem {
 
@@ -19,8 +46,8 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 {
 	printf("rvematerial initializing...\n");
 
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom";
+    IRResultType result;
 
     // Read filename and instanciate RVE problem
 
@@ -41,14 +68,9 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 
     OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", rve);
 
-    /* Get BCType which is the type of boundary condition imposed on the rve
-     *
-     */
-    //IR_GIVE_FIELD(ir, BCType, IFT_RVEMaterial_bctype, "bctype");
-
     SupressRVEoutput=0;
 
-    IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, IFT_RVEMaterial_supressoutput, "supressoutput"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, IFT_RVEMaterial_supressoutput, "supressoutput");
 
     return IRRT_OK;
 }
@@ -56,22 +78,22 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 void
 RVEMaterial :: suppressStdout()
 {
-    if (SupressRVEoutput) {
-        fgetpos(stdout, &stdoutPos);
-        stdoutFID=dup(fileno(stdout));
-        freopen(this->rveLogFilename.c_str(), "a", stdout);
-    }
+//    if (SupressRVEoutput) {
+//        fgetpos(stdout, &stdoutPos);
+//        stdoutFID=dup(fileno(stdout));
+//        freopen(this->rveLogFilename.c_str(), "a", stdout);
+//    }
 }
 
 void RVEMaterial :: enableStdout()
 {
-    if (SupressRVEoutput) {
-        fflush(stdout);
-        dup2(stdoutFID, fileno(stdout));
-        close (stdoutFID);
-        clearerr(stdout);
-        fsetpos(stdout, &stdoutPos);        /* for C9X */
-    }
+//    if (SupressRVEoutput) {
+//        fflush(stdout);
+//        dup2(stdoutFID, fileno(stdout));
+//        close (stdoutFID);
+//        clearerr(stdout);
+//        fsetpos(stdout, &stdoutPos);        /* for C9X */
+//    }
 }
 
 }
