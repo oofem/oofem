@@ -123,6 +123,7 @@ set (core_export
     vtkexportmodule.C
     vtkxmlexportmodule.C
     homexportmodule.C
+    matlabexportmodule.C
     )
 
 set (core_iga

@@ -63,6 +63,7 @@
 // export modules
 #include "vtkexportmodule.h"
 #include "vtkxmlexportmodule.h"
+#include "matlabexportmodule.h"
 
 // nodal recovery models
 #include "zznodalrecoverymodel.h"
@@ -351,6 +352,7 @@ ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, Eng
     if ( exportList.size() == 0 ) {
         exportList [ "vtkxml" ]    = exportCreator< VTKXMLExportModule >;
         exportList [ "vtk" ]       = exportCreator< VTKExportModule >;
+        exportList [ "matlab" ]    = exportCreator< MatlabExportModule >;
 #ifdef __SM_MODULE
         exportList [ "poi" ]       = exportCreator< POIExportModule >;
         exportList [ "hom" ]       = exportCreator< HOMExportModule >;
