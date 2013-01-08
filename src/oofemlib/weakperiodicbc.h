@@ -90,6 +90,8 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
 
+    basisType giveBasisType() {return useBasisType; };
+
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
