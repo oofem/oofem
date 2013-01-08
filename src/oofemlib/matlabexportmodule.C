@@ -108,12 +108,6 @@ void MatlabExportModule :: doOutput(TimeStep *tStep)
 		fprintf(FID,"\tdata=[];\n");
 	}
 
-	if (exportSpecials)
-		doOutputSpecials(tStep, FID);
-	else {
-		fprintf(FID,"\tspecials=[];\n");
-	}
-
 	if (exportArea) {
 		computeArea();
 		fprintf(FID, "\tarea.xmax=%f;\n", xmax);
@@ -123,6 +117,15 @@ void MatlabExportModule :: doOutput(TimeStep *tStep)
 		fprintf(FID, "\tarea.area=%f;\n", Area);
 	} else {
 		fprintf(FID,"\tarea=[];\n");
+	}
+
+	if (exportSpecials) {
+		if (!exportArea) {
+			computeArea();
+		}
+		doOutputSpecials(tStep, FID);
+	} else {
+		fprintf(FID,"\tspecials=[];\n");
 	}
 
 	fprintf(FID, "\nend\n");
