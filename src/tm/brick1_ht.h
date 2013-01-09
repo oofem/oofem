@@ -63,7 +63,8 @@ public:
     virtual const char *giveClassName() const { return "Brick1_ht"; }
     virtual classType giveClassID() const { return Brick1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    // virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
 
@@ -111,6 +112,7 @@ public:
 
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
     virtual classType giveClassID() const { return Brick1_hmtClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 16; }
 };
 
 /**
@@ -123,6 +125,7 @@ public:
 
     virtual const char *giveClassName() const { return "Brick1_mt"; }
     virtual classType giveClassID() const { return Brick1_mtClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
 };
 } // end namespace oofem
 #endif // brick1_ht_h
