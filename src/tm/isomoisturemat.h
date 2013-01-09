@@ -46,7 +46,6 @@ namespace oofem {
  */
 class IsotropicMoistureTransferMaterial : public TransportMaterial
 {
-
 public:
     IsotropicMoistureTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
     virtual ~IsotropicMoistureTransferMaterial() { }
@@ -72,8 +71,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     /*
-    virtual double give(int aProperty, GaussPoint *gp);
-    */
+     * virtual double give(int aProperty, GaussPoint *gp);
+     */
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };

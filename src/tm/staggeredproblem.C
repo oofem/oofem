@@ -154,9 +154,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 }
 
 
-  void
-  StaggeredProblem :: updateAttributes(MetaStep *mStep)
-  {
+void
+StaggeredProblem :: updateAttributes(MetaStep *mStep)
+{
     const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
 
@@ -166,22 +166,22 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     // update attributes of slaves
     for ( int i = 1; i <= nModels; i++ ) {
-      this->giveSlaveProblem(i)->updateAttributes(mStep);
+        this->giveSlaveProblem(i)->updateAttributes(mStep);
     }
 
     if ( !timeDefinedByProb ) {
-      if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
-        IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
-	IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf"); // Macro
-	IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
-	if ( stepMultiplier < 0 ) {
-	  _error("stepMultiplier must be > 0")
-	    }
-      } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
-        IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes"); // Macro
-      }
+        if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
+            IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
+            if ( stepMultiplier < 0 ) {
+                _error("stepMultiplier must be > 0")
+            }
+        } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
+            IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes"); // Macro
+        }
     }
-  }
+}
 
 LoadTimeFunction *StaggeredProblem :: giveDtTimeFunction()
 // Returns the load-time function of the receiver.
@@ -207,22 +207,23 @@ StaggeredProblem :: giveDeltaT(int n)
         }
     }
 
-    if ( discreteTimes.giveSize()>0 ) {
-        return this->giveDiscreteTime(n) - this->giveDiscreteTime(n-1);
+    if ( discreteTimes.giveSize() > 0 ) {
+        return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
     }
 
     return deltaT;
 }
 
-double 
+double
 StaggeredProblem :: giveDiscreteTime(int iStep)
 {
-  if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
-    return ( discreteTimes.at(iStep) );
-  }
-  if ( ( iStep == 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
-    return ( 0.0);
-  }
+    if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+        return ( discreteTimes.at(iStep) );
+    }
+
+    if ( ( iStep == 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+        return ( 0.0 );
+    }
 
     _error("giveDiscreteTime: invalid iStep");
     return 0.0;
@@ -375,7 +376,8 @@ StaggeredProblem :: terminate(TimeStep *tStep) {
     for ( int i = 1; i <= nModels; i++ ) {
         this->giveSlaveProblem(i)->terminate(tStep);
     }
-    fflush(this->giveOutputStream());
+
+    fflush( this->giveOutputStream() );
 }
 
 void

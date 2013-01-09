@@ -98,7 +98,7 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \subsubsection{Isotropic linear elastic material - IsoLE}
 \label{IsoLE}
 Linear isotropic material model. The model parameters are summarized
-in table~\ref{IsoLE_table}.
+in Tab.~\ref{IsoLE_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -130,7 +130,7 @@ Features & Adaptivity support\\
 \subsubsection{Orthotropic linear elastic material - OrthoLE}
 \label{OrthoLE}
 Linear orthotropic, linear elastic  material model. The model parameters are summarized
-in table~\ref{OrthoLE_table}.
+in Tab.~\ref{OrthoLE_table}.
 Local coordinate system, which determines axes of material orthotrophy
 can by specified using \param{lcs} array. This array contains six numbers,
 where the first three numbers represent directional vector of a local x-axis,
@@ -190,7 +190,7 @@ Note, that there is only nine independent material parameters,
 because of symmetry conditions. The symmetry condition yields
 $$\nu_{xy}E_y=\nu_{yx}E_x,\ \ \nu_{yz}E_z=\nu_{zy}E_y,\ \ \nu_{zx}E_x=\nu_{xz}E_z$$
 The model description and parameters are summarized
-in table~\ref{OrthoLE_table}.
+in Tab.~\ref{OrthoLE_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -239,7 +239,7 @@ Then stress-strain law can be derived from (\ref{freeEnergy}) as
 \mbf{S} = \rho_0 \frac{\partial \psi}{\partial \mbf{E}} = \frac{1}{2}\left(K - \frac{2}{3}G \right) \left(J^2 -1 \right)\mbf{C}^{-1} + G \left(\mbf{I} -\mbf{C}^{-1} \right)
 \end{equation}
 where $\mbf{S}$ is the second Piola-Kirchhoff stress, $\mbf{E}$ is the Green-Lagrange strain and $\mbf{C}$ is the right Cauchy-Green tensor.
-The model description and parameters are summarized in table~\ref{hyperElMat_table}.
+The model description and parameters are summarized in Tab.~\ref{hyperElMat_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -555,7 +555,7 @@ The stress-evaluation algorithm can be based on the
 classical radial return mapping; see \cite{SimoHughes} for more details. Damage is not yet implemented in the large-strain version of the model.
 
 %\paragraph{}
-The model description and parameters are summarized in Table~\ref{misesMat_table}.
+The model description and parameters are summarized in Tab.~\ref{misesMat_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -620,7 +620,7 @@ with homogeneous Neumann boundary condition
 \end{equation} In (\ref{implicitGradient}), $l$ is the length scale parameter and $\nabla$ is the Laplace operator. 
 
 %\paragraph{}
-The model description and parameters are summarized in Tables~\ref{misesMatNl_table} and~\ref{misesMatGrad_table}. Note that the internal length parameter \param{r} has the meaning of the
+The model description and parameters are summarized in Tabs.~\ref{misesMatNl_table} and~\ref{misesMatGrad_table}. Note that the internal length parameter \param{r} has the meaning of the
 radius of interaction $R$ for the integral version (and thus has the dimension
 of length) but for the gradient version it has the meaning of the coefficient $l^2$
 multiplying the Laplacean in (\ref{implicitGradient}), and thus has the dimension of length squared.
@@ -705,7 +705,7 @@ For exponential plastic hardening, the evaluation of $a$ from $g_f$ is not prope
 implemented and it is better to specify $a$ directly.
 
 %\paragraph{}
-The model description and parameters are summarized in Tables~\ref{rankineMat_table}--\ref{rankineMatGrad_table}. Note that the default value of parameter $m$ is equal to 1 for the
+The model description and parameters are summarized in Tabs.~\ref{rankineMat_table}--\ref{rankineMatGrad_table}. Note that the default value of parameter $m$ is equal to 1 for the
 integral model but for the gradient model it is equal to 2. 
 Also note that the internal length parameter \param{r} has the meaning of the
 radius of interaction $R$ for the integral version (and thus has the dimension
@@ -817,7 +817,7 @@ Supported modes& PlaneStress\\
 This is an older model, kept here for compatibility with previous versions.
 It uses Mises plasticity condition with no hardening and under small strain only.
 The model description and parameters are summarized
-in Table~\ref{Steel1_table}. All its features are included in the model
+in Tab.~\ref{Steel1_table}. All its features are included in the model
 described in Section~\ref{sec:misplast}. 
 
 \begin{table}[!htb]
@@ -973,7 +973,7 @@ An associated flow and strain hardening hypothesis are being considered. This yi
 \label{hs3fig}
 \end{figure}
 
-The model parameters are summarized in table~\ref{compomasonry1_table}.
+The model parameters are summarized in Tab.~\ref{compomasonry1_table}.
 There is one algorithmic issue, that follows from the model
 formulation. Since the cap mode hardening/softening is not coupled to
 hardening/softening of shear and tension modes the it may happen that
@@ -1031,7 +1031,7 @@ Can be used only for 2d plates and shells with layered cross section
 and together with explicit integration method (stiffness matrix is not
 provided).
 The model description and parameters are summarized
-in table~\ref{Rer_table}.
+in Tab.~\ref{Rer_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -1109,7 +1109,7 @@ to preserve fracture energy. Multiple cracks are allowed.
 The elastic unloading and reloading is assumed.
 In compression regime, this model correspond to isotropic linear elastic material.
 The model description and parameters are summarized
-in table~\ref{rcm_table}.
+in Tab.~\ref{rcm_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -1171,7 +1171,7 @@ Multiple cracks are allowed.
 The elastic unloading and reloading is assumed.
 In compression regime, this model correspond to isotropic linear elastic material.
 The model description and parameters are summarized
-in table~\ref{rcsd_table}.
+in Tab.~\ref{rcsd_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -1208,7 +1208,7 @@ damage - exponential softening - RCSDE}
 \label{rcsde}
 Implementation of smeared rotating crack model with transition to
 scalar damage with exponential softening law.
-The description and model summary (table~\ref{rcsde_table}) are the
+The description and model summary (Tab.~\ref{rcsde_table}) are the
 same as for the RC-SD model with linear softening law (see section~\ref{rcsd}).
 \begin{table}[!htb]
 %\begin{center}
@@ -1259,7 +1259,7 @@ Multiple cracks are allowed.
 The elastic unloading and reloading is assumed.
 In compression regime, this model correspond to isotropic linear elastic material.
 The model description and parameters are summarized
-in table~\ref{rcsdnl_table}.
+in Tab.~\ref{rcsdnl_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -1550,7 +1550,7 @@ to the mesh size. These cases are intended to be used in combination
 with a nonlocal formulation. An alternative formulation uses fracture energy
 to determine fracturing strain.
 
-The model parameters are summarized in Table~\ref{id_table}. Figure~\ref{idm_softening} shows
+The model parameters are summarized in Tab.~\ref{id_table}. Figure~\ref{idm_softening} shows
 three modes of a softening law with corresponding variables.
 
 \begin{figure}[!htb]
@@ -1770,7 +1770,7 @@ The term on the right-hand side after the integral is a multiple of the local
 variable, and so it can be referred to as the local complement.  
 
 The model parameters are summarized
-in Tables~\ref{idnl_table} and \ref{idnl_table_cont}.
+in Tabs.~\ref{idnl_table} and \ref{idnl_table_cont}.
 
 
 \begin{table}[!htb]
@@ -1806,10 +1806,10 @@ Parameters &- \param{} material number\\
 &- \param{n} Poisson's ratio\\
 &- \param{tAlpha} thermal expansion coefficient\\
 &- \param{equivstraintype} allows to choose from different definitions
-of equivalent strain, same as for the local model; see Table \ref{id_table}\\
+of equivalent strain, same as for the local model; see Tab.~\ref{id_table}\\
 &- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
 &- \param{damlaw} allows to choose from different damage laws, 
-same as for the local model; see Table \ref{id_table}
+same as for the local model; see Tab.~\ref{id_table}
 (note that parameter {\it wf} cannot be used for the nonlocal model)\\
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{ef} strain parameter controling ductility, has the meaning of strain (for damage laws 0 and 1), the tangent modulus just after the peak is
@@ -1832,7 +1832,7 @@ value is nonzero.\\
 \item[4 -] uniform averaging up to distance $R$
 \item[5 -] uniform averaging over one finite element
 \end{itemize}\\
-& {\it --- continued in Table \ref{idnl_table_cont} ---} \\
+& {\it --- continued in Tab.~\ref{idnl_table_cont} ---} \\
 \hline
 \end{tabular}
 \caption{Nonlocal isotropic damage model for tensile failure -- summary.}
@@ -1895,7 +1895,7 @@ microplane theory, it is called the microplane-based damage model (MDM).
 
 The general structure of the MDM
 model is schematically shown in Fig.\ \ref{ff4}
-and the basic equations are summarized in Table \ref{tab2}.
+and the basic equations are summarized in Tab.~\ref{tab2}.
 Here, $\veps$ and $\vsig$ are the (nominal) second-order
 strain and stress tensors
 with components $\eps_{ij}$ and $\sigma_{ij}$; $\ve$ and $\vs$
@@ -2084,7 +2084,7 @@ as $m=0.05$, and $R$ is the radius of nonlocal interaction reflecting the
 internal length of the material.
 \paragraph{Input Record}
 The model description and parameters are summarized
-in table~\ref{mdm_table}.
+in Tab.~\ref{mdm_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2164,7 +2164,7 @@ Only the exponential softening damage law is supported:
 $$
 \omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
 $$
-The model parameters are summarized in Table~\ref{iid_table}. 
+The model parameters are summarized in Tab.~\ref{iid_table}. 
 \begin{table}[!htb]
 %\begin{center}
   \small
@@ -2215,7 +2215,7 @@ material, taking into account the principle of preserving of fracture
 energy $G_f$. The equivalent strain, i.e., a scalar measure of the
 strain level is defined as norm from positive principal strains.
 The model description and parameters are summarized
-in table~\ref{maz_table}.
+in Tab.~\ref{maz_table}.
 
 
 \begin{table}[!htb]
@@ -2255,7 +2255,7 @@ tension damage evolution law is used, if equal 1, the modified law
 used which asymptotically tends to zero
 $g_t = 1.0-(\varepsilon_0/\kappa)*\exp((\varepsilon_0-\kappa)/A_t)$\\
 &- \param{tAlpha} thermal dilatation coefficient\\
-&- \param{equivstraintype} see Table~\ref{id_table}\\
+&- \param{equivstraintype} see Tab.~\ref{id_table}\\
 &- \param{maxOmega} limit maximum damage, use for convergency improvement\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 \hline
@@ -2272,7 +2272,7 @@ Model based on nonlocal averaging of equivalent strain.
 The nonlocal averaging acts as a powerful localization
 limiter. The bell-shaped nonlocal averaging function is used.
 The model description and parameters are summarized
-in table~\ref{maznl_table}.
+in Tab.~\ref{maznl_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2319,7 +2319,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Implementation of aging viscoelastic model for concrete creep
 according to the CEB-FIP Model Code.
 The model parameters are summarized
-in table~\ref{cebfip_table}.
+in Tab.~\ref{cebfip_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2354,7 +2354,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 Implementation of aging viscoelastic model for concrete creep
 with compliance function given by the double-power law.
 The model parameters are summarized
-in table~\ref{doublepowerlaw_table}.
+in Tab.~\ref{doublepowerlaw_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2488,7 +2488,7 @@ The rate of thermal strain is expressed as $\dot{\varepsilon}_T = \alpha_T \dot{
 
 
 The model description and parameters are summarized
-in table~\ref{b3_table} for ``B3mat'', in table~\ref{b3solid_table} for ``B3solidmat'', and in table ~\ref{mps_table} for ``MPS''. 
+in Tab.~\ref{b3_table} for ``B3mat'', in Tab.~\ref{b3solid_table} for ``B3solidmat'', and in Tab.~\ref{mps_table} for ``MPS''. 
 Since some model parameters are determined from the composition
 and strength using empirical formulae, it is necessary to use the
 specified units (e.g.\ compressive strength always in MPa, irrespectively
@@ -2948,7 +2948,7 @@ to the element size. Since the tangent stiffness matrix is not available,
 elastic stiffness is used. This can lead to a very slow convergence 
 when used within an implicit approach.
 The model parameters are summarized
-in table~\ref{m4_table}.
+in Tab.~\ref{m4_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -3281,7 +3281,7 @@ and represents its actual size.
 The damage-plastic model contains 15 parameters, but only 6 of them need to be actually calibrated for different concrete types, namely Young's modulus $E$, Poisson's ratio $\nu$, tensile strength $f_{\rm t}$, compressive strength $f_{\rm c}$, parameter $w_f$ (or fracture energy $G_f$), and parameter $A_{\rm s}$ in the ductility measure (\ref{eq:damageDuctility}) of the damage model. The remaining parameters can be set to their default values specified in \cite{GraJir}.
 
 The model parameters are summarized
-in table~\ref{dpm_table}. Note that it is possible to specify the ``size'' of finite element, $h$, which (if specified) replaces
+in Tab.~\ref{dpm_table}. Note that it is possible to specify the ``size'' of finite element, $h$, which (if specified) replaces
 the actual element size in  (\ref{eq:damageLaw4}). The usual approach is to consider $h$ as the actual element size (evaluated automatically by OOFEM), 
 in which case the optional
 parameter $h$ is missing (or is set to 0., which has the same effect in the code). However, for various studies of mesh sensitivity
@@ -3492,7 +3492,7 @@ In the equation above $\sigma_i^{\pm} = \sigma_0^{\pm}\rho^p m_i^{2q}$ is uniaxi
 \begin{equation}
 \frac{\chi_0^- +1}{(\sigma_0^-)^2} = \frac{\chi_0^+ +1}{(\sigma_0^+)^2}.
 \end{equation}
-The model description and parameters are summarized in table~\ref{trabbone_table}.
+The model description and parameters are summarized in Tab.~\ref{trabbone_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -3547,7 +3547,7 @@ where
 \alpha_0(r) =\left\{\begin{array}{cc} \left(1-\frac{r^2}{R^2}\right)^2 & \mbox{ if } r\le R \\ 0 & \mbox{ if } r> R \end{array}\right.
 \end{equation}
 Parameter $R$ is related to the internal length of the material.
-The model description and parameters are summarized in table~\ref{trabboneNl_table}.
+The model description and parameters are summarized in Tab.~\ref{trabboneNl_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -3624,7 +3624,7 @@ In the future, this law will be enriched by a cohesion-like term.
 
 If used in connection of two nodes with {\tt interface1delement}, the element-level parameter \param{normal} determines what is compression and what is tension (from the 1st node to the 2nd node in \param{normal} direction it is tension). If \param{normalClearance} is defined, the element has tensile stiffness until the gap within the element is closed. This feature allows simulating two faces with a gap. When the gap is smaller than \param{normalClearance}, the element stiffness changes to compression, see Figure~\ref{SimpleInterfaceMat}. 
 
-The model description and parameters are summarized in table~\ref{simpleinterfacemat_table}.
+The model description and parameters are summarized in Tab.~\ref{simpleinterfacemat_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -3700,7 +3700,7 @@ The strength envelope is elliptic (Figure~\ref{StrengthLatticeDamage2d}) and det
   \label{SofteningLatticeDamage2d}
 \end{figure}
 
-The model parameters are summarised in table~\ref{latticedamage2d_table}.
+The model parameters are summarised in Tab.~\ref{latticedamage2d_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -3732,10 +3732,17 @@ Supported modes& 2dlattice\\
 \clearpage
 
 \section{Material Models for Transport Problems}
-\subsection{Isotropic linear material - IsoHeat}
+\subsection{Isotropic linear material for heat transport -- IsoHeat}
 \label{IsoLET}
-Linear isotropic material model for transport problems. The model parameters are summarized
-in table~\ref{Isoheat_table}.
+Linear isotropic material model for heat transport problems described
+by the linear diffusion equation
+\begin{equation}\label{lindiffheat}
+c\frac{\partial T}{\partial t} = \nabla \cdot \left( k \nabla T \right)
+\end{equation}
+where $T$ is the temperature, $c$ is the specific heat capacity,
+and $k$ is the conductivity.
+The model parameters are summarized
+in Tab.~\ref{Isoheat_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -3752,16 +3759,27 @@ Parameters &- \param{num} material model number\\
 Supported modes& \_2dHeat\\
 \hline
 \end{tabular}
-\caption{Linear Isotropic Material - summary.}
+\caption{Linear isotropic material for heat transport - summary.}
 \label{Isoheat_table}
 %\end{center}
 \end{table}
 
 
-\subsection{Isotropic linear material for moisture transport - IsoLinMoisture}
+\subsection{Isotropic linear material for moisture transport -- IsoLinMoisture}
 \label{IsoLinMoistureMat}
-Linear isotropic material model for moisture transport problems. The model parameters are summarized
-in table~\ref{IsoLinmoistureMat_table}.
+Linear isotropic material model for moisture transport problems described
+by the linear diffusion equation
+\begin{equation}\label{lindiff}
+c\frac{\partial h}{\partial t} = \nabla \cdot \left( k \nabla h \right)
+\end{equation}
+where $h$ is the relative humidity, $c$ is the moisture capacity,
+and $k$ is the moisture permeability.\footnote{The notation in
+\refeq{lindiff} is not standard. For instance, 
+Ba\v{z}ant uses $c$ for the moisture permeability
+and $k$ for the inverse moisture capacity. Here, the objective is to 
+avoid confusion between parameters in \refeq{lindiff0} and \refeq{lindiff}.}
+The model parameters are summarized
+in Tab.~\ref{IsoLinmoistureMat_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -3778,30 +3796,42 @@ Parameters &- \param{num} material model number\\
 Supported modes& \_2dHeat\\
 \hline
 \end{tabular}
-\caption{Linear Isotropic Material for Moisture Transport - summary.}
+\caption{Linear isotropic material for moisture transport - summary.}
 \label{IsoLinmoistureMat_table}
 %\end{center}
 \end{table}
 
 \subsection{Isotropic material for moisture transport based on Ba\v{z}ant
-  and Najjar - BazantNajjarMoisture}
+  and Najjar -- BazantNajjarMoisture}
 \label{BazantNajjarMoistureMat}
 Nonlinear isotropic material for moisture transport in cementitious
 materials. A detailed description of this material model can be found
-in reference \cite{Bazant:72}. The governing equation was derived
-assuming that the slope of the sorption isotherm is linear, i.e. the
-moisture capacity is constant. This equation reads
+in reference \cite{Bazant:72}. The governing equation 
 \begin{equation}\label{BNmodel:governing}
 \frac{\partial h}{\partial t} = \nabla \cdot \left( C(h) \nabla h \right)
-\end{equation}
-where $h$ is the relative humidity [-] and $C(h)$ is highly nonlinear
+\end{equation} 
+was derived
+assuming that the slope of the sorption isotherm is linear, i.e.\ the
+moisture capacity is constant.
+In \refeq{BNmodel:governing}, $h$ is the relative humidity and $C(h)$ is the
 humidity-dependent diffusivity approximated by
 \begin{equation}\label{BNmodel:diffusivity}
-C (\varphi) = C_1 \left( \alpha_0
+C (h) = C_1 \left( \alpha_0
 + \frac{1-\alpha_0}{1+\left(\frac{1-h}{1-h_c}\right)^n} \right)
 \end{equation}
+where $C_1$ is the diffusivity at saturation (typical value for concrete
+$\approx 30$ mm$^2/$day), $\alpha_0$ is the dimensionless ratio of
+diffusivity at low humidity to diffusivity at saturation (typical
+value $\approx 0.05$), $h_c$ is the humidity ``in the middle'' of the
+transition between low and high diffusivity (typical value $\approx 0.8$), and $n$ is dimensionless
+exponent (high values of $n$, e.g.\ 12, lead to a rapid transition
+between low and high diffusivity). Optionally, it is possible to
+specify the moisture capacity. This property is not needed for solution
+of the diffusion equation  (\ref{BNmodel:governing}),
+but it is needed if the computed change of relative humidity is transformed     
+into water content loss (mass of lost water per unit volume).
 
-The model parameters are summarized in table~\ref{BazantNajjarMoistureMat}.
+The model parameters are summarized in Tab.~\ref{BazantNajjarMoistureMat}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -3817,7 +3847,7 @@ Parameters &- \param{num} material model number\\
 &- \param{n} exponent [-]\\
 &- \param{alpha0} ratio between minimum and maximum diffusivity [-]\\
 &- \param{hc} relative humidity at which the diffusivity is exactly
-between its minimum and maximum value\\
+between its minimum and maximum value [-] \\
 &- \param{capa} moisture capacity (default value is 1.0)\\
 
 Supported modes& \_2dHeat\\
@@ -3845,7 +3875,7 @@ The hydrating model is coupled with temperature and averaging over shared
 elements within one material instance occurs during the solution. Such approach
 allows domain partitioning to many CemhydMat instances, depending on expected
 accuracy or computational speed. A more detailed description with engineering
-examples was published \cite{Smilauer:09}. Table~\ref{Cemhydmat_table} summarizes input parameters.
+examples was published \cite{Smilauer:09}. Tab.~\ref{Cemhydmat_table} summarizes input parameters.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -3970,7 +4000,7 @@ Source: T. Krejci doctoral thesis; Bazant and Najjar, 1972;
 Pedersen, 1990. Assumptions: water vapor is the only driving
 mechanism; relative humidity is from range 0.2 - 0.98 (I and II
 regions). The model parameters are summarized
-in table~\ref{hemotk_table}.
+in Tab.~\ref{hemotk_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
@@ -4016,7 +4046,7 @@ Supported modes& \_2dHeMo\\
 \subsection{Newtonian fluid - NewtonianFluid}
 \label{NewtonianFluidMaterial}
 Constitutive model of Newtonian fluid. The model parameters are summarized
-in table~\ref{NewtonianFluidMaterial_table}.
+in Tab.~\ref{NewtonianFluidMaterial_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -4043,7 +4073,7 @@ Supported modes& 2d, 3d flow\\
 \label{BinghamFluidMaterial}
 Constitutive model of Bingham fluid. This is a constitutive model of
 non-Newtonian type. The model parameters are summarized
-in table~\ref{BinghamFluidMaterial_table}.
+in Tab.~\ref{BinghamFluidMaterial_table}.
 
 In the Bingham model the flow is characterized by following
 constitutive equation
@@ -4115,7 +4145,7 @@ Supported modes& 2d, 3d flow\\
 \label{TwoFluidMaterial}
 Material coupling the behaviour of two particulat materials based on
 rule of mixture. The weighting factor is VOF fraction.
-The model parameters are summarized in table~\ref{TwoFluidMaterial_table}.
+The model parameters are summarized in Tab.~\ref{TwoFluidMaterial_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -4146,7 +4176,7 @@ Some requirements are put on the RVE, such as the it must use the MixedGradientP
 Worth noting is that the macroscale (and microscale) behavior can still be compressible,  in particular is the RVE contains pores.
 The triangular and tetrahedral Stokes' flow elements both support compressible behavior, but it perhaps be applicable other types of flow, as long as the extended mixed control option is used when calling the material routine (the function with gradient and pressure as input). If the RVE doesn't contain any pores (such that the response turns out to be incompressible) then material should work for all problem classes.
 This could for example be the case of a oil-water mixture.
-The model parameters are summarized in table~\ref{FE2FluidMaterial_table}.
+The model parameters are summarized in Tab.~\ref{FE2FluidMaterial_table}.
 
 \begin{table}[!htb]
 \centering
@@ -4315,7 +4345,7 @@ Update and check the signs of $\Delta\lambda^{i,(k)}_{n+1}$. If $\Delta\lambda^{
 If the consistency parameters $\Delta\lambda^{i}$ can be shown to increase monotonically within the return mapping algorithm, the the latter procedure is preferred since it leads to more efficient computer implementation.
 
 The overall algorithm is convergent, first order accurate and unconditionally stable.
-The general algorithm is summarized in table (\ref{closespointalgo}).
+The general algorithm is summarized in Tab.~\ref{closespointalgo}.
 
 \begin{table}
 \label{closespointalgo}

@@ -42,35 +42,35 @@ IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
- 
+
     this->Material :: initializeFrom(ir);
 
     return IRRT_OK;
 }
 
-  /*
-double
-IsotropicMoistureTransferMaterial :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty.
-//
-{
-    if ( aProperty == 'c' ) { // moisture permeability [kg/(m s)]
-        return permeability;
-    } else if ( aProperty == 'k' ) { // moisture capacity [kg / m^3]
-        return moistureCapacity;
-    }
-
-    return this->Material :: give(aProperty, gp);
-}
-  */
+/*
+ * double
+ * IsotropicMoistureTransferMaterial :: give(int aProperty, GaussPoint *gp)
+ * //
+ * // Returns the value of the property aProperty.
+ * //
+ * {
+ * if ( aProperty == 'c' ) { // moisture permeability [kg/(m s)]
+ *    return permeability;
+ * } else if ( aProperty == 'k' ) { // moisture capacity [kg / m^3]
+ *    return moistureCapacity;
+ * }
+ *
+ * return this->Material :: give(aProperty, gp);
+ * }
+ */
 
 void
 IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                          MatResponseForm form,
-                                                          MatResponseMode mode,
-                                                          GaussPoint *gp,
-                                                          TimeStep *atTime)
+                                                              MatResponseForm form,
+                                                              MatResponseMode mode,
+                                                              GaussPoint *gp,
+                                                              TimeStep *atTime)
 {
     /*
      * returns constitutive (conductivity) matrix of receiver
@@ -81,7 +81,6 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
 
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
-
     case _1dHeat:
         answer.resize(1, 1);
         answer.at(1, 1) = permeability;
@@ -106,11 +105,11 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
 
 double
 IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
-                                                         GaussPoint *gp,
-                                                         TimeStep *atTime)
+                                                             GaussPoint *gp,
+                                                             TimeStep *atTime)
 {
     if ( mode == Capacity ) {
-      return ( this->giveMoistureCapacity(gp, atTime) );
+        return ( this->giveMoistureCapacity(gp, atTime) );
     } else {
         _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
@@ -136,24 +135,21 @@ IsotropicMoistureTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint 
 {
     if (  type == IST_HydrationDegree ) {
         answer.resize(1);
-        answer.at(1)=0.;
+        answer.at(1) = 0.;
         return 1;
     }
-    
+
     /* else if (  type == IST_Humidity ) {
-      FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(aGaussPoint) )->giveStateVector();
-      if ( state.giveSize() < 1 ) {
-        _error("computeWaterChange: undefined moisture status!");
-      }
-      
-      answer.resize(1);
-      answer.at(1) =  state.at(1);
-      return 1;
-      }*/
+     * FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(aGaussPoint) )->giveStateVector();
+     * if ( state.giveSize() < 1 ) {
+     *  _error("computeWaterChange: undefined moisture status!");
+     * }
+     *
+     * answer.resize(1);
+     * answer.at(1) =  state.at(1);
+     * return 1;
+     * }*/
 
     return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
-
-
-
 } // end namespace oofem

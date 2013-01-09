@@ -46,10 +46,9 @@ namespace oofem {
  */
 class IsotropicLinMoistureTransferMaterial : public IsotropicMoistureTransferMaterial
 {
-
 protected:
-  double moistureCapacity;
-  double permeability;
+    double moistureCapacity;
+    double permeability;
 
 public:
     IsotropicLinMoistureTransferMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
@@ -64,8 +63,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     /*
-    virtual double give(int aProperty, GaussPoint *gp);
-    */
+     * virtual double give(int aProperty, GaussPoint *gp);
+     */
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };

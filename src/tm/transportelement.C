@@ -84,7 +84,7 @@ TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
     } else if ( emode == HeatMass1TransferEM ) {
         answer.setValues(2, T_f, C_1);
     } else if ( emode == Mass1TransferEM ) {
-            answer.setValues(1, C_1);
+        answer.setValues(1, C_1);
     } else {
         _error("Unknown ElementMode");
     }
@@ -157,16 +157,17 @@ TransportElement :: checkConsistency()
 //
 {
     int result = 1;
-    if ( !dynamic_cast<TransportMaterial*>(giveMaterial()) ) {
+    if ( !dynamic_cast< TransportMaterial * >( giveMaterial() ) ) {
         _warning("checkConsistency : material without support for transport problems");
         result = 0;
     }
 
 #if 0
-     if (!this->giveCrossSection()->testCrossSectionExtension(CS_TransportCapability)) {
+    if ( !this->giveCrossSection()->testCrossSectionExtension(CS_TransportCapability) ) {
         _warning("checkConsistency : cross-section without support for transport problems", 1);
-        result =0;
-     }
+        result = 0;
+    }
+
 #endif
     return result;
 }
@@ -184,7 +185,7 @@ TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
     answer.zero();
 
-    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         this->computeCapacitySubMatrix(answer, Capacity, 0, tStep);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
@@ -193,7 +194,7 @@ TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
         };
         //double coeff = 1.0; //this->giveMaterial()->give('d');
 
-        for (int i = 1; i <= 2; i++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
             this->computeCapacitySubMatrix(subAnswer, rmode [ i - 1 ], 0, tStep);
             this->assembleLocalContribution(answer, subAnswer, 2, i, i);
         }
@@ -207,14 +208,14 @@ TransportElement :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMo
 {
     answer.resize( computeNumberOfDofs(EID_ConservationEquation), computeNumberOfDofs(EID_ConservationEquation) );
     answer.zero();
-    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         this->computeConductivitySubMatrix(answer, 2, 0, Conductivity_hh, tStep);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
         MatResponseMode rmode [ 2 ] [ 2 ] = { { Conductivity_hh, Conductivity_hw }, { Conductivity_wh, Conductivity_ww } };
 
-        for (int i = 1; i <= 2; i++ ) {
-            for (int j = 1; j <= 2; j++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
+            for ( int j = 1; j <= 2; j++ ) {
                 this->computeConductivitySubMatrix(subAnswer, 2, 0, rmode [ i - 1 ] [ j - 1 ], tStep);
                 this->assembleLocalContribution(answer, subAnswer, 2, i, j);
             }
@@ -225,28 +226,28 @@ TransportElement :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMo
 }
 
 
-void 
+void
 TransportElement :: computeNAt(FloatArray &answer, const FloatArray &lcoord)
 {
-    this->giveInterpolation()->evalN(answer, lcoord, FEIElementGeometryWrapper(this));
+    this->giveInterpolation()->evalN( answer, lcoord, FEIElementGeometryWrapper(this) );
 }
 
 
-void 
+void
 TransportElement :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
 {
     FloatArray n;
     this->computeNAt(n, lcoords);
-    int q = n.giveSize();    
-    if ( this->emode == HeatTransferEM  || this->emode == Mass1TransferEM) {
+    int q = n.giveSize();
+    if ( this->emode == HeatTransferEM  || this->emode == Mass1TransferEM ) {
         answer.resize(1, q);
-        for (int i = 1; i <= q; i++ ) {
+        for ( int i = 1; i <= q; i++ ) {
             answer.at(1, i) = n.at(i);
         }
     } else {
-        answer.resize(2, 2*q);
-        for (int i = 0; i < 2; i++ ) {
-            for (int j = 0; j < q; j++ ) {
+        answer.resize(2, 2 * q);
+        for ( int i = 0; i < 2; i++ ) {
+            for ( int j = 0; j < q; j++ ) {
                 answer(i, j * 2 + i) = n(j);
             }
         }
@@ -258,7 +259,7 @@ void
 TransportElement :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dnx;
-    this->giveInterpolation()->evaldNdx(dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    this->giveInterpolation()->evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     ///@todo We should change the transposition in evaldNdx;
     answer.beTranspositionOf(dnx);
 }
@@ -268,11 +269,11 @@ void
 TransportElement :: computeEgdeNAt(FloatArray &answer, const FloatArray &lcoords)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if (dynamic_cast<FEInterpolation2d*>(interp)) {
-        dynamic_cast<FEInterpolation2d*>(interp)->edgeEvalN(answer, lcoords, FEIElementGeometryWrapper(this));
-    } else if (dynamic_cast<FEInterpolation3d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->edgeEvalN(answer, lcoords, FEIElementGeometryWrapper(this));
-    }    
+    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
+        dynamic_cast< FEInterpolation2d * >(interp)->edgeEvalN( answer, lcoords, FEIElementGeometryWrapper(this) );
+    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->edgeEvalN( answer, lcoords, FEIElementGeometryWrapper(this) );
+    }
 }
 
 
@@ -280,10 +281,10 @@ void
 TransportElement :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if (dynamic_cast<FEInterpolation2d*>(interp)) {
-        dynamic_cast<FEInterpolation2d*>(interp)->computeLocalEdgeMapping(answer, iEdge);
-    } else if (dynamic_cast<FEInterpolation3d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->computeLocalEdgeMapping(answer, iEdge);
+    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
+        dynamic_cast< FEInterpolation2d * >(interp)->computeLocalEdgeMapping(answer, iEdge);
+    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->computeLocalEdgeMapping(answer, iEdge);
     }
 }
 
@@ -292,10 +293,10 @@ void
 TransportElement :: computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArray &lcoords, int iEdge)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if (dynamic_cast<FEInterpolation2d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->edgeLocal2global(answer, iEdge, lcoords, FEIElementGeometryWrapper(this));
-    } else if (dynamic_cast<FEInterpolation3d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->edgeLocal2global(answer, iEdge, lcoords, FEIElementGeometryWrapper(this));
+    if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
+    } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iEdge, lcoords, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -303,8 +304,8 @@ void
 TransportElement :: computeSurfaceNAt(FloatArray &answer, const FloatArray &lcoord)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if (dynamic_cast<FEInterpolation3d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->surfaceEvalN(answer, lcoord, FEIElementGeometryWrapper(this));
+    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->surfaceEvalN( answer, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -312,8 +313,8 @@ void
 TransportElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if (dynamic_cast<FEInterpolation3d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->computeLocalSurfaceMapping(answer, iSurf);
+    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->computeLocalSurfaceMapping(answer, iSurf);
     }
 }
 
@@ -321,8 +322,8 @@ void
 TransportElement :: computeSurfIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iSurf)
 {
     FEInterpolation *interp = this->giveInterpolation();
-    if (dynamic_cast<FEInterpolation3d*>(interp)) {
-        dynamic_cast<FEInterpolation3d*>(interp)->edgeLocal2global(answer, iSurf, lcoord, FEIElementGeometryWrapper(this));
+    if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
+        dynamic_cast< FEInterpolation3d * >(interp)->edgeLocal2global( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -341,9 +342,9 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
     IntegrationRule *iRule = integrationRulesArray [ iri ];
 
     answer.beEmptyMtrx();
-    for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
-        this->computeNAt( n, *gp->giveCoordinates() );
+        this->computeNAt( n, * gp->giveCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
         c = ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicValue(rmode, gp, tStep);
         dV = this->computeVolumeAround(gp);
@@ -363,7 +364,7 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, i
 
     answer.resize( this->giveNumberOfDofManagers(), this->giveNumberOfDofManagers() );
     answer.zero();
-    for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         this->computeConstitutiveMatrixAt(d, rmode, gp, tStep);
         this->computeGradientMatrixAt(b, gp);
@@ -405,7 +406,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
         if ( ltype == BodyLoadBGT ) {
             for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
                 gp  = iRule->getIntegrationPoint(igp);
-                this->computeNAt( n, *gp->giveCoordinates() );
+                this->computeNAt( n, * gp->giveCoordinates() );
                 dV  = this->computeVolumeAround(gp);
                 this->computeGlobalCoordinates( globalIPcoords, * gp->giveCoordinates() );
                 load->computeValueAt(val, tStep, globalIPcoords, mode);
@@ -421,10 +422,10 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     if ( mat->hasInternalSource() ) {
         for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
             gp  = iRule->getIntegrationPoint(igp);
-            this->computeNAt( n, *gp->giveCoordinates() );
+            this->computeNAt( n, * gp->giveCoordinates() );
             dV  = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, mode);
-            
+
             helpLoadVector.add(val.at(indx) * dV, n);
         }
 
@@ -441,11 +442,11 @@ TransportElement :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeSte
     } else if ( emode == HeatMass1TransferEM ) {
         FloatArray subAnswer;
 
-        for (int i = 1; i <= 2; i++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
             this->computeInternalSourceRhsSubVectorAt(subAnswer, tStep, mode, i);
             if ( subAnswer.isNotEmpty() ) {
                 if ( answer.isEmpty() ) {
-                    answer.resize(2*subAnswer.giveSize());
+                    answer.resize( 2 * subAnswer.giveSize() );
                     answer.zero();
                 }
 
@@ -502,9 +503,9 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
     IntegrationRule *iRule = integrationRulesArray [ iri ];
 
     answer.beEmptyMtrx();
-    for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
-        this->computeNAt( n, *gp->giveCoordinates() );
+        this->computeNAt( n, * gp->giveCoordinates() );
         // ask for coefficient from material
         c = ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicValue(rmode, gp, tStep);
         dV = this->computeVolumeAround(gp);
@@ -530,12 +531,12 @@ TransportElement :: computeBCVectorAt(FloatArray &answer, TimeStep *tStep, Value
     answer.resize( computeNumberOfDofs(EID_ConservationEquation) );
     answer.zero();
 
-    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         this->computeBCSubVectorAt(answer, tStep, mode, 1);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatArray subAnswer;
 
-        for (int i = 1; i <= 2; i++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
             this->computeBCSubVectorAt(subAnswer, tStep, mode, i);
             this->assembleLocalContribution(answer, subAnswer, 2, i);
         }
@@ -551,7 +552,7 @@ TransportElement :: computeBCMtrxAt(FloatMatrix &answer, TimeStep *tStep, ValueM
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    if ( emode == HeatTransferEM || emode == Mass1TransferEM) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         this->computeBCSubMtrxAt(answer, tStep, mode, 1);
     } else if ( emode == HeatMass1TransferEM ) {
         FloatMatrix subAnswer;
@@ -631,17 +632,17 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             coeff = edgeLoad->giveProperty('a');
         }
 
-        for (int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
-            this->computeEgdeNAt(n, *lcoords);
+            this->computeEgdeNAt(n, * lcoords);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
-                edgeLoad->computeValueAt(val, tStep, *lcoords, mode);
+                edgeLoad->computeValueAt(val, tStep, * lcoords, mode);
             } else {
                 FloatArray globalIPcoords;
-                this->computeEdgeIpGlobalCoords(globalIPcoords, *lcoords, iEdge);
+                this->computeEdgeIpGlobalCoords(globalIPcoords, * lcoords, iEdge);
                 edgeLoad->computeValueAt(val, tStep, globalIPcoords, mode);
             }
 
@@ -689,15 +690,15 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
-        for (int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
-            this->computeSurfaceNAt(n, *gp->giveCoordinates());
+            this->computeSurfaceNAt( n, * gp->giveCoordinates() );
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
-                surfLoad->computeValueAt(val, tStep, *gp->giveCoordinates(), mode);
+                surfLoad->computeValueAt(val, tStep, * gp->giveCoordinates(), mode);
             } else {
-                this->computeSurfIpGlobalCoords(globalIPcoords, *gp->giveCoordinates(), iSurf);
+                this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveCoordinates(), iSurf);
                 surfLoad->computeValueAt(val, tStep, globalIPcoords, mode);
             }
 
@@ -729,7 +730,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
 
     // loop over boundary load array
     int nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-    for (int i = 1; i <= nLoads; i++ ) {
+    for ( int i = 1; i <= nLoads; i++ ) {
         k     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
         id    = boundaryLoadArray.at(i * 2);
         load  = ( Load * ) domain->giveLoad(k);
@@ -751,11 +752,11 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 IntArray mask;
                 FloatMatrix subAnswer;
 
-                for (int igp = 0; igp < iRule.getNumberOfIntegrationPoints(); igp++ ) {
+                for ( int igp = 0; igp < iRule.getNumberOfIntegrationPoints(); igp++ ) {
                     gp  = iRule.getIntegrationPoint(igp);
-                    this->computeEgdeNAt(n, *gp->giveCoordinates());
+                    this->computeEgdeNAt( n, * gp->giveCoordinates() );
                     dV  = this->computeEdgeVolumeAround(gp, id);
-                    subAnswer.plusDyadSymmUpper(n, n, dV * edgeLoad->giveProperty('a')  );
+                    subAnswer.plusDyadSymmUpper( n, n, dV * edgeLoad->giveProperty('a') );
                 }
 
                 subAnswer.symmetrized();
@@ -769,7 +770,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 FloatMatrix subAnswer;
 
                 BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
-                if ( surfLoad->isDofExcluded(indx) || !surfLoad->isImposed(tStep)) {
+                if ( surfLoad->isDofExcluded(indx) || !surfLoad->isImposed(tStep) ) {
                     continue;
                 }
 
@@ -777,9 +778,9 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int approxOrder = 2 * this->giveApproxOrder(indx);
                 iRule = this->GetSurfaceIntegrationRule(approxOrder);
 
-                for (int igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+                for ( int igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
                     gp  = iRule->getIntegrationPoint(igp);
-                    this->computeSurfaceNAt(n, *gp->giveCoordinates());
+                    this->computeSurfaceNAt( n, * gp->giveCoordinates() );
                     dV  = this->computeSurfaceVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, n, dV * surfLoad->giveProperty('a') );
                 }
@@ -809,9 +810,9 @@ TransportElement :: assembleLocalContribution(FloatMatrix &answer, FloatMatrix &
     int ti, tj;
     int nnodes = this->giveNumberOfDofManagers();
 
-    for (int i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         ti = ( i - 1 ) * ndofs + rdof;
-        for (int j = 1; j <= nnodes; j++ ) {
+        for ( int j = 1; j <= nnodes; j++ ) {
             tj = ( j - 1 ) * ndofs + cdof;
             answer.at(ti, tj) += src.at(i, j);
         }
@@ -826,7 +827,7 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
     int ti;
     int nnodes = this->giveNumberOfDofManagers();
 
-    for (int i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         ti = ( i - 1 ) * ndofs + rdof;
         answer.at(ti) += src.at(i);
     }
@@ -841,7 +842,7 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     this->computeGradientMatrixAt(b, gp);
 
-    if ( emode == HeatTransferEM ||  emode == Mass1TransferEM) {
+    if ( emode == HeatTransferEM ||  emode == Mass1TransferEM ) {
         this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, tStep);
         br.beProductOf(b, r);
         answer.beProductOf(d, br);
@@ -877,9 +878,9 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
     }
 
     answer.negated();
-    
+
     if ( !isActivated(tStep) ) {
-         answer.zero();
+        answer.zero();
     }
 }
 
@@ -894,22 +895,22 @@ TransportElement :: updateInternalState(TimeStep *tStep)
     FloatMatrix n, B;
     TransportMaterial *mat = ( ( TransportMaterial * ) this->giveMaterial() );
     GaussPoint *gp;
-    
+
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     // force updating ip values
-    for (int i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         iRule = integrationRulesArray [ i ];
-        for (int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             gp = iRule->getIntegrationPoint(j);
-            
+
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
-            this->computeNmatrixAt( n, *gp->giveCoordinates() );
+            this->computeNmatrixAt( n, * gp->giveCoordinates() );
             stateVector.beProductOf(n, r);
             mat->updateInternalState(stateVector, gp, tStep);
 
-             ///@todo We need to sort out multiple materials for coupled (heat+mass) problems
+            ///@todo We need to sort out multiple materials for coupled (heat+mass) problems
 #if 0
-            this->computeGradientMatrixAt( B, *gp->giveCoordinates() );
+            this->computeGradientMatrixAt( B, * gp->giveCoordinates() );
             gradient.beProductOf(B, r);
             mat->giveFluxVector(flux, gp, gradient, tStep);
 #endif
@@ -936,10 +937,10 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
         this->computeNmatrixAt(n, lc);
         // compute answer
         answer.resize( dofId.giveSize() );
-        for (int i = 1; i <= dofId.giveSize(); i++ ) {
+        for ( int i = 1; i <= dofId.giveSize(); i++ ) {
             if ( ( indx = elemdofs.findFirstIndexOf( dofId.at(i) ) ) ) {
                 double sum = 0.0;
-                for (int j = 1; j <= elemvector.giveSize(); j++ ) {
+                for ( int j = 1; j <= elemvector.giveSize(); j++ ) {
                     sum += n.at(indx, j) * elemvector.at(j);
                 }
 
@@ -1000,5 +1001,4 @@ TransportElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
         return Element :: giveIntVarCompFullIndx(answer, type);
     }
 }
-
 } // end namespace oofem

@@ -54,7 +54,7 @@ QuadAxisym1_hmt :: QuadAxisym1_hmt(int n, Domain *aDomain) : QuadAxisym1_ht(n, a
 
 QuadAxisym1_mt :: QuadAxisym1_mt(int n, Domain *aDomain) : QuadAxisym1_ht(n, aDomain)
 {
-    this->emode = Mass1TransferEM; 
+    this->emode = Mass1TransferEM;
 }
 
 QuadAxisym1_ht :: ~QuadAxisym1_ht()
@@ -66,8 +66,8 @@ QuadAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight * this->computeRadiusAt(aGaussPoint);
@@ -80,19 +80,19 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double radius;
     FloatArray gcoords;
-    this->interpolation.edgeLocal2global(gcoords, iEdge, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.edgeLocal2global( gcoords, iEdge, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) );
     radius = gcoords.at(1);
-    
-    double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
-                                                                     FEIElementGeometryWrapper(this)) );
-    return detJ*gp->giveWeight()*radius;
+
+    double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                           FEIElementGeometryWrapper(this) ) );
+    return detJ * gp->giveWeight() * radius;
 }
 
 double
 QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 {
     FloatArray gcoords;
-    this->interpolation.local2global(gcoords, *gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this));
+    this->interpolation.local2global( gcoords, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) );
     return gcoords.at(1);
 }
 } // end namespace oofem

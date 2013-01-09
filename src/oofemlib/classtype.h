@@ -470,7 +470,6 @@ enum classType {
     BasicGeometryClass,
 
     StokesFlowVelocityHomogenizationClass
-
 };
 } // end namespace oofem
 #endif // classtype_h

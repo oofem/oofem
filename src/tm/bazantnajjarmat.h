@@ -46,19 +46,18 @@ namespace oofem {
  */
 class BazantNajjarMoistureTransferMaterial : public IsotropicMoistureTransferMaterial
 {
-
 protected:
-  /// sorption isotherm derivative [kg/m^3]
-  double moistureCapacity;
+    /// sorption isotherm derivative [kg/m^3]
+    double moistureCapacity;
 
-  /// maximal permeability [kg/ m s]
-  double C1; 
-  /// exponent in nonlinear permeability function [-]
-  double n;
-  /// fraction minimal/maximal permeability [-]
-  double alpha0;
-  /// nonlinear threshold [-]
-  double hC;
+    /// maximal permeability [kg/ m s]
+    double C1;
+    /// exponent in nonlinear permeability function [-]
+    double n;
+    /// fraction minimal/maximal permeability [-]
+    double alpha0;
+    /// nonlinear threshold [-]
+    double hC;
 
 public:
     BazantNajjarMoistureTransferMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
@@ -77,8 +76,8 @@ public:
     double giveHumidity(GaussPoint *gp);
 
     /*
-    virtual double give(int aProperty, GaussPoint *gp);
-    */
+     * virtual double give(int aProperty, GaussPoint *gp);
+     */
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 };

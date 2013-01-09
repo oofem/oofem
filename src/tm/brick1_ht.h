@@ -79,8 +79,8 @@ public:
     virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    
-    
+
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
@@ -124,7 +124,5 @@ public:
     virtual const char *giveClassName() const { return "Brick1_mt"; }
     virtual classType giveClassID() const { return Brick1_mtClass; }
 };
-
-
 } // end namespace oofem
 #endif // brick1_ht_h

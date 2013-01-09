@@ -299,11 +299,13 @@ Domain :: giveNode(int n)
     if ( node == NULL ) {
         _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
     }
+
     return node;
+
 #else
     return static_cast< Node * >( dofManagerList->at(n) );
-#endif
 
+#endif
 }
 
 
@@ -503,9 +505,10 @@ Domain :: instanciateYourself(DataReader *dr)
 #ifdef __ENABLE_COMPONENT_LABELS
         // assign component number according to record order
         // component number (as given in input record) becomes label
-        if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), i+1, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str());
+        if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), i + 1, this) ) == NULL ) {
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str() );
         }
+
         node->initializeFrom(ir);
         if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
             // label does not exist yet
@@ -519,8 +522,9 @@ Domain :: instanciateYourself(DataReader *dr)
 #else
         // component numbers as given in input record
         if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str() );
         }
+
         node->initializeFrom(ir);
 
         // check number
@@ -553,8 +557,9 @@ Domain :: instanciateYourself(DataReader *dr)
 
 #ifdef __ENABLE_COMPONENT_LABELS
         if ( ( elem = CreateUsrDefElementOfType(name.c_str(), i + 1, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create element: %s", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create element: %s", name.c_str() );
         }
+
         elem->initializeFrom(ir);
 
         if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
@@ -568,8 +573,9 @@ Domain :: instanciateYourself(DataReader *dr)
         elementList->put(i + 1, elem);
 #else
         if ( ( elem = CreateUsrDefElementOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create element: %s", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create element: %s", name.c_str() );
         }
+
         elem->initializeFrom(ir);
 
         // check number
@@ -599,8 +605,9 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         if ( ( crossSection = CreateUsrDefCrossSectionOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create crosssection: %s", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create crosssection: %s", name.c_str() );
         }
+
         crossSection->initializeFrom(ir);
 
         // check number
@@ -630,8 +637,9 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         if ( ( mat = CreateUsrDefMaterialOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create material: %s", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create material: %s", name.c_str() );
         }
+
         mat->initializeFrom(ir);
 
         // check number
@@ -724,8 +732,9 @@ Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         if ( ( load = CreateUsrDefBoundaryConditionOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create boundary condition: %s", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create boundary condition: %s", name.c_str() );
         }
+
         load->initializeFrom(ir);
 
         // check number
@@ -787,8 +796,9 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of ltf
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         if ( ( ltf = CreateUsrDefLoadTimeFunctionOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str());
+            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create time function: %s", name.c_str() );
         }
+
         ltf->initializeFrom(ir, dr);
 
         // check number
@@ -839,7 +849,7 @@ Domain :: instanciateYourself(DataReader *dr)
 void
 Domain :: postInitialize()
 {
-    for (int i = 1; i <= this->elementList->giveSize(); i++) {
+    for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
         Element *e = this->elementList->at(i);
         e->postInitialize();
     }
@@ -969,9 +979,9 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _2dBeamMode;
     } else if  ( !strncasecmp(typeName, "2dlattice", 9) ) {
         dType = _2dLatticeMode;
-    } else if  ( !strncasecmp(typeName, "heattransfer", 12) )   {
+    } else if  ( !strncasecmp(typeName, "heattransfer", 12) ) {
         dType = _HeatTransferMode;
-    } else if  ( !strncasecmp(typeName, "mass1transfer", 13) )   {
+    } else if  ( !strncasecmp(typeName, "mass1transfer", 13) ) {
         dType = _Mass1TransferMode;
     } else if  ( !strncasecmp(typeName, "hema1", 5) ) {
         dType = _HeatMass1Mode;
@@ -1271,47 +1281,47 @@ Domain :: giveErrorEstimator() {
 
 
 
-#define SAVE_COMPONENTS(size,type,giveMethod)   \
-  {                                             \
-    type* obj;                                  \
-    for ( i = 1; i <= size; i++ ) {             \
-        obj = giveMethod(i);                    \
-        if ( ( mode & CM_Definition ) ) {       \
-            ct =  (int) obj->giveClassID();     \
-            if ( !stream->write(& ct, 1) ) {    \
-                THROW_CIOERR(CIO_IOERR);        \
-            }                                   \
-        }                                       \
-        if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
-            THROW_CIOERR(iores);                \
-        }                                       \
-    }                                           \
-  }
+#define SAVE_COMPONENTS(size, type, giveMethod)   \
+    {                                             \
+        type *obj;                                  \
+        for ( i = 1; i <= size; i++ ) {             \
+            obj = giveMethod(i);                    \
+            if ( ( mode & CM_Definition ) ) {       \
+                ct =  ( int ) obj->giveClassID();     \
+                if ( !stream->write(& ct, 1) ) {    \
+                    THROW_CIOERR(CIO_IOERR);        \
+                }                                   \
+            }                                       \
+            if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
+                      THROW_CIOERR(iores);                \
+                  }                                       \
+                  }                                           \
+                  }
 
-#define RESTORE_COMPONENTS(size,type,resizeMethod,creator,giveMethod,setMethod) \
-  {                                         \
-    type *obj;                              \
-    if ( mode & CM_Definition ) {           \
-        resizeMethod(size);                 \
-    }                                       \
-    for ( i = 1; i <= size; i++ ) {         \
-        if ( mode & CM_Definition ) {       \
-            if ( !stream->read(& ct, 1) ) { \
-                THROW_CIOERR(CIO_IOERR);    \
-            }                               \
-            compId = ( classType ) ct;      \
-            obj = creator(compId, 0, this); \
-        } else {                            \
-            obj = giveMethod(i);            \
-        }                                   \
-        if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
-            THROW_CIOERR(iores);            \
-        }                                   \
-        if ( mode & CM_Definition ) {       \
-            setMethod(i, obj);              \
-        }                                   \
-    }                                       \
-  }
+#define RESTORE_COMPONENTS(size, type, resizeMethod, creator, giveMethod, setMethod) \
+    {                                         \
+        type *obj;                              \
+        if ( mode & CM_Definition ) {           \
+            resizeMethod(size);                 \
+        }                                       \
+        for ( i = 1; i <= size; i++ ) {         \
+            if ( mode & CM_Definition ) {       \
+                if ( !stream->read(& ct, 1) ) { \
+                    THROW_CIOERR(CIO_IOERR);    \
+                }                               \
+                compId = ( classType ) ct;      \
+                obj = creator(compId, 0, this); \
+            } else {                            \
+                obj = giveMethod(i);            \
+            }                                   \
+            if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
+                      THROW_CIOERR(iores);            \
+                  }                                   \
+                  if ( mode & CM_Definition ) {       \
+                      setMethod(i, obj);              \
+                  }                                   \
+                  }                                       \
+                  }
 
 #define DOMAIN_NCOMP 9
 
@@ -1330,45 +1340,44 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     if ( ( mode & CM_Definition ) ) {
-      long ncomp[DOMAIN_NCOMP];
-      ncomp[0]=this->giveNumberOfDofManagers();
-      ncomp[1]=this->giveNumberOfElements();
-      ncomp[2]=this->giveNumberOfMaterialModels();
-      ncomp[3]=this->giveNumberOfCrossSectionModels();
-      ncomp[4]=this->giveNumberOfBoundaryConditions();
-      ncomp[5]=this->giveNumberOfInitialConditions();
-      ncomp[6]=this->giveNumberOfLoadTimeFunctions();
-      ncomp[7]=this->giveNumberOfNonlocalBarriers();
-      ncomp[8]=this->giveNumberOfRandomFieldGenerators();
+        long ncomp [ DOMAIN_NCOMP ];
+        ncomp [ 0 ] = this->giveNumberOfDofManagers();
+        ncomp [ 1 ] = this->giveNumberOfElements();
+        ncomp [ 2 ] = this->giveNumberOfMaterialModels();
+        ncomp [ 3 ] = this->giveNumberOfCrossSectionModels();
+        ncomp [ 4 ] = this->giveNumberOfBoundaryConditions();
+        ncomp [ 5 ] = this->giveNumberOfInitialConditions();
+        ncomp [ 6 ] = this->giveNumberOfLoadTimeFunctions();
+        ncomp [ 7 ] = this->giveNumberOfNonlocalBarriers();
+        ncomp [ 8 ] = this->giveNumberOfRandomFieldGenerators();
 
-      // store number of components
-      if ( !stream->write (ncomp, DOMAIN_NCOMP) ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
+        // store number of components
+        if ( !stream->write(ncomp, DOMAIN_NCOMP) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
 
     // save dof managers
-    SAVE_COMPONENTS(this->giveNumberOfDofManagers(),DofManager,this->giveDofManager);
+    SAVE_COMPONENTS(this->giveNumberOfDofManagers(), DofManager, this->giveDofManager);
     // elements and corresponding integration points
-    SAVE_COMPONENTS(this->giveNumberOfElements(),Element,this->giveElement);
+    SAVE_COMPONENTS(this->giveNumberOfElements(), Element, this->giveElement);
     // boundary conditions
-    SAVE_COMPONENTS(this->giveNumberOfBoundaryConditions(),GeneralBoundaryCondition,this->giveBc);
+    SAVE_COMPONENTS(this->giveNumberOfBoundaryConditions(), GeneralBoundaryCondition, this->giveBc);
 
     if ( ( mode & CM_Definition ) ) {
-      // store material models
-      SAVE_COMPONENTS(this->giveNumberOfMaterialModels(),Material,this->giveMaterial);
-      // store cross sections
-      SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(),CrossSection,this->giveCrossSection);
-      // store initial conditions
-      SAVE_COMPONENTS(this->giveNumberOfInitialConditions(),InitialCondition,this->giveIc);
-      // store load time functions
-      SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(),LoadTimeFunction,this->giveLoadTimeFunction);
-      // store nonlocal barriers
-      SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(),NonlocalBarrier,this->giveNonlocalBarrier);
-      // store random field generators
-      SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(),RandomFieldGenerator,this->giveRandomFieldGenerator);
+        // store material models
+        SAVE_COMPONENTS(this->giveNumberOfMaterialModels(), Material, this->giveMaterial);
+        // store cross sections
+        SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(), CrossSection, this->giveCrossSection);
+        // store initial conditions
+        SAVE_COMPONENTS(this->giveNumberOfInitialConditions(), InitialCondition, this->giveIc);
+        // store load time functions
+        SAVE_COMPONENTS(this->giveNumberOfLoadTimeFunctions(), LoadTimeFunction, this->giveLoadTimeFunction);
+        // store nonlocal barriers
+        SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(), NonlocalBarrier, this->giveNonlocalBarrier);
+        // store random field generators
+        SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(), RandomFieldGenerator, this->giveRandomFieldGenerator);
     } // end if ( ( mode & CM_Definition ) ) {
-
 
     // store error estimator data
     ee = this->giveErrorEstimator();
@@ -1391,7 +1400,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     ErrorEstimator *ee;
     int ct;
     classType compId;
-    long ncomp[DOMAIN_NCOMP];
+    long ncomp [ DOMAIN_NCOMP ];
 
     int nnodes, nelem, nmat, ncs, nbc, nic, nltf, nnlb, nrfg;
 
@@ -1409,15 +1418,15 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
             THROW_CIOERR(CIO_IOERR);
         }
 
-        nnodes = ncomp[0];
-        nelem = ncomp[1];
-        nmat  = ncomp[2];
-        ncs   = ncomp[3];
-        nbc   = ncomp[4];
-        nic   = ncomp[5];
-        nltf  = ncomp[6];
-        nnlb  = ncomp[7];
-        nrfg  = ncomp[8];
+        nnodes = ncomp [ 0 ];
+        nelem = ncomp [ 1 ];
+        nmat  = ncomp [ 2 ];
+        ncs   = ncomp [ 3 ];
+        nbc   = ncomp [ 4 ];
+        nic   = ncomp [ 5 ];
+        nltf  = ncomp [ 6 ];
+        nnlb  = ncomp [ 7 ];
+        nrfg  = ncomp [ 8 ];
 
         // clear receiver data
         dofManagerList->clear();
@@ -1447,29 +1456,28 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
             domainUpdated = true;
         }
 
-        nnodes=this->giveNumberOfDofManagers();
-        nelem=this->giveNumberOfElements();
-        nmat=this->giveNumberOfMaterialModels();
-        ncs=this->giveNumberOfCrossSectionModels();
-        nbc=this->giveNumberOfBoundaryConditions();
-        nic=this->giveNumberOfInitialConditions();
-        nltf=this->giveNumberOfLoadTimeFunctions();
-        nnlb=this->giveNumberOfNonlocalBarriers();
-        nrfg=this->giveNumberOfRandomFieldGenerators();
+        nnodes = this->giveNumberOfDofManagers();
+        nelem = this->giveNumberOfElements();
+        nmat = this->giveNumberOfMaterialModels();
+        ncs = this->giveNumberOfCrossSectionModels();
+        nbc = this->giveNumberOfBoundaryConditions();
+        nic = this->giveNumberOfInitialConditions();
+        nltf = this->giveNumberOfLoadTimeFunctions();
+        nnlb = this->giveNumberOfNonlocalBarriers();
+        nrfg = this->giveNumberOfRandomFieldGenerators();
     }
 
-    RESTORE_COMPONENTS(nnodes,DofManager,this->resizeDofManagers,CreateUsrDefDofManagerOfType,this->giveDofManager,this->setDofManager);
-    RESTORE_COMPONENTS(nelem,Element,this->resizeElements,CreateUsrDefElementOfType,this->giveElement,this->setElement);
-    RESTORE_COMPONENTS(nbc,GeneralBoundaryCondition,this->resizeBoundaryConditions,CreateUsrDefBoundaryConditionOfType,this->giveBc,this->setBoundaryCondition);
+    RESTORE_COMPONENTS(nnodes, DofManager, this->resizeDofManagers, CreateUsrDefDofManagerOfType, this->giveDofManager, this->setDofManager);
+    RESTORE_COMPONENTS(nelem, Element, this->resizeElements, CreateUsrDefElementOfType, this->giveElement, this->setElement);
+    RESTORE_COMPONENTS(nbc, GeneralBoundaryCondition, this->resizeBoundaryConditions, CreateUsrDefBoundaryConditionOfType, this->giveBc, this->setBoundaryCondition);
 
     if ( ( mode & CM_Definition ) ) {
-
-        RESTORE_COMPONENTS(nmat,Material,this->resizeMaterials,CreateUsrDefMaterialOfType,this->giveMaterial,this->setMaterial);
-        RESTORE_COMPONENTS(ncs,CrossSection,this->resizeCrossSectionModels,CreateUsrDefCrossSectionOfType,this->giveCrossSection,this->setCrossSection);
-        RESTORE_COMPONENTS(nic,InitialCondition,this->resizeInitialConditions,CreateUsrDefInitialConditionOfType,this->giveIc,setInitialCondition);
-        RESTORE_COMPONENTS(nltf,LoadTimeFunction,resizeLoadTimeFunctions,CreateUsrDefLoadTimeFunctionOfType,giveLoadTimeFunction,setLoadTimeFunction);
-        RESTORE_COMPONENTS(nnlb,NonlocalBarrier,resizeNonlocalBarriers,CreateUsrDefNonlocalBarrierOfType, giveNonlocalBarrier,setNonlocalBarrier);
-        RESTORE_COMPONENTS(nrfg,RandomFieldGenerator,resizeRandomFieldGenerators,CreateUsrDefRandomFieldGenerator,giveRandomFieldGenerator,setRandomFieldGenerator);
+        RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, CreateUsrDefMaterialOfType, this->giveMaterial, this->setMaterial);
+        RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, CreateUsrDefCrossSectionOfType, this->giveCrossSection, this->setCrossSection);
+        RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, CreateUsrDefInitialConditionOfType, this->giveIc, setInitialCondition);
+        RESTORE_COMPONENTS(nltf, LoadTimeFunction, resizeLoadTimeFunctions, CreateUsrDefLoadTimeFunctionOfType, giveLoadTimeFunction, setLoadTimeFunction);
+        RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, CreateUsrDefNonlocalBarrierOfType, giveNonlocalBarrier, setNonlocalBarrier);
+        RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, CreateUsrDefRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
     }
 
     // restore error estimator data
@@ -1703,8 +1711,8 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
     std :: map< int, DofManager * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
@@ -1724,8 +1732,8 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
 {
     std :: map< int, Element * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( it = elementMap.begin(); it != elementMap.end(); it++ ) {

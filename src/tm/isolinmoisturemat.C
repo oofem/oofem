@@ -63,6 +63,4 @@ IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeSte
 {
     return this->permeability;
 }
-
-
 } // end namespace oofem

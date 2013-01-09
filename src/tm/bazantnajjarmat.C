@@ -68,24 +68,21 @@ BazantNajjarMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, Tim
 double
 BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
 {
-  double permeability;
-  double humidity = this->giveHumidity(gp);
+    double permeability;
+    double humidity = this->giveHumidity(gp);
 
-  permeability = C1 * (alpha0 + (1.-alpha0)/(1. + pow( (1.-humidity)/(1.-hC), n) ) ) ;
-  return permeability;
+    permeability = C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
+    return permeability;
 }
 
 double
 BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp)
 {
     FloatArray tempState = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
-    if ((tempState.at(1) > 1.0)||(tempState.at(1) < 0.0)) {
-        OOFEM_ERROR2("BazantNajjarMoistureTransferMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1));
+    if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
+        OOFEM_ERROR2( "BazantNajjarMoistureTransferMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1) );
     } else {
         return tempState.at(1);
     }
 }
-
-
-
 } // end namespace oofem

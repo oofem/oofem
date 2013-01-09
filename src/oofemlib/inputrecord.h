@@ -1212,7 +1212,7 @@ enum InputFieldType {
 
     IFT_ErrorEstimator_regionskipmap,
     IFT_ErrorEstimator_IStype,
-    
+
 
     IFT_ScalarErrorIndicator_vartype,
 
@@ -1425,7 +1425,7 @@ public:
     /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the std::list<Range> field value.
-    virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
+    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Returns a double on the position tokenNumber
     virtual IRResultType giveField(double &answer, int tokenNumber) = 0;
     //@}
@@ -1454,7 +1454,7 @@ public:
     /// Reads the Dictionary field value.
     IRResultType giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString);
     /// Reads the std::list<Range> field value.
-    IRResultType giveOptionalField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
+    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.
