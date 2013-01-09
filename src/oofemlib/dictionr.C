@@ -178,7 +178,7 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
 // current state)
 //
 {
-    int nitems = 0, type_id = DictionaryClass;
+    int nitems = 0;
     int key;
     double value;
     Pair *next;
@@ -191,11 +191,6 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
     while ( next ) {
         nitems++;
         next = next->giveNext();
-    }
-
-    // write class header
-    if ( !stream->write(& type_id, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
     }
 
     // write size
@@ -231,21 +226,11 @@ contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode
 //
 {
     int i, size;
-    int type_id;
     int key;
     double value;
 
     // delete currently occupied space
     this->clear();
-
-    // read class header
-    if ( !stream->read(& type_id, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( type_id != DictionaryClass ) {
-        THROW_CIOERR(CIO_BADVERSION);
-    }
 
     // read size
     if ( !stream->read(& size, 1) ) {
