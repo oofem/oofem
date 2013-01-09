@@ -62,6 +62,8 @@ private:
 
     double smax, smin;
     bool doUpdateSminmax;
+    /** Number of Gausspoints used when integrating along the element edges */
+    int ngp;
 
 
     /** ID of dofs on which weak periodicity is imposed */

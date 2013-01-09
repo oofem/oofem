@@ -76,6 +76,9 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     dofid = 11;    // Pressure as default
     IR_GIVE_OPTIONAL_FIELD(ir, dofid, IFT_WeakPeriodicBoundaryCondition_order, "dofid");
 
+    ngp = 3;    // Pressure as default
+    IR_GIVE_OPTIONAL_FIELD(ir, ngp, IFT_WeakPeriodicBoundaryCondition_order, "ngp");
+
     IntArray temp;
     IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_ActiveBoundaryCondition_elementSides, "elementsidespositive");
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
@@ -231,7 +234,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
             thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
-            iRule->setUpIntegrationPoints(_Line, 3, _Unknown);
+            iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
             // Find dofs for this element side
             IntArray tempSideLocation, sideLocation;
@@ -364,7 +367,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                 FloatArray a;
 
                 iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
-                iRule->setUpIntegrationPoints(_Line, 3, _Unknown);
+                iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
                 // Find dofs for this element side
                 IntArray tempSideLocation, sideLocation;
@@ -445,6 +448,8 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
             }
         }
     }
+
+//    answer.printYourself();
 
     return norm;
 }
