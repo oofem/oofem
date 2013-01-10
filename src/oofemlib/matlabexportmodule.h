@@ -32,13 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef MATLABEXPORTMODULE_H_
-#define MATLABEXPORTMODULE_H_
+#ifndef matlabexportmodule_h_
+#define matlabexportmodule_h_
 
 #include "exportmodule.h"
 
 namespace oofem {
-
 /**
  * (Under development) The Matlab export module enables oofem to export the results to a textfile containing the description of the mesh used
  * along with the pertinent results.
@@ -48,7 +47,6 @@ namespace oofem {
 class MatlabExportModule : public ExportModule
 {
 protected:
-
     /// list of InternalStateType values, identifying the selected vars for export
     IntArray internalVarsToExport;
     /// list of primary unknowns to export
@@ -59,29 +57,27 @@ protected:
     double xmax, xmin, ymax, ymin;
     double Area;
 
-	bool exportMesh;
-	bool exportData;
-	bool exportArea;
-	bool exportSpecials;
+    bool exportMesh;
+    bool exportData;
+    bool exportArea;
+    bool exportSpecials;
+
 private:
-	void computeArea();
+    void computeArea();
 
 public:
-	 MatlabExportModule(int n, EngngModel *e);
-	 virtual ~MatlabExportModule();
-	 virtual IRResultType initializeFrom(InputRecord *ir);
-	 virtual void doOutput(TimeStep *tStep);
-	 virtual void initialize();
-	 virtual void terminate();
+    MatlabExportModule(int n, EngngModel *e);
+    virtual ~MatlabExportModule();
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void doOutput(TimeStep *tStep);
+    virtual void initialize();
+    virtual void terminate();
 
-	 void doOutputMesh(TimeStep *tStep,	FILE *FID);
-	 void doOutputData(TimeStep *tStep,	FILE *FID);
-	 void doOutputSpecials(TimeStep *tStep,	FILE *FID);
+    void doOutputMesh(TimeStep *tStep,  FILE *FID);
+    void doOutputData(TimeStep *tStep,  FILE *FID);
+    void doOutputSpecials(TimeStep *tStep,      FILE *FID);
 
-	 virtual const char *giveClassName() const { return "MatlabExportModule"; };
-
+    virtual const char *giveClassName() const { return "MatlabExportModule"; };
 };
-
-};
-
-#endif /* MATLABEXPORTMODULE_H_ */
+} // end namespace oofem
+#endif // matlabexportmodule_h_
