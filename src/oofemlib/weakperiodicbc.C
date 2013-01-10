@@ -76,7 +76,7 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     dofid = 11;    // Pressure as default
     IR_GIVE_OPTIONAL_FIELD(ir, dofid, IFT_WeakPeriodicBoundaryCondition_order, "dofid");
 
-    ngp = 3;    // Pressure as default
+    ngp = -1;    // Pressure as default
     IR_GIVE_OPTIONAL_FIELD(ir, ngp, IFT_WeakPeriodicBoundaryCondition_order, "ngp");
 
     IntArray temp;
@@ -234,6 +234,9 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
             thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
+            if (ngp==-1) {
+            	ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+orderOfPolygon);
+            }
             iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
             // Find dofs for this element side
@@ -367,6 +370,9 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                 FloatArray a;
 
                 iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
+                if (ngp==-1) {
+                	ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+(int) orderOfPolygon);
+                }
                 iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
                 // Find dofs for this element side
