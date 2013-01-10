@@ -173,14 +173,17 @@ enum classType {
     LIBeam3dNL2Class,
     LIBeam2dNLClass,
     Quad1_htClass,
+    Quad1_mtClass,
     Quad1_hmtClass,
     Tr1_htClass,
     Tr1DarcyClass,
     Tr1_hmtClass,
     QuadAxisym1_htClass,
+    QuadAxisym1_mtClass,
     QuadAxisym1_hmtClass,
     TrAxisym1_htClass,
     Brick1_htClass,
+    Brick1_mtClass,
     Brick1_hmtClass,
     QBrick1_htClass,
     QBrick1_hmtClass,
@@ -324,6 +327,9 @@ enum classType {
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
+    IsotropicMoistureTransferMaterialClass,
+    IsotropicLinMoistureTransferMaterialClass,
+    BazantNajjarMoistureTransferMaterialClass,
     AnisotropicMassTransferMaterialClass,
     AnisotropicMassTransferMaterialStatusClass,
     NonlinearMassTransferMaterialClass,
@@ -470,7 +476,6 @@ enum classType {
     RVEStokesFlowMaterialStatusClass,
 
     WeakPeriodicbcClass
-
 };
 } // end namespace oofem
 #endif // classtype_h

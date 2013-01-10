@@ -60,7 +60,7 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
     timeDefinedByProb = 0;
 }
 
-StaggeredProblem :: ~StaggeredProblem()
+StaggeredProblem ::  ~StaggeredProblem()
 {
     delete emodelList;
     delete [] inputStreamNames;
@@ -129,6 +129,10 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
         dtTimeFunction = 0;
+    } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
+        EngngModel :: initializeFrom(ir);
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes"); // Macro
+        dtTimeFunction = 0;
     } else {
         IR_GIVE_FIELD(ir, timeDefinedByProb, IFT_StaggeredProblem_timeDefinedByProb, "timedefinedbyprob"); // Macro
     }
@@ -138,7 +142,6 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf"); // Macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
     if ( stepMultiplier < 0 ) {
         _error("stepMultiplier must be > 0")
@@ -167,7 +170,16 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     }
 
     if ( !timeDefinedByProb ) {
-        IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
+        if ( ir->hasField(IFT_StaggeredProblem_deltat, "deltat") ) {
+            IR_GIVE_FIELD(ir, deltaT, IFT_StaggeredProblem_deltat, "deltat"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, dtTimeFunction, IFT_StaggeredProblem_dtf, "dtf"); // Macro
+            IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
+            if ( stepMultiplier < 0 ) {
+                _error("stepMultiplier must be > 0")
+            }
+        } else if ( ir->hasField(IFT_StaggeredProblem_prescribedtimes, "prescribedtimes") ) {
+            IR_GIVE_FIELD(ir, discreteTimes, IFT_StaggeredProblem_prescribedtimes, "prescribedtimes"); // Macro
+        }
     }
 }
 
@@ -195,7 +207,26 @@ StaggeredProblem :: giveDeltaT(int n)
         }
     }
 
+    if ( discreteTimes.giveSize() > 0 ) {
+        return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
+    }
+
     return deltaT;
+}
+
+double
+StaggeredProblem :: giveDiscreteTime(int iStep)
+{
+    if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+        return ( discreteTimes.at(iStep) );
+    }
+
+    if ( ( iStep == 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+        return ( 0.0 );
+    }
+
+    _error("giveDiscreteTime: invalid iStep");
+    return 0.0;
 }
 
 TimeStep *
@@ -203,7 +234,8 @@ StaggeredProblem :: giveSolutionStepWhenIcApply()
 {
     if ( stepWhenIcApply == NULL ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
-        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT(inin), giveDeltaT(inin), 0);
+        int nFirst = giveNumberOfFirstStep();
+        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0);
     }
 
     return stepWhenIcApply;
@@ -344,7 +376,8 @@ StaggeredProblem :: terminate(TimeStep *tStep) {
     for ( int i = 1; i <= nModels; i++ ) {
         this->giveSlaveProblem(i)->terminate(tStep);
     }
-    fflush(this->giveOutputStream());
+
+    fflush( this->giveOutputStream() );
 }
 
 void

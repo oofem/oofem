@@ -1,0 +1,88 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2012   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include "bazantnajjarmat.h"
+#include "flotmtrx.h"
+#include "gausspnt.h"
+#include "mathfem.h"
+
+namespace oofem {
+IRResultType
+BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+    IsotropicMoistureTransferMaterial :: initializeFrom(ir);
+
+    IR_GIVE_FIELD(ir, C1, IFT_BazantNajjarMoistureTransferMaterial_c1, "c1"); // Macro
+    IR_GIVE_FIELD(ir, n, IFT_BazantNajjarMoistureTransferMaterial_n, "n"); // Macro
+    IR_GIVE_FIELD(ir, alpha0, IFT_BazantNajjarMoistureTransferMaterial_alpha0, "alpha0"); // Macro
+    IR_GIVE_FIELD(ir, hC, IFT_BazantNajjarMoistureTransferMaterial_hc, "hc"); // Macro
+
+    this->moistureCapacity = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, IFT_BazantNajjarMoistureTransferMaterial_capa, "capa"); // Macro
+
+
+    return IRRT_OK;
+}
+
+
+double
+BazantNajjarMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *atTime)
+{
+    return this->moistureCapacity;
+}
+
+double
+BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
+{
+    double permeability;
+    double humidity = this->giveHumidity(gp);
+
+    permeability = C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
+    return permeability;
+}
+
+double
+BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp)
+{
+    FloatArray tempState = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
+    if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
+        OOFEM_ERROR2( "BazantNajjarMoistureTransferMaterial :: giveHumidity : Relative humidity %.3f is out of range", tempState.at(1) );
+    } else {
+        return tempState.at(1);
+    }
+}
+} // end namespace oofem

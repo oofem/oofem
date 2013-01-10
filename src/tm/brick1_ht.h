@@ -63,7 +63,8 @@ public:
     virtual const char *giveClassName() const { return "Brick1_ht"; }
     virtual classType giveClassID() const { return Brick1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    // virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
 
@@ -79,8 +80,8 @@ public:
     virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    
-    
+
+
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
@@ -101,6 +102,9 @@ protected:
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
 };
 
+/**
+ * Class for heat and mass transfer.
+ */
 class Brick1_hmt : public Brick1_ht
 {
 public:
@@ -108,7 +112,20 @@ public:
 
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
     virtual classType giveClassID() const { return Brick1_hmtClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 16; }
 };
 
+/**
+ * Class for mass transfer.
+ */
+class Brick1_mt : public Brick1_ht
+{
+public:
+    Brick1_mt(int n, Domain *d);
+
+    virtual const char *giveClassName() const { return "Brick1_mt"; }
+    virtual classType giveClassID() const { return Brick1_mtClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+};
 } // end namespace oofem
 #endif // brick1_ht_h

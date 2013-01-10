@@ -62,6 +62,10 @@ Brick1_hmt :: Brick1_hmt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
     emode = HeatMass1TransferEM;
 }
 
+Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
+}
 Brick1_ht :: ~Brick1_ht()
 { }
 
@@ -72,7 +76,7 @@ Brick1_ht :: computeGaussPoints()
 {
     MaterialMode mmode;
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         mmode = _3dHeat;
     } else {
         mmode = _3dHeMo;
@@ -112,8 +116,8 @@ Brick1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = aGaussPoint->giveWeight();
     volume = determinant * weight;
@@ -124,8 +128,8 @@ Brick1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 double
 Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this));
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) );
     return result * gp->giveWeight();
 }
 
@@ -144,7 +148,7 @@ double
 Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
     return volume;
@@ -299,7 +303,7 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
     }
 
     result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-    if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
 

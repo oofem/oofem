@@ -39,6 +39,9 @@ set (tm_material
     hydratinghemomat.C
     hemotkmat.C
     isoheatmat.C
+    isomoisturemat.C
+    isolinmoisturemat.C
+    bazantnajjarmat.C
     hydratingconcretemat.C
     nonlinearmassmat.C
     anisomassmat.C

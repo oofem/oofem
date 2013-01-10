@@ -38,7 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 #define domainType_DEF \
     ENUM_ITEM(_unknownMode) \
     ENUM_ITEM(_2dPlaneStressMode) \
@@ -52,10 +51,11 @@ namespace oofem {
     ENUM_ITEM(_1dTrussMode) \
     ENUM_ITEM(_2dBeamMode) \
     ENUM_ITEM(_HeatTransferMode) \
+    ENUM_ITEM(_Mass1TransferMode) \
     ENUM_ITEM(_HeatMass1Mode) /* Coupled heat and mass (1 matter) transfer */   \
     ENUM_ITEM(_2dIncompressibleFlow) /* 2d Incompressible flow, no energy eq */ \
-      ENUM_ITEM(_3dIncompressibleFlow) /* 3d Incompressible flow, no energy eq */ \
-      ENUM_ITEM(_2dLatticeMode)\
+    ENUM_ITEM(_3dIncompressibleFlow)   /* 3d Incompressible flow, no energy eq */\
+    ENUM_ITEM(_2dLatticeMode) \
 
 /**
  * Type representing type of domain.

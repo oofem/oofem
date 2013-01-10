@@ -48,7 +48,6 @@
 #endif
 
 namespace oofem {
-
 FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
 
 Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
@@ -62,6 +61,11 @@ Quad1_hmt :: Quad1_hmt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
     emode = HeatMass1TransferEM;
 }
 
+Quad1_mt :: Quad1_mt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
+}
+
 Quad1_ht :: ~Quad1_ht()
 // Destructor
 { }
@@ -72,7 +76,7 @@ Quad1_ht :: computeGaussPoints()
 {
     MaterialMode mmode;
 
-    if ( emode == HeatTransferEM ) {
+    if ( emode == HeatTransferEM || emode == Mass1TransferEM ) {
         mmode = _2dHeat;
     } else {
         mmode = _2dHeMo;
@@ -113,8 +117,8 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* gp->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this)) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness); // 't'
     volume      = determinant * weight * thickness;
@@ -125,10 +129,10 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
-                                                                       FEIElementGeometryWrapper(this));
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) );
     double thick = this->giveCrossSection()->give(CS_Thickness); // 't'
-    return result*thick *gp->giveWeight();
+    return result * thick * gp->giveWeight();
 }
 
 Interface *
@@ -232,7 +236,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
         }
 
         result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-        if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+        if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
             return;
         }
 
