@@ -404,12 +404,6 @@ contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mo
 // return value >0 succes
 //              =0 file i/o error
 {
-    int type_id = IntArrayClass;
-    // write class header
-    if ( !stream->write(& type_id, 1) ) {
-        return ( CIO_IOERR );
-    }
-
     // write size
     if ( !stream->write(& size, 1) ) {
         return ( CIO_IOERR );
@@ -430,16 +424,6 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
 // returns 0 if file i/o error
 //        -1 if id od class id is not correct
 {
-    int class_id;
-    // read class header
-    if ( !stream->read(& class_id, 1) ) {
-        return ( CIO_IOERR );
-    }
-
-    if ( class_id != IntArrayClass ) {
-        return CIO_BADVERSION;
-    }
-
     // read size
     if ( !stream->read(& size, 1) ) {
         return ( CIO_IOERR );
