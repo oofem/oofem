@@ -87,6 +87,7 @@ protected:
     double a0, a1, a2, a3, a4, a5, a6, a7;
 
     FloatArray velocityVector, accelerationVector, previousLoadVector;
+    FloatArray previousVelocityVector, previousAccelerationVector;
     FloatArray help, rhs, rhs2, previousInternalForces;
     FloatArray previousIncrementOfDisplacement;
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
@@ -102,7 +103,7 @@ protected:
     /// incremental Load Vector for prescribed DOFs.
     FloatArray incrementalLoadVectorOfPrescribed;
 
-    int currentIterations;
+    int currentIterations, totIterations, MANRMSteps;
     int commInitFlag;
     int nonlocalStiffnessFlag;
     NM_Status numMetStatus;
@@ -179,6 +180,7 @@ protected:
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);
+    void determineConstants(TimeStep *tStep);
     void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
