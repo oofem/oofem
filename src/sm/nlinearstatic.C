@@ -558,6 +558,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         OOFEM_LOG_RELEVANT( "solving for increment\n");
         linSolver->solve(stiffnessMatrix, &extrapolatedForces, &incrementOfDisplacement);
         OOFEM_LOG_RELEVANT( "initial guess found\n");
+        totalDisplacement.add(incrementOfDisplacement);
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR2("Initial guess type: %d not supported", initialGuessType);
     } else {
