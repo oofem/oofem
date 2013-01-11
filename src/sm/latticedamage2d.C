@@ -180,14 +180,14 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 
         //
         if ( tempKappa > e0 ) {
-            omega = ( this->wfOne / status->giveLe() - helpStrain ) / ( this->wfOne / status->giveLe() - e0 ) * ( 1 - e0 / tempKappa );
+            omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * status->giveLe() + 1. );
 
-            if ( omega * tempKappa > 0 && omega * tempKappa < this->wfOne / status->giveLe() ) {
+            if ( omega * tempKappa * status->giveLe() > 0 && omega * tempKappa * status->giveLe() < this->wfOne ) {
                 return;
             } else {
-                omega = 1. - helpStrain / ( this->wf / status->giveLe() - this->wfOne / status->giveLe() ) * ( this->wf / status->giveLe() / tempKappa - 1 );
+                omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( this->wf - this->wfOne ) ) ) / ( 1. - helpStrain * status->giveLe() / ( this->wf - this->wfOne ) );
 
-                if ( omega * tempKappa > this->wfOne / status->giveLe() && omega * tempKappa < this->wf / status->giveLe() ) {
+                if ( omega * tempKappa * status->giveLe() >= this->wfOne  && omega * tempKappa * status->giveLe() < this->wf  ) {
                     return;
                 }
             }
