@@ -108,9 +108,9 @@ public:
     Mat *giveMtrx() { return & this->mtrx; }
     bool giveSymmetryFlag() const { return symmFlag; }
     int setOption(MatOption op, PetscBool flag) { return MatSetOption(this->mtrx, op, flag); }
-    EquationID giveEquationID() { return ut; }
+    EquationID giveEquationID() const { return ut; }
     int giveLeqs() { return leqs; }
-    int giveDomainIndex() { return di; }
+    int giveDomainIndex() const { return di; }
 
     friend class PetscSolver;
     //friend class PETScSNESNM;

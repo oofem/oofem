@@ -73,32 +73,59 @@ PetscSparseMtrx :: GiveCopy() const
 void
 PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 {
-    if ( this->giveNumberOfColumns() != x.giveSize() ) {
-        OOFEM_ERROR("Dimension mismatch");
-    }
-
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+        if ( x.giveSize() != answer.giveSize() ) {
+            OOFEM_ERROR("Size mismatch");
+        }
+
+        Vec globX;
+        Vec globY;
+
+        // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
+        PetscContext *context = emodel->givePetscContext( this->giveDomainIndex(), this->giveEquationID() );
+
+        /*
+         * scatter and gather x to global representation
+         */
+        context->createVecGlobal(& globX);
+        context->scatter2G(&x, globX, ADD_VALUES);
+
+        VecDuplicate(globX, & globY);
+
+        MatMult(this->mtrx, globX, globY);
+
+        context->scatterG2N(globY, &answer, INSERT_VALUES);
+
+        VecDestroy(&globX);
+        VecDestroy(&globY);
+    } else {
+#endif
+
+        if ( this->giveNumberOfColumns() != x.giveSize() ) {
+            OOFEM_ERROR("Dimension mismatch");
+        }
+
+        Vec globX, globY;
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
+        VecCreate(PETSC_COMM_SELF, & globY);
+        VecSetType(globY, VECSEQ);
+        VecSetSizes(globY, PETSC_DECIDE, this->nRows);
+
+        MatMult(this->mtrx, globX, globY);
+        double *ptr;
+        VecGetArray(globY, & ptr);
+        answer.resize(this->nRows);
+        for ( int i = 0; i < this->nRows; i++ ) {
+            answer(i) = ptr [ i ];
+        }
+
+        VecRestoreArray(globY, & ptr);
+        VecDestroy(&globX);
+        VecDestroy(&globY);
+#ifdef __PARALLEL_MODE
     }
 #endif
-    Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
-    VecCreate(PETSC_COMM_SELF, & globY);
-    VecSetType(globY, VECSEQ);
-    VecSetSizes(globY, PETSC_DECIDE, this->nRows);
-
-    MatMult(this->mtrx, globX, globY);
-    double *ptr;
-    VecGetArray(globY, & ptr);
-    answer.resize(this->nRows);
-    for ( int i = 0; i < this->nRows; i++ ) {
-        answer(i) = ptr [ i ];
-    }
-
-    VecRestoreArray(globY, & ptr);
-    VecDestroy(&globX);
-    VecDestroy(&globY);
 }
 
 void
