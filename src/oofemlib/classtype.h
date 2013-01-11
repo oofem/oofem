@@ -143,6 +143,7 @@ enum classType {
     QTrPlaneStressGradClass,
     CCTPlateClass,
     CCTPlate3dClass,
+    Quad1MindlinClass,
     LSpaceClass,
     LSpaceBBClass,
     QSpaceClass,

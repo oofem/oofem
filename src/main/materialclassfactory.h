@@ -36,6 +36,7 @@
 #include "isolinearelasticmaterial.h"
 
 #ifdef __SM_MODULE
+ #include "abaqususermaterial.h"
  #include "ortholinearelasticmaterial.h"
  #include "perfectlyplasticmaterial.h"
  #include "steel1.h"
@@ -115,6 +116,7 @@
 
 #ifdef __SM_MODULE
 REGISTER_CLASS(DummyMaterial, "dummymat", DummyMaterialClass)
+REGISTER_CLASS(AbaqusUserMaterial, "abaqususermaterial", AbaqusUserMaterialClass)
 REGISTER_CLASS(IsotropicLinearElasticMaterial, "isole", IsotropicLinearElasticMaterialClass)
 REGISTER_CLASS(OrthotropicLinearElasticMaterial, "orthole", OrthotropicLinearElasticMaterialClass)
 REGISTER_CLASS(Steel1, "steel1", Steel1MaterialClass)

@@ -50,6 +50,7 @@ set (sm_loads
     )
 
 set (sm_material
+    abaqususermaterial.C
     ortholinearelasticmaterial.C
     concrete2.C concrete3.C concretedpm.C concretedpm2.C
     cebfip78.C
