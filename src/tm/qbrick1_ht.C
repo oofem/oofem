@@ -43,12 +43,6 @@
 #include "mathfem.h"
 #include "load.h"
 
-// #ifdef __OOFEG
-//  #include "oofeggraphiccontext.h"
-//  #include "oofegutils.h"
-//  #include "conTable.h"
-// #endif
-
 namespace oofem {
 FEI3dHexaQuad QBrick1_ht :: interpolation;
 
@@ -242,86 +236,4 @@ QBrick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
 }
 
 
-// #ifdef __OOFEG
-// void QBrick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
-// {
-//     int i;
-//     WCRec p [ 8 ];
-//     GraphicObj *go;
-// 
-//     if ( !gc.testElementGraphicActivity(this) ) {
-//         return;
-//     }
-// 
-//     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-//     EASValsSetColor( gc.getElementColor() );
-//     EASValsSetEdgeColor( gc.getElementEdgeColor() );
-//     EASValsSetEdgeFlag(true);
-//     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-//     EASValsSetFillStyle(FILL_SOLID);
-//     for ( i = 0; i < 8; i++ ) {
-//         p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-//         p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-//         p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
-//     }
-// 
-//     go =  CreateHexahedron(p);
-//     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
-//     EGAttachObject(go, ( EObjectP ) this);
-//     EMAddGraphicsToModel(ESIModel(), go);
-// }
-
-
-// void QBrick1_ht :: drawScalar(oofegGraphicContext &context)
-// {
-//     int i, indx, result = 0;
-//     WCRec p [ 8 ];
-//     GraphicObj *tr;
-//     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-//     FloatArray v [ 8 ];
-//     double s [ 8 ];
-//     IntArray map;
-// 
-//     if ( !context.testElementGraphicActivity(this) ) {
-//         return;
-//     }
-// 
-//     if ( context.giveIntVarMode() == ISM_recovered ) {
-//         for ( i = 1; i <= 8; i++ ) {
-//             result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
-//         }
-// 
-//         if ( result != 8 ) {
-//             return;
-//         }
-//     } else if ( context.giveIntVarMode() == ISM_local ) {
-//         return;
-//     }
-// 
-//     result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-//     if ( (!result) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-//         return;
-//     }
-// 
-//     for ( i = 1; i <= 8; i++ ) {
-//         s [ i - 1 ] = v [ i - 1 ].at(indx);
-//     }
-// 
-//     EASValsSetEdgeColor( context.getElementEdgeColor() );
-//     EASValsSetEdgeFlag(true);
-//     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-//     if ( context.getScalarAlgo() == SA_ISO_SURF ) {
-//         for ( i = 0; i < 8; i++ ) {
-//             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-//             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-//             p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
-//         }
-// 
-//         context.updateFringeTableMinMax(s, 8);
-//         tr = CreateHexahedronWD(p, s);
-//         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
-//         EMAddGraphicsToModel(ESIModel(), tr);
-//     }
-// }
-// #endif
 } // end namespace oofem

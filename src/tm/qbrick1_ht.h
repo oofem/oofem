@@ -84,15 +84,6 @@ public:
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-#ifdef __OOFEG
-    // Graphics output
-    void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawScalar(oofegGraphicContext &context);
-    //void drawYourself(oofegGraphicContext&);
-    //virtual void drawRawGeometry(oofegGraphicContext&) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
-#endif
-
 protected:
     virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 2; }

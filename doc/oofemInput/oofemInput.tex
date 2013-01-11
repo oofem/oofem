@@ -987,6 +987,7 @@ The convergence is reached, when the norms are less than the value given by \par
 If \param{manrmsteps} parameter is nonzero, then the modified
 N-R scheme is used, with the left-hand side matrix updated after
 \param{manrmsteps} steps.
+\param{nsmax} maximum number of iterations per time step, default is 30.
 If \param{lumpedcapa} is set, then the stabilization of numerical
 algorithm using lumped capacity matrix will be used, reducing the
 initial oscillations.
@@ -1183,10 +1184,10 @@ with solver parameters related to specific solver.
 %%\scalebox{0.50}{
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-Storage format & id & \multicolumn{5}{c|}{Sparse solver} \\
+Storage format & id & \multicolumn{5}{c|}{Sparse solver, \param{lstype}} \\
 \hline
- && \tiny{Direct} &\tiny{IML}
- &\tiny{Spooles}& \tiny{Petsc}& \tiny{DSS}\\
+& \param{smtype} & \tiny{Direct (0)} &\tiny{IML (1)}
+ &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}\\
 \hline
 \small{SMT\_Skyline}       & 0&+&+& & & \\
 \small{SMT\_SkylineU}      & 1&+&+& & & \\
@@ -1202,7 +1203,7 @@ Storage format & id & \multicolumn{5}{c|}{Sparse solver} \\
 \hline
 \end{tabular}
 %%}
-\caption{Solver and stoorage scheme compatibility.}
+\caption{Solver and storage scheme compatibility.}
 \label{linsolvstoragecompattable}
 \end{center}
 \end{table}

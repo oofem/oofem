@@ -94,10 +94,10 @@ void Homogenize :: reuss(FloatMatrix &PhaseMatrix)
  */
 void Homogenize :: hashinShtrikmanWalpole(FloatMatrix &PhaseMatrix)
 {
-    int phase, i, r;
+    int phase=0, i, r;
     int counter = 0;
     int numRows = PhaseMatrix.giveNumberOfRows();
-    double k, k_min, mu, mu_phase, muMin, muMax;
+    double k, k_min, mu, mu_phase=0., muMin, muMax;
     double dummy;
     FloatMatrix PhaseMatrix1;
     PhaseMatrix1 = PhaseMatrix;
@@ -252,7 +252,7 @@ void Homogenize :: selfConsistent(FloatMatrix &PhaseMatrix)
     double f_r, E_r, nu_r, k_r, mu_r;
     double k_SCS, mu_SCS, nom_k_SCS, denom_k_SCS, nom_mu_SCS, denom_mu_SCS;
     double fr_tot;
-    double alpha_m, beta_m;
+    double alpha_m=0., beta_m=0.;
     double k_S_denom = 0., mu_S_denom = 0.;
     int numRows = PhaseMatrix.giveNumberOfRows();
     double *k_S, *mu_S;
