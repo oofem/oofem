@@ -57,8 +57,8 @@ using namespace std;
 
 namespace oofem {
 NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
-    totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
+    totalDisplacement(), incrementOfDisplacement(), internalForces(), forcesVector(), initialLoadVector(),
+    incrementalLoadVector(), initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
     initialTimeDiscretization = TD_ThreePointBackward;
     numMetStatus              = NM_None;
@@ -68,8 +68,9 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     internalVarUpdateStamp  = 0;
     initFlag = commInitFlag = 1;
 
-    stiffnessMatrix  = NULL;
-    nMethod          = NULL;
+    effectiveStiffnessMatrix = NULL;
+    massMatrix               = NULL;
+    nMethod                  = NULL;
 
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
 #ifdef __PARALLEL_MODE
@@ -408,21 +409,28 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     if ( initFlag ) {
         // First assemble problem at current time step.
         // Option to take into account initial conditions.
-        if ( !stiffnessMatrix ) {
-            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+        if ( !effectiveStiffnessMatrix ) {
+            effectiveStiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+            massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         }
 
-        if ( stiffnessMatrix == NULL ) {
+        if ( effectiveStiffnessMatrix == NULL || massMatrix == NULL ) {
             _error("proceedStep: sparse matrix creation failed");
         }
 
         if ( nonlocalStiffnessFlag ) {
-            if ( !stiffnessMatrix->isAsymmetric() ) {
-                _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+            if ( !effectiveStiffnessMatrix->isAsymmetric() ) {
+                _error("proceedStep: effectiveStiffnessMatrix does not support asymmetric storage");
             }
         }
 
-        stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        effectiveStiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        massMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+
+        // Assemble mass matrix
+        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(di));
+
         // Initialize vectors
         help.resize(neq);
         help.zero();
@@ -444,6 +452,9 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
             previousInternalForces.at(i)          = internalForces.at(i);
         }
 
+        forcesVector.resize(neq);
+        forcesVector.zero();
+
         totIterations = 0;
         initFlag = 0;
     }
@@ -464,7 +475,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                       + a6 * previousIncrementOfDisplacement.at(i) );
     }
 
-    this->timesMtrx(help, rhs, MassMatrix, this->giveDomain(di), tStep);
+    massMatrix->times(help, rhs);
 
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
@@ -472,7 +483,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                                    + a5 * previousAccelerationVector.at(i)
                                    + a6 * previousIncrementOfDisplacement.at(i) );
         }
-        this->timesMtrx(help, rhs2, StiffnessMatrix, this->giveDomain(di), tStep);
+        this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(di), tStep);
+
         help.zero();
         for ( int i = 1; i <= neq; i++ ) {
             rhs.at(i) += rhs2.at(i);
@@ -496,12 +508,12 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     if ( totIterations == 0 ) { incrementOfDisplacement.zero(); }
 
     if ( initialLoadVector.isNotEmpty() ) {
-        numMetStatus = nMethod->solve(stiffnessMatrix, & rhs, & initialLoadVector,
-                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
+        numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, & initialLoadVector,
+                                      & totalDisplacement, & incrementOfDisplacement, & forcesVector,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
-        numMetStatus = nMethod->solve(stiffnessMatrix, & rhs, NULL,
-                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
+        numMetStatus = nMethod->solve(effectiveStiffnessMatrix, & rhs, NULL,
+                                      & totalDisplacement, & incrementOfDisplacement, & forcesVector,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 
@@ -511,8 +523,6 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
             - a6 * previousIncrementOfDisplacement.at(i);
     }
     totIterations += currentIterations;
-
-    this->giveInternalForces(internalForces, true, 1, tStep);
 }
 
 
@@ -579,7 +589,7 @@ NonLinearDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num
         FloatMatrix charMtrx;
 
         element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
+        element->giveCharacteristicMatrix(answer, TangentStiffnessMatrix, tStep);
         answer.times(1 + this->delta * a1);
 
         element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
@@ -642,11 +652,11 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Updating nonlinear LHS\n");
 #endif
-            stiffnessMatrix->zero();
+            effectiveStiffnessMatrix->zero();
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+            this->assemble(effectiveStiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
 #ifdef TIME_REPORT
             timer.stopTimer();
@@ -669,24 +679,22 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
                 help.at(i) = ( a0 + eta * a1 ) * incrementOfDisplacement.at(i);
             }
 
-            this->timesMtrx(help, rhs2, MassMatrix, this->giveDomain(1), tStep);
+            massMatrix->times(help, rhs2);
 
             for ( int i = 1; i <= neq; i++ ) {
-                internalForces.at(i) += rhs2.at(i) - previousInternalForces.at(i);
+                forcesVector.at(i) = internalForces.at(i) + rhs2.at(i) - previousInternalForces.at(i);
             }
 
             if ( delta != 0 ) {
                 for ( int i = 1; i <= neq; i++ ) {
                     help.at(i) = delta * a1 * incrementOfDisplacement.at(i);
                 }
-
-                this->timesMtrx(help, rhs2, StiffnessMatrix, this->giveDomain(1), tStep);
+                this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
 
                 for ( int i = 1; i <= neq; i++ ) {
-                    internalForces.at(i) += rhs2.at(i);
+                    forcesVector.at(i) += rhs2.at(i);
                 }
             }
-
 #ifdef TIME_REPORT
             timer.stopTimer();
             OOFEM_LOG_DEBUG("User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );

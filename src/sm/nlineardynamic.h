@@ -75,7 +75,7 @@ namespace oofem {
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix;
+    SparseMtrx *effectiveStiffnessMatrix, *massMatrix,;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
@@ -91,7 +91,7 @@ protected:
     FloatArray help, rhs, rhs2, previousInternalForces;
     FloatArray previousIncrementOfDisplacement;
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
-    FloatArray internalForces;
+    FloatArray internalForces, forcesVector;
 
     /// A load vector already applied, which does not scales.
     FloatArray initialLoadVector;
