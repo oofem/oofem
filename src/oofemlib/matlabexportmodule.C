@@ -205,7 +205,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
     fprintf(FID, "];\n");
 
     for ( size_t i = 0; i < valuesList.size(); i++ ) {
-        fprintf(FID, "\tdata.a{%lu}=[", i + 1);
+        fprintf(FID, "\tdata.a{%lu}=[", static_cast<long unsigned int>(i) + 1);
         for ( size_t j = 0; j < valuesList.at(i)->size(); j++ ) {
             fprintf( FID, "%f,", valuesList.at(i)->at(j) );
         }
