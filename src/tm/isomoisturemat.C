@@ -40,9 +40,6 @@ namespace oofem {
 IRResultType
 IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     this->Material :: initializeFrom(ir);
 
     return IRRT_OK;
@@ -100,6 +97,8 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
+
+    return;
 }
 
 
