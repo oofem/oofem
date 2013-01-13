@@ -518,6 +518,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     }
 
     for ( int i = 1; i <= neq; i++ ) {
+        rhs.at(i)                = previousVelocityVector.at(i);
+        rhs2.at(i)               = previousAccelerationVector.at(i);
         accelerationVector.at(i) = a0 * incrementOfDisplacement.at(i) - a2 * rhs.at(i) - a3 * rhs2.at(i);
         velocityVector.at(i)     = a1 * incrementOfDisplacement.at(i) - a4 * rhs.at(i) - a5 * rhs2.at(i)
             - a6 * previousIncrementOfDisplacement.at(i);
