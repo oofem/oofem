@@ -672,27 +672,30 @@ void NonLinearDynamic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, D
 #ifdef TIME_REPORT
             timer.startTimer();
 #endif
-            this->giveInternalForces(internalForces, true, 1, tStep);
+            if ( ( currentIterations != 0 ) || ( totIterations == 0 ) )
+            {
+                this->giveInternalForces(internalForces, true, 1, tStep);
 
-            // Updating the residual vector @ NR-solver
-            for ( int i = 1; i <= neq; i++ ) {
-                help.at(i) = ( a0 + eta * a1 ) * incrementOfDisplacement.at(i);
-            }
-
-            massMatrix->times(help, rhs2);
-
-            for ( int i = 1; i <= neq; i++ ) {
-                forcesVector.at(i) = internalForces.at(i) + rhs2.at(i) - previousInternalForces.at(i);
-            }
-
-            if ( delta != 0 ) {
+                // Updating the residual vector @ NR-solver
                 for ( int i = 1; i <= neq; i++ ) {
-                    help.at(i) = delta * a1 * incrementOfDisplacement.at(i);
+                    help.at(i) = ( a0 + eta * a1 ) * incrementOfDisplacement.at(i);
                 }
-                this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
+
+                massMatrix->times(help, rhs2);
 
                 for ( int i = 1; i <= neq; i++ ) {
-                    forcesVector.at(i) += rhs2.at(i);
+                    forcesVector.at(i) = internalForces.at(i) + rhs2.at(i) - previousInternalForces.at(i);
+                }
+
+                if ( delta != 0 ) {
+                    for ( int i = 1; i <= neq; i++ ) {
+                        help.at(i) = delta * a1 * incrementOfDisplacement.at(i);
+                    }
+                    this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
+
+                    for ( int i = 1; i <= neq; i++ ) {
+                        forcesVector.at(i) += rhs2.at(i);
+                    }
                 }
             }
 #ifdef TIME_REPORT
