@@ -131,6 +131,11 @@ if (USE_SM)
         set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
     endif ()
     set (MODULE_LIST ${MODULE_LIST} sm)
+
+    if (NOT MSVC)
+        find_library (DL_LIB dl) 
+        set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
+    endif ()
 endif ()
 
 if (USE_DSS)
