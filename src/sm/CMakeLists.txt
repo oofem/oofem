@@ -14,6 +14,7 @@ set (sm_element
     cct.C
     cohsur3d.C
     cct3d.C
+    quad1mindlin.C
     trplanrot3d.C
     lumpedmasselement.C
     tr_shell01.C

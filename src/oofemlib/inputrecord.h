@@ -425,6 +425,7 @@ enum InputFieldType {
     IFT_Axisymm3d_nip,
     IFT_Axisymm3d_nipfish,
     IFT_CCTPlate_nip,
+    IFT_Quad1Mindlin_nip,
     IFT_LSpace_nip,
     IFT_LTrElementPPDE_nip,
     IFT_L4Axisymm_nip,
