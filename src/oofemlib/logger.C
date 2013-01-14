@@ -39,21 +39,25 @@
 
 #ifdef __GNUC__
 #include <cxxabi.h>
-#include <execinfo.h>
+#ifdef HAVE_EXECINFO_H
+  #include <execinfo.h>
+#endif
 #include <cstdio>
 #include <cstdlib>
 // Taken from https://idlebox.net/2008/0901-stacktrace-demangled/ which indicated free usage.
 /** Print a demangled stack backtrace of the caller function to FILE* out. */
 static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames = 63)
 {
+    int addrlen = 0;
     fprintf(out, "stack trace:\n");
 
     // storage array for stack trace address data
     void* addrlist[max_frames+1];
 
     // retrieve current stack addresses
-    int addrlen = backtrace(addrlist, sizeof(addrlist) / sizeof(void*));
-
+#ifdef HAVE_EXECINFO_H
+    addrlen = backtrace(addrlist, sizeof(addrlist) / sizeof(void*));
+#endif
     if (addrlen == 0) {
         fprintf(out, "  <empty, possibly corrupt>\n");
         return;
@@ -61,8 +65,10 @@ static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames 
 
     // resolve addresses into strings containing "filename(function+address)",
     // this array must be free()-ed
-    char** symbollist = backtrace_symbols(addrlist, addrlen);
-
+    char** symbollist;
+#ifdef HAVE_EXECINFO_H
+    symbollist = backtrace_symbols(addrlist, addrlen);
+#endif
     // allocate string which will be filled with the demangled function name
     size_t funcnamesize = 256;
     char* funcname = (char*)malloc(funcnamesize);

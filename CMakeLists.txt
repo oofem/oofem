@@ -362,6 +362,7 @@ if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
 endif ()
 check_include_files ("strings.h" HAVE_STRINGS_H)
 check_include_files ("unistd.h" HAVE_UNISTD_H)
+check_include_files ("execinfo.h" HAVE_EXECINFO_H)
 check_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
 check_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
 check_cxx_symbol_exists ("nearest" "cmath" HAVE_NEAREST) # In what header? I don't have it.

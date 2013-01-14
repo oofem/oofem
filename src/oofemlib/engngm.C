@@ -1767,7 +1767,7 @@ EngngModel :: giveOutputStream()
 // Returns an output stream on the data file of the receiver.
 {
     if ( !outputStream ) {
-#ifdef _MSC_VER
+#if defined (_MSC_VER) || defined (__MINGW32__)
 
         char *tmp = tmpnam(NULL);
         _warning2("giveOutputStream: using default output stream %s", tmp);

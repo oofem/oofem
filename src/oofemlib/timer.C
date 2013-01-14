@@ -37,8 +37,10 @@
 #include <cstdio>
 
 #ifndef _MSC_VER
-// for getrusage - user time reporting
-#include <sys/resource.h>
+  #ifndef __MINGW32__
+    //for getrusage - user time reporting
+    #include <sys/resource.h>
+  #endif
 #endif
 
 namespace oofem {
@@ -47,24 +49,26 @@ namespace oofem {
 
 void Timer :: getUtime(oofem_timeval &answer)
 {
+#ifndef __MINGW32__
     struct rusage rsg;
     getrusage(RUSAGE_SELF, & rsg);
     answer.tv_sec  = rsg.ru_utime.tv_sec;
     answer.tv_usec = rsg.ru_utime.tv_usec;
+#endif
 }
 
 void Timer :: getTime(oofem_timeval &answer)
 {
-    gettimeofday(&answer, NULL);
+     gettimeofday(&answer, NULL);
 }
 
 #else // #ifndef _MSC_VER
 
 void Timer :: getUtime(oofem_timeval &answer)
 {
-    clock_t utime = clock();
-    answer.tv_sec = utime / CLOCKS_PER_SEC;
-    answer.tv_usec = 0;
+     clock_t utime = clock();
+     answer.tv_sec = utime / CLOCKS_PER_SEC;
+     answer.tv_usec = 0;
 }
 
 void Timer :: getTime(oofem_timeval &answer)
@@ -164,12 +168,14 @@ void Timer :: updateElapsedTime()
     }
 
 #ifndef _MSC_VER
+#ifndef __MINGW32__
     oofem_timeval etime;
     timersub(& end_wtime, & start_wtime, & etime);
     timeradd(& etime, & elapsedWTime, & elapsedWTime);
 
     timersub(& end_utime, & start_utime, & etime);
     timeradd(& etime, & elapsedUTime, & elapsedUTime);
+#endif
 #endif
 
     start_utime = end_utime;
