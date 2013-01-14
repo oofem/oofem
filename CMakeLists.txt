@@ -132,10 +132,16 @@ if (USE_SM)
     endif ()
     set (MODULE_LIST ${MODULE_LIST} sm)
 
-    if (NOT MSVC)
+    if (NOT MSVC AND NOT MINGW)
         find_library (DL_LIB dl) 
         set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
     endif ()
+    
+#     if (MINGW)
+#         find_library (DL_LIB ltdl HINTS "C:/MinGW/lib/" ) 
+#         set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
+#     endif ()
+    
 endif ()
 
 if (USE_DSS)
