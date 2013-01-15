@@ -360,18 +360,19 @@ TimeStep *NonLinearStatic :: giveNextStep()
 void NonLinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
+    if (this->isParallel()) {
  #ifdef __VERBOSE_PARALLEL
-    // force equation numbering before setting up comm maps
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
+        // force equation numbering before setting up comm maps
+        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-    // set up communication patterns
-    this->initializeCommMaps();
-    // init remote dofman list
-    // this->initRemoteDofManList ();
+        // set up communication patterns
+        this->initializeCommMaps();
+        // init remote dofman list
+        // this->initRemoteDofManList ();
+    }
 #endif
-
     StructuralEngngModel :: solveYourself();
 }
 

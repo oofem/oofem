@@ -92,7 +92,6 @@ int main(int argc, char *argv[])
     std :: set_new_handler(freeStoreError);   // prevents memory overflow
 #endif
 
-    int i;
     int adaptiveRestartFlag = 0, restartStepInfo [ 2 ];
     bool parallelFlag = false, renumberFlag = false, debugFlag = false, contextFlag = false, restartFlag = false,
          inputFileFlag = false, outputFileFlag = false, errOutputFileFlag = false;
@@ -107,7 +106,6 @@ int main(int argc, char *argv[])
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
  #endif
-    parallelFlag = true; ///@todo The default should be false even for parallel builds, and turned on with -p
 #endif
 
     //
@@ -116,7 +114,7 @@ int main(int argc, char *argv[])
     if ( argc != 1 ) {
         // argv[0] is not read by PETSc and SLEPc.
         modulesArgs.push_back(argv [ 0 ]);
-        for ( i = 1; i < argc; i++ ) {
+        for ( int i = 1; i < argc; i++ ) {
             if ( ( strcmp(argv [ i ], "-context") == 0 ) || ( strcmp(argv [ i ], "-c") == 0 ) ) {
                 contextFlag = true;
             } else if ( strcmp(argv [ i ], "-v") == 0 ) {
@@ -278,7 +276,9 @@ int main(int argc, char *argv[])
 
     problem->terminateAnalysis();
 #ifdef __PARALLEL_MODE
-    DynamicCommunicationBuffer :: printInfo();
+    if (parallelFlag) {
+        DynamicCommunicationBuffer :: printInfo();
+    }
 #endif
     oofem_errLogger.printStatistics();
     delete problem;
