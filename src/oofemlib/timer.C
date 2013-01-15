@@ -36,34 +36,13 @@
 #include "compiler.h"
 #include <cstdio>
 
-#ifndef _MSC_VER
-  #ifndef __MINGW32__
-    //for getrusage - user time reporting
-    #include <sys/resource.h>
-  #endif
+#ifndef _WIN32 //_MSC_VER and __MINGW32__ included
+//for getrusage - user time reporting
+ #include <sys/resource.h>
 #endif
 
 namespace oofem {
-
-#ifndef _MSC_VER
-
-void Timer :: getUtime(oofem_timeval &answer)
-{
-#ifndef __MINGW32__
-    struct rusage rsg;
-    getrusage(RUSAGE_SELF, & rsg);
-    answer.tv_sec  = rsg.ru_utime.tv_sec;
-    answer.tv_usec = rsg.ru_utime.tv_usec;
-#endif
-}
-
-void Timer :: getTime(oofem_timeval &answer)
-{
-    gettimeofday(&answer, NULL);
-}
-
-#else // #ifndef _MSC_VER
-
+#ifdef _WIN32 //_MSC_VER and __MINGW32__ included
 void Timer :: getUtime(oofem_timeval &answer)
 {
     clock_t utime = clock();
@@ -78,9 +57,20 @@ void Timer :: getTime(oofem_timeval &answer)
     answer.tv_sec = ( unsigned long ) t;
     answer.tv_usec = 0;
 }
+#else
+void Timer :: getUtime(oofem_timeval &answer)
+{
+    struct rusage rsg;
+    getrusage(RUSAGE_SELF, & rsg);
+    answer.tv_sec  = rsg.ru_utime.tv_sec;
+    answer.tv_usec = rsg.ru_utime.tv_usec;
+}
 
+void Timer :: getTime(oofem_timeval &answer)
+{
+    gettimeofday(& answer, NULL);
+}
 #endif
-
 
 Timer :: Timer()
 {
@@ -134,28 +124,28 @@ double Timer :: getWtime()
     return ( double ) elapsedWTime.tv_sec + ( double ) elapsedWTime.tv_usec * 1.e-6;
 }
 
-void Timer :: convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec)
+void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec)
 {
     long int _nsec = tsec;
     if ( _nsec > 60 ) {
         nmin = _nsec / 60;
         _nsec %= 60;
     }
-    
+
     if ( nmin > 60 ) {
         nhrs = nmin / 60;
         nmin %= 60;
     }
-    
+
     nsec = _nsec;
 }
 
-void Timer :: convert2HMS(int& nhrs, int& nmin, int& nsec, double tsec)
+void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 {
-    Timer  ::  convert2HMS(nhrs, nmin, nsec, (long int)tsec);
+    Timer  ::  convert2HMS(nhrs, nmin, nsec, ( long int ) tsec);
 }
 
-void Timer :: toString(char* buff)
+void Timer :: toString(char *buff)
 {
     sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() );
 }
@@ -167,15 +157,13 @@ void Timer :: updateElapsedTime()
         resumeTimer();
     }
 
-#ifndef _MSC_VER
-#ifndef __MINGW32__
+#ifndef _WIN32
     oofem_timeval etime;
     timersub(& end_wtime, & start_wtime, & etime);
     timeradd(& etime, & elapsedWTime, & elapsedWTime);
 
     timersub(& end_utime, & start_utime, & etime);
     timeradd(& etime, & elapsedUTime, & elapsedUTime);
-#endif
 #endif
 
     start_utime = end_utime;
@@ -192,20 +180,19 @@ double EngngModelTimer :: getWtime(EngngModelTimer :: EngngModelTimerType t)
     return timers [ t ].getWtime();
 }
 
-void EngngModelTimer :: convert2HMS(int& nhrs, int& nmin, int& nsec, long int tsec) const
+void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const
 {
     Timer  ::  convert2HMS(nhrs, nmin, nsec, tsec);
 }
 
-void EngngModelTimer :: convert2HMS(int& nhrs, int& nmin, int& nsec, double tsec) const
+void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const
 {
     Timer  ::  convert2HMS(nhrs, nmin, nsec, tsec);
 }
 
-void EngngModelTimer :: toString(EngngModelTimer :: EngngModelTimerType t, char* buff)
+void EngngModelTimer :: toString(EngngModelTimer :: EngngModelTimerType t, char *buff)
 {
     return timers [ t ].toString(buff);
 }
-    
 }
 
