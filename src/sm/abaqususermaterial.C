@@ -49,17 +49,9 @@ int AbaqusUserMaterial :: n = 1;
 AbaqusUserMaterial :: ~AbaqusUserMaterial()
 {
 #ifdef _WIN32
- #ifdef __MINGW32__
     if ( this->umatobj ) {
         FreeLibrary( ( HMODULE ) this->umatobj );
     }
-
- #else
-    if ( this->umatobj ) {
-        FreeLibrary(this->umatobj);
-    }
-
- #endif
 #else
     if ( this->umatobj ) {
         dlclose(this->umatobj);
@@ -84,21 +76,20 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, umatname, IFT_AbaqusUserMaterial_userMaterial, "name");
     strncpy(this->cmname, umatname.c_str(), 80);
 
-#ifndef __MINGW32__
- #ifdef _WIN32
+#ifdef _WIN32
     ///@todo Check all the windows support.
-    //this->umatobj = (void*)LoadLibrary(umatfile.c_str());
+    this->umatobj = ( void * ) LoadLibrary( umatfile.c_str() );
     if ( !this->umatobj ) {
-        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str(), dlerror() );
+        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str()) );
     }
 
-    // *(void**)( &this->umat ) = GetProcAdress((HMODULE)this->umatobj, "umat_");
+    * ( void ** )( & this->umat ) = GetProcAdress( ( HMODULE ) this->umatobj, "umat_" );
     if ( !this->umat ) {
-        //char *dlresult = GetLastError();
-        //OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
+        char *dlresult = GetLastError();
+        OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\nerror: %s\n", dlresult);
     }
 
- #else
+#else
     this->umatobj = dlopen(umatfile.c_str(), RTLD_NOW);
     if ( !this->umatobj ) {
         OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str(), dlerror() );
@@ -110,7 +101,6 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
     }
 
- #endif
 #endif
     return IRRT_OK;
 }
@@ -220,9 +210,10 @@ void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 
     // Times and increment
     double dtime = tStep->giveTimeIncrement();
+    ///@todo Check this. I'm just guessing. Maybe intrinsic time instead?
     double time [ 2 ] = {
         tStep->giveTargetTime() - dtime, tStep->giveTargetTime()
-    };                                                                         ///@todo Check this. I'm just guessing. Maybe intrinsic time instead?
+    };
     double pnewdt = 1.0; ///@todo Right default value? umat routines may change this (although we ignore it)
 
     /* Specific elastic strain energy, plastic dissipation, and “creep” dissipation, respectively. These are passed
