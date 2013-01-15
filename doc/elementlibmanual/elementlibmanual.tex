@@ -14,8 +14,7 @@
 \renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
 \setcounter{totalnumber}{5} %maximum floating objects on one page
 
-\newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
-\newcommand{\descitem}[1]{{\noindent \bf #1}:}
+\newcommand{\descitem}[1]{{\noindent \textbf{#1}}:}
 \newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\bf \texttt{#1}}}
 \newcommand{\elemparam}[2]{{{\texttt{#1}\tiny (#2)}~~\#}}
 \newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
@@ -249,12 +248,12 @@ coordinate system is determined by the following rules:
 \begin{enumerate}
 \item let first element node has following coordinates $(x_i, y_i, z_i)$
 and the second one $(x_j, y_j, z_j)$,
-\item direction vector of local x-axis is then $\mbf{a_1} = (x_j-x_i, y_j-y_i, z_j-z_i)$,
+\item direction vector of local x-axis is then $\mathbf{a}_1 = (x_j-x_i, y_j-y_i, z_j-z_i)$,
 \item local y-axis direction vector lies in plane defined by local
-x-axis direction vector ($\mbf{a_1}$) and given
+x-axis direction vector ($\mathbf{a}_1$) and given
 point (k-node with coordinates $(x_k, y_k, z_k)$) - so called reference node,
 \item local z-axis is then determined as vector product of local
-x-axis direction vector ($\mbf{a_1}$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
+x-axis direction vector ($\mathbf{a}_1$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
 \item local y-axis is then determined as vector product of local
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
@@ -308,9 +307,11 @@ Represents two-node lattice element. Each node has 3 degrees of freedom.
 The element is defined in x,y plane.
 
 \begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{lattice2d.pdf}
-\caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
+ \centering
+ \begin{makeimage}
+  \input{lattice2d.tikz}
+ \end{makeimage}
+ \caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
  \label{lattice2dfig}
 \end{figure}
 
@@ -335,8 +336,7 @@ z-axis).
  \begin{makeimage}
   \input{planestress2d.tikz}
  \end{makeimage}
- \caption{PlaneStress2d element. Node numbering, Side numbering and
- definition of local edge c.s.(a).}
+ \caption{PlaneStress2d element. Node numbering, Side numbering and definition of local edge c.s.(a).}
  \label{Planestress2dfig}
 \end{figure}
 

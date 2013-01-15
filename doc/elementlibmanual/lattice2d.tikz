@@ -1,0 +1,30 @@
+\tikzstyle{elemnode} = [draw,thin,circle,inner sep=1,fill=white]
+\tikzstyle{dofstyle} = [red]
+\tikzstyle{nodestyle} = [black]
+
+\begin{tikzpicture}[scale=7,>=stealth]
+ \coordinate (b) at (0.15,0.1);
+ \newcommand{\beamlength}{0.6};
+
+ \draw[->] (-0.05,0) -- (0.6,0) node[below,at end] {$x_g$};
+ \draw[->] (0,-0.05) -- (0,0.5) node[right,at end] {$y_g$};
+
+ \draw[very thick] (b) -- +(30:\beamlength)
+    coordinate[midway] (bmid)
+    coordinate[at end] (bend);
+
+ \draw[dotted,<-] (bmid)++(-60:0.05) node[below left] {$y_\mathrm{l}$} -- +(-60:0.1) coordinate (bmid2);
+ \draw[dotted,->] (bmid2) -- +(30:0.1) node[below right] {$x_\mathrm{l}$};
+ \node[elemnode] at (bmid2) {};
+ \node[below] at (bmid2) {$C$};
+
+ \draw[thin,->] (b) -- +(0:0.1) node[right, dofstyle] {1};
+ \draw[thin,->] (b) -- +(90:0.1) node[above, dofstyle] {2};
+ \draw[thin,->] (bend) -- +(0:0.1) node[right, dofstyle] {4};
+ \draw[thin,->] (bend) -- +(90:0.1) node[above, dofstyle] {5};
+ \draw[thin,->] (b)++(-60:0.05) arc (-60:150:0.05) node[left, dofstyle] {3};
+ \draw[thin,->] (bend)++(-60:0.05) arc (-60:150:0.05) node[left, dofstyle] {6};
+
+ \node[elemnode] at (b) {}; \node[below, nodestyle] at (b) {1};
+ \node[elemnode] at (bend) {}; \node[below, nodestyle] at (bend) {2};
+\end{tikzpicture}
