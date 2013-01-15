@@ -59,16 +59,16 @@ void Timer :: getUtime(oofem_timeval &answer)
 
 void Timer :: getTime(oofem_timeval &answer)
 {
-     gettimeofday(&answer, NULL);
+    gettimeofday(&answer, NULL);
 }
 
 #else // #ifndef _MSC_VER
 
 void Timer :: getUtime(oofem_timeval &answer)
 {
-     clock_t utime = clock();
-     answer.tv_sec = utime / CLOCKS_PER_SEC;
-     answer.tv_usec = 0;
+    clock_t utime = clock();
+    answer.tv_sec = utime / CLOCKS_PER_SEC;
+    answer.tv_usec = 0;
 }
 
 void Timer :: getTime(oofem_timeval &answer)

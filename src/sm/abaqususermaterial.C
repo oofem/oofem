@@ -49,15 +49,12 @@ int AbaqusUserMaterial::n = 1;
 
 AbaqusUserMaterial :: ~AbaqusUserMaterial()
 {
-    
-#ifndef __MINGW32__
-#if defined (_MSC_VER)
+#if defined (_MSC_VER) || defined (__MINGW32__)
     if (this->umatobj)
         FreeLibrary(this->umatobj);
 #else
     if (this->umatobj)
         dlclose(this->umatobj);
-#endif
 #endif
 }
 
@@ -77,16 +74,16 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, umatname, IFT_AbaqusUserMaterial_userMaterial, "name");
     strncpy(this->cmname, umatname.c_str(), 80);
 
-#ifndef __MINGW32__
-#ifdef _MSC_VER
-    this->umatobj = LoadLibrary(umatfile.c_str());
+#if defined (_MSC_VER) || defined (__MINGW32__)
+    ///@todo Check all the windows support.
+    //this->umatobj = (void*)LoadLibrary(umatfile.c_str());
     if (!this->umatobj) {
         OOFEM_ERROR3("AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str(), dlerror ());
     }
-    *(void**)( &this->umat ) = GetProcAdress((HMODULE)this->umatobj, "umat_");
+    // *(void**)( &this->umat ) = GetProcAdress((HMODULE)this->umatobj, "umat_");
     if ( !this->umat ) {
-        char *dlresult = GetLastError();
-        OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
+        //char *dlresult = GetLastError();
+        //OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
     }
 #else
     this->umatobj = dlopen(umatfile.c_str(), RTLD_NOW);
@@ -99,7 +96,6 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     if (dlresult) {
        OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
     }
-#endif
 #endif
 
     return IRRT_OK;
