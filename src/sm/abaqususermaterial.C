@@ -80,15 +80,17 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     ///@todo Check all the windows support.
     this->umatobj = ( void * ) LoadLibrary( umatfile.c_str() );
     if ( !this->umatobj ) {
-        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str()) );
+        OOFEM_ERROR2( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", umatfile.c_str() );
     }
 
-    * ( void ** )( & this->umat ) = GetProcAdress( ( HMODULE ) this->umatobj, "umat_" );
+//     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
+    *(FARPROC *)( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );//works for MinGW 32bit
     if ( !this->umat ) {
-        char *dlresult = GetLastError();
+//         char *dlresult = GetLastError();
+        DWORD dlresult = GetLastError();//works for MinGW 32bit
         OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\nerror: %s\n", dlresult);
     }
-
+    
 #else
     this->umatobj = dlopen(umatfile.c_str(), RTLD_NOW);
     if ( !this->umatobj ) {
