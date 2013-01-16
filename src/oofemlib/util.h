@@ -62,7 +62,7 @@ char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
  * Returns the name of the file containing the data of the problem.
  * @param dataInputFileName Input file name read from stdin.
  */
-void giveInputDataFileName(std::string &sdataInputFileName);
+void giveInputDataFileName(std::string &dataInputFileName);
 
 /**
  * Instanciates the new problem.

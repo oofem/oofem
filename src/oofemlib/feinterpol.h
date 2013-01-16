@@ -194,7 +194,9 @@ public:
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
      * @param answer Basis functions Array to be filled with the boundary nodes.
-     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
+     * @todo Support boundary number.
      */
     virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
@@ -202,6 +204,7 @@ public:
      * @param answer The evaluated normal.
      * @param boundary Boundary number.
      * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
      * @return The boundary transformation Jacobian.
      */
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
@@ -209,6 +212,8 @@ public:
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
      * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
      * @return The determinant of the boundary transformation Jacobian.
      */
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;

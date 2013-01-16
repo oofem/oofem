@@ -1190,6 +1190,7 @@ Stokes' flow elements neglect acceleration, and thus requires no additional stab
 \subsubsection{Tr21Stokes element}
 Standard 6 node triangular element for stokes flow, with quadratic geometry, velocity and linear pressure.
 Both compressible and incompressible material behavior is supported (and also the seamless transition between the two).
+
 \elemkeyword{Tr121Stokes}\\
 \descitem{Parameters} none.
 \descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes.
@@ -1197,9 +1198,28 @@ Both compressible and incompressible material behavior is supported (and also th
 
 \subsubsection{Tet21Stokes element}
 Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure.
+
 \elemkeyword{Tr121Stokes}\\
 \descitem{Parameters} none.
 \descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.
+\descitem{Status} Untested.
+
+\subsubsection{Tr1BubbleStokes element}
+So called ``Mini'' element in 2D. A 3 node triangular element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
+Should not be used with materials that have memory (which is uncommon for flow problems).
+
+\elemkeyword{Tr1BubbleStokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
+\descitem{Status} Untested.
+
+\subsubsection{Tet1BubbleStokes element}
+So called ``Mini'' element in 3D. A 4 node tetrahedral element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
+Should not be used with materials that have memory (which is uncommon for flow problems).
+
+\elemkeyword{Tet1BubbleStokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
 \descitem{Status} Untested.
 
 \subsection{2D CBS Elements}

@@ -3438,6 +3438,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
             this->mesh->addElement(i, _element);
         } else {
             OOFEM_ERROR2("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
+            _element = NULL;
         }
 
 #ifdef __PARALLEL_MODE

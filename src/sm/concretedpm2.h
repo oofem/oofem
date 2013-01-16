@@ -702,7 +702,7 @@ public:
 
     /**
      * Perform stress return for vertex case of the plasticity model, i.e. if the trial stress state lies within the vertex region.
-     * @param strain Strain vector of this Gauss point.
+     * @param stress Stress vector of this Gauss point.
      * @param apexStress Volumetric stress at the apex of the yield surface.
      * @param gp Gauss point.
      */

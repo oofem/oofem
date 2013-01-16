@@ -213,6 +213,7 @@ protected:
      * uniformly distributed in log time scale.
      * The time interval (to-from) is divided to nsteps intervals.
      * We return times starting from ("from" + first increment)
+     * @param answer Resulting array of discrete times.
      * @param from Starting time
      * @param to End time
      * @param nsteps Number of discrete steps.

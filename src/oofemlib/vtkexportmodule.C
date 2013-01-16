@@ -539,7 +539,8 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 }
 
 void
-VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep) {
+VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep)
+{
     int i, ielem, pos;
     InternalStateType type;
     Element *elem;
@@ -580,13 +581,9 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
         case IST_MaterialOrientation_z:
             if ( type == IST_MaterialOrientation_x ) {
                 pos = 1;
-            }
-
-            if ( type == IST_MaterialOrientation_y ) {
+            } else if ( type == IST_MaterialOrientation_y ) {
                 pos = 2;
-            }
-
-            if ( type == IST_MaterialOrientation_z ) {
+            } else {
                 pos = 3;
             }
 

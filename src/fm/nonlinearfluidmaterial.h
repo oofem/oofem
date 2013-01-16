@@ -60,53 +60,53 @@ protected:
 public:
     NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g);
 
-    ~NonlinearFluidMaterialStatus() { }
+    virtual ~NonlinearFluidMaterialStatus() { }
 
     virtual void initTempStatus();
 
     virtual void updateYourself(TimeStep *);
 
-    const FloatArray &giveDeviatoricStrainVector()                                { return deviatoricStrainVector; }
-    const FloatArray &giveTempDeviatoricStrainVector()                            { return temp_deviatoricStrainVector; }
-    void  letTempDeviatoricStrainVectorBe(const FloatArray &v)       { temp_deviatoricStrainVector = v; }
+    const FloatArray &giveDeviatoricStrainVector() { return deviatoricStrainVector; }
+    const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
+    void  letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
 
-    const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
-    classType giveClassID() const { return NonlinearFluidMaterialStatusClass; }
+    virtual const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
+    virtual classType giveClassID() const { return NonlinearFluidMaterialStatusClass; }
 };
 
 /**
  * Constitutive model of a nonlinear fluid material where the deviatoric stress is defined as
- *
- * $\sigma^{\mbox{dev}}=2\mu(1+C \mid\mid \mathbm{v} \otimes \mathbm{\nabla} \mid\mid^{\alpha})\mathbm{v} \otimes \mathbm{\nabla}$
- *
- * where $C$ and $\alpha$ are constants and $\mu$ the viscosity.
+ * @f[
+ * \boldsymbol{\sigma}_{\text{dev}}=2\mu(1+C \mid\mid \boldsymbol{v} \otimes \boldsymbol{\nabla} \mid\mid^{\alpha})\boldsymbol{v} \otimes \boldsymbol{\nabla}
+ * @f]
+ * where @f$ C @f$ and @f$ \alpha @f$ are constants and @f$ \mu @f$ the viscosity.
  *
  * @author Carl Sandström
  */
 class NonlinearFluidMaterial : public FluidDynamicMaterial
 {
 protected:
-    /// Viscosity $\mu$ of o material
+    /// Viscosity @f$ \mu @f$ of material.
     double viscosity;
-    /// Material constant $C$
+    /// Material constant @f$ C @f$.
     double c;
-    /// Material constant $\alpha$
+    /// Material constant @f$ \alpha @f$.
     double alpha;
-public:
 
+public:
     NonlinearFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
 
-    ~NonlinearFluidMaterial()                { }
+    virtual ~NonlinearFluidMaterial() { }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseForm form,
-                                           MatResponseMode mode,
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
+                                          MatResponseForm form,
+                                          MatResponseMode mode,
+                                          GaussPoint *gp,
+                                          TimeStep *atTime);
+
+    virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
-
-    virtual double  giveCharacteristicValue(MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *atTime);
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
@@ -115,22 +115,18 @@ public:
 
     virtual double give(int aProperty, GaussPoint *);
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "NewtonianFluidMaterial"; }
-    /// Returns classType id of receiver.
-    classType giveClassID()         const { return NewtonianFluidMaterialClass; }
+    virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
+    virtual classType giveClassID() const { return NewtonianFluidMaterialClass; }
 
-    virtual int    checkConsistency();
+    virtual int checkConsistency();
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-protected:
 };
 } // end namespace oofem
 #endif // nonlinearfluidmaterial_h

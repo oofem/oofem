@@ -282,7 +282,7 @@ public:
     void copySubVector(const IntArray &src, int si);
     /**
      * Sets the array to be a sequence of values.
-     * @param x Number of integers in the sequence to follow.
+     * @param n Number of integers in the sequence to follow.
      */
     void setValues(int n, ...);
     /**

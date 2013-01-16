@@ -69,7 +69,6 @@ namespace oofem {
  *
  * @author Vit Smilauer
  */
-
 class CemhydMatStatus;
 
 #ifdef __TM_MODULE //OOFEM transport module
@@ -100,7 +99,7 @@ public:
     /// Returns concrete density depending on chosen type
     virtual double giveConcreteDensity(GaussPoint *gp);
 
-    ///compute heat thermal capacity per volume
+    /// Compute heat thermal capacity per volume.
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -108,28 +107,29 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual int initMaterial(Element *element);
-    ///clear temperatures multiplied with volume around GPs - need before temperature averaging
+    /// Clear temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void clearWeightTemperatureProductVolume(Element *element);
-    ///store temperatures multiplied with volume around GPs - need before temperature averaging
+    /// Store temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void storeWeightTemperatureProductVolume(Element *element, TimeStep *tStep);
-    ///perform averaging on a master CemhydMatStatus
+    /// Perform averaging on a master CemhydMatStatus.
     virtual void averageTemperature(void);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    ///use different methods to evaluate material parameters
+    /// Use different methods to evaluate material parameters
     int conductivityType, capacityType, densityType;
-    ///array containing warnings supression for density, conductivity, capacity, high temperature
+    /// Array containing warnings supression for density, conductivity, capacity, high temperature.
     IntArray nowarnings;
-    ///array containing scaling factors for density, conductivity and capacity
+    /// Array containing scaling factors for density, conductivity and capacity.
     FloatArray scaling;
-    ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
+    /// Degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
     int reinforcementDegree;
-    ///assign a separate microstructure in each integration point
+    /// Assign a separate microstructure in each integration point.
     int eachGP;
-    ///XML input file name for CEMHYD3D
+    /// XML input file name for CEMHYD3D.
     std::string XMLfileName;
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    /** Pointer to master CemhydMatStatus, which is shared among related integration points (on element, for example).
+    /** 
+     * Pointer to master CemhydMatStatus, which is shared among related integration points (on element, for example).
      * When Cemhyd3D runs seperately in each GP, MasterCemhydMatStatus belongs to the first instance, from which the microstructure is copied to the rest of integration points.
      */
     CemhydMatStatus *MasterCemhydMatStatus;
@@ -176,7 +176,7 @@ double GiveCp(void);
 double computeConcreteCapacityBentz(void);
 double GiveDensity(void);
 double GiveDoHLastCyc(void);
-///return degree of hydration of the receiver
+/// Return degree of hydration of the receiver
 double GiveDoHActual(void);
 int GiveCycNum(void);
 double GiveCycTime(void);
@@ -189,21 +189,21 @@ void AnalyticHomogenizationPaste(double &E, double &nu, int perc_unperc_flag);
 void AnalyticHomogenizationConcrete(double E_paste_inp, double nu_paste_inp, double *E_paste, double *nu_paste, double *E_mortar, double *nu_mortar, double &E_concrete, double &nu_concrete);
 void GetInitClinkerPhases(double &c3s, double &c2s, double &c3a, double &c4af, double &gypsum, double &hemi, double &anh);
 
-///average temperature through integration points
+/// Average temperature through integration points
 double averageTemperature;
-///volume associated to master IP of one CemhydMat
+/// Volume associated to master IP of one CemhydMat
 double IPVolume;
-//inital material time for growing problems
+/// Inital material time for growing problems
 double init_material_time;
 
-///auxiliary function for temperature averaging over GPs
+/// Auxiliary function for temperature averaging over GPs
 void setAverageTemperatureVolume(double temperature, double volume) {
     averageTemperature = temperature;
     IPVolume = volume;
 }
-///auxiliary function
+// Auxiliary function
 double giveAverageTemperature(void);
-///auxiliary function
+// Auxiliary function
 double giveTotalVolume(void) { return IPVolume; }
 
 int readInputFileAndInitialize(const char *inp, bool generateMicrostructure);
@@ -220,19 +220,19 @@ double *PhaseFrac;
 //double SH_hmg_1;
 double LastHydrTime, LastCallTime, PrevHydrTime;
 double LastCycHeat, LastTotHeat, PrevCycHeat;
-///The last incremental heat returned from a GP
+/// The last incremental heat returned from a GP
 double PartHeat;
 /* Parameters for kinetic modelling ---- maturity approach */
 double ind_time, temp_0, temp_cur, time_step, time_cur, E_act, beta, heat_new, Mass_cement_concrete;
-///cycle of celular automata
+/// Cycle of celular automata
 int icyc;
-///Array for storing temporary values (elastic properties etc.)
+/// Array for storing temporary values (elastic properties etc.)
 double *last_values;
-///Flag to proceed percolation filtering and elastic homogenization
+/// Flag to proceed percolation filtering and elastic homogenization
 int Calculate_elastic_homogenization;
 private:
 #ifdef __TM_MODULE //OOFEM transport module
-///stores GP of the CemhydMatStatus
+/// Stores GP of the CemhydMatStatus
 GaussPoint * gp;
 #endif
 double LastTargTime;

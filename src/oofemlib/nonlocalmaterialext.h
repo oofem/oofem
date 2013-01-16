@@ -360,8 +360,8 @@ protected:
      * This function is called when nlvariation is set to 1.
      * The function loops over all user defined nonlocal boundaries to
      * to find minimum distance from the GP. Then calculates interaction radius
-     * @param gp  Gauss Point whose interaction radius is calculated based on the distance-based averaging approach
-     * @return    new interaction radius based on the Distance of the Gauss Point from Nonlocal Boundaries
+     * @param gpCoords The Gauss points' coordinates, whose interaction radius is calculated based on the distance-based averaging approach.
+     * @return New interaction radius based on the Distance of the Gauss Point from Nonlocal Boundaries.
      */
     double giveDistanceBasedInteractionRadius(const FloatArray &gpCoords);
 };

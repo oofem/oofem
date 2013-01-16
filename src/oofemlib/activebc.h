@@ -208,6 +208,7 @@ public:
      * @param field Field to take value from.
      * @param mode Mode of unknown value.
      * @param tStep Time step.
+     * @param dof Active dof for which to obtain the value.
      * @return Value of dof.
      */
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
@@ -220,9 +221,10 @@ public:
      * @param eid Equation ID for the unknown value.
      * @param mode Mode of unknown value.
      * @param tStep Time step.
+     * @param dof Active dof for which to obtain the value.
      * @return Value of dof.
      */
-    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+    virtual double giveUnknown(EquationID eid, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
         OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
         return 0.0;

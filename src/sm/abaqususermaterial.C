@@ -119,7 +119,7 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( ~ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
         MaterialMode mMode = gp->giveMaterialMode();
-        int ncomp;
+        int ncomp = 0;
         if ( mMode == _3dMat ) {
             ncomp = 6;
         } else if ( mMode == _PlaneStress ) {
