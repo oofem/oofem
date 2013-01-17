@@ -55,8 +55,16 @@ namespace oofem {
 class ConcreteDPM2Status : public StructuralMaterialStatus
 {
 public:
-    /// values of history variable state_flag
-    enum state_flag_values { ConcreteDPM2_Elastic, ConcreteDPM2_Unloading, ConcreteDPM2_Plastic, ConcreteDPM2_Damage, ConcreteDPM2_PlasticDamage,  ConcreteDPM2_VertexCompression, ConcreteDPM2_VertexTension, ConcreteDPM2_VertexCompressionDamage, ConcreteDPM2_VertexTensionDamage };
+    /// Values of history variable state_flag.
+    enum state_flag_values { ConcreteDPM2_Elastic, 
+                             ConcreteDPM2_Unloading,
+                             ConcreteDPM2_Plastic,
+                             ConcreteDPM2_Damage,
+                             ConcreteDPM2_PlasticDamage,
+                             ConcreteDPM2_VertexCompression,
+                             ConcreteDPM2_VertexTension,
+                             ConcreteDPM2_VertexCompressionDamage,
+                             ConcreteDPM2_VertexTensionDamage };
 protected:
     /// @name History variables of the plasticity model
     //@{
@@ -523,16 +531,13 @@ public:
 //   *** CLASS DYNAMIC CONCRETE   ***
 //   ********************************
 
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "cltypes.h"
-#include "structuralmaterial.h"
-#include "isolinearelasticmaterial.h"
-#include "strainvector.h"
-#include "stressvector.h"
-
 /**
- * This class contains the combination of a local plasticity model for concrete with a local isotropic damage model. This is an extension of concretedpm2. The yield surface of the plasticity model is based on the extension of the Menetrey and Willam yield criterion. The flow rule is nonassociated. The evolution laws of the hardening variables depend on the stress state. The plasticity model describes only hardening and perfect plasticity. It is based on the effective stress. The damage parameter of the isotropic damage model is based on the total volumetric strain. An exponential softening law is implemented.
+ * This class contains the combination of a local plasticity model for concrete with a local isotropic damage model.
+ * This is an extension of concretedpm2. The yield surface of the plasticity model is based on the extension of the Menetrey and Willam yield criterion.
+ * The flow rule is nonassociated. The evolution laws of the hardening variables depend on the stress state.
+ * The plasticity model describes only hardening and perfect plasticity.
+ * It is based on the effective stress. The damage parameter of the isotropic damage model is based on the total volumetric strain.
+ * An exponential softening law is implemented.
  */
 class ConcreteDPM2 : public StructuralMaterial
 {
