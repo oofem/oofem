@@ -251,7 +251,7 @@ INCLUDE_PATH           = @oofem_SOURCE_DIR@/src/ \
                          @oofem_SOURCE_DIR@/src/oofemlib/iml/ \
                          @oofem_SOURCE_DIR@/src/fm/ \
                          @oofem_SOURCE_DIR@/src/sm/ \
-                         @oofem_SOURCE_DIR@/src/tm/ \
+                         @oofem_SOURCE_DIR@/src/tm/
 INCLUDE_FILE_PATTERNS  =
 
 # The PREDEFINED tag can be used to specify one or more macro names that
