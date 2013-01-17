@@ -50,11 +50,12 @@
  #include "../isoheatmat.h"
 #endif
 
+namespace oofem {
+
 typedef struct FCOMPLEX {
     float r, i;
 } fcomplex_cem;
 
-namespace oofem {
 /**
  * CemhydMat is a general class of the hydration model CEMHYD3D, version 3.0.
  * The model has been developed at NIST under the leadership of D.P. Bentz and E.J. Garboczi.
@@ -143,6 +144,10 @@ class CemhydMatStatus : public TransportMaterialStatus
 public:
     /**
      * Create status in an integration point.
+     * @param n Number of receiver.
+     * @param d Domain that receiver belongs to.
+     * @param gp Integration point that receiver belongs to.
+     * @param cemhydmat Material model which receiver belongs to.
      * @param CemStat A pointer to existing microstructure, from which the 3D image is copied.
      * @param withMicrostructure Creates also 3D microstructure representation at the integration point.
      */

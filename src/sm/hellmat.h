@@ -79,10 +79,11 @@ class AgingIsoLEMaterial : public IsotropicLinearElasticMaterial
 {
 public:
     /**
-     * Constructor. Creates a new AgingIsoLEMaterial class instance
-     * with given number belonging to domain d.
-     * @param n material model number in domain
-     * @param d domain which receiver belongs to
+     * Creates a new AgingIsoLEMaterial class instance with given number belonging to domain.
+     * @param n Material model number in domain.
+     * @param d Domain which receiver belongs to.
+     * @param E Young's modulus.
+     * @param nu Poisson's ratio.
      */
     AgingIsoLEMaterial(int n, Domain *d, double E, double nu);
     void setE(double newE);

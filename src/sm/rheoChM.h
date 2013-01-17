@@ -232,6 +232,8 @@ protected:
      * where @f$ \varepsilon_n(t) @f$ is stress-independent deformation, for the case
      * where @f$ \varepsilon(t) = 1 @f$ is kept at constant value in time.
      *
+     * @param[out] answer Array with evaluated relaxation function.
+     * @param gp Integration point.
      * @param t0 Age of material when load is applied.
      * @param tr Age of material when relaxation has begun ???
      * @param atTimes At which times the relaxation function will be evaluated.

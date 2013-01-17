@@ -70,7 +70,7 @@ void giveInputDataFileName(std::string &dataInputFileName);
  * @param mode Mode determining macro or micro problem.
  * @param master Master problem in case of multiscale computations.
  * @param parallelFlag Determines if the problem should be run in parallel or not.
- * @todo Document the contextFlag input.
+ * @param contextFlag When set, turns on context output after each step.
  */
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
