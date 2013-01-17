@@ -47,43 +47,42 @@ namespace oofem {
 class Domain;
 class EngngModel;
 
-
+/**
+ * This class implements the class NumericalMethod instance Generalized Jacobi
+ * Eigen Value Problem Solver
+ *
+ * DESCRIPTION :
+ * Perform solution of eigen value problem in the form
+ * K y = (omega)^2 M y
+ *
+ * TASKS :
+ *
+ * - solving problem
+ *   solveYourselfAt.
+ * - returning results (eigen values and associated eigen vectors).
+ *
+ * Variable description  :
+ *
+ *       A(N,N)    = STIFFNESS MATRIX (ASSUMED POZITIVE DEFINITE)        *
+ *       B(N,N)    = MASS MATRIX (ASSUMED POZITIVE DEFINITE)             *
+ *       X(N,N)    = MATRIX STORING EIGENVECTORS ON SOLUTION EXIT        *
+ *       EIGV(N)   = VECTOR STORING EIGENVALUES ON SOLUTION EXIT         *
+ *       D(N)      = WORKING VECTOR                                      *
+ *       N         = ORDER OF WORKING AREA MATRICES A AND B              *
+ *       RTOL      = CONVERGENCE TOLERANCE (USUALLY SET TO 10.**-12)     *
+ *       NSMAX     = MAXIMUM NUMBER OF SWEEPS ALLOVED                    *
+ *                                 (USUALLY SET TO 15)                   *
+ *
+ * OUTPUT : (after call solveYourselfAt)
+ *       A(N,N)    = DIAGONALIZED STIFFNESS MATRIX                       *
+ *       B(N,N)    = DIAGONALIZED MASS MATRIX                            *
+ *       X(N,N)    = EIGENVECTORS STORED COLUMNWISE                      *
+ *       EIGV(N)   = EIGENVALUES                                         *
+ *
+ *
+ */
 class InverseIteration : public SparseGeneralEigenValueSystemNM
 {
-    /*
-     * This class implements the class NumericalMethod instance Generalized Jacobi
-     * Eigen Value Problem Solver
-     *
-     * DESCRIPTION :
-     * Perform solution of eigen value problem in the form
-     * K y = (omega)^2 M y
-     *
-     * TASKS :
-     *
-     * - solving problem
-     *   solveYourselfAt.
-     * - returning results (eigen values and associated eigen vectors).
-     *
-     * Variable description  :
-     *
-     *       A(N,N)    = STIFFNESS MATRIX (ASSUMED POZITIVE DEFINITE)        *
-     *       B(N,N)    = MASS MATRIX (ASSUMED POZITIVE DEFINITE)             *
-     *       X(N,N)    = MATRIX STORING EIGENVECTORS ON SOLUTION EXIT        *
-     *       EIGV(N)   = VECTOR STORING EIGENVALUES ON SOLUTION EXIT         *
-     *       D(N)      = WORKING VECTOR                                      *
-     *       N         = ORDER OF WORKING AREA MATRICES A AND B              *
-     *       RTOL      = CONVERGENCE TOLERANCE (USUALLY SET TO 10.**-12)     *
-     *       NSMAX     = MAXIMUM NUMBER OF SWEEPS ALLOVED                    *
-     *                                 (USUALLY SET TO 15)                   *
-     *
-     * OUTPUT : (after call solveYourselfAt)
-     *       A(N,N)    = DIAGONALIZED STIFFNESS MATRIX                       *
-     *       B(N,N)    = DIAGONALIZED MASS MATRIX                            *
-     *       X(N,N)    = EIGENVECTORS STORED COLUMNWISE                      *
-     *       EIGV(N)   = EIGENVALUES                                         *
-     *
-     *
-     */
 private:
     FloatMatrix *a;
     FloatMatrix *b;
@@ -96,20 +95,9 @@ private:
 public:
 
     InverseIteration(int i, Domain *d, EngngModel *m);
-    // constructor
-    virtual ~InverseIteration();               // destructor
+    virtual ~InverseIteration();
 
-    /**
-     * Solves the given sparse generalized eigen value system of equations Ax = o^2 Bx.
-     * @param A coefficient matrix
-     * @param B coefficient matrix
-     * @param x eigen vector(s)
-     * @param o eigen value(s)
-     * @param rtol tolerance
-     * @param nroot number of required eigenvalues
-     * @return NM_Status value
-     */
-    virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *r, double rtol, int nroot);
+    virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification

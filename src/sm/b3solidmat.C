@@ -651,6 +651,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
         eta = 1.e6 * tHalfStep / q4;
     } else {
         _error("computeFlowTermViscosity - mode is not supported");
+        eta = 0.;
     }
 
     return eta;
@@ -930,6 +931,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
         humNew = humOld + 0.5 * ( this->giveHumidityIncrement(gp, atTime) );       //linearly approximated
     } else {
         _error("computeMicroPrestress: invalid option parameter");
+        humNew = 0.;
     }
 
     //following section is used if humidity remains constant
@@ -958,7 +960,7 @@ B3SolidMaterial :: giveInitMicroPrestress(void)
 double
 B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes humidity at given TimeStep
 {
-    double humidity;
+    double humidity = 0.;
     int err, wflag = 0;
 
     /* ask for humidity from external sources, if provided */
@@ -989,7 +991,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime) //computes hum
 double
 B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime) //computes humidity increment at given TimeStep
 {
-    double humIncrement;
+    double humIncrement = 0.;
     int err, wflag = 0;
 
     /* ask for humidity from external sources, if provided */

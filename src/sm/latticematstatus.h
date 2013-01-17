@@ -61,7 +61,7 @@ public:
 
     virtual void initTempStatus() { }
 
-    virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) { }
     
     virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 

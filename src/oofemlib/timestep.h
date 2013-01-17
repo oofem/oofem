@@ -103,17 +103,16 @@ protected:
 
 public:
     /**
-     * Constructor. Creates a new solution step.
+     * Creates a new solution step.
      * @param n Solution step number.
      * @param e Reference to corresponding engng model.
      * @param mn Meta step number.
      * @param tt Intrinsic time.
      * @param dt Intrinsic time increment.
      * @param counter Solution state counter.
-     * @param timeDiscretization Time discretization.
+     * @param td Time discretization.
      */
-    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter);
-    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td);
+    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td = TD_Unspecified);
     TimeStep(const TimeStep &);
     TimeStep(EngngModel *e);
     TimeStep &operator=(const TimeStep &);

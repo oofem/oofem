@@ -173,13 +173,15 @@ public:
     void computeReaction(FloatArray &answer, TimeStep *tStep, int di);
     /**
      * Exchanges necessary remote DofManagers data.
-     * @ExchangeTag Exchange tag used by communicator.
+     * @param answer Array with collected values.
+     * @param ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
      */
     int updateSharedDofManagers(FloatArray &answer, int ExchangeTag);
     /**
      * Exchanges necessary remote prescribed DofManagers data.
-     * @ExchangeTag Exchange tag used by communicator.
+     * @param answer Array with collected values.
+     * @param ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
      */
     int updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag);
@@ -191,7 +193,7 @@ public:
      * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
      * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
      * receiver's services.
-     * @ExchangeTag Exchange tag used by communicator.
+     * @param ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
      */
     int exchangeRemoteElementData(int ExchangeTag);

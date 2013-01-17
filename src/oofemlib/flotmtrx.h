@@ -143,13 +143,13 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    double &operator()(int, int);
+    double &operator()(int i, int j);
     /**
      * Coefficient access function. Implements 0-based indexing.
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-    double operator()(int, int) const;
+    double operator()(int i, int j) const;
 
     /**
      * Assembles the contribution using localization array into receiver. The receiver must

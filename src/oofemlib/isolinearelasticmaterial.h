@@ -125,10 +125,10 @@ public:
     /// Returns Poisson's ratio.
     double givePoissonsRatio() { return nu; }
 
-    /// Returns the shear elastic modulus G = E / (2*(1+nu)).
+    /// Returns the shear elastic modulus @f$ G = \frac{E}{2(1+\nu)} @f$.
     double giveShearModulus() { return G; }
 
-    /// Returns the bulk elastic modulus K = E / (3*(1-2*nu)).
+    /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
@@ -145,10 +145,10 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /**
-     * Computes bulk modulus from given Young's modulus and Poisson's ratio
-     * @param young Young's modulus
-     * @param nu Poisson's ratio
-     * @return bulk modulus (K = E/(3*(1-2*nu))
+     * Computes bulk modulus from given Young's modulus and Poisson's ratio.
+     * @param young Young's modulus (@f$ E @f$).
+     * @param nu Poisson's ratio (@f$ \nu @f$).
+     * @return Bulk modulus (@f$ K = E/(3*(1-2*nu) @f$).
      */
     static double computeBulkModulusFromYoungAndPoisson(double young, double nu)
     {
@@ -156,10 +156,10 @@ public:
     }
 
     /**
-     * Computes shear modulus from given Young's modulus and Poisson's ratio
-     * @param E Young's modulus
-     * @param nu Poisson's ratio
-     * @return shear modulus (G = E/(2*(1+nu))
+     * Computes shear modulus from given Young's modulus and Poisson's ratio.
+     * @param young Young's modulus (@f$ E @f$).
+     * @param nu Poisson's ratio (@f$ \nu @f$).
+     * @return Shear modulus (@f$ G = \frac{E}{2 (1+\nu)} @f$).
      */
     static double computeShearModulusFromYoungAndPoisson(double young, double nu)
     {

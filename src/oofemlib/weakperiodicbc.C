@@ -311,7 +311,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 
 double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
 {
-    double fVal;
+    double fVal = 0.;
     double sideLength = smax - smin;
 
     if ( useBasisType == monomial ) {

@@ -1,32 +1,22 @@
-/** \mainpage OOFEM Reference Documentation
+/** 
+ * \mainpage OOFEM Reference Documentation
  *
- * <CENTER><H2>
- * Welcome to the world of OOFEM </H2></CENTER>
+ * <CENTER><H2>Welcome to the world of OOFEM </H2></CENTER>
  *
  * OOFEM is a general purpose object oriented FEM code, written in C++. 
- * This code is built on top of OOFEMlib - library containing the basic set of integrated classes offering the basic 
- * functionality of general FEM kernel (enhanced support is provided for structural analysis). 
- * The OOFEM code, built on the top of OOFEMlib, consist of different modules.
- * Currently, only <b> structural analysis module</b> is under development.
- * This manual contains the documentation of complete OOFEM source (structural analysis module and OOFEMlib).
+ * This code provides the functionality of general FEM kernel though the core library, with several modules that implements many types of elements, material models, and analysis types.
+ * This manual contains the API documentation for all components.
  *
  * For an introduction to the philosophy of OOFEM go on reading the \ref Introduction.
  * This reference manual will provide you with a complete documentation of the
  * features provided by OOFEM.
- * OOFEM allows user to directly focus on his/her problem, by writting some derived classes. 	
- * If you think OOFEM or OOFEMlib can help you with your projects and you want to get your
- * copy of OOFEM go on reading section \ref Distribution.
+ * OOFEM allows user to directly focus on his/her problem, at a high abstraction layer, by writing some derived classes.
+ * If you think OOFEM can help you with your projects and you want to get your copy of OOFEM go on reading section \ref Distribution.
  *
+ * See (<A HREF="http://oofem.org"> http://oofem.org </A>) for more information about OOFEM.
  *
- * See (<A HREF="http://oofem.org"> http://oofem.org </A>) 
- * for more information about OOFEM and OOFEMlib.
- *
- *
- * <CENTER>
- * <H2>Enjoy!</H2></CENTER>
- * 
+ * <CENTER><H2>Enjoy!</H2></CENTER>
  *
  * @author <A HREF="http://mech.fsv.cvut.cz/~bp/bp.html">Borek Patzak</A>
  */
-
 
