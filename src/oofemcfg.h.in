@@ -1,11 +1,11 @@
 #define PRG_VERSION "OOFEM version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
 #define OOFEG_VERSION "OOFEG version @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@"
-#define OOFEM_COPYRIGHT "Copyright (C) 1994-2011 Borek Patzak"
+#define OOFEM_COPYRIGHT "Copyright (C) 1994-2013 Borek Patzak"
 
 #define PRG_HEADER_SM "\
 ____________________________________________________\n\
            OOFEM - Finite Element Solver            \n\
-        Copyright (C) 1994-2012 Borek Patzak        \n\
+        Copyright (C) 1994-2013 Borek Patzak        \n\
 ____________________________________________________\n"
 
 #define PRG_HEADER "\
@@ -15,12 +15,15 @@ ____________________________________________________\n"
     #    #  #    #  #####   #####   # ## #\n\
    #    #  #    #  #       #       #    #\n\
   #    #  #    #  #       #       #    #   OOFEM ver. @oofem_VERSION_MAJOR@.@oofem_VERSION_MINOR@\n\
-  ####    ####   #       ######  #    #    Copyright (C) 1994-2012 Borek Patzak\n\
+  ####    ####   #       ######  #    #    Copyright (C) 1994-2013 Borek Patzak\n\
 ################################################################################\n\n"
 
 #define HOST_TYPE "@HOST_TYPE@"
 #define HOST_NAME "@HOST_NAME@"
 #define MODULE_LIST "@MODULE_LIST@"
+
+#ifndef CONFIG_DEFINED
+#define CONFIG_DEFINED
 
 /* Headers */
 /* Define if #include<sys/time.h> exist */
@@ -68,3 +71,4 @@ ____________________________________________________\n"
 /* Define to support arbitrary compoment labels */
 #cmakedefine __ENABLE_COMPONENT_LABELS
 
+#endif // CONFIG_DEFINED
