@@ -42,7 +42,7 @@
 #include "inputrecord.h"
 
 namespace oofem {
-enum basisType { monomial=0, trigonometric=1 };
+enum basisType { monomial=0, trigonometric=1, legendre=2 };
 /**
  * Imposes weak periodicity on the doftype of choice. 2D. It is required that the two edges are parallel and either horizontal or vertical.
  *
@@ -85,6 +85,22 @@ private:
 
     Node *gammaDman;
     IntArray DofIDList;
+
+    double factorial(double n) {
+    	if (n==0) {
+    		return 1.0;
+    	} else {
+    		return n*factorial(n-1);
+    	};
+    };
+
+    double binomial(double n , double k) {
+    	double f=1.0;
+    	for (double i=1.0; i<=k; i=i+1.0) {
+    		f=f*(n-(k-i))/i;
+    	}
+    	return f;//factorial(n)/(factorial(k)*factorial(n-k));
+    };
 
 public:
     WeakPeriodicbc(int n, Domain *d);
