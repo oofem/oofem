@@ -14,8 +14,7 @@
 \renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
 \setcounter{totalnumber}{5} %maximum floating objects on one page
 
-\newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
-\newcommand{\descitem}[1]{{\noindent \bf #1}:}
+\newcommand{\descitem}[1]{{\noindent \textbf{#1}}:}
 \newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\bf \texttt{#1}}}
 \newcommand{\elemparam}[2]{{{\texttt{#1}\tiny (#2)}~~\#}}
 \newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
@@ -249,12 +248,12 @@ coordinate system is determined by the following rules:
 \begin{enumerate}
 \item let first element node has following coordinates $(x_i, y_i, z_i)$
 and the second one $(x_j, y_j, z_j)$,
-\item direction vector of local x-axis is then $\mbf{a_1} = (x_j-x_i, y_j-y_i, z_j-z_i)$,
+\item direction vector of local x-axis is then $\mathbf{a}_1 = (x_j-x_i, y_j-y_i, z_j-z_i)$,
 \item local y-axis direction vector lies in plane defined by local
-x-axis direction vector ($\mbf{a_1}$) and given
+x-axis direction vector ($\mathbf{a}_1$) and given
 point (k-node with coordinates $(x_k, y_k, z_k)$) - so called reference node,
 \item local z-axis is then determined as vector product of local
-x-axis direction vector ($\mbf{a_1}$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
+x-axis direction vector ($\mathbf{a}_1$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
 \item local y-axis is then determined as vector product of local
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
@@ -308,9 +307,11 @@ Represents two-node lattice element. Each node has 3 degrees of freedom.
 The element is defined in x,y plane.
 
 \begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{lattice2d.pdf}
-\caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
+ \centering
+ \begin{makeimage}
+  \input{lattice2d.tikz}
+ \end{makeimage}
+ \caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
  \label{lattice2dfig}
 \end{figure}
 
@@ -335,8 +336,7 @@ z-axis).
  \begin{makeimage}
   \input{planestress2d.tikz}
  \end{makeimage}
- \caption{PlaneStress2d element. Node numbering, Side numbering and
- definition of local edge c.s.(a).}
+ \caption{PlaneStress2d element. Node numbering, Side numbering and definition of local edge c.s.(a).}
  \label{Planestress2dfig}
 \end{figure}
 
@@ -1190,6 +1190,7 @@ Stokes' flow elements neglect acceleration, and thus requires no additional stab
 \subsubsection{Tr21Stokes element}
 Standard 6 node triangular element for stokes flow, with quadratic geometry, velocity and linear pressure.
 Both compressible and incompressible material behavior is supported (and also the seamless transition between the two).
+
 \elemkeyword{Tr121Stokes}\\
 \descitem{Parameters} none.
 \descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes.
@@ -1197,9 +1198,28 @@ Both compressible and incompressible material behavior is supported (and also th
 
 \subsubsection{Tet21Stokes element}
 Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure.
+
 \elemkeyword{Tr121Stokes}\\
 \descitem{Parameters} none.
 \descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.
+\descitem{Status} Untested.
+
+\subsubsection{Tr1BubbleStokes element}
+So called ``Mini'' element in 2D. A 3 node triangular element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
+Should not be used with materials that have memory (which is uncommon for flow problems).
+
+\elemkeyword{Tr1BubbleStokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
+\descitem{Status} Untested.
+
+\subsubsection{Tet1BubbleStokes element}
+So called ``Mini'' element in 3D. A 4 node tetrahedral element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
+Should not be used with materials that have memory (which is uncommon for flow problems).
+
+\elemkeyword{Tet1BubbleStokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
 \descitem{Status} Untested.
 
 \subsection{2D CBS Elements}

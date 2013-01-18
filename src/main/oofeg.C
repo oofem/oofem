@@ -289,7 +289,6 @@ main(int argc, char *argv[])
     printf("%s", PRG_HEADER_SM);
 
 #ifdef __PARALLEL_MODE
-    parallelFlag = true; ///@todo Read this from input arguments (eventually)
     int rank = 0;
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
@@ -318,7 +317,14 @@ main(int argc, char *argv[])
                     oofem_logger.setLogLevel(level);
                     oofem_errLogger.setLogLevel(level);
                 }
-            }
+            }   else if ( strcmp(argv [ i ], "-p") == 0 ) {
+#ifdef __PARALLEL_MODE
+                parallelFlag = true;
+#else
+                fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");
+                exit(EXIT_FAILURE);
+#endif
+            } 
         }
     }
 

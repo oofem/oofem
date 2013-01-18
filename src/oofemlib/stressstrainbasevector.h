@@ -122,11 +122,7 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-     /**
-     * Computes principal values and directions of receiver vector.
-     * @param answer Computed principal values (sorted).
-     * @param dir Principal directions (stored column wise).
-     */
+     /// Returns the volumetric part of the vector.
     double computeVolumetricPart() const;
 
 protected:

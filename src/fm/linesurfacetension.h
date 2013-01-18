@@ -87,6 +87,7 @@ public:
     /**
      * Computes tangent to load vector.
      * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
+     * @param tStep Time step.
      */
     virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 

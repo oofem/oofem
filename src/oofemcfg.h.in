@@ -32,6 +32,9 @@ ____________________________________________________\n"
 /* Define if unistd.h defined */
 #cmakedefine HAVE_UNISTD_H
 
+/* Define if execinfo.h defined */
+#cmakedefine HAVE_EXECINFO_H
+
 /* Define if program may include both 'time.h' and 'sys/time.h' */
 #cmakedefine TIME_WITH_SYS_TIME
 

@@ -237,7 +237,7 @@ public:
      * @param ind Index of component.
      * @return Component index or 0 or error is generated for unknown Material Mode.
      */
-    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int);
+    virtual int giveStressStrainComponentIndOf(MatResponseForm form, MaterialMode mmode, int ind);
     /**
      * This method returns mask of reduced (if form == ReducedForm)
      * or Full (if form==FullForm) stress/strain vector in full or
@@ -620,7 +620,7 @@ protected:
      * @param tStep Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void give3dShellLayerStiffMtrx(FloatMatrix & answer,
-                                           MatResponseForm, MatResponseMode mmode, GaussPoint * gp,
+                                           MatResponseForm form, MatResponseMode mmode, GaussPoint * gp,
                                            TimeStep * tStep);
 
     /**

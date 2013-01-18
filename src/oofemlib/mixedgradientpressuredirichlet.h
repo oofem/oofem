@@ -108,9 +108,6 @@ public:
      */
     virtual DofManager *giveInternalDofManager(int i);
 
-    /// Not relevant for this boundary condition.
-    virtual bcType giveType() const { return UnknownBT; }
-
     /**
      * Initializes receiver according to object description stored in input record.
      * The input record contains two fields;
@@ -127,37 +124,10 @@ public:
 
     virtual void scale(double s) { devGradient.times(s); pressure *= s; }
 
-    /**
-     * Computes the homogenized fields through sensitivity analysis.
-     * @param[out] stressDev Computes the homogenized deviatoric stress.
-     * @param[out] vol Computes the homogenized volumetric gradient.
-     * @param eid Equation ID that fields belong to.
-     * @param tStep Time step for which field to obtain.
-     */
-    virtual void computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep);
-
-    /**
-     * Computes the macroscopic tangents through sensitivity analysis.
-     * @param[out] Ed Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial d_{\mathrm{dev}}} @f$.
-     * @param[out] Ep Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial p} @f$.
-     * @param[out] Cd Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial d_{\mathrm{dev}}} @f$.
-     * @param[out] Cp Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial p} @f$.
-     * @param eid Equation ID for which the tangents belong.
-     * @param tStep Time step for the tangents.
-     */
+    virtual void computeFields(FloatArray &stressDev, double &vol, EquationID eid, TimeStep *tStep);
     virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
 
-    /**
-     * Set prescribed pressure.
-     * @param p New prescribed pressure.
-     */
     virtual void setPrescribedPressure(double p) { pressure = p; }
-
-    /**
-     * Sets the prescribed tensor from the matrix from given Voigt notation.
-     * Assumes use of double values (gamma) for off-diagonal, usually the way for strain in Voigt form.
-     * @param ddev Vector in Voigt format.
-     */
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
     /**

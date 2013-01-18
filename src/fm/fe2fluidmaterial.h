@@ -69,7 +69,6 @@ public:
      * @param d Domain that status belongs to.
      * @param gp Gauss point that the status belongs to.
      * @param inputfile The input file describing the micro problem.
-     * @param porosity Initial porosity.
      */
     FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::string &inputfile);
     /// Destructor

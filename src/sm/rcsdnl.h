@@ -70,7 +70,7 @@ public:
     virtual classType giveClassID() const { return RCSDNLMaterialStatusClass; }
 
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *);
 
     // saves current context(state) into stream
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

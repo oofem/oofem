@@ -48,80 +48,59 @@ namespace oofem {
 class Domain;
 class EngngModel;
 
+/**
+ * This class implements the class NumericalMethod instance Subspace Iteration Eigen Value Problem Solver
+ *
+ * DESCRIPTION :
+ * Perform solution of eigen value problem in the form
+ * K y = (omega)^2 M y
+ *
+ * TASKS :
+ *
+ * - solving problem
+ *   solveYourselfAt.
+ * - returning results (eigen values and associated eigen vectors).
+ *
+ * Variable description  :
+ *
+ *      - - - INPUT  DATA - - -
+ * 
+ *      A(NWK)  -  STIFFNESS MATRIX
+ *      B(NWM)  -  MASS MARTRIX
+ *      NN  -      SIZE OF PROBLEM
+ *      NNM  -  NN+1
+ *      NROOT  -  REQUIRED NUMBER OF
+ *      RTOL  -  KRITERIUM KONVERGENCE VLASTNICH CISEL
+ *      NC  -  POCET VEKTORU SIMULTANNI ITERACE, DOPORUCUJE SE VOLIT
+ *      NC = MIN (2*NROOT , NROOT+8 )
+ *      NITEM  -  MAXIMALNI POCET ITERACI (OBYC. 16)
+ * 
+ *      - - - PRACOVNI POLE - - -
+ * 
+ *      TT(NN),W(NN),D(NC),RTOLV(NC),BUP(NC),BLO(NC),BUPC(NC)
+ *      AR(NC,NC)  -  PRACOVNI MATICE - PROJEKCE MATICE  A
+ *      BR(NC,NC)  -  PROJEKCE MATICE  B
+ * 
+ *      - - - VYSTUPNI DATA - - -
+ * 
+ *      EIGV(NROOT)  -  VLASTNI CISLA
+ *      R(NN,NROOT)  -  VLASTNI VEKTORY
+ */
 
 class SubspaceIteration : public SparseGeneralEigenValueSystemNM
 {
-    /*
-     * This class implements the class NumericalMethod instance Subspace Iteration
-     * Eigen Value Problem Solver
-     *
-     * DESCRIPTION :
-     * Perform solution of eigen value problem in the form
-     * K y = (omega)^2 M y
-     *
-     * TASKS :
-     *
-     * - solving problem
-     *   solveYourselfAt.
-     * - returning results (eigen values and associated eigen vectors).
-     *
-     * Variable description  :
-     *
-     * C     - - - INPUT  DATA - - -
-     * C
-     * C     A(NWK)  -  STIFFNESS MATRIX
-     * C     B(NWM)  -  MASS MARTRIX
-     * C     NN  -      SIZE OF PROBLEM
-     * C     NNM  -  NN+1
-     * C     NROOT  -  REQUIRED NUMBER OF
-     * C     RTOL  -  KRITERIUM KONVERGENCE VLASTNICH CISEL
-     * C     NC  -  POCET VEKTORU SIMULTANNI ITERACE, DOPORUCUJE SE VOLIT
-     * C     NC = MIN (2*NROOT , NROOT+8 )
-     * C     NITEM  -  MAXIMALNI POCET ITERACI (OBYC. 16)
-     * C
-     * C     - - - PRACOVNI POLE - - -
-     * C
-     * C     TT(NN),W(NN),D(NC),RTOLV(NC),BUP(NC),BLO(NC),BUPC(NC)
-     * C     AR(NC,NC)  -  PRACOVNI MATICE - PROJEKCE MATICE  A
-     * C     BR(NC,NC)  -  PROJEKCE MATICE  B
-     * C
-     * C     - - - VYSTUPNI DATA - - -
-     * C
-     * C     EIGV(NROOT)  -  VLASTNI CISLA
-     * C     R(NN,NROOT)  -  VLASTNI VEKTORY
-     */
-
 private:
-    //SparseMtrx*   a ;
-    //SparseMtrx*   b ;
     FloatMatrix *ar;
     FloatMatrix *br;
-    //FloatArray*    _eigv;  // only pointer to Engngmethod data, not ownership
-    //FloatMatrix*   _r;    // only pointer to Engngmethod data, not ownership
     FloatMatrix *vec;
     int n, nc, nsmax, nitem;
-    //double         rtol  ;
     int solved;
-
 
 public:
     SubspaceIteration(int i, Domain *d, EngngModel *m);
-    // constructor
-    virtual ~SubspaceIteration();               // destructor
+    virtual ~SubspaceIteration();
 
-
-    /**
-     * Solves the given sparse generalized eigen value system of equations Ax = o^2 Bx.
-     * @param A coefficient matrix
-     * @param B coefficient matrix
-     * @param x eigen vector(s)
-     * @param o eigen value(s)
-     * @param rtol tolerance
-     * @param nroot number of required eigenvalues
-     * @return NM_Status value
-     */
-    virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *r, double rtol, int nroot);
-
+    virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

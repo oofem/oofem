@@ -84,7 +84,8 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
     }
 
 #ifdef __PARALLEL_MODE
-    this->initCommMaps();
+    if ( this->domain->giveEngngModel()->isParallel() )
+        this->initCommMaps();
 #endif
 
     // clear nodal table
@@ -160,11 +161,12 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         } // end assemble element contributions
 
 #ifdef __PARALLEL_MODE
-        this->exchangeDofManValues(ireg, lhs, rhs, regionNodalNumbers);
+        if ( this->domain->giveEngngModel()->isParallel() )
+            this->exchangeDofManValues(ireg, lhs, rhs, regionNodalNumbers);
 #endif
 
         bool missingDofManContribution = false;
-	unresolvedDofMans.clear();
+        unresolvedDofMans.clear();
         // solve for recovered values of active region
         for ( i = 1; i <= regionDofMans; i++ ) {
             eq = ( i - 1 ) * regionValSize;
@@ -174,7 +176,7 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                     sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
                 } else {
                     missingDofManContribution = true;
-		    unresolvedDofMans.insert(regionNodalNumbers.at(i));
+                    unresolvedDofMans.insert(regionNodalNumbers.at(i));
                     sol.at(eq + j) = 0.0;
                 }
             }
@@ -184,15 +186,15 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         this->updateRegionRecoveredValues(ireg, regionNodalNumbers, regionValSize, sol);
 
         if ( missingDofManContribution ) {
-	  std::ostringstream msg;
-	  std::set<int>::const_iterator sit;
-	  i = 0;
-	  for (sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); sit++) {
-	    msg << *sit << ' ';
-	    if (++i > 20) break;
-	  }
-	  if (i > 20)  msg << "...";
-	  OOFEM_WARNING3("ZZNodalRecoveryModel::recoverValues: region %d: values of some dofmanagers undetermined\n[%s]", ireg, msg.str().c_str());
+            std::ostringstream msg;
+            std::set<int>::const_iterator sit;
+            i = 0;
+            for (sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); sit++) {
+                msg << *sit << ' ';
+                if (++i > 20) break;
+            }
+            if (i > 20)  msg << "...";
+            OOFEM_WARNING3("ZZNodalRecoveryModel::recoverValues: region %d: values of some dofmanagers undetermined\n[%s]", ireg, msg.str().c_str());
         }
     } // end loop over regions
 
