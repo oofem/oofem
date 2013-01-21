@@ -435,6 +435,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     nodes.resize(output.numberofpoints);
     //n_markers.resize(output.numberofpoints);
     for (int i = 0; i < output.numberofpoints; ++i) {
+        nodes[i].resize(2);
         nodes[i].at(1) = output.pointlist[i*2];
         nodes[i].at(2) = output.pointlist[i*2+1];
         //n_markers(i) = output.pointmarkerlist[i]; // Not enough.
@@ -446,7 +447,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
         IntArray &triangle = triangles[i];
         triangle.resize(output.numberofcorners);
         for (int j = 0; j < 3; j++) { // First three
-            triangle(j+1) = output.trianglelist[i*output.numberofcorners + j];
+            triangle(j) = output.trianglelist[i*output.numberofcorners + j];
         }
         // Rearrange the strange ordering of the edge nodes.
         if (output.numberofcorners == 6) {
@@ -543,12 +544,12 @@ void TriangleMesherInterface :: fixNodeMarkers(const std::vector<FloatArray> &no
 
     for (std::size_t i = 0; i < segments.size(); ++i) {
         for (int j = 1; j <= segments[i].giveSize(); ++j) {
-            n_markers[segments[i].at(j)].insertSortedOnce(s_markers.at(i));
+            n_markers[segments[i].at(j)-1].insertSortedOnce(s_markers.at(i));
         }
     }
     for (std::size_t i = 0; i < triangles.size(); ++i) {
         for (int j = 1; j <= triangles[i].giveSize(); ++j) {
-            n_markers[triangles[i].at(j)].insertSortedOnce(t_markers.at(i));
+            n_markers[triangles[i].at(j)-1].insertSortedOnce(t_markers.at(i));
         }
     }
 }
