@@ -103,10 +103,10 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList<
 {
     XfemManager *xf = this->element->giveDomain()->giveEngngModel()->giveXfemManager(1);
     IntArray interactedEI;
-    xf->getInteractedEI(interactedEI, element);
+    xf->getInteractedEI(interactedEI, element); //give the EI's for the el
     // in intersecPoints the points of Element with interaction to EnrichmentItem will be stored
     AList< FloatArray >intersecPoints;
-    for ( int i = 1; i <= interactedEI.giveSize(); i++ ) {
+    for ( int i = 1; i <= interactedEI.giveSize(); i++ ) { // for the active enrichment items
         xf->giveEnrichmentItem( interactedEI.at(i) )->computeIntersectionPoints(& intersecPoints, element);
     }
 

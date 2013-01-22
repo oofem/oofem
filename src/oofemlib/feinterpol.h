@@ -152,6 +152,16 @@ public:
         OOFEM_ERROR("FEInterpolation::evald2Ndx2: not implemented");
     }
     /**
+     * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
+     * These derivatives are wrt local (parent) coordinate system
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxij.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     */
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
+        OOFEM_ERROR("FEInterpolation::evaldNdxi: not implemented");
+    }
+    /**
      * Evaluates global coordinates from given local ones.
      * @param answer Contains resulting global coordinates.
      * @param lcoords Array containing (local) coordinates.
