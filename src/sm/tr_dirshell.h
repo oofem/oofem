@@ -85,7 +85,7 @@ protected:
     FloatArray giveInitialNodeDirector(int i);
 
 
-    virtual void TrDirShell :: computeGaussPoints();
+    virtual void computeGaussPoints();
 
 	// Interpolation functions
 	virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);

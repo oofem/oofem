@@ -75,7 +75,7 @@ namespace oofem {
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *effectiveStiffnessMatrix, *massMatrix,;
+    SparseMtrx *effectiveStiffnessMatrix, *massMatrix;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;

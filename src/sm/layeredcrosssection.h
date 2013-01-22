@@ -154,7 +154,7 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-	void LayeredCrossSection :: setupZCoordsInGaussPoint(LayeredCrossSection *layeredCS,IntegrationRule **layerIntegrationRulesArray);
+	void setupZCoordsInGaussPoint(LayeredCrossSection *layeredCS,IntegrationRule **layerIntegrationRulesArray);
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)

@@ -59,24 +59,24 @@ protected:
     int numberOfGaussPoints;	
     IntegrationRule **layerIntegrationRulesArray;
     static bool __initialized;
-	static IntArray ordering_x;
-	static IntArray ordering_m;
-	static IntArray ordering_gam;
+    static IntArray ordering_x;
+    static IntArray ordering_m;
+    static IntArray ordering_gam;
     static IntArray ordering_all;
-	
+    
     std::vector< FloatArray > initialNodeDirectors;
 
-	FloatArray &giveInitialNodeDirector(int i){return this->initialNodeDirectors[i-1];};
+    FloatArray &giveInitialNodeDirector(int i){return this->initialNodeDirectors[i-1];};
 
     // Abstract methods
     virtual void computeGaussPoints() = 0;
-	virtual void setupInitialNodeDirectors();
+    virtual void setupInitialNodeDirectors();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) = 0;
 
-	virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
-	virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
+    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) ;
-	virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) ;
+    virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) ;
 
     virtual double computeVolumeAround(GaussPoint *gp) = 0;
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer) = 0;
@@ -98,20 +98,20 @@ protected:
 
 
 
-   	// Base vectors and directors
-	void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
-	
-	void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, FloatArray &G2, FloatArray &G3);
-	void evalInitialContravarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, FloatArray &G2, FloatArray &G3);
+    // Base vectors and directors
+    void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
+    
+    void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, FloatArray &G2, FloatArray &G3);
+    void evalInitialContravarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, FloatArray &G2, FloatArray &G3);
 
 
-	void giveDualBase(const FloatArray &G1, const FloatArray &G2, const FloatArray &G3, FloatArray &g1, FloatArray &g2, FloatArray &g3 );
-	void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
-	void evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
+    void giveDualBase(const FloatArray &G1, const FloatArray &G2, const FloatArray &G3, FloatArray &g1, FloatArray &g2, FloatArray &g3 );
+    void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
+    void evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, TimeStep *tStep, FloatArray &solVec);
     double giveLocalZetaCoord(GaussPoint *gp);
     double giveLayerZetaCoord(GaussPoint *gp, int layer);
 
-	
+    
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
     void computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer); // for analytically integrated mass matrix
 
@@ -126,10 +126,10 @@ protected:
 
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
 
-	// Stress and strain
-	void computeFAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *stepN, FloatArray &genEps);
-	void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
-	void transInitialCartesianToInitialContravar(GaussPoint *gp, const FloatArray &VoightMatrix, FloatArray &answer);
+    // Stress and strain
+    void computeFAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *stepN, FloatArray &genEps);
+    void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
+    void transInitialCartesianToInitialContravar(GaussPoint *gp, const FloatArray &VoightMatrix, FloatArray &answer);
     void transInitialCartesianToInitialContravar(GaussPoint *gp, const FloatMatrix &Stiffness, FloatMatrix &answer);
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1, 
          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
@@ -139,10 +139,10 @@ protected:
     void computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
 
 
-	virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
-	
-	virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-	virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
+    
+    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
     virtual void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); // numerical integration in B_X
 
 
@@ -186,33 +186,33 @@ protected:
     virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
             GaussPoint *slaveGp, TimeStep *tStep) {};
 
-	virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-	virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-	virtual int computeNumberOfDofs(EquationID ut) {return this->giveNumberOfDofs(); }
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeNumberOfDofs(EquationID ut) {return this->giveNumberOfDofs(); }
 
 public:
     Shell7Base(int n, Domain *d);	// constructor
     virtual ~Shell7Base() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
-	//Specific!
+    //Specific!
 
-	virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual int giveNumberOfDofs() = 0;
-	virtual int giveNumberOfEdgeDofs() = 0;
+    virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
     
 
     // definition & identification
     virtual const char *giveClassName() const { return "Shell7Base"; }
     virtual classType giveClassID() const { return Shell7BaseClass; }
-	
+    
     //Specific!
     virtual Element_Geometry_Type giveGeometryType() const = 0;
     virtual FEInterpolation *giveInterpolation() = 0;
     virtual integrationDomain  giveIntegrationDomain() const = 0; 
 
-	virtual MaterialMode giveMaterialMode() { return _3dMat; }
-	virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 
 
