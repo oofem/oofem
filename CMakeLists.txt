@@ -574,8 +574,8 @@ else:
     files = [sys.argv[1]]
     mpicommand = ''
     parallel = ''
-print('Running: ' + mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2')
-if os.system(mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2'):
+print('Running: ' + mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2')
+if os.system(mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2'):
     exit(1)
 else:
     for f in files:
