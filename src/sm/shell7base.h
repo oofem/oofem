@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef trdirshell_h
-#define trdirshell_h
+#ifndef Shell7Base_h
+#define Shell7Base_h
 
 
 #include "eleminterpmapperinterface.h"
@@ -41,74 +41,62 @@
 #include "layeredcrosssection.h"
 
 #include "nlstructuralelement.h"
+#include <vector>
 namespace oofem {
 
-
-class FEI2dTrQuad;
-class FEI3dTrQuad;
 class BoundaryLoad;
 
 /**
  * This class represent a 7 parameter shell element. 
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
- *
+ * Add ref. to paper!
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-class TrDirShell : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface
+class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface
 {
 protected:
-    int numberOfGaussPoints;
-	IntegrationRule **layerIntegrationRulesArray;
-	FloatMatrix testmatrix;
-    static FEI2dTrQuad interpolation_quad;
-    static FEI3dTrQuad interpolation;
+    int numberOfGaussPoints;	
+    IntegrationRule **layerIntegrationRulesArray;
     static bool __initialized;
 	static IntArray ordering_x;
 	static IntArray ordering_m;
 	static IntArray ordering_gam;
     static IntArray ordering_all;
+	
+    std::vector< FloatArray > initialNodeDirectors;
 
-    static bool initOrdering() {
-        ordering_x.setValues(18, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38);
-		ordering_m.setValues(18, 4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41);
-		ordering_gam.setValues(6, 7, 14, 21, 28, 35, 42);
-        ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38,
-                                   4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41,
-                                   7, 14, 21, 28, 35, 42);
-        return true;
-    }
+	FloatArray &giveInitialNodeDirector(int i){return this->initialNodeDirectors[i-1];};
 
-	FloatArray initialNodeDirectors[6];
-	void setupInitialNodeDirectors();
-	//FloatArray &giveInitialNodeDirector(int i){return this->initialNodeDirectors[i-1];};
-    FloatArray giveInitialNodeDirector(int i);
+    // Abstract methods
+    virtual void computeGaussPoints() = 0;
+	virtual void setupInitialNodeDirectors();
+    virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) = 0;
 
-
-    virtual void TrDirShell :: computeGaussPoints();
-
-	// Interpolation functions
 	virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 	virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) ;
+	virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) ;
 
-    // -Edge
-	void edgeEvalN(FloatArray &answer, const FloatArray &lcoords);
-    void edgeEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
-    void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
+    virtual double computeVolumeAround(GaussPoint *gp) = 0;
+    virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer) = 0;
+    virtual double computeAreaAround(GaussPoint *gp) = 0;
+
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const = 0;
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const = 0;
+
+    virtual void computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep) ;
+    
+
+
     void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep);
     void edgeGiveUpdatedSolutionVector(FloatArray &answer,const int iedge, TimeStep *tStep);
-    virtual double edgeComputeAreaAround(GaussPoint *gp, const int iedge);
+    virtual double edgeComputeLengthAround(GaussPoint *gp, const int iedge);
     void edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, const int iEdge);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+
     void edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &G1, FloatArray &G3);
 
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
-    virtual double computeThicknessAroundLayer(GaussPoint *gp, int layer);
-    virtual double computeAreaAround(GaussPoint *gp);
 
-    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
 
    	// Base vectors and directors
 	void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
@@ -135,7 +123,7 @@ protected:
     void computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep);
     void computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep);
 
-    void computeTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep);
+
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
 
 	// Stress and strain
@@ -148,38 +136,10 @@ protected:
     void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, TimeStep *tStep, FloatArray &solVec);
     void computeStressVector(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN );
 
-
-
     void computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
 
 
-public:
-    TrDirShell(int n, Domain *d);	// constructor
-    virtual ~TrDirShell() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
-	virtual int computeNumberOfDofs(EquationID ut) { return 42; } // 6*7dofs
-	virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-
-	
-	virtual IRResultType initializeFrom(InputRecord *ir);
-
-	virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-	
-
-    // definition & identification
-    virtual const char *giveClassName() const { return "TrDirShell"; }
-    virtual classType giveClassID() const { return TrDirShellClass; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
-	virtual MaterialMode giveMaterialMode() { return _3dMat; }
-    virtual FEInterpolation *giveInterpolation();
-
-	virtual integrationDomain  giveIntegrationDomain() { return _Triangle; } // write new wedge-like type
-
-	virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-
-
 	virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &genEps);
-
 	
 	virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
 	virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
@@ -201,26 +161,61 @@ public:
 
     void giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q);
 
+
+
+
     void computeLinearizedStiffness(GaussPoint *gp,  Material *mat, TimeStep *tStep,
                 FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A[3][3], FloatArray &solVec);
     
 
-     int giveVoigtIndex(const int ind1, const int ind2);
+    int giveVoigtIndex(const int ind1, const int ind2);
 
-     void giveTensorForm(const FloatMatrix &matrix, FloatArray &tensor);
+    void giveTensorForm(const FloatMatrix &matrix, FloatArray &tensor);
 
-     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
+    void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
 
-     virtual Interface *giveInterface(InterfaceType it);
+    virtual Interface *giveInterface(InterfaceType it);
+
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual int  NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
 
     // layered cross section
-        virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
             GaussPoint *slaveGp, TimeStep *tStep) {};
+
+	virtual IRResultType initializeFrom(InputRecord *ir);
+
+	virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+	virtual int computeNumberOfDofs(EquationID ut) {return this->giveNumberOfDofs(); }
+
+public:
+    Shell7Base(int n, Domain *d);	// constructor
+    virtual ~Shell7Base() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
+	//Specific!
+
+	virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual int giveNumberOfDofs() = 0;
+	virtual int giveNumberOfEdgeDofs() = 0;
+    virtual int giveNumberOfEdgeDofManagers() = 0;
+    
+
+    // definition & identification
+    virtual const char *giveClassName() const { return "Shell7Base"; }
+    virtual classType giveClassID() const { return Shell7BaseClass; }
+	
+    //Specific!
+    virtual Element_Geometry_Type giveGeometryType() const = 0;
+    virtual FEInterpolation *giveInterpolation() = 0;
+    virtual integrationDomain  giveIntegrationDomain() const = 0; 
+
+	virtual MaterialMode giveMaterialMode() { return _3dMat; }
+	virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
+
+
 
 };
 

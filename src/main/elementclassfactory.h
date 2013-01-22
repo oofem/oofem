@@ -74,7 +74,9 @@
  #include "truss1d.h"
  #include "cct.h"
  #include "cct3d.h"
- #include "tr_dirshell.h"
+// #include "tr_dirshell.h"
+ #include "shell7base.h"
+ #include "tr2shell7.h"
  #include "rershell.h"
  #include "interfaceelem2dquad.h"
  #include "interfaceelement1d.h"
@@ -149,7 +151,9 @@ REGISTER_CLASS(CCTPlate, "cctplate", CCTPlateClass)
 REGISTER_CLASS(LTRSpace, "ltrspace", LTRSpaceClass)
 REGISTER_CLASS(Truss2d, "truss2d", Truss2dClass)
 REGISTER_CLASS(RerShell, "rershell", RerShellClass)
-REGISTER_CLASS(TrDirShell, "trdirshell", TrDirShellClass)
+//REGISTER_CLASS(TrDirShell, "trdirshell", TrDirShellClass)
+//REGISTER_CLASS(Shell7Base, "shell7base", Shell7BaseClass)
+REGISTER_CLASS(Tr2Shell7, "tr2shell7", Tr2Shell7Class)
 REGISTER_CLASS(Beam2d, "beam2d", Beam2dClass)
 REGISTER_CLASS(Beam3d, "beam3d", Beam3dClass)
 REGISTER_CLASS(LIBeam2dNL, "libeam2dNL", LIBeam2dNLClass)

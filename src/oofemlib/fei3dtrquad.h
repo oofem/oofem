@@ -39,8 +39,8 @@
 
 namespace oofem {
 /**
- * Class representing implementation of quadratic tetrahedra interpolation class.
- * @author Mikael Öhman
+ * Class representing implementation of quadratic  interpolation class.
+ * @author 
  * @todo This class is entirely unchecked.
  */
 class FEI3dTrQuad : public FEInterpolation3d
@@ -59,9 +59,10 @@ public:
     // new methods
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
+    //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo); 
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
-
+    
 
 
     /**
@@ -73,7 +74,7 @@ public:
 
     // Edge
     virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-            void edgeEvaldNdxi(FloatArray &answer, const FloatArray &lcoords);
+            void edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
