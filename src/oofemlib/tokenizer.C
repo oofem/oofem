@@ -37,7 +37,6 @@
 
 #include <cctype>
 #include <list>
-#include <iterator>
 
 namespace oofem {
 
@@ -77,7 +76,7 @@ Tokenizer :: readStructToken(std::size_t &pos, const std::string &line)
 std::string
 Tokenizer :: readToken(std::size_t &pos, const std::string &line, char sep)
 {
-    std::size_t startpos = pos;
+    int startpos = pos;
     if ( sep == 0 ) {
         while ( pos < line.size() && !isspace(line[pos]) ) pos++;
         return line.substr(startpos, pos-startpos);
@@ -120,7 +119,7 @@ void Tokenizer :: tokenizeLine(const std::string &currentLine)
 int Tokenizer :: giveNumberOfTokens()
 {
     // if EOF currentTokens == -1
-    return (int)tokens.size();
+    return tokens.size();
 }
 
 const char *Tokenizer :: giveToken(int i)
