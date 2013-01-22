@@ -69,7 +69,7 @@ class StructuralMaterial;
  * - Returning RealStress state in Gauss point and for given Stress mode.
  * - Returning a properties of cross section like thickness or area.
  */
-class LayeredCrossSection : public StructuralCrossSection
+class LayeredCrossSection : public StructuralCrossSection 
 {
 protected:
     IntArray layerMaterials; ///< Material of each layer.
@@ -88,7 +88,7 @@ public:
         totalThick = 0.;
         area = -1.0;
     }
-
+    
     virtual ~LayeredCrossSection() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -152,6 +152,9 @@ public:
 
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+
+
+	void LayeredCrossSection :: setupZCoordsInGaussPoint(LayeredCrossSection *layeredCS,IntegrationRule **layerIntegrationRulesArray);
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
