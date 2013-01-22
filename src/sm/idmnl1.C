@@ -310,7 +310,7 @@ IDNLMaterial :: computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoi
 }
 
 double
-IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoint *gp, GaussPoint *jGp, double &weight)
+IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight)
 {
     //Compute Distance between source and receiver point
     FloatArray gpCoords, jGpCoords;

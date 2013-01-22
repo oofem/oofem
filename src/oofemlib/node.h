@@ -128,7 +128,6 @@ public:
      * from corresponding nodal DOF.
      * Local coordinate system is taken into account and the answer is given in global coordinates.
      * @param answer Updated coordinate.
-     * @param ic Index of coordinate.
      * @param tStep Time step for the displacement.
      * @param type Equation ID for displacement of node.
      * @param scale Scaling of displacement.

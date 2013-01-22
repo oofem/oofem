@@ -513,10 +513,10 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
         return;
     }
 
-    int i, i1, i2;
     GaussPoint *gp;
 
     if ( node < 5 ) {
+        int i = 0;
         switch ( node ) {
         case 1: i = 4;
             break;
@@ -531,6 +531,7 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
         this->giveIPValue(answer, gp, type, tStep);
     } else {
+        int i1 = 0, i2 = 0;
         switch ( node ) {
         case 5: i1 = 4;
             i2 = 2;
@@ -554,16 +555,6 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
         answer.add(contrib);
         answer.times(0.5);
     }
-
-    /*
-     * if (type == IST_StressTensor) {
-     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStressVector();
-     * } else if (type == IST_StrainTensor) {
-     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStrainVector();
-     * }else answer.resize(0);
-     */
 }
 
 void

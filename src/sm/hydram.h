@@ -91,21 +91,13 @@ namespace oofem {
 
 
 // =========== Hydration Model Status class ============
-
+/**
+ * This class implements associated Status to HydrationModel.
+ * It is attribute of owner material status for each GaussPoint, for which that material
+ * is active.
+ */
 class HydrationModelStatus : public MaterialStatus
 {
-    /*
-     * This class implements associated Status to HydrationModel.
-     * It is atribute of owner material status for each GaussPoint, for which that material
-     * is active.
-     * DESCRIPTION:
-     *  This class contains state variables of the hydration model
-     *
-     * TASK:
-     * returning and setting variables
-     * printing
-     * saving & restoring context
-     */
 protected:
     // hydration degree at beginning of current time step
     double hydrationDegree;
@@ -116,9 +108,9 @@ public:
     HydrationModelStatus(int n, Domain *d, GaussPoint *g);
     virtual ~HydrationModelStatus() { }
 
-    // query temp hydration degree
+    /// Returns the temp hydration degree.
     double giveTempHydrationDegree() { return tempHydrationDegree; }
-    // query non-temp hydration degree - used for step restart and postprocessing
+    /// Returns the non-temp hydration degree. Used for step restart and postprocessing.
     double giveHydrationDegree() { return hydrationDegree; }
     void setHydrationDegree(double v) { hydrationDegree = v; }
     void setTempHydrationDegree(double v) { tempHydrationDegree = v; }
@@ -155,16 +147,16 @@ protected:
     double timeScale;
 
     // === Material parameters ===
-    double aa, // normalized chemical affinity regression function coefficients
+    double aa, ///< Normalized chemical affinity regression function coefficients.
            ba,
            ca,
            da,
 
-           e0, // ksi_0
-           ear, // activation term [K]
-           le, // latent heat [kJ/m3]
-           cv, // input cement content kg/m3 for evaluation of total water consumption
-           we; // total water consumption for hydration [kg/m3]
+           e0, ///< ksi_0.
+           ear, ///< Activation term [K].
+           le, ///< Latent heat [kJ/m3].
+           cv, ///< Input cement content kg/m3 for evaluation of total water consumption.
+           we; ///< Total water consumption for hydration [kg/m3].
 
     // === Hydration degree increment evaluation ===
     // auxiliary values to enable external root finding method without passing them as parameters in each call
@@ -179,9 +171,9 @@ protected:
     double mixedfindroot();
 
     // === Material functions ===
-    // Returns the normalized chemical affinity A~(ksi) [1/s]
+    /// Returns the normalized chemical affinity A~(ksi) [1/s].
     double affinity(double ksi);
-    // Returns the derivation of chemical affinity dA~/dksi(ksi)
+    /// Returns the derivation of chemical affinity dA~/dksi(ksi).
     double dAdksi(double ksi);
     double dksidT(double ksi, double T, double h, double dt);
     double dksidh(double ksi, double T, double h, double dt);
@@ -191,8 +183,8 @@ protected:
     /**
      * Computes and returns hydration degree increment for given ksi, T [K], dt [s].
      * Called by updateInternalState(val, gp, atTime)
+     * @note Formerly dksi, maybe should be changed to use gp & timestep.
      */
-    //!!! formerly dksi, maybe should be changed to use gp & timestep
     double computeHydrationDegreeIncrement(double ksi, double T, double h, double dt);
 
 public:
@@ -256,7 +248,7 @@ public:
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     // } end new 5.1.2004
-    /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector
+    /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
     virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime);
     // --- identification and auxiliary functions ---
     virtual const char *giveClassName() const { return "HydrationModel"; }
@@ -325,14 +317,21 @@ public:
         return CIO_OK;
     }
 
+    /**
+     * Calls hydrationModel->updateInternalState, if the material is already cast.
+     * In case the cast time lies within the span of current timestep, the timestep increment is set to (time-castAt).
+     * @param vec New state vector.
+     * @param gp Integration point.
+     * @param atTime Time step.
+     */
     virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime);
     /**
-     * Returns the hydration degree at end of TimeStep atTime in given integraion point.
+     * Returns the hydration degree at end of TimeStep atTime in given integration point.
      * The value is obtained from gp hydration status via the hydration model or the constantHydrationDegree value is returned.
-     * @param gp integration point
-     * @param atTime solution step
-     * @param mode value mode VM_Incremental or VM_Total
-     * @return hydration degree or increment in given gp
+     * @param gp Integration point.
+     * @param atTime Solution step.
+     * @param mode Value mode VM_Incremental or VM_Total.
+     * @return Hydration degree or increment in given gp.
      */
     double giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 };

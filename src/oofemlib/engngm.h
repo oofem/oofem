@@ -336,9 +336,6 @@ public:
     /**
      * Returns base output file name
      * to which extensions, like .out .vtu .osf should be added.
-     * In current implementation, output file name is simply returned.
-     * @param dest Path and base file name will be copied into the array pointed to by dest.
-     * @param n Not more than n bytes of src are copied
      */
     std::string giveOutputBaseFileName() { return dataOutputFileName; }
     /**
