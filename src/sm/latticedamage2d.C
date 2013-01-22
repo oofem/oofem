@@ -127,22 +127,19 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
         return;
     }
 
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    //LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
     double paramA = 0.;
     double paramB = 0.;
     double paramC = 0.;
-    double equivStrain;
 
     paramA = 0.5 * ( e0 + ec * e0 );
     paramB = ( coh * e0 ) / sqrt( 1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
     paramC = 0.5 * ( this->ec * e0 - e0 );
 
-    equivStrain = status->giveEquivalentStrain();
+    //double equivStrain = status->giveEquivalentStrain();
     tempEquivStrain =  sqrt( pow(this->alphaOne * strain.at(2) / paramB, 2.) + pow( ( strain.at(1) + paramC ) / paramA, 2. ) ) * paramA - paramC;
-
-    return;
 }
 
 void
@@ -181,14 +178,14 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 
         //
         if ( tempKappa > e0 ) {
-            omega = ( this->wfOne / status->giveLe() - helpStrain ) / ( this->wfOne / status->giveLe() - e0 ) * ( 1 - e0 / tempKappa );
+            omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * status->giveLe() + 1. );
 
-            if ( omega * tempKappa > 0 && omega * tempKappa < this->wfOne / status->giveLe() ) {
+            if ( omega * tempKappa * status->giveLe() > 0 && omega * tempKappa * status->giveLe() < this->wfOne ) {
                 return;
             } else {
-                omega = 1. - helpStrain / ( this->wf / status->giveLe() - this->wfOne / status->giveLe() ) * ( this->wf / status->giveLe() / tempKappa - 1 );
+                omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( this->wf - this->wfOne ) ) ) / ( 1. - helpStrain * status->giveLe() / ( this->wf - this->wfOne ) );
 
-                if ( omega * tempKappa > this->wfOne / status->giveLe() && omega * tempKappa < this->wf / status->giveLe() ) {
+                if ( omega * tempKappa * status->giveLe() >= this->wfOne  && omega * tempKappa * status->giveLe() < this->wf  ) {
                     return;
                 }
             }
@@ -365,7 +362,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     FloatArray crackPlaneNormal(3); //Dummy floatArray so that I can use giveCharacteristiclenght. This needs to be improved
     double length = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-    status->giveReducedStrain(reducedStrainOld);
+    reducedStrainOld = status->giveReducedStrain();
     double omegaOld = status->giveDamage();
     double deltaOmega;
 
@@ -408,8 +405,8 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
         intervals = 1.;
     }
 
-    if ( intervals > 1000 ) {
-        intervals = 1000;
+    if ( intervals > 1000. ) {
+        intervals = 1000.;
     }
 
     double oldKappa = status->giveKappa();
@@ -463,19 +460,15 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     double crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * le;
 
     status->setTempCrackWidth(crackWidth);
-
-    return;
 }
 
 void
 LatticeDamage2d :: giveStressStrainMask(IntArray &answer, MatResponseForm form,
                                         MaterialMode mmode) const
 {
-    int i;
-
     if ( mmode == _2dLattice ) {
         answer.resize(3);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) = i;
         }
     } else {
@@ -493,8 +486,6 @@ void LatticeDamage2d :: giveRandomParameters(FloatArray &param)
     } else {
         _error("Error: Unknown local random type:\n randomtype 1 = Gaussian\n");
     }
-
-    return;
 }
 
 
@@ -575,7 +566,6 @@ LatticeDamage2d :: giveSecantStiffnessMatrix(FloatMatrix &answer,
     answer.at(1, 1) = ( 1 - omega ) * eNormal;
     answer.at(2, 2) = ( 1 - omega ) * eShear;
     answer.at(3, 3) = ( 1 - omega ) * eTorsion;
-    return;
 }
 
 
@@ -585,7 +575,6 @@ LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
                                               TimeStep *atTime)
 {
     _error("tangent stiffness not implemented\n");
-    return;
 }
 
 
@@ -601,7 +590,6 @@ LatticeDamage2d :: giveElasticStiffnessMatrix(FloatMatrix &answer,
     answer.at(1, 1) = eNormal;
     answer.at(2, 2) = eShear;
     answer.at(3, 3) = eTorsion;
-    return;
 }
 
 
@@ -633,8 +621,6 @@ LatticeDamage2d :: giveThermalDilatationVector(FloatArray &answer,
     answer.resize(3);
     answer.zero();
     answer.at(1) = this->give(tAlpha, gp);
-
-    return;
 }
 
 
@@ -680,15 +666,15 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
         answer.resize(1);
         answer.at(1) = status->giveCrackFlag();
         return 1;
-    } else if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageScalar || type == IST_DamageTensor ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();
         return 1;
-    } else if ( ( type == IST_DissWork ) ) {
+    } else if ( type == IST_DissWork ) {
         answer.resize(1);
         answer.at(1) = status->giveDissipation();
         return 1;
-    } else if ( ( type == IST_DeltaDissWork ) ) {
+    } else if ( type == IST_DeltaDissWork ) {
         answer.resize(1);
         answer.at(1) = status->giveDeltaDissipation();
         return 1;
@@ -701,7 +687,7 @@ int
 LatticeDamage2d :: giveIPValueSize(InternalStateType type,
                                    GaussPoint *gp)
 {
-    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DamageTensor ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DamageTensor || type == IST_DissWork || type == IST_DeltaDissWork ) {
         return 1;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, gp);
@@ -712,11 +698,11 @@ int
 LatticeDamage2d :: giveIntVarCompFullIndx(IntArray &answer,
                                           InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer.zero();
         answer.at(1) = 1;
@@ -729,9 +715,9 @@ LatticeDamage2d :: giveIntVarCompFullIndx(IntArray &answer,
 InternalStateValueType
 LatticeDamage2d :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_CrackStatuses ) || ( type == IST_DamageScalar ) || ( type == IST_DissWork ) || ( type == IST_DeltaDissWork ) ) {
+    if ( type == IST_CrackStatuses || type == IST_DamageScalar || type == IST_DissWork || type == IST_DeltaDissWork ) {
         return ISVT_SCALAR;
-    } else if ( ( type == IST_DamageTensor ) ) {
+    } else if ( type == IST_DamageTensor ) {
         return ISVT_TENSOR_S3;
     } else {
         return StructuralMaterial :: giveIPValueType(type);

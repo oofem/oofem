@@ -41,8 +41,6 @@
 
 namespace oofem {
 
-/**
- */
 class FieldManager
 {
 protected:
@@ -59,8 +57,8 @@ protected:
         bool   isManaged;
     public:
         /// Creates new field record, containing reference to given field.
-        fieldRecord (Field* f, bool managed) {field=f; isManaged=managed;}
-        fieldRecord () {field=NULL; isManaged=false;}
+        fieldRecord (Field* f, bool managed): field(f), isManaged(managed) { }
+        fieldRecord (): field(NULL), isManaged(false) { }
         /// Destructor. Deletes managed field.
         ~fieldRecord () {if (isManaged) delete field;}
 
@@ -77,7 +75,7 @@ protected:
 
 
 public:
-    FieldManager() { }
+    FieldManager(): externalFields() { }
     ~FieldManager();
 
     /**

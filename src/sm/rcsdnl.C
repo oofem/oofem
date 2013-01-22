@@ -119,8 +119,8 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     this->updateDomainBeforeNonlocAverage(atTime);
 
     // compute nonlocal strain increment first
-    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    dynaList< localIntegrationRecord > :: iterator listIter;
+    std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+    std::list< localIntegrationRecord > :: iterator listIter;
 
     for ( listIter = list->begin(); listIter != list->end(); ++listIter ) {
         nonlocStatus = ( RCSDNLMaterialStatus * ) this->giveStatus( ( * listIter ).nearGp );

@@ -44,7 +44,8 @@ InitModuleManager :: ~InitModuleManager()
 {}
 
 IRResultType
-InitModuleManager :: initializeFrom(InputRecord *ir) {
+InitModuleManager :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
@@ -61,9 +62,7 @@ InitModule *InitModuleManager :: CreateModuleOfType(const char *name, int n, Eng
 void
 InitModuleManager :: doInit()
 {
-    int i;
-
-    for ( i = 1; i <= numberOfModules; i++ ) {
+    for ( int i = 1; i <= numberOfModules; i++ ) {
         ( ( InitModule * ) this->giveModule(i) )->doInit();
     }
 }

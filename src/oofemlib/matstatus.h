@@ -88,9 +88,9 @@ class MaterialStatus : public IntegrationPointStatus
 public:
     /**
      * Constructor.
-     * @param n receiver's number
-     * @param d domain to which new status belongs
-     * @param g associated integration point
+     * @param n Receiver's number.
+     * @param d Domain to which new status belongs.
+     * @param g Associated integration point.
      */
     MaterialStatus(int n, Domain *d, GaussPoint *g) : IntegrationPointStatus (n,d,g) {}
     /// Destructor.

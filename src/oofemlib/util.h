@@ -62,7 +62,7 @@ char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
  * Returns the name of the file containing the data of the problem.
  * @param dataInputFileName Input file name read from stdin.
  */
-void giveInputDataFileName(std::string &sdataInputFileName);
+void giveInputDataFileName(std::string &dataInputFileName);
 
 /**
  * Instanciates the new problem.
@@ -70,15 +70,9 @@ void giveInputDataFileName(std::string &sdataInputFileName);
  * @param mode Mode determining macro or micro problem.
  * @param master Master problem in case of multiscale computations.
  * @param parallelFlag Determines if the problem should be run in parallel or not.
- * @todo Document the contextFlag input.
+ * @param contextFlag When set, turns on context output after each step.
  */
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
-/**
- * Static storage for temporary strings to solve compiler warnings about conversion from string constant to char*.
- * @param src Constant data to be copied over.
- * @return Pointer to static array of data, overwritten with src.
- */
-char *oofem_tmpstr(const char *src);
 } // end namespace oofem
 #endif // util_h

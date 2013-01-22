@@ -36,8 +36,9 @@
 #define exportmodule_h
 
 #include "intarray.h"
-#include "dynalist.h"
 #include "inputrecord.h"
+
+#include <list>
 
 namespace oofem {
 class EngngModel;
@@ -65,7 +66,7 @@ protected:
     /// User timeStep Output step. Indicates every tstep_step_out-th step selected.
     int tstep_step_out;
     /// List of user selected step numbers.
-    dynaList< Range >tsteps_out;
+    std::list< Range >tsteps_out;
 
     /// Indicates all domains.
     bool domain_all_flag;

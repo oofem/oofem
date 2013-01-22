@@ -44,6 +44,7 @@
 #include "mixedgradientpressuredirichlet.h"
 #include "mixedgradientpressureneumann.h"
 #include "surfacetensionbc.h"
+#include "weakperiodicbc.h"
 
 #ifdef __SM_MODULE
  #include "structtemperatureload.h"
@@ -71,6 +72,7 @@ REGISTER_CLASS(ConstantSurfaceLoad, "constantsurfaceload", ConstantSurfaceLoadCl
 REGISTER_CLASS(ConstantPressureLoad, "constantpressureload", ConstantPressureLoadClass)
 REGISTER_CLASS(PointLoad, "pointload", PointLoadClass)
 REGISTER_CLASS(SurfaceTensionBoundaryCondition, "surfacetension", SurfaceTensionBoundaryConditionClass)
+REGISTER_CLASS(WeakPeriodicbc, "weakperiodicbc", WeakPeriodicbcClass)
 
 #ifdef __SM_MODULE
 REGISTER_CLASS(StructuralTemperatureLoad, "structtemperatureload", StructuralTemperatureLoadClass)

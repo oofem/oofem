@@ -83,18 +83,13 @@ protected:
     Domain *domain;
 
 public:
-    /// Constructor used for instanciating temporary objects.
-    FEMComponent() { }
     /**
      * Regular constructor, creates component with given number and belonging to given domain.
      * @param n Component number in particular domain. For instance, can represent
      * node number in particular domain.
      * @param d Domain to which component belongs to.
      */
-    FEMComponent(int n, Domain *d) {
-        number = n;
-        domain = d;
-    }
+    FEMComponent(int n, Domain *d): number(n), domain(d) { }
     /// Virtual destructor.
     virtual ~FEMComponent() { }
 

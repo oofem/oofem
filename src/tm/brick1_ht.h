@@ -38,13 +38,16 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
+#include "nodalaveragingrecoverymodel.h"
+#include "eleminterpmapperinterface.h"
 #include "fei3dhexalin.h"
 
 namespace oofem {
 /**
  * Brick (3d) elements with linear approximation for heat and mass transfer.
  */
-class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
+class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface
 {
 protected:
     static FEI3dHexaLin interpolation;
@@ -56,11 +59,12 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() { return & interpolation; }
-    // definition
+    // definition & identification
     virtual const char *giveClassName() const { return "Brick1_ht"; }
     virtual classType giveClassID() const { return Brick1_htClass; }
 
-    virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    // virtual int computeNumberOfDofs(EquationID ut) { return ( emode == HeatTransferEM ) ? 8 : 16; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_hexa_1; }
 
@@ -70,6 +74,13 @@ public:
 
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
@@ -91,6 +102,9 @@ protected:
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
 };
 
+/**
+ * Class for heat and mass transfer.
+ */
 class Brick1_hmt : public Brick1_ht
 {
 public:
@@ -98,7 +112,20 @@ public:
 
     virtual const char *giveClassName() const { return "Brick1_hmt"; }
     virtual classType giveClassID() const { return Brick1_hmtClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 16; }
 };
 
+/**
+ * Class for mass transfer.
+ */
+class Brick1_mt : public Brick1_ht
+{
+public:
+    Brick1_mt(int n, Domain *d);
+
+    virtual const char *giveClassName() const { return "Brick1_mt"; }
+    virtual classType giveClassID() const { return Brick1_mtClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
+};
 } // end namespace oofem
 #endif // brick1_ht_h

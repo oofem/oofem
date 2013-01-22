@@ -36,7 +36,8 @@
 #define dummylocalizer_h
 
 #include "spatiallocalizer.h"
-#include "alist.h"
+
+#include <vector>
 
 namespace oofem {
 class IntArray;
@@ -50,14 +51,14 @@ class IntArray;
 class DummySpatialLocalizer : public SpatialLocalizer
 {
 protected:
-    AList<IntArray> region_elements;
+    std::vector<IntArray> region_elements;
     bool initialized;
 
 public:
     /// Constructor
-    DummySpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d), initialized(false) { }
+    DummySpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d), region_elements(), initialized(false) { }
     /// Destructor
-    virtual ~DummySpatialLocalizer() { this->region_elements.clear(true); }
+    virtual ~DummySpatialLocalizer() { }
 
     virtual int init(bool force = false);
 

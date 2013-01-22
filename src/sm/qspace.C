@@ -106,10 +106,12 @@ void
 QSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
+    }
 }
 
 

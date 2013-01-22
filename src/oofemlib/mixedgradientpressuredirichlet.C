@@ -187,12 +187,12 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
 
     int nsd = dx.giveSize(); // Number of spatial dimensions
 
-    double dev11, dev22, dev33, gam23, gam13, gam12;
+    double dev11, dev22, dev33 = 0., gam12, gam23 = 0., gam13 = 0.;
     if (nsd == 2) {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
         gam12 = dev.at(3);
-    } else if (nsd == 3) {
+    } else /*if (nsd == 3)*/ {
         dev11 = dev.at(1);
         dev22 = dev.at(2);
         dev33 = dev.at(3);
@@ -209,7 +209,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
     } else if ( id == D_v || id == V_v ) {
         val = dx.at(2)/3.0*vol + dx.at(1)/2.0*gam12 + dx.at(2)*dev22;
         if (nsd == 3) val += dx.at(3)/2.0*gam23;
-    } else if ( id == D_w || id == V_w ) { // 3D only:
+    } else /*if ( id == D_w || id == V_w )*/ { // 3D only:
         val = dx.at(3)/3.0*vol + dx.at(1)/2.0*gam13 + dx.at(2)/2.0*gam23 + dx.at(3)*dev33;
     }
     return val;

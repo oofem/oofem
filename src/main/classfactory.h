@@ -39,6 +39,8 @@
 #include "domain.h"
 #include "classtype.h"
 #include "sparselinsystemnm.h"
+#include "errorestimator.h"
+#include "sparsemtrx.h"
 #include "compiler.h"
 #include <map>
 #include <string>
@@ -48,6 +50,7 @@
 #include "elementclassfactory.h"
 
 namespace oofem {
+
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
@@ -365,8 +368,8 @@ public:
      */
     InitialCondition *createInitialCondition(classType type, int num, Domain *d) ;
 
+};
 
-  };
 extern ClassFactory classFactory;
 } // end namespace oofem
 #endif // clasfactort_h

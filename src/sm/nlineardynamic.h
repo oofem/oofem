@@ -75,8 +75,7 @@ namespace oofem {
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix;
-	SparseMtrx *effectiveMassMatrix;
+    SparseMtrx *effectiveStiffnessMatrix, *massMatrix,;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
@@ -87,11 +86,12 @@ protected:
     double eta, delta;
     double a0, a1, a2, a3, a4, a5, a6, a7;
 
-    FloatArray velocityVector, accelerationVector, previousAccelerationVector, previousVelocityVector, previousLoadVector;
+    FloatArray velocityVector, accelerationVector, previousLoadVector;
+    FloatArray previousVelocityVector, previousAccelerationVector;
     FloatArray help, rhs, rhs2, previousInternalForces;
-    FloatArray previousIncrementOfDisplacement, previousPreviousTotalDisplacement;
+    FloatArray previousIncrementOfDisplacement;
     FloatArray previousTotalDisplacement, totalDisplacement,  incrementOfDisplacement;
-    FloatArray internalForces;
+    FloatArray internalForces, forcesVector;
 
     /// A load vector already applied, which does not scales.
     FloatArray initialLoadVector;
@@ -103,13 +103,12 @@ protected:
     /// incremental Load Vector for prescribed DOFs.
     FloatArray incrementalLoadVectorOfPrescribed;
 
-    int currentIterations;
+    int currentIterations, totIterations, MANRMSteps;
     int commInitFlag;
     int nonlocalStiffnessFlag;
     NM_Status numMetStatus;
     /// Numerical method used to solve the problem.
     SparseNonLinearSystemNM *nMethod;
-	SparseLinearSystemNM *nMethodLin;
     /// Intrinsic time increment.
     double deltaT;
 
@@ -181,6 +180,7 @@ protected:
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);
+    void determineConstants(TimeStep *tStep);
     void computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,

@@ -36,12 +36,13 @@
 #define activebc_h
 
 #include "generalbc.h"
-#include "alist.h"
 #include "intarray.h"
 #include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "error.h"
+
+#include <vector>
 
 namespace oofem {
 class SparseMtrx;
@@ -151,7 +152,7 @@ public:
      * @param c_s Column numbering scheme.
      * @param domain Domain to assemble from.
      */
-    virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain) {};
 
 
@@ -207,6 +208,7 @@ public:
      * @param field Field to take value from.
      * @param mode Mode of unknown value.
      * @param tStep Time step.
+     * @param dof Active dof for which to obtain the value.
      * @return Value of dof.
      */
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
@@ -219,9 +221,10 @@ public:
      * @param eid Equation ID for the unknown value.
      * @param mode Mode of unknown value.
      * @param tStep Time step.
+     * @param dof Active dof for which to obtain the value.
      * @return Value of dof.
      */
-    virtual double giveUnknown(EquationID type, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
+    virtual double giveUnknown(EquationID eid, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
         OOFEM_ERROR2("%s :: giveUnknown - Not supported by bc.", giveClassName());
         return 0.0;

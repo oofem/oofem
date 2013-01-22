@@ -146,8 +146,6 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 int
 TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 // IST_Humidity must be overriden!
-
-
 {
     if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
         FloatArray vec = ( ( TransportMaterialStatus * ) this->giveStatus(aGaussPoint) )->giveStateVector();
@@ -158,9 +156,20 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         TransportElement *transpElem = ( TransportElement * ) aGaussPoint->giveElement();
         transpElem->computeFlow(answer, aGaussPoint, atTime);
         return 1;
-    } else {
-        return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
+    } else if ( type == IST_Density ) {
+        answer.resize(1);
+        answer.at(1)=this->give('d',aGaussPoint);
+        return 1;
+    } else if ( type == IST_HeatCapacity ) {
+        answer.resize(1);
+        answer.at(1)=this->give('c',aGaussPoint);
+        return 1;
+    } else if ( type == IST_ThermalConductivityIsotropic ) {
+        answer.resize(1);
+        answer.at(1)=this->give('k',aGaussPoint);
+        return 1;
     }
+    return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
 

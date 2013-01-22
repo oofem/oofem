@@ -44,34 +44,12 @@
 #include "contextioerr.h"
 
 namespace oofem {
-TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter)
-// Constructor. Creates a new time step, with number n, and belonging to
-// the time history of s. Used for the initial step (0 or 1).
-{
-    eModel = e;
-    deltaT = dt;
-    targetTime = tt;
-    intrinsicTime = tt;//intrinsicTime is the same as targetTime in constructor.
-    solutionStateCounter = counter;
-    number = n;
-    version = 0;
-    mstepNumber = mn;
-    timeDiscretization = TD_Unspecified;
-}
 
-TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td)
-// Constructor. Creates a new time step, with number n, and belonging to
-// the time history of s. Used for the initial step (0 or 1).
+TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td) :
+    eModel(e), targetTime(tt), intrinsicTime(tt), deltaT(dt), solutionStateCounter(counter), 
+    number(n), version(0), mstepNumber(mn), timeDiscretization(td)
 {
-    eModel = e;
-    deltaT = dt;
-    targetTime = tt;
-    intrinsicTime = tt;//intrinsicTime is the same as targetTime in constructor.
-    solutionStateCounter = counter;
-    number = n;
-    version = 0;
-    mstepNumber = mn;
-    timeDiscretization = td;
+    // Target time and intrinsic time is the same in the constructor.
 }
 
 TimeStep :: TimeStep(EngngModel *e)
@@ -167,12 +145,6 @@ bool TimeStep :: isTheCurrentTimeStep()
 contextIOResultType
 TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    int type_id = TimeStepClass;
-    // write class header
-    if ( !stream->write(& type_id, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
     // write step number
     if ( !stream->write(& number, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -216,16 +188,6 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 contextIOResultType
 TimeStep :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    int class_id;
-    // read class header
-    if ( !stream->read(& class_id, 1) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( class_id != TimeStepClass ) {
-        THROW_CIOERR(CIO_BADVERSION);
-    }
-
     // read step number
     if ( !stream->read(& number, 1) ) {
         THROW_CIOERR(CIO_IOERR);

@@ -90,7 +90,7 @@ OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
 
     fprintf(file, "\n\nDofManager output:\n------------------\n");
 
-    if ( dofman_all_out_flag   && dofman_except.isEmpty() ) {
+    if ( dofman_all_out_flag   && dofman_except.empty() ) {
         for ( i = 1; i <= ndofman; i++ ) {
 #ifdef __PARALLEL_MODE
             // test for null dof in parallel mode
@@ -122,7 +122,7 @@ OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
 
     fprintf(file, "\n\nElement output:\n---------------\n");
 
-    if ( element_all_out_flag   && element_except.isEmpty() ) {
+    if ( element_all_out_flag   && element_except.empty() ) {
         for ( i = 1; i <= nelem; i++ ) {
 #ifdef __PARALLEL_MODE
             // test for remote element in parallel mode
@@ -163,7 +163,7 @@ OutputManager :: _testDofManOutput(int number)
         selected  = 1;
     } else {
         // test for particular dofman selection
-        dynaList< Range > :: iterator dofmanOutIter;
+        std::list< Range > :: iterator dofmanOutIter;
 
         int _label = domain->giveDofManager(number)->giveLabel();
         for ( dofmanOutIter = dofman_out.begin(); dofmanOutIter != dofman_out.end(); ++dofmanOutIter ) {
@@ -180,8 +180,8 @@ OutputManager :: _testDofManOutput(int number)
     }
 
     // if selected check exclude list
-    dynaList< Range > *list2 = & ( this->dofman_except );
-    dynaList< Range > :: iterator dofmanExceptIter;
+    std::list< Range > *list2 = & ( this->dofman_except );
+    std::list< Range > :: iterator dofmanExceptIter;
     int _label = domain->giveDofManager(number)->giveLabel();
 
     for ( dofmanExceptIter = list2->begin(); dofmanExceptIter != list2->end(); ++dofmanExceptIter ) {
@@ -215,7 +215,7 @@ OutputManager :: _testElementOutput(int number)
         selected  = 1;
     } else {
         // test for particular element selection
-        dynaList< Range > :: iterator elemOutIter;
+        std::list< Range > :: iterator elemOutIter;
         int _label = domain->giveElement(number)->giveLabel();
 
         for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
@@ -232,7 +232,7 @@ OutputManager :: _testElementOutput(int number)
     }
 
     // if selected check exclude list
-    dynaList< Range > :: iterator elemExceptIter;
+    std::list< Range > :: iterator elemExceptIter;
     int _label = domain->giveElement(number)->giveLabel();
 
     for ( elemExceptIter = element_except.begin(); elemExceptIter != element_except.end(); ++elemExceptIter ) {
@@ -259,7 +259,7 @@ OutputManager :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    dynaList< Range > :: iterator tstepsIter;
+    std::list< Range > :: iterator tstepsIter;
     for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
         // test if INCLUDED
         if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {

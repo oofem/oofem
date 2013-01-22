@@ -441,7 +441,7 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
     double c2 = vertices->at(1)->at(2);
     double distX = x2 - x1;
     double distY = y2 - y1;
-    double a, b, A, B, C;
+    double a = 0., b = 0., A, B, C;
     if ( distX != 0.0 ) {
         a = distY / distX;
         b = y1 - a * x1;

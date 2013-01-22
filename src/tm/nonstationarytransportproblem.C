@@ -51,7 +51,6 @@
 #endif //__CEMHYD_MODULE
 
 namespace oofem {
-
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
 {
     ndomains = 1;
@@ -64,8 +63,7 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
 }
 
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
-{
-}
+{}
 
 
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -99,8 +97,10 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltat") ) {
         IR_GIVE_FIELD(ir, deltaT, IFT_NonStationaryTransportProblem_deltat, "deltat"); // Macro
-    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltatfunction") ){
+    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_deltat, "deltatfunction") ) {
         IR_GIVE_FIELD(ir, dtTimeFunction, IFT_NonStationaryTransportProblem_dtf, "deltatfunction"); // Macro
+    } else if ( ir->hasField(IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes") ) {
+        IR_GIVE_FIELD(ir, discreteTimes, IFT_NonStationaryTransportProblem_prescribedtimes, "prescribedtimes"); // Macro
     } else {
         OOFEM_ERROR("Time step not defined");
     }
@@ -159,9 +159,10 @@ TimeStep *
 NonStationaryTransportProblem :: giveSolutionStepWhenIcApply()
 {
     if ( stepWhenIcApply == NULL ) {
-        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT-giveDeltaT(giveNumberOfFirstStep()), giveDeltaT(giveNumberOfFirstStep()), 0);
+        stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT - giveDeltaT( giveNumberOfFirstStep() ), giveDeltaT( giveNumberOfFirstStep() ), 0);
         //stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -deltaT, deltaT, 0);
     }
+
     return stepWhenIcApply;
 }
 
@@ -184,9 +185,27 @@ NonStationaryTransportProblem :: giveDeltaT(int n)
         return giveDtTimeFunction()->__at(n);
     }
 
+    if ( discreteTimes.giveSize() > 0 ) {
+        return this->giveDiscreteTime(n) - this->giveDiscreteTime(n - 1);
+    }
+
     return deltaT;
 }
 
+double
+NonStationaryTransportProblem :: giveDiscreteTime(int iStep)
+{
+    if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+        return ( discreteTimes.at(iStep) );
+    }
+
+    if ( ( iStep == 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+        return ( initT );
+    }
+
+    _error("giveDiscreteTime: invalid iStep");
+    return 0.0;
+}
 
 
 TimeStep *
@@ -241,7 +260,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         this->applyIC(stepWhenIcApply);
 
         //project initial conditions to have temorary temperature in integration points
-        
+
         //edge or surface load on elements
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
                                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -291,7 +310,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
     solutionVector->resize(neq);
     solutionVector->zero();
-    
+
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling rhs\n");
 #endif
@@ -636,7 +655,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         }
     }
 
-    
+
     //project initial temperature to integration points
 
     //     for ( j = 1; j <= nelem; j++ ) {
@@ -671,6 +690,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
             cem->averageTemperature();
         }
     }
+
 #endif //__CEMHYD_MODULE
 }
 
@@ -715,15 +735,11 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int ielem, i;
     int nelem = domain->giveNumberOfElements();
-    double dV;
     TransportElement *element;
     IntegrationRule *iRule;
     GaussPoint *gp;
     FloatArray vecTemperature;
     TransportMaterial *mat;
-
-
-
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = ( TransportElement * ) domain->giveElement(ielem);
@@ -732,7 +748,6 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
             iRule = element->giveDefaultIntegrationRulePtr();
             for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
-                dV  = element->computeVolumeAround(gp);
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
                 //mat->average_temp += vecState.at(1) * dV;
@@ -747,5 +762,4 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
         }
     }
 }
-
 } // end namespace oofem

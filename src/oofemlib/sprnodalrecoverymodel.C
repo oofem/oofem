@@ -40,6 +40,8 @@
 #include "integrationrule.h"
 #include "gausspnt.h"
 
+#include <list>
+
 namespace oofem {
 SPRNodalRecoveryModel :: SPRNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
@@ -428,8 +430,8 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
 {
     int nelem, ndofman, ielem, count, patchElements, i, j, includes, npap, ipap;
     const IntArray *papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(papNumber);
-    dynaList< int >dofManToDetermineList;
-    dynaList< int > :: iterator dofManToDetermineListIter;
+    std::list< int >dofManToDetermineList;
+    std::list< int > :: iterator dofManToDetermineListIter;
     SPRNodalRecoveryModelInterface *interface;
     IntArray toDetermine, toDetermine2, elemPap, papInv;
     Element *element;
@@ -500,7 +502,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
                 }
 
                 if ( !includes ) {
-                    dofManToDetermineList.pushBack( toDetermine.at(i) );
+                    dofManToDetermineList.push_back( toDetermine.at(i) );
                 }
 
                 // determine those dofManagers which are not reported by elements,
@@ -523,7 +525,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
                         }
 
                         if ( !includes ) {
-                            dofManToDetermineList.pushBack( elemPap.at(ipap) );
+                            dofManToDetermineList.push_back( elemPap.at(ipap) );
                         }
 
                         // add also all dofManagers which are reported by element for this Assembly node
@@ -540,7 +542,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
                             }
 
                             if ( !includes ) {
-                                dofManToDetermineList.pushBack( toDetermine2.at(j) );
+                                dofManToDetermineList.push_back( toDetermine2.at(j) );
                             }
                         }
                     }
@@ -792,12 +794,10 @@ SPRNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommun
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     double value;
-    bool accept;
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
         indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
-        accept = indx && s->dofManPatchCount->at(indx);
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
         result &= pcbuff->unpackInt(flag);

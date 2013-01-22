@@ -1,3 +1,9 @@
+if (NOT USE_SM)
+    set (tm_hydram
+        ../sm/hydram.C
+        )
+endif ()
+
 if (USE_CEMHYD)
     set (tm_cemhyd
         cemhyd/cemhydmat.C
@@ -19,6 +25,7 @@ set (tm_element
     quadaxisym1_ht.C
     traxisym1_ht.C
     brick1_ht.C
+    qbrick1_ht.C
     tetrah1_ht.C
     tr1darcy.C
     )
@@ -32,9 +39,13 @@ set (tm_material
     hydratinghemomat.C
     hemotkmat.C
     isoheatmat.C
+    isomoisturemat.C
+    isolinmoisturemat.C
+    bazantnajjarmat.C
     hydratingconcretemat.C
     nonlinearmassmat.C
     anisomassmat.C
+    rvestokesflow.C
     )
 
 set (tm
@@ -44,6 +55,7 @@ set (tm
     ${tm_status}
     ${tm_new}
     ${tm_cemhyd}
+    ${tm_hydram}
     )
 
 add_library (tm

@@ -227,12 +227,7 @@ PrimaryField :: advanceSolution(TimeStep *atTime)
 contextIOResultType
 PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 {
-    int i, type_id = PrimaryFieldClass;
-    contextIOResultType iores;
-    // write class header
-    if ( !stream->write(& type_id, 1) ) {
-        return CIO_IOERR;
-    }
+    contextIOResultType iores(CIO_IOERR);
 
     if ( !stream->write(& actualStepNumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -242,7 +237,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    for ( i = 0; i <= nHistVectors; i++ ) {
+    for ( int i = 0; i <= nHistVectors; i++ ) {
         if ( ( iores = solutionVectors.at(i + 1)->storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -250,7 +245,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 
     TimeStep *iStep;
     int flag;
-    for ( i = 0; i <= nHistVectors; i++ ) {
+    for ( int i = 0; i <= nHistVectors; i++ ) {
         if ( ( iStep = solStepList.at(i + 1) ) ) {
             flag = 1;
         } else {
@@ -274,16 +269,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 contextIOResultType
 PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 {
-    int i, class_id;
-    contextIOResultType iores;
-    // read class header
-    if ( !stream->read(& class_id, 1) ) {
-        return CIO_IOERR;
-    }
-
-    if ( class_id != PrimaryFieldClass ) {
-        return CIO_BADVERSION;
-    }
+    contextIOResultType iores(CIO_IOERR);
 
     if ( !stream->read(& actualStepNumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -293,7 +279,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    for ( i = 0; i <= nHistVectors; i++ ) {
+    for ( int i = 0; i <= nHistVectors; i++ ) {
         if ( ( iores = solutionVectors.at(i + 1)->restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -301,7 +287,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 
     int flag;
     TimeStep *iStep;
-    for ( i = 0; i <= nHistVectors; i++ ) {
+    for ( int i = 0; i <= nHistVectors; i++ ) {
         if ( !stream->read(& flag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }

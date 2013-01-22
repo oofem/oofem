@@ -173,8 +173,8 @@ protected:
      * If runs in parallel, the masses of shared nodes are exchanged and
      * remote contributions are added accordingly.
      * @param mass Assembled mass matrix.
-     * @param maximum Estimate of eigenfrequency.
-     * @param solution Step.
+     * @param maxOm Estimate of eigenfrequency.
+     * @param tStep Time step.
      */
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
     void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);

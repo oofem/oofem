@@ -144,6 +144,7 @@ enum classType {
     QTrPlaneStressGradClass,
     CCTPlateClass,
     CCTPlate3dClass,
+    Quad1MindlinClass,
     LSpaceClass,
     LSpaceBBClass,
     QSpaceClass,
@@ -173,15 +174,20 @@ enum classType {
     LIBeam3dNL2Class,
     LIBeam2dNLClass,
     Quad1_htClass,
+    Quad1_mtClass,
     Quad1_hmtClass,
     Tr1_htClass,
     Tr1DarcyClass,
     Tr1_hmtClass,
     QuadAxisym1_htClass,
+    QuadAxisym1_mtClass,
     QuadAxisym1_hmtClass,
     TrAxisym1_htClass,
     Brick1_htClass,
+    Brick1_mtClass,
     Brick1_hmtClass,
+    QBrick1_htClass,
+    QBrick1_hmtClass,
     Tetrah1_htClass,
     Tetrah1_hmtClass,
     PlaneStress2dXfemClass,
@@ -320,10 +326,14 @@ enum classType {
     LatticeDamage2dClass,
     IsoInterfaceDamageMaterialClass,
     CebFipSlip90MaterialClass,
-	 DustMaterialClass,
+    DustMaterialClass,
+    RVEMaterialClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
+    IsotropicMoistureTransferMaterialClass,
+    IsotropicLinMoistureTransferMaterialClass,
+    BazantNajjarMoistureTransferMaterialClass,
     AnisotropicMassTransferMaterialClass,
     AnisotropicMassTransferMaterialStatusClass,
     NonlinearMassTransferMaterialClass,
@@ -380,7 +390,7 @@ enum classType {
     FE2FluidMaterialStatusClass,
     ConcreteDPM2StatusClass,
     LatticeDamage2dStatusClass,
-	 DustMaterialStatusClass,
+    DustMaterialStatusClass,
 
 
     FluidDynamicMaterialClass,
@@ -390,6 +400,8 @@ enum classType {
     BinghamFluidMaterialStatusClass,
     BinghamFluidMaterial2Class,
     TwoFluidMaterialClass,
+    NonlinearFluidMaterialClass,
+    NonlinearFluidMaterialStatusClass,
 
     SurfaceTensionMaterialClass,
     SurfaceTensionMaterialStatusClass,
@@ -462,8 +474,12 @@ enum classType {
 
     BasicGeometryClass,
 
-    StokesFlowVelocityHomogenizationClass
+    StokesFlowVelocityHomogenizationClass,
+    RVEStokesFlowClass,
+    RVEStokesFlowMaterialClass,
+    RVEStokesFlowMaterialStatusClass,
 
+    WeakPeriodicbcClass
 };
 } // end namespace oofem
 #endif // classtype_h

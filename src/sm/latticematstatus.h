@@ -44,7 +44,7 @@ class GaussPoint;
 class Dictionary;
 class Domain;
 class NonlocalMaterialStatusExtension;
-	
+
 /**
  * This class implements a base lattice material status.
  * In this class services are defined that are used by other 
@@ -61,7 +61,7 @@ public:
 
     virtual void initTempStatus() { }
 
-    virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) { }
     
     virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 

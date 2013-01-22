@@ -545,7 +545,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 #ifdef __LB_DEBUG
     // perturb solution time artificially if requested
     bool perturb = false;
-    dynaList< Range > :: iterator perturbedStepsIter;
+    std::list< Range > :: iterator perturbedStepsIter;
     for ( perturbedStepsIter = perturbedSteps.begin(); perturbedStepsIter != perturbedSteps.end(); ++perturbedStepsIter ) {
         if ( ( * perturbedStepsIter ).test( atTime->giveNumber() ) ) {
             perturb  = true;

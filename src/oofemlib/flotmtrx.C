@@ -748,7 +748,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         FloatMatrix tmp = src;
         this->zero();
         // initialize answer to be unity matrix;
-		for ( int i = 1; i <= nRows; i++ ) {
+        for ( int i = 1; i <= nRows; i++ ) {
             this->at(i, i) = 1.0;
         }
 
@@ -1587,13 +1587,6 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
 // return value >0 success
 //              =0 file i/o error
 {
-    int type_id = FloatMatrixClass;
-    int size = nRows * nColumns;
-    // write class header
-    if ( !stream->write(& type_id, 1) ) {
-        return ( CIO_IOERR );
-    }
-
     // write size
     if ( !stream->write(& nRows, 1) ) {
         return ( CIO_IOERR );
@@ -1604,7 +1597,7 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
     }
 
     // write raw data
-    if ( !stream->write(values, size) ) {
+    if ( !stream->write(values, nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1619,16 +1612,6 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
 // returns 0 if file i/o error
 //        -1 if id of class id is not correct
 {
-    int class_id;
-    // read class header
-    if ( !stream->read(& class_id, 1) ) {
-        return ( CIO_IOERR );
-    }
-
-    if ( class_id != FloatMatrixClass ) {
-        return ( CIO_BADVERSION );
-    }
-
     // read size
     if ( !stream->read(& nRows, 1) ) {
         return ( CIO_IOERR );
@@ -1650,7 +1633,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
         allocatedSize = 0;
     }
 
-    // write raw data
+    // read raw data
     if ( !stream->read(values, nRows * nColumns) ) {
         return ( CIO_IOERR );
     }

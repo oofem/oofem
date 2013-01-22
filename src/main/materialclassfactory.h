@@ -36,6 +36,7 @@
 #include "isolinearelasticmaterial.h"
 
 #ifdef __SM_MODULE
+ #include "abaqususermaterial.h"
  #include "ortholinearelasticmaterial.h"
  #include "perfectlyplasticmaterial.h"
  #include "steel1.h"
@@ -88,6 +89,8 @@
 
 #ifdef __TM_MODULE
  #include "isoheatmat.h"
+ #include "isolinmoisturemat.h"
+ #include "bazantnajjarmat.h"
  #include "hemotkmat.h"
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
@@ -97,6 +100,9 @@
  #ifdef __CEMHYD_MODULE
   #include "cemhydmat.h"
  #endif
+ #ifdef __FM_MODULE
+ #include "rvestokesflow.h"
+ #endif
 #endif //__TM_MODULE
 
 #ifdef __FM_MODULE
@@ -105,10 +111,12 @@
  #include "surfacetensionmaterial.h"
  #include "twofluidmaterial.h"
  #include "binghamfluid2.h"
+ #include "nonlinearfluidmaterial.h"
 #endif // __FM_Module
 
 #ifdef __SM_MODULE
 REGISTER_CLASS(DummyMaterial, "dummymat", DummyMaterialClass)
+REGISTER_CLASS(AbaqusUserMaterial, "abaqususermaterial", AbaqusUserMaterialClass)
 REGISTER_CLASS(IsotropicLinearElasticMaterial, "isole", IsotropicLinearElasticMaterialClass)
 REGISTER_CLASS(OrthotropicLinearElasticMaterial, "orthole", OrthotropicLinearElasticMaterialClass)
 REGISTER_CLASS(Steel1, "steel1", Steel1MaterialClass)
@@ -164,6 +172,8 @@ REGISTER_CLASS(DustMaterial, "dustmat", DustMaterialClass)
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)
+REGISTER_CLASS(IsotropicLinMoistureTransferMaterial, "isolinmoisturemat", IsotropicLinMoistureTransferMaterialClass)
+REGISTER_CLASS(BazantNajjarMoistureTransferMaterial, "bazantnajjarmoisturemat", BazantNajjarMoistureTransferMaterialClass)
 REGISTER_CLASS(HeMoTKMaterial, "hemotk", HeMoTKMaterialClass)
 REGISTER_CLASS(HydratingConcreteMat, "hydratingconcretemat", HydratingConcreteMatClass)
 REGISTER_CLASS(AnisotropicMassTransferMaterial, "anisomass", AnisotropicMassTransferMaterialClass)
@@ -171,6 +181,9 @@ REGISTER_CLASS(NonlinearMassTransferMaterial, "nonlinmass", NonlinearMassTransfe
  #ifdef __CEMHYD_MODULE
 REGISTER_CLASS(CemhydMat, "cemhydmat", CemhydMatClass)
  #endif //__CEMHYD_MODULE
+ #ifdef __FM_MODULE
+REGISTER_CLASS(RVEStokesFlow, "rvestokesflow", RVEStokesFlowClass)
+ #endif
 #endif //__TM_MODULE
 #if defined ( __SM_MODULE ) && defined ( __TM_MODULE )
 REGISTER_CLASS(HydratingIsoHeatMaterial, "hisoheat", HydratingIsoHeatMaterialClass)
@@ -183,5 +196,6 @@ REGISTER_CLASS(BinghamFluidMaterial2, "binghamfluid2", BinghamFluidMaterial2Clas
 REGISTER_CLASS(BinghamFluidMaterial2, "binghamfluid", BinghamFluidMaterial2Class)
 REGISTER_CLASS(FE2FluidMaterial, "fe2fluidmaterial", FE2FluidMaterialClass)
 REGISTER_CLASS(SurfaceTensionMaterial, "surfacetension", SurfaceTensionMaterialClass)
+REGISTER_CLASS(NonlinearFluidMaterial, "nonlinearfluid", NonlinearFluidMaterialClass)
 #endif // __FM_MODULE
 

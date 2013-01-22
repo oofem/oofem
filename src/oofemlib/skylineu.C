@@ -44,7 +44,7 @@
 #include "error.h"
 
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 
 namespace oofem {
@@ -430,9 +430,8 @@ SkylineUnsym :: factorized()
     double diag;
     int k, i, p, start, startK, startI;
 #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
     if ( isFactorized ) {
@@ -487,10 +486,8 @@ SkylineUnsym :: factorized()
     isFactorized = true;
 
 #ifdef TIME_REPORT
-    //printf ("\nSkylineU info: user time consumed by factorization: %.2gs", (clock()-tstart)/(double)CLOCKS_PER_SEC);
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_DEBUG( "SkylineU info: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "SkylineU info: user time consumed by factorization: %.2fs\n", timer.getUtime() );
 #endif
     // increment version
     //this->version++;

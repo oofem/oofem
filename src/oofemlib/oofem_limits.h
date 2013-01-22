@@ -38,10 +38,6 @@
 namespace oofem {
 /// Maximum input line length read.
 #define OOFEM_MAX_LINE_LENGTH 32768
-/// Maximum size of token buffer, which holds tokens.
-#define OOFEM_MAX_TOKENS_LENGTH 32768
-/// Maximum number of tokens.
-#define OOFEM_MAX_TOKENS 8000
 /// Maximum length of error message.
 #define MAX_ERROR_MSG_LENGTH 2048
 } // end namespace oofem

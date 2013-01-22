@@ -92,7 +92,6 @@ protected:
 extern Logger oofem_logger;
 extern Logger oofem_errLogger;
 
-
 /**@
  * General log-family macros (those for error and warning reporting).
  * These macros add to given message also file and line information.

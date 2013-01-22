@@ -90,8 +90,7 @@ public:
     /// Prints buffer to stdout.
     void printYourself();
 
-    /// Return the whole line
-    virtual void giveLine(char *line);
+    virtual std::string giveLine();
     
     /**
      * Dumps buffer to file.
@@ -100,8 +99,8 @@ public:
     void writeToFile(char *fileName);
 
 protected:
-    void giveRawLineFromInput(char *line);
-    void giveLineFromInput(char *line);
+    void giveRawLineFromInput(std::string &line);
+    void giveLineFromInput(std::string &line);
 };
 } // end namespace oofem
 #endif // buffereddatareader_h

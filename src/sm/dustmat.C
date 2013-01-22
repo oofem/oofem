@@ -460,10 +460,9 @@ DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
     double qRight = q;
     double qLeft = q;
     double tempQ = .5 * ( qLeft + qRight );
-    double fqRight, fqLeft, fq;
-    int i;
+    double fq;
     double fx, dfx;
-    for ( i = 0; i < newtonIter; i++ ) {
+    for ( int i = 0; i < newtonIter; i++ ) {
         fx = i1 - 3 *bulkModulus *functionH(q, qLeft) - qLeft;
         dfx =   -3 *bulkModulus *functionHDQ(qLeft) - 1;
         qLeft -= fx / dfx;
@@ -472,15 +471,13 @@ DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
         }
     }
 
-    for ( i = 0; i < newtonIter; i++ ) {
+    for ( int i = 0; i < newtonIter; i++ ) {
         fq = fTempR2(tempQ, q, i1, rho, bulkModulus, shearModulus);
         if ( fabs( ( qRight - qLeft ) / qRight ) < newtonTol ) {
             status->letTempQBe(tempQ);
             return;
         }
 
-        fqRight = fTempR2(qRight, q, i1, rho, bulkModulus, shearModulus);
-        fqLeft = fTempR2(qLeft, q, i1, rho, bulkModulus, shearModulus);
         if ( fq > 0 ) {
             qRight = tempQ;
         } else {
@@ -543,7 +540,7 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 int
-DustMaterial :: setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type)
+DustMaterial :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type)
 {
     DustMaterialStatus *status = ( DustMaterialStatus * ) giveStatus(gp);
     if ( type == IST_PlasticStrainTensor ) {

@@ -249,7 +249,6 @@ public:
      * @note Error is produced if the unknown type doesn't represent a vector.
      * @param answer The requested vector.
      * @param ut The unknown type to assemble.
-     * @param eid Equation that unknowns belong to.
      * @param mode Value mode (total, incremental, etc.)
      * @param tStep Time step to evaluate at.
      */

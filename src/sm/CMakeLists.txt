@@ -14,6 +14,7 @@ set (sm_element
     cct.C
     cohsur3d.C
     cct3d.C
+    quad1mindlin.C
     trplanrot3d.C
     lumpedmasselement.C
     springelement.C
@@ -52,6 +53,7 @@ set (sm_loads
     )
 
 set (sm_material
+    abaqususermaterial.C
     ortholinearelasticmaterial.C
     concrete2.C concrete3.C concretedpm.C concretedpm2.C
     cebfip78.C

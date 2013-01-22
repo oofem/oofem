@@ -82,6 +82,7 @@ public:
     virtual const char *giveClassName() const { return "LIBeam3dNL2"; }
     virtual classType giveClassID() const { return LIBeam3dNL2Class; }
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

@@ -75,7 +75,7 @@ void SloanGraph :: initialize()
     Element *ielem;
     GeneralBoundaryCondition *ibc;
 
-    ///@todo Use dynaList for this first part instead (suboptimization?)
+    ///@todo Use std::list for this first part instead (suboptimization?)
     this->nodes.growTo(nnodes);
 
     // Add dof managers.
@@ -244,8 +244,8 @@ SloanGraph :: findPeripheralNodes()
     int MinimumWidth = domain->giveNumberOfDofManagers();
     int CurrentDiameter = Spine->giveDepth();
     int TrialDepth, TrialWidth, Root;
-    dynaList< int >candidates;
-    dynaList< int > :: iterator pos;
+    std::list< int >candidates;
+    std::list< int > :: iterator pos;
     int newStartNode = 1;
 
     while ( newStartNode ) {
@@ -293,7 +293,7 @@ SloanGraph :: findPeripheralNodes()
 
 
 void
-SloanGraph :: extractCandidates(dynaList< int > &candidates, SloanLevelStructure *Spine)
+SloanGraph :: extractCandidates(std::list< int > &candidates, SloanLevelStructure *Spine)
 {
     if ( !Spine ) {
         OOFEM_ERROR("SloanGraph::extractCandidates : Invalid spine");
@@ -309,7 +309,7 @@ SloanGraph :: extractCandidates(dynaList< int > &candidates, SloanLevelStructure
     for ( i = 1; i <= LastLevel->giveSize(); i++ ) {
         if ( lastDegree != this->giveNode( LastLevel->at(i) )->giveDegree() ) {
             lastDegree = this->giveNode( LastLevel->at(i) )->giveDegree();
-            candidates.pushBack( LastLevel->at(i) );
+            candidates.push_back( LastLevel->at(i) );
         }
     }
 }
@@ -478,17 +478,17 @@ SloanGraph :: assignNewNumbers()
 
     this->initStatusAndPriority();
     SloanGraphNode *nextNode;
-    //dynaList<int>::iterator next;
+    //std::list<int>::iterator next;
 
     Start = this->startNode;
     this->queue.clear();
-    this->queue.pushBack(Start);
+    this->queue.push_back(Start);
     this->giveNode(Start)->setStatus(SloanGraphNode :: Preactive);
 
 #ifdef MDC
     for ( ; ; ) {
 #endif
-    while ( !this->queue.isEmpty() ) {
+    while ( !this->queue.empty() ) {
         // finds top priority, returns the corresponding node and deletes the entry
         inext = findTopPriorityInQueue();
         // this->queue.erase(next); - done by findTopPriority
@@ -512,7 +512,7 @@ SloanGraph :: assignNewNumbers()
     this->initStatusAndPriority();
     Start = this->startNode;
     this->queue.clear();
-    this->queue.pushBack(Start);
+    this->queue.push_back(Start);
     this->giveNode(Start)->setStatus(SloanGraphNode :: Preactive);
 }
 #else
@@ -529,14 +529,14 @@ SloanGraph :: insertNeigborsOf(int next)
 {
     int neighborNode;
     SloanGraphNode *node = this->giveNode(next);
-    dynaList< int > *neighbors = node->giveNeighborList();
-    dynaList< int > :: iterator pos;
+    std::list< int > *neighbors = node->giveNeighborList();
+    std::list< int > :: iterator pos;
 
     for ( pos = neighbors->begin(); pos != neighbors->end(); ++pos ) {
         neighborNode = * pos;
         if ( this->giveNode(neighborNode)->giveStatus() == SloanGraphNode :: Inactive ) {
             this->giveNode(neighborNode)->setStatus(SloanGraphNode :: Preactive);
-            this->queue.pushFront(neighborNode);
+            this->queue.push_front(neighborNode);
         }
     }
 }
@@ -546,8 +546,8 @@ SloanGraph :: modifyPriorityAround(int next)
 {
     SloanGraphNode :: SloanGraphNode_StatusType status;
     SloanGraphNode *neighborNode, *neighborOfNeighbor, *nextNode = this->giveNode(next);
-    dynaList< int > *neighborsOfneighbors, *neighbors = nextNode->giveNeighborList();
-    dynaList< int > :: iterator pos, npos;
+    std::list< int > *neighborsOfneighbors, *neighbors = nextNode->giveNeighborList();
+    std::list< int > :: iterator pos, npos;
 
     for ( pos = neighbors->begin(); pos != neighbors->end(); ++pos ) {
         neighborNode = this->giveNode(* pos);
@@ -562,7 +562,7 @@ SloanGraph :: modifyPriorityAround(int next)
                     neighborOfNeighbor->increasePriorityBy(WeightDegree);
                 } else if ( status == SloanGraphNode :: Inactive ) {
                     neighborOfNeighbor->increasePriorityBy(WeightDegree);
-                    this->queue.pushFront(* npos);
+                    this->queue.push_front(* npos);
                     neighborOfNeighbor->setStatus(SloanGraphNode :: Preactive);
                 }
             }
@@ -574,7 +574,7 @@ int
 SloanGraph :: findTopPriorityInQueue()
 {
     int candidate = 0, priority, pmax = -WeightDegree * ( domain->giveNumberOfDofManagers() + 1 );
-    dynaList< int > :: iterator pos, toDel;
+    std::list< int > :: iterator pos, toDel;
 
     for ( pos = queue.begin(); pos != queue.end(); ++pos ) {
         priority = this->giveNode(* pos)->givePriority();

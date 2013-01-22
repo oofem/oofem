@@ -40,9 +40,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#include "sparsemtrx.h"
-#include "dynalist.h"
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "conTable.h"
@@ -140,26 +137,30 @@ public:
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *atTime);
 
-    virtual dynaList< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
 
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp Source integration point.
      * @param loc Local code numbers.
      * @param lcontrib "Local" contribution.
+     * @param s Numbering scheme that determines assembly.
+     * @param tStep Time step.
      * @return Nonzero if local point contributes (loading) or zero if not (unloading in elastic range, elastic).
      */
     int giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
-                                               FloatArray &lcontrib, TimeStep *atTime);
+                                               FloatArray &lcontrib, TimeStep *tStep);
 
     /**
      * Computes the "remote" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp Remote integration point.
-     * @param loc Remote element code numbers.
+     * @param rloc Remote element code numbers.
      * @param rcontrib "Remote" contribution.
+     * @param s Numbering scheme that determines assembly.
+     * @param tStep Time step.
      */
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
-                                                 FloatArray &rcontrib, TimeStep *atTime);
+                                                 FloatArray &rcontrib, TimeStep *tStep);
 
     // Computes elastic stiffness for normal stress components
     // @param answer result of size (3,3)

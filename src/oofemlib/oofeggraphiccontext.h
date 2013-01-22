@@ -40,9 +40,11 @@
 
 
  #include "intarray.h"
- #include "dynalist.h"
  #include "nodalrecoverymodel.h"
  #include "internalstatemode.h"
+ 
+ #include <list>
+ 
 //
 // for c++ compiler to be successful on some c files
 //
@@ -154,7 +156,7 @@ protected:
     static IntArray matRegFilter;
 
     // element filter
-    static dynaList< Range >element_filter;
+    static std::list< Range >element_filter;
 
     static ScalarAlgorithmType scalarAlgo;
     // smoother type

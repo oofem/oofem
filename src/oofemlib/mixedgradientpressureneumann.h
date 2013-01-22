@@ -43,7 +43,8 @@
 #include "classtype.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "dynalist.h"
+
+#include <list>
 
 namespace oofem {
 class MasterDof;
@@ -103,9 +104,9 @@ protected:
 
     /// DOF-manager containing the unknown deviatoric stress.
     Node *sigmaDev;
-    
+
     /// Element boundaries to integrate over. Boundary number 0 indicates that the element is a boundary element itself.
-    dynaList< std::pair<int,int> > boundaries;
+    std::list< std::pair<int,int> > boundaries;
 
 public:
     /**
@@ -142,7 +143,7 @@ public:
      * The gradient should be in Voigt notation (only the deviatoric part will be used)
      */
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
+
     virtual void addElementSide(int elem, int side);
     virtual void addElement(int elem);
     void clearElements();
@@ -151,37 +152,10 @@ public:
 
     virtual void scale(double s);
 
-    /**
-     * Computes the homogenized fields through sensitivity analysis.
-     * @param[out] stressDev Computes the homogenized deviatoric stress.
-     * @param[out] vol Computes the homogenized volumetric gradient.
-     * @param eid Equation ID that fields belong to.
-     * @param tStep Time step for which field to obtain.
-     */
     virtual void computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep);
-
-    /**
-     * Computes the macroscopic tangents through sensitivity analysis.
-     * @param[out] Ed Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial d_{\mathrm{dev}}} @f$.
-     * @param[out] Ep Tangent @f$ \frac{\partial \sigma_{\mathrm{dev}}}{\partial p} @f$.
-     * @param[out] Cd Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial d_{\mathrm{dev}}} @f$.
-     * @param[out] Cp Tangent @f$ \frac{\partial d_{\mathrm{vol}}}{\partial p} @f$.
-     * @param eid Equation ID for which the tangents belong.
-     * @param tStep Time step for the tangents.
-     */
     virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
 
-    /**
-     * Set prescribed pressure.
-     * @param p New prescribed pressure.
-     */
     virtual void setPrescribedPressure(double p) { pressure = p; }
-
-    /**
-     * Sets the prescribed tensor from the matrix from given Voigt notation.
-     * Assumes use of double values (gamma) for off-diagonal, usually the way for strain in Voigt form.
-     * @param ddev Vector in Voigt format.
-     */
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
@@ -191,7 +165,7 @@ public:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     
-    virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }

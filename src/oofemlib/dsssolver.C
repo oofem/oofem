@@ -37,20 +37,20 @@
 #ifdef __DSS_MODULE
 
  #include "dss.h"
+ #include "timer.h"
 
 namespace oofem {
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) { }
 
-DSSSolver ::  ~DSSSolver() { }
+DSSSolver :: ~DSSSolver() { }
 
 NM_Status
 DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
  #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    :: getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
  #endif
 
 
@@ -63,9 +63,8 @@ DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     }
 
  #ifdef TIME_REPORT
-    oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
-    OOFEM_LOG_INFO( "DSSSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "DSSSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
  #endif
 
     return NM_Success;

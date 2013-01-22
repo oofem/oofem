@@ -274,30 +274,21 @@ std::string viewTitle = "";
 oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 EView *myview;
 
-/* Defaul oofem loggers */
-Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
-
-/* Global class factory */
-ClassFactory oofem :: classFactory;
-
 int
 main(int argc, char *argv[])
 {
-    int i;
     int inputFileFlag = 0;
     //int rank=0;
     std :: stringstream inputFileName;
     char buff [ 20 ];
     unsigned long mask = 0;
-    bool parallelFlag;
+    bool parallelFlag = false;
 
 
     // print prg header on stdout
     printf("%s", PRG_HEADER_SM);
 
 #ifdef __PARALLEL_MODE
-    parallelFlag = true; ///@todo Read this from input arguments (eventually)
     int rank = 0;
  #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
@@ -313,7 +304,7 @@ main(int argc, char *argv[])
     // check for options
     //
     if ( argc != 1 ) {
-        for ( i = 1; i < argc; i++ ) {
+        for ( int i = 1; i < argc; i++ ) {
             if ( strcmp(argv [ i ], "-f") == 0 ) {
                 if ( i + 1 < argc ) {
                     inputFileName << argv [ i + 1 ];
@@ -326,7 +317,14 @@ main(int argc, char *argv[])
                     oofem_logger.setLogLevel(level);
                     oofem_errLogger.setLogLevel(level);
                 }
-            }
+            }   else if ( strcmp(argv [ i ], "-p") == 0 ) {
+#ifdef __PARALLEL_MODE
+                parallelFlag = true;
+#else
+                fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");
+                exit(EXIT_FAILURE);
+#endif
+            } 
         }
     }
 
@@ -378,7 +376,7 @@ main(int argc, char *argv[])
 
     ESIBuildInterface(mask, argc, argv);
     myview  =  ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("OOFEG"), 
-			     const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+                             const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                              const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
@@ -395,12 +393,12 @@ main(int argc, char *argv[])
     //problem -> giveEngngModel()->forceEquationNumbering();
 
     // activate some useful layers
-    for ( i = 0; i < OOFEG_LAST_LAYER; i++ ) {
+    for ( int i = 0; i < OOFEG_LAST_LAYER; i++ ) {
         EVSetLayerOnOff(myview, i, 1);
     }
 
     if ( oofeg_box_setup ) {
-        oofeg_display_message( oofem_tmpstr(OOFEG_VERSION) );
+        oofeg_display_message( OOFEG_VERSION );
     }
 
     updateISA(gc);
@@ -2535,7 +2533,7 @@ oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
     view = ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("SimpleXF"), 
-			 const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+                         const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                          const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
     EMAttachView(ESIModel(), view);

@@ -35,9 +35,10 @@
 #ifndef trianglemesherinterface_h
 #define trianglemesherinterface_h
 
-#include "alist.h"
 #include "flotarry.h"
 #include "intarray.h"
+
+#include <vector>
 
 namespace oofem {
 
@@ -111,19 +112,19 @@ public:
      * @return True if mesh generation was successful.
      */
     bool meshPSLG(const Triangle_PSLG &pslg,
-            const IntArray &outside, const IntArray &inside,
-            AList<FloatArray> &nodes, AList<IntArray> &n_markers,
-            AList<IntArray> &triangles, IntArray &t_markers,
-            AList<IntArray> &segments, IntArray &s_markers) const;
+                  const IntArray &outside, const IntArray &inside,
+                  std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
+                  std::vector<IntArray> &triangles, IntArray &t_markers,
+                  std::vector<IntArray> &segments, IntArray &s_markers) const;
 
 protected:
     /**
      * Adds all neighboring regions to every node region.
      * Necessary since triangle can only store a single node number.
      */
-    static void fixNodeMarkers(const AList<FloatArray> &nodes, AList<IntArray> &n_markers,
-            const AList<IntArray> &triangles, const IntArray &t_markers,
-            const AList<IntArray> &segments, const IntArray &s_markers);
+    static void fixNodeMarkers(const std::vector<FloatArray> &nodes, std::vector<IntArray> &n_markers,
+                               const std::vector<IntArray> &triangles, const IntArray &t_markers,
+                               const std::vector<IntArray> &segments, const IntArray &s_markers);
 };
 
 } // end namespace oofem

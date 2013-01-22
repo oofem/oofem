@@ -315,8 +315,8 @@ LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     int i;
 
-    pap.resize(8);
-    for ( i = 1; i <= 8; i++ ) {
+    pap.resize(numberOfDofMans);
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -328,7 +328,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     int i, found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -337,7 +337,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 
@@ -784,7 +784,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
         p [ 1 ].y = p [ 0 ].y + coeff *jm.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *jm.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors [ i - 1 ]), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

@@ -103,7 +103,7 @@ ExportModule :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    dynaList< Range > :: iterator tstepsIter;
+    std::list< Range > :: iterator tstepsIter;
     for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
         // test if INCLUDED
         if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {

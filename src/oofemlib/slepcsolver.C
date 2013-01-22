@@ -45,7 +45,7 @@
  #include "verbose.h"
 
  #ifdef TIME_REPORT
-  #include "clock.h"
+  #include "timer.h"
  #endif
 
 namespace oofem {
@@ -56,7 +56,8 @@ SLEPcSolver :: SLEPcSolver(int i, Domain *d, EngngModel *m) : SparseGeneralEigen
 }
 
 
-SLEPcSolver :: ~SLEPcSolver() {
+SLEPcSolver :: ~SLEPcSolver()
+{
     if ( epsInit ) {
         EPSDestroy(eps);
     }
@@ -117,9 +118,8 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     EPSConvergedReason reason;
 
  #ifdef TIME_REPORT
-    //clock_t tstart = clock();
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
  #endif
 
     if ( !epsInit ) {
@@ -237,9 +237,8 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
     }
 
  #ifdef TIME_REPORT
-    oofem_timeval ut;
-    getRelativeUtime(ut, tstart);
-    OOFEM_LOG_INFO( "SLEPcSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_INFO( "SLEPcSolver info: user time consumed by solution: %.2fs\n", timer.getUtime() );
  #endif
 
     return NM_Success;

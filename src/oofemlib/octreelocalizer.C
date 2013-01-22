@@ -42,7 +42,9 @@
 #include "conTable.h"
 #include "alist.h"
 #include "mathfem.h"
-#include "clock.h"
+#include "timer.h"
+
+#include <iostream>
 
 namespace oofem {
 OctantRec :: OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth)
@@ -234,9 +236,8 @@ OctantRec :: testBoundingBox(const FloatArray &coords, double radius)
 void OctantRec :: printYourself()
 {
     if (this->isTerminalOctant()) {
-        printf(" center = {%e, %e, %e} size = %f, nodes = %d, elem_ips = %d\n", 
-                this->origin.at(1), this->origin.at(2), this->origin.at(3), 
-                this->halfWidth*2., this->nodeList->size(), this->elementIPList->size());
+        std::cout << " center = {" << this->origin.at(1) << "," << this->origin.at(2) << "," << this->origin.at(3)
+            << "} size = " << (this->halfWidth*2.) << " nodes = " << this->nodeList->size() << " elem_ips = " << this->elementIPList->size();
     } else {
         if (this->depth == 0) {
             printf("*ROOTCELL*");
@@ -292,8 +293,8 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     this->elementIPListsInitialized = false;
 
     // measure time consumed by octree build phase
-    oofem_timeval ut, tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 
     // first determine domain extends (bounding box), and check for degenerated domain type
     for ( int i = 1; i <= nnode; i++ ) {
@@ -355,14 +356,12 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
         }
     }
 
-    getRelativeUtime(ut, tstart);
+    timer.stopTimer();
 
     // compute max. tree depth
     int treeDepth = 0;
     this->giveMaxTreeDepthFrom(this->rootCell, treeDepth);
-    // compute processor time used by the program
-    double nsec = ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM );
-    OOFEM_LOG_DEBUG("Octree init [depth %d in %.2fs]\n", treeDepth, nsec);
+    OOFEM_LOG_DEBUG("Octree init [depth %d in %.2fs]\n", treeDepth, timer.getUtime());
 
     return true;
 }

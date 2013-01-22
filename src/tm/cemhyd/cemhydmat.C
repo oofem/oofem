@@ -429,7 +429,6 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
 {
     IntegrationRule *iRule;
     GaussPoint *gp;
-    CemhydMatStatus *ms;
     int i;
     double dV;
     FloatArray vecTemperature;
@@ -438,7 +437,6 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
     if ( !eachGP ) {
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
-            ms = ( CemhydMatStatus * ) this->giveStatus(gp);
             //when more GPs are lumped to a master GP
             dV  = element->computeVolumeAround(gp);
             element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
@@ -3042,7 +3040,6 @@ int CemhydMatStatus :: procair(int nsearch) {
 /* Calls procsol and procair */
 /* Called by runsint */
 int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
-    int xloc [ 2100 ], yloc [ 2100 ], zloc [ 2100 ];
     int count1, count2, ntot, countc, i, xp, yp, zp;
     int cmin, cmax, cfg;
     int alldone;
@@ -3119,9 +3116,6 @@ int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
                         nair [ countc ] += 1;
                         /* store the location of the modified pixel */
                         ntot += 1;
-                        xloc [ ntot ] = xp;
-                        yloc [ ntot ] = yp;
-                        zloc [ ntot ] = zp;
                     }
 
                     if ( countc == count1 ) {
@@ -3142,9 +3136,6 @@ int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
                             nair [ count1 ] += 1;
                             /* store the location of the modified pixel */
                             ntot += 1;
-                            xloc [ ntot ] = xp;
-                            yloc [ ntot ] = yp;
-                            zloc [ ntot ] = zp;
                         }
                     }
                 }
@@ -3157,9 +3148,6 @@ int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
                         nsolid [ countc ] += 1;
                         nair [ countc ] -= 1;
                         ntot += 1;
-                        xloc [ ntot ] = xp;
-                        yloc [ ntot ] = yp;
-                        zloc [ ntot ] = zp;
                     }
 
                     if ( countc == count2 ) {
@@ -3177,9 +3165,6 @@ int CemhydMatStatus :: movepix(int ntomove, int ph1, int ph2) {
                             nsolid [ count2 ] += 1;
                             nair [ count2 ] -= 1;
                             ntot += 1;
-                            xloc [ ntot ] = xp;
-                            yloc [ ntot ] = yp;
-                            zloc [ ntot ] = zp;
                         }
                     }
                 }
@@ -3391,7 +3376,6 @@ void CemhydMatStatus :: stat3d(void) {
 }
 
 void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
-    int ires;
     float s2, ss, sdiff, xtmp, ytmp;
     //static float normm[SYSIZE+1][SYSIZE+1][SYSIZE+1];
     //static float res[SYSIZE+1][SYSIZE+1][SYSIZE+1];
@@ -3609,7 +3593,6 @@ void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
 #ifdef PRINTF
     printf("Critical volume fraction is %f\n", vcrit);
 #endif
-    ires = 0;
 
     for ( k = 1; k <= SYSIZE; k++ ) {
         for ( j = 1; j <= SYSIZE; j++ ) {
@@ -3636,7 +3619,7 @@ void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
 /*disabled sintering*/
 void CemhydMatStatus :: distrib3d(void)
 {
-    int i, j, k, alumflag, alumval, alum2, valin;
+    int i, j, k, alumval, alum2, valin;
     int output_img;
     double volin, volf [ 5 ], surff [ 5 ], rhtest, rdesire;
     char filen [ 80 ];
@@ -3673,7 +3656,6 @@ void CemhydMatStatus :: distrib3d(void)
      * printf("%s\n",filealum);
      */
 
-    alumflag = 1;
     alumval = 4;
 
     //assume always C4AF

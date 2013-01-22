@@ -37,6 +37,8 @@
 
 #include "exportmodule.h"
 
+#include <cstdio>
+
 namespace oofem {
 /**
  * Represents GP (Gauss point) export module.

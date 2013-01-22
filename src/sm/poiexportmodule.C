@@ -102,7 +102,7 @@ POIExportModule :: readPOIFile(const std::string &poiFileName)
     for ( i = 0; i < nPOI; i++ ) {
         giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
         sscanf(line, "%d %lf %lf %lf %d", & poi.id, & poi.x, & poi.y, & poi.z, & poi.region);
-        POIList.pushBack(poi);
+        POIList.push_back(poi);
     }
 }
 
@@ -162,7 +162,7 @@ POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
     }
 
     // loop over POIs
-    dynaList< POI_dataType > :: iterator PoiIter = POIList.begin();
+    std::list< POI_dataType > :: iterator PoiIter = POIList.begin();
     poiCoords.at(1) = ( * PoiIter ).x;
     poiCoords.at(2) = ( * PoiIter ).y;
     poiCoords.at(3) = ( * PoiIter ).z;
@@ -192,7 +192,7 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
     toMap.at(1) = ( int ) valID;
 
     // loop over POIs
-    dynaList< POI_dataType > :: iterator PoiIter;
+    std::list< POI_dataType > :: iterator PoiIter;
     for ( PoiIter = POIList.begin(); PoiIter != POIList.end(); ++PoiIter ) {
         poiCoords.at(1) = ( * PoiIter ).x;
         poiCoords.at(2) = ( * PoiIter ).y;
@@ -286,7 +286,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     SpatialLocalizer *sl = d->giveSpatialLocalizer();
     // loop over POIs
-    dynaList< POI_dataType > :: iterator PoiIter;
+    std::list< POI_dataType > :: iterator PoiIter;
     for ( PoiIter = POIList.begin(); PoiIter != POIList.end(); ++PoiIter ) {
         coords.at(1) = ( * PoiIter ).x;
         coords.at(2) = ( * PoiIter ).y;

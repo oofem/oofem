@@ -304,7 +304,7 @@ public:
      * @param stepN Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeBoundaryVectorOf(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeBoundaryVectorOf(int boundary, EquationID eid, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
@@ -363,6 +363,7 @@ public:
     /**
      * Transformation matrices updates rotation matrix between element-local and primary DOFs,
      * taking into account nodal c.s. and master DOF weights.
+     * @param answer Contains the rotation matrix on exit.
      * @param eid Equation ID to compute rotation matrix for.
      * @return True if there is a rotation required, false otherwise.
      */

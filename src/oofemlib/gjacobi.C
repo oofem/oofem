@@ -40,7 +40,8 @@
 
 namespace oofem {
 GJacobi :: GJacobi(int i, Domain *d, EngngModel *m) :
-    NumericalMethod(i, d, m) {
+    NumericalMethod(i, d, m)
+{
     //
     // constructor
     //
@@ -55,7 +56,7 @@ GJacobi :: GJacobi(int i, Domain *d, EngngModel *m) :
     solved = 0;
 }
 
-GJacobi ::  ~GJacobi() { }
+GJacobi :: ~GJacobi() { }
 
 
 #define GJacobi_ZERO_CHECK_TOL 1.e-40

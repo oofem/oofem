@@ -1,7 +1,7 @@
 # Much to organize
 set (core_unsorted
     femcmpnn.C domain.C timestep.C metastep.C gausspnt.C
-    cltypes.C clock.C dictionr.C freestor.C
+    cltypes.C timer.C dictionr.C freestor.C
     conTable.C compiler.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initial.C
     homogenize.C
@@ -10,19 +10,20 @@ set (core_unsorted
     trianglemesherinterface.C
     geotoolbox.C geometry.C
     externalfieldgenerator.C
+    rvematerial.C
+    weakperiodicbc.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
-    oofemtxtinputrecord.C buffereddatareader.C oofemtxtdatareader.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
     structuralms.C
     nonlocalmaterialext.C randommaterialext.C
-    inputrecord.C tokenizer.C parser.C
+    inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
+    dynamicdatareader.C buffereddatareader.C oofemtxtdatareader.C tokenizer.C parser.C
     spatiallocalizer.C dummylocalizer.C octreelocalizer.C
     integrationrule.C gaussintegrationrule.C lobattoir.C
     smoothednodalintvarfield.C dofmanvalfield.C
     # Deprecated?
-    strreader.C
     spoolessparsemtrx.C
     rowcol.C skyline.C skylineu.C
     ldltfact.C
@@ -122,6 +123,7 @@ set (core_export
     vtkexportmodule.C
     vtkxmlexportmodule.C
     homexportmodule.C
+    matlabexportmodule.C
     )
 
 set (core_iga

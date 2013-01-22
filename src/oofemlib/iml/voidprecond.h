@@ -53,7 +53,7 @@ public:
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     VoidPreconditioner();
     /// Destructor
-    ~VoidPreconditioner(void) { };
+    virtual ~VoidPreconditioner(void) { };
 
     void init(const SparseMtrx &a) { };
     void solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; }

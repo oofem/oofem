@@ -56,7 +56,7 @@ public:
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     CompCol_ICPreconditioner() : Preconditioner() { }
     /// Destructor.
-    ~CompCol_ICPreconditioner(void) { };
+    virtual ~CompCol_ICPreconditioner(void) { };
 
     virtual void init(const SparseMtrx &a);
 

@@ -71,5 +71,16 @@ public:
     virtual classType giveClassID() const { return QuadAxisym1_hmtClass; }
 };
 
+
+/**
+ * Class for mass transfer.
+ */
+class QuadAxisym1_mt : public QuadAxisym1_ht
+{
+public:
+    QuadAxisym1_mt(int n, Domain *d);
+    virtual const char *giveClassName() const { return "QuadAxisym1_mt"; }
+    virtual classType giveClassID() const { return QuadAxisym1_mtClass; }
+};
 } // end namespace oofem
 #endif // quadaxisym1_ht_h

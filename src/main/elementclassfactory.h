@@ -78,6 +78,7 @@
  #include "shell7base.h"
  #include "tr2shell7.h"
  #include "rershell.h"
+ #include "quad1mindlin.h"
  #include "interfaceelem2dquad.h"
  #include "interfaceelement1d.h"
  #include "interfaceelem3dtrlin.h"
@@ -100,6 +101,7 @@
  #include "quadaxisym1_ht.h"
  #include "traxisym1_ht.h"
  #include "brick1_ht.h"
+ #include "qbrick1_ht.h"
  #include "tetrah1_ht.h"
  #include "tr1darcy.h"
 #endif
@@ -145,6 +147,7 @@ REGISTER_CLASS(LSpaceBB, "lspacebb", LSpaceBBClass)
 REGISTER_CLASS(LSpace, "lspace", LSpaceClass)
 REGISTER_CLASS(QSpaceGrad, "qspacegrad", QSpaceGradClass)
 REGISTER_CLASS(QSpace, "qspace", QSpaceClass)
+REGISTER_CLASS(Quad1Mindlin, "quad1mindlin", Quad1MindlinClass)
 REGISTER_CLASS(CCTPlate3d, "cctplate3d", CCTPlate3dClass)
 REGISTER_CLASS(CCTPlate, "cctplate", CCTPlateClass)
 //REGISTER_CLASS(LTRSpaceWithEmbeddedCrack, "ltrspaceec", )
@@ -202,10 +205,15 @@ REGISTER_CLASS(Line2SurfaceTension, "line2surfacetension", Line2SurfaceTensionEl
 #ifdef __TM_MODULE
 REGISTER_CLASS(Quad1_ht, "quad1ht", Quad1_htClass)
 REGISTER_CLASS(Quad1_hmt, "quad1hmt", Quad1_hmtClass)
+REGISTER_CLASS(Quad1_mt, "quad1mt", Quad1_mtClass)
 REGISTER_CLASS(QuadAxisym1_ht, "quadaxisym1ht", QuadAxisym1_htClass)
 REGISTER_CLASS(QuadAxisym1_hmt, "quadaxisym1hmt", QuadAxisym1_hmtClass)
+REGISTER_CLASS(QuadAxisym1_mt, "quadaxisym1mt", QuadAxisym1_mtClass)
 REGISTER_CLASS(Brick1_ht, "brick1ht", Brick1_htClass)
 REGISTER_CLASS(Brick1_hmt, "brick1hmt", Brick1_hmtClass)
+REGISTER_CLASS(Brick1_mt, "brick1mt", Brick1_mtClass)
+REGISTER_CLASS(QBrick1_ht, "qbrick1ht", QBrick1_htClass)
+REGISTER_CLASS(QBrick1_hmt, "qbrick1hmt", QBrick1_hmtClass)
 REGISTER_CLASS(Tetrah1_ht, "tetrah1ht", Tetrah1_htClass)
 REGISTER_CLASS(Tetrah1_hmt, "tetrah1hmt", Tetrah1_hmtClass)
 REGISTER_CLASS(Tr1_ht, "tr1ht", Tr1_htClass)

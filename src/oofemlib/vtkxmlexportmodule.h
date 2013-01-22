@@ -48,6 +48,8 @@
  #include <vtkSmartPointer.h>
 #endif
 
+#include <string>
+#include <list>
 
 namespace oofem {
 /**
@@ -84,7 +86,7 @@ protected:
     IntArray vrmap;
 
     /// Buffer for earlier time steps exported to *.pvd file.
-    dynaList< std::string > pvdBuffer;
+    std::list< std::string > pvdBuffer;
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.

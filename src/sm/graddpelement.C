@@ -75,7 +75,7 @@ GradDpElement :: setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int 
 
 
 void
-GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN)
 {
 
     StructuralElement* elem = this->giveStructuralElement();
@@ -91,7 +91,7 @@ GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, GaussPo
 }
 
 
-void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN)
 {
     StructuralElement* elem = this->giveStructuralElement();
     FloatArray u;
@@ -151,7 +151,7 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
 #endif
 
     elem->computeBmatrixAt(gp, b);
-    this->computeDisplacementDegreesOfFreedom(u, gp,stepN);
+    this->computeDisplacementDegreesOfFreedom(u, stepN);
     answer.beProductOf(b, u);
 }
 
@@ -168,7 +168,7 @@ GradDpElement :: computeNonlocalCumPlasticStrain(double &answer, GaussPoint *gp,
             return;
     }*/
     this->computeNkappaMatrixAt(gp, Nk);
-    this->computeNonlocalDegreesOfFreedom(u, gp,stepN);
+    this->computeNonlocalDegreesOfFreedom(u, stepN);
     aux.beProductOf(Nk, u);
     answer = aux.at(1);
 }
@@ -210,8 +210,8 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer,
         aux.add(fKappa);
     }
 
-    this->computeStiffnessMatrix_kk(stiffKappa,rMode,tStep);
-    this-> computeNonlocalDegreesOfFreedom(dKappa,gp,tStep);
+    this->computeStiffnessMatrix_kk(stiffKappa, rMode, tStep);
+    this->computeNonlocalDegreesOfFreedom(dKappa, tStep);
     answer.beProductOf(stiffKappa,dKappa);
     answer.add(aux);
 }

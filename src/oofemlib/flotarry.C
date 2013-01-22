@@ -789,12 +789,6 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode 
 // return value >0 success
 //              =0 file i/o error
 {
-    int type_id = FloatArrayClass;
-    // write class header
-    if ( !stream->write(& type_id, 1) ) {
-        return CIO_IOERR;
-    }
-
     // write size
     if ( !stream->write(& size, 1) ) {
         return CIO_IOERR;
@@ -817,16 +811,6 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 // returns 0 if file i/o error
 //        -1 if id od class id is not correct
 {
-    int class_id;
-    // read class header
-    if ( !stream->read(& class_id, 1) ) {
-        return CIO_IOERR;
-    }
-
-    if ( class_id != FloatArrayClass ) {
-        return CIO_BADVERSION;
-    }
-
     // read size
     if ( !stream->read(& size, 1) ) {
         return CIO_IOERR;

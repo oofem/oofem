@@ -47,7 +47,7 @@ class InputRecord;
  *
  * @see DynamicInputRecord It is the intended complement for in-code generation of FE-problem intialization.
  * @author Mikael Öhman
- * @todo InputRecordType is ignored. It shouldn't be too difficult to respect it, but its not necessary.
+ * @todo InputRecordType is ignored. It shouldn't be too difficult to respect it, but it's not necessary.
  */
 class DynamicDataReader : public DataReader
 {
@@ -56,6 +56,11 @@ protected:
     std::list<InputRecord*>::iterator it;
     /// All record types will be appended to this list, no split in terms of InputRecordType is implemented yet.
     std::list<InputRecord*> recordList;
+
+    /// Output file name (first line in OOFEM input files).
+    std::string outputFileName;
+    /// Description line (second line in OOFEM input files).
+    std::string description;
 
 public:
     /// Constructor.
@@ -70,9 +75,25 @@ public:
      */
     void insertInputRecord(InputRecordType type, InputRecord *record);
 
+    /**
+     * Sets the output file name. Used for writing input files.
+     */
+    void setOutputFileName(const std::string &outputFileName) { this->outputFileName = outputFileName; }
+    /**
+     * Sets the description line. Used for writing input files.
+     */
+    void setDescription(const std::string &description) { this->description = description; }
+
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual void finish();
     virtual const char *giveDataSourceName() const { return ""; }
+
+    /**
+     * Writes all containing OOFEMTXTInputRecords to file. 
+     * Will give error if any of the records aren't of the type OOFEMTXTInputRecord.
+     * @param fileName Name of file to dump data to.
+     */
+    void writeToFile(const char *fileName);
 };
 } // end namespace oofem
 #endif // dynamicdatareader_h

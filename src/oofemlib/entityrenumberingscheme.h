@@ -67,8 +67,10 @@ public:
 template< class TClass >class SpecificEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
-    int ( TClass :: *fpt )( int, EntityRenumberingScheme ); // pointer to member function
-    TClass *pt2Object;                                 // pointer to object
+     /// Pointer to member function
+    int ( TClass :: *fpt )( int, EntityRenumberingScheme );
+    /// Pointer to object
+    TClass *pt2Object;
 
 public:
 

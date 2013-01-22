@@ -49,7 +49,7 @@ LineSearchNM :: LineSearchNM(int i, Domain *d, EngngModel *m) :
     minEta = 0.2;
 }
 
-LineSearchNM ::  ~LineSearchNM() { }
+LineSearchNM :: ~LineSearchNM() { }
 
 NM_Status
 LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,

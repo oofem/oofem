@@ -65,8 +65,8 @@ public:
     virtual int evaluateAt(FloatArray &answer, DofManager* dman,
                     ValueModeType mode, TimeStep *atTime) ;
 
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode) { return CIO_OK; }
 };
 
 } // end namespace oofem

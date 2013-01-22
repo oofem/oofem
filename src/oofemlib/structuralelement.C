@@ -446,7 +446,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
 // in this vector a real forces are stored (temperature part is subtracted).
 // so we need further subtract part corresponding to non-nodal loading.
 {
-    int i, n, id, nLoads;
+    int nLoads;
     bcGeomType ltype;
     GeneralBoundaryCondition *load;
     FloatArray helpLoadVector;
@@ -454,10 +454,10 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
     answer.resize(0);
 
     // loop over body load array first
-    nLoads    = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
-        n     = bodyLoadArray.at(i);
-        load  = ( GeneralBoundaryCondition * ) domain->giveLoad(n);
+    nLoads = this->giveBodyLoadArray()->giveSize();
+    for ( int i = 1; i <= nLoads; i++ ) {
+        int id = bodyLoadArray.at(i);
+        load = ( GeneralBoundaryCondition * ) domain->giveLoad(id);
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             this->computeBodyLoadVectorAt(helpLoadVector, ( Load * ) load, stepN, mode);
@@ -467,17 +467,17 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
         } else {
             if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
                 // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
-                OOFEM_ERROR("StructuralElement :: computeForceLoadVector - unsupported load type class");
+                OOFEM_ERROR3("StructuralElement :: computeLocalForceLoadVector - body load %d is of unsupported type (%d)", id, ltype);
             }
         }
     }
 
     // loop over boundary load array
-    nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-    for ( i = 1; i <= nLoads; i++ ) {
-        n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-        id    = boundaryLoadArray.at(i * 2);
-        load  = ( Load * ) domain->giveLoad(n);
+    nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+    for ( int i = 1; i <= nLoads; i++ ) {
+        int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+        int id = boundaryLoadArray.at(i * 2);
+        load = ( Load * ) domain->giveLoad(n);
         ltype = load->giveBCGeoType();
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeLoadVectorAt(helpLoadVector, ( Load * ) load, id, stepN, mode);
@@ -496,7 +496,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR("StructuralElement :: computeForceLoadVector -unsupported load type class");
+            OOFEM_ERROR3("StructuralElement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
 }
@@ -1230,9 +1230,9 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     } else {
         IntArray elemLocArry;
         // create lit of remote elements, contributing to receiver
-        dynaList< localIntegrationRecord > *integrationDomainList;
+        std::list< localIntegrationRecord > *integrationDomainList;
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        dynaList< localIntegrationRecord > :: iterator pos;
+        std::list< localIntegrationRecord > :: iterator pos;
 
         locationArray.resize(0);
         // loop over element IP

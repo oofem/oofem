@@ -67,7 +67,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 
 #endif
 #endif
-	return IRRT_OK;
+    return IRRT_OK;
 
 }
 
@@ -85,7 +85,7 @@ void DarcyFlow :: solveYourselfAt (TimeStep *tStep)
 
     // Move solution space to current timestep
     if ( !hasAdvanced ) {
-    	PressureField->advanceSolution(tStep);
+        PressureField->advanceSolution(tStep);
         hasAdvanced = true;
     }
 

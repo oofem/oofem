@@ -399,13 +399,10 @@ int
 FETISolver :: packQQProducts(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, size;
-    IntArray const *toSendMap = processComm.giveToSendMap();
+    int i;
     CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
 
-
-    size = toSendMap->giveSize();
     for ( i = 1; i <= nse; i++ ) {
         result &= send_buff->packDouble( qq.at(i) );
     }
@@ -503,7 +500,7 @@ int
 FETISolver :: unpackSolution(ProcessCommunicator &processComm)
 {
     // slaves unpack their slotion contributions
-    int receivedRank, result = 1, to;
+    int result = 1, to;
     int i, size;
     int j, ndofs, eqNum;
     double value;
@@ -512,10 +509,7 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
     IntArray locationArray;
     EModelDefaultEquationNumbering dn;
 
-    receivedRank = processComm.giveRank();
-
     size = toRecvMap->giveSize();
-    // if (receivedRank != 0) {
     for ( i = 1; i <= size; i++ ) {
         to = toRecvMap->at(i);
         domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
@@ -531,8 +525,6 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
 #endif
             }
         }
-
-        //  }
     }
 
     return result;
@@ -1066,10 +1058,9 @@ NM_Status
 FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partitionSolution)
 {
     int i, j, tnse = 0, rank = domain->giveEngngModel()->giveRank();
-    int ani;
     int source, tag;
     int masterLoopStatus;
-    double nom = 0.0, denom, alpha, beta, ares, energyNorm = 0.0;
+    double nom = 0.0, denom, alpha, beta, energyNorm = 0.0;
     FloatMatrix l1;
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
     Skyline *partitionStiffness;
@@ -1557,10 +1548,8 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     } // end iterative loop
 
     if ( rank == 0 ) {
-        ani = i;
-        ares = nom;
 #ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_DEBUG("Konec metody sdruzenych gradientu, nite %d, err %e\n", ani, ares);
+        OOFEM_LOG_DEBUG("Konec metody sdruzenych gradientu, nite %d, err %e\n", i, nom);
 #endif
     }
 

@@ -40,7 +40,8 @@
 #include "engngm.h"
 #include "intarray.h"
 #include "materialmappingalgorithm.h"
-#include "dynalist.h"
+
+#include <list>
 
 namespace oofem {
 /**
@@ -62,7 +63,7 @@ protected:
     /// List of primary unknowns to export.
     IntArray primaryVarsToExport;
     /// List of POIs.
-    dynaList< POI_dataType >POIList;
+    std::list< POI_dataType >POIList;
 
     /// Smoother type.
     enum POIEM_MapperType { POI_CPT, POI_SFT, POI_LST } mtype;

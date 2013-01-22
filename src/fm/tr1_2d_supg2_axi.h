@@ -113,7 +113,7 @@ protected:
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
                                const FloatArray &normal, const double p, bool updFlag);
-    double computeVolumeAround(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
+    double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
     double computeRadiusAt(GaussPoint *gp);
     void computeBMtrx(FloatMatrix &answer, GaussPoint *gp);
     void computeNVector(FloatArray &answer, GaussPoint *gp);

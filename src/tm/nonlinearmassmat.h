@@ -43,10 +43,10 @@ namespace oofem {
 /**
  *
  * Class for a nonlinear fictitious transport material. The constitutive equation is given as
- *
- * @f[ \mathbf{w}=-\left( 1+C \mid \mid \mathbf{\nabla} p \mid\mid^{\alpha}\right) \mathbf{\nabla} p @f]
- *
- * where @f$ \mathbm{w} @f$ is the seepage velocity, @f$ \alpha @f$ and @f$ C @f$ are constants and @f$ p @f$ is the pressure.
+ * @f[
+ * \mathbf{w}=-\left( 1+C \mid \mid \mathbf{\nabla} p \mid\mid^{\alpha}\right) \mathbf{\nabla} p
+ * @f]
+ * where @f$ \boldsymbol{w} @f$ is the seepage velocity, @f$ \alpha @f$ and @f$ C @f$ are constants and @f$ p @f$ is the pressure.
  *
  * @author Carl Sandström
  *

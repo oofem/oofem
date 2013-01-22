@@ -66,7 +66,7 @@ public:
      */
     ProblemCommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, ProblemCommunicatorMode mode);
     /// Destructor
-    ~ProblemCommunicator();
+    virtual ~ProblemCommunicator();
 
     /**
      * Service for setting up the communication patterns with other remote process.
@@ -96,8 +96,8 @@ public:
      * @param map Received map.
      */
     int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map);
-private:
 
+private:
     /**
      * Sorts given communication map, containing local DofManager numbers according to their
      * corresponding global numbers. It could not be sorted by standard techniques, because

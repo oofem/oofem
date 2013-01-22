@@ -33,9 +33,12 @@ endif ()
 #######################################################################
 set (SLEPC_DIR CACHE PATH "Manual SLEPc directory")
 set (X11_DIR CACHE PATH "Manual X11 directory")
+set (TINYXML_DIR CACHE PATH "Manual TinyXML directory")
 set (MY_PETSC_DIR CACHE PATH "Manual PETSc directory")
 set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
 set (MPI_DIR CACHE PATH "Manual MPI directory")
+set (VTK_DIR CACHE PATH "Manual VTK directory")
+set (LAPACK_DIR CACHE PATH "Manual LAPACK directory")
 set (IML_DIR CACHE PATH "Manual IML++ directory")
 set (SPOOLES_DIR CACHE PATH "Manual SPOOLES directory")
 set (ELIXIR_DIR CACHE PATH "Manual Elixir directory (OOFEG only)")
@@ -51,10 +54,10 @@ if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version o
     option (USE_SHARED_LIB "Build shared library" OFF)
     option (USE_STATIC_LIB "Build static library" OFF)
 endif ()
-# Parallell stuff
+# Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
 option (USE_PARMETIS "Enable Parmetis support" OFF)
-option (USE_OPENMP "Compile with OpenMP support (for parallell assembly)" OFF)
+option (USE_OPENMP "Compile with OpenMP support (for parallel assembly)" OFF)
 # Solvers and such
 option (USE_DSS "Enable DSS module" OFF) # No reason to use this
 option (USE_IML "Enable iml++ solvers" OFF) # or this
@@ -85,7 +88,6 @@ endif ()
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/xfem")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/iga")
-include_directories ("${oofem_SOURCE_DIR}/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
@@ -131,6 +133,17 @@ if (USE_SM)
         set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
     endif ()
     set (MODULE_LIST ${MODULE_LIST} sm)
+
+    if (NOT MSVC AND NOT MINGW)
+        find_library (DL_LIB dl) 
+        set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
+    endif ()
+    
+#     if (MINGW)
+#         find_library (DL_LIB ltdl HINTS "C:/MinGW/lib/" ) 
+#         set (EXT_LIBS ${EXT_LIBS} ${DL_LIB})
+#     endif ()
+    
 endif ()
 
 if (USE_DSS)
@@ -192,6 +205,7 @@ endif ()
 ######################## External libaries ############################
 #######################################################################
 if (USE_LAPACK)
+    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${LAPACK_DIR})
     find_package (LAPACK REQUIRED)
     set (EXT_LIBS ${EXT_LIBS} ${LAPACK_LIBRARIES})
     set (MODULE_LIST ${MODULE_LIST} lapack)
@@ -199,6 +213,7 @@ if (USE_LAPACK)
 endif ()
 
 if (USE_VTK)
+    set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${VTK_DIR})
     find_package (VTK REQUIRED)
     include (${VTK_USE_FILE}) # Sets necessary includes_directories
     add_definitions (-D__VTK_MODULE)
@@ -253,7 +268,12 @@ if (USE_MPI)
     if (MPI_DIR)
         include_directories ("${MPI_DIR}/include")
         link_directories ("${MPI_DIR}/lib")
-        set (EXT_LIBS ${EXT_LIBS} mpi_cxx)
+        find_library (MPI_LIBRARY NAMES mpi PATHS ${MPI_DIR}/lib)
+        set (EXT_LIBS ${EXT_LIBS} ${MPI_LIBRARY})
+        find_library (MPI_CXX_LIBRARY NAMES mpi_cxx PATHS ${MPI_DIR}/lib)
+        if (MPI_CXX_LIBRARY)
+            set (EXT_LIBS ${EXT_LIBS} ${MPI_CXX_LIBRARY})
+        endif ()
     else ()
         include (FindMPI)
         find_package (MPI REQUIRED)
@@ -278,12 +298,17 @@ if (USE_TRIANGLE)
 endif ()
 
 if (USE_TINYXML)
-    find_library (TINYXML_LIB tinyxml DOC "TinyXML library")
-    if (${TINYXML_LIB} STREQUAL "TINYXML_LIB-NOTFOUND")
-        message (FATAL_ERROR "TinyXML not found")
+    if (TINYXML_DIR)
+        include_directories (${TINYXML_DIR})
+        set (LIBS ${LIBS} ${TINYXML_DIR}/tinystr.o ${TINYXML_DIR}/tinyxmlerror.o ${TINYXML_DIR}/tinyxml.o ${TINYXML_DIR}/tinyxmlparser.o)
+    else ()
+        find_library (TINYXML_LIB tinyxml DOC "TinyXML library")
+        if (${TINYXML_LIB} STREQUAL "TINYXML_LIB-NOTFOUND")
+            message (FATAL_ERROR "TinyXML not found")
+        endif ()
+        set (EXT_LIBS ${EXT_LIBS} ${TINYXML_LIB})
     endif ()
     add_definitions (-D__TINYXML_MODULE -DTIXML_USE_STL)
-    set (EXT_LIBS ${EXT_LIBS} ${TINYXML_LIB})
     set (MODULE_LIST ${MODULE_LIST} TinyXML)
 endif ()
 
@@ -347,6 +372,7 @@ if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
 endif ()
 check_include_files ("strings.h" HAVE_STRINGS_H)
 check_include_files ("unistd.h" HAVE_UNISTD_H)
+check_include_files ("execinfo.h" HAVE_EXECINFO_H)
 check_symbol_exists ("strncasecmp" "strings.h" HAVE_STRNCASECMP)
 check_symbol_exists ("access" "unistd.h" HAVE_ACCESS)
 check_cxx_symbol_exists ("nearest" "cmath" HAVE_NEAREST) # In what header? I don't have it.
@@ -462,6 +488,27 @@ if (USE_OOFEG)
     install(TARGETS oofeg DESTINATION bin)
 endif ()
 
+# CppCheck target (not built by default)
+add_custom_target(cppcheck)
+set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
+add_custom_command(TARGET cppcheck 
+    COMMAND cppcheck "--xml" "--template=gcc" "--enable=all" 
+    "-I${oofem_BINARY_DIR}/"
+    "-I${oofem_SOURCE_DIR}/src/oofemlib/"
+    "-I${oofem_SOURCE_DIR}/src/sm/"
+    "-I${oofem_SOURCE_DIR}/src/fm/"
+    "-I${oofem_SOURCE_DIR}/src/tm/"
+    "-DDEBUG"
+    ${oofem_SOURCE_DIR}/src/oofemlib/
+    ${oofem_SOURCE_DIR}/src/sm/
+    ${oofem_SOURCE_DIR}/src/fm/
+    ${oofem_SOURCE_DIR}/src/tm/
+    ${oofem_SOURCE_DIR}/src/main/
+    "2>"
+    "cppcheck.xml"
+    COMMENT "Running cppcheck on entire source"
+    )
+
 #######################################################################
 ######################## Documentation ################################
 #######################################################################
@@ -556,25 +603,24 @@ if (USE_PARALLEL)
     #foreach (case ${parallel_tests})
     #    add_test (${case}_test ${test_cmd} ${case}.oofem.in ${par_dir}/${case} ${oofem_cmd} "p")
     #endforeach (case)
-
-else () # Non-parallel test cases
-    file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
-    file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
-    file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
-    file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
-    foreach (case ${sm_tests})
-        add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/sm ${oofem_cmd} "s")
-    endforeach (case)
-    foreach (case ${fm_tests})
-        add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/fm ${oofem_cmd} "s")
-    endforeach (case)
-    foreach (case ${tm_tests})
-        add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/tm ${oofem_cmd} "s")
-    endforeach (case)
-    foreach (case ${tmsm_tests})
-        add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/tmsm ${oofem_cmd} "s")
-    endforeach (case)
 endif ()
+# Sequential test cases
+file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
+file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
+file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
+file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
+foreach (case ${sm_tests})
+    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/sm ${oofem_cmd} "s")
+endforeach (case)
+foreach (case ${fm_tests})
+    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/fm ${oofem_cmd} "s")
+endforeach (case)
+foreach (case ${tm_tests})
+    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/tm ${oofem_cmd} "s")
+endforeach (case)
+foreach (case ${tmsm_tests})
+    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/tmsm ${oofem_cmd} "s")
+endforeach (case)
 
 #file (GLOB par_tests RELATIVE "${oofem_TEST_DIR}/tests/partests" "${oofem_SOURCE_DIR}/tests/tm/*.in.*")
 #runandcheck ("${oofem_TEST_DIR}/sm" ${case})

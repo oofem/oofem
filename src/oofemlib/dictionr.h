@@ -64,10 +64,7 @@ protected:
 
 public:
     /// Constructor, creates empty dictionary
-    Dictionary()  {
-        first = NULL;
-        last = NULL;
-    }
+    Dictionary(): first(NULL), last(NULL) { }
     /// Destructor
     ~Dictionary();
 

@@ -132,10 +132,10 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
             for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
                 node = element->giveDofManager(elementNode)->giveNumber();
                 interface->NodalAveragingRecoveryMI_computeNodalValue(val, elementNode, type, tStep);
-		// if the elemet cannot evaluate this variable, it is ignored
-		if ( val.giveSize() == 0 ) {
-		  continue;
-		}
+                // if the element cannot evaluate this variable, it is ignored
+                if ( val.giveSize() == 0 ) {
+                    continue;
+                }
                 eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
                 for ( i = 1; i <= regionValSize; i++ ) {
                     lhs.at(eq + i) += val.at(i);
@@ -209,19 +209,19 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-	  if ((elemVR = this->giveElementVirtualRegionNumber(ielem))) { // test if elemVR is nonzero
-            if ( regionValSize.at(elemVR) ) {
-                if ( regionValSize.at(elemVR) !=
-                    interface->NodalAveragingRecoveryMI_giveDofManRecordSize(type) ) {
-                    // This indicates a size mis-match between different elements, no choice but to skip the region.
-                    regionMap.at(elemVR) = 1;
-                    regionsSkipped = 1;
+            if ((elemVR = this->giveElementVirtualRegionNumber(ielem))) { // test if elemVR is nonzero
+                if ( regionValSize.at(elemVR) ) {
+                    if ( regionValSize.at(elemVR) !=
+                        interface->NodalAveragingRecoveryMI_giveDofManRecordSize(type) ) {
+                        // This indicates a size mis-match between different elements, no choice but to skip the region.
+                        regionMap.at(elemVR) = 1;
+                        regionsSkipped = 1;
+                    }
+                } else {
+                    regionValSize.at(elemVR) = interface->
+                                            NodalAveragingRecoveryMI_giveDofManRecordSize(type);
                 }
-            } else {
-                regionValSize.at(elemVR) = interface->
-                                           NodalAveragingRecoveryMI_giveDofManRecordSize(type);
             }
-	  }
         }
     }
 

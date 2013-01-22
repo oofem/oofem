@@ -1,61 +1,37 @@
 /**
 \page page1 Additional information
 \section Introduction Introduction
-The idea of OOFEM is to provide to the FEM analyst highly modular,
-easily extensible and robust enviroment. 
-The OOFEM is built on the top of OOFEMlib - the general purpose FE kernel.
+The idea of OOFEM is to provide a highly modular, easily extensible, high level, and robust environment for anyone wishing to write new FE code.
+OOFEM has a core library which currently 3 modules that extend the implementations (structural, fluid and heat/mass transfer problems).
 
 Here is a list of OOFEMlib highlights:
-<UL>    
-<LI>object oriented architecture</LI>
-<LI>modular and extensible FEM kernel (OOFEMlib)
-          fully extensible - The kernel is extensible in any "direction". The possibility of
-          adding new element type, new material model with any type and number of internal
-          history parameters, new boundary condition, new numerical algorithm or new
-          analysis module is matter of course.</LI>
-<LI>independent problem formulation, numerical solution and data storage  -
-          The kernel provides the independent abstractions for analysis, general numerical
-          method and data storage (sparse matrices). The component mapping concept
-          allows to formulate problem and numerical method independently and allows to use
-          any suitable numerical method for problem solution without changes. This concept is
-          further enhanced by abstract sparse matrix interface, allowing to formulate
-          numerical method independently on sparse matrix implementation.</LI>
-<LI>full restart support - The kernel supports full restart from any previously saved
-          state.</LI>
-<LI>support for parallel processing (message passing) - General classes for
-          efficient inter domain communication are provided  built over the abstract general
-          layer for message passing libraries, which is available on many parallel platforms
-          (massively parallel computers, shared memory systems and workstation clusters) .</LI>
-<LI>adaptive analysis support - multiple domain concept, fast spatial localization algorithms 
-					based on tree techniques are available.</LI>
-<LI>includes enhanced support for structural analysis.</LI>
-</UL>
+ - object oriented architecture
+ - modular and extensible FEM kernel
+ - fully extensible - The kernel is extensible in any "direction". The possibility of
+   adding new element type, new material model with any type and number of internal
+   history parameters, new boundary condition, new numerical algorithm or new
+   analysis module is matter of course.
+ - threaded assembly
+ - PETSc bindings for parallel solvers
+ - support for exotic elements, boundary conditions, etc.
+ - independent problem formulation, numerical solution and data storage  -
+   The kernel provides the independent abstractions for analysis, general numerical
+   method and data storage (sparse matrices). The component mapping concept
+   allows to formulate problem and numerical method independently and allows to use
+   any suitable numerical method for problem solution without changes. This concept is
+   further enhanced by abstract sparse matrix interface, allowing to formulate
+   numerical method independently on sparse matrix implementation.
+ - full restart support - The kernel supports full restart from any previously saved state.
+ - export functions (VTK format and more)
+ - support for parallel processing (message passing) - General classes for
+   efficient inter domain communication are provided  built over the abstract general
+   layer for message passing libraries, which is available on many parallel platforms
+   (massively parallel computers, shared memory systems and workstation clusters).
+ - adaptive analysis support - multiple domain concept, fast spatial localization algorithms 
+   based on tree techniques are available.
+ - includes enhanced support for structural analysis, flow problems and heat/mass transfer.
 
-<p>The OOFEM code, built on the top of OOFEMlib, consist of different modules. 
-Currently, only structural analysis module is
-under development. The OOFEM features include:
-<UL>
-<LI>Structural Mechanics module </LI>
-<UL>
-<LI> many analysis procedures - linear statics, linear dynamics (eigen value analysis, direct
-     integration methods - implicit and explicit), nonlinear statics (robust CALM solver),
-     nonlinear dynamics (explicit, parallel version) </LI>
-<LI> large element and material libraries - see %Element Library Manual and %Material
-     Model Library Manual</LI>
-<LI> advanced modeling features  - slave DOFs, rigid arms, local coordinate systems and
-     many more</LI>
-<LI> parallel analysis - explicit nonlinear dynamics utilizing  the %Domain Decomposition
-     Method, pilot implementation of implicit solver (FETI)</LI>
-<LI> profile optimization (Sloan)</LI>
-</UL>
-<LI> X-Windows postprocessing </LI>
-<LI> parallel processing - utilizes the %Domain Decomposition Method for dramatic performance
-     scalability on various parallel architectures (explicit dynamics)</LI>
-<LI> portability (C++) </LI>
-<LI> comparable computational performance </LI>
-</UL>
-
-\section Distribution Distribution
+\section Distribution Distribution 
 The OOFEM www-page (<A HREF="http://www.oofem.org"> http://oofem.org </A>) is the source of up-to-date information and documentation.
 */
 

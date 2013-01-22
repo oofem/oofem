@@ -81,7 +81,7 @@ public:
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s, Domain *domain);
 
-    virtual void giveLocationArrays(AList<IntArray> &rows, AList<IntArray> &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
 
     virtual classType giveClassID() const { return SurfaceTensionBoundaryConditionClass; }

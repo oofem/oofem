@@ -176,8 +176,8 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
         this->updateDomainBeforeNonlocAverage(atTime);
 
         // compute nonlocal strain increment first
-        dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-        dynaList< localIntegrationRecord > :: iterator pos;
+        std::list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
+        std::list< localIntegrationRecord > :: iterator pos;
 
         for ( pos = list->begin(); pos != list->end(); ++pos ) {
             nonlocStatus = ( MDMStatus * ) this->giveStatus( ( * pos ).nearGp );

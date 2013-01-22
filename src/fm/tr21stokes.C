@@ -589,9 +589,9 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep )
             if ((d->giveDofID()==V_u) || (d->giveDofID()==V_v)) {
                 k=k+1;
                 v.at(k,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-            /*} else	if (d->giveDofID()==A_x) {
+            /*} else if (d->giveDofID()==A_x) {
                 boundaryV.at(1,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-            } else	if (d->giveDofID()==A_y) {
+            } else if (d->giveDofID()==A_y) {
                 boundaryV.at(2,1)=d->giveUnknown(EID_ConservationEquation, VM_Total, tStep);*/
             }
         }
@@ -635,8 +635,8 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
     IntArray col;
     FloatMatrix temp;
 
-    N2.resize(6);	N2.zero();
-    col.resize(2);  col.at(1)=1;  	col.at(2)=2;
+    N2.resize(6);   N2.zero();
+    col.resize(2);  col.at(1)=1;  col.at(2)=2;
 
     temp.resize(15,2);
     temp.zero();

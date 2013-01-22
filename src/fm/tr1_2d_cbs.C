@@ -330,7 +330,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 
             //_error ("computeDiffusionTermsI: traction bc not supported");
             FloatArray t, coords(1);
-            int nLoads, n, id;
+            int nLoads, n;
             BoundaryLoad *load;
             // integrate tractions
             n1 = i;
@@ -346,7 +346,6 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
             nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
             for ( i = 1; i <= nLoads; i++ ) {
                 n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-                id    = boundaryLoadArray.at(i * 2);
                 load  = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
                 if ( load ) {
                     load->computeValueAt(t, tStep, coords, VM_Total);

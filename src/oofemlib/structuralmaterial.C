@@ -2313,7 +2313,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 
 
 int
-StructuralMaterial :: setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
+StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type)
 {
     StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
     if ( type == IST_StressTensor ) {

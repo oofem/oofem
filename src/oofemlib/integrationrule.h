@@ -42,6 +42,8 @@
 #include "inputrecord.h"
 #include "classtype.h"
 
+#include <cstdio>
+
 namespace oofem {
 class TimeStep;
 class GaussPoint;

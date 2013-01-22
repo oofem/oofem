@@ -74,7 +74,7 @@ public:
     CommunicationPacket(MPI_Comm comm, int num);
  #endif
     /// Destructor.
-    ~CommunicationPacket();
+    virtual ~CommunicationPacket();
 
     /**
      * Initializes buffer to empty state. All packed data are lost.

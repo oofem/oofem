@@ -35,7 +35,9 @@
 #include "mixedgradientpressurebc.h"
 #include "flotarry.h"
 #include "engngm.h"
+#ifdef __FM_MODULE
 #include "../fm/line2boundaryelement.h"
+#endif
 
 namespace oofem {
 
@@ -45,6 +47,7 @@ double MixedGradientPressureBC :: domainSize()
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     double domain_size = 0.0;
     // This requires the boundary to be consistent and ordered correctly.
+#ifdef __FM_MODULE
     for (int i = 1; i <= this->domain->giveNumberOfElements(); ++i) {
         //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
         ///@todo Support more than 2D
@@ -53,6 +56,7 @@ double MixedGradientPressureBC :: domainSize()
             domain_size += e->computeNXIntegral();
         }
     }
+#endif
     if  (domain_size == 0.0) { // No boundary elements? Assume full density;
         return this->domain->giveArea(); ///@todo Support more than 2D
     } else {

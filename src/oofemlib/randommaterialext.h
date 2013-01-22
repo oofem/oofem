@@ -61,7 +61,7 @@ public:
     RandomMaterialStatusExtensionInterface() : randProperties() {}
 
     /// Destructor.
-    ~RandomMaterialStatusExtensionInterface() {}
+    virtual ~RandomMaterialStatusExtensionInterface() {}
 
     /**
      * Returns the value of random property, identified by a key.
@@ -95,7 +95,7 @@ public:
     RandomMaterialExtensionInterface()  : Interface(), randVariables(), randomVariableGenerators()
     { }
     /// Destructor.
-    ~RandomMaterialExtensionInterface()
+    virtual ~RandomMaterialExtensionInterface()
     { }
 
 public:

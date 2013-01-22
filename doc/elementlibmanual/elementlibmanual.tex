@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{hyperref}
+\usepackage{biblatex}
 \usepackage{ifpdf}
 \usepackage{ifthen}
 \input{include.tex}
@@ -13,8 +14,7 @@
 \renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
 \setcounter{totalnumber}{5} %maximum floating objects on one page
 
-\newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
-\newcommand{\descitem}[1]{{\noindent \bf #1}:}
+\newcommand{\descitem}[1]{{\noindent \textbf{#1}}:}
 \newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\bf \texttt{#1}}}
 \newcommand{\elemparam}[2]{{{\texttt{#1}\tiny (#2)}~~\#}}
 \newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
@@ -52,6 +52,8 @@
 %\newenvironment{record}{\begin{tabular}{|llr}}{\end{tabular*}\\}
 \newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
 %end{latexonly}
+
+\addbibresource{References.bib}
 
 \begin{document}
 %begin{latexonly}
@@ -132,7 +134,7 @@ not supported in current implementation.
 
 Two node linear isoparametric truss element for 2D analysis. The
 element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{truss2d.tikz}
@@ -197,7 +199,7 @@ of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end displacement and local end forces are
 printed. 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
    \input{beam2d.tikz}
@@ -246,16 +248,16 @@ coordinate system is determined by the following rules:
 \begin{enumerate}
 \item let first element node has following coordinates $(x_i, y_i, z_i)$
 and the second one $(x_j, y_j, z_j)$,
-\item direction vector of local x-axis is then $\mbf{a_1} = (x_j-x_i, y_j-y_i, z_j-z_i)$,
+\item direction vector of local x-axis is then $\mathbf{a}_1 = (x_j-x_i, y_j-y_i, z_j-z_i)$,
 \item local y-axis direction vector lies in plane defined by local
-x-axis direction vector ($\mbf{a_1}$) and given
+x-axis direction vector ($\mathbf{a}_1$) and given
 point (k-node with coordinates $(x_k, y_k, z_k)$) - so called reference node,
 \item local z-axis is then determined as vector product of local
-x-axis direction vector ($\mbf{a_1}$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
+x-axis direction vector ($\mathbf{a}_1$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
 \item local y-axis is then determined as vector product of local
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
    \input{beam3d.tikz}
@@ -304,10 +306,12 @@ model properties to be defined.\\
 Represents two-node lattice element. Each node has 3 degrees of freedom.
 The element is defined in x,y plane.
 
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{lattice2d.eps}
-\caption{Lattice element. Node numbering, DOF numbering and definition of integration point $C$.}
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \input{lattice2d.tikz}
+ \end{makeimage}
+ \caption{Lattice2d element. Node numbering, DOF numbering and definition of integration point $C$.}
  \label{lattice2dfig}
 \end{figure}
 
@@ -327,13 +331,12 @@ Structure should be defined in x,y plane.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{planestress2d.tikz}
  \end{makeimage}
- \caption{PlaneStress2d element. Node numbering, Side numbering and
- definition of local edge c.s.(a).}
+ \caption{PlaneStress2d element. Node numbering, Side numbering and definition of local edge c.s.(a).}
  \label{Planestress2dfig}
 \end{figure}
 
@@ -378,7 +381,7 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
  \begin{makeimage}
   \input{qplanstrss.tikz}
  \end{makeimage}
- \caption{QPlaneStress element - node numbering.}
+ \caption{QPlaneStress2d element - node numbering.}
  \label{qplanstrssfig}
 \end{figure}
 
@@ -413,7 +416,7 @@ The node numbering is anti-clockwise
  \begin{makeimage}
    \input{trplanstrss.tikz}
  \end{makeimage}
- \caption{TrPlaneStress element - node and side numbering.}
+ \caption{TrPlaneStress2d element - node and side numbering.}
  \label{TrPlanestressfig}
 \end{figure}
 
@@ -511,7 +514,7 @@ Structure should be defined in x,y plane.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{planestress2d.tikz}
@@ -666,7 +669,7 @@ not supported now.\\
 \subsubsection {tr\_shell01 element}
 Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. It comes with complete set of 6 DOFs per node.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trshell_lin.tikz}
@@ -683,6 +686,20 @@ Integration of all terms using one point formula.\\
 not supported.\\
 \descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
 \descitem{Status} Reliable.
+
+\subsubsection{Quad1Mindlin Element} \label{quad1mindlin}
+This class implements an quadrilateral, bilinear, four-node Mindlin plate.
+This type of element exhibit strong shear locking (thin plates exhibit almost no bending).
+Implements the lumped mass matrix.
+
+\elemkeyword{quad1mindlin}\\
+\descitem{Parameters} \optelemparam{NIP}{in} \\
+\descitem{Unknowns} Three dofs (w-displacement, u and v - rotation) are required in each node. \\
+\descitem{Integration} Default uses 4 integration points. No reduced integration is used, as it causes numerical problems. \\
+\descitem{Features} Layered cross section support. \\
+\descitem{Loads} Dead weight loads, and edge loads are supported. \\
+\descitem{Status} Experimental. \\
+\descitem{Reference} \cite{RobertCook1989}
 
 
 \subsection{Axisymmetric Elements}
@@ -750,23 +767,22 @@ $\gamma_{rz}$) are integrated using one point integration formula.\\
 \label{lspacesect}
 Implementation of Linear 3d  eight - node 
 finite element. Each node has 3 degrees of freedom.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{hexa_lin.tikz}
  \end{makeimage}
- \caption{lspace element (Node numbers in black, side numbers in blue,
+ \caption{LSpace element (Node numbers in black, side numbers in blue,
  and surface numbers in red).}
 \end{figure}
 
 \elemkeyword{lspace}\\
 \descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
-Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.
-\descitem{Approximation} Linear approximation of displacements and
-geometry.
+Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
+\descitem{Approximation} Linear approximation of displacements and geometry. \\
 \descitem{Integration}
-Full integration of all strain components.
+Full integration of all strain components. \\
 \param{NIP} parameter (possible completions are 8 (default) and 27)
 allows to change the integration formula.\\
 \descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
@@ -774,21 +790,21 @@ allows to change the integration formula.\\
 \descitem{Status} 
 
 \subsubsection{LSpaceBB element}
-Implementation of 3d brick  eight - node 
+Implementation of 3d brick eight - node 
 linear approximation element with selective integration of deviatoric and volumetric 
 strain contributions (B-bar formulation) for incompressible problems. 
 Features and description identical to conventional lspace element, see section ~\ref{lspacesect}.
 
-\subsubsection{QSpace element}
-Implementation of quadratic 3d  20-node 
+\subsubsection{QSpace element}\label{QSpace_element}
+Implementation of quadratic 3d 20-node 
 finite element. Each node has 3 degrees of freedom.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \raisebox{-0.5\height}{\input{hexa_quad_a.tikz}}
   \raisebox{-0.5\height}{\input{hexa_quad_b.tikz}}
  \end{makeimage}
- \caption{qspace element.}
+ \caption{QSpace element.}
 \end{figure}
 
 \elemkeyword{qspace}\\
@@ -815,12 +831,12 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
       excluded corner.
 \end{itemize}
  
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{tetrahedra_lin.tikz}
  \end{makeimage}
- \caption{Linear terahedra element. Definition and node numbering convention}
+ \caption{LTRSpace element. Definition and node numbering convention.}
  \label{lintetrahedron_fig}
 \end{figure}
 
@@ -870,12 +886,12 @@ w-displacement) are required in each node, according to element mode.\\
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
  \input{interf2d_quad.tikz}
  \end{makeimage}
- \caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
+ \caption{Interface2dquad element with quadratic interpolation. Definition and node numbering convention}
  \label{interf2d_quad_fig}
 \end{figure}
 
@@ -895,12 +911,12 @@ Full integration of all strain components using four point integration formula.
 Implementation of a three dimensional interface element with linear
 approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared triangular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{interf3d_lin.tikz}
  \end{makeimage}
- \caption{3D interface element with linear interpolation. Definition and node numbering convention}
+ \caption{Interface3dtrlin element with linear interpolation. Definition and node numbering convention}
  \label{interf3d_lin_fig}
 \end{figure}
 
@@ -1009,7 +1025,7 @@ property is requested form cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{planestress2d.tikz}
@@ -1111,17 +1127,17 @@ surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.
 \label{Brick1ht}
 Represents isoparametric eight-node brick/hexahedron finite element for
 heat transfer problems. Each node has 1 degrees of freedom.
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{hexa_lin.tikz}
  \end{makeimage}
- \caption{brick element (Node numbers in black, side numbers in blue,
- and surface numbers in red).}
+ \caption{Brick1ht element. Node numbers are in black, side numbers are in blue,
+ and surface numbers are in red.}
  \label{Brick1htfig}
 \end{figure}
 
-\elemkeyword{Brick1ht}\\
+\elemkeyword{Brick1ht - hexahedral 3D element}\\
 \descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
 Single dof (T\_f - temperature) is required in each node.
@@ -1145,6 +1161,28 @@ each node. Linear approximation of temperature and mass concentration.
 Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 %\subsection{Other Elements}
 
+\subsubsection{QBrick1ht - quadratic hexahedral 3D element}\label{QBrick1ht_element}
+Implementation of quadratic 3d 20-node 
+finite element. Each node has 1 degrees of freedom. See section ~\ref{QSpace_element} 
+for node numbering order and order of faces.
+
+\elemkeyword{QBrick1ht}\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Unknowns}
+\descitem{Approximation} Quadratic approximation of temperature and
+geometry.\\
+\param{NIP} number of integration points, possible values are 8, 27 (default) and 64.\\
+\descitem{Features} None.\\
+\descitem{Status} 
+
+\subsubsection{QBrick1hmt - quadratic hexahedral 3D element}
+The same element as QBrick1ht for
+heat and mass (one constituent) transfer problems. 
+Two dofs (T\_f - temperature and C\_1 - concentration) are required in
+each node. Linear approximation of temperature and mass concentration.
+Other features are similar to QBrick1ht element, see section \ref{QBrick1ht_element}.
+
+
 \section{Elements for Fluid Dynamics problems\\(FM Module)}
 \subsection{Stokes' Flow Elements}
 Stokes' flow elements neglect acceleration, and thus requires no additional stabilization.
@@ -1152,6 +1190,7 @@ Stokes' flow elements neglect acceleration, and thus requires no additional stab
 \subsubsection{Tr21Stokes element}
 Standard 6 node triangular element for stokes flow, with quadratic geometry, velocity and linear pressure.
 Both compressible and incompressible material behavior is supported (and also the seamless transition between the two).
+
 \elemkeyword{Tr121Stokes}\\
 \descitem{Parameters} none.
 \descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes.
@@ -1159,9 +1198,28 @@ Both compressible and incompressible material behavior is supported (and also th
 
 \subsubsection{Tet21Stokes element}
 Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure.
+
 \elemkeyword{Tr121Stokes}\\
 \descitem{Parameters} none.
 \descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.
+\descitem{Status} Untested.
+
+\subsubsection{Tr1BubbleStokes element}
+So called ``Mini'' element in 2D. A 3 node triangular element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
+Should not be used with materials that have memory (which is uncommon for flow problems).
+
+\elemkeyword{Tr1BubbleStokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
+\descitem{Status} Untested.
+
+\subsubsection{Tet1BubbleStokes element}
+So called ``Mini'' element in 3D. A 4 node tetrahedral element for stokes flow, with linear geometry and pressure. Velocity is enriched by a bubble function.
+Should not be used with materials that have memory (which is uncommon for flow problems).
+
+\elemkeyword{Tet1BubbleStokes}\\
+\descitem{Parameters} none.
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
 \descitem{Status} Untested.
 
 \subsection{2D CBS Elements}
@@ -1173,7 +1231,7 @@ approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trplanstrss.tikz}
@@ -1223,7 +1281,7 @@ approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trplanstrss.tikz}
@@ -1306,7 +1364,7 @@ approximation of velocity and pressure fields in 2d-axisymmetric setting. Each n
 of freedoms (two components of velocity and pressure). The y-axis is
 axis of ratational symmetry. The node numbering is anti-clockwise
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{trplanstrss.tikz}
@@ -1350,7 +1408,7 @@ incompressible flow analysis using SUPG/PSPG stabilization with equal order
 approximation of velocity and pressure fields. Each node has 3 degrees
 of freedoms (two components of velocity and pressure).
 
-\begin{figure}[tb]
+\begin{figure}[htb]
  \centering
  \begin{makeimage}
   \input{tetrahedra_lin.tikz}
@@ -1380,13 +1438,9 @@ is used to track the position of interface.
 The material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.
 
+% References;
+\printbibliography
+
 \end{document}
-
-
-
-
-
-
-
 
 

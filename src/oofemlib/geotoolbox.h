@@ -67,7 +67,7 @@ public:
         coords(0) = c [ 0 ];
         coords(1) = c [ 1 ];
     }
-    Vertex(const Vertex &src) { coords = src.coords; }
+    Vertex(const Vertex &src): coords(src.coords) { }
     Vertex & operator=(const Vertex &src) {
         coords = src.coords;
         return * this;
@@ -194,7 +194,7 @@ protected:
 
     node *s, *c;
 public:
-    Graph() { s = c = NULL; }
+    Graph(): s(NULL), c(NULL) { }
     ~Graph();
 
     void clip(Polygon &result, const Polygon &a, const Polygon &b);
@@ -235,17 +235,8 @@ class GT_Exception
     int line;
 
 public:
-
-    GT_Exception(const char *file, int line) {
-        this->file = file;
-        this->line = line;
-        this->msg = NULL;
-    }
-    GT_Exception(const char *msg, const char *file, int line) {
-        this->file = file;
-        this->line = line;
-        this->msg = msg;
-    }
+    GT_Exception(const char *file, int line): msg(NULL), file(file), line(line) { }
+    GT_Exception(const char *msg, const char *file, int line): msg(msg), file(file), line(line) { }
     ~GT_Exception() { }
 
     void print();

@@ -46,7 +46,7 @@
 #include "outputmanager.h"
 #include "datastream.h"
 #include "usrdefsub.h"
-#include "clock.h"
+#include "timer.h"
 #include "contextioerr.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
@@ -360,18 +360,19 @@ TimeStep *NonLinearStatic :: giveNextStep()
 void NonLinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
+    if (this->isParallel()) {
  #ifdef __VERBOSE_PARALLEL
-    // force equation numbering before setting up comm maps
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
+        // force equation numbering before setting up comm maps
+        int neq = this->giveNumberOfEquations(EID_MomentumBalance);
+        OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-    // set up communication patterns
-    this->initializeCommMaps();
-    // init remote dofman list
-    // this->initRemoteDofManList ();
+        // set up communication patterns
+        this->initializeCommMaps();
+        // init remote dofman list
+        // this->initRemoteDofManList ();
+    }
 #endif
-
     StructuralEngngModel :: solveYourself();
 }
 
@@ -533,7 +534,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     //
     //    ->   BEGINNING OF LOAD (OR DISPLACEMENT) STEP  <-
     //
-    incrementOfDisplacement.zero();
 
     //
     // set-up numerical model
@@ -562,8 +562,9 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         totalDisplacement.add(incrementOfDisplacement);
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR2("Initial guess type: %d not supported", initialGuessType);
+    } else {
+        incrementOfDisplacement.zero();
     }
-
 
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
@@ -845,8 +846,8 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
-    oofem_timeval tstart;
-    getUtime(tstart);
+    Timer timer;
+    timer.startTimer();
 #endif
 
     LinearStatic :: assemble(answer, tStep, ut, type, s, domain);
@@ -863,10 +864,8 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
     }
 
 #ifdef TIME_REPORT
-    oofem_timeval tfin;
-    getRelativeUtime(tfin, tstart);
-    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n",
-                   ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "NonLinearStatic: User time consumed by assembly: %.2fs\n", timer.getUtime() );
 #endif
 }
 

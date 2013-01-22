@@ -1901,7 +1901,7 @@ ConcreteDPM :: computeDRDCosTheta(const double theta, const double ecc) const
 }
 
 int
-ConcreteDPM :: setIPValue(const FloatArray value, GaussPoint *gp, InternalStateType type)
+ConcreteDPM :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type)
 {
     ConcreteDPMStatus *status = giveStatus(gp);
     if ( status->setIPValue(value, type) ) {

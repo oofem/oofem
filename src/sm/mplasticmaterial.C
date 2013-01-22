@@ -1046,7 +1046,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf);
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1056,13 +1056,6 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * )
                                            ( gp->giveElement()->giveCrossSection() );
-
-    if ( this->plType == associatedPT ) {
-        yieldGradVecPtr = loadGradVecPtr = & yieldGradVec;
-    } else {
-        yieldGradVecPtr = & yieldGradVec;
-        loadGradVecPtr  = & loadGradVec;
-    }
 
     // ask for plastic consistency parameter
     status->giveTempGamma(gamma);

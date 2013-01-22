@@ -51,57 +51,58 @@ namespace oofem {
 class LatticeDamage2dStatus : public LatticeMaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 protected:
-    /// scalar measure of the largest strain level ever reached in material
+    /// Scalar measure of the largest strain level ever reached in material.
     double kappa;
-    /// non-equilibrated scalar measure of the largest strain level
+    /// Non-equilibrated scalar measure of the largest strain level.
     double tempKappa;
 
-    /// scalar measure of the strain
+    /// Scalar measure of the strain.
     double equivStrain;
-    /// non-equilibrated scalar measure of the strain
+    /// Non-equilibrated scalar measure of the strain.
     double tempEquivStrain;
 
-    /// damage level of material
+    /// Damage level of material.
     double damage;
-    /// non-equilibrated damage level of material
+    /// Non-equilibrated damage level of material.
     double tempDamage;
 
-    /// dissipation
+    /// Dissipation.
     double dissipation;
-    /// non-equilibrated dissipation
+    /// Non-equilibrated dissipation..
     double tempDissipation;
 
-    /// increment of dissipation
+    /// Increment of dissipation.
     double deltaDissipation;
-    /// non-equilibrated increment of dissipation
+    /// Non-equilibrated increment of dissipation.
     double tempDeltaDissipation;
 
-    /// characteristic length
+    /// Characteristic length.
     double le;
 
-    /// random material parameter stored in status, since each gp has a differnet value.
+    /// Random material parameter stored in status, since each gp has a different value.
     double e0;
 
-    /** the crack_flag indicates if the gp is cracked:
-     *  crack_flag = 0 gp is uncracked
+    /** 
+     * The crack_flag indicates if the gp is cracked:
+     * crack_flag = 0 gp is uncracked
      * crack_flag = 1 gp is cracked and damage grows
      * crack_flag = 2 gp is cracked and damage does not grow
      */
     int crack_flag;
 
-    /// non-equilibrated temp flag
+    /// Non-equilibrated temp flag.
     int temp_crack_flag;
 
-    /// crack width
+    /// Crack width.
     double crackWidth;
 
-    /// non-equilibrated crack width
+    /// Non-equilibrated crack width.
     double tempCrackWidth;
 
-    /// reduced strain
+    /// Reduced strain.
     FloatArray reducedStrain;
 
-    /// non-equilibrated reduced strain
+    /// Non-equilibrated reduced strain.
     FloatArray tempReducedStrain;
 
 public:
@@ -148,22 +149,16 @@ public:
     /// Sets the temp damage level to given value
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
-    /*
-     * Assign the temp value of plastic strain.
-     * @v new temp value of plastic strain
-     */
-    void giveTempReducedStrain(FloatArray &answer) const
-    { answer = tempReducedStrain; }
+    /// Gives the temp value of plastic strain.
+    const FloatArray &giveTempReducedStrain() const { return tempReducedStrain; }
+    /// Gives the old equilibrated value of plastic strain.
+    const FloatArray &giveReducedStrain() const { return reducedStrain; }
 
-    void giveReducedStrain(FloatArray &answer) const
-    { answer = reducedStrain; }
-
-    /*
+    /**
      * Assign the temp value of plastic strain.
-     * @v new temp value of plastic strain
+     * @param v New temp value of plastic strain.
      */
-    void letTempReducedStrainBe(const FloatArray &v)
-    { tempReducedStrain = v; }
+    void letTempReducedStrainBe(const FloatArray &v)  { tempReducedStrain = v; }
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep);
@@ -183,9 +178,9 @@ public:
     /// Set random e0
     void setE0(double val) { e0 = val; }
 
-    ///Sets the temp crack width
+    /// Sets the temp crack width
     void setTempCrackWidth(double val);
-    //Gives the last equilibrated crack width
+    /// Gives the last equilibrated crack width
     double giveCrackWidth() { return this->crackWidth; }
 
     // definition
@@ -194,7 +189,7 @@ public:
 
     virtual void initTempStatus();
 
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *);
 
     virtual Interface *giveInterface(InterfaceType);
 
@@ -210,7 +205,6 @@ public:
  * This class implements a local random isotropic damage model for concrete in tension for 2D lattice elements.
  */
 class LatticeDamage2d : public StructuralMaterial, public RandomMaterialExtensionInterface
-    //
 {
 protected:
 
@@ -220,37 +214,38 @@ protected:
     double eShear;
     /// Torsion modulus
     double eTorsion;
-    /// ratio of shear and normal modulus
+    /// Ratio of shear and normal modulus
     double alphaOne;
-    /// ratio of torsion and normal modulus
+    /// Ratio of torsion and normal modulus
     double alphaTwo;
 
-    /// mean effective strain at peak
+    /// Mean effective strain at peak
     double e0Mean;
 
-    /// mean effective strain at sigma1
+    /// Mean effective strain at sigma1
     double e0OneMean;
 
-    /**parameter which determines the typ of the softeningFunction
+    /**
+     * Parameter which determines the typ of the softeningFunction
      * 1 = linear softening
      * 2 = bilinear softening
      * 3 = exponential softening
-     **/
+     */
     int softeningType;
 
-    /// determines the softening -> corresponds to threshold of crack opening (not strain)
+    /// Determines the softening -> corresponds to threshold of crack opening (not strain)
     double wf, wfOne;
 
-    /// parameter for the elliptic equivalent strain function
+    /// Parameter for the elliptic equivalent strain function
     double ec;
 
-    /// parameter setting ratio of shear and tensile strength
+    /// Parameter setting ratio of shear and tensile strength
     double coh;
 
-    /// coefficient variation of the Gaussian distribution
+    /// Coefficient variation of the Gaussian distribution
     double coefficientOfVariation;
 
-    /// flag which chooses between no distribution (0) and Gaussian distribution (1)
+    /// Flag which chooses between no distribution (0) and Gaussian distribution (1)
     double localRandomType;
 
 public:
@@ -288,9 +283,9 @@ public:
 
     /**
      * Computes the tangent stiffness.
-     * @param answer return param, containing the stiffness
-     * @param gp integration point
-     * @param atTime timeStep
+     * @param answer Return parameter, containing the stiffness.
+     * @param gp Integration point.
+     * @param atTime Time step.
      */
 
     void giveTangentStiffnessMatrix(FloatMatrix &answer,
@@ -299,9 +294,9 @@ public:
 
     /**
      * Computes the secant stiffness.
-     * @param answer return param, containing the stiffness
-     * @param gp integration point
-     * @param atTime timeStep
+     * @param answer Return parameter, containing the stiffness.
+     * @param gp Integration point.
+     * @param atTime Time step.
      */
 
     void giveSecantStiffnessMatrix(FloatMatrix &answer,
@@ -311,9 +306,9 @@ public:
 
     /**
      * Computes the elastic stiffness.
-     * @param answer return param, containing the stiffness
-     * @param gp integration point
-     * @param atTime timeStep
+     * @param answer Return parameter, containing the stiffness.
+     * @param gp Integration point.
+     * @param atTime Time step.
      */
 
     void giveElasticStiffnessMatrix(FloatMatrix &answer,
@@ -324,17 +319,19 @@ public:
 
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
-     * @param kappa return param, comtaining the corresponding equivalent strain
-     * @param strain total strain vector in full form
-     * @param gp integration point
-     * @param atTime timeStep
+     * @param kappa Return parameter, containing the corresponding equivalent strain.
+     * @param strain Total strain vector in full form.
+     * @param gp Integration point.
+     * @param atTime Time step.
      */
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
 
     /**
-     * computes the value of damage parameter omega, based on given value of equivalent strain
-     * @param omega contains result
-     * @param kappa equivalent strain measure
+     * Computes the value of damage parameter omega, based on given value of equivalent strain.
+     * @param omega Contains result.
+     * @param kappa Equivalent strain measure.
+     * @param strain Strain vector.
+     * @param gp Integration point.
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
     /** Interface requesting service */

@@ -105,7 +105,7 @@ public:
     /// Assignment operator
     CompCol &operator=(const CompCol &C);
     /// Destructor
-    ~CompCol() { }
+    virtual ~CompCol() { }
 
     // Overloaded methods:
     SparseMtrx *GiveCopy() const;

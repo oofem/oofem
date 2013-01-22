@@ -54,11 +54,14 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    int indx = 0, ui, vi, wi, i, nsd, numberOfGaussPoints = 1, numberOfKnotSpans=1;
+    int indx = 0, nsd, numberOfGaussPoints = 1;
     double du, dv, dw;
     const FloatArray *gpcoords;
     FloatArray newgpcoords;
     IntArray knotSpan;
+#ifdef __PARALLEL_MODE
+    int numberOfKnotSpans = 0;
+#endif
 
     Element :: initializeFrom(ir); // read nodes , material, cross section
     // set number of dofmanagers
@@ -74,7 +77,9 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     } else if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
+#ifdef __PARALLEL_MODE
         numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV;
+#endif
         const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
         const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
         const FloatArray * knotValuesU = this->giveInterpolation()->giveKnotValues(1);
@@ -87,12 +92,12 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
 
         knotSpan.at(2) = -1;
-        for ( vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
+        for ( int vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
             dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
             knotSpan.at(2) += knotMultiplicityV->at(vi);
 
             knotSpan.at(1) = -1;
-            for ( ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
+            for ( int ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
                 du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
@@ -100,7 +105,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                 integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( i = 0; i < numberOfGaussPoints; i++ ) {
+                for ( int i = 0; i < numberOfGaussPoints; i++ ) {
                     gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
@@ -116,7 +121,9 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
         int numberOfKnotSpansW = this->giveInterpolation()->giveNumberOfKnotSpans(3);
+#ifdef __PARALLEL_MODE
         numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV*numberOfKnotSpansW;
+#endif
         const IntArray * knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
         const IntArray * knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
         const IntArray * knotMultiplicityW = this->giveInterpolation()->giveKnotMultiplicity(3);
@@ -131,17 +138,17 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
 
         knotSpan.at(3) = -1;
-        for ( wi = 1; wi <= numberOfKnotSpansW; wi++ ) {
+        for ( int wi = 1; wi <= numberOfKnotSpansW; wi++ ) {
             dw = knotValuesW->at(wi + 1) - knotValuesW->at(wi);
             knotSpan.at(3) += knotMultiplicityW->at(wi);
 
             knotSpan.at(2) = -1;
-            for ( vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
+            for ( int vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
                 dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
                 knotSpan.at(2) += knotMultiplicityV->at(vi);
 
                 knotSpan.at(1) = -1;
-                for ( ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
+                for ( int ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
                     du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                     knotSpan.at(1) += knotMultiplicityU->at(ui);
 
@@ -149,7 +156,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                     integrationRulesArray [ indx ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                    for ( i = 0; i < numberOfGaussPoints; i++ ) {
+                    for ( int i = 0; i < numberOfGaussPoints; i++ ) {
                         gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
 
                         newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
@@ -169,10 +176,9 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     // read optional knot span parallel mode
-    int _i;
     this->knotSpanParallelMode.resize(numberOfKnotSpans);
     // set Element_local as default
-    for (_i=1; _i<=numberOfKnotSpans; _i++) knotSpanParallelMode.at(_i)=Element_local;
+    for ( int i = 1; i <= numberOfKnotSpans; i++) knotSpanParallelMode.at(i) = Element_local;
     IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, IFT_IGAElement_KnotSpanParallelMode, "knotspanparmode"); // Macro
 #endif
 

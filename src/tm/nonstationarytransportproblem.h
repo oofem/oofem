@@ -62,6 +62,7 @@ protected:
 
     /// Initial time from which the computation runs. Default is zero.
     double initT;
+    /// Length of time step.
     double deltaT;
     double alpha;
 
@@ -70,6 +71,9 @@ protected:
 
     /// Associated time function for time step increment.
     int dtTimeFunction;
+
+    /// Specified times where the problem is solved
+    FloatArray discreteTimes;
 
     /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
     bool changingProblemSize;
@@ -124,6 +128,11 @@ public:
      * Returns the time step length for given step number n, initial step is number 0.
      */
     double giveDeltaT(int n);
+
+    /**
+     * Returns time for time step number n (array discreteTimes must be specified)
+     */
+    double giveDiscreteTime(int n);
 
     void averageOverElements(TimeStep *tStep);
 

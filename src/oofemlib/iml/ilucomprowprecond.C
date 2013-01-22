@@ -36,10 +36,6 @@
 #include "ilucomprowprecond.h"
 #include "verbose.h"
 
-#ifdef TIME_REPORT
- #include "clock.h"
-#endif
-
 namespace oofem {
 CompRow_ILUPreconditioner ::
 CompRow_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)

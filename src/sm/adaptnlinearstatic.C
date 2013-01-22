@@ -35,7 +35,7 @@
 #include "mathfem.h"
 #include "adaptnlinearstatic.h"
 #include "verbose.h"
-#include "clock.h"
+#include "timer.h"
 #include "metastep.h"
 #include "timestep.h"
 #include "nummet.h"
@@ -104,7 +104,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     this->updateYourself(tStep);
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, oofem_tmpstr("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
 #endif
 
     this->terminate( this->giveCurrentStep() );
@@ -226,17 +226,15 @@ double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueMod
 }
 
 
-
 int
 AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 {
     int ielem, nelem, result = 1;
 
     // measure time consumed by mapping
-    //clock_t sc = this->getClock();
-    //clock_t mc, mc2, ec ;
-    oofem_timeval st, st1, st2, mc1, mc2, mc3, ec;
-    getUtime(st);
+    Timer timer;
+    double mc1, mc2, mc3;
+    timer.startTimer();
 
     if ( sourceProblem->giveClassID() != AdaptiveNonLinearStaticClass ) {
         _error("sory");
@@ -261,9 +259,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental, EID_MomentumBalance,
                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
-    //mc = this->getClock();
-    getRelativeUtime(mc1, st);
-    getUtime(st1);
+    timer.stopTimer();
+    mc1 = timer.getUtime();
+    timer.startTimer();
 
     // map internal ip state
     nelem = this->giveDomain(1)->giveNumberOfElements();
@@ -272,9 +270,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
                                                                        sourceProblem->giveCurrentStep() );
     }
 
-    //mc2 = this->getClock();
-    getRelativeUtime(mc2, st1);
-    getUtime(st2);
+    timer.stopTimer();
+    mc2 = timer.getUtime();
+    timer.startTimer();
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
@@ -320,15 +318,14 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
 
-    //ec = this->getClock();
-    getRelativeUtime(mc3, st2);
-    getRelativeUtime(ec, st);
+    timer.stopTimer();
+    mc3 = timer.getUtime();
 
     // compute processor time used by the program
-    OOFEM_LOG_INFO( "user time consumed by primary mapping: %.2fs\n", ( double ) ( mc1.tv_sec + mc1.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-    OOFEM_LOG_INFO( "user time consumed by ip mapping:      %.2fs\n", ( double ) ( mc2.tv_sec + mc2.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-    OOFEM_LOG_INFO( "user time consumed by ip update:       %.2fs\n", ( double ) ( mc3.tv_sec + mc3.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-    OOFEM_LOG_INFO( "user time consumed by mapping:         %.2fs\n", ( double ) ( ec.tv_sec + ec.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    OOFEM_LOG_INFO( "user time consumed by primary mapping: %.2fs\n", mc1 );
+    OOFEM_LOG_INFO( "user time consumed by ip mapping:      %.2fs\n", mc2 );
+    OOFEM_LOG_INFO( "user time consumed by ip update:       %.2fs\n", mc3 );
+    OOFEM_LOG_INFO( "user time consumed by mapping:         %.2fs\n", mc1 + mc2 + mc3 );
 
     //
 
@@ -469,11 +466,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->forceEquationNumbering();
 
     // measure time consumed by mapping
-    //clock_t sc = this->getClock();
-    //clock_t mc, mc2, ec ;
-    oofem_timeval st, st1, st2, mc1, mc2, mc3, ec;
-    getUtime(st);
+    Timer timer;
+    double mc1, mc2, mc3;
 
+    timer.startTimer();
 
     // map primary unknowns
     EIPrimaryUnknownMapper mapper;
@@ -489,9 +485,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental, EID_MomentumBalance,
                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
-    //mc = this->getClock();
-    getRelativeUtime(mc1, st);
-    getUtime(st1);
+    timer.stopTimer();
+    mc1 = timer.getUtime();
+    timer.startTimer();
 
     // map internal ip state
     nelem = this->giveDomain(2)->giveNumberOfElements();
@@ -503,7 +499,6 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         }
 
 #endif
-
 
         result &= this->giveDomain(2)->giveElement(ielem)->adaptiveMap( this->giveDomain(1), this->giveCurrentStep() );
     }
@@ -546,9 +541,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
 #endif
 
-    //mc2 = this->getClock();
-    getRelativeUtime(mc2, st1);
-    getUtime(st2);
+    timer.stopTimer();
+    mc2 = timer.getUtime();
+    timer.startTimer();
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
@@ -614,15 +609,14 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
 
-    //ec = this->getClock();
-    getRelativeUtime(mc3, st2);
-    getRelativeUtime(ec, st);
+    timer.stopTimer();
+    mc3 = timer.getUtime();
 
     // compute processor time used by the program
-    OOFEM_LOG_INFO( "user time consumed by primary mapping: %.2fs\n", ( double ) ( mc1.tv_sec + mc1.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-    OOFEM_LOG_INFO( "user time consumed by ip mapping:      %.2fs\n", ( double ) ( mc2.tv_sec + mc2.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-    OOFEM_LOG_INFO( "user time consumed by ip update:       %.2fs\n", ( double ) ( mc3.tv_sec + mc3.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-    OOFEM_LOG_INFO( "user time consumed by mapping:         %.2fs\n", ( double ) ( ec.tv_sec + ec.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+    OOFEM_LOG_INFO( "user time consumed by primary mapping: %.2fs\n", mc1 );
+    OOFEM_LOG_INFO( "user time consumed by ip mapping:      %.2fs\n", mc2 );
+    OOFEM_LOG_INFO( "user time consumed by ip update:       %.2fs\n", mc3 );
+    OOFEM_LOG_INFO( "user time consumed by mapping:         %.2fs\n", mc1 + mc2 + mc3 );
 
     //
 
@@ -665,7 +659,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
      *************/
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, oofem_tmpstr("AdaptiveRemap: Press Ctrl-p to continue") );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveRemap: Press Ctrl-p to continue") );
 #endif
 
     //

@@ -37,14 +37,13 @@
 #ifdef __PARALLEL_MODE
  #include "inputrecord.h"
  #include "interface.h"
- #include "clock.h"
  #include "alist.h"
  #include "flotarry.h"
  #include "intarray.h"
 
 #define __LB_DEBUG
  #ifdef __LB_DEBUG
-  #include "dynalist.h"
+  #include <list>
   #include "range.h"
  #endif
 
@@ -111,7 +110,7 @@ protected:
     int lbstep;
  #ifdef __LB_DEBUG
     /// List of steps with perturbed balancing.
-    dynaList< Range >perturbedSteps;
+    std::list< Range >perturbedSteps;
     /// Perturbing factor.
     double perturbFactor;
     /// list of step at which to performed lb recovery.

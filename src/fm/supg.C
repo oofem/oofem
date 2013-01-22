@@ -51,7 +51,7 @@
 #include "loadtime.h"
 #include "contextioerr.h"
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 
 namespace oofem {
@@ -378,15 +378,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             //if (this->fsflag) updateDofManVals(tStep);
 #ifdef SUPG_IMPLICIT_INTERFACE
  #ifdef TIME_REPORT
-            oofem_timeval tstart;
-            :: getUtime(tstart);
+            Timer timer;
+            timer.startTimer();
  #endif
             materialInterface->updatePosition( this->giveCurrentStep() );
             updateElementsForNewInterfacePosition(tStep);
  #ifdef TIME_REPORT
-            oofem_timeval ut;
-            :: getRelativeUtime(ut, tstart);
-            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+            timer.stopTimer();
+            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime(); );
  #endif
 #else
             //updateElementsForNewInterfacePosition (tStep);
@@ -453,8 +452,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	    this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, BCLhsPressureTerm_MC,
-			  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, BCLhsPressureTerm_MC,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC,
@@ -504,16 +503,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
  #ifdef SUPG_IMPLICIT_INTERFACE
         if ( materialInterface ) {
   #ifdef TIME_REPORT
-            oofem_timeval tstart;
-            :: getUtime(tstart);
+            Timer timer;
+            timer.startTimer();
   #endif
             //if (this->fsflag) updateDofManVals(tStep);
             materialInterface->updatePosition( this->giveCurrentStep() );
             updateElementsForNewInterfacePosition(tStep);
   #ifdef TIME_REPORT
-            oofem_timeval ut;
-            :: getRelativeUtime(ut, tstart);
-            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+            timer.stopTimer();
+            OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
   #endif
             //if (this->fsflag) this->updateDofManActivityMap(tStep);
         }
@@ -580,7 +578,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         //    OOFEM_LOG_INFO("%-10d       n/a       %-15e %-15e\n", nite, rnorm, _absErrResid);
         //} else {
             OOFEM_LOG_INFO("%-10d %-15e %-15e (%-10e,%-10e) %-15e\n", nite, err, rnorm, rnorm_mb, rnorm_mc, _absErrResid);
-	//}
+        //}
 
         if ( 0 ) {
             // evaluate element supg and sppg stabilization coeffs
@@ -614,15 +612,14 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 #ifndef SUPG_IMPLICIT_INTERFACE
     if ( materialInterface ) {
  #ifdef TIME_REPORT
-        oofem_timeval tstart;
-        getUtime(tstart);
+        Timer timer;
+        timer.startTimer();
  #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
         updateElementsForNewInterfacePosition(tStep);
  #ifdef TIME_REPORT
-        oofem_timeval ut;
-        getRelativeUtime(ut, tstart);
-        OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+        timer.stopTimer();
+        OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
  #endif
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
     }
@@ -1288,8 +1285,8 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         eptr->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, v);
         h.beProductOf(m1, v);
         answer.add(h);
-	eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MC, tStep);
-	h.beProductOf(m1, v);
+        eptr->giveCharacteristicMatrix(m1, BCLhsPressureTerm_MC, tStep);
+        h.beProductOf(m1, v);
         answer.add(h);
         // advection N term (nonlinear)
         eptr->giveCharacteristicVector(v, AdvectionTerm_MC, VM_Total, tStep);

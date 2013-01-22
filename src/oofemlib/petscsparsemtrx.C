@@ -73,32 +73,59 @@ PetscSparseMtrx :: GiveCopy() const
 void
 PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 {
-    if ( this->giveNumberOfColumns() != x.giveSize() ) {
-        OOFEM_ERROR("Dimension mismatch");
-    }
-
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+        if ( x.giveSize() != answer.giveSize() ) {
+            OOFEM_ERROR("Size mismatch");
+        }
+
+        Vec globX;
+        Vec globY;
+
+        // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
+        PetscContext *context = emodel->givePetscContext( this->giveDomainIndex(), this->giveEquationID() );
+
+        /*
+         * scatter and gather x to global representation
+         */
+        context->createVecGlobal(& globX);
+        context->scatter2G(&x, globX, ADD_VALUES);
+
+        VecDuplicate(globX, & globY);
+
+        MatMult(this->mtrx, globX, globY);
+
+        context->scatterG2N(globY, &answer, INSERT_VALUES);
+
+        VecDestroy(&globX);
+        VecDestroy(&globY);
+    } else {
+#endif
+
+        if ( this->giveNumberOfColumns() != x.giveSize() ) {
+            OOFEM_ERROR("Dimension mismatch");
+        }
+
+        Vec globX, globY;
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
+        VecCreate(PETSC_COMM_SELF, & globY);
+        VecSetType(globY, VECSEQ);
+        VecSetSizes(globY, PETSC_DECIDE, this->nRows);
+
+        MatMult(this->mtrx, globX, globY);
+        double *ptr;
+        VecGetArray(globY, & ptr);
+        answer.resize(this->nRows);
+        for ( int i = 0; i < this->nRows; i++ ) {
+            answer(i) = ptr [ i ];
+        }
+
+        VecRestoreArray(globY, & ptr);
+        VecDestroy(&globX);
+        VecDestroy(&globY);
+#ifdef __PARALLEL_MODE
     }
 #endif
-    Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
-    VecCreate(PETSC_COMM_SELF, & globY);
-    VecSetType(globY, VECSEQ);
-    VecSetSizes(globY, PETSC_DECIDE, this->nRows);
-
-    MatMult(this->mtrx, globX, globY);
-    double *ptr;
-    VecGetArray(globY, & ptr);
-    answer.resize(this->nRows);
-    for ( int i = 0; i < this->nRows; i++ ) {
-        answer(i) = ptr [ i ];
-    }
-
-    VecRestoreArray(globY, & ptr);
-    VecDestroy(&globX);
-    VecDestroy(&globY);
 }
 
 void
@@ -297,19 +324,19 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         }
     }
     // Structure from active boundary conditions.
-    AList<IntArray> r_locs, c_locs;
+    std::vector<IntArray> r_locs, c_locs;
     for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
             ///@todo Deal with the CharType here.
             activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s, domain);
-            for (int k = 1; k < r_locs.giveSize(); k++) {
-                IntArray *krloc = r_locs.at(k);
-                IntArray *kcloc = c_locs.at(k);
-                for ( int i = 1; i <= krloc->giveSize(); i++ ) {
-                    if ( ( ii = krloc->at(i) ) ) {
-                        for ( int j = 1; j <= kcloc->giveSize(); j++ ) {
-                            jj = kcloc->at(j);
+            for (std::size_t k = 0; k < r_locs.size(); k++) {
+                IntArray &krloc = r_locs[k];
+                IntArray &kcloc = c_locs[k];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            jj = kcloc.at(j);
                             if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
                                 if ( jj >= ii ) {
@@ -375,10 +402,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
-        int rank;
         PetscNatural2GlobalOrdering *n2g;
         PetscNatural2LocalOrdering *n2l;
-        rank = eModel->giveRank();
         n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
         n2l = eModel->givePetscContext(di, ut)->giveN2Lmap();
 
@@ -386,7 +411,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         n2g->init(eModel, ut, di);
 
  #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
+        VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", eModel-giveRank());
  #endif
 
         leqs = n2g->giveNumberOfLocalEqs();
@@ -498,18 +523,18 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     }
 
     // Structure from active boundary conditions.
-    AList<IntArray> locs, temp;
+    std::vector<IntArray> locs, temp;
     for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
             ///@todo Deal with the CharType here.
             activebc->giveLocationArrays(locs, temp, ut, TangentStiffnessMatrix, s, s, domain);
-            for (int k = 1; k < locs.giveSize(); k++) {
-                IntArray *kloc = locs.at(k);
-                for ( i = 1; i <= kloc->giveSize(); i++ ) {
-                    if ( ( ii = kloc->at(i) ) ) {
-                        for ( j = 1; j <= kloc->giveSize(); j++ ) {
-                            jj = kloc->at(j);
+            for (std::size_t k = 1; k < locs.size(); k++) {
+                IntArray &kloc = locs[k];
+                for ( i = 1; i <= kloc.giveSize(); i++ ) {
+                    if ( ( ii = kloc.at(i) ) ) {
+                        for ( j = 1; j <= kloc.giveSize(); j++ ) {
+                            jj = kloc.at(j);
                             if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
                                 if ( jj >= ii ) {

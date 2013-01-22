@@ -164,7 +164,7 @@ InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType fieldID, con
 }
 
 IRResultType
-InputRecord :: giveOptionalField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString)
+InputRecord :: giveOptionalField(std::list< Range > &answer, InputFieldType fieldID, const char *idString)
 {
     IRResultType r = this->giveField(answer, fieldID, idString);
     if ( r == IRRT_NOTFOUND ) {

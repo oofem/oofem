@@ -98,23 +98,12 @@ DofManValueField::setDofManValue (int dofMan, const FloatArray &value)
 contextIOResultType
 DofManValueField :: saveContext(DataStream *stream, ContextMode mode)
 {
-    // int i, type_id = SmoothedNodalInternalVariableFieldClass;
-    // contextIOResultType iores;
-    // write class header
-    // if (!stream->write(&type_id,1)) return CIO_IOERR;
-
     return CIO_OK;
 }
 
 contextIOResultType
 DofManValueField :: restoreContext(DataStream *stream, ContextMode mode)
 {
-    // int i, class_id;
-    // contextIOResultType iores;
-    // read class header
-    // if (!stream->read(&class_id,1)) return CIO_IOERR;
-    // if (class_id != SmoothedNodalInternalVariableField) return CIO_BADVERSION;
-
     return CIO_OK;
 }
 } // end namespace oofem

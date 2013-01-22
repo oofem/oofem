@@ -35,9 +35,8 @@
 #ifndef inputrecord_h
 #define inputrecord_h
 
-#include "dynalist.h"
-
 #include <vector>
+#include <list>
 #include <string>
 
 namespace oofem {
@@ -197,6 +196,7 @@ enum InputFieldType {
     IFT_NonStationaryTransportProblem_initt,
     IFT_NonStationaryTransportProblem_deltat,
     IFT_NonStationaryTransportProblem_dtf,
+    IFT_NonStationaryTransportProblem_prescribedtimes,
     IFT_NonStationaryTransportProblem_alpha,
     IFT_NonStationaryTransportProblem_lumpedcapa,
     IFT_NonStationaryTransportProblem_changingproblemsize,
@@ -209,6 +209,7 @@ enum InputFieldType {
     IFT_StaggeredProblem_dtf,
     IFT_StaggeredProblem_timeDefinedByProb,
     IFT_StaggeredProblem_stepmultiplier,
+    IFT_StaggeredProblem_prescribedtimes,
     IFT_StaggeredProblem_prob1,
     IFT_StaggeredProblem_prob2,
 
@@ -416,11 +417,15 @@ enum InputFieldType {
     IFT_StokesFlow_smtype,
     IFT_StokesFlow_deltat,
 
+    IFT_NonlinearFluidMaterial_alpha,
+    IFT_NonlinearFluidMaterial_C,
+
     IFT_NLStructuralElement_nlgeoflag,
 
     IFT_Axisymm3d_nip,
     IFT_Axisymm3d_nipfish,
     IFT_CCTPlate_nip,
+    IFT_Quad1Mindlin_nip,
     IFT_LSpace_nip,
     IFT_LTrElementPPDE_nip,
     IFT_L4Axisymm_nip,
@@ -458,6 +463,7 @@ enum InputFieldType {
 
     IFT_Quad1_ht_nip,
     IFT_Brick1_ht_nip,
+    IFT_QBrick1_ht_nip,
     IFT_Tetrah1_ht_nip,
 
     IFT_TR12DCBS_vof,
@@ -521,6 +527,15 @@ enum InputFieldType {
     IFT_IsotropicHeatTransferMaterial_k,
     IFT_IsotropicHeatTransferMaterial_c,
 
+    IFT_IsotropicLinMoistureTransferMaterial_perm,
+    IFT_IsotropicLinMoistureTransferMaterial_capa,
+
+    IFT_BazantNajjarMoistureTransferMaterial_c1,
+    IFT_BazantNajjarMoistureTransferMaterial_n,
+    IFT_BazantNajjarMoistureTransferMaterial_alpha0,
+    IFT_BazantNajjarMoistureTransferMaterial_hc,
+    IFT_BazantNajjarMoistureTransferMaterial_capa,
+
     IFT_AnisotropicMassTransferMaterial_c,
     IFT_NonlinearMassTransferMaterial_c,
     IFT_NonlinearMassTransferMaterial_alpha,
@@ -538,20 +553,6 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_chi_eff,
     IFT_HeMoTKMaterial_por,
     IFT_HeMoTKMaterial_rho_gws,
-
-    IFT_HeMoZBMaterial_a_0,
-    IFT_HeMoZBMaterial_nn,
-    IFT_HeMoZBMaterial_phi_c,
-    IFT_HeMoZBMaterial_delta_wet,
-    IFT_HeMoZBMaterial_w_h,
-    IFT_HeMoZBMaterial_n,
-    IFT_HeMoZBMaterial_a,
-    IFT_HeMoZBMaterial_latent,
-    IFT_HeMoZBMaterial_c,
-    IFT_HeMoZBMaterial_rho,
-    IFT_HeMoZBMaterial_chi_eff,
-    IFT_HeMoZBMaterial_por,
-    IFT_HeMoZBMaterial_rho_gws,
 
     IFT_CemhydMatInputFileName,
     IFT_CemhydMat_conductivitytype,
@@ -1213,7 +1214,7 @@ enum InputFieldType {
 
     IFT_ErrorEstimator_regionskipmap,
     IFT_ErrorEstimator_IStype,
-    
+
 
     IFT_ScalarErrorIndicator_vartype,
 
@@ -1335,6 +1336,12 @@ enum InputFieldType {
     IFT_IGAElement_NIP,
     IFT_IGAElement_KnotSpanParallelMode,
 
+    IFT_RVEMaterial_bctype,
+    IFT_RVEMaterial_supressoutput,
+
+    IFT_WeakPeriodicBoundaryCondition_order,
+    IFT_WeakPeriodicBoundaryCondition_descritization,
+
     IFT_Unknown
 };
 
@@ -1425,8 +1432,8 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the dynaList<Range> field value.
-    virtual IRResultType giveField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
+    /// Reads the std::list<Range> field value.
+    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Returns a double on the position tokenNumber
     virtual IRResultType giveField(double &answer, int tokenNumber) = 0;
     //@}
@@ -1454,8 +1461,8 @@ public:
     IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType fieldID, const char *idString);
     /// Reads the Dictionary field value.
     IRResultType giveOptionalField(Dictionary &answer, InputFieldType fieldID, const char *idString);
-    /// Reads the dynaList<Range> field value.
-    IRResultType giveOptionalField(dynaList< Range > &answer, InputFieldType fieldID, const char *idString);
+    /// Reads the std::list<Range> field value.
+    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.

@@ -76,7 +76,7 @@ public:
     /// Assignment operator
     DynCompRow &operator=(const DynCompRow &C);
     /// Destructor
-    ~DynCompRow();
+    virtual ~DynCompRow();
 
     // Overloaded methods:
     SparseMtrx *GiveCopy() const;

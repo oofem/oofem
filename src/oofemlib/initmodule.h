@@ -37,6 +37,8 @@
 
 #include "inputrecord.h"
 
+#include <cstdio>
+
 namespace oofem {
 class EngngModel;
 class TimeStep;

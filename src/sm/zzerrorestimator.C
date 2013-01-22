@@ -85,6 +85,8 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     oldSmoother = this->domain->giveSmoother();
     this->domain->setSmoother(rm, 0); // do not delete old one
 
+    // set recovery mode
+    rm->setRecoveryMode(-1, IntArray());
     // recover nodal values
     rm->recoverValues(type, tStep);
 
@@ -270,15 +272,15 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
-	    diff.zero();
-	    this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
+            diff.zero();
+            this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= nDofMans; k++ ) {
                     diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
 
-	    elem->giveIPValue(sig, gp, type, tStep);
+            elem->giveIPValue(sig, gp, type, tStep);
 
             diff.subtract(sig);
 
@@ -292,7 +294,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
-	    diff.zero();
+            diff.zero();
             this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
             ( ( StructuralMaterial * ) elem->giveMaterial() )
             ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness,
@@ -303,7 +305,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                 }
             }
 
-	    elem->giveIPValue(sig, gp, type, tStep);
+            elem->giveIPValue(sig, gp, type, tStep);
             diff.subtract(sig);
 
             help.beProductOf(DInv, diff);
@@ -333,11 +335,16 @@ ZZRemeshingCriteria :: giveRequiredDofManDensity(int num, TimeStep *tStep, int r
 
     this->estimateMeshDensities(tStep);
     size = this->nodalDensities.at(num);
-    size = max(minElemSize, size);
-    if ( relative ) {
+    if (size >= 0) {
+      size = max(minElemSize, size);
+      if ( relative ) {
         return size / this->giveDofManDensity(num);
-    } else {
+      } else {
         return size;
+      }
+    } else {
+      // size negative -> marks undetermined size
+      return size;
     }
 }
 
@@ -474,6 +481,7 @@ double
 ZZRemeshingCriteria :: giveDofManDensity(int num)
 {
     int i, isize;
+    bool init = false;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
     ZZRemeshingCriteriaInterface *interface;
@@ -502,14 +510,17 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     for ( i = 1; i <= isize; i++ ) {
         interface = ( ZZRemeshingCriteriaInterface * )
                     domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType);
-        if ( !interface ) {
-            _error("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
-        }
-
-        density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+        if ( interface ) {
+	  init = true;
+	  density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+	}
     }
-
-    density /= isize;
+    if (init) {
+      density /= isize;
+    } else {
+      // the nodal mesh density could not be determined
+      density = -1;
+    }
 
     return density;
 }

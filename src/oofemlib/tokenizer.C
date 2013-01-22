@@ -36,155 +36,98 @@
 #include "error.h"
 
 #include <cctype>
+#include <list>
 
 namespace oofem {
-Tokenizer :: Tokenizer(char separator)
+
+Tokenizer :: Tokenizer() :
+    tokens()
 {
-    this->separator = separator;
-    nTokens = -1;
 }
 
-void
-Tokenizer :: readStringToken(int &bpos, const char * &line, char * &token)
+
+std::string
+Tokenizer :: readStringToken(std::size_t &pos, const std::string &line)
 {
-    ++line; // skip leading '"'
-    this->readToken(bpos, line, token, '"'); // read everything up to terminating '"'
-    if ( * line == '"' ) {
-        line++;            // check if terminating '"' was found
+    pos++;
+    std::string x = this->readToken(pos, line, '"'); // read everything up to terminating '"' (or to the end of the string)
+    if ( line[pos] == '"' ) {
+        pos++;            // check if terminating '"' was found
     } else {
-        OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (\")");
+        OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (\") inserted at end of line");
     }
-}
-
-void
-Tokenizer :: readStructToken(int &bpos, const char * &line, char * &token)
-{
-    int refLevel = 0;
-    char c;
-
-    do {
-        c = * line++;
-        if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
-            * token = c;
-            token++;
-            bpos++;
-        }
-
-        if ( c == '{' ) {
-            refLevel++;
-        } else if ( c == '}' ) {
-            refLevel--;
-        }
-    } while ( refLevel && c != '\0' && c != '\n' );
-
-    if ( refLevel ) {
-        OOFEM_WARNING("Tokenizer::readStructToken : Missing closing separator (})");
-    }
+    return x;
 }
 
 
-void
-Tokenizer :: readToken(int &bpos, const char * &line, char * &token, char sep)
+std::string
+Tokenizer :: readStructToken(std::size_t &pos, const std::string &line)
 {
-    char c;
+    std::string x = this->readToken(pos, line, '}'); // read everything up to terminating '"' (or to the end of the string)
+    if ( line[pos] == '}' ) {
+        pos++;            // check if terminating '"' was found
+    } else {
+        OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (}) inserted at end of line");
+    }
+    return x + '}'; // structs are left with surrounding brackets, unlike strings ""
+}
+
+
+std::string
+Tokenizer :: readToken(std::size_t &pos, const std::string &line, char sep)
+{
+    int startpos = pos;
     if ( sep == 0 ) {
-        for ( ; ( c = * line ) != '\0' && !isspace(c); line++ ) {
-            if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
-                * token = c;
-                token++;
-                bpos++;
-            }
-        }
+        while ( pos < line.size() && !isspace(line[pos]) ) pos++;
+        return line.substr(startpos, pos-startpos);
     } else {
-        for ( ; ( c = * line ) != '\0' && c != '\n' && c != sep; line++ ) {
-            if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
-                * token = c;
-                token++;
-                bpos++;
-            }
-        }
+        while ( pos < line.size() && line[pos] != sep ) pos++;
+        return line.substr(startpos, pos-startpos);
     }
 }
 
 
-int Tokenizer :: tokenizeLine(const char *currentLine)
+void Tokenizer :: tokenizeLine(const std::string &currentLine)
 {
-    /*
-     *       Parses input line, tokens are separated by separator.
-     *       if separator == 0, tokens are separated by whitespaces.
-     *       return code:
-     * 0 - ok
-     * 1 - too many tokens
-     */
-    bool overflow = false;
-    int c = 0;
-    const char *ptr = currentLine;
-    char *token;
+    std :: list< std::string > sList;
+    std::size_t bpos = 0;
+    char c = 0;
+    int nTokens = 0;
 
-    int bpos = 0;
-    nTokens = 0;
+    while ( bpos < currentLine.size() ) {
 
-    while ( nTokens < OOFEM_MAX_TOKENS && * ptr != '\n' && * ptr != '\0' ) {
-        tokenPosition [ nTokens ] = token = tokens + bpos;
-        if ( separator == 0 ) {
-            /* skip whitespaces */
-            while ( ( c = * ptr ) != '\0' && c != '\n' && isspace(c) ) {
-                ptr++;
-            }
+        c = currentLine[bpos];
 
-            if ( c == '"' ) {
-                readStringToken(bpos, ptr, token);
-            } else if ( c == '{' ) {
-                readStructToken(bpos, ptr, token);
-            } else {
-                this->readToken(bpos, ptr, token, 0);
-            }
+        if ( isspace(c) ) {
+            bpos++;
+            continue;
+        } else if ( c == '"' ) {
+            sList.push_back(this->readStringToken(bpos, currentLine));
+        } else if ( c == '{' ) {
+            sList.push_back(this->readStructToken(bpos, currentLine));
         } else {
-            this->readToken(bpos, ptr, token, separator);
-            if ( c == separator ) {
-                ptr++;                /* skip separator */
-            }
-        }
-
-        if ( token - tokenPosition [ nTokens ] ) {  // if some chars were valid
-            * token = '\0';
-            if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
-                token++;
-                bpos++;
-                nTokens++;
-            } else {
-                overflow = true;
-            }
+            sList.push_back(this->readToken(bpos, currentLine, 0));
         }
     }
-
-    if ( overflow ) {
-        OOFEM_WARNING("Tokenizer :: tokenizeLine: overflow detected, increase token buffer");
-    }
-
-    if ( nTokens >= OOFEM_MAX_TOKENS ) {
-        OOFEM_WARNING("Tokenizer :: tokenizeLine: overflow detected, increase number of tokens");
-    }
-
-    if ( * ptr == '\n' || * ptr == '\0' ) {
-        return 0;
-    } else {
-        return 1;
-    }
+    
+    // Clear the old stuff and copy list to vector
+    this->tokens.clear();
+    this->tokens.reserve(nTokens);
+    std::copy(sList.begin(),sList.end(),std::back_inserter(tokens));
 }
 
 int Tokenizer :: giveNumberOfTokens()
 {
     // if EOF currentTokens == -1
-    return nTokens;
+    return tokens.size();
 }
 
 const char *Tokenizer :: giveToken(int i)
 {
     // tokens are numbered from 1
 
-    if ( i <= nTokens ) {
-        return tokenPosition [ i - 1 ];
+    if ( i <= (int)tokens.size() ) {
+        return tokens [ i - 1 ].c_str();
     } else {
         return NULL;
     }

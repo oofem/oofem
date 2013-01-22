@@ -61,11 +61,10 @@ DummySpatialLocalizer :: init(bool force)
         region_nelem.at(r)++;
     }
 
-    this->region_elements.clear(true);
-    this->region_elements.growTo(nregion);
+    this->region_elements.resize(nregion);
     // Creates a new int array of correct size for each region
     for (int i = 1; i <= nregion; i++) {
-        this->region_elements.put(i, new IntArray(region_nelem.at(i)) );
+        this->region_elements[i-1].resize(region_nelem.at(i));
     }
     // Add the numbers into the list.
     IntArray c(nregion);
@@ -74,7 +73,7 @@ DummySpatialLocalizer :: init(bool force)
         Element *e = this->domain->giveElement(i);
         r = e->giveRegionNumber();
         c.at(r)++;
-        this->region_elements.at(r)->at(c.at(r)) = i;
+        this->region_elements[r-1].at(c.at(r)) = i;
     }
     return this->initialized = true;
 }
@@ -152,9 +151,9 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
     closest.resize(0);
 
     if ( region > 0 ) {
-        IntArray *elems = this->region_elements.at(region);
-        for (ielem = 1; ielem <= elems->giveSize(); ielem++) {
-            ielemptr = this->domain->giveElement(elems->at(ielem));
+        IntArray &elems = this->region_elements[region-1];
+        for (ielem = 1; ielem <= elems.giveSize(); ielem++) {
+            ielemptr = this->domain->giveElement(elems.at(ielem));
             interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
             if ( interface ) {
                 currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);

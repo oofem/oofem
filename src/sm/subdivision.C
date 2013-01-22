@@ -48,6 +48,7 @@
 #include "outputmanager.h"
 #include "crosssection.h"
 #include "loadtime.h"
+#include "timer.h"
 
 #include <queue>
 #include <set>
@@ -3273,7 +3274,7 @@ Subdivision :: RS_Node :: drawGeometry()
     p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
 
     EASValsSetMType(FILLED_CIRCLE_MARKER);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3283,7 +3284,7 @@ Subdivision :: RS_Node :: drawGeometry()
     EMAddGraphicsToModel(ESIModel(), go);
 
     char num [ 6 ];
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3309,9 +3310,9 @@ Subdivision :: RS_Triangle :: drawGeometry()
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -3348,9 +3349,9 @@ Subdivision :: RS_Tetra :: drawGeometry()
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
+    color = ColorGetPixelFromString(const_cast< char * >(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -3390,9 +3391,9 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     Subdivision :: RS_Node *_node;
     Subdivision :: RS_Element *_element;
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
+    Timer timer;
 
-    oofem_timeval st, dt;
-    getUtime(st);
+    timer.startTimer();
 
     if ( this->mesh ) {
         delete mesh;
@@ -3437,6 +3438,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
             this->mesh->addElement(i, _element);
         } else {
             OOFEM_ERROR2("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
+            _element = NULL;
         }
 
 #ifdef __PARALLEL_MODE
@@ -3571,6 +3573,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
             node->setNumberOfDofs(ndofs);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
+            dof = NULL;
             for ( idof = 1; idof <= ndofs; idof++ ) {
                 idofPtr = parentNodePtr->giveDof(idof);
                 if ( idofPtr->giveClassID() == MasterDofClass ) {
@@ -3911,13 +3914,14 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
     // copy output manager settings
     ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );
-    getRelativeUtime(dt, st);
+
+    timer.stopTimer();
 #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                   ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                   ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, timer.getUtime() );
 #else
     OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                   nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+                   nnodes, eNum, timer.getUtime() );
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -4244,7 +4248,7 @@ Subdivision :: bisectMesh() {
             mesh->giveElement(ie)->drawGeometry();
         }
 
-        ESIEventLoop( YES, oofem_tmpstr("Subdivision Bisection; Press Ctrl-p to continue") );
+        ESIEventLoop( YES, const_cast< char * >("Subdivision Bisection; Press Ctrl-p to continue") );
  #endif
 #endif
     }

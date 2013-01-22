@@ -41,9 +41,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#include "sparsemtrx.h"
-#include "dynalist.h"
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "conTable.h"
@@ -129,7 +126,7 @@ public:
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *atTime);
 
-    virtual dynaList< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    virtual std::list< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
 
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.

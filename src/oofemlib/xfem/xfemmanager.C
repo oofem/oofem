@@ -230,7 +230,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
         ret = STANDARD;
     } else if ( intersectionCount == 1 ) {
         ret = TIP;
-    } else if ( intersectionCount > 1 ) {
+    } else /*if ( intersectionCount > 1 )*/ {
         ret = SPLIT;
     }
 

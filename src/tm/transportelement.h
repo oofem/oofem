@@ -52,7 +52,7 @@ namespace oofem {
 class TransportElement : public Element, public EIPrimaryFieldInterface
 {
 public:
-    enum ElementMode { HeatTransferEM, HeatMass1TransferEM };
+    enum ElementMode { HeatTransferEM, HeatMass1TransferEM, Mass1TransferEM };
 
 protected:
     ElementMode emode;
@@ -66,7 +66,7 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
     virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
-    
+
     /** Computes the capacity matrix of the receiver */
     virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the conductivity matrix of the receiver */

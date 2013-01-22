@@ -61,16 +61,16 @@ public:
      * Constructor. Creates a internal variable field of given type associated to given domain.
      * @param ist Physical meaning of field.
      * @param b Field type.
-     * @param st detrmines the type of nodal recovery model used.
+     * @param st Determines the type of nodal recovery model used.
      * @param d Domain which field belongs to.
      */
     SmoothedNodalInternalVariableField(InternalStateType ist, FieldType b, NodalRecoveryModel::NodalRecoveryModelType st, Domain *d);
-    ~SmoothedNodalInternalVariableField();
+    virtual ~SmoothedNodalInternalVariableField();
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime);
     virtual int evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime);
 
-    InternalStateType giveType() { return istType; }
+    InternalStateType giveInternalType() { return istType; }
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
     virtual const char *giveClassName() const { return "SmoothedNodalInternalVariableField"; }

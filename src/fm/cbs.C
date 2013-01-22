@@ -50,7 +50,7 @@
 #include "leplic.h"
 //</RESTRICTED_SECTION>
 #ifdef TIME_REPORT
- #include "clock.h"
+ #include "timer.h"
 #endif
 #include "contextioerr.h"
 
@@ -413,14 +413,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     if ( materialInterface ) {
 #ifdef TIME_REPORT
-        oofem_timeval tstart;
-        getUtime(tstart);
+        Timer timer;
+        timer.startTimer();
 #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
 #ifdef TIME_REPORT
-        oofem_timeval ut;
-        getRelativeUtime(ut, tstart);
-        OOFEM_LOG_INFO( "CBS info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+        timer.stopTimer();
+        OOFEM_LOG_INFO( "CBS info: user time consumed by updating interfaces: %.2fs\n", timer.getUtime() );
 #endif
     }
 

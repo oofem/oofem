@@ -113,16 +113,15 @@ NRSolver :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    nsmax = 0;
+    // Choosing a big "enough" number. (Alternative: Force input of maxinter)
+    nsmax = 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, IFT_NRSolver_maxiter, "maxiter"); // Macro
-    if ( nsmax < 30 ) {
-        nsmax = 30;
+    if ( nsmax < 0 ) {
+        _error("initializeFrom: nsmax < 0");
     }
 
     minIterations = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_NRSolver_miniterations, "miniter"); // Macro
-
-
 
     minStepLength = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength"); // Macro
@@ -245,10 +244,10 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 //
 //
 {
-    FloatArray rhs, ddX, RT, XInitial; // residual, iteration increment of solution, total external force, intial value of solution.
+    // residual, iteration increment of solution, total external force
+    FloatArray rhs, ddX, RT;
     double RRT;
     int neq = X->giveSize();
-    int irest = 0;
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
 #ifdef __PARALLEL_MODE
@@ -262,7 +261,6 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         OOFEM_LOG_INFO("----------------------------------------------------------------------------\n");
     }
 
-    XInitial = * X; // Stored in case of divergence.
     l = 1.0;
 
     status = NM_None;
@@ -281,13 +279,12 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     RRT = RT.computeSquaredNorm();
 #endif
 
-restart:
-    dX->zero();
     ddX.resize(neq);
 
     // Fetch the matrix before evaluating internal forces.
     // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.
-    // (This old tangent is just used
+    // (This old tangent is just used)
+
     engngModel->updateComponent(tNow, NonLinearLhs, domain);
     if ( this->prescribedDofsFlag ) {
         if ( !prescribedEqsInitFlag ) {
@@ -296,7 +293,8 @@ restart:
         applyConstraintsToStiffness(k);
     }
 
-    for (nite = 0; true; ++nite) {
+    nite = 0;
+    do {
         // Compute the residual
         engngModel->updateComponent(tNow, InternalRhs, domain);
         rhs.beDifferenceOf(RT, *F);
@@ -308,43 +306,15 @@ restart:
         // convergence check
         converged = this->checkConvergence(RT, * F, rhs, ddX, * X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
 
-        if (converged && nite >= minIterations ) {
+        if ( errorOutOfRangeFlag ) {
+            status = NM_NoSuccess;
+            OOFEM_WARNING2("NRSolver:  Divergence reached after %d iterations", nite);
             break;
-        } else if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
-            if ( irest <= NRSOLVER_MAX_RESTARTS ) {
-                // convergence problems
-                // there must be step restart followed by decrease of step length
-                // status |= NM_ForceRestart;
-                // reduce step length
-
-                /*
-                 * double time;
-                 * time = tNow->giveTime() - tNow->giveTimeIncrement()*(1.-NRSOLVER_RESET_STEP_REDUCE) ;
-                 * deltaL =  deltaL * NRSOLVER_RESET_STEP_REDUCE ;
-                 * if (deltaL < minStepLength)  deltaL = minStepLength;
-                 *
-                 * tNow -> setTime(time);
-                 * tNow -> setTimeIncrement(tNow->giveTimeIncrement()*NRSOLVER_RESET_STEP_REDUCE);
-                 * tNow->incrementStateCounter();              // update solution state counter
-                 */
-
-                // restore previous total displacement vector
-                *X = XInitial;
-                // reset all changes fro previous equilibrium state
-                engngModel->initStepIncrements();
-
-                OOFEM_WARNING2("NRSolver:  Iteration Reset: %d\n",irest);
-
-                NR_OldMode  = NR_Mode;
-                NR_Mode     = nrsolverFullNRM;
-                NR_ModeTick = NRSOLVER_DEFAULT_NRM_TICKS;
-                irest++;
-                goto restart;
-            } else {
-                status = NM_NoSuccess;
-                OOFEM_WARNING2("NRSolver:  Convergence not reached after %d iterations", nsmax);
-                break;
-            }
+        } else if ( converged && ( nite >= minIterations ) ) {
+            break;
+        } else if ( nite >= nsmax ) {
+            OOFEM_LOG_DEBUG("Maximum number of iterations reached\n");
+            break;
         }
 
         if ( nite > 0 ) {
@@ -374,10 +344,9 @@ restart:
         X->add(ddX);
         dX->add(ddX);
         tNow->incrementStateCounter(); // update solution state counter
-    }
-    //
-    // end of iteration
-    //
+
+        nite++; // iteration increment
+    } while ( true ); // end of iteration
 
     status |= NM_Success;
     solved = 1;

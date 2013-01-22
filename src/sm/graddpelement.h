@@ -80,8 +80,8 @@ protected:
     void computeStiffnessMatrix_kk(FloatMatrix&, MatResponseMode, TimeStep *tStep);
     void computeStiffnessMatrix_ku(FloatMatrix&, MatResponseMode, TimeStep *tStep);
 
-    void computeDisplacementDegreesOfFreedom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeNonlocalDegreesOfFreedom(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
+    void computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
 
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);

@@ -188,7 +188,7 @@ protected:
     void computeNVector(FloatArray &answer, GaussPoint *gp);
     virtual void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
                                const FloatArray &normal, const double p, bool updFlag);
-    virtual double computeVolumeAround(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
+    double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
     void updateIntegrationRules();
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }
 };

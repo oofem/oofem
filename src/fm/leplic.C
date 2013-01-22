@@ -155,7 +155,7 @@ LEPlic :: updatePosition(TimeStep *atTime)
     // to reconstruct interface (normal, constant) on original grid
     this->doInterfaceReconstruction(atTime, false, true);
 #ifdef __OOFEG
-    ESIEventLoop( NO, oofem_tmpstr("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
+    ESIEventLoop( NO, const_cast< char * >("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }
@@ -284,7 +284,6 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
     Graph g;
 
     double matVol = 0.0, matVolSum = 0.0;
-    double __vol;
 
     LEPlicElementInterface *interface, *neghbrInterface;
     // loop over elements
@@ -307,9 +306,6 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
                 interface->giveTempInterfaceNormal(normal);
                 interface->formMaterialVolumePoly(matvolpoly, this, normal, interface->giveTempLineConstant(), true);
                 matVol = matvolpoly.computeVolume();
-
-                // internal test of incompressibility
-                __vol = interface->computeMyVolume(this, false);
 
 #ifdef __OOFEG
                 //EASValsSetColor(::gc[OOFEG_DEBUG_LAYER].getElementColor());

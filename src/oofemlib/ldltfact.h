@@ -73,10 +73,9 @@ public:
      * @param b right hand side
      * @param x solution array
      * @return NM_Status value
-     * @param tNow time step
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
-    /// Initializes receiver from given record. Empty implementation.
+
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     // identification

@@ -96,15 +96,15 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
 
     plate->giveCharacteristicVector(answer, mtrx, mode, tStep);
     if ( answer.isNotEmpty() ) {
-      if (plate->giveRotationMatrix(R, EID_MomentumBalance)) {
-	answer.rotatedWith(R, 't');
-      }
+        if (plate->giveRotationMatrix(R, EID_MomentumBalance)) {
+            answer.rotatedWith(R, 't');
+        }
     }
     membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
     if ( aux.isNotEmpty() ) {
-      if (membrane->giveRotationMatrix(R, EID_MomentumBalance)) {
-	aux.rotatedWith(R, 't');
-      }
+        if (membrane->giveRotationMatrix(R, EID_MomentumBalance)) {
+            aux.rotatedWith(R, 't');
+        }
     }
 
     answer.add(aux);
@@ -309,9 +309,9 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 
       fprintf(file, "  strains ");
       fprintf( file,
-	       " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-	       v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-	       v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+            " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+            v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+            v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
       
       // Strain - Curvature
       plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
@@ -320,9 +320,9 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
       
       fprintf(file, "\n              stresses");
       fprintf( file,
-	       " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-	       v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-	       v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+            " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+            v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+            v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
       
       fprintf(file, "\n");
     }
@@ -444,59 +444,59 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 void
 TR_SHELL01  :: drawScalar(oofegGraphicContext &context)
 {
-  int i, indx, result = 0;
-  WCRec p [ 3 ];
-  GraphicObj *tr;
-  TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-  FloatArray v1, v2, v3;
-  double s [ 3 ], defScale;
-  IntArray map;
-  if ( !context.testElementGraphicActivity(this) ) {
-    return;
-  }
-  
-  if ( !this->giveMaterial()->isActivated(tStep) ) {
-    return;
-  }
-
-  if ( context.giveIntVarMode() == ISM_recovered ) {
-    result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-    result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-    result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-  } else if ( context.giveIntVarMode() == ISM_local ) {
-    return;
-  }
-
-  result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
-  
-  if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
-    return;
-  }
-
-  s [ 0 ] = v1.at(indx);
-  s [ 1 ] = v2.at(indx);
-  s [ 2 ] = v3.at(indx);
-  EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-  if ( context.getScalarAlgo() == SA_ISO_SURF ) {
-    for ( i = 0; i < 3; i++ ) {
-      if ( context.getInternalVarsDefGeoFlag() ) {
-	// use deformed geometry
-	defScale = context.getDefScale();
-	p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-	p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-	p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
-      } else {
-	p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-	p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-	p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
-      }
+    int i, indx, result = 0;
+    WCRec p [ 3 ];
+    GraphicObj *tr;
+    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+    FloatArray v1, v2, v3;
+    double s [ 3 ], defScale;
+    IntArray map;
+    if ( !context.testElementGraphicActivity(this) ) {
+        return;
     }
-    //     //EASValsSetColor(gc.getYieldPlotColor(ratio));
-    context.updateFringeTableMinMax(s, 3);
-    tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
-    EGWithMaskChangeAttributes(LAYER_MASK, tr);
-    EMAddGraphicsToModel(ESIModel(), tr);
-  }
+    
+    if ( !this->giveMaterial()->isActivated(tStep) ) {
+        return;
+    }
+
+    if ( context.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
+    } else if ( context.giveIntVarMode() == ISM_local ) {
+        return;
+    }
+
+    result = this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    
+    if ( ( !result ) || ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+        return;
+    }
+
+    s [ 0 ] = v1.at(indx);
+    s [ 1 ] = v2.at(indx);
+    s [ 2 ] = v3.at(indx);
+    EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+        for ( i = 0; i < 3; i++ ) {
+            if ( context.getInternalVarsDefGeoFlag() ) {
+                // use deformed geometry
+                defScale = context.getDefScale();
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+            } else {
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+            }
+        }
+        //     //EASValsSetColor(gc.getYieldPlotColor(ratio));
+        context.updateFringeTableMinMax(s, 3);
+        tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
+        EGWithMaskChangeAttributes(LAYER_MASK, tr);
+        EMAddGraphicsToModel(ESIModel(), tr);
+    }
 }
 
 /*

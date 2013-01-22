@@ -76,23 +76,12 @@ InternalVariableField::evaluateAt(FloatArray &answer, DofManager* dman, ValueMod
 contextIOResultType
 InternalVariableField :: saveContext(DataStream *stream, ContextMode mode)
 {
-    // int i, type_id = InternalVariableFieldClass;
-    // contextIOResultType iores;
-    // write class header
-    // if (!stream->write(&type_id,1)) return CIO_IOERR;
-
     return CIO_OK;
 }
 
 contextIOResultType
 InternalVariableField :: restoreContext(DataStream *stream, ContextMode mode)
 {
-    // int i, class_id;
-    // contextIOResultType iores;
-    // read class header
-    // if (!stream->read(&class_id,1)) return CIO_IOERR;
-    // if (class_id != InternalVariableField) return CIO_BADVERSION;
-
     return CIO_OK;
 }
 } // end namespace oofem

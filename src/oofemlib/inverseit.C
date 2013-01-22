@@ -51,7 +51,7 @@ InverseIteration ::  InverseIteration(int i, Domain *d, EngngModel *m) :
 }
 
 
-InverseIteration ::  ~InverseIteration() { }
+InverseIteration :: ~InverseIteration() { }
 
 NM_Status
 InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
