@@ -333,19 +333,14 @@ void Triangle :: printYourself()
 
 bool Triangle :: isOrientedAnticlockwise()
 {
-    FloatMatrix fm(3, 2);
-    for ( int i = 1; i <= fm.giveNumberOfRows(); i++ ) {
-        for ( int j = 1; j <= fm.giveNumberOfColumns(); j++ ) {
+    FloatMatrix fm(3, 3);
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 2; j++ ) {
             fm.at(i, j) = this->giveVertex(i)->at(j);
         }
+        fm.at(i, 3) = 1.;
     }
 
-    FloatMatrix fm2(3, 1);
-    for ( int i = 1; i <= fm.giveNumberOfRows(); i++ ) {
-        fm2.at(i, 1) = 1;
-    }
-
-    fm.addSubMatrix(fm2, 1, 3);
     if ( fm.giveDeterminant() > 0.0001 ) {
         return true;
     } else {
