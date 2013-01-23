@@ -858,19 +858,17 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
         this->computeConstitutiveMatrixAt(d_hw, Conductivity_hw, gp, tStep);
         this->computeConstitutiveMatrixAt(d_wh, Conductivity_wh, gp, tStep);
         this->computeConstitutiveMatrixAt(d_ww, Conductivity_ww, gp, tStep);
-        d.resize( 2 * d_hh.giveNumberOfRows(), 2 * d_hh.giveNumberOfColumns() );
-        d.zero();
 
         b_tot.resize( 2 * b.giveNumberOfRows(), 2 * b.giveNumberOfColumns() );
-        b_tot.zero();
-        b_tot.addSubMatrix(b, 1, 1);
-        b_tot.addSubMatrix(b, b.giveNumberOfRows() + 1, b.giveNumberOfColumns() + 1);
+        b_tot.setSubMatrix(b, 1, 1);
+        b_tot.setSubMatrix(b, b.giveNumberOfRows() + 1, b.giveNumberOfColumns() + 1);
         br.beProductOf(b_tot, r);
 
-        d.addSubMatrix(d_hh, 1, 1);
-        d.addSubMatrix(d_hw, 1, d_hh.giveNumberOfColumns() + 1);
-        d.addSubMatrix(d_wh, d_hh.giveNumberOfRows() + 1, 1);
-        d.addSubMatrix(d_ww, d_hh.giveNumberOfRows() + 1, d_wh.giveNumberOfColumns() + 1);
+        d.resize( 2 * d_hh.giveNumberOfRows(), 2 * d_hh.giveNumberOfColumns() );
+        d.setSubMatrix(d_hh, 1, 1);
+        d.setSubMatrix(d_hw, 1, d_hh.giveNumberOfColumns() + 1);
+        d.setSubMatrix(d_wh, d_hh.giveNumberOfRows() + 1, 1);
+        d.setSubMatrix(d_ww, d_hh.giveNumberOfRows() + 1, d_wh.giveNumberOfColumns() + 1);
 
         answer.beProductOf(d, br);
     } else {

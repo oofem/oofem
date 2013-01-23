@@ -260,11 +260,19 @@ public:
      * Adds the given matrix as sub-matrix to receiver. The sub-matrix values will be added to receivers
      * corresponding receiver's values at positions (ri...ri+src.nrows, ci....ci+src.ncolumns).
      * The size of receiver will be adjusted, if necessary.
-     * @param src Sub-matrix to be added.
+     * @param src Sub-matrix to be inserted.
      * @param sr Determines the row position (receiver's 1-based index) of first src value to be added.
      * @param sc Determines the column position (receiver's 1-based index) of first src value to be added.
      */
-    void addSubMatrix(const FloatMatrix &src, int sr, int sc);
+    void setSubMatrix(const FloatMatrix &src, int sr, int sc);
+    /**
+     * Adds the given matrix as sub-matrix to receiver.
+     * The same as setSubMatrix but transposes the source matrix.
+     * @param src Sub-matrix to be inserted transposed.
+     * @param sr Determines the row position (receiver's 1-based index) of first src value to be added.
+     * @param sc Determines the column position (receiver's 1-based index) of first src value to be added.
+     */
+    void setTSubMatrix(const FloatMatrix &src, int sr, int sc);
     /**
      * Assigns to the receiver the sub-matrix of another matrix.
      * @param src Matrix from which sub-matrix is taken

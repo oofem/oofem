@@ -331,7 +331,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatMatrix B(3, 12), EdB, K(12,12), G, Dp, DvT, C, Ed, dN, GT;
+    FloatMatrix B(3, 12), EdB, K(12,12), G, Dp, DvT, C, Ed, dN;
     FloatArray *lcoords, dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
@@ -373,17 +373,17 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     K.symmetrized();
     C.symmetrized();
-
-    GT.beTranspositionOf(G);
+    FloatMatrix GTDvT, GDp;
+    GTDvT.beTranspositionOf(G);
+    GTDvT.add(DvT);
+    GDp = G;
+    GDp.add(Dp);
 
     FloatMatrix temp(15, 15);
-    temp.zero();
-    temp.addSubMatrix(K, 1, 1);
-    temp.addSubMatrix(GT, 13, 1);
-    temp.addSubMatrix(DvT, 13, 1);
-    temp.addSubMatrix(G, 1, 13);
-    temp.addSubMatrix(Dp, 1, 13);
-    temp.addSubMatrix(C, 13, 13);
+    temp.setSubMatrix(K, 1, 1);
+    temp.setSubMatrix(GTDvT, 13, 1);
+    temp.setSubMatrix(GDp, 1, 13);
+    temp.setSubMatrix(C, 13, 13);
 
     answer.resize(15, 15);
     answer.zero();

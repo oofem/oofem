@@ -209,7 +209,7 @@ double FloatMatrix :: operator() (int i, int j) const
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size;
-
+#if DEBUG
     if ( ( size = src.giveNumberOfRows() ) != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
     }
@@ -217,6 +217,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
     if ( !src.isSquare() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : 'src' is not sqaure matrix");
     }
+#endif
 
     for ( int i = 1; i <= size; i++ ) {
         if ( ( ii = loc.at(i) ) ) {
@@ -236,6 +237,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
     int nr = src.giveNumberOfRows();
     int nc = src.giveNumberOfColumns();
 
+#if DEBUG
     if ( nr != rowind.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : row dimensions of 'src' and 'rowind' mismatch");
     }
@@ -243,6 +245,7 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
     if ( nc != colind.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : column dimensions of 'src' and 'colind' mismatch");
     }
+#endif
 
     for ( int i = 1; i <= nr; i++ ) {
         if ( ( ii = rowind.at(i) ) ) {
@@ -435,24 +438,49 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 }
 
 
-void FloatMatrix :: addSubMatrix(const FloatMatrix &src, int sr, int sc)
+void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
 {
     sr--;
     sc--;
 
     int srcRows = src.giveNumberOfRows(), srcCols = src.giveNumberOfColumns();
-
+#if DEBUG
     int nr = sr + srcRows;
     int nc = sc + srcCols;
 
     if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
-        this->resizeWithData( max(this->giveNumberOfRows(), nr), max(this->giveNumberOfColumns(), nc) );
+        OOFEM_ERROR("FloatMatrix :: setSubMatrix  - Sub matrix doesn't fit inside allocated space.");
     }
+#endif
 
     // add sub-matrix
-    for ( int i = 1; i <= srcRows; i++ ) {
-        for ( int j = 1; j <= srcCols; j++ ) {
-            this->at(sr + i, sc + j) += src.at(i, j);
+    for ( int i = 0; i < srcRows; i++ ) {
+        for ( int j = 0; j < srcCols; j++ ) {
+            (*this)(sr + i, sc + j) = src(i, j);
+        }
+    }
+}
+
+
+void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
+{
+    sr--;
+    sc--;
+
+    int srcRows = src.giveNumberOfRows(), srcCols = src.giveNumberOfColumns();
+#if DEBUG
+    int nr = sr + srcCols;
+    int nc = sc + srcRows;
+
+    if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
+        OOFEM_ERROR("FloatMatrix :: setTSubMatrix  - Sub matrix doesn't fit inside allocated space");
+    }
+#endif
+
+    // add sub-matrix
+    for ( int i = 0; i < srcCols; i++ ) {
+        for ( int j = 0; j < srcRows; j++ ) {
+            (*this)(sr + i, sc + j) = src(j, i);
         }
     }
 }

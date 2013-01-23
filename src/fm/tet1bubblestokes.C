@@ -187,7 +187,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
         dNv(12) = B(0,12) = B(4,14) = B(5,13) = dN(0,0)*N(1)*N(2)*N(3) + N(0)*dN(1,0)*N(2)*N(3) + N(0)*N(1)*dN(2,0)*N(3) + N(0)*N(1)*N(2)*dN(3,0);
         dNv(13) = B(1,13) = B(3,14) = B(5,12) = dN(0,1)*N(1)*N(2)*N(3) + N(0)*dN(1,1)*N(2)*N(3) + N(0)*N(1)*dN(2,1)*N(3) + N(0)*N(1)*N(2)*dN(3,1);
         dNv(14) = B(2,14) = B(3,13) = B(4,12) = dN(0,2)*N(1)*N(2)*N(3) + N(0)*dN(1,2)*N(2)*N(3) + N(0)*N(1)*dN(2,2)*N(3) + N(0)*N(1)*N(2)*dN(3,2);
-        
+
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
 
@@ -373,7 +373,7 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
                 f(3 * j + 1) += N(j) * t(1) * dA;
                 f(3 * j + 2) += N(j) * t(2) * dA;
             }
-            
+
             this->interp.surfaceEvalNormal(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
         }
 
@@ -389,7 +389,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatMatrix B(6, 15), EdB, K(15,15), G, Dp, DvT, C, Ed, dN, GT;
+    FloatMatrix B(6, 15), EdB, K(15,15), G, Dp, DvT, C, Ed, dN;
     FloatArray *lcoords, dNv(15), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
@@ -407,7 +407,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 
         this->interp.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this));
         this->interp.evalN(N, * lcoords, FEIElementGeometryWrapper(this));
-        
+ 
         for ( int j = 0, k = 0; j < 4; j++, k += 3 ) {
             dNv(k + 0) = B(0, k + 0) = B(4, k + 2) = B(5, k + 1) = dN(j, 0);
             dNv(k + 1) = B(1, k + 1) = B(3, k + 2) = B(5, k + 0) = dN(j, 1);
@@ -438,17 +438,17 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 
     K.symmetrized();
     C.symmetrized();
+    FloatMatrix GTDvT, GDp;
+    GTDvT.beTranspositionOf(G);
+    GTDvT.add(DvT);
+    GDp = G;
+    GDp.add(Dp);
 
-    GT.beTranspositionOf(G);
-    
     FloatMatrix temp(19, 19);
-    temp.zero();
-    temp.addSubMatrix(K, 1, 1);
-    temp.addSubMatrix(GT, 16, 1);
-    temp.addSubMatrix(DvT, 16, 1);
-    temp.addSubMatrix(G, 1, 16);
-    temp.addSubMatrix(Dp, 1, 16);
-    temp.addSubMatrix(C, 16, 16);
+    temp.setSubMatrix(K, 1, 1);
+    temp.setTSubMatrix(GTDvT, 16, 1);
+    temp.setSubMatrix(GDp, 1, 16);
+    temp.setSubMatrix(C, 16, 16);
 
     answer.resize(19, 19);
     answer.zero();
