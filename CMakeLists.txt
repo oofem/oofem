@@ -578,12 +578,12 @@ if len(sys.argv) == 6:
     flags = ' ' + sys.argv[5]
 else:
     flags = ''
-print('Running: ' + mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2' + flags)
-if os.system(mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2' + flags):
+print('Running: ' + mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f \"'+sys.argv[1]+'\" -l 2' + flags)
+if os.system(mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f \"'+sys.argv[1]+'\" -l 2' + flags):
     exit(1)
 else:
     for f in files:
-        if os.system('${PYTHON_EXECUTABLE} ${oofem_SOURCE_DIR}/tools/extractor.py -f '+f+' -c'):
+        if os.system('${PYTHON_EXECUTABLE} \"${oofem_SOURCE_DIR}/tools/extractor.py\" -f \"'+f+'\" -c'):
             exit(2)
 exit(0)
 ")
