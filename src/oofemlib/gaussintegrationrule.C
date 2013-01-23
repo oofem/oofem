@@ -58,9 +58,12 @@ GaussIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, GaussP
 // ( don't confuse with GaussPoint - elem is only the container where to
 //   store corrdinates and weights)
 {
+
+#if 0
     int i;
     double weight;
     FloatArray *coord, *c, *w;
+
 
     switch ( nPoints ) {
     case 1:
@@ -541,6 +544,25 @@ GaussIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode, GaussP
     default:
         OOFEM_ERROR2("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
     }
+#endif
+
+    
+    FloatArray *coord;
+
+    FloatArray coords_xi, weights;
+    this->giveLineCoordsAndWeights(nPoints, coords_xi, weights);
+    double weight;
+    this->numberOfIntegrationPoints = nPoints;
+    this->gaussPointArray  = new GaussPoint * [ nPoints ];
+
+    for ( int i = 1; i <= nPoints; i++ ) {
+            coord = new FloatArray(1);
+            coord->at(1) = coords_xi.at(i);
+            weight = weights.at(i);
+            this->gaussPointArray[i-1] = new GaussPoint(this, i, coord, weight, mode);
+        
+    }
+
 
     return nPoints;
 }
@@ -567,7 +589,7 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints,
             coord->at(1) = coords_xi1.at(i);
             coord->at(2) = coords_xi2.at(i);
             weight = weights.at(i);
-            this->gaussPointArray[i-1] = new GaussPoint(this, 1, coord, weight, mode);
+            this->gaussPointArray[i-1] = new GaussPoint(this, i, coord, weight, mode);
         
     }
        // return 1;
@@ -2433,7 +2455,7 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPoints, MaterialMode mode, Gauss
 //   store coordinates and weights)
 {
     FloatArray *coord1;
-	double weight;
+    double weight;
 
     switch ( nPoints ) {
     case 1:
@@ -2443,8 +2465,8 @@ GaussIntegrationRule :: SetUpPointsOnWedge(int nPoints, MaterialMode mode, Gauss
         coord1             = new FloatArray(3);
         coord1->at(1)    = 0.333333333333;
         coord1->at(2)    = 0.333333333333;
-		coord1->at(3)    = 0.;
-		weight = 2.0*0.5;
+        coord1->at(3)    = 0.;
+        weight = 2.0*0.5;
         ( * arry ) [ 0 ]        = new GaussPoint(this, 1, coord1, weight, mode);
         break;
 
@@ -2530,39 +2552,39 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         }
 
         if ( requiredNIP <= 1) {
-        	return 1;
+            return 1;
         }
 
         if ( requiredNIP <= 2) {
-        	return 2;
+            return 2;
         }
 
         if ( requiredNIP <= 3) {
-        	return 3;
+            return 3;
         }
 
         if ( requiredNIP <= 4) {
-        	return 4;
+            return 4;
         }
 
         if ( requiredNIP <= 8) {
-        	return 8;
+            return 8;
         }
 
         if ( requiredNIP <= 16) {
-        	return 16;
+            return 16;
         }
 
         if ( requiredNIP <= 24) {
-        	return 24;
+            return 24;
         }
 
         if ( requiredNIP <= 32) {
-        	return 32;
+            return 32;
         }
 
         if ( requiredNIP <= 64) {
-        	return 64;
+            return 64;
         }
 
         return requiredNIP;
@@ -3268,7 +3290,7 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         break;
 
     case 5:
-	
+    
        coords_xi.setValues(5,
            -0.9061798459386639927976269, 
            -0.5384693101056830910363144, 
@@ -3288,7 +3310,7 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         break;
 
     case 6:
-	
+    
        coords_xi.setValues(6,
            -0.2386191860831969086305017, 
            -0.6612093864662645136613996,
@@ -3310,7 +3332,7 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
         break;
 
     case 7:
-	
+    
        coords_xi.setValues(7,
            -0.9491079123427585245261897, 	
            -0.7415311855993944398638648,	
