@@ -439,23 +439,14 @@ $\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
 integration, which may be reduced by program in order to satisfy
 solution stability conditions. Parameter \param{nsteps} specifies
 how many time steps will be analyzed.
-\\ \\
-\noindent
+
+The parallel version has the following additional syntax:\\ \\
 \begin{record}
-\recentry{\PentKeywordInst{PNlDEIDynamic}}{\Pfield{nsteps}{in}}
-\recentry{}{\Pfield{dumpcoef}{rn}} \recentry{}{\PoptField{deltaT}{rn}}
 \recentry{}{\PentKeyword{commode}} \recentry{}{\PoptField{nonlocalext}{}}
 \end{record}
 
+\noindent
 \Pmode{
-Represents the parallel direct explicit  nonlinear dynamic  integration.
-The central difference method with diagonal mass matrix is used,
-damping matrix is assumed to be proportional to mass matrix, $\mbf{C}
-= {\rm dumpcoef} * \mbf{M}$, where
-$\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
-integration, which may be reduced by program in order to satisfy
-solution stability conditions. Parameter \param{nsteps} specifies
-how many time steps will be analyzed.
 The \PentKeyword{commode} keyword can be one from following:
 \begin{itemize}
 \item \entKeywordInst{nodecutmode} - indicates the node cut partitioning scheme is
@@ -585,7 +576,7 @@ attributes and is explained in section \ref{dynamicloadbalancing}}.
 %\param{nsteps} - determines number of solution steps for corresponding
 %metastep.
 \noindent
-The metastep record has following general syntax:\\
+The metastep record has the following general syntax:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{nsteps}{in}}
 \recentry{}{\optField{controlmode}{in}}
@@ -1493,7 +1484,7 @@ The file name following the keyword ``initfile'' specifies
 the path to the file that contains the initialization data
 and should be given without quotes.
 
-Currently, the only supported initialization module is 
+Currently, the only supported initialization module is
 \begin{itemize}
 \item Gauss point initialization module
 
@@ -1504,7 +1495,7 @@ Currently, the only supported initialization module is
 Each Gauss point is represented by one line in the initialization file.
 \item
 The Gauss points should be given in a specific order, based on the element number and the Gauss point number, in agreement with the mesh specified in later sections.
-\item 
+\item
 Each line referring to a Gauss point should contain the following data:
 \begin{record}
 \recentry{\field{elnum}{in}\;\;\;\field{gpnum}{in}\;\;\;\field{coords}{ra}\;\;\;\field{ng}{in}}{}
@@ -1633,13 +1624,13 @@ InternalStateType enumeration, which is defined in include file
 \item Parameter \param{ncoords} specifies the number of spatial coordinates to be exported at each Gauss point. Depending on the spatial dimension of the
 domain, the points can have one, two or three coordinates. If  \param{ncoords}
 is set to -1, only those coordinates that are actually used are exported.
- If  \param{ncoords} is set to 0, no coordinates are exported. 
+ If  \param{ncoords} is set to 0, no coordinates are exported.
 If  \param{ncoords}
 is set to a positive integer, exactly \param{ncoords} coordinates are exported.
 If  \param{ncoords} exceeds the actual number of coordinates, the actual
 coordinates are supplemented by zeros. For instance, if we deal with a 2D
 problem, the actual number of coordinates is 2. For  \param{ncoords}=3,
-the two actual coordinates followed by 0 will be exported. 
+the two actual coordinates followed by 0 will be exported.
 For  \param{ncoords}=1, only the first coordinate will be exported.
 \end{itemize}
 The Gauss point export module creates a file with extension ``gp''
@@ -1647,7 +1638,7 @@ after each step for which the output is performed. This file contains
 a header with lines starting by the symbol \#, followed by the actual data
 section.
 Each data line corresponds to one Gauss point and contains the following
-data: 
+data:
 \begin{enumerate}
 \item element number,
  \item    material number,
@@ -1656,7 +1647,7 @@ data:
 \item Gauss point global coordinates (written as a real array of length \param{ncoords}),
 \item internal variables according to the specification in \param{vars} (each written as a real array of the corresponding length).
 \end{enumerate}
-Example:\\ 
+Example:\\
 ``GPExportModule 1 tstep\_step 100 domain\_all ncoords 2 vars 5 4 13 31 64 65''
 \\
 means that the *.gp file will be written after each 100 steps and will contain
@@ -1672,7 +1663,7 @@ or area, again depending on the spatial dimension), it is useful to have
 access to the contributing volume  of the Gauss point. The product of this
 contributing volume and the density gives an additive contribution to the
 total value of the corresponding variable. This can be exploited e.g.\ to
-evaluate the total dissipated energy over the entire domain.  
+evaluate the total dissipated energy over the entire domain.
 \end{itemize}
 
 \section{Domain record(s)}
@@ -1780,7 +1771,7 @@ These records describe individual DofManager records (i.e. nodes or element side
 \noindent
 \begin{record}
   \recentry{\entKeyword{DofManagerType}}{\fieldVal{num}{in}}
-           \recentry{}{[\field{load}{ra}]} 
+           \recentry{}{[\field{load}{ra}]}
            \recentry{}{[\field{ndofs}{in} \field{DofIDMask}{ia}]}
            \recentry{}{\optField{bc}{ia}} \recentry{}{\optField{ic}{ia}}
            \recentry{}{[\field{doftype}{ia} \field{masterMask}{ia}]}
@@ -1954,13 +1945,13 @@ The hanging node can be loaded independently of its master.
 Values of array \param{dofType} can have following values:
 0-primary DOF, 2-linked DOF.
 
-The value of \param{masterElement} specifies the element number to which the hanging node is attached. 
+The value of \param{masterElement} specifies the element number to which the hanging node is attached.
 The node can be attached to any arbitrary coordinate within the master element.
 The element must support the necessary interpolation classes.
 The same interpolation for unknowns and geometry is assumed.
 
 The no (or -1) value for \param{masterElement} is supplied, then the node will locate the element closest to its coordinate.
-If no (or zero) value for \param{masterRegion} is supplied, then all regions will be searched, 
+If no (or zero) value for \param{masterRegion} is supplied, then all regions will be searched,
 otherwise only the elements in cross section with number \param{masterRegion}.
 If \param{masterElement} is directly supplied \param{masterRegion} is unused.
 
@@ -1968,12 +1959,12 @@ If \param{masterElement} is directly supplied \param{masterRegion} is unused.
 
   \begin{record}[0.9\textwidth]
     \recentry{\entKeywordInst{SlaveNode}}{\field{coords}{ra}}
-    \recentry{}{\field{dofType}{in}} 
+    \recentry{}{\field{dofType}{in}}
     \recentry{}{\field{masterDofMan}{ia}}
     \recentry{}{\field{weights}{ra}}
   \end{record}
-  
-Works identical to hanging node, but the weights (\param{weights}) are not computed from any element, 
+
+Works identical to hanging node, but the weights (\param{weights}) are not computed from any element,
 but given explicitly, as well as the connected dof managers (\param{masterDMan}).
 
 \item Element side
@@ -2698,7 +2689,7 @@ fig. \ref{nodecut-ex01}.
 partest.out.0
 Parallel test of explicit oofem computation
 #
-PNlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
@@ -2719,7 +2710,7 @@ ConstantFunction 1 f(t) 1.0
 partest.out.1
 Parallel test of explicit oofem computation
 #
-PNlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0 NodeCutMode
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
@@ -2763,7 +2754,7 @@ fig. \ref{nodecut-ex01}.
 partest2.out.0
 Parallel test of explicit oofem computation
 #
-PNlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
@@ -2788,7 +2779,7 @@ ConstantFunction 1 f(t) 1.0
 partest2.out.1
 Parallel test of explicit oofem computation
 #
-PNlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
