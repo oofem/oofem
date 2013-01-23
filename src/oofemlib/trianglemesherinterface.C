@@ -716,6 +716,33 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
         }
     }
 
+
+    // Remove simple double-connections like o<--->o
+    for (int i = 1; i <= nodes; i++) {
+        std::set<int> &elems = connectivity[i-1];
+        if ( elems.size() == 2 ) {
+            int e0 = *elems.begin();
+            int e1 = *(++elems.begin());
+            int n0 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
+            int n1 = i;
+            int n2 = seg_a.at(e1) == i ? seg_b.at(e1) : seg_a.at(e1);
+
+            if ( n0 == n2 ) {
+                // Then we have a simple double connection. We get rid of this node and the two edges.
+                nodeRemoval.at(n1) = true;
+                edgeRemoval.at(e0) = true;
+                edgeRemoval.at(e1) = true;
+                connectivity[n1-1].erase(e0);
+                connectivity[n1-1].erase(e1);
+                connectivity[n2-1].erase(e0);
+                connectivity[n2-1].erase(e1);
+                if (connectivity[n1-1].size() == 0) {
+                    nodeRemoval.at(n2) = true;
+                }
+            }
+        }
+    }
+
     delete[] connectivity;
 
     // Cleanup
