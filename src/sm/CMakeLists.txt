@@ -50,6 +50,7 @@ set (sm_loads
     tf1.C
     usrdeftempfield.C
     rotatingboundary.C
+	constantpressureload.C
     )
 
 set (sm_material

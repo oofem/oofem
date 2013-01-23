@@ -217,7 +217,6 @@ set (core_bc
     linearedgeload.C
     constantedgeload.C
     constantsurfaceload.C
-	constantpressureload.C
     nodload.C
     reinforcement.C
     surfacetensionbc.C
