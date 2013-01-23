@@ -73,7 +73,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    double giveHumidity(GaussPoint *gp);
+    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 
     /*
      * virtual double give(int aProperty, GaussPoint *gp);

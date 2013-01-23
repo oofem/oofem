@@ -41,7 +41,7 @@
 
 namespace oofem {
 /**
- * This class implements a isotropic moisture tranport material. A material
+ * This class implements a isotropic moisture transport material. A material
  * is an attribute of a domain. It is usually also attribute of many elements.
  */
 class IsotropicMoistureTransferMaterial : public TransportMaterial

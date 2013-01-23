@@ -86,7 +86,6 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 2; }
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
