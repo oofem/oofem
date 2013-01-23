@@ -169,10 +169,10 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     double r_vol, pressure;
     FloatMatrix dN, B(3, 12);
     B.zero();
-    
+
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
-    
+
     FloatArray momentum(12), conservation(3);
     momentum.zero();
     conservation.zero();
@@ -215,7 +215,7 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
 
 void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 {
-    int i, load_number, load_id;
+    int load_number, load_id;
     Load *load;
     bcGeomType ltype;
     FloatArray vec;
@@ -223,7 +223,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
     answer.resize(15);
     answer.zero();
-    for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
+    for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         load_number = this->boundaryLoadArray.at(2 * i - 1);
         load_id = this->boundaryLoadArray.at(2 * i);
         load = this->domain->giveLoad(load_number);
@@ -236,7 +236,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     }
 
     nLoads = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
+    for ( int i = 1; i <= nLoads; i++ ) {
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
@@ -331,11 +331,10 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatMatrix B(3, 12), EdB, K(12,12), G, Dp, DvT, C, Ed, dN;
+    FloatMatrix B(3, 12), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray *lcoords, dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
-    K.zero();
     G.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
