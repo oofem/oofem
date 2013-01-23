@@ -353,9 +353,11 @@ bool IntArray :: containsOnlyZeroes() const
 
 int IntArray :: minimum() const
 {
+#if DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: minimum - Empty array.");
     }
+#endif
     int x = values[0];
     for ( int i = 1; i < size; ++i ) {
         if (values[i] < x) {
@@ -368,9 +370,11 @@ int IntArray :: minimum() const
 
 int IntArray :: maximum() const
 {
+#if DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: maximum - Empty array.");
     }
+#endif
     int x = values[0];
     for ( int i = 1; i < size; ++i ) {
         if (values[i] > x) {

@@ -355,7 +355,7 @@ public:
      * Computes the sum of receiver values.
      * @return Sum of receiver.
      */
-    double sum(void) const;
+    double sum() const;
 
     /**
      * Returns the receiver a rotated according the change-of-base matrix r.
