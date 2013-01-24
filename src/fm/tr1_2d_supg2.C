@@ -68,6 +68,8 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans  = 3;
+    vcoords [ 0 ] = NULL;
+    vcoords [ 1 ] = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
