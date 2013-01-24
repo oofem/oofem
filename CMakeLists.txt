@@ -14,7 +14,7 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "2012")
 set (oofem_EMAIL "info@oofem.org")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
@@ -574,26 +574,30 @@ else:
     files = [sys.argv[1]]
     mpicommand = ''
     parallel = ''
-print('Running: ' + mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2')
-if os.system(mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2'):
+if len(sys.argv) == 6:
+    flags = ' ' + sys.argv[5]
+else:
+    flags = ''
+print('Running: ' + mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2' + flags)
+if os.system(mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2' + flags):
     exit(1)
 else:
     for f in files:
-        if os.system('${PYTHON_EXECUTABLE} ${oofem_SOURCE_DIR}/tools/extractor.py -f '+f+' -c'):
+        if os.system('${PYTHON_EXECUTABLE} \"${oofem_SOURCE_DIR}/tools/extractor.py\" -f \"'+f+'\" -c'):
             exit(2)
 exit(0)
 ")
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
-    add_test (NAME 4test_test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd} -ksp_rtol 1.e-15" "p")
+    add_test (NAME 4test_test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd}" "p" "-ksp_rtol 1.e-15")
     add_test (NAME bar_test_np4 COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
     add_test (NAME barnl_test_np4 COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
     add_test (NAME barnl_test_np2 COMMAND ${test_cmd} barnl2.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
     add_test (NAME brazil_test_np2 COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
     add_test (NAME brazil_test_np4 COMMAND ${test_cmd} brazil_2d_nl4.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
     add_test (NAME brazil_test_np7 COMMAND ${test_cmd} brazil_2d_nl7.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME brazil3d_test_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd} -ksp_rtol 1.e-15 -ksp_type cg" "p")
+    add_test (NAME brazil3d_test_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd}" "p" "-ksp_rtol 1.e-15 -ksp_type cg")
     add_test (NAME dyn_bar01_test_np2 COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
     add_test (NAME dyn_bar02_test_np2 COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
     add_test (NAME dyn_bar03_test_np2 COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
