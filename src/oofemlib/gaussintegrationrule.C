@@ -575,7 +575,7 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints,
 //   store coordinates and weights)
 {
 
-
+#if 1
     FloatArray *coord;
 
     FloatArray coords_xi1, coords_xi2, weights;
@@ -592,8 +592,9 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints,
             this->gaussPointArray[i-1] = new GaussPoint(this, i, coord, weight, mode);
         
     }
-       // return 1;
-
+    
+    return nPoints;
+#endif
 
 
 
@@ -601,7 +602,7 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints,
 
     //------------------
 
-/*
+#if 0
     FloatArray *coord1;
 
     switch ( nPoints ) {
@@ -774,8 +775,9 @@ GaussIntegrationRule :: SetUpPointsOnTriangle(int nPoints,
     default:
         OOFEM_ERROR2("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
     }
-    */
     return nPoints;
+
+#endif
 
 }
 
@@ -2798,14 +2800,14 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
     case 3:
         coords_xi1.setValues(3, 
            0.166666666666667,
-           0.166666666666667,
-           0.666666666666667
+           0.666666666666667,
+           0.166666666666667
         );
 
         coords_xi2.setValues(3,
-           0.666666666666667,
            0.166666666666667,
-           0.166666666666667
+           0.166666666666667,
+           0.666666666666667
         );
         weights.setValues(3,
            0.166666666666666,
