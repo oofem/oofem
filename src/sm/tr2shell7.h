@@ -62,13 +62,13 @@ protected:
     int numberOfGaussPoints;	
     static FEI3dTrQuad interpolation;
     static bool __initialized;
-	static IntArray ordering_x;
+	static IntArray ordering_phibar;
 	static IntArray ordering_m;
 	static IntArray ordering_gam;
     static IntArray ordering_all;
 
     static bool initOrdering() {
-        ordering_x.setValues(18, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38);
+        ordering_phibar.setValues(18, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38);
 		ordering_m.setValues(18, 4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41);
 		ordering_gam.setValues(6, 7, 14, 21, 28, 35, 42);
         ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38,
@@ -93,7 +93,7 @@ protected:
 
     virtual FEInterpolation *giveInterpolation();
 
-
+    
 public:
     Tr2Shell7(int n, Domain *d);	// constructor
     virtual ~Tr2Shell7() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.

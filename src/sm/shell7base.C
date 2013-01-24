@@ -47,6 +47,16 @@
 
 namespace oofem {
 
+    #if 1
+	IntArray Shell7Base :: ordering_phibar(18);
+	IntArray Shell7Base :: ordering_m(18);
+	IntArray Shell7Base :: ordering_gam(6);
+    IntArray Shell7Base :: ordering_all(42);
+    IntArray Shell7Base :: ordering_gr(42);
+    IntArray Shell7Base :: ordering_gr_edge(21);
+	IntArray Shell7Base :: ordering_all_edge(21);
+	bool Shell7Base :: __initialized = Shell7Base :: initOrdering();
+    #endif
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface()
 {
@@ -282,7 +292,8 @@ Shell7Base :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatA
     FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
     fei->computeLocalEdgeMapping(edgeNodes, iedge);
 	this->edgeComputeBmatrixAt(gp, B, 1, ALL_STRAINS);
-	this->edgeGiveUpdatedSolutionVector(a, iedge, tStep);
+    this->edgeGiveUpdatedSolutionVector(a, iedge, tStep);
+
 	FloatArray eps;	      // generalized strain
 	eps.beProductOf(B,a); // [dxdxi, dmdxi, m, dgamdxi, gam]^T
 
@@ -467,8 +478,8 @@ Shell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dph
 void
 Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-   
-    this->computeBulkTangentMatrix(answer, rMode, tStep);
+    FloatMatrix temp;
+    this->computeBulkTangentMatrix(temp, rMode, tStep);
         
     
     // Add contribution due to pressure load
@@ -484,10 +495,14 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
             FloatMatrix K_pressure;
             this->computePressureTangentMatrix(K_pressure, load, iSurf, tStep);
             //answer.subtract(K_pressure);
-            answer.add(K_pressure);
+            temp.add(K_pressure);
         }
     }
-    
+    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+    answer.assemble(temp, ordering_all);
+
 }
 
 void
@@ -668,7 +683,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
         }
     }
     answer.symmetrized();
-
+    
     //answer.printYourself();
     //FloatMatrix test;
     //test.beSubMatrixOf(L,1,3,1,3);
@@ -718,7 +733,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 
     FloatArray solVec, pressure;
     this->giveUpdatedSolutionVector(solVec,tStep);
-       
+  
 
 	int ndof = this->giveNumberOfDofs();
     answer.resize(ndof,ndof); answer.zero();
@@ -1013,58 +1028,6 @@ Shell7Base :: transInitialCartesianToInitialContravar(GaussPoint *gp, const Floa
 
 
 
-void
-Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep){
-	
-	FloatArray *Xi, Mi;
-	this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, answer);
-
-	// Add reference position and directors to computed update
-	//for( int i = 1, j = 0; i <= 6; i++, j += 7 ){
-	for( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 7 ){
-		Xi = this->giveNode(i)->giveCoordinates();
-		Mi = this->giveInitialNodeDirector(i);
-		answer.at(1+j) += Xi->at(1);
-		answer.at(2+j) += Xi->at(2);
-		answer.at(3+j) += Xi->at(3);
-		answer.at(4+j) += Mi.at(1);
-		answer.at(5+j) += Mi.at(2);
-		answer.at(6+j) += Mi.at(3);
-		//answer.at(7+j) =... gam(t=0)=0 so no update necessary. Well this assumes gam=0 at t=0
-        //Mi.printYourself();
-	}
-
-}
-
-
-void
-Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep)
-{	
-	FloatArray *Xi, Mi;
-	// should extract solution vector from three nodes only
-    this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, answer);
-    IntArray edgeNodes;
-    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
-
-    fei->computeLocalEdgeMapping(edgeNodes, iedge);
-
-
-	// Add reference position and directors to computed update
-	for( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 7 ){
-
-		Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
-		Mi = this->giveInitialNodeDirector( edgeNodes.at(i) );
-		answer.at(1+j) += Xi->at(1);
-		answer.at(2+j) += Xi->at(2);
-		answer.at(3+j) += Xi->at(3);
-		answer.at(4+j) += Mi.at(1);
-		answer.at(5+j) += Mi.at(2);
-		answer.at(6+j) += Mi.at(3);
-		//answer.at(7+j) =... gam(t=0)=0 so no update necessary
-	}
-
-}
-
 
 
 // Nodal forces
@@ -1075,10 +1038,13 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 {
     FloatArray fM, fP, fT;
     
-    FloatArray solVec;
+    FloatArray solVec, temp;
     this->giveUpdatedSolutionVector(solVec,tStep);
+
     //solVec.printYourself();
-    this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
+    this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
+    //this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
+
     //answer.printYourself();
 
     //this->computeConvectiveMassForce(fM, tStep);
@@ -1115,6 +1081,10 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     test.printYourself();
     */
     
+    answer.resize(this->computeNumberOfDofs(EID_MomentumBalance));
+    answer.zero();
+
+    answer.assemble(temp, ordering_all);
     
 }
 
@@ -1138,7 +1108,8 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             
             GaussPoint *gp = iRuleL->getIntegrationPoint(j-1); 
             this->computeBmatrixAt(gp, B);
-		    genEps.beProductOf(B,solVec); 
+		    genEps.beProductOf(B,solVec);
+            //genEps.printYourself();
 			double zeta = giveLocalZetaCoord(gp);
             this->computeSectionalForcesAt(f, gp, mat, tStep, genEps, zeta);
             
@@ -1306,6 +1277,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep){
         gp = iRule->getIntegrationPoint(i);
         this->computeNmatrixAt(gp, N);
         this->giveUpdatedSolutionVector(aVec,tStep);
+        // Fix for the new numbering in B & N
         this->computeVectorOf(EID_MomentumBalance, VM_Velocity, tStep, daVec);
 	       
          a.beProductOf(N,aVec);  // [ x,  m,  gam]^T
@@ -1386,7 +1358,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep){
     FloatMatrix N, Nt, Ntm, NtmN, mass;
     FloatArray a, unknowns, m(3);
     double gam, dA;
-    this->giveUpdatedSolutionVector(a, tStep);  
+    this->giveUpdatedSolutionVector(a, tStep);   
 
 	int ndofs = this->giveNumberOfDofs();
 	answer.resize(ndofs,ndofs); answer.zero();
@@ -1455,7 +1427,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep){
 void 
 Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray fT, components, traction(3);
+    FloatArray fT, components, traction(3), temp;
 
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     
@@ -1468,8 +1440,15 @@ Shell7Base :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge,
         this->giveEdgeDofMapping(mask, iEdge);
         answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
         answer.zero();
-
         answer.assemble(fT, mask);
+        int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+        temp.resize( ndofs );
+        temp.zero();
+        temp.assemble(fT, mask);
+        //answer.resize(ndofs);
+        //answer.zero();
+        //answer.assemble(temp, ordering_all);
+		
 
         return;
     } else {
@@ -1730,7 +1709,6 @@ Shell7Base :: computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer){
 
 
 
-// Integration //Specific!
 
 double 
 Shell7Base :: computeVolumeAround(GaussPoint *gp){
@@ -1789,9 +1767,8 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
 	    //------------------------------
         FloatMatrix N, Nt, Ntm, NtmN, mass;
         FloatArray a, unknowns, m(3);
-        double gam;
+        double gam; 
         this->giveUpdatedSolutionVector(a, tStep);  
-
 	    int ndofs = this->giveNumberOfDofs();
 	    answer.resize(ndofs,ndofs); answer.zero();
 
@@ -2094,6 +2071,61 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 
 
+#if 0
+
+void
+Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep){
+	
+	FloatArray *Xi, Mi;
+	this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, answer);
+    answer.setValues(42, 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. );
+	// Add reference position and directors to computed update
+	//for( int i = 1, j = 0; i <= 6; i++, j += 7 ){
+	for( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 7 ){
+		Xi = this->giveNode(i)->giveCoordinates();
+		Mi = this->giveInitialNodeDirector(i);
+		answer.at(1+j) += Xi->at(1);
+		answer.at(2+j) += Xi->at(2);
+		answer.at(3+j) += Xi->at(3);
+		answer.at(4+j) += Mi.at(1);
+		answer.at(5+j) += Mi.at(2);
+		answer.at(6+j) += Mi.at(3);
+		//answer.at(7+j) =... gam(t=0)=0 so no update necessary. Well this assumes gam=0 at t=0
+        //Mi.printYourself();
+	}
+    //answer.printYourself();
+}
+#endif
+
+#if 0
+
+void
+Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep)
+{	
+	FloatArray *Xi, Mi;
+	// should extract solution vector from three nodes only
+    this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, answer);
+    IntArray edgeNodes;
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
+
+    fei->computeLocalEdgeMapping(edgeNodes, iedge);
+
+
+	// Add reference position and directors to computed update
+	for( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 7 ){
+
+		Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
+		Mi = this->giveInitialNodeDirector( edgeNodes.at(i) );
+		answer.at(1+j) += Xi->at(1);
+		answer.at(2+j) += Xi->at(2);
+		answer.at(3+j) += Xi->at(3);
+		answer.at(4+j) += Mi.at(1);
+		answer.at(5+j) += Mi.at(2);
+		answer.at(6+j) += Mi.at(3);
+		//answer.at(7+j) =... gam(t=0)=0 so no update necessary
+	}
+
+}
 
 void
 Shell7Base :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
@@ -2122,6 +2154,8 @@ Shell7Base :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
         answer.at(7,7+j) = N.at(i);
 	}
 }
+
+
 
 void
 Shell7Base :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li , int ui)
@@ -2177,8 +2211,6 @@ Shell7Base :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li , int
 	}
 
 }
-
-
 
 void
 Shell7Base :: edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
@@ -2266,6 +2298,244 @@ Shell7Base :: edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li ,
 	}
 
 }
+
+
+#endif
+
+
+
+
+
+
+#if 1
+
+void
+Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep){
+	
+	FloatArray *Xi, Mi, temp;
+	this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
+    //temp.setValues(42, 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. );
+    answer.zero();
+    answer.assemble(temp,ordering_gr);
+    //answer.printYourself();
+	// Add reference position and directors to computed update
+	for( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ){
+		Xi = this->giveNode(i)->giveCoordinates();
+		Mi = this->giveInitialNodeDirector(i);
+		answer.at(1+j) += Xi->at(1);
+		answer.at(2+j) += Xi->at(2);
+		answer.at(3+j) += Xi->at(3);
+		answer.at(18+1+j) += Mi.at(1);
+		answer.at(18+2+j) += Mi.at(2);
+		answer.at(18+3+j) += Mi.at(3);
+		//answer.at(7+j) =... gam(t=0)=0 so no update necessary. Well this assumes gam=0 at t=0
+        
+	}
+    //answer.printYourself();
+}
+#endif
+
+#if 1
+
+void
+Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep)
+{	
+	FloatArray *Xi, Mi, temp;
+	// should extract solution vector from three nodes only
+    this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, temp);
+    IntArray edgeNodes;
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
+    answer.zero();
+    fei->computeLocalEdgeMapping(edgeNodes, iedge);
+    answer.assemble(temp,ordering_gr_edge);
+
+	// Add reference position and directors to computed update
+	for( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 3 ){
+
+		Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
+		Mi = this->giveInitialNodeDirector( edgeNodes.at(i) );
+		answer.at(1+j) += Xi->at(1);
+		answer.at(2+j) += Xi->at(2);
+		answer.at(3+j) += Xi->at(3);
+		answer.at(9+1+j) += Mi.at(1);
+		answer.at(9+2+j) += Mi.at(2);
+		answer.at(9+3+j) += Mi.at(3);
+		//answer.at(7+j) =... gam(t=0)=0 so no update necessary
+	}
+
+}
+
+
+void
+Shell7Base :: edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at aGaussPoint along one edge
+{
+    answer.resize(7, this->giveNumberOfEdgeDofs());
+    answer.zero();
+
+    FloatArray lcoords = *gp->giveCoordinates();
+	FloatArray N;
+	
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
+    fei->edgeEvalN(N, lcoords, FEIElementGeometryWrapper(this));
+	
+
+	/*    9   9    3
+  	   3 [N_x   0    0
+	   3   0   N_m   0
+	   1   0    0  N_gmm ]
+    */
+
+    for( int i = 1, j = 0; i<=this->giveNumberOfEdgeDofManagers(); i++, j+=3 ){ 
+		answer.at(1,1+j)   = N.at(i);
+		answer.at(2,2+j)   = N.at(i);
+		answer.at(3,3+j)   = N.at(i);
+		answer.at(4,9+1+j) = N.at(i);
+		answer.at(5,9+2+j) = N.at(i);
+		answer.at(6,9+3+j) = N.at(i);
+        answer.at(7,18+i)  = N.at(i);
+	}
+	
+}
+
+void
+Shell7Base :: edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li , int ui)
+/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+*/
+{
+	answer.resize(11, this->giveNumberOfEdgeDofs()); answer.zero();
+    FloatArray lcoords = *gp->giveCoordinates();
+	FloatArray N, dNdxi;
+	
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
+    fei->edgeEvalN(N, lcoords, FEIElementGeometryWrapper(this));
+    int iedge = 0;
+    fei->edgeEvaldNdxi(dNdxi, iedge, lcoords, FEIElementGeometryWrapper(this));
+
+	/*   
+  	   3 [B_u   0    0
+	   3   0   B_w   0
+	   3   0   N_w   0
+	   1   0    0  B_gam 
+	   1   0    0  N_gam] 
+	*/
+	
+    int ndofman = this->giveNumberOfEdgeDofManagers();
+	// First row
+	for( int i = 1, j = 0; i<=ndofman; i++, j+=3  ){ 
+		answer.at(1,1+j) = dNdxi.at(i);
+		answer.at(2,2+j) = dNdxi.at(i);
+		answer.at(3,3+j) = dNdxi.at(i);
+
+	}
+
+	// Second row
+	for( int i = 1, j = 0; i<=ndofman; i++, j+=3  ){ 
+		answer.at(4,9+1+j) = dNdxi.at(i);
+		answer.at(5,9+2+j) = dNdxi.at(i);
+		answer.at(6,9+3+j) = dNdxi.at(i);
+		answer.at(7,9+1+j) = N.at(i);
+		answer.at(8,9+2+j) = N.at(i);
+		answer.at(9,9+3+j) = N.at(i);
+	}
+
+	// Third row
+	for( int i = 1, j = 0; i<=ndofman; i++, j+=1  ){ 
+		answer.at(10,18+1+j) = dNdxi.at(i);
+		answer.at(11,18+1+j) = N.at(i);
+	}
+
+}
+
+
+void
+Shell7Base :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li , int ui)
+/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+*/
+{
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(18, ndofs); answer.zero();
+    FloatArray lcoords = *gp->giveCoordinates();
+	FloatArray N;
+	FloatMatrix dNdxi;
+    this->giveInterpolation()->evalN(N, lcoords, FEIElementGeometryWrapper(this));
+    this->giveInterpolation()->evaldNdxi(dNdxi, lcoords, FEIElementGeometryWrapper(this));
+
+	/*    18   18   6
+  	   6 [B_u   0   0
+	   6   0   B_w  0
+	   3   0   N_w  0
+	   2   0    0  B_gam 
+	   1   0    0  N_gam] 
+	*/
+	int ndofman = this->giveNumberOfDofManagers();  
+	
+    // First row
+    for ( int i = 1, j = 0; i<=ndofman; i++, j+=3 ){ 
+		answer.at(1,1+j) = dNdxi.at(i,1);
+		answer.at(2,2+j) = dNdxi.at(i,1);
+		answer.at(3,3+j) = dNdxi.at(i,1);
+		answer.at(4,1+j) = dNdxi.at(i,2);
+		answer.at(5,2+j) = dNdxi.at(i,2);
+		answer.at(6,3+j) = dNdxi.at(i,2);
+	}
+
+	// Second row
+	for ( int i = 1, j = 0; i<=ndofman; i++, j+=3 ){ 
+		answer.at(7,18+1+j) = dNdxi.at(i,1);
+		answer.at(8,18+2+j) = dNdxi.at(i,1);
+		answer.at(9,18+3+j) = dNdxi.at(i,1);
+		answer.at(10,18+1+j) = dNdxi.at(i,2);
+		answer.at(11,18+2+j) = dNdxi.at(i,2);
+		answer.at(12,18+3+j) = dNdxi.at(i,2);
+		answer.at(13,18+1+j) = N.at(i);
+		answer.at(14,18+2+j) = N.at(i);
+		answer.at(15,18+3+j) = N.at(i);
+	}
+
+	// Third row
+	for ( int i = 1, j = 0; i<=ndofman; i++, j+=1 ){ 
+		answer.at(16,36+1+j) = dNdxi.at(i,1);
+		answer.at(17,36+1+j) = dNdxi.at(i,2);
+		answer.at(18,36+1+j) = N.at(i);
+	}
+
+
+}
+
+
+void
+Shell7Base :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at aGaussPoint.
+{
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(7, ndofs); answer.zero();
+    FloatArray &lcoords = *gp->giveCoordinates();
+	FloatArray N;
+    this->giveInterpolation()->evalN(N, lcoords, FEIElementGeometryWrapper(this));
+
+	/*   nno*3 nno*3 nno
+  	   3 [N_x   0    0
+	   3   0   N_m   0
+	   1   0    0  N_gmm ]
+    */
+    for ( int i = 1, j = 0; i<=this->giveNumberOfDofManagers(); i++, j+=3 ){ 
+        answer.at(1,1+j) = N.at(i);
+		answer.at(2,2+j) = N.at(i);
+		answer.at(3,3+j) = N.at(i);
+		answer.at(4,18+1+j) = N.at(i);
+		answer.at(5,18+2+j) = N.at(i);
+		answer.at(6,18+3+j) = N.at(i);
+        answer.at(7,36+i) = N.at(i);
+    }
+}
+
+#endif
+
 
 
 
