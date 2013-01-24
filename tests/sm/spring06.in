@@ -29,7 +29,7 @@ ConstantFunction 1 f(t) 1.0
 ##
 ##
 #
-#%BEGIN_CHECK% tolerance 1.e-4
+#%BEGIN_CHECK% tolerance 2.e-3
 ## check nodal displacements
 #NODE tStep 1 number 2 dof 5 unknown d value -0.56250
 #NODE tStep 1 number 3 dof 5 unknown d value  0.65625
