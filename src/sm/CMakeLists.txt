@@ -22,7 +22,6 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-	tr_dirshell.C
 	shell7base.C
 	tr2shell7.C
     )

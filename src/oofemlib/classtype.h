@@ -196,7 +196,6 @@ enum classType {
     LatticeStructuralElementClass,
     Lattice2dClass,
     LatticeMaterialStatusClass,
-    TrDirShellClass,
 	Shell7BaseClass,
 	Tr2Shell7Class,
 
