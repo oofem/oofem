@@ -293,6 +293,8 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
     double val;
     for ( int i = 1; i <= ndofs; i++ ) {
         iDof = inode->giveDof(i);
+	// skip slave DOFs (only master (primary) DOFs have to be updated).
+	if (!iDof->isPrimaryDof()) continue;
         val = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         if ( !iDof->hasBc(tStep) ) {
             val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
