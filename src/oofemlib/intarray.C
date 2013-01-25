@@ -155,6 +155,18 @@ int IntArray :: at(int i) const
     this->checkBounds(i);
     return values [ i - 1 ];
 }
+
+int &IntArray :: operator()(int i)
+{
+    this->checkBounds(i);
+    return values [ i ];
+}
+
+const int &IntArray :: operator()(int i) const
+{
+    this->checkBounds(i);
+    return values [ i ];
+}
 #endif
 
 
