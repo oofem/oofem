@@ -209,8 +209,9 @@ double FloatMatrix :: operator() (int i, int j) const
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size;
+    size = src.giveNumberOfRows();
 #if DEBUG
-    if ( ( size = src.giveNumberOfRows() ) != loc.giveSize() ) {
+    if ( ( size ) != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
     }
 
@@ -1700,11 +1701,13 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     if ( !isSquare() ) {
         OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
     }
-
+	
     // check for symmetry
+	double equalityTol = 1.0e-6;
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
-            if ( this->at(i, j) != this->at(j, i) ) {
+            //if ( this->at(i, j) != this->at(j, i) ) {
+			if ( abs( this->at(i, j) - this->at(j, i) ) > equalityTol ) {
                 OOFEM_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
             }
         }
