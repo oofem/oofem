@@ -90,6 +90,7 @@ protected:
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) = 0;
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
+	//virtual void computePhibarBmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) ;
     virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) ;
@@ -165,8 +166,9 @@ protected:
     
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
+    virtual void computeLayeredMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
     virtual void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); // numerical integration in B_X
-
+    virtual void giveMassFactorsAt(GaussPoint *gp, FloatArray &answer, FloatArray &m, double gam); // numerical integration in B_X
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
