@@ -176,7 +176,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp)
 double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double conduct;
+    double conduct=0.;
 
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -207,7 +207,7 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double capacityConcrete;
+    double capacityConcrete=0.;
 
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -238,7 +238,7 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
 double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double concreteBulkDensity;
+    double concreteBulkDensity=0.;
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -3373,6 +3373,9 @@ void CemhydMatStatus :: stat3d(void) {
 
     printf(" 28    %8ld     %8ld\n", volume [ 28 ], surface [ 28 ]);
 #endif
+    (void)surftot;
+    (void)voltot;
+    
 }
 
 void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
@@ -3885,6 +3888,7 @@ void CemhydMatStatus :: distrib3d(void)
 
     //deallocate cemreal[][][]
     dealloc_long_3D(cemreal, SYSIZE + 1);
+    (void)rhtest;
 }
 
 
@@ -6209,6 +6213,8 @@ void CemhydMatStatus :: dissolve(int cycle) {
 #endif
 
     fflush(stdout);
+    (void)nsurf;
+    (void)calcz;
 }
 /* routine to add nneed one pixel elements of phase randid at random */
 /* locations in microstructure */
@@ -6261,7 +6267,7 @@ void CemhydMatStatus :: addrand(int randid, long int nneed) {
 /* and for all phases (cement= C3S, C2S, C3A, C4AF, and calcium sulfates */
 void CemhydMatStatus :: measuresurf(void)
 {
-    int sx, sy, sz, jx, jy, jz, faceid;
+    int sx, sy, sz, jx=0, jy=0, jz=0, faceid;
 
     for ( sx = 0; sx < SYSIZE; sx++ ) {
         for ( sy = 0; sy < SYSIZE; sy++ ) {
@@ -7810,6 +7816,7 @@ int CemhydMatStatus :: burn3d(int npix, int d1, int d2, int d3)
     delete [] nnewy;
     delete [] nnewz;
     return ( bflag );
+    (void)alpha_burn;
 }
 
 
@@ -8123,6 +8130,7 @@ int CemhydMatStatus :: burnset(int d1, int d2, int d3)
 
     /* Return flag indicating if set has indeed occurred */
     return ( setyet );
+    (void)alpha_burn;
 }
 
 
@@ -8538,6 +8546,7 @@ int CemhydMatStatus :: movecsh(int xcur, int ycur, int zcur, int finalstep, int 
     }
 
     return ( action );
+    (void)sumback;
 }
 
 /* routine to add extra FH3 when gypsum, hemihydrate, anhydrite, CAS2, or */
@@ -8757,6 +8766,8 @@ int CemhydMatStatus :: extettr(int xpres, int ypres, int zpres, int etype)
     }
 
     return ( newact );
+    (void)multf;
+    
 }
 
 /* routine to add extra CH when gypsum, hemihydrate, anhydrite, CaCl2, or */
@@ -9165,6 +9176,7 @@ int CemhydMatStatus :: moveanh(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumback;
 }
 
 /* routine to move a diffusing HEMIHYDRATE species */
@@ -9450,6 +9462,7 @@ int CemhydMatStatus :: movehem(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumback;
 }
 
 /* routine to add extra Freidel's salt when CaCl2 reacts with */
@@ -9894,6 +9907,7 @@ int CemhydMatStatus :: movegyp(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CaCl2 species */
@@ -10143,6 +10157,7 @@ int CemhydMatStatus :: movecacl2(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CAS2 species */
@@ -10389,6 +10404,7 @@ int CemhydMatStatus :: movecas2(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing AS species */
@@ -10537,6 +10553,7 @@ int CemhydMatStatus :: moveas(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CACO3 species */
@@ -10640,6 +10657,8 @@ int CemhydMatStatus :: movecaco3(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)newact;
+    (void)sumgarb;
 }
 
 /* routine to add extra AFm phase when diffusing ettringite reacts */
@@ -10856,6 +10875,7 @@ int CemhydMatStatus :: moveettr(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to add extra pozzolanic CSH when CH reacts at */
@@ -10985,6 +11005,7 @@ int CemhydMatStatus :: movefh3(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CH species */
@@ -11098,6 +11119,7 @@ int CemhydMatStatus :: movech(int xcur, int ycur, int zcur, int finalstep, float
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to add extra C3AH6 when diffusing C3A nucleates or reacts at */
@@ -11715,6 +11737,7 @@ int CemhydMatStatus :: movec3a(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing C4A species */
@@ -12260,6 +12283,7 @@ int CemhydMatStatus :: movec4a(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to oversee hydration by updating position of all */
@@ -12454,6 +12478,7 @@ void CemhydMatStatus :: hydrate(int fincyc, int stepmax, float chpar1, float chp
     }
 
     /* end of istep loop */
+    (void)ntodo;
 }
 
 
@@ -14201,6 +14226,8 @@ void CemhydMatStatus :: AnalyticHomogenizationPaste(double &E, double &nu, int p
 
     E = Paste_level.E_hmg;
     nu =  Paste_level.nu_hmg;
+    (void)E_CSH_hmg;
+    (void)nu_CSH_hmg;
 }
 
 //use results from cement paste level and add SCM, inert filler, entrained air, ITZ, FA, CA
