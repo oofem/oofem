@@ -609,7 +609,6 @@ void MixedGradientPressureNeumann :: computeTangents(
     }
 
     // Solve all sensitivities
-    Kff->printStatistics();
     solver->solve(Kff,ddev_pert,s_d);
     solver->solve(Kff,&p_pert,&s_p);
 
