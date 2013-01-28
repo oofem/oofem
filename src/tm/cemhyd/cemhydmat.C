@@ -1166,11 +1166,11 @@ void CemhydMatStatus :: dealloc_double_3D(double ***( & mic ), long SYSIZE) {
 
 #ifdef TINYXML
 //functions to read int, double and string with error checking
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val) {
     int success;
     char key [ 256 ];
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
@@ -1178,40 +1178,40 @@ void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char 
 
     sprintf(key, "key%d", position);
     success = elemSelected->QueryIntAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read int value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, long int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val) {
     int temp;
     QueryNumAttributeExt(xmlFile, elementName, position, temp);
     val = static_cast< long int >(temp);
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, const char *key, int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val) {
     int success;
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
     }
 
     success = elemSelected->QueryIntAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read int value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, double &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val) {
     int success;
     char key [ 256 ];
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
@@ -1219,34 +1219,34 @@ void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char 
 
     sprintf(key, "key%d", position);
     success = elemSelected->QueryDoubleAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read double value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, const char *key, double &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val) {
     int success;
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
     }
 
     success = elemSelected->QueryDoubleAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read double value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
-void CemhydMatStatus :: QueryStringAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, char *chars) {
+void CemhydMatStatus :: QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars) {
     int success;
     char key [ 256 ];
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
+    XMLHandle docHandle = XMLHandle(xmlFile);
     std :: string str1;
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
@@ -1258,11 +1258,11 @@ void CemhydMatStatus :: QueryStringAttributeExt(TiXmlDocument *xmlFile, const ch
     // Change with above whenever packages are updated.
     const char *cstr = elemSelected->Attribute(key);
     if (cstr) {
-        success = TIXML_SUCCESS;
+        success = XML_SUCCESS;
     } else {
-        success = TIXML_NO_ATTRIBUTE;
+        success = XML_NO_ATTRIBUTE;
     }
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read string value or key %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
@@ -1403,10 +1403,11 @@ int CemhydMatStatus :: readInputFileAndInitialize(const char *inp, bool generate
     F->get_value(0, ( long & )iseed);
 #endif
 #ifdef TINYXML
-    xmlFile = new TiXmlDocument(inp);
+    xmlFile = new XMLDocument();
     countKey = 0;
-    if ( !xmlFile->LoadFile() ) {
-        printf("\nError reading XML file %s or nonletter symbols used, such as =, (file %s, line %d)\n", inp, __FILE__, __LINE__);
+    int errorId = xmlFile->LoadFile(inp);
+    if ( errorId != XML_NO_ERROR ) {
+        printf("\nError reading XML file %s or nonletter symbols used, error id = %d\n", inp, errorId);
         exit(0);
     }
 

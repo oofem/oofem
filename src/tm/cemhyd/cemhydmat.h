@@ -41,7 +41,9 @@
 #include "mathfem.h"
 #include <cstdio>
 #include <cstring>
-#include <tinyxml.h>
+#include <tinyxml2.h>
+
+using namespace tinyxml2;
 
 #define TINYXML //read CEMHYD3D input file through tinyXML library
 
@@ -450,13 +452,13 @@ int OFFSET;             /*Offset for highlighted potentially soluble pixel*/
 char ***mic;     //char mic [SYSIZE] [SYSIZE] [SYSIZE];
 
 #ifdef TINYXML
-TiXmlDocument *xmlFile;
-void QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, int &val);
-void QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, long int &val);
-void QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, const char *key, int &val);
-void QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, double &val);
-void QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, const char *key, double &val);
-void QueryStringAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, char *chars);
+XMLDocument *xmlFile;
+void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val);
+void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val);
+void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val);
+void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val);
+void QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val);
+void QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars);
 int countKey;     //counter for many keys in the XML element
 #endif
 #ifdef CMLFILE
