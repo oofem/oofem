@@ -626,10 +626,6 @@ Element :: initializeFrom(InputRecord *ir)
     }
 
 #ifdef __PARALLEL_MODE
- #ifndef __ENABLE_COMPONENT_LABELS
-    globalNumber = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, globalNumber, IFT_Element_globnum, "globnum"); // Macro
- #endif
     partitions.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_Element_partitions, "partitions"); // Macro
     // if (hasString (initString, "shared")) parallel_mode = Element_shared;
@@ -657,11 +653,7 @@ Element :: postInitialize()
 void Element :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->printOutputAt(file, stepN);

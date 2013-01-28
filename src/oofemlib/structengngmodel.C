@@ -92,17 +92,10 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     //
     for ( i = 1; i <= numRestrDofs; i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
-            //fprintf(outputStream,"\tNode %8d iDof %2d reaction % .4e\n",dofManMap.at(i), dofMap.at(i),reactions.at(eqnMap.at(i)));
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
             fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
                     domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
                     dofMap.at(i), reactions.at( eqnMap.at(i) ),
                     domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
-#else
-            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
-                    dofManMap.at(i), dofMap.at(i), reactions.at( eqnMap.at(i) ),
-                    domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
-#endif
         }
     }
 }

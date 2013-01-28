@@ -167,14 +167,12 @@ protected:
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityLtf;
     
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
      * local domain number.
      */
     int globalNumber;
-#endif
 #ifdef __PARALLEL_MODE
     elementParallelMode parallel_mode;
     /**
@@ -887,7 +885,6 @@ public:
 
 #endif
 
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     /**
      * @return Receivers globally unique number (label).
      */
@@ -901,7 +898,6 @@ public:
      * @param num New unique number.
      */
     void setGlobalNumber(int num) { globalNumber = num; }
-#endif
 
 #ifdef __PARALLEL_MODE
     /**
@@ -910,13 +906,11 @@ public:
     elementParallelMode giveParallelMode() const { return parallel_mode; }
     /// Sets parallel mode of element
     void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
- #ifdef __PARALLEL_MODE
     /**
      * Returns the parallel mode for particular knot span of the receiver.
      * The knot span identifies the sub-region of the finite element.
      */
     virtual elementParallelMode giveKnotSpanParallelMode(int) const { return parallel_mode; }
- #endif
 
     /**
      * Pack all necessary data of element (according to its parallel_mode) integration points

@@ -68,7 +68,4 @@ ____________________________________________________\n"
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
 #cmakedefine HAVE_MACRO_VA_ARGS
 
-/* Define to support arbitrary compoment labels */
-#cmakedefine __ENABLE_COMPONENT_LABELS
-
 #endif // CONFIG_DEFINED

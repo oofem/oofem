@@ -434,11 +434,6 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 
 #ifdef __PARALLEL_MODE
- #ifndef __ENABLE_COMPONENT_LABELS
-    globalNumber = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, globalNumber, IFT_DofManager_globnum, "globnum"); // Macro
- #endif
-
     partitions.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro
 
@@ -535,11 +530,7 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *stepN)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
 
-#if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
     fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
-#else
-    fprintf( stream, "%-8s%8d:\n", this->giveClassName(), this->giveNumber() );
-#endif
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         emodel->printDofOutputAt(stream, this->giveDof(i), stepN);
     }
@@ -747,10 +738,15 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
     IntArray dofArray;
 
     answer.resize( size = dofIDArry.giveSize() );
-    this->giveDofArray(dofIDArry, dofArray);
 
-    for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = this->giveDof( dofArray.at(j) )->giveUnknown(type, mode, stepN);
+    for ( int i = 1; i <= size; i++ ) {
+        int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
+#if DEBUG
+        if ( pos == 0 ) {
+            OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+        }
+#endif
+        answer.at(i) = this->giveDof(pos)->giveUnknown(type, mode, stepN);
     }
 
     // Transform to global c.s.
@@ -768,10 +764,15 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
     IntArray dofArray;
 
     answer.resize( size = dofIDArry.giveSize() );
-    this->giveDofArray(dofIDArry, dofArray);
 
-    for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = this->giveDof( dofArray.at(j) )->giveUnknown(field, mode, stepN);
+    for ( int i = 1; i <= size; i++ ) {
+        int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
+#if DEBUG
+        if ( pos == 0 ) {
+            OOFEM_ERROR2("DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+        }
+#endif
+        answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, stepN);
     }
 
     // Transform to global c.s.
