@@ -116,29 +116,25 @@ FloatArray :: operator = ( const FloatArray & src )
     return * this;
 }
 
+#ifdef DEBUG
 double &
 FloatArray :: operator()(int i)
 {
-#ifdef DEBUG
     if ( i >= size ) {
         OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
     }
-
-#endif
     return values [ i ];
 }
 
 const double &
 FloatArray :: operator()(int i) const
 {
-#ifdef DEBUG
     if ( i >= size ) {
         OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
     }
-
-#endif
     return values [ i ];
 }
+#endif
 
 
 void
@@ -443,21 +439,19 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
 // Assembles the array fe (typically, the load vector of a finite
 // element) to the receiver, using loc as location array.
 {
-    int ii, n;
+    int ii, n = fe.giveSize();
 
 #  ifdef DEBUG
-    if ( ( n = fe.giveSize() ) != loc.giveSize() ) {
+    if ( n != loc.giveSize() ) {
         OOFEM_ERROR3("FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch",fe.giveSize(), loc.giveSize());
     }
 
-    this->checkSizeTowards(loc);
 #  endif
 
-    n = fe.giveSize();
-    for ( int i = 0; i < n; i++ ) {
-        ii = loc(i);
+    for ( int i = 1; i <= n; i++ ) {
+        ii = loc.at(i);
         if ( ii ) { // if non 0 coefficient,
-            this->at(ii) += fe(i);
+            this->at(ii) += fe.at(i);
         }
     }
 
@@ -503,7 +497,7 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
     int n, high;
 
     high = 0;
-    n    = loc.giveSize();
+    n = loc.giveSize();
     for ( int i = 1; i <= n; i++ ) {
         high = max( high, ( loc.at(i) ) );
     }
@@ -844,8 +838,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 
 
 #ifdef __PARALLEL_MODE
-int
-FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
+int FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
 {
     int result = 1;
     // pack size
@@ -856,8 +849,7 @@ FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
     return result;
 }
 
-int
-FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
+int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
 {
     int newSize, result = 1;
     // unpack size
@@ -869,8 +861,7 @@ FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     return result;
 }
 
-int
-FloatArray :: givePackSize(CommunicationBuffer &buff) const
+int FloatArray :: givePackSize(CommunicationBuffer &buff) const
 {
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_DOUBLE, this->size);
 }
@@ -932,9 +923,11 @@ FloatArray operator *( const FloatArray & x, const double & a )
 FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("loatArray operator+ : incompatible vector lengths");
     }
+#endif
 
     FloatArray result(N);
     for ( int i = 0; i < N; i++ ) {
@@ -947,9 +940,11 @@ FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray operator- : incompatible vector lengths");
     }
+#endif
 
     FloatArray result(N);
     for ( int i = 0; i < N; i++ ) {
@@ -963,9 +958,11 @@ FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray& operator+= : incompatible vector lengths");
     }
+#endif
 
     for ( int i = 0; i < N; i++ ) {
         x(i) += y(i);
@@ -978,9 +975,11 @@ FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray& operator-= : incompatible vector lengths");
     }
+#endif
 
     for ( int i = 0; i < N; i++ ) {
         x(i) -= y(i);
@@ -993,9 +992,11 @@ FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 double dot(const FloatArray &x, const FloatArray &y)
 {
     //  Check for compatible dimensions:
+#if DEBUG
     if ( x.giveSize() != y.giveSize() ) {
         OOFEM_ERROR("dot : incompatible dimensions");
     }
+#endif
 
     double temp =  0;
     for ( int i = 0; i < x.giveSize(); i++ ) {

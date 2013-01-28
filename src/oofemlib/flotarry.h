@@ -138,14 +138,21 @@ public:
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
+#ifdef DEBUG
     double &operator()(int i);
+#else
+    inline double &operator()(int i) { return values [ i ]; };
+#endif
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
+#ifdef DEBUG
     const double &operator()(int i) const;
-
+#else
+    inline const double &operator()(int i) const { return values [ i ]; };
+#endif
     /** Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension
      * mismatch found.
