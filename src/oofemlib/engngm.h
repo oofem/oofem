@@ -923,7 +923,7 @@ public:
      * Allows programmer to test problem its internal data, before computation begins.
      * @return Nonzero if receiver check is o.k.
      */
-    int checkProblemConsistency();
+    virtual int checkProblemConsistency();
     /**
      * Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
      * invoke initialization by individual init modules.

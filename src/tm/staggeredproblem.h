@@ -160,7 +160,7 @@ public:
     virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
 #endif
 
-    virtual int checkConsistency();
+    virtual int checkProblemConsistency();
 
     virtual EngngModel *giveSlaveProblem(int i);
     virtual int giveNumberOfSlaveProblems() { return nModels; }
