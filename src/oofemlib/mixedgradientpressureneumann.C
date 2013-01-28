@@ -571,7 +571,7 @@ void MixedGradientPressureNeumann :: computeTangents(
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureNeumann :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure( rve, this->domain->giveNumber(), eid, fnum, fnum );
+    Kff->buildInternalStructure( rve, this->domain->giveNumber(), eid, fnum );
     rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain );
 
     // Setup up indices and locations
