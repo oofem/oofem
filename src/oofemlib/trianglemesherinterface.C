@@ -544,12 +544,12 @@ void TriangleMesherInterface :: fixNodeMarkers(const std::vector<FloatArray> &no
 
     for (std::size_t i = 0; i < segments.size(); ++i) {
         for (int j = 1; j <= segments[i].giveSize(); ++j) {
-            n_markers[segments[i].at(j)-1].insertSortedOnce(s_markers.at(i));
+            n_markers[segments[i].at(j)-1].insertSortedOnce(s_markers(i));
         }
     }
     for (std::size_t i = 0; i < triangles.size(); ++i) {
         for (int j = 1; j <= triangles[i].giveSize(); ++j) {
-            n_markers[triangles[i].at(j)-1].insertSortedOnce(t_markers.at(i));
+            n_markers[triangles[i].at(j)-1].insertSortedOnce(t_markers(i));
         }
     }
 }
