@@ -312,7 +312,7 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac, 
     // Basic creep parameters
     q1  = 1.e-12 * stiffnessFactor * 126.74271 / ( sqrt(fc) );
     q2  = 1.e-12 * stiffnessFactor * 185.4 * pow(c, 0.5) * pow(fc, -0.9);
-    q3  = 1.e-6 *  stiffnessFactor * 0.29 * pow(wc, 4.) * q2;
+    q3 = 0.29 * pow(wc, 4.) * q2;
     q4  = 1.e-12 * stiffnessFactor * 20.3 * pow(ac, -0.7);
 
     char buff [ 1024 ];
