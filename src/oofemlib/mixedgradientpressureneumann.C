@@ -322,6 +322,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
         
         answer.add(detJ*gp->giveWeight(), contrib);
     }
+    delete ir;
 }
 
 
@@ -409,6 +410,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
         
         answer.add(detJ*gp->giveWeight(), contrib);
     }
+    delete ir;
 }
 
 
