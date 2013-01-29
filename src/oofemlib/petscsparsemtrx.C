@@ -362,15 +362,14 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     // create PETSc mat
     MatCreate(PETSC_COMM_SELF, & mtrx);
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
-    //MatSetType(mtrx, MATSEQAIJ);
-    MatSetType(mtrx, MATSEQSBAIJ);
+    MatSetType(mtrx, MATSEQAIJ);
     MatSetFromOptions(mtrx);
 
     //The incompatible preallocations are ignored automatically.
     MatSetUp(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
-    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); ///@todo Not sure about PETSC_DECIDE here.
-    //MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() ); // Symmetry should practically never apply here.
+    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() );
+    MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() );
 
     MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
