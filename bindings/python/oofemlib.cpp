@@ -1534,7 +1534,7 @@ object vtkxml(bp::tuple args, bp::dict kw) { return CreateExportModuleOfType("vt
 * O O F E M L I B   P Y T H O N   M O D U L E
 *
 *****************************************************/
-BOOST_PYTHON_MODULE (oofemlib)
+BOOST_PYTHON_MODULE (liboofem)
 {
     pyclass_FloatArray();
     pyclass_FloatMatrix();
