@@ -669,7 +669,7 @@ void MixedGradientPressureNeumann :: computeTangents(
         Ed.beEmptyMtrx();
     }
 
-    delete Kff;    
+    delete Kff;
     delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 

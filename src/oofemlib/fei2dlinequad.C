@@ -161,13 +161,13 @@ double FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 
     normal.resize(2);
 
-    normal.at(1) = dN1dxi*cellgeo.giveVertexCoordinates(1)->at(yind) +
-                   dN2dxi*cellgeo.giveVertexCoordinates(2)->at(yind) +
-                   dN3dxi*cellgeo.giveVertexCoordinates(3)->at(yind);
+    normal.at(1) = -dN1dxi*cellgeo.giveVertexCoordinates(1)->at(yind) +
+                   -dN2dxi*cellgeo.giveVertexCoordinates(2)->at(yind) +
+                   -dN3dxi*cellgeo.giveVertexCoordinates(3)->at(yind);
 
-    normal.at(2) = -dN1dxi*cellgeo.giveVertexCoordinates(1)->at(xind) +
-                   -dN2dxi*cellgeo.giveVertexCoordinates(2)->at(xind) +
-                   -dN3dxi*cellgeo.giveVertexCoordinates(3)->at(xind);
+    normal.at(2) = dN1dxi*cellgeo.giveVertexCoordinates(1)->at(xind) +
+                   dN2dxi*cellgeo.giveVertexCoordinates(2)->at(xind) +
+                   dN3dxi*cellgeo.giveVertexCoordinates(3)->at(xind);
 
     return normal.normalize();
 }
