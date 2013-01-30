@@ -477,13 +477,14 @@ Shell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dph
 void
 Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    FloatMatrix massNum, mass;
-    this->computeMassMatrixNum(massNum, tStep);
-    this->computeMassMatrix(mass, tStep);
+    //FloatMatrix massNum, mass;
+    //this->computeMassMatrixNum(massNum, tStep);
+    //this->computeMassMatrix(mass, tStep);
 
     FloatMatrix temp;
-    this->computeBulkTangentMatrix(temp, rMode, tStep);
-    
+    //this->computeBulkTangentMatrixOld(answer, rMode, tStep);
+    //this->computeBulkTangentMatrixOld(temp, rMode, tStep);
+    this->computeBulkTangentMatrix(answer, rMode, tStep);
         
     // Add contribution due to pressure load
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -501,15 +502,36 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
             temp.add(K_pressure);
         }
     }
-    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    answer.resize(ndofs, ndofs);
-    answer.zero();
-    answer.assemble(temp, ordering_all);
+    //FloatMatrix test;
+    //printf("\n Kold \n");
+    //test.beSubMatrixOf(temp,1,18,37,42);
+    //test.printYourself();
 
+    //int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    //answer.resize(ndofs, ndofs);
+    //answer.zero();
+    //answer.assemble(temp, ordering_all);
+
+    
+    //FloatMatrix test;
+    //printf("\n Kold \n");
+    //test.beSubMatrixOf(answer,1,18,1,18);
+    //test.beSubMatrixOf(answer,1,18,37,42);
+    //test.beSubMatrixOf(answer,19,36,19,36);
+    //test.beSubMatrixOf(answer,19,36,37,42);
+    //test.beSubMatrixOf(answer,37,42,37,42);
+    //test.printYourself();
+    
+    
+    
+    //printf("\n K(1:12,1:12) \n");
+    //test.beSubMatrixOf(answer,1,12,1,12);
+    //test.printYourself();
 }
 
+#if 1
 void
-Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+Shell7Base :: computeBulkTangentMatrixOld(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     FloatMatrix B, Bt, BtL, BtLB, L(18,18);
     FloatArray BF;
@@ -687,32 +709,252 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
     }
     answer.symmetrized();
     
-    //answer.printYourself();
-    //FloatMatrix test;
-    //test.beSubMatrixOf(L,1,3,1,3);
-    //test.beSubMatrixOf(L,4,6,4,6);
-    //test.beSubMatrixOf(L,1,3,4,6);
-    //test.beSubMatrixOf(L,1,6,7,12);
-    //test.beSubMatrixOf(L,1,6,13,18);
-    //test.beSubMatrixOf(L,1,6,16,18);
-    //test.beSubMatrixOf(L,7,12,13,15);
     
-    //test.beSubMatrixOf(L,7,12,16,18);
-    
-    //test.beSubMatrixOf(L,13,15,13,15);
-    //test.beSubMatrixOf(L,13,15,16,18);
-    //test.beSubMatrixOf(L,16,18,16,18);
-
-    //test.beSubMatrixOf(answer,1,6,1,6);
-    //printf("\n new \n");
-    //test.printYourself();
-    //printf("\n Tangent \n");
-    //test.printYourself();
-   
-    //testmatrix = L;
-
     }
+#endif
 
+
+#if 1
+void
+Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+    FloatMatrix B, Bt, BtL, BtLB, L(18,18), K11(18,18), K12(18,18), K13(18,6), K22(18,18), K23(18,6), K33(6,6);
+    K11.zero(), K12.zero(), K13.zero(), K22.zero(), K23.zero(), K33.zero();
+    FloatArray BF;
+
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec,tStep);
+    
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(ndofs,ndofs); answer.zero();
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
+    int numberOfLayers = layeredCS->give(CS_NumLayers);
+
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
+        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+
+            FloatArray g1, g2, g3, S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
+            double gam, dg1, dg2;
+
+            FloatMatrix B11, B22, B32, B43, B53;
+            this->computeBmatricesAt( gp, B11, B22, B32, B43, B53 );
+            FloatArray genEps;	            
+            this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+            this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dg1, dg2, gam);
+
+
+            // Material stiffness
+            FloatMatrix A[3][3];
+            Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
+        
+            // Tangent stiffness
+            FloatArray t1(3), t2(3), t3(3);
+            FloatMatrix F1[3];
+#if 1
+            // thickness coefficients
+            //double zeta = giveLayerZetaCoord(gp, layer);
+            double zeta = giveLocalZetaCoord(gp);
+            double a = zeta + 0.5*gam*zeta*zeta; double b = 0.5*zeta*zeta; double c = 1. + gam*zeta;
+
+            // f1(alpha) = b*A(alpha,beta)*dg(beta) + c*A(alpha,3); 
+            F1[0].add(dg1*b,A[0][0]); F1[0].add(dg2*b,A[0][1]); F1[0].add(c,A[0][2]);
+            F1[1].add(dg1*b,A[1][0]); F1[1].add(dg2*b,A[1][1]); F1[1].add(c,A[1][2]);
+            F1[2].add(dg1*b,A[2][0]); F1[2].add(dg2*b,A[2][1]); F1[2].add(c,A[2][2]);
+
+            //f3(alpha) = b*A(alpha,beta)*dm(beta) + zeta*A(alpha,3)*m; 
+            FloatArray f3[2];
+            t1.beProductOf(A[0][0],dm1); t2.beProductOf(A[0][1],dm2); t3.beProductOf(A[0][2],m);
+            f3[0].add(b,t1); f3[0].add(b,t2); f3[0].add(zeta,t3);
+
+            //f32 = b*( A.at(2,1)*dm1 + A.at(2,2)*dm2 )  + zeta*A.at(2,3)*m;
+            t1.beProductOf(A[1][0],dm1); t2.beProductOf(A[1][1],dm2); t3.beProductOf(A[1][2],m);
+            f3[1].add(b,t1); f3[1].add(b,t2); f3[1].add(zeta,t3);
+
+
+            //f4 = b*dm(alpha)*A(alpha,3) + zeta*A(3,3)*m; 
+            FloatArray f4;
+            t1.beTProductOf(A[0][2],dm1); t2.beTProductOf(A[1][2],dm2); t3.beTProductOf(A[2][2],m);
+            f4.add(b,t1);  f4.add(b,t2);  f4.add(zeta,t3);
+
+            // f5 = b*F1(alpha)*dm(alpha) + zeta*F2*m + zeta*N3
+            FloatArray f5;
+            t1.beTProductOf(F1[0],dm1); t2.beTProductOf(F1[1],dm2); t3.beTProductOf(F1[2],m);
+
+            f5.add(b,t1); f5.add(b,t2); f5.add(zeta,t3); f5.add(zeta,S3g);
+
+
+     /*
+        
+            A     a*A            F1           b*A*m             f3
+           a*A    a^2*A          a*F1         a*b*A*m         a*f3+b*N
+           F1     a*F1     b*F1*dgam+c*F2     b*(F1*m+N)        f5
+           b*A*m  a*b*A*m    b*(F1*m+N)       b^2*m*A*m     b*m*f3
+           f3     a*f3+b*N       f5           b*m*f3    b*dm*f3+zeta*m*f4
+           */
+
+            // L(1,1) = A(alpha,beta)
+            FloatMatrix L11(6,6); L11.zero();
+            L11.setSubMatrix(A[0][0],1,1); L11.setSubMatrix(A[0][1],1,4);
+            L11.setSubMatrix(A[1][0],4,1); L11.setSubMatrix(A[1][1],4,4);
+
+            // L(1,2) = a*A(alpha,beta)
+            FloatMatrix L12; L12.add(a,L11);
+        
+            // L(1,3) = F1(alpha)
+            FloatMatrix L13(6,3); L13.zero();
+            L13.setSubMatrix(F1[0],1,1); L13.setSubMatrix(F1[1],4,1);
+        
+            // L(1,4) = b*A*m
+            FloatMatrix L14(6,2); L14.zero();
+            t1.beProductOf(A[0][0],m); t2.beProductOf(A[0][1],m);
+            L14.addSubVectorCol(t1,1,1); L14.addSubVectorCol(t2,1,2);
+            t1.beProductOf(A[1][0],m); t2.beProductOf(A[1][1],m);
+            L14.addSubVectorCol(t1,4,1); L14.addSubVectorCol(t2,4,2);
+            L14.times(b);
+
+            // L(1,5) = f3(alpha)
+            FloatMatrix L15(6,1); L15.zero();
+            L15.addSubVectorCol(f3[0],1,1); L15.addSubVectorCol(f3[1],4,1);
+
+
+            // L(2,2) = a^2*A(alpha,beta)= a*L12
+            FloatMatrix L22; L22.add(a,L12);
+        
+            // L(2,3) = a*F1(alpha) = a*L13
+            FloatMatrix L23; L23.add(a,L13);
+        
+            // L(2,4) = a*F1(alpha)=a*L14
+            FloatMatrix L24; L24.add(a,L14);
+
+            // L(2,5) = a*f3(alpha) + b*N(alpha)
+            FloatMatrix L25(6,1); L25.zero(); 
+            L25.addSubVectorCol(S1g,1,1); L25.addSubVectorCol(S2g,4,1); L25.times(b); L25.add(a,L15);
+        
+
+            // L(3,3) = b*F1(beta)*dgam(beta) + c*F2
+            FloatMatrix L33;
+            L33.add(dg1*b,F1[0]); L33.add(dg2*b,F1[1]); L33.add(c,F1[2]); 
+
+                
+            // L(3,4) = b*( F1(beta)*m + N(beta) )
+            FloatMatrix L34(3,2);
+            t1.beTProductOf(F1[0],m); t1.add(S1g); t1.times(b);
+            t2.beTProductOf(F1[1],m); t2.add(S2g); t2.times(b);
+            L34.setColumn(t1,1); L34.setColumn(t2,2);
+
+            // L(3,5) = f5
+            FloatMatrix L35(&f5);
+
+
+            // L(4,4) = b^2*m*A*m (2x2)
+            FloatMatrix L44(2,2); L44.zero(); 
+            t1.beProductOf(A[0][0],m); L44.at(1,1) = t1.dotProduct(m);
+            t1.beProductOf(A[0][1],m); L44.at(1,2) = t1.dotProduct(m);
+            t1.beProductOf(A[1][0],m); L44.at(2,1) = t1.dotProduct(m);
+            t1.beProductOf(A[1][1],m); L44.at(2,2) = t1.dotProduct(m);
+            L44.times(b*b);
+
+            // L(4,5) = b*m*f3(alpha)
+            FloatMatrix L45(2,1); 
+            L45.at(1,1) = b*m.dotProduct(f3[0]);
+            L45.at(2,1) = b*m.dotProduct(f3[1]);
+
+            // L(5,5) = b*m*f3(alpha)
+            FloatMatrix L55(1,1); 
+            L55.at(1,1) = b*dm1.dotProduct(f3[0]) + b*dm2.dotProduct(f3[1]) + zeta*m.dotProduct(f4);
+#endif
+
+            FloatMatrix LB, LB1, LB2, BtLB, T1, T2, T3;
+            FloatMatrix K11temp(18,18), K12temp(18,18), K13temp(18,6), K22temp(18,18), K23temp(18,6), K33temp(6,6);
+
+            // K11 = BT11*L11*B11
+               LB.beProductOf(L11,B11);
+               K11temp.beTProductOf(B11,LB);
+
+            // K12 = BT11*(L12*B22+L13*B32)
+               this->computeSumProduct(LB,  L12, B22, L13, B32);
+               K12temp.beTProductOf(B11,LB);
+
+            // K13 = BT11*(L14*B43 + L15*B53)
+               // B43 BT11 L14 + B53 BT11 L15
+               this->computeSumProduct(LB,  L14, B43, L15, B53);
+               K13temp.beTProductOf(B11,LB);
+
+            // K22 = BT22*(L22*B22 + L23*B32) + BT32*(L32*B22 + L33*B32) 
+               FloatMatrix L32; L32.beTranspositionOf(L23);
+               this->computeStiffnessProduct(K22temp,   B22, L22, B22, L23, B32,   B32, L32, B22, L33, B32); 
+
+            // K23 = BT22*(L24*B43 + L25*B53) + BT32*(L34*B43 + L35*B53)
+               this->computeStiffnessProduct(K23temp,   B22, L24, B43, L25, B53,   B32, L34, B43, L35, B53); 
+
+            // K33 = BT43*(L44*B43 + L45*B53) + BT53*(L54*B43 + L55*B53)
+               FloatMatrix L54; L54.beTranspositionOf(L45);
+               this->computeStiffnessProduct(K33temp,   B43, L44, B43, L45, B53,   B53, L54, B43, L55, B53); 
+    
+
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            K11.add(dV,K11temp); K12.add(dV,K12temp); K13.add(dV,K13temp);
+            K22.add(dV,K22temp); K23.add(dV,K23temp); K33.add(dV,K33temp);
+            //answer.plusProductSymmUpper(B, LB, dV);
+        }
+    }
+    
+    answer.assemble(K11, ordering_phibar, ordering_phibar);
+    answer.assemble(K12, ordering_phibar, ordering_m);
+    answer.assemble(K13, ordering_phibar, ordering_gam);
+    answer.assemble(K22, ordering_m,      ordering_m);
+    answer.assemble(K23, ordering_m,      ordering_gam);
+    answer.assemble(K33, ordering_gam,    ordering_gam);
+
+    FloatMatrix K21, K31, K32;
+    K21.beTranspositionOf(K12); K31.beTranspositionOf(K13); K32.beTranspositionOf(K23);
+    answer.assemble(K21, ordering_m,      ordering_phibar);
+    answer.assemble(K31, ordering_gam,    ordering_phibar );
+    answer.assemble(K32, ordering_gam,    ordering_m );
+    answer.symmetrized();
+
+}
+
+void
+Shell7Base :: computeSumProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c, const FloatMatrix &d){
+    // Computes the product and sums (a*b + c*d) 
+    FloatMatrix temp1;               
+    temp1.beProductOf(a,b);
+    answer.beProductOf(c,d);
+    answer.add(temp1);
+
+
+}
+
+void
+Shell7Base :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c){
+    // Computes the product a^T*b*c  
+    FloatMatrix temp;               
+    temp.beTProductOf(a,b);
+    answer.beProductOf(temp,c);
+    
+}
+
+void
+Shell7Base :: computeStiffnessProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c, 
+                                     const FloatMatrix &d, const FloatMatrix &e, const FloatMatrix &f, const FloatMatrix &g, 
+                                     const FloatMatrix &h, const FloatMatrix &i, const FloatMatrix &j){
+    // Computes the product and sums a^T*(b*c + d*e) + f^T*(g*h+i*j)
+    FloatMatrix temp1, temp2, temp3;               
+    this->computeSumProduct(temp1, b, c, d, e);
+    this->computeSumProduct(temp2, g, h, i, j);
+    temp3.beTProductOf(a, temp1);
+    answer.beTProductOf(f,temp2);
+    answer.add(temp3);
+
+
+}
+
+#endif
 
 void
 Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep)
@@ -1045,8 +1287,10 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     FloatArray solVec, temp;
     this->giveUpdatedSolutionVector(solVec,tStep);
 
+    this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
+
     //solVec.printYourself();
-    this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
+    //this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
     //this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
 
     //answer.printYourself();
@@ -1085,16 +1329,11 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     test.printYourself();
     */
     
-    answer.resize(this->computeNumberOfDofs(EID_MomentumBalance));
-    answer.zero();
-
-    answer.assemble(temp, ordering_all);
-    
 }
 
-
+#if 0
 void
-Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord)
+Shell7Base :: computeSectionalForcesOld(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord)
 //
 {
     FloatMatrix B;
@@ -1113,7 +1352,6 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             GaussPoint *gp = iRuleL->getIntegrationPoint(j-1); 
             this->computeBmatrixAt(gp, B);
             genEps.beProductOf(B,solVec);
-            //genEps.printYourself();
             double zeta = giveLocalZetaCoord(gp);
             this->computeSectionalForcesAt(f, gp, mat, tStep, genEps, zeta);
             
@@ -1125,6 +1363,25 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
         }
     }
 
+    FloatArray temp;
+
+    temp.resize(18);
+    for ( int i=1; i<=18; i++ ){
+        temp.at(i) = answer.at(i);
+    }
+    //temp.printYourself();
+
+    temp.resize(18);
+    for ( int i=1; i<=18; i++ ){
+        temp.at(i) = answer.at(i+18);
+    }
+    //temp.printYourself();
+
+    temp.resize(6);
+    for ( int i=1; i<=6; i++ ){
+        temp.at(i) = answer.at(i+36);
+    }
+    //temp.printYourself();
     
     //answer.printYourself();
 
@@ -1212,7 +1469,12 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
     test.printYourself();
    */
 }
+#endif
 
+
+
+
+#if 0
 void
 Shell7Base :: computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta){
 
@@ -1260,7 +1522,129 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &answer, GaussPoint *gp, Mater
         // Ts
         f.at(18) = fac3 * ( dm1.dotProduct(S1g) + dm2.dotProduct(S2g) ) + zeta * m.dotProduct(S3g) ;
         answer=f;
+    
+        FloatArray temp;
+
+        temp.resize(3);
+        for ( int i=1; i<=3; i++ ){
+            temp.at(i) = answer.at(15+i);
+        }
+        //temp.printYourself();
 }
+#endif
+
+#if 1
+
+void
+Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord)
+//
+{
+    FloatMatrix B;
+    FloatArray BtF, f, genEps;
+    answer.resize(this->giveNumberOfDofs()); answer.zero();
+    
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
+    int numberOfLayers = layeredCS->give(CS_NumLayers);
+    FloatArray f1(18), f2(18), f3(6);
+    f1.zero(); f2.zero(); f3.zero();
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRuleL = layerIntegrationRulesArray [layer-1]; 
+        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+
+        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {      
+            
+            GaussPoint *gp = iRuleL->getIntegrationPoint(j-1); 
+            //this->computeBmatrixAt(gp, B);
+            FloatMatrix B11, B22, B32, B43, B53;
+            this->computeBmatricesAt(gp, B11, B22, B32, B43, B53 );
+            this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+
+            double zeta = giveLocalZetaCoord(gp);
+            FloatArray N, M, T, Ms; double Ts=0.;
+            this->computeSectionalForcesAtNew(N, M, T, Ms, Ts, gp, mat, tStep, genEps, zeta);
+
+            FloatArray f1temp(18), f2temp(18), f3temp(6), temp;
+            // f1 = BT11*N
+            f1temp.beTProductOf(B11,N);
+            
+            // f2 = BT22*M + BT32*T
+            f2temp.beTProductOf(B22,M);
+            temp.beTProductOf(B32,T);
+            f2temp.add(temp);
+
+            // f3 = BT43*Ms + BT53*Ts
+            f3temp.beTProductOf(B43,Ms);
+            for (int i=1; i<=6; i ++ ){f3temp.at(i) += B53.at(1,i)*Ts; }
+            
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            f1.add(dV,f1temp); f2.add(dV,f2temp); f3.add(dV,f3temp); 
+            
+        }
+    }
+
+    answer.assemble(f1, ordering_phibar);
+    answer.assemble(f2, ordering_m);
+    answer.assemble(f3, ordering_gam);
+
+}
+
+
+
+void
+Shell7Base :: computeSectionalForcesAtNew(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta){
+
+        FloatArray g1, g2, g3, S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
+        FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a;
+        double fac1, fac2, fac3, gam, dg1, dg2;
+
+        lcoords = *gp->giveCoordinates();
+
+        this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dg1, dg2, gam);
+        
+        this->computeStressVector(cartStressVector, genEps, gp, mat, tStep);
+       
+        this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
+        this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, tStep, genEps);
+
+        fac1 = zeta + 0.5*gam*zeta*zeta;
+        fac2 = 1. + gam*zeta;
+        fac3 = 0.5*zeta*zeta;
+
+        /* The following expressions are sectional forces (in the classic sense) if integrated over the thickness. However, 
+           now they are integrated over the volume to produce f_int.*/
+ 
+        // Membrane forces - N1, N2 
+        N.resize(6);
+        N.at(1) = S1g.at(1); N.at(2) = S1g.at(2); N.at(3) = S1g.at(3);
+        N.at(4) = S2g.at(1); N.at(5) = S2g.at(2); N.at(6) = S2g.at(3);
+
+        // Moments - M1, M2
+        M.resize(6);
+        M.at(1) = fac1 * S1g.at(1);
+        M.at(2) = fac1 * S1g.at(2);
+        M.at(3) = fac1 * S1g.at(3);
+        M.at(4) = fac1 * S2g.at(1);
+        M.at(5) = fac1 * S2g.at(2);
+        M.at(6) = fac1 * S2g.at(3);
+
+        // Shear force - T
+        T.resize(3);
+        T.at(1) = fac2 * S3g.at(1) + fac3 * ( S1g.at(1)*dg1 + S2g.at(1)*dg2) ;
+        T.at(2) = fac2 * S3g.at(2) + fac3 * ( S1g.at(2)*dg1 + S2g.at(2)*dg2) ;
+        T.at(3) = fac2 * S3g.at(3) + fac3 * ( S1g.at(3)*dg1 + S2g.at(3)*dg2) ;
+
+
+        // Higher order force - Ms
+        Ms.resize(2);
+        Ms.at(1) = fac3 * m.dotProduct(S1g);
+        Ms.at(2) = fac3 * m.dotProduct(S2g);
+
+        // Ts
+        Ts = fac3 * ( dm1.dotProduct(S1g) + dm2.dotProduct(S2g) ) + zeta * m.dotProduct(S3g) ;
+  
+}
+#endif
+
 
 void 
 Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep){
@@ -1386,7 +1770,45 @@ Shell7Base :: computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer){
 
 }
 
+void
+Shell7Base :: computeThicknessMappingCoeffNew(GaussPoint *gp, FloatArray &answer){
+    //thickness jacobian = ratio between volume and area: j0 = a3 + a2*zeta^2 + a1 * zeta
+    // Returns array with a1-a3, used in expression for analytical integration of mass matrix.
+    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    FloatArray lcoords = *gp->giveCoordinates();
+    
+    FloatMatrix dNdxi;
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
+    fei->evaldNdxi(dNdxi, lcoords, FEIElementGeometryWrapper(this));
 
+    FloatArray M, dM1(3), dM2(3), dX1(3), dX2(3);
+    double gam, dg1, dg2;
+    FloatMatrix B11, B22, B32, B43, B53;
+    this->computeBmatricesAt( gp, B11, B22, B32, B43, B53 );
+
+    FloatArray initSolVec, genEps;
+    this->giveInitialSolutionVector(initSolVec);
+    
+    this->computeGeneralizedStrainVector(genEps, initSolVec, B11, B22, B32, B43, B53);
+    this->giveGeneralizedStrainComponents(genEps, dX1, dX2, dM1, dM2, M, dg1, dg2, gam);
+
+
+    FloatArray temp, temp2;
+    temp.beVectorProductOf(dX1,dX2);
+    double sc = temp.computeNorm();
+    answer.resize(3);
+    answer.at(3) = M.dotProduct(temp)/sc;
+    
+    temp.beVectorProductOf(dX1,dM2); 
+    temp2.beVectorProductOf(dX2,dM1); 
+    temp.add(temp2);
+    answer.at(2) = M.dotProduct(temp)/sc;
+
+    temp.beVectorProductOf(dM1,dM2); 
+    //answer.at(1) = M.dotProduct(temp)/sc;
+    answer.at(1) = temp.computeNorm()/sc;
+
+}
 
 void 
 Shell7Base :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep){
@@ -1521,7 +1943,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep){
         double rho = this->giveMaterial()->give('d', gp);
         FloatArray factors;
         this->giveMassFactorsAt(gp, factors, m, gam);
-
+        
         FloatMatrix mass; mass.resize(7,7);
         mass.at(1,1) = mass.at(2,2) = mass.at(3,3) = factors.at(1); // A
         mass.at(1,4) = mass.at(2,5) = mass.at(3,6) = factors.at(2); // B
@@ -1550,15 +1972,17 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep){
     answer.symmetrized();
 
 #if 1
-    FloatMatrix A(18,18), B(18,18), C(18,6), D(18,18), E(18,6), F(6,6), eigVec;
+    FloatMatrix A(18,18), B(18,18), C(18,6), D(18,18), E(18,6), F(6,6), eigVec, temp2;
 
+     temp2.beSubMatrixOf(temp,1,18,19,36);
+  //   temp2.printYourself();
     A.beSubMatrixOf(temp,1,18,1,18);
     B.beSubMatrixOf(temp,1,18,19,36);
     C.beSubMatrixOf(temp,1,18,37,42);
     D.beSubMatrixOf(temp,19,36,19,36);
     E.beSubMatrixOf(temp,19,36,37,42);
     F.beSubMatrixOf(temp,37,42,37,42);
-
+//    B.printYourself();
 
     FloatArray eig, sums(6);
     sums.zero();
@@ -1573,7 +1997,6 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep){
         sums.at(6) += F.at(1,1) + F.at(2,2) + F.at(3,3)+ F.at(4,4)+ F.at(5,5)+ F.at(6,6);
     printf("\n analytical \n");
     sums.printYourself();
-
 #endif
 }
 
@@ -1710,11 +2133,12 @@ Shell7Base :: computeLayeredMassMatrix(FloatMatrix &answer, TimeStep *tStep){
 }
 
 void 
-Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, FloatArray &m, double gam){
+Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, FloatArray &m, double &gam){
     
     double a1, a2, a3;
     FloatArray coeff;
-    this->computeThicknessMappingCoeff(gp, coeff);
+    //this->computeThicknessMappingCoeff(gp, coeff);
+    this->computeThicknessMappingCoeffNew(gp, coeff);
     a1 = coeff.at(1); a2 = coeff.at(2); a3 = coeff.at(3);
 
     double h, h2, h3, h5, fac1, fac2, fac3, fac4, fac5, fac6, gam2, rho; 
@@ -1727,7 +2151,8 @@ Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, FloatArray 
     factors.at(2) = h3*(40.*a2 + 20.*a3*gam + 3.*a1*h2*gam)/480. ;
     factors.at(3) = h3*(20.*a3 + 3.*a1*h2)/480. *1.0;
     factors.at(4) = (28.*a3*h3*(80. + 3.*h2*gam2) + 3.*h5*(112.*a2*gam + a1*(112. + 5.*h2*gam2)))/26880.;
-    factors.at(5) = h*(56.*a2 + 28.*a3*gam + 5.*a1*h2*gam)/8960. ;
+    //factors.at(5) = h*(56.*a2 + 28.*a3*gam + 5.*a1*h2*gam)/8960. ;
+    factors.at(5) = h5*(56.*a2 + 28.*a3*gam + 5.*a1*h2*gam)/8960. ;
     factors.at(6) = h5*(28.*a3 + 5.*a1*h2)/8960.;
     //factors.printYourself();
 }
@@ -1739,8 +2164,8 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
 
 
     FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
-    FloatArray a, unknowns, m(3);
-    this->giveUpdatedSolutionVector(a, tStep);  
+    FloatArray solVec, unknowns;
+    this->giveUpdatedSolutionVector(solVec, tStep);  
     int ndofs = this->giveNumberOfDofs();
     temp.resize(ndofs,ndofs); temp.zero();
 
@@ -1748,17 +2173,25 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
     int numberOfLayers = layeredCS->give(CS_NumLayers);
 
+    FloatMatrix M11(18,18), M12(18,18), M13(18,6), M22(18,18), M23(18,6), M33(6,6);
+    M11.zero(); M12.zero(); M13.zero(); M22.zero(); M23.zero(); M33.zero();
+
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = layerIntegrationRulesArray [layer-1]; 
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
         for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {    
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j-1);      
-                
-            this->computeNmatrixAt(gp, N);
-            unknowns.beProductOf(N,a); // [xbar, m, gam]^T
-            m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) ); 
-            double gam = unknowns.at(7);
+            GaussPoint *gp = iRuleL->getIntegrationPoint(j-1);  
+
+            FloatMatrix N11, N22, N33; 
+            this->computeNmatricesAt(gp, N11, N22, N33);
+            FloatArray xbar, m; 
+            double gam=0.;
+            this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
+            //this->computeNmatrixAt(gp, N);
+            //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
+            //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) ); 
+            //double gam = unknowns.at(7);
         
 
             /* Consistent mass matrix M = int{N^t*mass*N}
@@ -1777,52 +2210,69 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
             double fac4 = zeta * zeta*(2.0 + gam*zeta) * (2.0 + gam*zeta);
             double fac5 = zeta*zeta*zeta*(2.0 + gam*zeta);
             double fac6 = zeta*zeta*zeta*zeta;
+            FloatMatrix mass11(3,3), mass12(3,3), mass13(3,1), mass21(3,3), mass22(3,3), mass23(3,1), mass31(1,3), mass32(1,3), mass33(1,1);
+            mass11.zero(); mass12.zero(); mass13.zero(); mass21.zero(); mass22.zero(); mass23.zero(); mass31.zero(); mass32.zero(); mass33.zero();
             mass.resize(7,7);
-            mass.at(1,1) = mass.at(2,2) = mass.at(3,3) = fac1; // A
-            mass.at(1,4) = mass.at(2,5) = mass.at(3,6) = fac2; // B
-            mass.at(1,7) = fac3 * m.at(1);  
-            mass.at(2,7) = fac3 * m.at(2); 
-            mass.at(3,7) = fac3 * m.at(3); // C
-            mass.at(4,4) = mass.at(5,5) = mass.at(6,6) = fac4; // D
-            mass.at(4,7) = fac5 * m.at(1);  
-            mass.at(5,7) = fac5 * m.at(2); 
-            mass.at(6,7) = fac5 * m.at(3); // E
-            mass.at(7,7) = fac6 * m.dotProduct(m); // F
-            mass.symmetrized();
+            mass11.at(1,1) = mass11.at(2,2) = mass11.at(3,3) = fac1; // A
+            mass12.at(1,1) = mass12.at(2,2) = mass12.at(3,3) = fac2; // B
+            mass13.at(1,1) = fac3 * m.at(1);  
+            mass13.at(2,1) = fac3 * m.at(2); 
+            mass13.at(3,1) = fac3 * m.at(3); // C
+            mass22.at(1,1) = mass22.at(2,2) = mass22.at(3,3) = fac4; // D
+            mass23.at(1,1) = fac5 * m.at(1);  
+            mass23.at(2,1) = fac5 * m.at(2); 
+            mass23.at(3,1) = fac5 * m.at(3); // E
+            mass33.at(1,1) = fac6 * m.dotProduct(m); // F
+            mass21.beTranspositionOf(mass12);
+            mass31.beTranspositionOf(mass13);
+            mass32.beTranspositionOf(mass23);
+            //mass.symmetrized();
 
             double dV = this->computeVolumeAroundLayer(gp, layer); 
             double rho = mat->give('d', gp);     
-            Ntm.beTProductOf(N, mass);
-            NtmN.beProductOf(Ntm, N);
-            NtmN.times(dV*rho/4.0 );
-            temp.add(NtmN);
-        }
 
+            FloatMatrix M11temp, M12temp, M13temp, M22temp, M23temp, M33temp;
+            this->computeTripleProduct(M11temp, N11, mass11, N11);
+            this->computeTripleProduct(M12temp, N11, mass12, N22);
+            this->computeTripleProduct(M13temp, N11, mass13, N33);
+            this->computeTripleProduct(M22temp, N22, mass22, N22);
+            this->computeTripleProduct(M23temp, N22, mass23, N33);
+            this->computeTripleProduct(M33temp, N33, mass33, N33);
+            M11.add(0.25*rho*dV,M11temp); M12.add(0.25*rho*dV,M12temp); M13.add(0.25*rho*dV,M13temp);
+            M22.add(0.25*rho*dV,M22temp); M23.add(0.25*rho*dV,M23temp); M33.add(0.25*rho*dV,M33temp);
+        }
+        //M33.printYourself();
         answer.resize(ndofs, ndofs);
         answer.zero();
-        answer.assemble(temp, ordering_all);
+
+
+        answer.assemble(M11, ordering_phibar, ordering_phibar);
+        answer.assemble(M12, ordering_phibar, ordering_m);
+        answer.assemble(M13, ordering_phibar, ordering_gam);
+        answer.assemble(M22, ordering_m,      ordering_m);
+        answer.assemble(M23, ordering_m,      ordering_gam);
+        answer.assemble(M33, ordering_gam,    ordering_gam);
+
+        FloatMatrix M21, M31, M32;
+        M21.beTranspositionOf(M12); M31.beTranspositionOf(M13); M32.beTranspositionOf(M23);
+        answer.assemble(M21, ordering_m,      ordering_phibar);
+        answer.assemble(M31, ordering_gam,    ordering_phibar );
+        answer.assemble(M32, ordering_gam,    ordering_m );
+        answer.symmetrized();
 
         #if 1
         
-        FloatMatrix A(18,18), B(18,18), C(18,6), D(18,18), E(18,6), F(6,6), eigVec;
-        A.beSubMatrixOf(temp,1,18,1,18);
-        B.beSubMatrixOf(temp,1,18,19,36);
-        C.beSubMatrixOf(temp,1,18,37,42);
-        D.beSubMatrixOf(temp,19,36,19,36);
-        E.beSubMatrixOf(temp,19,36,37,42);
-        F.beSubMatrixOf(temp,37,42,37,42);
-
         FloatArray eig, sums(6);
         sums.zero();
         for ( int i = 1; i<=18; i++ ){
 
-            sums.at(1) += A.at(i,i);
-            sums.at(2) += B.at(i,i);
-            sums.at(3) += C.at(i,1) + C.at(i,2) + C.at(i,3)+ C.at(i,4)+ C.at(i,5)+ C.at(i,6);
-            sums.at(4) += D.at(i,i);
-            sums.at(5) += E.at(i,1) + E.at(i,2) + E.at(i,3)+ E.at(i,4)+ E.at(i,5)+ E.at(i,6);
+            sums.at(1) += M11.at(i,i);
+            sums.at(2) += M12.at(i,i);
+            sums.at(3) += M13.at(i,1) + M13.at(i,2) + M13.at(i,3)+ M13.at(i,4)+ M13.at(i,5)+ M13.at(i,6);
+            sums.at(4) += M22.at(i,i);
+            sums.at(5) += M23.at(i,1) + M23.at(i,2) + M23.at(i,3)+ M23.at(i,4)+ M23.at(i,5)+ M23.at(i,6);
         }
-        sums.at(6) += F.at(1,1) + F.at(2,2) + F.at(3,3)+ F.at(4,4)+ F.at(5,5)+ F.at(6,6);
+        sums.at(6) += M33.at(1,1) + M33.at(2,2) + M33.at(3,3)+ M33.at(4,4)+ M33.at(5,5)+ M33.at(6,6);
         printf("\n numerical \n");
         sums.printYourself();
 
@@ -2347,237 +2797,6 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 
 
 
-#if 0
-
-void
-Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep){
-    
-    FloatArray *Xi, Mi;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, answer);
-    answer.setValues(42, 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. );
-    // Add reference position and directors to computed update
-    //for( int i = 1, j = 0; i <= 6; i++, j += 7 ){
-    for( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 7 ){
-        Xi = this->giveNode(i)->giveCoordinates();
-        Mi = this->giveInitialNodeDirector(i);
-        answer.at(1+j) += Xi->at(1);
-        answer.at(2+j) += Xi->at(2);
-        answer.at(3+j) += Xi->at(3);
-        answer.at(4+j) += Mi.at(1);
-        answer.at(5+j) += Mi.at(2);
-        answer.at(6+j) += Mi.at(3);
-        //answer.at(7+j) =... gam(t=0)=0 so no update necessary. Well this assumes gam=0 at t=0
-        //Mi.printYourself();
-    }
-    //answer.printYourself();
-}
-#endif
-
-#if 0
-
-void
-Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep)
-{	
-    FloatArray *Xi, Mi;
-    // should extract solution vector from three nodes only
-    this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, answer);
-    IntArray edgeNodes;
-    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
-
-    fei->computeLocalEdgeMapping(edgeNodes, iedge);
-
-
-    // Add reference position and directors to computed update
-    for( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 7 ){
-
-        Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
-        Mi = this->giveInitialNodeDirector( edgeNodes.at(i) );
-        answer.at(1+j) += Xi->at(1);
-        answer.at(2+j) += Xi->at(2);
-        answer.at(3+j) += Xi->at(3);
-        answer.at(4+j) += Mi.at(1);
-        answer.at(5+j) += Mi.at(2);
-        answer.at(6+j) += Mi.at(3);
-        //answer.at(7+j) =... gam(t=0)=0 so no update necessary
-    }
-
-}
-
-void
-Shell7Base :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
-{
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(7, ndofs); answer.zero();
-    FloatArray &lcoords = *gp->giveCoordinates();
-    FloatArray N;
-    this->giveInterpolation()->evalN(N, lcoords, FEIElementGeometryWrapper(this));
-
-    /*   nno*3 nno*3 nno
-       3 [N_x   0    0
-       3   0   N_m   0
-       1   0    0  N_gmm ]
-    */
-    int i, j;
-    for( i = 1, j = 0; i<=this->giveNumberOfDofManagers(); i++, j+=7  ){ 
-        answer.at(1,1+j) = N.at(i);
-        answer.at(2,2+j) = N.at(i);
-        answer.at(3,3+j) = N.at(i);
-        answer.at(4,4+j) = N.at(i);
-        answer.at(5,5+j) = N.at(i);
-        answer.at(6,6+j) = N.at(i);
-        answer.at(7,7+j) = N.at(i);
-    }
-}
-
-
-
-void
-Shell7Base :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li , int ui)
-/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
-   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
-*/
-{
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(18, ndofs); answer.zero();
-    FloatArray lcoords = *gp->giveCoordinates();
-    FloatArray N;
-    FloatMatrix dNdxi;
-    this->giveInterpolation()->evalN(N, lcoords, FEIElementGeometryWrapper(this));
-    this->giveInterpolation()->evaldNdxi(dNdxi, lcoords, FEIElementGeometryWrapper(this));
-
-    /*    18   18   6
-       6 [B_u   0   0
-       6   0   B_w  0
-       3   0   N_w  0
-       2   0    0  B_gam 
-       1   0    0  N_gam] 
-    */
-    int ndofman = this->giveNumberOfDofManagers();  
-    int i, j;
-    // First row
-    for( i = 1, j = 0; i<=ndofman; i++, j+=7  ){ 
-        answer.at(1,1+j) = dNdxi.at(i,1);
-        answer.at(2,2+j) = dNdxi.at(i,1);
-        answer.at(3,3+j) = dNdxi.at(i,1);
-        answer.at(4,1+j) = dNdxi.at(i,2);
-        answer.at(5,2+j) = dNdxi.at(i,2);
-        answer.at(6,3+j) = dNdxi.at(i,2);
-    }
-
-    // Second row
-    for( i = 1, j = 0; i<=ndofman; i++, j+=7  ){ 
-        answer.at(7,4+j) = dNdxi.at(i,1);
-        answer.at(8,5+j) = dNdxi.at(i,1);
-        answer.at(9,6+j) = dNdxi.at(i,1);
-        answer.at(10,4+j) = dNdxi.at(i,2);
-        answer.at(11,5+j) = dNdxi.at(i,2);
-        answer.at(12,6+j) = dNdxi.at(i,2);
-        answer.at(13,4+j) = N.at(i);
-        answer.at(14,5+j) = N.at(i);
-        answer.at(15,6+j) = N.at(i);
-    }
-
-    // Third row
-    for( i = 1, j = 0; i<=ndofman; i++, j+=7  ){ 
-        answer.at(16,7+j) = dNdxi.at(i,1);
-        answer.at(17,7+j) = dNdxi.at(i,2);
-        answer.at(18,7+j) = N.at(i);
-    }
-
-}
-
-void
-Shell7Base :: edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint along one edge
-{
-    answer.resize(7, this->giveNumberOfEdgeDofs());
-    answer.zero();
-
-    FloatArray lcoords = *gp->giveCoordinates();
-    FloatArray N;
-    FloatMatrix dNdxi;
-
-    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
-    fei->edgeEvalN(N, lcoords, FEIElementGeometryWrapper(this));
-    
-
-    /*    9   9    3
-       3 [N_x   0    0
-       3   0   N_m   0
-       1   0    0  N_gmm ]
-    */
-    int i, j;
-    for( i = 1, j = 0; i<=this->giveNumberOfEdgeDofManagers(); i++, j+=7  ){ 
-        answer.at(1,1+j) = N.at(i);
-        answer.at(2,2+j) = N.at(i);
-        answer.at(3,3+j) = N.at(i);
-        answer.at(4,4+j) = N.at(i);
-        answer.at(5,5+j) = N.at(i);
-        answer.at(6,6+j) = N.at(i);
-        answer.at(7,7+j) = N.at(i);
-    }
-
-    
-}
-
-void
-Shell7Base :: edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li , int ui)
-/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
-   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
-*/
-{
-    answer.resize(11, this->giveNumberOfEdgeDofs()); answer.zero();
-    FloatArray lcoords = *gp->giveCoordinates();
-    FloatArray N, dNdxi;
-    //FloatMatrix dNdxi;
-
-    FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation()) ;
-    fei->edgeEvalN(N, lcoords, FEIElementGeometryWrapper(this));
-    int iedge = 0;
-    fei->edgeEvaldNdxi(dNdxi, iedge, lcoords, FEIElementGeometryWrapper(this));
-
-    /*   
-       3 [B_u   0    0
-       3   0   B_w   0
-       3   0   N_w   0
-       1   0    0  B_gam 
-       1   0    0  N_gam] 
-    */
-    
-    int ndofman = this->giveNumberOfEdgeDofManagers();
-    int i, j;
-    // First row
-    for( i = 1, j = 0; i<=ndofman; i++, j+=7  ){ 
-        answer.at(1,1+j) = dNdxi.at(i);
-        answer.at(2,2+j) = dNdxi.at(i);
-        answer.at(3,3+j) = dNdxi.at(i);
-
-    }
-
-    // Second row
-    for( i = 1, j = 0; i<=ndofman; i++, j+=7  ){ 
-        answer.at(4,4+j) = dNdxi.at(i);
-        answer.at(5,5+j) = dNdxi.at(i);
-        answer.at(6,6+j) = dNdxi.at(i);
-        answer.at(7,4+j) = N.at(i);
-        answer.at(8,5+j) = N.at(i);
-        answer.at(9,6+j) = N.at(i);
-    }
-
-    // Third row
-    for( i = 1, j = 0; i<=ndofman; i++, j+=7  ){ 
-        answer.at(10,7+j) = dNdxi.at(i);
-        answer.at(11,7+j) = N.at(i);
-    }
-
-}
-
-
-#endif
-
 
 
 
@@ -2610,6 +2829,30 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep){
     }
     //answer.printYourself();
 }
+
+
+void
+Shell7Base :: giveInitialSolutionVector(FloatArray &answer){
+    
+    FloatArray *Xi, Mi, temp;
+    answer.resize(this->giveNumberOfDofs());
+    answer.zero();
+    // Add reference position and directors to computed update
+    for( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ){
+        Xi = this->giveNode(i)->giveCoordinates();
+        Mi = this->giveInitialNodeDirector(i);
+        answer.at(1+j) += Xi->at(1);
+        answer.at(2+j) += Xi->at(2);
+        answer.at(3+j) += Xi->at(3);
+        answer.at(18+1+j) += Mi.at(1);
+        answer.at(18+2+j) += Mi.at(2);
+        answer.at(18+3+j) += Mi.at(3);
+        //answer.at(7+j) =... gam(t=0)=0 so no update necessary. Well this assumes gam=0 at t=0
+        
+    }
+    //answer.printYourself();
+}
+
 #endif
 
 #if 1
@@ -2863,19 +3106,30 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iedge, Boundary
 
 
 
-#if 0
+
+
+
+#if 1
+
+int
+Shell7Base :: giveFieldSize(SolutionField fieldType)
+{
+    if ( fieldType == Midplane ) {
+		return 3;
+    } else if ( fieldType == Director  )   {
+		return 3;
+    } else if ( fieldType == InhomStrain  )   {
+		return 1;
+    }    
+}
+
+
 void
-Shell7Base :: computeBmatrixMidplane( FloatMatrix &answer, FloatMatrix &dNdxi)
+Shell7Base :: computeBmatrixMidplane( FloatMatrix &answer, FloatMatrix &dNdxi )
 /* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
    B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
 */
 {
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(6, ndofs); answer.zero();
-    FloatArray lcoords = *gp->giveCoordinates();
-    FloatMatrix dNdxi;
-    this->giveInterpolation()->evaldNdxi(dNdxi, lcoords, FEIElementGeometryWrapper(this));
-
     /*    18   18   6
        6 [B_u   0   0
        6   0   B_w  0
@@ -2884,7 +3138,8 @@ Shell7Base :: computeBmatrixMidplane( FloatMatrix &answer, FloatMatrix &dNdxi)
        1   0    0  N_gam] 
     */
     int ndofman = this->giveNumberOfDofManagers();  
-    
+    answer.resize( 6, this->giveFieldSize(Midplane) * ndofman ); answer.zero();    
+
     for ( int i = 1, j = 0; i<=ndofman; i++, j+=3 ){ 
         answer.at(1,1+j) = dNdxi.at(i,1);
         answer.at(2,2+j) = dNdxi.at(i,1);
@@ -2894,8 +3149,178 @@ Shell7Base :: computeBmatrixMidplane( FloatMatrix &answer, FloatMatrix &dNdxi)
         answer.at(6,3+j) = dNdxi.at(i,2);
     }
 
-
 }
+
+void
+Shell7Base :: computeFieldBmatrix( FloatMatrix &answer, FloatMatrix &dNdxi, SolutionField fieldType )
+/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+*/
+{
+    /*    18   18   6
+       6 [B_u   0   0
+       6   0   B_w  0
+       3   0   N_w  0
+       2   0    0  B_gam 
+       1   0    0  N_gam] 
+    */
+    int ndofman = this->giveNumberOfDofManagers();
+	int fieldSize = this->giveFieldSize(fieldType);
+    answer.resize( 2*fieldSize, fieldSize * ndofman ); answer.zero();    
+    
+    for ( int row  = 1; row <= fieldSize; row++  ){
+        for ( int i = 1, j = 0; i<=ndofman; i++, j+=fieldSize ){ 
+			answer.at( row            , row+j ) = dNdxi.at(i,1);
+			answer.at( row + fieldSize, row+j ) = dNdxi.at(i,2);
+		}
+    }
+}
+
+
+void
+Shell7Base :: computeFieldNmatrix( FloatMatrix &answer, FloatArray &N, SolutionField fieldType )
+{
+    
+    int ndofman = this->giveNumberOfDofManagers();
+	int fieldSize = this->giveFieldSize(fieldType);
+    answer.resize( fieldSize, fieldSize * ndofman ); answer.zero();    
+
+    for ( int i = 1, j = 0; i<=ndofman; i++, j+=fieldSize ){ 
+		for ( int row  = 1; row <= fieldSize; row++  ){
+            answer.at( row, row+j ) = N.at(i);
+		}
+    }
+   
+}
+
+void
+Shell7Base :: computeInhomStrainNmatrix( FloatArray &answer, FloatArray &N )
+{
+    int ndofman = this->giveNumberOfDofManagers();
+    answer.resize(ndofman); 
+    for ( int i = 1; i<=ndofman; i++ ){ 
+            answer.at(i) = N.at(i);
+	}
+}
+
+void
+Shell7Base :: computeBmatricesAt(GaussPoint *gp, FloatMatrix &B11, FloatMatrix &B22, FloatMatrix &B32, FloatMatrix &B43, FloatMatrix &B53 )
+/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+*/
+{
+    /*    18   18   6
+       6 [B_u   0   0
+       6   0   B_w  0
+       3   0   N_w  0
+       2   0    0  B_gam 
+       1   0    0  N_gam] 
+    */
+    FloatArray lcoords = *gp->giveCoordinates();
+    FloatArray N;
+    FloatMatrix dNdxi;
+    this->giveInterpolation()->evalN(N, lcoords, FEIElementGeometryWrapper(this));
+    this->giveInterpolation()->evaldNdxi(dNdxi, lcoords, FEIElementGeometryWrapper(this));
+
+    this->computeFieldBmatrix(B11, dNdxi, Midplane);
+    B22 = B11;
+    this->computeFieldNmatrix(B32, N, Director);
+    this->computeFieldBmatrix(B43, dNdxi, InhomStrain);
+    //this->computeInhomStrainNmatrix(B53, N);
+    this->computeFieldNmatrix(B53, N, InhomStrain);
+}
+
+void
+Shell7Base :: computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &N22, FloatMatrix &N33 )
+/* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
+   B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
+*/
+{
+    /*   nno*3 nno*3 nno
+       3 [N_x   0    0
+       3   0   N_m   0
+       1   0    0  N_gmm ]
+    */
+    FloatArray lcoords = *gp->giveCoordinates();
+    FloatArray N;
+    this->giveInterpolation()->evalN(N, lcoords, FEIElementGeometryWrapper(this));
+    
+    this->computeFieldNmatrix(N11, N, Midplane);
+    N22 = N11;
+    this->computeFieldNmatrix(N33, N, InhomStrain);
+}
+
+void
+Shell7Base :: computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
+                 const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53){
+
+    answer.resize(18); answer.zero();
+    /*
+    FloatArray xbar(18), m(18), gamma(6);
+    FloatArray eps1, eps2, eps3, eps4;
+    // eps1 = B11*xbar
+    eps1.beProductOf(B11, xbar);
+    // eps2 = B22*m
+    eps2.beProductOf(B22, m);
+    // eps3 = B32*m
+    eps1.beProductOf(B32, m);
+    // eps4 = B43*gam
+    eps1.beProductOf(B43, gamma);
+    // eps5 = B53*gam
+    double eps5 = B53.dotProduct(gamma);
+    
+    answer.at(1) = eps1.at(1); answer.at(2) = eps1.at(2); answer.at(3) = eps1.at(3); 
+    answer.at(4) = eps1.at(4); answer.at(5) = eps1.at(5); answer.at(6) = eps1.at(6); 
+    
+    answer.at(7)  = eps2.at(1); answer.at(8)  = eps2.at(2); answer.at(9)  = eps2.at(3); 
+    answer.at(10) = eps2.at(4); answer.at(11) = eps2.at(5); answer.at(12) = eps2.at(6);
+
+    answer.at(13) = eps3.at(1); answer.at(14) = eps3.at(2); answer.at(15) = eps3.at(3);
+
+    answer.at(16) = eps4.at(1); answer.at(17) = eps4.at(2); answer.at(18) = eps5;
+    */
+    
+    for ( int i = 1; i <= 18; i++ ){
+        for ( int j = 1; j <= 6; j++ ){
+            answer.at(j  )  += B11.at(j,i)*solVec.at(i);
+            answer.at(6+j)  += B22.at(j,i)*solVec.at(i+18);
+        }        
+    }
+    for ( int i = 1; i <= 18; i++ ){
+        for ( int j = 1; j <= 3; j++ ){
+            answer.at(12+j) += B32.at(j,i)*solVec.at(i+18);
+    
+        }
+    }
+    for ( int i = 1; i <= 6; i++ ){
+        for ( int j = 1; j <= 2; j++ ){
+            answer.at(15+j) += B43.at(j,i)*solVec.at(i+36);
+        }
+    }
+    for ( int i = 1; i <= 6; i++ ){
+        answer.at(18) += B53.at(1,i)*solVec.at(i+36);
+    }
+} 
+
+
+void
+Shell7Base :: computeSolutionFields(FloatArray &xbar, FloatArray &m, double &gam, const FloatArray &solVec, const FloatMatrix &N11, const FloatMatrix &N22, const FloatMatrix &N33){
+
+    xbar.resize(3); xbar.zero(); m.resize(3); m.zero(); gam=0.;
+
+    for ( int i = 1; i <= 18; i++ ){
+        for ( int j = 1; j <= 3; j++ ){
+            xbar.at(j) += N11.at(j,i)*solVec.at(i);
+               m.at(j) += N22.at(j,i)*solVec.at(i+18);
+        }        
+    }
+    
+    for ( int i = 1; i <= 6; i++ ){
+        gam += N33.at(1,i)*solVec.at(i+36);
+    }
+} 
+
+
 #endif
 
 
