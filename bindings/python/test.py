@@ -1,21 +1,21 @@
-import oofemlib
+import liboofem
 
-a = oofemlib.FloatArray(2);
-b = oofemlib.FloatArray(4);
-ind = oofemlib.IntArray(2);
+a = liboofem.FloatArray(2);
+b = liboofem.FloatArray(4);
+ind = liboofem.IntArray(2);
 
 a.zero();
 b.zero();
 a[1]=15.0;
 a[0]=10.0;
-print a[1], a[2];
+print a[0], a[1];
 a.printYourself();
 
-c = oofemlib.FloatArray(a)
-print c[1], c[2];
+c = liboofem.FloatArray(a)
+print c[0], c[1];
 c.printYourself();
 
-d = oofemlib.FloatMatrix(2,2);
+d = liboofem.FloatMatrix(2,2);
 d.beUnitMatrix();
 d[0,1]=1.0;
 d.printYourself();
@@ -31,8 +31,8 @@ b.assemble(a,ind);
 b.printYourself();
 
 
-dr=oofemlib.OOFEMTXTDataReader("patch100.in");
-problem=oofemlib.InstanciateProblem(dr,oofemlib.problemMode._processor,0);
+dr=liboofem.OOFEMTXTDataReader("patch100.in");
+problem=liboofem.InstanciateProblem(dr,liboofem.problemMode._processor,0);
 problem.checkProblemConsistency();
 problem.setRenumberFlag();
 problem.solveYourself();
