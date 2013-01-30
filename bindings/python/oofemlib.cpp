@@ -32,6 +32,7 @@ namespace bp = boost::python;
 #include "spatiallocalizer.h"
 #include "errorestimator.h"
 #include "nodalrecoverymodel.h"
+#include "oofemtxtinputrecord.h"
 #include "oofemtxtdatareader.h"
 #include "logger.h"
 #include "util.h"
@@ -60,17 +61,6 @@ namespace bp = boost::python;
 
 
 namespace oofem {
-
-/*****************************************************
-* OOFEM global objects
-*****************************************************/
-Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
-ClassFactory classFactory;
-
-
-
-
 
 /*****************************************************
 *
@@ -1210,14 +1200,15 @@ void pyenum_domainType()
 *****************************************************/
 
 // constuct auxiliary global object (for eval and exec functions) only once
-dict temp_global(import("__main__").attr("__dict__"));
+bp::dict temp_global(import("__main__").attr("__dict__"));
 
 /*
 make oofem input line from **kw arguments. This function is used by "constructor" methods
 e.g. in function:
   engngModel("nonLinearStatic",nSteps=10) # kw = {'nSteps':10}
 */
-OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(dict &kw) {
+OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
+{
     temp_global["kw"] = kw;
     str command =
         "ret = ''\n"
@@ -1241,7 +1232,8 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(dict &kw) {
     return OOFEMTXTInputRecord( ( extract<string>(temp_global["ret"])() ).c_str() );
 }
 
-OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(dict &kw) {
+OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(bp::dict &kw)
+{
     bp::list keys = kw.keys();
     bp::list vals = kw.values();
     kw.clear();
@@ -1256,7 +1248,8 @@ OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(dict &kw) {
 }
 
 // transform all keys of given dictionary to lower case
-void makeDictKeysLowerCase(dict &kw) {
+void makeDictKeysLowerCase(bp::dict &kw)
+{
     bp::list keys = kw.keys();
     bp::list vals = kw.values();
     kw.clear();
@@ -1275,7 +1268,8 @@ The process is almost same for all classes, therefore only Element part is docum
 * EngngModel
 *****************************************************/
 // engngModel(aClass,number=0,master=None,**kw)
-object engngModel(tuple args, dict kw) {
+object engngModel(bp::tuple args, bp::dict kw)
+{
     //args
     string aClass = extract<string>(args[0])();
     int number = len(args)>1? extract<int>(args[1])() : 0;
@@ -1306,18 +1300,20 @@ object engngModel(tuple args, dict kw) {
     return ret;
 }
 
-object createEngngModelOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object createEngngModelOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return engngModel(args,kw);
 }
-object linearStatic(tuple args, dict kw) { return createEngngModelOfType("linearstatic", args, kw); }
+object linearStatic(bp::tuple args, bp::dict kw) { return createEngngModelOfType("linearstatic", args, kw); }
 
 
 /*****************************************************
 * Domain
 *****************************************************/
 // domain(number=1,serialNumber=1,engngModel*=None,dType=_unknownMode,**kw)
-object domain(tuple args, dict kw) {
+object domain(bp::tuple args, bp::dict kw)
+{
     // args
     int number =             len(args)>0? extract<int>(args[0])() : 0;
     int serialNumber =       len(args)>1? extract<int>(args[1])() : 0;
@@ -1341,7 +1337,8 @@ object domain(tuple args, dict kw) {
 * Element
 *****************************************************/
 // element(aClass,domain=defaultDomain,**kw)
-object element(tuple args, dict kw) {
+object element(bp::tuple args, bp::dict kw)
+{
     // extracts first python argument (string element type)
     string aClass = extract<string>(args[0])();
     // extracts values from args if they are specified
@@ -1362,7 +1359,7 @@ object element(tuple args, dict kw) {
     if (elem==NULL) { LOG_ERROR(oofem_errLogger,"element: wrong input data"); }
     // sets globalNumber == number befor initializeFrom
     elem->setGlobalNumber(number);
-    // construct OOFEMTXTInputRecord from dict **kw
+    // construct OOFEMTXTInputRecord from bp::dict **kw
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // pass input record to elem
     elem->initializeFrom(&ir);
@@ -1371,12 +1368,13 @@ object element(tuple args, dict kw) {
 }
 
 // auxiliary constructor for specific element type (name is passed as first argument)
-object createElementOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object createElementOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return element(args, kw);
 }
 // specific elements
-object beam2d(tuple args, dict kw) { return createElementOfType("beam2d",args,kw); }
+object beam2d(bp::tuple args, bp::dict kw) { return createElementOfType("beam2d",args,kw); }
 
 
 
@@ -1384,7 +1382,8 @@ object beam2d(tuple args, dict kw) { return createElementOfType("beam2d",args,kw
 * DofManager
 *****************************************************/
 // dofManager(aClass,domain=defaultDomain,**kw)
-object dofManager(tuple args, dict kw) {
+object dofManager(bp::tuple args, bp::dict kw)
+{
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
@@ -1396,18 +1395,20 @@ object dofManager(tuple args, dict kw) {
     return object(ptr(dofMan));
 }
 
-object createDofManagerOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object createDofManagerOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return dofManager(args, kw);
 }
-object node(tuple args, dict kw) { return createDofManagerOfType("node",args,kw); }
+object node(bp::tuple args, bp::dict kw) { return createDofManagerOfType("node",args,kw); }
 
 
 /*****************************************************
 * GeneralBoundaryCondition
 *****************************************************/
 // generalBoundaryCondition(aClass,domain=defaultDomain,**kw)
-object generalBoundaryCondition(tuple args, dict kw) {
+object generalBoundaryCondition(bp::tuple args, bp::dict kw)
+{
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
@@ -1418,20 +1419,22 @@ object generalBoundaryCondition(tuple args, dict kw) {
     return object(ptr(bc));
 }
 
-object CreateBCOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object CreateBCOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return generalBoundaryCondition(args, kw);
 }
-object boundaryCondition(tuple args, dict kw) { return CreateBCOfType("boundarycondition",args,kw); }
-object constantEdgeLoad(tuple args, dict kw) { return CreateBCOfType("constantedgeload",args,kw); }
-object nodalLoad(tuple args, dict kw) { return CreateBCOfType("nodalload",args,kw); }
-object structTemperatureLoad(tuple args, dict kw) { return CreateBCOfType("structtemperatureload",args,kw); }
+object boundaryCondition(bp::tuple args, bp::dict kw) { return CreateBCOfType("boundarycondition",args,kw); }
+object constantEdgeLoad(bp::tuple args, bp::dict kw) { return CreateBCOfType("constantedgeload",args,kw); }
+object nodalLoad(bp::tuple args, bp::dict kw) { return CreateBCOfType("nodalload",args,kw); }
+object structTemperatureLoad(bp::tuple args, bp::dict kw) { return CreateBCOfType("structtemperatureload",args,kw); }
 
 
 /*****************************************************
 * Material
 *****************************************************/
-object material(tuple args, dict kw) {
+object material(bp::tuple args, bp::dict kw)
+{
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
@@ -1442,17 +1445,19 @@ object material(tuple args, dict kw) {
     return object(ptr(mat));
 }
 
-object CreateMaterialOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object CreateMaterialOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return material(args, kw);
 }
-object isoLE(tuple args, dict kw) { return CreateMaterialOfType("isole",args,kw); }
+object isoLE(bp::tuple args, bp::dict kw) { return CreateMaterialOfType("isole",args,kw); }
 
 
 /*****************************************************
 * CrossSection
 *****************************************************/
-object crossSection(tuple args, dict kw) {
+object crossSection(bp::tuple args, bp::dict kw)
+{
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
@@ -1463,18 +1468,20 @@ object crossSection(tuple args, dict kw) {
     return object(ptr(cs));
 }
 
-object CreateCrossSectionOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object CreateCrossSectionOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return crossSection(args, kw);
 }
-object simpleCS(tuple args, dict kw) { return CreateCrossSectionOfType("simplecs",args,kw); }
+object simpleCS(bp::tuple args, bp::dict kw) { return CreateCrossSectionOfType("simplecs",args,kw); }
 
 
 
 /*****************************************************
 * LoadTimeFunction
 *****************************************************/
-object loadTimeFunction(tuple args, dict kw) {
+object loadTimeFunction(bp::tuple args, bp::dict kw)
+{
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
@@ -1485,18 +1492,20 @@ object loadTimeFunction(tuple args, dict kw) {
     return object(ptr(ltf));
 }
 
-object CreateLoadTimeFunctionOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object CreateLoadTimeFunctionOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return loadTimeFunction(args, kw);
 }
-object peakFunction(tuple args, dict kw) { return CreateLoadTimeFunctionOfType("peakfunction",args,kw); }
+object peakFunction(bp::tuple args, bp::dict kw) { return CreateLoadTimeFunctionOfType("peakfunction",args,kw); }
 
 
 
 /*****************************************************
 * ExportModule
 *****************************************************/
-object exportModule(tuple args, dict kw) {
+object exportModule(bp::tuple args, bp::dict kw)
+{
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
@@ -1507,11 +1516,12 @@ object exportModule(tuple args, dict kw) {
     return object(ptr(module));
 }
 
-object CreateExportModuleOfType(const char* type, tuple args, dict kw) {
-    args = len(args)>1? make_tuple(type,args[0],args[1]) : len(args)>0? make_tuple(type,args[0]) : make_tuple(type);
+object CreateExportModuleOfType(const char* type, bp::tuple args, bp::dict kw)
+{
+    args = len(args)>1? bp::make_tuple(type,args[0],args[1]) : len(args)>0? bp::make_tuple(type,args[0]) : bp::make_tuple(type);
     return exportModule(args, kw);
 }
-object vtkxml(tuple args, dict kw) { return CreateExportModuleOfType("vtkxml",args,kw); }
+object vtkxml(bp::tuple args, bp::dict kw) { return CreateExportModuleOfType("vtkxml",args,kw); }
 
 
 
