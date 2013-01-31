@@ -10,6 +10,11 @@ targets/
 *.vtu
 *.pvd
 *.out.*
+*.synctex.gz
+*.run.xml
+*.bcf
+*-blx.bib
+*.blg
 
 # documentation aux-files.
 *.aux
