@@ -172,6 +172,7 @@ set (core_fei
     fei2dquadconst.C
     fei2dquadlin.C
     fei2dquadquad.C
+    fei2dquadbiquad.C
     fei3dlinelin.C
     fei3dtrlin.C
     fei3dtetquad.C
