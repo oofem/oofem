@@ -90,7 +90,6 @@ protected:
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) = 0;
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
-	
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) ;
     virtual void edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) ;
@@ -110,7 +109,6 @@ protected:
     void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep);
     void edgeGiveUpdatedSolutionVector(FloatArray &answer,const int iedge, TimeStep *tStep);
     void edgeGiveUpdatedSolutionVectorNew(FloatArray &answer,const int iedge, TimeStep *tStep);
-    void giveInitialSolutionVector(FloatArray &answer);
 
     virtual double edgeComputeLengthAround(GaussPoint *gp, const int iedge);
     void edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, const int iEdge);
@@ -138,14 +136,12 @@ protected:
 
 
     void computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer); // for analytically integrated mass matrix
-    void computeThicknessMappingCoeffNew(GaussPoint *gp, FloatArray &answer); // for analytically integrated mass matrix
 
     // Loads
     void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
     void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
     void computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep);
     void computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord = 0);
-    void computeSectionalForcesOld(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord = 0);
     void computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep);
     void computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep);
 
@@ -169,13 +165,11 @@ protected:
     
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
-    virtual void computeLayeredMassMatrix(FloatMatrix &answer, TimeStep *tStep);    // analytically integrated through the thickness
     virtual void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); // numerical integration in B_X
-    virtual void giveMassFactorsAt(GaussPoint *gp, FloatArray &answer, FloatArray &m, double &gam); // numerical integration in B_X
+
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeBulkTangentMatrixOld(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     
@@ -218,32 +212,6 @@ protected:
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs(EquationID ut) {return this->giveNumberOfDofs(); }
-
-
-
-	// split of B and N matrices
-	enum SolutionField {
-    Midplane,     ///< phi_bar 7 x_bar (3 dofs)
-    Director,     ///< m (3 dofs)
-	InhomStrain,  ///< gamma (1 dofs) - inhomogenious thickness strain
-	};
-	int  giveFieldSize(SolutionField fieldType);
-	virtual void computeBmatrixMidplane( FloatMatrix &answer, FloatMatrix &dNdxi );
-	virtual void computeFieldBmatrix( FloatMatrix &answer, FloatMatrix &dNdxi, SolutionField );
-	virtual void computeFieldNmatrix( FloatMatrix &answer, FloatArray &N, SolutionField );
-    virtual void computeInhomStrainNmatrix( FloatArray &answer, FloatArray &N );
-    void computeBmatricesAt(GaussPoint *gp, FloatMatrix &B11, FloatMatrix &B22, FloatMatrix &B32, FloatMatrix &B43, FloatMatrix &B53 );
-    void computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &N22, FloatMatrix &N33 );
-
-    void computeStiffnessProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c, 
-                                                      const FloatMatrix &d, const FloatMatrix &e, const FloatMatrix &f, const FloatMatrix &g, 
-                                                      const FloatMatrix &h, const FloatMatrix &i, const FloatMatrix &j);
-    void computeSumProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c, const FloatMatrix &d);
-    void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
-    void computeSectionalForcesAtNew(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
-    void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
-                const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
-    void computeSolutionFields(FloatArray &xbar, FloatArray &m, double &gam, const FloatArray &solVec, const FloatMatrix &N11, const FloatMatrix &N22, const FloatMatrix &N33);
 
 public:
     Shell7Base(int n, Domain *d);	// constructor

@@ -127,12 +127,12 @@ Tr2Shell7 :: computeGaussPoints()
     if ( !integrationRulesArray ) {
         
         int nPointsTri = 6;			// points in the plane
-        //int nPointsThickness = 2;
+        int nPointsThickness = 2;
         int nPointsEdge = 2;
         integrationRulesArray = new IntegrationRule * [ 3 ];
         // Midplane and thickness
-		//integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        //integrationRulesArray[0]->SetUpPointsOnWedge2(nPointsTri, nPointsThickness, _3dMat);
+		integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        integrationRulesArray[0]->SetUpPointsOnWedge2(nPointsTri, nPointsThickness, _3dMat);
 
         // Midplane only (Mass matrix integrated analytically through the thickness)
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
