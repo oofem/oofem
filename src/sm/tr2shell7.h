@@ -107,8 +107,6 @@ public:
 	virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
 
 
-	virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
 };
 
 

@@ -75,49 +75,6 @@ Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &node
 FEInterpolation* Tr2Shell7 :: giveInterpolation() { return &interpolation;}
 
 
-void
-Tr2Shell7 :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
-{
-    /*
-	int i, j;
-    GaussPoint *gp;
-    FloatArray v;
-
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
-    fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
-
-	
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->getNumberOfIntegrationPoints(); j++ ) {
-            gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
-
-            // gp   -> printOutputAt(file,stepN) ;
-			fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
-
-            this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
-            fprintf(file, "  strains ");
-            fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                    v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
-
-            this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
-            fprintf(file, "\n              stresses");
-            fprintf( file,
-                    " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                    v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                    v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
-
-            fprintf(file, "\n");
-        }
-    }
-	*/
-}
-
 
 
 
@@ -127,12 +84,12 @@ Tr2Shell7 :: computeGaussPoints()
     if ( !integrationRulesArray ) {
         
         int nPointsTri = 6;			// points in the plane
-        int nPointsThickness = 2;
+        //int nPointsThickness = 2;
         int nPointsEdge = 2;
         integrationRulesArray = new IntegrationRule * [ 3 ];
         // Midplane and thickness
-		integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray[0]->SetUpPointsOnWedge2(nPointsTri, nPointsThickness, _3dMat);
+		//integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        //integrationRulesArray[0]->SetUpPointsOnWedge2(nPointsTri, nPointsThickness, _3dMat);
 
         // Midplane only (Mass matrix integrated analytically through the thickness)
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
