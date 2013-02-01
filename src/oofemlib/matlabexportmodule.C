@@ -188,7 +188,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
                 values = new( std :: vector< double > );
                 valuesList.push_back(values);
             } else {
-                int pos = it - DofIDList.begin();
+                std::size_t pos = it - DofIDList.begin();
                 values = valuesList.at(pos);
             }
 
