@@ -333,6 +333,7 @@ enum classType {
     IsotropicMoistureTransferMaterialClass,
     IsotropicLinMoistureTransferMaterialClass,
     BazantNajjarMoistureTransferMaterialClass,
+    NlIsoMoistureMaterialClass,
     AnisotropicMassTransferMaterialClass,
     AnisotropicMassTransferMaterialStatusClass,
     NonlinearMassTransferMaterialClass,

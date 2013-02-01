@@ -91,6 +91,7 @@
  #include "isoheatmat.h"
  #include "isolinmoisturemat.h"
  #include "bazantnajjarmat.h"
+ #include "nlisomoisturemat.h"
  #include "hemotkmat.h"
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
@@ -174,6 +175,7 @@ REGISTER_CLASS(DustMaterial, "dustmat", DustMaterialClass)
 REGISTER_CLASS(IsotropicHeatTransferMaterial, "isoheat", IsotropicHeatTransferMaterialClass)
 REGISTER_CLASS(IsotropicLinMoistureTransferMaterial, "isolinmoisturemat", IsotropicLinMoistureTransferMaterialClass)
 REGISTER_CLASS(BazantNajjarMoistureTransferMaterial, "bazantnajjarmoisturemat", BazantNajjarMoistureTransferMaterialClass)
+REGISTER_CLASS(NlIsoMoistureMaterial, "nlisomoisturemat", NlIsoMoistureMaterialClass)
 REGISTER_CLASS(HeMoTKMaterial, "hemotk", HeMoTKMaterialClass)
 REGISTER_CLASS(HydratingConcreteMat, "hydratingconcretemat", HydratingConcreteMatClass)
 REGISTER_CLASS(AnisotropicMassTransferMaterial, "anisomass", AnisotropicMassTransferMaterialClass)

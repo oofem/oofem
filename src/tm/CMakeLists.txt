@@ -42,6 +42,7 @@ set (tm_material
     isomoisturemat.C
     isolinmoisturemat.C
     bazantnajjarmat.C
+    nlisomoisturemat.C
     hydratingconcretemat.C
     nonlinearmassmat.C
     anisomassmat.C
