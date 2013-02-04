@@ -209,8 +209,9 @@ double FloatMatrix :: operator() (int i, int j) const
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size;
+    size = src.giveNumberOfRows();
 #if DEBUG
-    if ( ( size = src.giveNumberOfRows() ) != loc.giveSize() ) {
+    if ( ( size ) != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
     }
 
@@ -316,6 +317,60 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
         }
     }
 }
+
+
+void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+// Receiver = aMatrix * bMatrix
+{
+    int p;
+    double coeff;
+
+#  ifdef DEBUG
+    if ( aMatrix.nColumns != bMatrix.nRows ) {
+        OOFEM_ERROR("FloatMatrix::addProductOf : error in product A*B : dimensions do not match");
+    }
+#  endif
+
+    p = bMatrix.nColumns;
+    for ( int i = 1; i <= aMatrix.nRows; i++ ) {
+        for ( int j = 1; j <= p; j++ ) {
+            coeff = 0.;
+            for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
+                coeff += aMatrix.at(i, k) * bMatrix.at(k, j);
+            }
+
+            this->at(i, j) += coeff;
+        }
+    }
+}
+
+
+void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+// Receiver += aMatrix^T * bMatrix
+{
+    int p;
+    double coeff;
+
+#  ifdef DEBUG
+    if ( aMatrix.nRows != bMatrix.nRows ) {
+        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product A*B : dimensions do not match");
+    }
+#  endif
+
+    p = bMatrix.nColumns;
+    this->resize(aMatrix.nColumns, p);
+    for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
+        for ( int j = 1; j <= p; j++ ) {
+            coeff = 0.;
+            for ( int k = 1; k <= aMatrix.nRows; k++ ) {
+                coeff += aMatrix.at(k, i) * bMatrix.at(k, j);
+            }
+
+            this->at(i, j) += coeff;
+        }
+    }
+}
+
 
 void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
 // Receiver = vec1 * vec2^T
@@ -1700,11 +1755,13 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     if ( !isSquare() ) {
         OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
     }
-
+	
     // check for symmetry
+	double equalityTol = 1.0e-6;
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
-            if ( this->at(i, j) != this->at(j, i) ) {
+            //if ( this->at(i, j) != this->at(j, i) ) {
+			if ( abs( this->at(i, j) - this->at(j, i) ) > equalityTol ) {
                 OOFEM_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
             }
         }

@@ -443,19 +443,18 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
 // Assembles the array fe (typically, the load vector of a finite
 // element) to the receiver, using loc as location array.
 {
-    int i, ii, n;
-
+    int n = fe.giveSize();
 #  ifdef DEBUG
-    if ( ( n = fe.giveSize() ) != loc.giveSize() ) {
+    if (  n != loc.giveSize() ) {
         OOFEM_ERROR3("FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch",fe.giveSize(), loc.giveSize());
     }
-
-    this->checkSizeTowards(loc);
+    
+    //this->checkSizeTowards(loc); should not resize! 
 #  endif
 
-    n = fe.giveSize();
-    for ( i = 1; i <= n; i++ ) {
-        ii = loc.at(i);
+    
+    for ( int i = 1; i <= n; i++ ) {
+        int ii = loc.at(i);
         if ( ii ) { // if non 0 coefficient,
             this->at(ii) += fe.at(i);
         }

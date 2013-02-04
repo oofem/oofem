@@ -230,6 +230,14 @@ public:
      */
     void beProductOf(const FloatMatrix &a, const FloatMatrix &b);
     /**
+     * Adds to the receiver product of @f$ a \cdot b @f$ .
+     */
+    void addProductOf(const FloatMatrix &a, const FloatMatrix &b);
+    /**
+     * Adds to the receiver product of @f$ a^{\mathrm{T}} \cdot b @f$ .
+     */
+    void addTProductOf(const FloatMatrix &a, const FloatMatrix &b);
+    /**
      * Assigns to the receiver product of @f$ a^{\mathrm{T}} \cdot b @f$ .
      * Grows or shrinks if necessary.
      */
