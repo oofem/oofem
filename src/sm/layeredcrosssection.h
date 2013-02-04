@@ -131,7 +131,7 @@ public:
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double give(CrossSectionProperty a);
-
+    int giveNumberOfLayers();
     /// Returns the total thickness of all layers.
     double computeIntegralThick();
     void setupLayerMidPlanes();

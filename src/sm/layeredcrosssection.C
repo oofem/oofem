@@ -1265,8 +1265,11 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty)
 }
 
 
-
-
+int
+LayeredCrossSection :: giveNumberOfLayers()
+{
+    return this->numberOfLayers;
+}
 
 double
 LayeredCrossSection :: giveArea()

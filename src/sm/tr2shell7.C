@@ -84,21 +84,20 @@ Tr2Shell7 :: computeGaussPoints()
     if ( !integrationRulesArray ) {
         
         int nPointsTri = 6;			// points in the plane
-        //int nPointsThickness = 2;
         int nPointsEdge = 2;
         integrationRulesArray = new IntegrationRule * [ 3 ];
+
         // Midplane and thickness
-		//integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        //integrationRulesArray[0]->SetUpPointsOnWedge2(nPointsTri, nPointsThickness, _3dMat);
 
         // Midplane only (Mass matrix integrated analytically through the thickness)
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray[1]->SetUpPointsOnWedge2(nPointsTri, 1, _3dMat); 
-
+        integrationRulesArray[1]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); 
+        //integrationRulesArray[1]->setUpIntegrationPoints(_Triangle, nPointsTri, _3dMat); 
+        
         // Edge
         integrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        integrationRulesArray[2]->SetUpPointsOnLine2(nPointsEdge, _3dMat); 
-
+        //integrationRulesArray[2]->SetUpPointsOnLine2(nPointsEdge, _3dMat); 
+        integrationRulesArray[2]->setUpIntegrationPoints(_Line, nPointsEdge, _3dMat); 
 
         // Layered cross section
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(Tr2Shell7::giveCrossSection());
@@ -111,7 +110,7 @@ Tr2Shell7 :: computeGaussPoints()
 		// may need to extend this to handle Newton-Cotes integration in the thickness direction
         for( int i = 1; i <= numberOfLayers; i++ ){
             layerIntegrationRulesArray[ i-1 ]= new GaussIntegrationRule(1, this);
-            layerIntegrationRulesArray[ i-1 ]->SetUpPointsOnWedge2(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat); 
+            layerIntegrationRulesArray[ i-1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat); 
 
 		}
 
