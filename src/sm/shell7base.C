@@ -2099,6 +2099,7 @@ Shell7Base :: giveFieldSize(SolutionField fieldType)
 		return 1;
 	} else {
 		_error("giveFieldSize: unknown fieldType");
+        return 0;
 	}
 }
 

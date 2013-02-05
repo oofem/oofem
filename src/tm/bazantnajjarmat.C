@@ -85,7 +85,5 @@ BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp)
     } else {
         return tempState.at(1);
     }
-
-    return 0.0;
 }
 } // end namespace oofem

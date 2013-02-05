@@ -826,9 +826,9 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 }
 
 void
-LayeredCrossSection :: setupLayerMidPlanes(){
-
-    double layerTopZ = 0., currentZCoord = 0.,  bottom, top;
+LayeredCrossSection :: setupLayerMidPlanes()
+{
+    double layerTopZ = 0., bottom, top;
     this->layerMidZ.resize(this->numberOfLayers);
     
     bottom = -midSurfaceZcoordFromBottom;
