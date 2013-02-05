@@ -24,6 +24,7 @@ set (sm_element
     lattice2d.C
 	shell7base.C
 	tr2shell7.C
+    shell7basexfem.C
     )
 
 set (sm_crosssection

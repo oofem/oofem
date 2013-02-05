@@ -68,21 +68,15 @@ XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
 {
     this->emodel = emodel;
     this->domainIndex = domainIndex;
-    this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
-    this->geometryList = new AList< BasicGeometry >(0);
     this->fictPosition = new AList< IntArray >();
     numberOfEnrichmentItems = 0;
-    numberOfEnrichmentFunctions = 0;
-    numberOfGeometryItems = 0;
     dofIdPos = 0;
 }
 
 XfemManager :: ~XfemManager()
 {
     delete enrichmentItemList;
-    delete geometryList;
-    delete enrichmentFunctionList;
     delete fictPosition;
 }
 
@@ -92,18 +86,9 @@ XfemManager :: clear()
     delete enrichmentItemList;
     enrichmentItemList = NULL;
 
-    delete geometryList;
-    geometryList = NULL;
-
-    delete enrichmentFunctionList;
-    enrichmentFunctionList = NULL;
-
     delete fictPosition;
     fictPosition = NULL;
-
     numberOfEnrichmentItems = 0;
-    numberOfEnrichmentFunctions = 0;
-    numberOfGeometryItems = 0;
     dofIdPos = 0;
 }
 
@@ -111,27 +96,66 @@ XfemManager :: clear()
 
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
+// computeActiveEIforElement
 void XfemManager :: getInteractedEI(IntArray &answer, Element *elem)
 {
     int count = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
-        if ( this->giveEnrichmentItem(i)->interacts(elem) ) {
+        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
             count++;
-            answer.resize(count);
+            answer.resize(count); //is this the proper way to expand an array dynamically? 
             answer.at(count) = enrichmentItemList->at(i)->giveNumber();
         }
     }
 }
 
-bool XfemManager :: isInteracted(Element *elem)
+bool XfemManager :: isElementEnriched(Element *elem)
 {
-    IntArray interactedEnrItems;
-    getInteractedEI(interactedEnrItems, elem);
-    if ( interactedEnrItems.giveSize() > 0 ) {
+    // new
+    // Loop over all EI which asks if el is E. 
+    for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
+        if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
+            return true; 
+            break;   
+        };
+    } 
+    return false;
+}
+
+
+bool XfemManager :: isNodeEnriched(int nodeNumber)
+{// not trivial to answer. element may be enriched but not neccessarily the node. depends on the EI and the geom.
+    /*
+    XfemManager :: XfemType nodeEnrType = this->computeNodeEnrichmentType(nodeNumber);
+    if ( nodeEnrType != 0 ) {
         return true;
     } else {
         return false;
     }
+    */
+
+
+    // 1. Check if neigh. el. are enriched
+    // 2. if so, say that all nodes are E. even though some of the dofs may be prescribed to zero. A simple solution.
+    // Give elsements surrounding the given node
+    const IntArray *neighborEl = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
+
+    // Check if any of the elements are enriched
+    for ( int i = 1; i <= neighborEl->giveSize(); i++ ) {
+        Element *elem = emodel->giveDomain(domainIndex)->giveElement( neighborEl->at(i) );
+        if ( this->isElementEnriched(elem) ){
+            // Ask the EI if the node is enriched
+            //if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
+            //    return true; 
+            //break;   
+        }
+        
+    }
+
+
+    return false;
+
+
 }
 
 EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
@@ -146,38 +170,51 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     return NULL;
 }
 
-BasicGeometry *XfemManager :: giveGeometry(int n)
-// Returns the n-th geometry.
+
+// strange workflow in this method
+XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 {
-    if ( geometryList->includes(n) ) {
-        return geometryList->at(n);
-    } else {
-        OOFEM_ERROR2("giveGeometry: undefined geometry (%d)", n);
+    XfemType ret;
+    int intersectionCount = 0;
+
+    // elements surrounding one node
+    const IntArray *neighbours = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
+    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
+        IntArray interactedEnrEl;
+        // list of the EI's that are active in the element
+        getInteractedEI( interactedEnrEl, emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+        for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
+            // sums up number of intersections the geometry have with a given element
+            intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
+        }
+
+        interactedEnrEl.zero();
+    }
+    // very specialized
+    // only fo 2d. Wont wok if several ei are active in the neighboring elemént to a node.
+    // one node could also have several TYPEs, Tip + iclusion etc.
+    if ( intersectionCount == 0 ) {
+        ret = STANDARD;
+    } else if ( intersectionCount == 1 ) {
+        ret = TIP;
+    } else /*if ( intersectionCount > 1 )*/ {
+        ret = SPLIT;
     }
 
-    return NULL;
+    return ret;
 }
 
-EnrichmentFunction *XfemManager :: giveEnrichmentFunction(int n)
-// Returns the n-th enrichment function.
-{
-    if ( enrichmentFunctionList->includes(n) ) {
-        return enrichmentFunctionList->at(n);
-    } else {
-        OOFEM_ERROR2("giveEnrichmentFunction: undefined enrichmentFunction (%d)", n);
-    }
-
-    return NULL;
-}
 
 int XfemManager :: computeFictPosition()
-{
+{   // Stupid name!
     // gives for a particular node position of its fictitious node
     // it is supposed that the fictitious nodes are at the very end
     // this is supposed to be used for creation of locationArray for a dofmanager
     // the function returns simultaneously the last dof
+    //
+    // Set up additional dofs due to enrichment 
     int nrNodes = emodel->giveDomain(1)->giveNumberOfDofManagers();
-    int count = this->giveDomain()->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance);
+    int count = this->giveDomain()->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance); // total number of dofs in model
     IntArray edofs;
     for ( int j = 1; j <= nrNodes; j++ ) {
         IntArray *dofs = new IntArray();
@@ -201,41 +238,9 @@ int XfemManager :: computeFictPosition()
     return count;
 }
 
-bool XfemManager :: isEnriched(int nodeNumber)
-{
-    XfemManager :: XfemType nodeEnrType = this->computeNodeEnrichmentType(nodeNumber);
-    if ( nodeEnrType != 0 ) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
-XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
-{
-    XfemType ret;
-    int intersectionCount = 0;
-    const IntArray *neighbours = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        IntArray interactedEnrEl;
-        getInteractedEI( interactedEnrEl, emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
-        for ( int j = 1; j <= interactedEnrEl.giveSize(); j++ ) {
-            intersectionCount += this->giveEnrichmentItem( interactedEnrEl.at(j) )->computeNumberOfIntersectionPoints( emodel->giveDomain(domainIndex)->giveElement( neighbours->at(i) ) );
-        }
 
-        interactedEnrEl.zero();
-    }
 
-    if ( intersectionCount == 0 ) {
-        ret = STANDARD;
-    } else if ( intersectionCount == 1 ) {
-        ret = TIP;
-    } else /*if ( intersectionCount > 1 )*/ {
-        ret = SPLIT;
-    }
-
-    return ret;
-}
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir) {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
@@ -244,10 +249,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir) {
     if ( !ir->hasField(IFT_XfemManager_name, "xfemmanager") ) {
         OOFEM_ERROR("XfemManager::instanciateFrom: bad record");
     }
-
-    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro// Macro
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, IFT_XfemManager_numberOfEnrichmentItems, "numberofenrichmentitems"); // Macro
-    IR_GIVE_FIELD(ir, numberOfGeometryItems, IFT_XfemManager_numberOfGeometryItems, "numberofgeometryitems");
     return IRRT_OK;
 }
 
@@ -262,42 +264,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     BasicGeometry *ge;
     InputRecord *mir;
 
-    enrichmentFunctionList->growTo(numberOfEnrichmentFunctions);
-    for ( i = 0; i < numberOfEnrichmentFunctions; i++ ) {
-        mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, i + 1);
-        result = mir->giveRecordKeywordField(name);
-
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
-        }
-
-        ef = CreateUsrDefEnrichmentFunction( name.c_str(), i + 1, emodel->giveDomain(1) );
-        if ( ef == NULL ) {
-            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
-        }
-
-        enrichmentFunctionList->put(i + 1, ef);
-        ef->initializeFrom(mir);
-    }
-
-    geometryList->growTo(numberOfGeometryItems);
-    for ( i = 0; i < numberOfGeometryItems; i++ ) {
-        mir = dr->giveInputRecord(DataReader :: IR_geoRec, i + 1);
-        result = mir->giveRecordKeywordField(name);
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
-        }
-
-        ge = CreateUsrDefGeometry( name.c_str() );
-
-        if ( ge == NULL ) {
-            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown geometry (%s)", name.c_str() );
-        }
-
-        geometryList->put(i + 1, ge);
-        ge->initializeFrom(mir);
-    }
-
+    
     enrichmentItemList->growTo(numberOfEnrichmentItems);
     for ( i = 0; i < numberOfEnrichmentItems; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i + 1);
@@ -351,12 +318,7 @@ void XfemManager :: updateIntegrationRule()
     }
 }
 
-void XfemManager :: updateGeometry(TimeStep *tStep)
-{
-    for ( int i = 1; i <= this->enrichmentItemList->giveSize(); i++ ) {
-        enrichmentItemList->at(i)->updateGeometry(tStep);
-    }
-}
+
 
 #define XFEMMAN_STATE_SIZE 5
 
@@ -402,6 +364,7 @@ void XfemManager :: updateGeometry(TimeStep *tStep)
     }                                       \
   }
 
+#if 0
 contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
@@ -549,5 +512,7 @@ contextIOResultType XfemManager:: restoreContext(DataStream *stream, ContextMode
 
     return CIO_OK;
 }
+
+#endif
 
 } // end namespace oofem

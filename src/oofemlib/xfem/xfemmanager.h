@@ -59,6 +59,7 @@ class DataStream;
  * in the Domain and Node class.
  *
  * @author Ruzena Chamrova
+ * @author Jim Brouzoulis
  */
 class XfemManager
 {
@@ -69,17 +70,13 @@ protected:
     int domainIndex;
     /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
-    /// Geometry list.
-    AList< BasicGeometry > *geometryList;
-    /// Enrichment function list.
-    AList< EnrichmentFunction > *enrichmentFunctionList;
-    /// Map giving for a node a position of its fictitious node.
+
+    /// Map giving for a node a position of its fictitious node.    - What is this? //JB
     AList< IntArray > *fictPosition;
+
     /// Index of next available dofId from pool.
     int dofIdPos;
     int numberOfEnrichmentItems;
-    int numberOfEnrichmentFunctions;
-    int numberOfGeometryItems;
 
 public:
     enum XfemType {
@@ -91,40 +88,51 @@ public:
     ~XfemManager();
     /**
      * Gets interacted enrichment items for a particular element, the enrichment items
-     * are referenced by a number from the domain
+     * are referenced by a number from the domain - Don't like the name 'interacted' // JB
      */
     void getInteractedEI(IntArray &answer, Element *elem);
+    
     /// Checks whether an element is interacted.
-    bool isInteracted(Element *elem);
-    /// Checks whether a node is interacted.
-    bool isEnriched(int nodeNumber);
+    bool isElementEnriched(Element *elem);
+
+    /// Checks whether a node is interacted. or 'isEnriched'
+    bool isEnriched(int nodeNumber){ return isNodeEnriched(nodeNumber); };
+    bool isNodeEnriched(int nodeNumber);
+
     /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
+    
     /// Accessor.
-    BasicGeometry *giveGeometry(int n);
-    /// Accessor.
-    EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
-    /// Computes for each node position of its fictitious node.
+    
+    /// Computes for each node position of its fictitious node. - What is this used for?
     int computeFictPosition();
+
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
-    XfemType computeNodeEnrichmentType(int nodeNumber);
+    XfemType computeNodeEnrichmentType(int nodeNumber); // ask node for EI and then type. but could be several?
+
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
+
     /// Instantiates the Xfem components.
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return "XfemManager"; }
+    
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
+
     /// Gives Domain.
     Domain *giveDomain();
+
     /// Accessor.
     IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
-    /// Geometry update; calls individual enrichment item updateGeometry method.
-    void updateGeometry(TimeStep *tStep);
+
+
     /// Clear the receiver
     void clear();
+
+
     /**
      * Stores the state of receiver to output stream.
      * @param stream Context stream.
@@ -133,7 +141,8 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+   
+    //contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the state of receiver from output stream.
      * @param stream Context file.
@@ -142,7 +151,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    //contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 protected:
     /// Changes dofIdPos to next index.

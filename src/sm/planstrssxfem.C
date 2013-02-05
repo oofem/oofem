@@ -92,18 +92,29 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *er = xf->giveEnrichmentItem(i);
         int erndofs = er->giveNumberOfDofs();
-        // enrichment function at the gauss point
-        double efgp = er->giveEnrichmentFunction()->evaluateFunctionAt(gp, er);
+        
+        // enrichment function at the gauss point     
+        // should ask after specific EF in a loop
+        //double efgp = er->giveEnrichmentFunction()->evaluateFunctionAt(gp, er);
+        double efgp = er->giveEnrichmentFunction(1)->evaluateFunctionAt(gp, er);
+
         // derivative of enrichment function at the gauss point
         FloatArray efgpD;
-        er->giveEnrichmentFunction()->evaluateDerivativeAt(efgpD, gp, er);
+        //er->giveEnrichmentFunction()->evaluateDerivativeAt(efgpD, gp, er);
+        // should ask after specific EF in a loop
+        er->giveEnrichmentFunction(1)->evaluateDerivativeAt(efgpD, gp, er);
+
         // adds up the number of the dofs from an enrichment item
         // for each node
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
             if ( er->isDofManEnriched( dofManArray.at(j) ) ) {
                 FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
                 // ef is a FloatArray containing the value of EnrichmentFunction in a specific for all enriched dofs
-                double efnode = er->giveEnrichmentFunction()->evaluateFunctionAt(nodecoords, er);
+                
+                // should ask after specific EF in a loop
+                //double efnode = er->giveEnrichmentFunction()->evaluateFunctionAt(nodecoords, er);
+                double efnode = er->giveEnrichmentFunction(1)->evaluateFunctionAt(nodecoords, er);
+
                 // matrix to be added anytime a node is enriched
                 FloatMatrix *toAdd = new FloatMatrix(3, erndofs);
                 toAdd->zero();
@@ -223,7 +234,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    if ( xf->isInteracted(this) ) {
+    if ( xf->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
         StructuralMaterial *sm = ( StructuralMaterial * ) this->giveDomain()->giveMaterial( pir->giveMaterial() );
         sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
@@ -273,7 +284,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     FloatArray Epsilon;
     this->computeStrainVector(Epsilon, gp, stepN);
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    if ( xf->isInteracted(this) ) {
+    if ( xf->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
         StructuralMaterial *sm = ( StructuralMaterial * ) this->giveDomain()->giveMaterial( pir->giveMaterial() );
         sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
@@ -302,7 +313,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
     }
 
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    if ( !xf->isInteracted(this) ) {
+    if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
     } else {
         if ( numberOfIntegrationRules > 1 ) {
@@ -327,7 +338,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     }
 
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    if ( !xf->isInteracted(this) ) {
+    if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
     } else {
         if ( context.giveIntVarMode() == ISM_local ) {

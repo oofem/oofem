@@ -49,40 +49,76 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
     xmanager = xm;
     geometry = 0;
     enrichmentFunction = 0;
-}
 
+    //new JB
+    this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
+    this->geometryList = new AList< BasicGeometry >(0);
+    numberOfEnrichmentFunctions = 0;    
+    numberOfGeometryItems = 0;  
+}
+// remove - should ask for specific geom. can be multiple?
 BasicGeometry *EnrichmentItem :: giveGeometry()
 {
-    return xmanager->giveGeometry(this->geometry);
+    //return xmanager->giveGeometry(this->geometry);
+    //return this->giveGeometry();
+    return this->geometryList->at(1);
 }
 
-EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction()
+BasicGeometry *EnrichmentItem :: giveGeometry(int n)
+// Returns the n-th geometry.
 {
-    return xmanager->giveEnrichmentFunction(this->enrichmentFunction);
+    if ( this->geometryList->includes(n) ) {
+        return this->geometryList->at(n);
+    } else {
+        OOFEM_ERROR2("giveGeometry: undefined geometry (%d)", n);
+    }
+
+    return NULL;
 }
 
-IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
+
+
+EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
+// Returns the n-th geometry.
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
+    if ( enrichmentFunctionList->includes(n) ) {
+        return enrichmentFunctionList->at(n);
+    } else {
+        OOFEM_ERROR2("giveEnrichmentFunction: undefined enrichment function (%d)", n);
+    }
 
-    this->geometry = 0;
-    this->enrichmentFunction = 0;
-
-    IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    IR_GIVE_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
-    // this->setEnrichmentFunction(enrItemFunction);
-    // this should go into enrichmentfunction probably
-    // enrItemFunction->insertEnrichmentItem(this);
-    // enrItemFunction->setActive(this);
-    return IRRT_OK;
+    return NULL;
 }
 
-bool EnrichmentItem :: interacts(Element *element)
+
+
+bool EnrichmentItem :: isElementEnriched(Element *element) 
 {
     return this->giveGeometry()->intersects(element);
 }
 
+
+bool EnrichmentItem :: isDofManEnriched(int nodeNumber)
+{
+    bool ret = false;
+    // gets neighbouring elements of a node
+    const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
+    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
+        // for each of the neighbouring elements finds out whether it interacts with this EnrichmentItem
+        if ( this->isElementEnriched( domain->giveElement( neighbours->at(i) ) ) ) {
+            ret = true;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+
+
+
+// Spatial query metods
+#if 1
 bool EnrichmentItem :: isOutside(BasicGeometry *bg)
 {
     return this->giveGeometry()->isOutside(bg);
@@ -97,22 +133,33 @@ int EnrichmentItem :: computeNumberOfIntersectionPoints(Element *element)
 {
     return this->giveGeometry()->computeNumberOfIntersectionPoints(element);
 }
+#endif
 
-bool EnrichmentItem :: isDofManEnriched(int nodeNumber)
+
+
+
+
+IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 {
-    bool ret = false;
-    // gets neighbouring elements of a node
-    const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        // for each of the neighbouring elements finds out whether it interacts with this EnrichmentItem
-        if ( this->interacts( domain->giveElement( neighbours->at(i) ) ) ) {
-            ret = true;
-            break;
-        }
-    }
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    return ret;
+
+    this->geometry = 0;
+    this->enrichmentFunction = 0;
+    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro// Macro
+    IR_GIVE_FIELD(ir, numberOfGeometryItems, IFT_XfemManager_numberOfGeometryItems, "numberofgeometryitems");
+
+
+    IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
+    IR_GIVE_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
+    // this->setEnrichmentFunction(enrItemFunction);
+    // this should go into enrichmentfunction probably
+    // enrItemFunction->insertEnrichmentItem(this);
+    // enrItemFunction->setActive(this);
+    return IRRT_OK;
 }
+
 
 IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 {
@@ -124,4 +171,63 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     this->mat = this->giveDomain()->giveMaterial(material);
     return IRRT_OK;
 }
+
+
+int EnrichmentItem :: instanciateYourself(DataReader *dr)
+{
+    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    int i;
+    std :: string name;
+    EnrichmentItem *ei;
+    EnrichmentFunction *ef;
+    BasicGeometry *ge;
+    InputRecord *mir;
+
+
+    this->enrichmentFunctionList->growTo(numberOfEnrichmentFunctions);
+    for ( i = 1; i <= this->numberOfEnrichmentFunctions; i++ ) {
+        mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, i);
+        result = mir->giveRecordKeywordField(name);
+
+        if ( result != IRRT_OK ) {
+            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+        }
+        
+        ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xmanager->giveDomain() );
+        if ( ef == NULL ) {
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
+        }
+
+        enrichmentFunctionList->put(i, ef);
+        ef->initializeFrom(mir);
+    }
+
+    
+    geometryList->growTo(numberOfGeometryItems);
+    for ( i = 1; i <= numberOfGeometryItems; i++ ) {
+        mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
+        result = mir->giveRecordKeywordField(name);
+        if ( result != IRRT_OK ) {
+            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+        }
+
+        ge = CreateUsrDefGeometry( name.c_str() );
+
+        if ( ge == NULL ) {
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown geometry (%s)", name.c_str() );
+        }
+
+        geometryList->put(i, ge);
+        ge->initializeFrom(mir);
+    }
+
+#ifdef VERBOSE
+    VERBOSE_PRINT0("Instanciated enrichment items ", nnode)
+#endif
+    return 1;
+}
+
+
+
 } // end namespace oofem

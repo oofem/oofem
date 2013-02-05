@@ -55,7 +55,7 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triang
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
     XfemManager *xf = this->element->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    if ( xf->isInteracted(element) ) {
+    if ( xf->isElementEnriched(element) ) {
         IntArray interactedEI;
         xf->getInteractedEI(interactedEI, element);
         AList< Triangle >triangles;

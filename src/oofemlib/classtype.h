@@ -198,7 +198,7 @@ enum classType {
     LatticeMaterialStatusClass,
 	Shell7BaseClass,
 	Tr2Shell7Class,
-
+    Shell7BaseXFEMClass,
     MacroLSpaceClass,
     MicroMaterialClass,
 

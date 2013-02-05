@@ -77,6 +77,7 @@
 // #include "tr_dirshell.h"
  #include "shell7base.h"
  #include "tr2shell7.h"
+ #include "shell7basexfem.h"
  #include "rershell.h"
  #include "quad1mindlin.h"
  #include "interfaceelem2dquad.h"

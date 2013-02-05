@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "flotmtrx.h"
 #include "enrichmentfunction.h"
+#include "layeredcrosssection.h"
 
 namespace oofem {
 class BasicGeometry;
@@ -52,6 +53,7 @@ class BasicGeometry;
  * Each EnrichmentItem keeps its DOF labels (assigned/allocated by XFemManager, its geometry representation, and
  * keeps the list of its EnrichmentFunctions.
  * @author chamrova
+ * @author Jim Brouzoulis
  */
 class EnrichmentItem : public FEMComponent
 {
@@ -60,51 +62,80 @@ public:
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const { return "EnrichmentItem"; }
 
-    /// Accessor.
+    /// Accessor. should there be support for several geom. objects describing one EI, probably yes. Ex. inclusion given as union of several geom.s?
+    BasicGeometry *giveGeometry(int i);
     BasicGeometry *giveGeometry();
-    /// Checks whether EnrichmentItem interacts element.
-    bool interacts(Element *element);
-    /// Computes intersection points with Element.
+
+    // Spatial search queries
+    
+    /// Computes intersection points with Element. - based on the geometry of the enrichment
     void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element);
+    
     /// Computes number intersection points with Element.
     int computeNumberOfIntersectionPoints(Element *element);
+    
+    /// Checks whether a Geometry is inside or outside. - what if the geometry is not closed? like a set of segments
+    bool isOutside(BasicGeometry *bg);
+
+
     /// Accessor.
-    EnrichmentFunction *giveEnrichmentFunction();
+    //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
+    EnrichmentFunction *giveEnrichmentFunction(int n);
+
     /// Gives number of dofs.
-    int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
+    //int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
+    int giveNumberOfDofs() { return 1; } // should loop over all EF and ask them - what should be meant. active dofs? total or enriched?
+
     /// Sets DofId Array of an Enrichment Item.
     void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
     /// Accessor.
     IntArray *getDofIdArray() { return & dofsId; }
+
     /// Finds out whether a DofManager is enriched.
     bool isDofManEnriched(int nodeNumber);
-    /// Checks whether a Geometry is inside or outside.
-    bool isOutside(BasicGeometry *bg);
+    /// Checks whether EnrichmentItem interacts element. - check if el. is enriched by this particular EI
+   // bool interacts(Element *element){ return this->isElementEnriched(element); }; // old method
+    bool isElementEnriched(Element *element); 
+
+
+    
     virtual Material *giveMaterial() { return NULL; }
+    
     /// Updates receiver geometry to the state reached at given time step.
+    /// Geometry update; calls individual enrichment item updateGeometry method.
     virtual void updateGeometry(TimeStep *tStep) {}
+        
 protected:
     /// Link to associated Xfem manager.
     XfemManager *xmanager;
     /// Geometry associated with EnrichmentItem.
     int geometry;
-    /// EnrichmentFunction associated with the EnrichmentItem.
+    /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
-    /// Additional dofIds from Enrichment.
+    /// Additional dofIds from Enrichment. - depends on problem type and spatial dimension
     IntArray dofsId;
+
+    // New -JB
+    /// Geometry list.
+    AList< BasicGeometry > *geometryList;
+    /// Enrichment function list.
+    AList< EnrichmentFunction > *enrichmentFunctionList;
+    int numberOfEnrichmentFunctions;
+    int numberOfGeometryItems;
 };
 
 /** Concrete representation of EnrichmentItem. */
-class CrackTip : public EnrichmentItem
+class CrackTip : public EnrichmentItem // only for 2D. Only the tip element belong to this
 {
 public:
     CrackTip(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
 };
 
 /** Concrete representation of EnrichmentItem. */
-class CrackInterior : public EnrichmentItem
+class CrackInterior : public EnrichmentItem // rest of the crack el. that does not contain any tip 
 {
 public:
     CrackInterior(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
@@ -122,5 +153,22 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Material *giveMaterial() { return mat; }
 };
+
+
+class Delamination : public EnrichmentItem, LayeredCrossSection // rest of the crack el. that does not contain any tip 
+{
+public:
+    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain), LayeredCrossSection(n, aDomain){}
+    int numberOfDelaminations;
+    IntArray delaminatedLayers;
+
+};
+
+
+
 } // end namespace oofem
+
+
+
+
 #endif  // enrichmentitem_h
