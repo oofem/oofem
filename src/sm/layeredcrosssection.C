@@ -984,11 +984,10 @@ LayeredCrossSection :: giveSlaveGaussPointNew(GaussPoint *masterGp, int i)
 
 
 void
-LayeredCrossSection :: setupZCoordsInGaussPoint(LayeredCrossSection *layeredCS, IntegrationRule **layerIntegrationRulesArray)
-//
-// return the i-th slave gauss point of master gp
-// if slave gp don't exists - create them
-//
+LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layeredCS, IntegrationRule **layerIntegrationRulesArray)
+/*
+  Maps the local z-coords in the layers [-1,1] to the corresponding z-coord in the local shell cs.
+*/
 {
 	double totalThickness = layeredCS->computeIntegralThick();
 	for( int layer = 1; layer <= numberOfLayers; layer++ ){
@@ -1003,64 +1002,10 @@ LayeredCrossSection :: setupZCoordsInGaussPoint(LayeredCrossSection *layeredCS, 
 			double xi = xiMid_i; 
 			double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
 			double xinew = xi+xi2;
-			//gp->coordinates->at(3) = xinew;
 			layerIntegrationRulesArray [layer-1]->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
 			double temp=0.;
 			}
 		}
-
-#if 0
-        // create new slave record in masterGp
-        // (requires that this is friend of gp)
-        double currentZTopCoord = 0., currentZCoord = 0.,  bottom, top;
-        double layerTopZ = 0., layerMidZ = 0.;
-        FloatArray *zCoord, *masterCoords = masterGp->giveCoordinates();
-        // resolve slave material mode
-        MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
-        slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
-
-        this->computeIntegralThick(); // ensure that total thic has been conputed
-        bottom = -midSurfaceZcoordFromBottom;
-        top    = totalThick - midSurfaceZcoordFromBottom;
-
-        masterGp->numberOfGp = this->numberOfLayers;                        // Generalize to multiple integration points per layer
-        masterGp->gaussPointArray = new GaussPoint * [ numberOfLayers ];
-        currentZTopCoord = -midSurfaceZcoordFromBottom;
-
-        for ( int j = 0; j < numberOfLayers; j++ ) {
-            currentZTopCoord += this->layerThicks.at(j + 1);
-            currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
-            
-            zCoord = new FloatArray(3);
-            zCoord->zero();
-
-
-            
-            layerTopZ += this->layerThicks.at(j + 1);
-            layerMidZ = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
-
-            zCoord->at(3) = ( 2.0 * ( layerMidZ ) - top - bottom ) / ( top - bottom ); // natural coord for the layer midplane
-            double weight =1.0;
-            masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, weight, slaveMode);
-            
-            
-            slave = masterGp->gaussPointArray [ i ];
-            slave->numberOfGp = this->numberOfIntegrationPoints;
-            slave->gaussPointArray = new GaussPoint * [ this->numberOfIntegrationPoints ];
-
-            // loop over the integration points in each layer
-            for( int k = 0; k < this->numberOfIntegrationPoints; k++ ){
-
-                // get points from integration rule Lobatto, Gauss or Newton-Cotes
-                // ...
-               
-                //integrationRulesArray[2]->SetUpPointsOnLine2(nPointsEdge, _3dMat); 
-                //slave->gaussPointArray[ k ]->SetUpPointsOnLine2(2, _3dMat); 
-                slave->gaussPointArray [ k ] = new GaussPoint(masterGp->giveIntegrationRule(), k + 1, zCoord, weight, slaveMode);
-            
-            }
-#endif
-
 
 }
 
