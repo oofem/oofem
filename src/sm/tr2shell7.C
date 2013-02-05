@@ -47,23 +47,41 @@
 
 namespace oofem {
     FEI3dTrQuad Tr2Shell7 :: interpolation;
-#if 1
+
 	IntArray Tr2Shell7 :: ordering_phibar(18);
 	IntArray Tr2Shell7 :: ordering_m(18);
 	IntArray Tr2Shell7 :: ordering_gam(6);
     IntArray Tr2Shell7 :: ordering_all(42);
-	
+	IntArray Tr2Shell7 :: ordering_gr(42);
+    IntArray Tr2Shell7 :: ordering_gr_edge(21);
 	bool Tr2Shell7 :: __initialized = Tr2Shell7 :: initOrdering();
-#endif
-    FloatMatrix testmatrix(42,42);
+    
 
 
 Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
 {
-	//this->numberOfIntegrationRules = 1;
 	this->numberOfDofMans = 6;
-    //this->numberOfGaussPoints = 1;
 }
+
+IntArray
+Tr2Shell7 :: giveOrdering(SolutionField fieldType) const {
+    if ( fieldType == Midplane ) {
+		return this->ordering_phibar;
+	} else if ( fieldType == Director  )   {
+        return this->ordering_m;
+	} else if ( fieldType == InhomStrain  )   {
+        return this->ordering_gam;
+    } else if ( fieldType == All  )   {
+        return this->ordering_all;
+    } else if ( fieldType == AllInv  )   {
+        return this->ordering_gr;
+    } else if ( fieldType == EdgeInv  )   {
+        return this->ordering_gr_edge;
+	} else {
+		_error("giveOrdering: unknown fieldType");
+	}
+}
+
 
 void 
 Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords){
@@ -92,12 +110,12 @@ Tr2Shell7 :: computeGaussPoints()
         // Midplane only (Mass matrix integrated analytically through the thickness)
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
         integrationRulesArray[1]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); 
-        //integrationRulesArray[1]->setUpIntegrationPoints(_Triangle, nPointsTri, _3dMat); 
+        
         
         // Edge
         integrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        //integrationRulesArray[2]->SetUpPointsOnLine2(nPointsEdge, _3dMat); 
-        integrationRulesArray[2]->setUpIntegrationPoints(_Line, nPointsEdge, _3dMat); 
+        integrationRulesArray[2]->SetUpPointsOnLine(nPointsEdge, _3dMat); 
+        
 
         // Layered cross section
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(Tr2Shell7::giveCrossSection());
@@ -114,7 +132,7 @@ Tr2Shell7 :: computeGaussPoints()
 
 		}
 
-		layeredCS->setupZCoordsInGaussPoint(layeredCS, layerIntegrationRulesArray);
+		layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
 		
 
     }

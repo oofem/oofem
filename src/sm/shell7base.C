@@ -47,16 +47,6 @@
 
 namespace oofem {
 
-    #if 1
-IntArray Shell7Base :: ordering_phibar(18);
-IntArray Shell7Base :: ordering_m(18);
-IntArray Shell7Base :: ordering_gam(6);
-IntArray Shell7Base :: ordering_all(42);
-IntArray Shell7Base :: ordering_gr(42);
-IntArray Shell7Base :: ordering_gr_edge(21);
-bool Shell7Base :: __initialized = Shell7Base :: initOrdering();
-    #endif
-
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface()
 {
 
@@ -249,28 +239,31 @@ Shell7Base :: edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, cons
 
 void
 Shell7Base :: setupInitialNodeDirectors()
-{       // If the directors are not present in the input file, then they should be approximated as the normal to the initial surface.
-	FloatMatrix dNdxi;
-	FloatArray M, G1, G2, lcoords, nodeLocalXiCoords, nodeLocalEtaCoords;
+{   /* If the directors are not present in the input file, then they should be approximated as  
+       normal to the initial surface. (No support in the input file at the moment.)
+    */
 
 	// Compute directors as normals to the surface
+    
+	FloatArray M(3), G1(3), G2(3), lcoords(2), nodeLocalXiCoords, nodeLocalEtaCoords;
 
-	// Set the local coordinates for the element nodes - all at once
+    // Give the local coordinates for the element nodes - all at once
 	this->giveLocalNodeCoords(nodeLocalXiCoords, nodeLocalEtaCoords);
-	lcoords.resize(2); G1.resize(3); G2.resize(3); M.resize(3);
-	this->initialNodeDirectors.resize(6);
+    int nDofMan = this->giveNumberOfDofManagers();
+	this->initialNodeDirectors.resize(nDofMan);
 
-	for (int node = 1; node <= this->giveNumberOfDofManagers(); node++ ) {
+	for (int node = 1; node <= nDofMan; node++ ) {
 		this->initialNodeDirectors[node-1].resize(3);
 		this->initialNodeDirectors[node-1].zero();
 
 		lcoords.at(1) = nodeLocalXiCoords.at(node);
 		lcoords.at(2) = nodeLocalEtaCoords.at(node);
 		FEInterpolation3d *fei = static_cast< FEInterpolation3d* >(this->giveInterpolation());
+        FloatMatrix dNdxi;
 		fei->evaldNdxi(dNdxi, lcoords, FEIElementGeometryWrapper(this));
 
 		G1.zero(); G2.zero(); M.zero();
-		for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) { // base vectors of the initial surface
+		for ( int i = 1; i <= nDofMan; i++ ) { // base vectors of the initial surface
 			FloatArray *nodeI = this->giveNode(i)->giveCoordinates();
 			G1.add( dNdxi.at(i,1), *nodeI );
 			G2.add( dNdxi.at(i,2), *nodeI );
@@ -596,6 +589,10 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
 	K11.symmetrized();
 	K22.symmetrized();
 	K33.symmetrized();
+
+    IntArray ordering_phibar = giveOrdering(Midplane);
+    IntArray ordering_m = giveOrdering(Director);
+    IntArray ordering_gam = giveOrdering(InhomStrain);
 
 	answer.assemble(K11, ordering_phibar, ordering_phibar);
 	answer.assemble(K12, ordering_phibar, ordering_m);
@@ -967,7 +964,9 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 
 		}
 	}
-
+    IntArray ordering_phibar = giveOrdering(Midplane);
+    IntArray ordering_m = giveOrdering(Director);
+    IntArray ordering_gam = giveOrdering(InhomStrain);
 	answer.assemble(f1, ordering_phibar);
 	answer.assemble(f2, ordering_m);
 	answer.assemble(f3, ordering_gam);
@@ -1143,6 +1142,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep){
 	int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
 	answer.resize(ndofs, ndofs);
 	answer.zero();
+    IntArray ordering_all = giveOrdering(All);
 	answer.assemble(temp, ordering_all);
 	answer.symmetrized();
 
@@ -1286,7 +1286,9 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
 		answer.resize(ndofs, ndofs);
 		answer.zero();
 
-
+        IntArray ordering_phibar = giveOrdering(Midplane);
+        IntArray ordering_m = giveOrdering(Director);
+        IntArray ordering_gam = giveOrdering(InhomStrain);
 		answer.assemble(M11, ordering_phibar, ordering_phibar);
 		answer.assemble(M12, ordering_phibar, ordering_m);
 		answer.assemble(M13, ordering_phibar, ordering_gam);
@@ -1449,6 +1451,7 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 		this->giveSurfaceDofMapping(mask, 1); // same dofs regardless of iSurf
 		answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
 		answer.zero();
+        IntArray ordering_all = giveOrdering(All);
 		answer.assemble(force, ordering_all);
 
 		return;
@@ -1774,7 +1777,7 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
 	this->giveInitialSolutionVector(answer);
 	FloatArray temp;
 	this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
-	answer.assemble(temp,ordering_gr);
+    answer.assemble(temp,this->giveOrdering(AllInv));
 }
 
 
@@ -1805,7 +1808,7 @@ Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge,
 	this->edgeGiveInitialSolutionVector(answer, iedge);
 	FloatArray temp;
 	this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, temp);
-	answer.assemble(temp,ordering_gr_edge);
+	answer.assemble(temp,this->giveOrdering(EdgeInv));
 
 }
 
