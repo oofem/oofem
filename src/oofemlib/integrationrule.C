@@ -316,22 +316,22 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
     switch ( mode ) {
     case _Line:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, matMode) );
 
     case _Triangle:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriangle(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriangle(nPoints, matMode) );
 
     case _Square:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnSquare(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnSquare(nPoints, matMode) );
 
     case _Cube:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnCube(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnCube(nPoints, matMode) );
 
     case _Tetrahedra:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, matMode) );
 
     case _Wedge:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnWedge(nPoints, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnWedge(nPoints, matMode) );
 
     default:
         OOFEM_ERROR("IntegrationRule::setUpIntegrationPoints - unknown mode");
@@ -348,7 +348,7 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 
     switch ( mode ) {
     case _Embedded2dLine:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, & gaussPointArray, coords) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords) );
 
     default:
         OOFEM_ERROR("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");
