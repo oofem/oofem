@@ -55,14 +55,14 @@ PatchIntegrationRule :: ~PatchIntegrationRule()
 }
 
 int
-PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode, GaussPoint ***arry)
+PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
-    numberOfIntegrationPoints = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode, arry);
+    numberOfIntegrationPoints = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
     firstLocalStrainIndx = 1;
     lastLocalStrainIndx = 3;
     // convert patch coordinates into element based, update weights accordingly
     for ( int j = 0; j <  numberOfIntegrationPoints; j++ ) {
-        GaussPoint *gp = ( * arry ) [ j ];
+        GaussPoint *gp = ( this->gaussPointArray ) [ j ];
         patch->convertGPIntoParental(gp); // convert coordinates into parental
         Element *elg = ( Element * ) patch->giveParent();
         double parentArea = elg->computeArea();

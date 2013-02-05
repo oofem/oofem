@@ -56,7 +56,7 @@ public:
     PatchIntegrationRule(int n, Element *e, Patch *p);
     /// Destructor.
     virtual ~PatchIntegrationRule();
-    virtual int SetUpPointsOnTriangle(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnTriangle(int, MaterialMode);
     int giveMaterial() { return this->patch->giveMaterial(); }
     Patch *givePatch() { return this->patch; }
 
