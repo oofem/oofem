@@ -14,10 +14,6 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "2012")
 set (oofem_EMAIL "info@oofem.org")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
-
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
 	set (CMAKE_BUILD_TYPE Debug)
@@ -26,7 +22,13 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4100 -wd4996 -wd4706 -wd4512")
+else ()
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
+
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
 #######################################################################
 ######################## Custom paths #################################
