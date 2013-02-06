@@ -33,6 +33,7 @@
  */
 
 #include "error.h"
+#include "compiler.h" // required for portable strncasecmp
 #include "chartype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
