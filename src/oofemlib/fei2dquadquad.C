@@ -103,32 +103,25 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 void
 FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(8, 2);
-    FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
-    FloatArray dndxi(8), dndeta(8);
+    FloatMatrix jacobianMatrix, inv, dn;
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     inv.beInverseOf(jacobianMatrix);
 
-    this->giveDerivativeXi(dndxi, lcoords);
-    this->giveDerivativeEta(dndeta, lcoords);
-
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(i, 1) = dndxi.at(i) * inv.at(1, 1) + dndeta.at(i) * inv.at(1, 2);
-        answer.at(i, 2) = dndxi.at(i) * inv.at(2, 1) + dndeta.at(i) * inv.at(2, 2);
-    }
+    this->giveDerivatives(dn, lcoords);
+    answer.beProductTOf(dn, inv);
 }
 
 void
 FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {
-    FloatArray n(8);
+    FloatArray n;
     answer.resize(2);
     answer.zero();
 
     this->evalN(n, lcoords, cellgeo);
 
-    for ( int i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= n.giveSize(); i++ ) {
         answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
         answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
     }
@@ -201,8 +194,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 double
 FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix(2, 2);
-
+    FloatMatrix jacobianMatrix;
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     return jacobianMatrix.giveDeterminant();
 }
@@ -228,7 +220,11 @@ void
 FEI2dQuadQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dQuadQuad :: edgeEvaldNds: not implemented");
+    double ksi = lcoords.at(1);
+    answer.resize(3);
+    answer.at(1) = ksi - 0.5;
+    answer.at(2) = ksi + 0.5;
+    answer.at(3) = ksi * 2.0;
 }
 
 void
@@ -273,7 +269,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 8;
     } else {
-        OOFEM_ERROR2("FEI2dQuadQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR2("FEI2dQuadQuad :: computeEdgeMapping: wrong edge number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;
@@ -309,60 +305,51 @@ FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
 // Computes it if it does not exist yet.
 {
     double x, y;
-    FloatArray dxi, deta;
+    FloatMatrix dn;
 
     jacobianMatrix.resize(2, 2);
     jacobianMatrix.zero();
 
-    this->giveDerivativeXi(dxi, lcoords);
-    this->giveDerivativeEta(deta, lcoords);
+    this->giveDerivatives(dn, lcoords);
 
-    for ( int i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(xind);
         y = cellgeo.giveVertexCoordinates(i)->at(yind);
 
-        jacobianMatrix.at(1, 1) += dxi.at(i) * x;
-        jacobianMatrix.at(1, 2) += dxi.at(i) * y;
-        jacobianMatrix.at(2, 1) += deta.at(i) * x;
-        jacobianMatrix.at(2, 2) += deta.at(i) * y;
+        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
     }
 }
 
 
 void
-FEI2dQuadQuad :: giveDerivativeXi(FloatArray &n, const FloatArray &lc)
+FEI2dQuadQuad :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
 {
     double ksi, eta;
     ksi = lc.at(1);
     eta = lc.at(2);
-    n.resize(8);
+    dn.resize(8, 2);
 
+    // dn/dxi
+    dn.at(1,1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
+    dn.at(2,1) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
+    dn.at(3,1) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
+    dn.at(4,1) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
+    dn.at(5,1) = -ksi * ( 1. + eta );
+    dn.at(6,1) = -0.5 * ( 1. - eta * eta );
+    dn.at(7,1) = -ksi * ( 1. - eta );
+    dn.at(8,1) =  0.5 * ( 1. - eta * eta );
 
-    n.at(1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
-    n.at(2) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
-    n.at(3) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
-    n.at(4) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
-    n.at(5) = -ksi * ( 1. + eta );
-    n.at(6) = -0.5 * ( 1. - eta * eta );
-    n.at(7) = -ksi * ( 1. - eta );
-    n.at(8) =  0.5 * ( 1. - eta * eta );
+    dn.at(1,2) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
+    dn.at(2,2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
+    dn.at(3,2) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
+    dn.at(4,2) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
+    dn.at(5,2) =  0.5 * ( 1. - ksi * ksi );
+    dn.at(6,2) = -eta * ( 1. - ksi );
+    dn.at(7,2) = -0.5 * ( 1. - ksi * ksi );
+    dn.at(8,2) = -eta * ( 1. + ksi );
 }
 
-void
-FEI2dQuadQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
-{
-    double ksi, eta;
-    ksi = lc.at(1);
-    eta = lc.at(2);
-    n.resize(8);
-
-    n.at(1) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
-    n.at(2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
-    n.at(3) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
-    n.at(4) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
-    n.at(5) =  0.5 * ( 1. - ksi * ksi );
-    n.at(6) = -eta * ( 1. - ksi );
-    n.at(7) = -0.5 * ( 1. - ksi * ksi );
-    n.at(8) = -eta * ( 1. + ksi );
-}
 } // end namespace oofem

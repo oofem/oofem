@@ -159,6 +159,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dN_V(30);
     FloatMatrix dN, B(4, 60);
+    double r_vol, pressure;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
     FloatArray momentum(30), conservation(4);
@@ -181,17 +182,14 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
         }
 
-        //FluidDynamicMaterialStatus *ms = static_cast<FluidDynamicMaterialStatus*>(mat->giveStatus(gp));
-        //FloatArray devStress = ms->giveDeviatoricStressVector();
         epsp.beProductOf(B, a_velocity);
-        mat->computeDeviatoricStressVector(devStress, gp, epsp, tStep);
-        double pressure = Nh.dotProduct(a_pressure);
-        double w = dN_V.dotProduct(a_velocity);
+        pressure = Nh.dotProduct(a_pressure);
+        mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
         BTs.beTProductOf(B, devStress);
 
         momentum.add(dV, BTs);
         momentum.add(-pressure*dV, dN_V);
-        conservation.add(-w*dV, Nh);
+        conservation.add(r_vol*dV, Nh);
     }
 
     answer.resize(34);
@@ -202,7 +200,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
 
 void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 {
-    int i, load_number, load_id;
+    int load_number, load_id;
     Load *load;
     bcGeomType ltype;
     FloatArray vec;
@@ -210,7 +208,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
     answer.resize(15);
     answer.zero();
-    for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
+    for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         load_number = this->boundaryLoadArray.at(2 * i - 1);
         load_id = this->boundaryLoadArray.at(2 * i);
         load = this->domain->giveLoad(load_number);
@@ -223,7 +221,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     }
 
     nLoads = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
+    for ( int i = 1; i <= nLoads; i++ ) {
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
@@ -306,7 +304,7 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
         }
 
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
-    } else   {
+    } else {
         OOFEM_ERROR("Tet21Stokes :: Strange boundary condition type");
     }
 }
@@ -316,11 +314,11 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatMatrix B(6, 60), BTCB(30, 30), G(30, 4), C, dN, GT, Ia;
-    FloatArray *lcoords, dN_V(30), Nlin;
+    FloatMatrix B(6, 60), EdB, K, G, Dp, DvT, C, Ed, dN;
+    FloatArray *lcoords, dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;
+    double Cp;
 
-    BTCB.zero();
-    G.zero();
+    B.zero();
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         // Compute Gauss point and determinant at current element
@@ -339,21 +337,37 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
             dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
         }
 
-        // Just so that the stress is stored in the material status.
-        mat->giveDeviatoricStiffnessMatrix(C, TangentStiffness, gp, tStep);
-        Ia.beProductOf(C, B); // tmp.
-        BTCB.plusProductSymmUpper(B, Ia, dV);
-        G.plusDyadUnsym(dN_V, Nlin, -dV);
-    }
-    BTCB.symmetrized();
+        // Computing the internal forces should have been done first.
+        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
+        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
+        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
+        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
 
-    GT.beTranspositionOf(G);
+        EdB.beProductOf(Ed,B);
+        K.plusProductSymmUpper(B, EdB, dV);
+        G.plusDyadUnsym(dN_V, Nlin, -dV);
+        C.plusDyadSymmUpper(Nlin, Nlin, Cp*dV);
+
+        tmpA.beTProductOf(B, Ep);
+        Dp.plusDyadUnsym(tmpA, Nlin, dV);
+
+        tmpB.beTProductOf(B, Cd);
+        DvT.plusDyadUnsym(Nlin, tmpB, dV);
+    }
+    K.symmetrized();
+    C.symmetrized();
+    FloatMatrix GTDvT, GDp;
+    GTDvT.beTranspositionOf(G);
+    GTDvT.add(DvT);
+    GDp = G;
+    GDp.add(Dp);
 
     answer.resize(34, 34);
     answer.zero();
-    answer.assemble(BTCB, this->momentum_ordering);
-    answer.assemble(G, this->momentum_ordering, this->conservation_ordering);
-    answer.assemble(GT, this->conservation_ordering, this->momentum_ordering);
+    answer.assemble(K, this->momentum_ordering);
+    answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
+    answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
+    answer.assemble(C, this->conservation_ordering, this->conservation_ordering);
 }
 
 FEInterpolation *Tet21Stokes :: giveInterpolation()
@@ -375,7 +389,7 @@ void Tet21Stokes :: updateYourself(TimeStep *tStep)
 
 Interface *Tet21Stokes :: giveInterface(InterfaceType it)
 {
-    switch (it) {
+    switch ( it ) {
         case NodalAveragingRecoveryModelInterfaceType:
             return static_cast< NodalAveragingRecoveryModelInterface * >(this);
         case SpatialLocalizerInterfaceType:
@@ -401,12 +415,12 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this));
     answer.resize(4);
     answer.zero();
-    for (int i = 1; i <= n.giveSize(); i++) {
+    for ( int i = 1; i <= n.giveSize(); i++ ) {
         answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
         answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
         answer(2) += n.at(i)*this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
     }
-    for (int i = 1; i <= n_lin.giveSize(); i++) {
+    for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
         answer(3) += n_lin.at(i)*this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
     }
 }
@@ -416,7 +430,7 @@ int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTyp
     bool ok;
     FloatArray lcoords, n, n_lin;
     ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if (!ok) {
+    if ( !ok ) {
         answer.resize(0);
         return false;
     }
@@ -458,7 +472,7 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
         answer.resize(1);
         if ( node <= 4 ) {
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-        } else   {
+        } else {
             double a, b;
             if ( node == 5 ) {
                 a = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
