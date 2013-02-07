@@ -626,7 +626,7 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, j, maxComponents;
+    int i, j, maxComponents=0;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     switch ( gp->giveMaterialMode() ) {

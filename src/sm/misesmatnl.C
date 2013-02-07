@@ -171,7 +171,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     elem->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
     double xtarget = coords.at(1);
 
-    double w, wsum = 0., x, xprev, damage, damageprev;
+    double w, wsum = 0., x, xprev, damage, damageprev=0.0;
     Element *nearElem;
 
     // process the list from the target to the end

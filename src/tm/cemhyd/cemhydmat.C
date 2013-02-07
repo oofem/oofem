@@ -176,7 +176,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp)
 double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double conduct;
+    double conduct = 0.0;
 
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -207,7 +207,7 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double capacityConcrete;
+    double capacityConcrete = 0.0;
 
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -238,7 +238,7 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
 double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double concreteBulkDensity;
+    double concreteBulkDensity = 0.0;
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }

@@ -655,12 +655,12 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
 
     double tempEquivStrain;
     double deltaPlasticStrainNorm;
-    double tempDamageTension;
-    double tempDamageCompression;
+    double tempDamageTension=0.0;
+    double tempDamageCompression=0.0;
 
-    double tempKappaDTension, tempKappaDCompression;
-    double tempKappaDTensionOne, tempKappaDTensionTwo;
-    double tempKappaDCompressionOne, tempKappaDCompressionTwo;
+    double tempKappaDTension=0.0, tempKappaDCompression=0.0;
+    double tempKappaDTensionOne=0.0, tempKappaDTensionTwo=0.0;
+    double tempKappaDCompressionOne=0.0, tempKappaDCompressionTwo = 0.0;
 
     double rateFactor;
 

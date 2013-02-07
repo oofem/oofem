@@ -462,7 +462,7 @@ MisesMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
-    MaterialMode plReturnMode;
+    MaterialMode plReturnMode = _Unknown;
     if ( mode == _1dMatGrad ) {
         plReturnMode = _1dMat;
     } else if ( mode == _PlaneStrainGrad ) {

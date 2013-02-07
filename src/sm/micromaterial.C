@@ -257,7 +257,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     EngngModel *microEngngModel = microDomain->giveEngngModel();
     DofManager *DofMan;
     Dof *dof;
-    CharType type;
+    CharType type = UnknownCharType;
 
     if ( rMode == TangentStiffness ) {
         type = TangentStiffnessMatrix;
@@ -665,7 +665,9 @@ int MicroMaterial :: giveDofEquationNumber(Dof *dof) const {
         answer =  microInternalDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     default:
+        answer = 0;
         OOFEM_ERROR("Node numbering undefined");
+	
     }
 
     //    answer = 3 * ( dof->giveDofManNumber() - 1 ) + dof->giveNumber();
