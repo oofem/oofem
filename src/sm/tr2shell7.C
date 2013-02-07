@@ -79,6 +79,7 @@ Tr2Shell7 :: giveOrdering(SolutionField fieldType) const {
         return this->ordering_gr_edge;
 	} else {
 		_error("giveOrdering: unknown fieldType");
+        return -1;
 	}
 }
 
@@ -122,7 +123,7 @@ Tr2Shell7 :: computeGaussPoints()
         if( layeredCS == NULL ){
             OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
         }
-        int numberOfLayers = layeredCS->give(CS_NumLayers);
+        int numberOfLayers = layeredCS->giveNumberOfLayers();
         layerIntegrationRulesArray = new IntegrationRule * [ numberOfLayers ];
 
 		// may need to extend this to handle Newton-Cotes integration in the thickness direction

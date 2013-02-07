@@ -1003,7 +1003,6 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
 			double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
 			double xinew = xi+xi2;
 			layerIntegrationRulesArray [layer-1]->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
-			double temp=0.;
 			}
 		}
 

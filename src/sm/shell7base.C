@@ -1336,7 +1336,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep){
 	GaussPoint *gp;
 
 
-	Material *mat = this->giveMaterial();
+	//Material *mat = this->giveMaterial();
 	FloatMatrix N, Nt;
 	FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a, da, unknowns, m, dm, aVec, daVec, fm(7), fM;
 	double gam, dgam, dA;
