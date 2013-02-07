@@ -564,7 +564,7 @@ set (test_cmd  ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/testhelper.py")
 # Helper script (perhaps one could do without this one)
 # Some input files requier other files, so I didn't feel that there were any option to just running them in the main tree.
 file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/testhelper.py
-"import os,sys,glob
+"import subprocess,os,sys,glob
 os.chdir(sys.argv[2])
 if sys.argv[4] == 'p':
     files = glob.glob(sys.argv[1]+'.[0-9]*')
@@ -574,15 +574,23 @@ else:
     files = [sys.argv[1]]
     mpicommand = ''
     parallel = ''
-print('Running: ' + mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2')
-if os.system(mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2'):
-    exit(1)
+if len(sys.argv) == 6:
+    flags = ' ' + sys.argv[5]
 else:
-    for f in files:
-        if os.system('${PYTHON_EXECUTABLE} ${oofem_SOURCE_DIR}/tools/extractor.py -f '+f+' -c'):
-            exit(2)
+    flags = ''
+command = mpicommand + sys.argv[3] + parallel + ' -f ' + sys.argv[1] + ' -l 2' + flags 
+print('Executing: ' + command)
+if os.system(command):
+	exit(1)
+else:
+	python=\"${PYTHON_EXECUTABLE}\"
+	extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+	print('Executing: ', [python, extractor, '-f', sys.argv[1], '-c'])
+	if subprocess.call([python, extractor, '-f', sys.argv[1], '-c']):
+		exit(2)
 exit(0)
 ")
+
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
