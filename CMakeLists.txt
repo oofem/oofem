@@ -583,10 +583,11 @@ print('Executing: ' + command)
 if os.system(command):
 	exit(1)
 else:
-	python=\"${PYTHON_EXECUTABLE}\"
-	extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
-	print('Executing: ', [python, extractor, '-f', sys.argv[1], '-c'])
-	if subprocess.call([python, extractor, '-f', sys.argv[1], '-c']):
+        for f in files:
+	    python=\"${PYTHON_EXECUTABLE}\"
+            extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+            print('Executing: ', [python, extractor, '-f', f, '-c'])
+	    if subprocess.call([python, extractor, '-f', f, '-c']):
 		exit(2)
 exit(0)
 ")
