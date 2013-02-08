@@ -104,7 +104,7 @@ protected:
      * The optimal moduli are obtained using the least-square method,
      * i.e. by minimizing the following functional (atTime = t_0):
      * @f[
-     * F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mu=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mu} - \bar{R}(t_r, t_0) \right]^2 = min
+     * F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mu=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mu} - \bar{R}(t_r, t_0)} \right]^2 = min
      * @f]
      *
      * @param[out] answer Array with coefficients

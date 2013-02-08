@@ -77,7 +77,7 @@ public:
  *
  * Class for an anisotropic linear transport material. The constitutive equation is given as
  * @f[ \mathbf{w}=-\mathbf{K} \mathbf{\nabla} p @f]
- * where @f$ \mathbm{w} @f$ is the seepage velocity, @f$ \mathbm{K} @f$ is the permeability which is given in the input file
+ * where @f$ \mathbf{w} @f$ is the seepage velocity, @f$ \mathbf{K} @f$ is the permeability which is given in the input file
  * and @f$ p @f$ is the pressure.
  *
  * @author Carl Sandström
