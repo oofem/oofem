@@ -109,7 +109,8 @@ CrossSection :: give(CrossSectionProperty aProperty)
 
 
 bool
-CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat) {
+CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
     return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
 

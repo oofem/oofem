@@ -401,6 +401,7 @@ void Parser :: reset()
         if ( ( entry = table [ i ] ) ) {
             do {
                 next = entry->next;
+                delete [] entry->string;
                 delete entry;
             } while ( ( entry = next ) );
 

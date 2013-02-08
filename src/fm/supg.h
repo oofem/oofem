@@ -107,8 +107,9 @@ public:
     }
     virtual ~SUPG() {
         if ( VelocityPressureField ) { delete VelocityPressureField; }
-
         if ( materialInterface ) { delete materialInterface; }
+        if ( nMethod ) { delete nMethod; }
+        if ( lhs ) { delete lhs; }
     }
 
     virtual void solveYourselfAt(TimeStep *tStep);
