@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -171,7 +171,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     elem->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
     double xtarget = coords.at(1);
 
-    double w, wsum = 0., x, xprev, damage, damageprev;
+    double w, wsum = 0., x, xprev, damage, damageprev=0.0;
     Element *nearElem;
 
     // process the list from the target to the end

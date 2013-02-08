@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -154,6 +154,18 @@ int IntArray :: at(int i) const
 {
     this->checkBounds(i);
     return values [ i - 1 ];
+}
+
+int &IntArray :: operator()(int i)
+{
+    this->checkBounds(i);
+    return values [ i ];
+}
+
+const int &IntArray :: operator()(int i) const
+{
+    this->checkBounds(i);
+    return values [ i ];
 }
 #endif
 
@@ -353,9 +365,11 @@ bool IntArray :: containsOnlyZeroes() const
 
 int IntArray :: minimum() const
 {
+#if DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: minimum - Empty array.");
     }
+#endif
     int x = values[0];
     for ( int i = 1; i < size; ++i ) {
         if (values[i] < x) {
@@ -368,9 +382,11 @@ int IntArray :: minimum() const
 
 int IntArray :: maximum() const
 {
+#if DEBUG
     if (size == 0) {
         OOFEM_ERROR("IntArray :: maximum - Empty array.");
     }
+#endif
     int x = values[0];
     for ( int i = 1; i < size; ++i ) {
         if (values[i] > x) {

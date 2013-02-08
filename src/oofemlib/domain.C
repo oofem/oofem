@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -443,11 +443,8 @@ Domain :: instanciateYourself(DataReader *dr)
     NonlocalBarrier *barrier;
     RandomFieldGenerator *rfg;
 
-#ifdef __ENABLE_COMPONENT_LABELS
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
-#endif
-
 
     FILE *outputStream = this->giveEngngModel()->giveOutputStream();
 
@@ -502,7 +499,6 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-#ifdef __ENABLE_COMPONENT_LABELS
         // assign component number according to record order
         // component number (as given in input record) becomes label
         if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), i + 1, this) ) == NULL ) {
@@ -519,26 +515,6 @@ Domain :: instanciateYourself(DataReader *dr)
 
         node->setGlobalNumber(num);    // set label
         dofManagerList->put(i + 1, node);
-#else
-        // component numbers as given in input record
-        if ( ( node = CreateUsrDefDofManagerOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create node of type: %s\n", name.c_str() );
-        }
-
-        node->initializeFrom(ir);
-
-        // check number
-        if ( ( num < 1 ) || ( num > nnode ) ) {
-            _error2("instanciateYourself: Invalid dofManager number (num=%d)", num);
-        }
-
-        if ( !dofManagerList->includes(num) ) {
-            dofManagerList->put(num, node);
-        } else {
-            _error2("instanciateYourself: Dofmanager entry already exist (num=%d)", num);
-        }
-
-#endif
 
         //dofManagerList->put(i+1,node) ;
         ir->finish();
@@ -555,7 +531,6 @@ Domain :: instanciateYourself(DataReader *dr)
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-#ifdef __ENABLE_COMPONENT_LABELS
         if ( ( elem = CreateUsrDefElementOfType(name.c_str(), i + 1, this) ) == NULL ) {
             OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create element: %s", name.c_str() );
         }
@@ -571,25 +546,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
         elem->setGlobalNumber(num);
         elementList->put(i + 1, elem);
-#else
-        if ( ( elem = CreateUsrDefElementOfType(name.c_str(), num, this) ) == NULL ) {
-            OOFEM_ERROR2( "Domain :: instanciateYourself - Couldn't create element: %s", name.c_str() );
-        }
 
-        elem->initializeFrom(ir);
-
-        // check number
-        if ( ( num < 1 ) || ( num > nelem ) ) {
-            _error2("instanciateYourself: Invalid element number (num=%d)", num);
-        }
-
-        if ( !elementList->includes(num) ) {
-            elementList->put(num, elem);
-        } else {
-            _error2("instanciateYourself: element entry already exist (num=%d)", num);
-        }
-
-#endif
         //elementList->put(i+1,elem) ;
         ir->finish();
     }
@@ -821,7 +778,6 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
 
-#ifdef __ENABLE_COMPONENT_LABELS
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
     for ( i = 1; i <= nnode; i++ ) {
@@ -832,7 +788,6 @@ Domain :: instanciateYourself(DataReader *dr)
         this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-#endif
     this->topology = NULL;
     if ( topologytype.length() > 0 ) {
         this->topology = CreateUsrDefTopologyOfType(topologytype.c_str(), this);

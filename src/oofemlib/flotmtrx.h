@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -123,7 +123,7 @@ public:
 #ifdef DEBUG
     double at(int i, int j) const;
 #else
-    double at(int i, int j) const { return values [ ( j - 1 ) * nRows + i - 1 ]; }
+    inline double at(int i, int j) const { return values [ ( j - 1 ) * nRows + i - 1 ]; }
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -134,7 +134,7 @@ public:
 #ifdef DEBUG
     double &at(int i, int j);
 #else
-    double &at(int i, int j) { return values [ ( j - 1 ) * nRows + i - 1 ]; }
+    inline double &at(int i, int j) { return values [ ( j - 1 ) * nRows + i - 1 ]; }
 #endif
 
     /**
@@ -143,14 +143,21 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
+#ifdef DEBUG
     double &operator()(int i, int j);
+#else
+    inline double &operator()(int i, int j)  { return values [ j * nRows + i ]; };
+#endif
     /**
      * Coefficient access function. Implements 0-based indexing.
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
+#ifdef DEBUG
     double operator()(int i, int j) const;
-
+#else
+    inline double operator()(int i, int j) const { return values [ j * nRows + i ]; }
+#endif
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
      * have dimensions large enough to localize contribution.

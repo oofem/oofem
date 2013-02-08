@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -252,7 +252,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     bool converged, errorOutOfRangeFlag;
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
-    PetscContext *parallel_context  = engngModel->givePetscContext(1, ut); ///@todo hard wired domain no 1
+    PetscContext *parallel_context  = engngModel->givePetscContext(this->domain->giveNumber(), ut);
  #endif
 #endif
 
@@ -423,9 +423,8 @@ void
 NRSolver :: initPrescribedEqs()
 {
     EModelDefaultEquationNumbering dn;
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
  #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
-    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); ///@todo hard wired domain no 1
+    PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber(), ut);
  #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
@@ -454,16 +453,7 @@ NRSolver :: initPrescribedEqs()
     }
 
     numberOfPrescribedDofs = count;
-#else
-    int i, inode, idof;
-    prescribedEqs.resize(numberOfPrescribedDofs);
-    for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
-        inode = prescribedDofs.at(2 * i - 1);
-        idof  = prescribedDofs.at(2 * i);
-        prescribedEqs.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber(dn);
-    }
 
-#endif
     this->prescribedEqsInitFlag = true;
 }
 
@@ -535,7 +525,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         PetscScalar *ptr;
         int eq;
 
-        PetscContext *parallel_context = engngModel->givePetscContext(1, ut);
+        PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber(), ut);
         parallel_context->createVecGlobal(& diag);
         MatGetDiagonal(* lhs->giveMtrx(), diag);
         VecGetArray(diag, & ptr);
@@ -618,7 +608,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
             Vec diag;
             PetscScalar *ptr;
             int eq;
-            engngModel->givePetscContext(1, ut)->createVecGlobal(& diag);
+            engngModel->givePetscContext(this->domain->giveNumber(), ut)->createVecGlobal(& diag);
             MatGetDiagonal(* lhs->giveMtrx(), diag);
             VecGetArray(diag, & ptr);
 
@@ -687,7 +677,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     EModelDefaultEquationNumbering dn;
  #ifdef __PARALLEL_MODE
   #ifdef __PETSC_MODULE
-    PetscContext *parallel_context = engngModel->givePetscContext(1, ut); ///@todo Shouldn't be hardwired domain no 1.
+    PetscContext *parallel_context = engngModel->givePetscContext(this->domain->giveNumber(), ut);
     PetscNatural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
   #endif
  #endif

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -42,6 +42,8 @@
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "verbose.h"
+
+#include <stdlib.h>
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -443,14 +445,24 @@ StaggeredProblem :: giveSlaveProblem(int i)
 
 
 int
-StaggeredProblem :: checkConsistency()
+StaggeredProblem :: checkProblemConsistency()
 {
     // check internal consistency
     // if success returns nonzero
     int result = 1;
     for ( int i = 1; i <= nModels; i++ ) {
-        result &= this->giveSlaveProblem(i)->checkConsistency();
+        result &= this->giveSlaveProblem(i)->checkProblemConsistency();
     }
+
+#  ifdef VERBOSE
+    if ( result ) {
+        OOFEM_LOG_DEBUG("Consistency check:  OK\n");
+    } else {
+        VERBOSE_PRINTS("Consistency check", "failed")
+        exit(1);
+    }
+
+#  endif
 
     return result;
 }

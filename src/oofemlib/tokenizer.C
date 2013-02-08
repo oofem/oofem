@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -37,6 +37,7 @@
 
 #include <cctype>
 #include <list>
+#include <iterator>
 
 namespace oofem {
 
@@ -76,7 +77,7 @@ Tokenizer :: readStructToken(std::size_t &pos, const std::string &line)
 std::string
 Tokenizer :: readToken(std::size_t &pos, const std::string &line, char sep)
 {
-    int startpos = pos;
+    std::size_t startpos = pos;
     if ( sep == 0 ) {
         while ( pos < line.size() && !isspace(line[pos]) ) pos++;
         return line.substr(startpos, pos-startpos);
@@ -109,7 +110,7 @@ void Tokenizer :: tokenizeLine(const std::string &currentLine)
             sList.push_back(this->readToken(bpos, currentLine, 0));
         }
     }
-    
+
     // Clear the old stuff and copy list to vector
     this->tokens.clear();
     this->tokens.reserve(nTokens);
@@ -119,7 +120,7 @@ void Tokenizer :: tokenizeLine(const std::string &currentLine)
 int Tokenizer :: giveNumberOfTokens()
 {
     // if EOF currentTokens == -1
-    return tokens.size();
+    return (int)tokens.size();
 }
 
 const char *Tokenizer :: giveToken(int i)

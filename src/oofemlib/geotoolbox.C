@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -1527,8 +1527,10 @@ Graph :: testCollapsedEdge(node *p1, node *p2)
 void
 Graph :: removeIntersectionIfExist(node *p1, node *p2, node *q1, node *q2)
 {
+    node *anext;
     node *aux = q1->next;
     while ( aux != q2 ) {
+        anext = aux->next;
         if ( aux->status == NS_Intersection ) {
             if ( ( prev_node(aux->neighbor->prev) == p1 ) && ( next_node(aux->neighbor->next) == p2 ) ) {
                 // remove aux and aux->neighbor
@@ -1543,7 +1545,7 @@ Graph :: removeIntersectionIfExist(node *p1, node *p2, node *q1, node *q2)
             }
         }
 
-        aux = aux->next;
+        aux = anext;
     }
 }
 

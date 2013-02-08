@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -655,12 +655,12 @@ ConcreteDPM2 :: computeDamage(FloatArray &answer,
 
     double tempEquivStrain;
     double deltaPlasticStrainNorm;
-    double tempDamageTension;
-    double tempDamageCompression;
+    double tempDamageTension=0.0;
+    double tempDamageCompression=0.0;
 
-    double tempKappaDTension, tempKappaDCompression;
-    double tempKappaDTensionOne, tempKappaDTensionTwo;
-    double tempKappaDCompressionOne, tempKappaDCompressionTwo;
+    double tempKappaDTension=0.0, tempKappaDCompression=0.0;
+    double tempKappaDTensionOne=0.0, tempKappaDTensionTwo=0.0;
+    double tempKappaDCompressionOne=0.0, tempKappaDCompressionTwo = 0.0;
 
     double rateFactor;
 
@@ -1561,7 +1561,11 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
         normOfResiduals = residualsNorm.computeNorm();
 
+#ifdef _MSC_VER
+	if ( isnan(normOfResiduals) ) {
+#else
         if ( std::isnan(normOfResiduals) ) {
+#endif
             returnResult = RR_NotConverged;
             return 0.;
         }

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -160,7 +160,7 @@ public:
     virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
 #endif
 
-    virtual int checkConsistency();
+    virtual int checkProblemConsistency();
 
     virtual EngngModel *giveSlaveProblem(int i);
     virtual int giveNumberOfSlaveProblems() { return nModels; }

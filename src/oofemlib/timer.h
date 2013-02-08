@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -48,18 +48,15 @@
 #  include <ctime>
 # endif
 #endif
-
+typedef timeval oofem_timeval;
 #else // _MSC_VER
 #include <ctime>
-typedef struct timeval
+typedef struct
 {
     unsigned long tv_sec;          ///< Seconds.
     unsigned long tv_usec;         ///< Microseconds.
 } oofem_timeval;
 #endif
-
-typedef timeval oofem_timeval;
-
 
 namespace oofem {
 

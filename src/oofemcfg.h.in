@@ -22,53 +22,46 @@ ____________________________________________________\n"
 #define HOST_NAME "@HOST_NAME@"
 #define MODULE_LIST "@MODULE_LIST@"
 
-#ifndef CONFIG_DEFINED
-#define CONFIG_DEFINED
-
 /* Headers */
 /* Define if #include<sys/time.h> exist */
-#cmakedefine HAVE_SYS_TIME_H
+#cmakedefine HAVE_SYS_TIME_H 1
 
 /* Define if strings.h defined */
-#cmakedefine HAVE_STRINGS_H
+#cmakedefine HAVE_STRINGS_H 1
 
 /* Define if unistd.h defined */
-#cmakedefine HAVE_UNISTD_H
+#cmakedefine HAVE_UNISTD_H 1
 
 /* Define if execinfo.h defined */
-#cmakedefine HAVE_EXECINFO_H
+#cmakedefine HAVE_EXECINFO_H 1
 
 /* Define if program may include both 'time.h' and 'sys/time.h' */
-#cmakedefine TIME_WITH_SYS_TIME
+#cmakedefine TIME_WITH_SYS_TIME 1
 
 /* Symbols */
 /* Define if access is defined */
-#cmakedefine HAVE_ACCESS
+#cmakedefine HAVE_ACCESS 1
 
 /* Define if strncasecmp is defined */
-#cmakedefine HAVE_STRNCASECMP
+#cmakedefine HAVE_STRNCASECMP 1
 
 /* Define if nearest is defined */
-#cmakedefine HAVE_NEAREST
+#cmakedefine HAVE_NEAREST 1
 
 /* Define if cbrt is defined */
-#cmakedefine HAVE_CBRT
+#cmakedefine HAVE_CBRT 1
 
 /* Define if isnan is defined */
-#cmakedefine HAVE_ISNAN
+#cmakedefine HAVE_ISNAN 1
 
 /* Variables */
 /* Define if M_PI constant is defined */
-#cmakedefine HAVE_M_PI
+#cmakedefine HAVE_M_PI 1
 
 /* Define if M_LN2 constant is defined */
-#cmakedefine HAVE_M_LN2
+#cmakedefine HAVE_M_LN2 1
 
 /* Other */
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
-#cmakedefine HAVE_MACRO_VA_ARGS
+#cmakedefine HAVE_MACRO_VA_ARGS 1
 
-/* Define to support arbitrary compoment labels */
-#cmakedefine __ENABLE_COMPONENT_LABELS
-
-#endif // CONFIG_DEFINED

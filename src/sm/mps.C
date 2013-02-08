@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -312,7 +312,7 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac, 
     // Basic creep parameters
     q1  = 1.e-12 * stiffnessFactor * 126.74271 / ( sqrt(fc) );
     q2  = 1.e-12 * stiffnessFactor * 185.4 * pow(c, 0.5) * pow(fc, -0.9);
-    q3  = 1.e-6 *  stiffnessFactor * 0.29 * pow(wc, 4.) * q2;
+    q3 = 0.29 * pow(wc, 4.) * q2;
     q4  = 1.e-12 * stiffnessFactor * 20.3 * pow(ac, -0.7);
 
     char buff [ 1024 ];
@@ -408,7 +408,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double sum = 0.0;
     double v;
 
-    double Cf; // incremental viscous flow compliance
+    double Cf=0.0; // incremental viscous flow compliance
     double eta, dt;
     double dEtaR, etaR, L;
 
@@ -540,7 +540,7 @@ MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *atTime, int Mu)
 double
 MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
 {
-    double eta, tHalfStep;
+    double eta=0.0, tHalfStep;
 
     double prevEta, PsiS, A, B, e, dt;
     double T_new, T_old, H_new, H_old;
@@ -758,7 +758,7 @@ MPSMaterial :: inverse_sorption_isotherm(double w)
 double
 MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
 {
-    double H_tot, H_inc;
+    double H_tot=0.0, H_inc=0.0;
 
     MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
 
@@ -815,7 +815,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
 double
 MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *atTime, int option)
 {
-    double T_tot, T_inc;
+    double T_tot=0.0, T_inc=0.0;
     MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
 
     // compute humidity and its increment if the step is first or humidity has not been yet computed

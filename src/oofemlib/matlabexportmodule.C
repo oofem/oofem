@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -188,7 +188,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
                 values = new( std :: vector< double > );
                 valuesList.push_back(values);
             } else {
-                int pos = it - DofIDList.begin();
+                std::size_t pos = it - DofIDList.begin();
                 values = valuesList.at(pos);
             }
 
