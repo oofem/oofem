@@ -133,7 +133,7 @@ Tr2Shell7 :: computeGaussPoints()
 		}
 
 		layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
-		
+        layeredCS->printYourself();
 
     }
 

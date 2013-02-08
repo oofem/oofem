@@ -157,10 +157,26 @@ public:
 
 class Delamination : public EnrichmentItem, LayeredCrossSection // rest of the crack el. that does not contain any tip 
 {
+    // maaybe layeredDelamination?
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain), LayeredCrossSection(n, aDomain){}
     int numberOfDelaminations;
-    IntArray delaminatedLayers;
+    IntArray delaminatedLayers; // ambigious
+    FloatArray delaminationZCoords; // must they be ordered?
+    void updateIntegrationRule();
+    int giveDelaminationGroupAt();
+    double giveDelaminationGroupMidZ();
+    double giveDelaminationGroupThickness();
+
+    /* for each delamination group = nDelam + 1
+        int dGroup = giveDelaminationGroupAt(gp);
+        double dMidZ = giveDelaminationGroupMidZ(dGroup);
+        double dThickness = giveDelaminationGroupThickness(dGroup);
+        b = dMidZ + 0.5*dThickness;
+        a = dMidZ - 0.5*dThickness;
+        remap the xi-coords -> 1-2(b-x)/(b-a)
+
+    */
 
 };
 

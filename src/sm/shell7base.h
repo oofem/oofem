@@ -110,7 +110,7 @@ virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const = 0;
 virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const = 0;
 
 
-
+virtual IRResultType initializeFrom(InputRecord *ir);
 
 
 
@@ -204,12 +204,6 @@ virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int 
 virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 virtual int  NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
-
-// layered cross section
-virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                        GaussPoint *slaveGp, TimeStep *tStep) {
-};                                                      // Abstract metod that layered CS requires
-virtual IRResultType initializeFrom(InputRecord *ir);
 
 
 

@@ -41,7 +41,15 @@ namespace oofem {
 //Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 //{}
 
+    /* giveGlobalZcoord(gp)
+    
+        int dGroup = giveDelaminationGroupAt(gp);
+        double dThickness = giveDelaminationGroupThickness(dGroup);
 
+        zeta = xi(gp)*dThickness
+
+
+    */
 
 
 
