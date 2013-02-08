@@ -287,7 +287,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
             // read dynamic flag
 
             if ( __create ) {
-                gaussPointArray [ i ] = new GaussPoint(this, i + 1, (new FloatArray(c)), w, m);
+                gaussPointArray [ i ] = new GaussPoint(this, i + 1, ( new FloatArray(c) ), w, m);
             } else {
                 gp = gaussPointArray [ i ];
                 gp->setWeight(w);

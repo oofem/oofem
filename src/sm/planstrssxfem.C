@@ -149,10 +149,10 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
 {
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >(this) );
+    xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
 
     // for all enrichment items which element interacts
-    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >(this) )->giveNumberOfDofManagers(); i++ ) {
+    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
         DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );
         for ( int j = 1; j <= xf->giveNumberOfEnrichmentItems(); j++ ) {
             EnrichmentItem *er = xf->giveEnrichmentItem(j);
@@ -161,7 +161,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
                 for ( int k = 1; k <= dofIdAr->giveSize(); k++ ) {
                     if ( dm->hasDofID( ( DofIDItem ) dofIdAr->at(k) ) == false ) {
                         int sz = dm->giveNumberOfDofs();
-                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, ( DofIDItem ) dofIdAr->at ( k ) );
+                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, ( DofIDItem ) dofIdAr->at(k) );
                         int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
                         df->setEquationNumber(eqN);
                         dm->appendDof(df);
@@ -174,8 +174,8 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
     locationArray.resize(0);
     IntArray enriched;
     enriched.resize(0);
-    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >(this) )->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dm = ( const_cast< PlaneStress2dXfem * >(this) )->giveDomain()->giveDofManager( dofManArray.at(i) );
+    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
+        DofManager *dm = ( const_cast< PlaneStress2dXfem * >( this ) )->giveDomain()->giveDofManager( dofManArray.at(i) );
         for ( int j = 1; j <= dm->giveNumberOfDofs(); j++ ) {
             int eqN = dm->giveDof(j)->giveEquationNumber(s);
             if ( j <= 2 ) {
@@ -309,7 +309,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
             int i;
             PatchIntegrationRule *iRule;
             for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
+                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
                 if ( iRule ) {
                     iRule->givePatch()->draw(context);
                 }
@@ -345,7 +345,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
             for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
+                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
 
  #if 0
                 val = iRule->giveMaterial();
