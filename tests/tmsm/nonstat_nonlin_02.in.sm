@@ -1,4 +1,4 @@
-test03_nonstat_nonlin_sm.p2.out
+nonstat_nonlin_02.out.sm
 Quadrilateral elements subjected to temperature strains
 nonlinearstatic nsteps 3 rtolv 0.001 controlmode 1 maxiter 100 nmodules 0
 #vtkxml tstep_all vars 2 1 4 primvars 1 1 stype 1
