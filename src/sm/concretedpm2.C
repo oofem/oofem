@@ -1191,14 +1191,13 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
         }
 
         if ( returnType == RT_Regular ) {
+            int subincrementcounter = 0;
             //Attempt to implement subincrementation
             // initialize variables
             subIncrementFlag = 0;
             convergedStrain = oldStrain;
             tempStrain = strain;
-            deltaStrain = oldStrain;
-            deltaStrain.negated();
-            deltaStrain.add(strain);
+            deltaStrain.beDifferenceOf(oldStrain, strain);
             //To get into the loop
             returnResult = RR_NotConverged;
             while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
@@ -1209,12 +1208,17 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                 tempKappaP = performRegularReturn(effectiveStress, gp);
 
                 if ( returnResult == RR_NotConverged ) {
-                    OOFEM_LOG_INFO("Subincrementation required");
+                    subincrementcounter++;
+                    if ( subincrementcounter > 10 ) {
+                        OOFEM_ERROR("ConcreteDPM2 :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
+                    }
+                    OOFEM_LOG_INFO("Subincrementation %d required\n", subincrementcounter);
                     subIncrementFlag = 1;
                     deltaStrain.times(0.5);
                     tempStrain = convergedStrain;
                     tempStrain.add(deltaStrain);
-                } else if ( returnResult == RR_Converged && subIncrementFlag == 1 )      {
+                } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
+                    subincrementcounter = 0;
                     effectiveStress.applyElasticCompliance(elasticStrain, eM, nu);
                     tempPlasticStrain = tempStrain;
                     tempPlasticStrain.subtract(elasticStrain);
@@ -1224,11 +1228,9 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
                     subIncrementFlag = 0;
                     returnResult = RR_NotConverged;
                     convergedStrain = tempStrain;
-                    deltaStrain = convergedStrain;
-                    deltaStrain.negated();
-                    deltaStrain.add(strain);
+                    deltaStrain.beDifferenceOf(convergedStrain, strain);
                     tempStrain = strain;
-                } else   {
+                } else {
                     status->letTempKappaPBe(tempKappaP);
                 }
             }
@@ -1322,7 +1324,7 @@ ConcreteDPM2 :: performVertexReturn(StressVector &effectiveStress,
 
     if ( returnType == RT_Tension ) {
         sig2 = -0.1 * ft;
-    } else if ( returnType == RT_Compression )      {
+    } else if ( returnType == RT_Compression ) {
         sig2 = apexStress;
     }
 
