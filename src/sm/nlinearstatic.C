@@ -543,7 +543,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     // call numerical model to solve arise problem
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d]\n\n", tStep->giveNumber(), tStep->giveVersion() );
+    OOFEM_LOG_RELEVANT( "\n\nSolving       [step number %5d.%d, time = %e]\n\n", tStep->giveNumber(), tStep->giveVersion(), tStep->giveIntrinsicTime() );
 #endif
 
     if ( this->initialGuessType == IG_Tangent ) {
