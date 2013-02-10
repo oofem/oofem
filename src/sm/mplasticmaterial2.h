@@ -85,7 +85,7 @@ protected:
     int temp_state_flag;
     
     /// Isotropic damage variables
-    float damage, tempDamage;
+    double damage, tempDamage;
 
     /// Consistency parameter values (needed for algorithmic stiffness).
     FloatArray gamma, tempGamma;
@@ -118,7 +118,7 @@ public:
     void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
     void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
     
-    void letTempDamageBe(const double v) {tempDamage = v; }
+    void letTempDamageBe(double v) { tempDamage = v; }
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
     
