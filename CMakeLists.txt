@@ -14,10 +14,6 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "2012")
 set (oofem_EMAIL "info@oofem.org")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
-
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
 	set (CMAKE_BUILD_TYPE Debug)
@@ -26,14 +22,20 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4100 -wd4996 -wd4706 -wd4512")
+else ()
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
+
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
 #######################################################################
 ######################## Custom paths #################################
 #######################################################################
 set (SLEPC_DIR CACHE PATH "Manual SLEPc directory")
 set (X11_DIR CACHE PATH "Manual X11 directory")
-set (TINYXML_DIR CACHE PATH "Manual TinyXML directory")
+set (TINYXML2_DIR CACHE PATH "Manual TinyXML-2 directory")
 set (MY_PETSC_DIR CACHE PATH "Manual PETSc directory")
 set (MY_PETSC_ARCH CACHE STRING "Manual PETSc arch name (e.g. linux-gnu-cxx-opt)")
 set (MPI_DIR CACHE PATH "Manual MPI directory")
@@ -49,7 +51,6 @@ set (CKIT_DIR CACHE PATH "Manual CKit directory (OOFEG only)")
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings" OFF)
-option (__ENABLE_COMPONENT_LABELS "Enable component labels" ON)
 if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
     option (USE_SHARED_LIB "Build shared library" OFF)
     option (USE_STATIC_LIB "Build static library" OFF)
@@ -105,7 +106,7 @@ if (USE_FM)
     else ()
         set (LIBS ${LIBS} $<TARGET_OBJECTS:fm>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} fm)
+    set (MODULE_LIST ${MODULE_LIST} "fm")
 endif ()
 
 if (USE_TM)
@@ -117,7 +118,7 @@ if (USE_TM)
     else ()
         set (LIBS ${LIBS} $<TARGET_OBJECTS:tm>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} tm)
+    set (MODULE_LIST ${MODULE_LIST} "tm")
     if (USE_CEMHYD)
         add_definitions (-D__CEMHYD_MODULE)
         set (USE_TINYXML ON)
@@ -132,7 +133,7 @@ if (USE_SM)
     else ()
         set (LIBS ${LIBS} $<TARGET_OBJECTS:sm>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} sm)
+    set (MODULE_LIST ${MODULE_LIST} "sm")
 
     if (NOT MSVC AND NOT MINGW)
         find_library (DL_LIB dl) 
@@ -154,7 +155,7 @@ if (USE_DSS)
     else ()
         set (LIBS ${LIBS} $<TARGET_OBJECTS:dss>)
     endif ()
-    set (MODULE_LIST ${MODULE_LIST} dss)
+    set (MODULE_LIST ${MODULE_LIST} "dss")
 endif ()
 
 if (USE_OPENMP)
@@ -163,7 +164,7 @@ if (USE_OPENMP)
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
         set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-        set (MODULE_LIST ${MODULE_LIST} openmp)
+        set (MODULE_LIST ${MODULE_LIST} "openmp")
     endif ()
 endif ()
 
@@ -194,7 +195,7 @@ if (USE_OOFEG)
     include_directories ("${CKIT_DIR}/include")
 
     set (EXT_LIBS ${EXT_LIBS} ${ESI_LIB} ${ELIXIR_LIB} ${CKIT_LIB} ${X11_LIBRARIES} ${X11_Xmu_LIB} ${X11_Xt_LIB} ${XAW_LIB})
-    set (MODULE_LIST ${MODULE_LIST} oofeg)
+    set (MODULE_LIST ${MODULE_LIST} "oofeg")
 endif ()
 
 if (BUILD_TESTING)
@@ -208,7 +209,7 @@ if (USE_LAPACK)
     set (CMAKE_LIBRARY_DIR ${CMAKE_LIBRARY_DIR} ${LAPACK_DIR})
     find_package (LAPACK REQUIRED)
     set (EXT_LIBS ${EXT_LIBS} ${LAPACK_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} lapack)
+    set (MODULE_LIST ${MODULE_LIST} "LAPACK")
     add_definitions (-D__LAPACK_MODULE)
 endif ()
 
@@ -218,7 +219,7 @@ if (USE_VTK)
     include (${VTK_USE_FILE}) # Sets necessary includes_directories
     add_definitions (-D__VTK_MODULE)
     set (EXT_LIBS ${EXT_LIBS} ${VTK_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} parmetis)
+    set (MODULE_LIST ${MODULE_LIST} "VTK")
 endif ()
 
 if (USE_PARMETIS)
@@ -230,7 +231,7 @@ if (USE_PARMETIS)
         message (FATAL_ERROR "Parmetis library not found")
     endif ()
     set (EXT_LIBS ${EXT_LIBS} parmetis)
-    set (MODULE_LIST ${MODULE_LIST} parmetis)
+    set (MODULE_LIST ${MODULE_LIST} "parmetis")
     set (USE_MPI ON)
     add_definitions (-D__PARMETIS_MODULE)
 endif ()
@@ -246,7 +247,7 @@ if (USE_SLEPC)
         message (FATAL_ERROR "SLEPc library not found")
     endif ()
     set (EXT_LIBS ${EXT_LIBS} ${SLEPC_LIBS})
-    set (MODULE_LIST ${MODULE_LIST} slepc)
+    set (MODULE_LIST ${MODULE_LIST} "slepc")
     set (USE_PETSC ON)
     add_definitions (-D__SLEPC_MODULE)
 endif ()
@@ -259,7 +260,7 @@ if (USE_PETSC)
         message (FATAL_ERROR "PETSc library not found")
     endif ()
     set (EXT_LIBS ${EXT_LIBS} ${PETSC_LIB} ${PETSC_PACKAGE_LIBS})
-    set (MODULE_LIST ${MODULE_LIST} PETSc)
+    set (MODULE_LIST ${MODULE_LIST} "PETSc")
     set (USE_MPI ON)
     add_definitions (-D__PETSC_MODULE)
 endif ()
@@ -283,7 +284,7 @@ if (USE_MPI)
         include_directories (${MPI_INCLUDE_PATH})
         set (EXT_LIBS ${EXT_LIBS} ${MPI_LIBRARIES})
     endif (MPI_DIR)
-    set (MODULE_LIST ${MODULE_LIST} MPI)
+    set (MODULE_LIST ${MODULE_LIST} "MPI")
     # Compile and link flags?
 endif ()
 
@@ -294,22 +295,21 @@ if (USE_TRIANGLE)
     endif ()
     add_definitions (-D__TRIANGLE_MODULE)
     set (EXT_LIBS ${EXT_LIBS} ${TRIANGLE_LIB})
-    set (MODULE_LIST ${MODULE_LIST} Triangle)
+    set (MODULE_LIST ${MODULE_LIST} "Triangle")
 endif ()
 
 if (USE_TINYXML)
-    if (TINYXML_DIR)
-        include_directories (${TINYXML_DIR})
-        set (LIBS ${LIBS} ${TINYXML_DIR}/tinystr.o ${TINYXML_DIR}/tinyxmlerror.o ${TINYXML_DIR}/tinyxml.o ${TINYXML_DIR}/tinyxmlparser.o)
+    if (TINYXML2_DIR)
+        include_directories (${TINYXML2_DIR})
+        find_library (TINYXML2_LIB NAMES tinyxml2 HINTS ${TINYXML2_DIR} NO_DEFAULT_PATH)
     else ()
-        find_library (TINYXML_LIB tinyxml DOC "TinyXML library")
-        if (${TINYXML_LIB} STREQUAL "TINYXML_LIB-NOTFOUND")
-            message (FATAL_ERROR "TinyXML not found")
-        endif ()
-        set (EXT_LIBS ${EXT_LIBS} ${TINYXML_LIB})
+        find_library (TINYXML2_LIB NAMES tinyxml2 )
     endif ()
-    add_definitions (-D__TINYXML_MODULE -DTIXML_USE_STL)
-    set (MODULE_LIST ${MODULE_LIST} TinyXML)
+    if (${TINYXML2_LIB} STREQUAL "TINYXML2_LIB-NOTFOUND")
+        message (FATAL_ERROR "TinyXML2 library not found")
+    endif ()
+    set (EXT_LIBS ${EXT_LIBS} ${TINYXML2_LIB})
+    set (MODULE_LIST ${MODULE_LIST} "TinyXML-2")
 endif ()
 
 if (USE_IML)
@@ -326,7 +326,7 @@ if (USE_IML)
         message (FATAL_ERROR "Necessary IML++ headers not found")
     endif ()
     add_definitions (-D__IML_MODULE)
-    set (MODULE_LIST ${MODULE_LIST} iml++)
+    set (MODULE_LIST ${MODULE_LIST} "IML++")
 endif ()
 
 if (USE_SPOOLES)
@@ -341,7 +341,7 @@ if (USE_SPOOLES)
     endif ()
     add_definitions (-D__SPOOLES_MODULE)
     set (EXT_LIBS ${EXT_LIBS} ${SPOOLES_LIB})
-    set (MODULE_LIST ${MODULE_LIST} SPOOLES)
+    set (MODULE_LIST ${MODULE_LIST} "SPOOLES")
 endif ()
 
 if (USE_PYTHON_BINDINGS)
@@ -353,7 +353,7 @@ if (USE_PYTHON_BINDINGS)
     include_directories (${Boost_INCLUDE_DIRS})
     include_directories (${oofem_SOURCE_DIR}/src/main) # classfactory should probably be in oofemlib instead.
     set (EXT_LIBS ${EXT_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES})
-    set (MODULE_LIST ${MODULE_LIST} Python)
+    set (MODULE_LIST ${MODULE_LIST} "Python")
     add_definitions(-DBOOST_PYTHON)
 endif ()
 
@@ -564,7 +564,7 @@ set (test_cmd  ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/testhelper.py")
 # Helper script (perhaps one could do without this one)
 # Some input files requier other files, so I didn't feel that there were any option to just running them in the main tree.
 file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/testhelper.py
-"import os,sys,glob
+"import subprocess,os,sys,glob
 os.chdir(sys.argv[2])
 if sys.argv[4] == 'p':
     files = glob.glob(sys.argv[1]+'.[0-9]*')
@@ -574,26 +574,35 @@ else:
     files = [sys.argv[1]]
     mpicommand = ''
     parallel = ''
-print('Running: ' + mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2')
-if os.system(mpicommand + sys.argv[3] + parallel +' -f '+sys.argv[1]+' -l 2'):
-    exit(1)
+if len(sys.argv) == 6:
+    flags = ' ' + sys.argv[5]
 else:
-    for f in files:
-        if os.system('${PYTHON_EXECUTABLE} ${oofem_SOURCE_DIR}/tools/extractor.py -f '+f+' -c'):
-            exit(2)
+    flags = ''
+command = mpicommand + sys.argv[3] + parallel + ' -f ' + sys.argv[1] + ' -l 2' + flags 
+print('Executing: ' + command)
+if os.system(command):
+	exit(1)
+else:
+        for f in files:
+	    python=\"${PYTHON_EXECUTABLE}\"
+            extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+            print('Executing: ', [python, extractor, '-f', f, '-c'])
+	    if subprocess.call([python, extractor, '-f', f, '-c']):
+		exit(2)
 exit(0)
 ")
 
+
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
-    add_test (NAME 4test_test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd} -ksp_rtol 1.e-15" "p")
+    add_test (NAME 4test_test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd}" "p" "-ksp_rtol 1.e-15")
     add_test (NAME bar_test_np4 COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
     add_test (NAME barnl_test_np4 COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
     add_test (NAME barnl_test_np2 COMMAND ${test_cmd} barnl2.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
     add_test (NAME brazil_test_np2 COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
     add_test (NAME brazil_test_np4 COMMAND ${test_cmd} brazil_2d_nl4.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
     add_test (NAME brazil_test_np7 COMMAND ${test_cmd} brazil_2d_nl7.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME brazil3d_test_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd} -ksp_rtol 1.e-15 -ksp_type cg" "p")
+    add_test (NAME brazil3d_test_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd}" "p" "-ksp_rtol 1.e-15 -ksp_type cg")
     add_test (NAME dyn_bar01_test_np2 COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
     add_test (NAME dyn_bar02_test_np2 COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
     add_test (NAME dyn_bar03_test_np2 COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")

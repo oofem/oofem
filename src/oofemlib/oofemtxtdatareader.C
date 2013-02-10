@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -36,13 +36,24 @@
 #include "error.h"
 
 namespace oofem {
-OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(), ir()
+OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(),
+    ir(), inputStream(), dataSourceName( inputfilename )
 {
     inputStream.open( inputfilename );
     if ( !inputStream.is_open() ) {
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
     dataSourceName = inputfilename;
+    lineNumber = 0;
+}
+
+OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataReader(),
+    ir(), inputStream(), dataSourceName( x.dataSourceName )
+{
+    inputStream.open( dataSourceName.c_str() );
+    if ( !inputStream.is_open() ) {
+        OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't copy open input stream (%s)", dataSourceName.c_str());
+    }
     lineNumber = 0;
 }
 

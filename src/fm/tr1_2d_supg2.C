@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -65,14 +65,22 @@ namespace oofem {
 
 TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     TR1_2D_SUPG(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans  = 3;
+    vcoords[0] = NULL;
+    vcoords[1] = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
-// Destructor
-{ }
+{
+    for ( int i = 0; i < 2; i++ ) {
+        myPoly [ i ].clear();
+        if ( vcoords [ i ] ) {
+            delete [] vcoords [ i ];
+        }
+        vcoords [ i ] = NULL;
+    }
+}
 
 
 void
@@ -1736,7 +1744,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
     for ( i = 0; i < 2; i++ ) {
         myPoly [ i ].clear();
         if ( vcoords [ i ] ) {
-            delete vcoords [ i ];
+            delete [] vcoords [ i ];
         }
 
         vcoords [ i ] = NULL;

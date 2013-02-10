@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -175,47 +175,48 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 {
-	Domain *domain  = emodel->giveDomain(1);
-	std :: vector< int >DofIDList;
-	std :: vector< int > :: iterator it;
-	std :: vector< std :: vector< double > * >valuesList;
-	std :: vector< double > *values;
+    Domain *domain  = emodel->giveDomain(1);
+    std :: vector< int >DofIDList;
+    std :: vector< int > :: iterator it;
+    std :: vector< std :: vector< double > * >valuesList;
+    std :: vector< double > *values;
 
-	for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-		for ( int j = 1; j <= domain->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-			Dof *thisDof;
-			thisDof = domain->giveDofManager(i)->giveDof(j);
-			it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
+    for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
+        for ( int j = 1; j <= domain->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+            Dof *thisDof;
+            thisDof = domain->giveDofManager(i)->giveDof(j);
+            it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
 
-			if ( it == DofIDList.end() ) {
-				DofIDList.push_back( thisDof->giveDofID() );
-				values = new( std :: vector< double > );
-				valuesList.push_back(values);
-			} else {
-				int pos = it - DofIDList.begin();
-				values = valuesList.at(pos);
-			}
+            if ( it == DofIDList.end() ) {
+                DofIDList.push_back( thisDof->giveDofID() );
+                values = new( std :: vector< double > );
+                valuesList.push_back(values);
+            } else {
+                std::size_t pos = it - DofIDList.begin();
+                values = valuesList.at(pos);
+            }
 
-			double value = thisDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-			values->push_back(value);
-		}
-	}
+            double value = thisDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+            values->push_back(value);
+        }
+    }
 
-	fprintf(FID, "\tdata.DofIDs=[");
-	for ( size_t i = 0; i < DofIDList.size(); i++ ) {
-		fprintf( FID, "%u, ", DofIDList.at(i) );
-	}
+    fprintf(FID, "\tdata.DofIDs=[");
+    for ( size_t i = 0; i < DofIDList.size(); i++ ) {
+        fprintf( FID, "%u, ", DofIDList.at(i) );
+    }
 
-	fprintf(FID, "];\n");
+    fprintf(FID, "];\n");
 
-	for ( size_t i = 0; i < valuesList.size(); i++ ) {
-		fprintf(FID, "\tdata.a{%lu}=[", static_cast<long unsigned int>(i) + 1);
-		for ( size_t j = 0; j < valuesList.at(i)->size(); j++ ) {
-			fprintf( FID, "%f,", valuesList.at(i)->at(j) );
-		}
+    for ( size_t i = 0; i < valuesList.size(); i++ ) {
+        fprintf(FID, "\tdata.a{%lu}=[", static_cast<long unsigned int>(i) + 1);
+        for ( size_t j = 0; j < valuesList.at(i)->size(); j++ ) {
+            fprintf( FID, "%f,", valuesList.at(i)->at(j) );
+        }
 
-		fprintf(FID, "];\n");
-	}
+        fprintf(FID, "];\n");
+    }
+
 }
 
 

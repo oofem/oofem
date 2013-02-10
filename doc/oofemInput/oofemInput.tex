@@ -823,6 +823,7 @@ The \param{errorerestimatorparams} parameter contains the parameters
 of Zien\-kie\-wicz Zhu Error Estimator. These are described in section \ref{errorestimators}.
 \end{itemize}
 
+
 \subsection{Adaptive nonlinear static}
 
 \begin{record}
@@ -1337,6 +1338,9 @@ element integration points and corresponding material model.
 EET\_ZZEE - The implementation of Zienkiewicz Zhu Error
 Estimator. It requires the special element algorithms, which may not
 be available for all element types.
+
+Please note, that in the actual version, the error on the element level is evaluated using default integration rule. For example, in case of ZZ error estimator, the error (L2 or energy norm) is evaluated from the difference of computed and ``recovered'' stresses, which are approximated using the same interpolation functions as displacements). Therefore, in many cases, the default integration rule order is not sufficient and higher integration must be used on elements (consult element library manual and related NIP parameter).
+
 \item
 EET\_CZZSI - The implementation of combined criteria: Zienkiewicz Zhu Error Estimator for elastic regime and
 scalar error indicator in non-linear regime.

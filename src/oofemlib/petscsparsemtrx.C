@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -362,15 +362,14 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     // create PETSc mat
     MatCreate(PETSC_COMM_SELF, & mtrx);
     MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
-    //MatSetType(mtrx, MATSEQAIJ);
-    MatSetType(mtrx, MATSEQSBAIJ);
+    MatSetType(mtrx, MATSEQAIJ);
     MatSetFromOptions(mtrx);
 
     //The incompatible preallocations are ignored automatically.
     MatSetUp(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
-    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() ); ///@todo Not sure about PETSC_DECIDE here.
-    //MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() ); // Symmetry should practically never apply here.
+    MatSeqBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz.givePointer() );
+    MatSeqSBAIJSetPreallocation( mtrx, PETSC_DECIDE, 0, d_nnz_sym.givePointer() );
 
     MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE); // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
@@ -523,18 +522,19 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     }
 
     // Structure from active boundary conditions.
-    std::vector<IntArray> locs, temp;
-    for ( n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
+    std::vector<IntArray> r_locs, c_locs;
+    for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
         ActiveBoundaryCondition *activebc = dynamic_cast<ActiveBoundaryCondition*>(domain->giveBc(n));
         if (activebc) {
             ///@todo Deal with the CharType here.
-            activebc->giveLocationArrays(locs, temp, ut, TangentStiffnessMatrix, s, s, domain);
-            for (std::size_t k = 1; k < locs.size(); k++) {
-                IntArray &kloc = locs[k];
-                for ( i = 1; i <= kloc.giveSize(); i++ ) {
-                    if ( ( ii = kloc.at(i) ) ) {
-                        for ( j = 1; j <= kloc.giveSize(); j++ ) {
-                            jj = kloc.at(j);
+            activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, s, s, domain);
+            for (std::size_t k = 0; k < r_locs.size(); k++) {
+                IntArray &krloc = r_locs[k];
+                IntArray &kcloc = c_locs[k];
+                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
+                    if ( ( ii = krloc.at(i) ) ) {
+                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
+                            jj = kcloc.at(j);
                             if ( jj ) {
                                 rows [ ii - 1 ].insert(jj - 1);
                                 if ( jj >= ii ) {

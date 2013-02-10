@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -60,7 +60,7 @@ public:
         yind = ind2;
     }
 
-    double giveArea(const FEICellGeometry &cellgeo) const;
+    virtual double giveArea(const FEICellGeometry &cellgeo) const;
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -85,9 +85,8 @@ public:
     virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
 protected:
-    void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
-    void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif // fei2dquadquad_h

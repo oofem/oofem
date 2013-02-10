@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -75,7 +75,7 @@ namespace oofem {
 class NonLinearDynamic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *effectiveStiffnessMatrix, *massMatrix,;
+    SparseMtrx *effectiveStiffnessMatrix, *massMatrix;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;

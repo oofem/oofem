@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -140,7 +140,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     int i, i_max, s;
-    double delta, sigma, charLen, tmp, Gf_tmp;
+    double delta, sigma, charLen, tmp=0., Gf_tmp;
     CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
     Element *element = gp->giveElement();
     FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6), reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6), charLenModes(6);
@@ -626,7 +626,7 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, j, maxComponents;
+    int i, j, maxComponents=0;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
     switch ( gp->giveMaterialMode() ) {

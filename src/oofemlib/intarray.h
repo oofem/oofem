@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -97,7 +97,7 @@ public:
 #ifdef DEBUG
     int &at(int i);
 #else
-    int &at(int i) { return values [ i - 1 ]; }
+    inline int &at(int i) { return values [ i - 1 ]; }
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -108,7 +108,7 @@ public:
 #ifdef DEBUG
     int at(int i) const;
 #else
-    int at(int i) const { return values [ i - 1 ]; }
+    inline int at(int i) const { return values [ i - 1 ]; }
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -116,26 +116,22 @@ public:
      * @param i Position of coefficient in array.
      * @return Value at position.
      */
-    int &operator()(int i)
-    {
 #ifdef DEBUG
-        checkBounds(i);
+    int &operator()(int i);
+#else
+    inline int &operator()(int i) { return values [ i ]; }
 #endif
-        return values [ i ];
-    }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i position of coefficient in array.
      * @return Value at position.
      */
-    const int &operator()(int i) const
-    {
 #ifdef DEBUG
-        checkBounds(i);
+    const int &operator()(int i) const;
+#else
+    inline const int &operator()(int i) const { return values [ i ]; }
 #endif
-        return values [ i ];
-    }
 
 #ifdef DEBUG
     /**

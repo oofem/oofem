@@ -1,7 +1,0 @@
-test02_nltrans_nonlin.out
-Staggered analysis in 2d - constantly rising temperature field in NlTransientTransportProblem is sent to NonLinearStatic problem
-StaggeredProblem nsteps 3 deltat 3600 prob1 "test02_nltrans_nonlin_tm.in.p1" prob2 "test02_nltrans_nonlin_sm.in.p2"
-#%BEGIN_CHECK%
-#INCLUDE test02_nltrans_nonlin_tm.in.p1
-#INCLUDE test02_nltrans_nonlin_sm.in.p2
-#%END_CHECK%

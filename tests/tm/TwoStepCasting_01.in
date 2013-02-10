@@ -14,8 +14,8 @@ MAT1 is cast, MAT2 is cast after 10 hours
 #   |         |        |
 #   1 ------- 3 -------5
 #
-NlTransientTransportProblem nsteps 10 deltat 7200 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
-vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
+NlTransientTransportProblem nsteps 10 deltat 7200 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 0
+#vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect 1 nmat 2 nbc 3 nic 2 nltf 3

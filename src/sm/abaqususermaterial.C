@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -116,7 +116,7 @@ void AbaqusUserMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                     MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( ~ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
+    if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
         MaterialMode mMode = gp->giveMaterialMode();
         int ncomp = 0;
@@ -266,7 +266,7 @@ void AbaqusUserMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     int npt = 0; // Integration point number.
 
     int layer = 0; // Layer number (for composite shells and layered solids)..
-    int kspt = 0.0; // Section point number within the current layer.
+    int kspt = 0; // Section point number within the current layer.
     int kstep = 0; // Step number.
     int kinc = 0; // Increment number.
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -544,12 +544,12 @@ void TriangleMesherInterface :: fixNodeMarkers(const std::vector<FloatArray> &no
 
     for (std::size_t i = 0; i < segments.size(); ++i) {
         for (int j = 1; j <= segments[i].giveSize(); ++j) {
-            n_markers[segments[i].at(j)-1].insertSortedOnce(s_markers.at(i));
+            n_markers[segments[i].at(j)-1].insertSortedOnce(s_markers(i));
         }
     }
     for (std::size_t i = 0; i < triangles.size(); ++i) {
         for (int j = 1; j <= triangles[i].giveSize(); ++j) {
-            n_markers[triangles[i].at(j)-1].insertSortedOnce(t_markers.at(i));
+            n_markers[triangles[i].at(j)-1].insertSortedOnce(t_markers(i));
         }
     }
 }
@@ -711,6 +711,33 @@ void TriangleMesherInterface :: simplifyPSLG(Triangle_PSLG &coarse, const Triang
                         elems.clear();
                         edgeRemoved = true;
                     }
+                }
+            }
+        }
+    }
+
+
+    // Remove simple double-connections like o<--->o
+    for (int i = 1; i <= nodes; i++) {
+        std::set<int> &elems = connectivity[i-1];
+        if ( elems.size() == 2 ) {
+            int e0 = *elems.begin();
+            int e1 = *(++elems.begin());
+            int n0 = seg_a.at(e0) == i ? seg_b.at(e0) : seg_a.at(e0);
+            int n1 = i;
+            int n2 = seg_a.at(e1) == i ? seg_b.at(e1) : seg_a.at(e1);
+
+            if ( n0 == n2 ) {
+                // Then we have a simple double connection. We get rid of this node and the two edges.
+                nodeRemoval.at(n1) = true;
+                edgeRemoval.at(e0) = true;
+                edgeRemoval.at(e1) = true;
+                connectivity[n1-1].erase(e0);
+                connectivity[n1-1].erase(e1);
+                connectivity[n2-1].erase(e0);
+                connectivity[n2-1].erase(e1);
+                if (connectivity[n1-1].size() == 0) {
+                    nodeRemoval.at(n2) = true;
                 }
             }
         }

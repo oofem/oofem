@@ -1,3 +1,21 @@
+2013-02-08  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* OOFEM 2.2 released.
+	* Added support for Abaqus UMAT subroutines.
+	* Added bazant-najjar and isolinmoisture materials + elements for moisture transport.
+	* Added QBrick1_h(m)t element for transport.
+	* Added tetrahedral linear-bubble elements for incompressible stokes flow.
+	* Added code for OpenMP based parallel assembly.
+	* Adding darcy flow problem representation and corresponding triangular element.
+	* Migration to PETSc 3.3 + added compability with PETSc built using --with-shared-libraries.
+	* Adding NonLinearDynamic Solver.
+	* Added lattice based elements and corresponding materials for microstructural mechanical analyses.
+	* Improved vtk export.
+	* Migrated to cmake build system.
+	* Migrated to Git - a distributed version control system.
+	* Many documentation updates, huge cleanup of Doxygen generated documentation.
+	* Many, many enhancements and bug-fixes.
+
 2011-12-22  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 2.1 released
