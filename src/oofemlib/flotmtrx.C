@@ -1733,13 +1733,11 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     if ( !isSquare() ) {
         OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
     }
-	
     // check for symmetry
-	double equalityTol = 1.0e-6;
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
             //if ( this->at(i, j) != this->at(j, i) ) {
-			if ( abs( this->at(i, j) - this->at(j, i) ) > equalityTol ) {
+            if ( fabs( this->at(i, j) - this->at(j, i) ) > 1.0e-6 ) {
                 OOFEM_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
             }
         }

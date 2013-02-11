@@ -1563,10 +1563,7 @@ ConcreteDPM2 :: performRegularReturn(StressVector &effectiveStress,
 
         normOfResiduals = residualsNorm.computeNorm();
 
-#ifdef _MSC_VER
-	if ( isnan(normOfResiduals) ) {
-#else
-#endif
+        if ( isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return 0.;
         }
