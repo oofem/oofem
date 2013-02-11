@@ -871,7 +871,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
 
-    double dA, a, b, c;
+    double dA, a, b;
     FloatMatrix N, B, Nt, NtL, NtLB, L(7, 18);
     FloatArray lcoords, BF;
     double zeta = 1.e30;
@@ -912,7 +912,6 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
         // thickness coefficients
         a = zeta + 0.5 * gam * zeta * zeta;
         b = 0.5 * zeta * zeta;
-        c = 1.0 + gam * zeta;
 
         FloatMatrix W1(3, 3), W2(3, 3), temp3(3, 3);
 

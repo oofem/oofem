@@ -828,11 +828,8 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 void
 LayeredCrossSection :: setupLayerMidPlanes()
 {
-    double layerTopZ = 0., bottom, top;
+    double layerTopZ = 0.;
     this->layerMidZ.resize(this->numberOfLayers);
-
-    bottom = -midSurfaceZcoordFromBottom;
-    top    = totalThick - midSurfaceZcoordFromBottom;
 
     layerTopZ = -midSurfaceZcoordFromBottom;
     for ( int j = 1; j <= numberOfLayers; j++ ) {
@@ -918,7 +915,7 @@ LayeredCrossSection :: giveSlaveGaussPointNew(GaussPoint *masterGp, int i)
 
         // create new slave record in masterGp
         // (requires that this is friend of gp)
-        double currentZTopCoord = 0., currentZCoord = 0.,  bottom, top;
+        double currentZTopCoord = 0., bottom, top;
         double layerTopZ = 0., layerMidZ = 0.;
         FloatArray *zCoord, *masterCoords = masterGp->giveCoordinates();
         // resolve slave material mode
@@ -935,7 +932,6 @@ LayeredCrossSection :: giveSlaveGaussPointNew(GaussPoint *masterGp, int i)
 
         for ( int j = 0; j < numberOfLayers; j++ ) {
             currentZTopCoord += this->layerThicks.at(j + 1);
-            currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
 
             zCoord = new FloatArray(3);
             zCoord->zero();
