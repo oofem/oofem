@@ -25,6 +25,7 @@ set (sm_element
 	shell7base.C
 	tr2shell7.C
     shell7basexfem.C
+    tr2shell7xfem.C
     )
 
 set (sm_crosssection

@@ -400,6 +400,23 @@ bool Circle :: intersects(Element *element)
     }
 }
 
+
+bool Circle :: isInside(Element *element)
+{
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        FloatArray *nodeCoor = element->giveDofManager(i)->giveCoordinates();
+        // distance from the node to the center of the circle
+        double dist = nodeCoor->distance( vertices->at(1) );
+        if ( dist < this->radius ) {
+            return true;
+        }
+    }
+
+    return false;
+    
+}
+
+
 void Circle :: computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints)
 {
     if ( intersects(element) ) {

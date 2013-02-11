@@ -59,22 +59,22 @@ class BoundaryLoad;
 class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
-    int numberOfGaussPoints;	
 
-    
-    
+    virtual double giveGlobalZcoord(GaussPoint *gp);
+    XfemManager *xMan; //=  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
 
     
 public:
-    //Shell7BaseXFEM(int n, Domain *d);	// constructor
-    Shell7BaseXFEM(int n, Domain *d) : Shell7Base(n, d), XfemElementInterface(this){};
-    virtual ~Shell7BaseXFEM() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
-    // definition & identification
-    virtual const char *giveClassName()                const { return "Shell7BaseXFEM"; }
-    virtual classType giveClassID()                    const { return Shell7BaseXFEMClass; }
-    
-	
+    // constructor
+    Shell7BaseXFEM(int n, Domain *d);   // : Shell7Base(n, d),  XfemElementInterface(this);
+    virtual ~Shell7BaseXFEM() {};		// destructor -> declaring as virtual will make each subclass call their respective destr.
 
+    virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
+    virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
+    
+    virtual Interface *giveInterface(InterfaceType it);
+	
+    //virtual IRResultType initializeFrom(InputRecord *ir){ return IRRT_OK; };
 
 };
 

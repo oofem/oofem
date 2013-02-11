@@ -60,7 +60,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
 BasicGeometry *EnrichmentItem :: giveGeometry()
 {
     //return xmanager->giveGeometry(this->geometry);
-    //return this->giveGeometry();
+    //return this->giveGeometry( this->geometry );
     return this->geometryList->at(1);
 }
 
@@ -94,7 +94,8 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 
 bool EnrichmentItem :: isElementEnriched(Element *element) 
 {
-    return this->giveGeometry()->intersects(element);
+    //return this->giveGeometry()->intersects(element);
+    return this->giveGeometry()->isInside(element);
 }
 
 
@@ -147,16 +148,22 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 
     this->geometry = 0;
     this->enrichmentFunction = 0;
-    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro// Macro
+//    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro// Macro
     IR_GIVE_FIELD(ir, numberOfGeometryItems, IFT_XfemManager_numberOfGeometryItems, "numberofgeometryitems");
+    
+
+    //IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
+    IR_GIVE_FIELD(ir, enrichmentDomainNumbers, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
+    int numEnrichementDomains = this->enrichmentDomainNumbers.giveSize();
+   // this->geometryList->growTo( numEnrichementDomains  );
+       // for ( int i = 1; i <= numEnrichementDomains; i++ ) {
+       //     this->geometryList->at(i) = 
+       // }
 
 
-    IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    IR_GIVE_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
-    // this->setEnrichmentFunction(enrItemFunction);
-    // this should go into enrichmentfunction probably
-    // enrItemFunction->insertEnrichmentItem(this);
-    // enrItemFunction->setActive(this);
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
+    
     return IRRT_OK;
 }
 
@@ -169,8 +176,11 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     int material = 0;
     IR_GIVE_FIELD(ir, material, IFT_EnrichmentItem_materialNr, "material"); // Macro
     this->mat = this->giveDomain()->giveMaterial(material);
+    numberOfEnrichmentFunctions = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
     return IRRT_OK;
 }
+
 
 
 int EnrichmentItem :: instanciateYourself(DataReader *dr)
@@ -228,6 +238,82 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
+
+// DELAMINATION
+
+IRResultType Delamination :: initializeFrom(InputRecord *ir)
+{
+    EnrichmentItem :: initializeFrom(ir);
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    int material = 0;
+    numberOfEnrichmentFunctions = 1;
+
+    IR_GIVE_FIELD(ir, this->delaminationZCoords, IFT_EnrichmentItem_Delamination_delaminationZCoords, "delaminationzcoords"); // Macro
+    this->numberOfDelaminations = this->delaminationZCoords.giveSize();
+
+    //write an instanciate method
+    
+    return IRRT_OK;
+}
+
+int
+Delamination :: giveDelaminationGroupAt(double zeta) 
+{
+    //double zRef = Shell7Base :: giveLocalZetaCoord(gp);
+    int nDelam = this->giveNumberOfDelaminations();
+    for ( int j = 1; j <= nDelam; j++ ) {
+        double zDelam = this->giveDelaminationZCoord(j);
+        if ( zeta  < zDelam ) { //belong to the delamination group just below delamination #j. How to deal with poins that lie onthe boundary?
+            return j;            
+        }
+
+    }
+    return nDelam + 1;
+            
+}
+
+
+double 
+Delamination :: giveDelaminationGroupMidZ(int dGroup, Element *e)
+{
+    double zTop=0., zBottom=0.;
+    this->giveDelaminationGroupZLimits(dGroup, zTop, zBottom, e);
+    return 0.5 * ( zTop + zBottom );
+}
+
+
+double 
+Delamination :: giveDelaminationGroupThickness(int dGroup, Element *e)
+{
+    double zTop, zBottom;
+    this->giveDelaminationGroupZLimits(dGroup, zTop, zBottom, e);
+    return zTop - zBottom;
+}
+
+void 
+Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e)
+{
+    int nDelam = this->giveNumberOfDelaminations();
+    //CrossSection *cs = e->giveCrossSection();
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > (e->giveCrossSection());
+    
+    if ( dGroup == 1 ) {
+        zBottom = - layeredCS->giveMidSurfaceZcoordFromBottom();
+        zTop    =  this->giveDelaminationZCoord(dGroup);
+    } else if (dGroup == nDelam + 1) {
+        zBottom =  this->giveDelaminationZCoord(dGroup-1);
+        zTop    = -layeredCS->giveMidSurfaceZcoordFromBottom() + layeredCS->computeIntegralThick();
+    } else {
+        zBottom =  this->giveDelaminationZCoord(dGroup-1);
+        zTop    =  this->giveDelaminationZCoord(dGroup);
+    }
+#if DEBUG
+    if ( zBottom > zTop ) {
+        OOFEM_ERROR2("giveDelaminationGroupZLimits: Bottom z-coord is larger than top z-coord in dGroup. (%i)", dGroup);
+    }
+#endif
+}
 
 
 } // end namespace oofem

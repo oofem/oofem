@@ -1321,6 +1321,8 @@ enum InputFieldType {
     IFT_EnrichmentItem_enrichmentFunctionNr,
     IFT_EnrichmentItem_materialNr,
 
+    IFT_EnrichmentItem_Delamination_delaminationZCoords,
+
     IFT_BSplineInterpolation_degree,
     IFT_BSplineInterpolation_knotVectorU,
     IFT_BSplineInterpolation_knotVectorV,

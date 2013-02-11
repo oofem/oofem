@@ -33,23 +33,51 @@
  */
 
 #include "shell7basexfem.h"
-
+#include "shell7base.h"
+#include "enrichmentitem.h"
 
 namespace oofem {
     
 
-//Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
-//{}
+Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
+{
+    //xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+}
 
-    /* giveGlobalZcoord(gp)
-    
-        int dGroup = giveDelaminationGroupAt(gp);
-        double dThickness = giveDelaminationGroupThickness(dGroup);
+Interface
+*Shell7BaseXFEM :: giveInterface(InterfaceType it)
+{
+    if ( it != XfemElementInterfaceType ) {
+        return Shell7Base :: giveInterface(it);
+    } else if ( it == XfemElementInterfaceType ) {
+        return ( XfemElementInterface * ) this;
+    } else {
+        return Shell7Base :: giveInterface(it);
+    }
+}
 
-        zeta = xi(gp)*dThickness
+double 
+Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp) 
+{
+    // What if we have multiple delaminationEI active in one el?
+    xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    int numEI = xMan->giveNumberOfEnrichmentItems();
+    double zRef = Shell7Base :: giveGlobalZcoord(gp);
+    Element *e = this->element;
+    for ( int i = 1; i <= numEI; i++ ) {
+        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
+        if ( dei ) {
+            if ( dei->isElementEnriched(this) ) { // should check if point is within enr. domain
+                int dGroup  = dei->giveDelaminationGroupAt(zRef);
+                double zMid = dei->giveDelaminationGroupMidZ(dGroup, e);
+                return zRef - zMid; // new z-coord measured from dGroup c.s. 
+            }
+        }
 
+    }
+    return zRef;
+}
 
-    */
 
 
 

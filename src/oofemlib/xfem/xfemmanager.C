@@ -282,6 +282,8 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
 
         ei->initializeFrom(mir);
+        //new
+        ei->instanciateYourself(dr);
         int eindofs = ei->giveNumberOfDofs();
         IntArray dofIds(eindofs);
         for ( int j = 1; j <= eindofs; j++ ) {

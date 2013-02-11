@@ -151,6 +151,9 @@ public:
     int giveNumIntegrationPointsInLayer() { 
         return this->numberOfIntegrationPoints; 
     }
+    double giveMidSurfaceZcoordFromBottom() {
+        return this->midSurfaceZcoordFromBottom;
+    }
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { 

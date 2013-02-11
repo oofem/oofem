@@ -90,7 +90,7 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 
 
 double
-Shell7Base :: giveLocalZetaCoord(GaussPoint *gp)
+Shell7Base :: giveGlobalZcoord(GaussPoint *gp)
 {
 	return (*gp->giveCoordinates()).at(3) * this->giveCrossSection()->give(CS_Thickness)*0.5;
 }
@@ -107,7 +107,7 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, Floa
 {
 	double x, y, z, Mx, My, Mz, zeta;
 	FloatArray lcoords = *gp->giveCoordinates();
-	zeta = giveLocalZetaCoord(gp);
+	zeta = giveGlobalZcoord(gp);
 	FloatArray N, M;
 	FloatMatrix dNdxi, Mmat;
 
@@ -279,7 +279,7 @@ void
 Shell7Base :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEps)
 {
 	FloatArray lcoords = *gp->giveCoordinates();
-	double zeta = giveLocalZetaCoord(gp);
+	double zeta = giveGlobalZcoord(gp);
 
 	FloatArray dxdxi, dxdxi1, dxdxi2, m, dmdxi, dmdxi1, dmdxi2, dgamdxi,  test;
 	double dgamdxi1, dgamdxi2, gam;
@@ -422,7 +422,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
 			// Tangent stiffness
 #if 1
 			// thickness coefficients
-			double zeta = giveLocalZetaCoord(gp);
+			double zeta = giveGlobalZcoord(gp);
 			double a = zeta + 0.5*gam*zeta*zeta; double b = 0.5*zeta*zeta; double c = 1. + gam*zeta;
 
 			// f1(alpha) = b*A(alpha,beta)*dg(beta) + c*A(alpha,3);
@@ -941,7 +941,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 			this->computeBmatricesAt(gp, B11, B22, B32, B43, B53 );
 			this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
 
-			double zeta = giveLocalZetaCoord(gp);
+			double zeta = giveGlobalZcoord(gp);
 			FloatArray N, M, T, Ms; double Ts=0.;
 			this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, zeta);
 
@@ -1244,7 +1244,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep){
 			 */
 
 
-			double zeta = giveLocalZetaCoord(gp);
+			double zeta = giveGlobalZcoord(gp);
 			double fac1 = 4;
 			double fac2 = 2.0 * zeta*(2.0 + gam*zeta);
 			double fac3 = 2.0 * zeta*zeta;

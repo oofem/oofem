@@ -86,6 +86,7 @@ public:
     /// Returns number of Geometry vertices.
     int giveNrVertices() { return this->vertices->giveSize(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
+    virtual bool isInside(Element *el) { return false; }
     virtual void printYourself() { }
     /**
      * Stores the state of receiver to output stream.
@@ -164,6 +165,7 @@ public:
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
     virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
     virtual bool isOutside(BasicGeometry *bg);
+    virtual bool isInside(Element *element);
     virtual void printYourself();
 };
 } // end namespace oofem

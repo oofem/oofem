@@ -79,8 +79,7 @@ public:
     
     /// Checks whether a Geometry is inside or outside. - what if the geometry is not closed? like a set of segments
     bool isOutside(BasicGeometry *bg);
-
-
+    
     /// Accessor.
     //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
     EnrichmentFunction *giveEnrichmentFunction(int n);
@@ -113,6 +112,7 @@ protected:
     XfemManager *xmanager;
     /// Geometry associated with EnrichmentItem.
     int geometry;
+    IntArray enrichmentDomainNumbers;
     /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
     /// Additional dofIds from Enrichment. - depends on problem type and spatial dimension
@@ -155,29 +155,63 @@ public:
 };
 
 
-class Delamination : public EnrichmentItem, LayeredCrossSection // rest of the crack el. that does not contain any tip 
+class Delamination : public EnrichmentItem //, LayeredCrossSection 
 {
-    // maaybe layeredDelamination?
+    // maybe layeredDelamination?
 public:
-    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain), LayeredCrossSection(n, aDomain){}
+    //Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain), LayeredCrossSection(n, aDomain){}
+    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+    {  }
+    virtual const char *giveClassName() const { return "Delamination"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
     int numberOfDelaminations;
-    IntArray delaminatedLayers; // ambigious
+    int giveNumberOfDelaminations() { return numberOfDelaminations; };
+    
+
+    int giveDelaminationGroupAt(double z);
     FloatArray delaminationZCoords; // must they be ordered?
-    void updateIntegrationRule();
-    int giveDelaminationGroupAt();
-    double giveDelaminationGroupMidZ();
-    double giveDelaminationGroupThickness();
+    double giveDelaminationZCoord(int n) { return delaminationZCoords.at(n); }; 
+    
+    FloatArray delaminationGroupMidZ(int dGroup);
+    double giveDelaminationGroupMidZ(int dGroup, Element *e);
+    
+    FloatArray delaimnationGroupThickness;
+    double giveDelaminationGroupThickness(int dGroup, Element *e);
 
-    /* for each delamination group = nDelam + 1
-        int dGroup = giveDelaminationGroupAt(gp);
-        double dMidZ = giveDelaminationGroupMidZ(dGroup);
-        double dThickness = giveDelaminationGroupThickness(dGroup);
-        b = dMidZ + 0.5*dThickness;
-        a = dMidZ - 0.5*dThickness;
-        remap the xi-coords -> 1-2(b-x)/(b-a)
+void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
 
-    */
+#if 0
+    void updateIntegrationRule(IntegrationRule **layerIntegrationRulesArray){
+	    for( int layer = 1; layer <= numberOfLayers; layer++ ) {
+		    IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
+		
+		    for( int j = 1; j <= iRule->getNumberOfIntegrationPoints(); j++ ) {
+			    GaussPoint *gp = iRule->getIntegrationPoint(j-1);
+                int dGroup = giveDelaminationGroupAt();
+                double dMidZ = giveDelaminationGroupMidZ(dGroup);
+                double dThickness = giveDelaminationGroupThickness(dGroup);
+                double b = dMidZ + 0.5*dThickness;
+                double a = dMidZ - 0.5*dThickness;
+                //remap the xi-coords -> 1-2(b-x)/(b-a)
 
+           	    double totalThickness = this->computeIntegralThick();
+
+
+			// Map local layer cs to local shell cs
+            /*
+			double zMid_i = layeredCS->giveLayerMidZ(layer);
+            double xiMid_i = 1.0 - 2.0*(totalThickness - this->midSurfaceZcoordFromBottom - zMid_i)/totalThickness; 
+			double xi = xiMid_i; 
+			double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
+			double xinew = xi+xi2;
+			iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
+			double temp=0.;
+            */
+			}
+		}
+
+    }
+#endif
 };
 
 

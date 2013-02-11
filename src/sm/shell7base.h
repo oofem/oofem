@@ -129,8 +129,8 @@ void evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, 
 void edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, const int iEdge);
 void edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &G1, FloatArray &G3);
 void edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep);
-double giveLocalZetaCoord(GaussPoint *gp);
-double giveLayerZetaCoord(GaussPoint *gp, int layer);
+virtual double giveGlobalZcoord(GaussPoint *gp);
+//double giveLayerZetaCoord(GaussPoint *gp, int layer);
 
 
 // Stress and strain

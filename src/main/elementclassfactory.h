@@ -78,6 +78,7 @@
  #include "shell7base.h"
  #include "tr2shell7.h"
  #include "shell7basexfem.h"
+ #include "tr2shell7xfem.h" 
  #include "rershell.h"
  #include "quad1mindlin.h"
  #include "interfaceelem2dquad.h"
@@ -158,6 +159,7 @@ REGISTER_CLASS(RerShell, "rershell", RerShellClass)
 //REGISTER_CLASS(TrDirShell, "trdirshell", TrDirShellClass)
 //REGISTER_CLASS(Shell7Base, "shell7base", Shell7BaseClass)
 REGISTER_CLASS(Tr2Shell7, "tr2shell7", Tr2Shell7Class)
+REGISTER_CLASS(Tr2Shell7XFEM, "tr2shell7xfem", Tr2Shell7XFEMClass)
 REGISTER_CLASS(Beam2d, "beam2d", Beam2dClass)
 REGISTER_CLASS(Beam3d, "beam3d", Beam3dClass)
 REGISTER_CLASS(LIBeam2dNL, "libeam2dNL", LIBeam2dNLClass)

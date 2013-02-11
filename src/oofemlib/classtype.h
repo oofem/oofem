@@ -199,6 +199,7 @@ enum classType {
 	Shell7BaseClass,
 	Tr2Shell7Class,
     Shell7BaseXFEMClass,
+    Tr2Shell7XFEMClass,
     MacroLSpaceClass,
     MicroMaterialClass,
 
