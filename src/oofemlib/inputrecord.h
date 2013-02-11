@@ -1420,6 +1420,8 @@ public:
     virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the double field value.
     virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString) = 0;
+    /// Reads the bool field value.
+    virtual IRResultType giveField(bool &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the string field value.
     virtual IRResultType giveField(std :: string &answer, InputFieldType fieldI, const char *idString) = 0;
     /// Reads the FloatArray field value.
@@ -1434,8 +1436,6 @@ public:
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString) = 0;
     /// Reads the std::list<Range> field value.
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType fieldID, const char *idString) = 0;
-    /// Returns a double on the position tokenNumber
-    virtual IRResultType giveField(double &answer, int tokenNumber) = 0;
     //@}
 
     /**@name Optional field extraction methods
@@ -1449,6 +1449,8 @@ public:
     IRResultType giveOptionalField(int &answer, InputFieldType fieldID, const char *idString);
     /// Reads the double field value.
     IRResultType giveOptionalField(double &answer, InputFieldType fieldID, const char *idString);
+    /// Reads the bool field value.
+    IRResultType giveOptionalField(bool &answer, InputFieldType fieldID, const char *idString);
     /// Reads the string field value.
     IRResultType giveOptionalField(std :: string &answer, InputFieldType fieldID, const char *idString);
     /// Reads the FloatArray field value.

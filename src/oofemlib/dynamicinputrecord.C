@@ -53,6 +53,7 @@ DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src)
     this->recordNumber = src.recordNumber;
     this->intRecord = src.intRecord;
     this->doubleRecord = src.doubleRecord;
+    this->boolRecord = src.boolRecord;
     this->stringRecord = src.stringRecord;
     this->floatArrayRecord = src.floatArrayRecord;
     this->intArrayRecord = src.intArrayRecord;
@@ -72,6 +73,7 @@ DynamicInputRecord & DynamicInputRecord :: operator=(const DynamicInputRecord &s
     this->recordNumber = src.recordNumber;
     this->intRecord = src.intRecord;
     this->doubleRecord = src.doubleRecord;
+    this->boolRecord = src.boolRecord;
     this->stringRecord = src.stringRecord;
     this->floatArrayRecord = src.floatArrayRecord;
     this->intArrayRecord = src.intArrayRecord;
@@ -114,6 +116,15 @@ IRResultType DynamicInputRecord :: giveField(double &answer, InputFieldType fiel
 {
     std::map<InputFieldType, double>::iterator it = this->doubleRecord.find(fieldID);
     if (it == this->doubleRecord.end())
+        return IRRT_NOTFOUND;
+    answer = it->second;
+    return IRRT_OK;
+}
+
+IRResultType DynamicInputRecord :: giveField(bool &answer, InputFieldType fieldID, const char *idString)
+{
+    std::map<InputFieldType, bool>::iterator it = this->boolRecord.find(fieldID);
+    if (it == this->boolRecord.end())
         return IRRT_NOTFOUND;
     answer = it->second;
     return IRRT_OK;
@@ -182,16 +193,11 @@ IRResultType DynamicInputRecord :: giveField(std::list< Range > &answer, InputFi
     return IRRT_OK;
 }
 
-IRResultType
-DynamicInputRecord :: giveField(double &answer, int tokenNumber){
-    OOFEM_ERROR("Not implemented");
-    return IRRT_OK;
-}
-
 bool DynamicInputRecord :: hasField(InputFieldType fieldID, const char *idString)
 {
     return this->intRecord.find(fieldID) != this->intRecord.end() ||
            this->doubleRecord.find(fieldID) != this->doubleRecord.end() ||
+           this->boolRecord.find(fieldID) != this->boolRecord.end() ||
            this->floatArrayRecord.find(fieldID) != this->floatArrayRecord.end() ||
            this->intArrayRecord.find(fieldID) != this->intArrayRecord.end() ||
            this->matrixRecord.find(fieldID) != this->matrixRecord.end() ||
@@ -221,6 +227,11 @@ void DynamicInputRecord :: setField(int item, InputFieldType fieldID)
 void DynamicInputRecord :: setField(double item, InputFieldType fieldID)
 {
     this->doubleRecord[fieldID] = item;
+}
+
+void DynamicInputRecord :: setField(bool item, InputFieldType fieldID)
+{
+    this->boolRecord[fieldID] = item;
 }
 
 void DynamicInputRecord :: setField(const std::string &item, InputFieldType fieldID)

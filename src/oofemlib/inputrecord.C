@@ -98,6 +98,17 @@ InputRecord :: giveOptionalField(double &answer, InputFieldType fieldID, const c
 }
 
 IRResultType
+InputRecord :: giveOptionalField(bool &answer, InputFieldType fieldID, const char *idString)
+{
+    IRResultType r = this->giveField(answer, fieldID, idString);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
 InputRecord :: giveOptionalField(std::string &answer, InputFieldType fieldID, const char *idString)
 {
     IRResultType r = this->giveField(answer, fieldID, idString);
