@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -98,7 +98,7 @@ double signum(double i);
 #ifndef HAVE_ISNAN
 #ifdef _MSC_VER
 /// Returns true is x is NaN
-inline bool isnan(double x) { return (bool)_isnan(x); }
+inline bool isnan(double x) { return _isnan(x) != 0; }
 #endif
 #endif
 

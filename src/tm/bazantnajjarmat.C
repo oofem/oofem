@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -69,14 +69,14 @@ double
 BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *atTime)
 {
     double permeability;
-    double humidity = this->giveHumidity(gp);
+    double humidity = this->giveHumidity(gp, VM_Total);
 
     permeability = C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
     return permeability;
 }
 
 double
-BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp)
+BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
     FloatArray tempState = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
     if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
@@ -85,7 +85,5 @@ BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp)
     } else {
         return tempState.at(1);
     }
-
-    return 0.0;
 }
 } // end namespace oofem

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -56,7 +56,7 @@ public:
     PatchIntegrationRule(int n, Element *e, Patch *p);
     /// Destructor.
     virtual ~PatchIntegrationRule();
-    virtual int SetUpPointsOnTriangle(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnTriangle(int, MaterialMode);
     int giveMaterial() { return this->patch->giveMaterial(); }
     Patch *givePatch() { return this->patch; }
 

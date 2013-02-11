@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -519,7 +519,5 @@ J2plasticMaterial :: giveIsotropicHardeningVar(FloatArray *stressSpaceHardeningV
     } else {
         return stressSpaceHardeningVars->at(1);
     }
-
-    return 0.;
 }
 } // end namespace oofem

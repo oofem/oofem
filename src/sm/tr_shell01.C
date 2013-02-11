@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -292,11 +292,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
     FloatArray v, aux;
     GaussPoint *gp, *membraneGP;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
 
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
       gp  = iRule->getIntegrationPoint(i);

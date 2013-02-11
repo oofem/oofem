@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -386,10 +386,10 @@ double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, Time
         return 0.0;
 
     int vol_loc = this->giveVolDof()->giveEquationNumber(s);
-
-    double rve_size = this->domainSize();
-    answer.at(vol_loc) -= rve_size*pressure; // Note the negative sign (pressure as opposed to mean stress)
-
+    if (vol_loc) {
+        double rve_size = this->domainSize();
+        answer.at(vol_loc) -= rve_size*pressure; // Note the negative sign (pressure as opposed to mean stress)
+    }
     return 0.0;
 }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -546,7 +546,7 @@ void
 IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
     int i, indx = 1;
-    double le;
+    double le=0.;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain, crackVect(3);
     FloatMatrix principalDir(3, 3);

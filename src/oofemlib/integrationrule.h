@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -275,7 +275,7 @@ public:
      * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
-    virtual int SetUpPointsOnWedge(int, MaterialMode mode) { return 0; }    
+    virtual int SetUpPointsOnWedge(int, MaterialMode mode) { return 0; }
 
     /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
@@ -284,8 +284,8 @@ public:
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode,
                                             const FloatArray **coords) { return 0; }
 
-    public:  
-    virtual int SetUpPointsOnWedge(int, int, MaterialMode mode) { return 0; }    
+public:
+    virtual int SetUpPointsOnWedge(int, int, MaterialMode mode) { return 0; }
 };
 } // end namespace oofem
 #endif // integrationrule_h

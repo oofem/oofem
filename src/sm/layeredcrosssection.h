@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -69,7 +69,7 @@ class StructuralMaterial;
  * - Returning RealStress state in Gauss point and for given Stress mode.
  * - Returning a properties of cross section like thickness or area.
  */
-class LayeredCrossSection : public StructuralCrossSection 
+class LayeredCrossSection : public StructuralCrossSection
 {
 protected:
     IntArray layerMaterials; ///< Material of each layer.
@@ -89,18 +89,18 @@ public:
         totalThick = 0.;
         area = -1.0;
     }
-    
+
     virtual ~LayeredCrossSection() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                          const FloatArray &reducedStrainIncrement, TimeStep *tStep);
+                                  const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
+                                                 MatResponseMode mode,
+                                                 GaussPoint *gp,
+                                                 TimeStep *tStep);
 
     // next function is intended to be used if we would like to obtain
     // char matrix form different material which is not associated with gp and its element.
@@ -115,9 +115,9 @@ public:
 
 
     virtual void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &charVector3d);
+                                                 const FloatArray &charVector3d);
     virtual void giveFullCharacteristicVector(FloatArray &answer,
-                                      GaussPoint *gp, const FloatArray &strainVector);
+                                              GaussPoint *gp, const FloatArray &strainVector);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
@@ -171,7 +171,7 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-	void mapLayerGpCoordsToShellCoords(LayeredCrossSection *layeredCS,IntegrationRule **layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(LayeredCrossSection *layeredCS, IntegrationRule **layerIntegrationRulesArray);
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)

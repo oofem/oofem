@@ -1,7 +1,0 @@
-test03_nonstat_nonlin.out
-Staggered analysis in 2d - Nonstationary temperature field sent to NonLinearStatic problem
-StaggeredProblem nsteps 3 deltat 36000 prob1 "test03_nonstat_nonlin_tm.in.p1" prob2 "test03_nonstat_nonlin_sm.in.p2"
-#%BEGIN_CHECK%
-#INCLUDE test03_nonstat_nonlin_tm.in.p1
-#INCLUDE test03_nonstat_nonlin_sm.in.p2
-#%END_CHECK%

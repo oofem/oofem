@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -74,7 +74,7 @@ class ClassFactory
 {
     struct CaseComp
     {
-        int operator()(std :: string a, std :: string b) const { return strncasecmp( a.c_str(), b.c_str(), b.length() ) < 0; }
+        int operator()(std :: string a, std :: string b) const { return strncasecmp( a.c_str(), b.c_str(), (int)b.length() ) < 0; }
     };
     struct CaseCompId
     {

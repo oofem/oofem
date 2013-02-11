@@ -1,4 +1,5 @@
 <?xml version="1.0" ?>
+<cemhyd>
 <!--automatically generated CEMHYD3D XML input file-->
 <!--fineness 380.000000 PSD-Dyckerhoff dihydrate 0.050000  hemihydrate 0.000000  anhydrite 0.000000 AutoCorrFile 16130s1 C3S_mass 0.700000  C2S_mass 0.130000  C3A_mass 0.090000  C4AF_mass 0.080000  totsodium 0.000000  totpotassium 0.000000  rssodium 0.000000  rspotassium 0.000000  wcr 0.400000  satur_sealed 0-->
 <Rand_seed_num key0="100" />
@@ -73,3 +74,4 @@
 <Concrete_thermal_conductivity key0="1.7" note0="Thermal conductivity in the beginning of hydration [W/m/K]" />
 <Info_concrete_thermal_capacity_DoH_0 key0="1038.11" note0="Informative heat capacity at DoH=0 [J/kg/K]" />
 <Info_concrete_thermal_capacity_DoH_1 key0="932.157" note0="Informative heat capacity at DoH=1 [J/kg/K]" />
+</cemhyd>

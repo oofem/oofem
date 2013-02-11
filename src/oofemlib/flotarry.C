@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -116,29 +116,25 @@ FloatArray :: operator = ( const FloatArray & src )
     return * this;
 }
 
+#ifdef DEBUG
 double &
 FloatArray :: operator()(int i)
 {
-#ifdef DEBUG
     if ( i >= size ) {
         OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
     }
-
-#endif
     return values [ i ];
 }
 
 const double &
 FloatArray :: operator()(int i) const
 {
-#ifdef DEBUG
     if ( i >= size ) {
         OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
     }
-
-#endif
     return values [ i ];
 }
+#endif
 
 
 void
@@ -330,17 +326,17 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 
 #endif
 
-    for ( isize = 0, i = 1; i <= n; i++ ) {
-        if ( indx.at(i) > isize ) {
-            isize = indx.at(i);
+    for ( isize = 0, i = 0; i < n; i++ ) {
+        if ( indx(i) > isize ) {
+            isize = indx(i);
         }
     }
 
     this->resize(isize);
-    for ( i = 1; i <= n; i++ ) {
-        ii = indx.at(i);
+    for ( i = 0; i < n; i++ ) {
+        ii = indx(i);
         if ( ii > 0 ) {
-            this->at(ii) = src.at(i);
+            this->values [ ii-1 ] = src.values [ i ];
         }
     }
 }
@@ -404,7 +400,7 @@ double FloatArray :: dotProduct(const FloatArray &x, int size) const
 
 #  endif
 
-    double dp = 0;
+    double dp = 0.;
     for ( int i = 0; i < size; i++ ) {
         dp += this->values [ i ] * x.values [ i ];
     }
@@ -443,16 +439,14 @@ void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
 // Assembles the array fe (typically, the load vector of a finite
 // element) to the receiver, using loc as location array.
 {
-    int n = fe.giveSize();
+    int ii, n = fe.giveSize();
 #  ifdef DEBUG
-    if (  n != loc.giveSize() ) {
+    if ( n != loc.giveSize() ) {
         OOFEM_ERROR3("FloatArray::assemble : dimensions of 'fe' (%d) and 'loc' (%d) mismatch",fe.giveSize(), loc.giveSize());
     }
     
-    //this->checkSizeTowards(loc); should not resize! 
 #  endif
 
-    
     for ( int i = 1; i <= n; i++ ) {
         int ii = loc.at(i);
         if ( ii ) { // if non 0 coefficient,
@@ -499,11 +493,11 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
 // Expands the receiver if loc points to coefficients beyond the size of
 // the receiver.
 {
-    int i, n, high;
+    int n, high;
 
     high = 0;
-    n    = loc.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    n = loc.giveSize();
+    for ( int i = 1; i <= n; i++ ) {
         high = max( high, ( loc.at(i) ) );
     }
 
@@ -609,7 +603,7 @@ void FloatArray :: zero()
 void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix * anArray in to receiver
 {
-    int i, j, nColumns, nRows;
+    int nColumns, nRows;
     double sum;
 
 #  ifdef DEBUG
@@ -621,9 +615,9 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 
     nColumns = aMatrix.giveNumberOfColumns();
     this->resize( nRows = aMatrix.giveNumberOfRows() );
-    for ( i = 1; i <= nRows; i++ ) {
+    for ( int i = 1; i <= nRows; i++ ) {
         sum = 0.;
-        for ( j = 1; j <= nColumns; j++ ) {
+        for ( int j = 1; j <= nColumns; j++ ) {
             sum += aMatrix.at(i, j) * anArray.at(j);
         }
 
@@ -635,7 +629,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix^T * anArray in to receiver
 {
-    int i, j, nColumns, nRows;
+    int nColumns, nRows;
     double sum;
 
 #  ifdef DEBUG
@@ -647,9 +641,9 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
     nColumns = aMatrix.giveNumberOfRows();
     this->resize( nRows = aMatrix.giveNumberOfColumns() );
-    for ( i = 1; i <= nRows; i++ ) {
+    for ( int i = 1; i <= nRows; i++ ) {
         sum = 0.;
-        for ( j = 1; j <= nColumns; j++ ) {
+        for ( int j = 1; j <= nColumns; j++ ) {
             sum += aMatrix.at(j, i) * anArray.at(j);
         }
 
@@ -843,8 +837,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 
 
 #ifdef __PARALLEL_MODE
-int
-FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
+int FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
 {
     int result = 1;
     // pack size
@@ -855,8 +848,7 @@ FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
     return result;
 }
 
-int
-FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
+int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
 {
     int newSize, result = 1;
     // unpack size
@@ -868,8 +860,7 @@ FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     return result;
 }
 
-int
-FloatArray :: givePackSize(CommunicationBuffer &buff) const
+int FloatArray :: givePackSize(CommunicationBuffer &buff) const
 {
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_DOUBLE, this->size);
 }
@@ -931,9 +922,11 @@ FloatArray operator *( const FloatArray & x, const double & a )
 FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("loatArray operator+ : incompatible vector lengths");
     }
+#endif
 
     FloatArray result(N);
     for ( int i = 0; i < N; i++ ) {
@@ -946,9 +939,11 @@ FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray operator- : incompatible vector lengths");
     }
+#endif
 
     FloatArray result(N);
     for ( int i = 0; i < N; i++ ) {
@@ -962,9 +957,11 @@ FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray& operator+= : incompatible vector lengths");
     }
+#endif
 
     for ( int i = 0; i < N; i++ ) {
         x(i) += y(i);
@@ -977,9 +974,11 @@ FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
+#if DEBUG
     if ( N != y.giveSize() ) {
         OOFEM_ERROR("FloatArray& operator-= : incompatible vector lengths");
     }
+#endif
 
     for ( int i = 0; i < N; i++ ) {
         x(i) -= y(i);
@@ -992,9 +991,11 @@ FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 double dot(const FloatArray &x, const FloatArray &y)
 {
     //  Check for compatible dimensions:
+#if DEBUG
     if ( x.giveSize() != y.giveSize() ) {
         OOFEM_ERROR("dot : incompatible dimensions");
     }
+#endif
 
     double temp =  0;
     for ( int i = 0; i < x.giveSize(); i++ ) {

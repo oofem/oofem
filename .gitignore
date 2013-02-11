@@ -16,8 +16,15 @@ targets/
 *.log
 *.toc
 *.lof
-*kdev*
+*.synctex.gz
+*.run.xml
+*.bcf
+*-blx.bib
+*.blg
 
+
+*.backup
+*kdev*
 makefile
 elixirtest.c
 configure

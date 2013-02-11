@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -205,6 +205,7 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
 
 void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
+//	printf("*** assemble\n");
     GaussIntegrationRule *iRule;
 
     GaussPoint *gp;
@@ -292,11 +293,12 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                 double s = gcoords.at(direction);
 
-                for ( int k = 0; k < dofCountOnBoundary; k++ ) {
-                    for ( int j = 0; j <= orderOfPolygon; j++ ) {
-                        double fVal = computeBaseFunctionValue(j, s);
-                        B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
-                    }
+                for ( int j = 0; j <= orderOfPolygon; j++ ) {
+                	double fVal = computeBaseFunctionValue(j, s);
+//                	printf("fVal=%f @ %f\n", fVal, s);
+                	for ( int k = 0; k < dofCountOnBoundary; k++ ) {
+                		B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
+                	}
                 }
             }
 
@@ -311,7 +313,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 
 double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
 {
-    double fVal = 0.;
+    double fVal=0.0;
     double sideLength = smax - smin;
 
     if ( useBasisType == monomial ) {
@@ -322,6 +324,12 @@ double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
         } else {
             fVal = sin( ( ( double ) baseID + 1 ) / 2 * ( coordinate * 2 * 3.141593 / sideLength ) );
         }
+    } else if ( useBasisType == legendre) {
+    	double n=(double) baseID;
+    	coordinate=2.0*coordinate-1;
+    	for (double k=0; k<=n; k=k+1.0) {
+    		fVal=fVal+binomial(n,k)*binomial(-n-1.0, k)*pow((1.0-coordinate)/2.0, k);
+    	}
     }
 
     return fVal;
@@ -331,6 +339,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                                         CharType type, ValueModeType mode,
                                         const UnknownNumberingScheme &s, Domain *domain)
 {
+//	printf("*** assembleVector\n");
     double norm = 0.0;
 
     // Fetch unknowns of this boundary condition
@@ -432,10 +441,11 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                     double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                     double s = gcoords.at(direction);
 
-                    for ( int k = 0; k < dofCountOnBoundary; k++ ) {
-                        for ( int j = 0; j <= orderOfPolygon; j++ ) {
-                            double fVal = computeBaseFunctionValue(j, s);
-                            B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
+                    for ( int j = 0; j <= orderOfPolygon; j++ ) {
+                		double fVal = computeBaseFunctionValue(j, s);
+//                    	printf("fVal=%f @ %f\n", fVal, s);
+                    	for ( int k = 0; k < dofCountOnBoundary; k++ ) {
+                    		B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
                         }
                     }
                 }

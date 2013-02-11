@@ -14,10 +14,6 @@ set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
 set (oofem_COPYRIGHT "2012")
 set (oofem_EMAIL "info@oofem.org")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
-
 # Default is debug build
 if (NOT CMAKE_BUILD_TYPE)
 	set (CMAKE_BUILD_TYPE Debug)
@@ -26,7 +22,14 @@ endif ()
 if (MSVC)
     add_definitions (-D_USE_MATH_DEFINES)
     set (CMAKE_REQUIRED_DEFINITIONS "-D_USE_MATH_DEFINES")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -wd4100 -wd4996 -wd4706 -wd4512")
+else ()
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 endif ()
+
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
+
 
 #######################################################################
 ######################## Custom paths #################################
@@ -299,12 +302,12 @@ endif ()
 if (USE_TINYXML)
     if (TINYXML2_DIR)
         include_directories (${TINYXML2_DIR})
-        find_library (TINYXML2_LIB tinyxml2 HINTS ${TINYXML2_DIR} NO_DEFAULT_PATH)
+        find_library (TINYXML2_LIB NAMES tinyxml2 HINTS ${TINYXML2_DIR} NO_DEFAULT_PATH)
     else ()
-        find_library (TINYXML2_LIB tinyxml2)
+        find_library (TINYXML2_LIB NAMES tinyxml2 )
     endif ()
     if (${TINYXML2_LIB} STREQUAL "TINYXML2_LIB-NOTFOUND")
-        message (FATAL_ERROR "TinyXML-2 library not found")
+        message (FATAL_ERROR "TinyXML2 library not found")
     endif ()
     set (EXT_LIBS ${EXT_LIBS} ${TINYXML2_LIB})
     set (MODULE_LIST ${MODULE_LIST} "TinyXML-2")
@@ -562,7 +565,7 @@ set (test_cmd  ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/testhelper.py")
 # Helper script (perhaps one could do without this one)
 # Some input files requier other files, so I didn't feel that there were any option to just running them in the main tree.
 file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/testhelper.py
-"import os,sys,glob
+"import subprocess,os,sys,glob
 os.chdir(sys.argv[2])
 if sys.argv[4] == 'p':
     files = glob.glob(sys.argv[1]+'.[0-9]*')
@@ -576,35 +579,39 @@ if len(sys.argv) == 6:
     flags = ' ' + sys.argv[5]
 else:
     flags = ''
-print('Running: ' + mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2' + flags)
-if os.system(mpicommand + '\"' + sys.argv[3] + '\"' + parallel +' -f '+sys.argv[1]+' -l 2' + flags):
-    exit(1)
+command = mpicommand + sys.argv[3] + parallel + ' -f ' + sys.argv[1] + ' -l 2' + flags 
+print('Executing: ' + command)
+if os.system(command):
+	exit(1)
 else:
-    for f in files:
-        if os.system('${PYTHON_EXECUTABLE} \"${oofem_SOURCE_DIR}/tools/extractor.py\" -f \"'+f+'\" -c'):
-            exit(2)
+        for f in files:
+	    python=\"${PYTHON_EXECUTABLE}\"
+            extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+            print('Executing: ', [python, extractor, '-f', f, '-c'])
+	    if subprocess.call([python, extractor, '-f', f, '-c']):
+		exit(2)
 exit(0)
 ")
 
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
-    add_test (NAME 4test_test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd} -ksp_rtol 1.e-15" "p")
-    add_test (NAME bar_test_np4 COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
-    add_test (NAME barnl_test_np4 COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
-    add_test (NAME barnl_test_np2 COMMAND ${test_cmd} barnl2.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
-    add_test (NAME brazil_test_np2 COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME brazil_test_np4 COMMAND ${test_cmd} brazil_2d_nl4.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME brazil_test_np7 COMMAND ${test_cmd} brazil_2d_nl7.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME brazil3d_test_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd} -ksp_rtol 1.e-15 -ksp_type cg" "p")
-    add_test (NAME dyn_bar01_test_np2 COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
-    add_test (NAME dyn_bar02_test_np2 COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
-    add_test (NAME dyn_bar03_test_np2 COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
+    add_test (NAME partest_4test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd}" "p" "-ksp_rtol 1.e-15")
+    add_test (NAME partest_bar_np4 COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
+    add_test (NAME partest_barnl_np4 COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
+    add_test (NAME partest_barnl_np2 COMMAND ${test_cmd} barnl2.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
+    add_test (NAME partest_brazil_np2 COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
+    add_test (NAME partest_brazil_np4 COMMAND ${test_cmd} brazil_2d_nl4.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
+    add_test (NAME partest_brazil_np7 COMMAND ${test_cmd} brazil_2d_nl7.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
+    add_test (NAME partest_brazil3d_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd}" "p" "-ksp_rtol 1.e-15 -ksp_type cg")
+    add_test (NAME partest_dyn_bar01_np2 COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
+    add_test (NAME partest_dyn_bar02_np2 COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
+    add_test (NAME partest_dyn_bar03_np2 COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
     # TODO: The tests requires different commands, and the files and named inconsistently. Some slight changes to naming could change this.
     # The flags are a bit trickier. It needs to be built into the input file.
     #file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     #foreach (case ${parallel_tests})
-    #    add_test (${case}_test ${test_cmd} ${case}.oofem.in ${par_dir}/${case} ${oofem_cmd} "p")
+    #    add_test ("partest_${case}" ${test_cmd} ${case}.oofem.in "${par_dir}/${case}" ${oofem_cmd} "p")
     #endforeach (case)
 endif ()
 # Sequential test cases
@@ -613,17 +620,24 @@ file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
 file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
 file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
 foreach (case ${sm_tests})
-    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/sm ${oofem_cmd} "s")
+    add_test (NAME "test_${case}" COMMAND ${test_cmd} ${case} "${oofem_TEST_DIR}/sm" ${oofem_cmd} "s")
 endforeach (case)
 foreach (case ${fm_tests})
-    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/fm ${oofem_cmd} "s")
+    add_test (NAME "test_${case}" COMMAND ${test_cmd} ${case} "${oofem_TEST_DIR}/fm" ${oofem_cmd} "s")
 endforeach (case)
 foreach (case ${tm_tests})
-    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/tm ${oofem_cmd} "s")
+    add_test (NAME "test_${case}" COMMAND ${test_cmd} ${case} "${oofem_TEST_DIR}/tm" ${oofem_cmd} "s")
 endforeach (case)
 foreach (case ${tmsm_tests})
-    add_test (NAME ${case}_test COMMAND ${test_cmd} ${case} ${oofem_TEST_DIR}/tmsm ${oofem_cmd} "s")
+    add_test (NAME "test_${case}" COMMAND ${test_cmd} ${case} "${oofem_TEST_DIR}/tmsm" ${oofem_cmd} "s")
 endforeach (case)
+
+# Benchmarks
+file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")
+foreach (case ${benchmarks})
+    add_test (NAME "benchmark_${case}" COMMAND ${test_cmd} ${case} "${oofem_TEST_DIR}/benchmark" ${oofem_cmd} "s")
+endforeach (case)
+
 
 #file (GLOB par_tests RELATIVE "${oofem_TEST_DIR}/tests/partests" "${oofem_SOURCE_DIR}/tests/tm/*.in.*")
 #runandcheck ("${oofem_TEST_DIR}/sm" ${case})

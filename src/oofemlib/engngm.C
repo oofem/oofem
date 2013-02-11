@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -569,7 +569,7 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int i, k, nnodes, nelem, nbc;
+    int nnodes, nelem, nbc;
     Element *elem;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
@@ -583,23 +583,23 @@ EngngModel :: forceEquationNumbering(int id)
     nbc    = domain->giveNumberOfBoundaryConditions();
 
     if ( !this->profileOpt ) {
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             domain->giveDofManager(i)->askNewEquationNumbers(currStep);
         }
 
-        for ( i = 1; i <= nelem; ++i ) {
+        for ( int i = 1; i <= nelem; ++i ) {
             elem = domain->giveElement(i);
             nnodes = elem->giveNumberOfInternalDofManagers();
-            for ( k = 1; k <= nnodes; k++ ) {
+            for ( int k = 1; k <= nnodes; k++ ) {
                 elem->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
         }
 
         // For special boundary conditions;
-        for ( i = 1; i <= nbc; ++i ) {
+        for ( int i = 1; i <= nbc; ++i ) {
             GeneralBoundaryCondition *bc = domain->giveBc(i);
             nnodes = bc->giveNumberOfInternalDofManagers();
-            for ( k = 1; k <= nnodes; k++ ) {
+            for ( int k = 1; k <= nnodes; k++ ) {
                 bc->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
         }
@@ -632,7 +632,7 @@ EngngModel :: forceEquationNumbering(int id)
 
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->invalidateLocationArray();
     }
 
@@ -643,26 +643,25 @@ EngngModel :: forceEquationNumbering(int id)
 int
 EngngModel :: forceEquationNumbering()
 {
-    int i;
     // set numberOfEquations counter to zero
     this->numberOfEquations = 0;
     this->numberOfPrescribedEquations = 0;
 
     OOFEM_LOG_DEBUG("Renumbering dofs in all domains\n");
-    for ( i = 1; i <= this->ndomains; i++ ) {
+    for ( int i = 1; i <= this->ndomains; i++ ) {
         domainNeqs.at(i) = 0;
         this->numberOfEquations += this->forceEquationNumbering(i);
     }
 
     equationNumberingCompleted = 1;
 
-    for ( i = 1; i <= this->ndomains; i++ ) {
+    for ( int i = 1; i <= this->ndomains; i++ ) {
         //this->numberOfPrescribedEquations+=giveNumberOfPrescribedDomainEquations(i);
         this->numberOfPrescribedEquations += domainPrescribedNeqs.at(i);
     }
 
 #ifdef __PETSC_MODULE
-    for ( i = 1; i <= petscContextList->giveSize(); i++ ) {
+    for ( int i = 1; i <= petscContextList->giveSize(); i++ ) {
         this->petscContextList->at(i)->init(i);
     }
 
@@ -676,7 +675,7 @@ EngngModel :: forceEquationNumbering()
 void
 EngngModel :: solveYourself()
 {
-    int imstep, jstep, nTimeSteps;
+    int nTimeSteps;
     int smstep = 1, sjstep = 1;
     MetaStep *activeMStep;
     FILE *out = this->giveOutputStream();
@@ -688,13 +687,13 @@ EngngModel :: solveYourself()
         sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
     }
 
-    for ( imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) { //loop over meta steps
+    for ( int imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) { //loop over meta steps
         activeMStep = this->giveMetaStep(imstep);
         // update state according to new meta step
         this->initMetaStepAttributes(activeMStep);
 
         nTimeSteps = activeMStep->giveNumberOfSteps();
-        for ( jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
+        for ( int jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
@@ -718,7 +717,6 @@ EngngModel :: solveYourself()
 
             fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
                     this->giveCurrentStep()->giveNumber(), _steptime);
-            //#endif
 
 #ifdef __PARALLEL_MODE
             if ( loadBalancingFlag ) {
@@ -764,11 +762,11 @@ EngngModel :: updateAttributes(MetaStep *mStep)
 void
 EngngModel :: updateYourself(TimeStep *stepN)
 {
-    int idomain, ndomains = this->giveNumberOfDomains();
-    int j, nnodes;
+    int ndomains = this->giveNumberOfDomains();
+    int nnodes;
     Domain *domain;
 
-    for ( idomain = 1; idomain <= ndomains; idomain++ ) {
+    for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
 
 #  ifdef VERBOSE
@@ -776,7 +774,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #  endif
 
         nnodes = domain->giveNumberOfDofManagers();
-        for ( j = 1; j <= nnodes; j++ ) {
+        for ( int j = 1; j <= nnodes; j++ ) {
             domain->giveDofManager(j)->updateYourself(stepN);
             domain->giveNode(j)->updateYourself(stepN);
             //domain->giveDofManager(j)->printOutputAt(File, stepN);
@@ -790,7 +788,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
         Element *elem;
 
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for ( int j = 1; j <= nelem; j++ ) {
             elem = domain->giveElement(j);
 #ifdef __PARALLEL_MODE
             // skip remote elements (these are used as mirrors of remote elements on other domains
@@ -822,7 +820,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
 
 #ifdef __CEMHYD_MODULE
         //perform averaging on each material instance
-        for ( j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
+        for ( int j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
             if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
                 CemhydMat *cem = ( CemhydMat * ) domain->giveMaterial(j);
                 cem->averageTemperature();
@@ -883,11 +881,11 @@ void
 EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     //FILE* File = this -> giveDomain() -> giveOutputStream() ;
-    int domCount = 0, idomain;
+    int domCount = 0;
     Domain *domain;
 
     // fprintf (File,"\nOutput for time step number %d \n\n",stepN->giveNumber());
-    for ( idomain = 1; idomain <= this->ndomains; idomain++ ) {
+    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
         domCount += domain->giveOutputManager()->testTimeStepOutput(stepN);
     }
@@ -899,7 +897,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
     fprintf(File, "\n==============================================================");
     fprintf( File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
-    for ( idomain = 1; idomain <= this->ndomains; idomain++ ) {
+    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
 
@@ -918,14 +916,9 @@ void EngngModel :: printYourself()
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
-// assembles matrix answer by calling
-// element(i) -> giveCharacteristicMatrix ( type, tStep );
-// for each element in domain
-// and assembling every contribution to answer
-//
+// assembles matrix
 //
 {
-    int ielem;
     IntArray loc;
     FloatMatrix mat, R;
     Element *element;
@@ -936,7 +929,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+#ifdef _OPENMP
+ #pragma omp parallel for private(element, mat, R, loc)
+#endif
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
@@ -959,6 +955,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                 mat.rotatedWith(R);
             }
 
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
             if ( answer->assemble(loc, mat) == 0 ) {
                 _error("assemble: sparse matrix assemble error");
             }
@@ -983,14 +982,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
                             CharType type, const UnknownNumberingScheme &ns,
                             Domain *domain)
 //
-// assembles matrix answer by calling
-// element(i) -> giveCharacteristicMatrix ( type, tStep );
-// for each element in domain
-// and assembling every contribution to answer
-//
+// assembles matrix
 //
 {
-    int ielem;
     IntArray r_loc, c_loc;
     FloatMatrix mat, Rr, Rc;
     Element *element;
@@ -1001,7 +995,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+#ifdef _OPENMP
+ #pragma omp parallel for private(element, mat, Rr, Rc, r_loc, c_loc)
+#endif
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
@@ -1034,6 +1031,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
                 mat = tmpMat;
             }
 
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
             if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
                 _error("assemble: sparse matrix assemble error");
             }
@@ -1053,7 +1053,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
-    int ielem;
     IntArray r_loc, c_loc;
     FloatMatrix mat, R;
     Element *element;
@@ -1063,7 +1062,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+#ifdef _OPENMP
+ #pragma omp parallel for private(element, mat, R, r_loc, c_loc)
+#endif
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1084,6 +1086,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                 mat.rotatedWith(R);
             }
 
+#ifdef _OPENMP
+ #pragma omp critical
+#endif
             if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
                 OOFEM_ERROR("EngngModel :: assemble: sparse matrix assemble error");
             }
@@ -1341,7 +1346,6 @@ EngngModel :: initStepIncrements()
 // of temp variables.
 //
 {
-    int j;
     Element *elem;
     Domain *domain;
 
@@ -1349,7 +1353,7 @@ EngngModel :: initStepIncrements()
         domain = this->giveDomain(idomain);
 
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for ( int j = 1; j <= nelem; j++ ) {
             elem = domain->giveElement(j);
 #ifdef __PARALLEL_MODE
             // skip remote elements (these are used as mirrors of remote elements on other domains
@@ -1371,8 +1375,6 @@ EngngModel :: updateDomainLinks()
 {
     this->giveExportModuleManager()->initialize();
 };
-
-
 
 
 contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1947,17 +1949,17 @@ EngngModel :: balanceLoad(TimeStep *atTime)
             this->forceEquationNumbering();
  #ifdef __VERBOSE_PARALLEL
             // debug print
-            int i, j, nnodes = giveDomain(1)->giveNumberOfDofManagers();
+            int nnodes = giveDomain(1)->giveNumberOfDofManagers();
             int myrank = this->giveRank();
             fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
-            for ( i = 1; i <= nnodes; i++ ) {
+            for ( int i = 1; i <= nnodes; i++ ) {
                 if ( giveDomain(1)->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
                     fprintf( stderr, "[%d]: %5d[%d] local ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber() );
                 } else if ( giveDomain(1)->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
                     fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber() );
                 }
 
-                for ( j = 1; j <= giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
+                for ( int j = 1; j <= giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
                     fprintf( stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber(dn) );
                 }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -73,7 +73,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    double giveHumidity(GaussPoint *gp);
+    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 
     /*
      * virtual double give(int aProperty, GaussPoint *gp);

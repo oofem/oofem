@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -176,7 +176,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp)
 double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double conduct;
+    double conduct = 0.0;
 
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -207,7 +207,7 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp)
 double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double capacityConcrete;
+    double capacityConcrete = 0.0;
 
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
@@ -238,7 +238,8 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp)
 double CemhydMat :: giveConcreteDensity(GaussPoint *gp)
 {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) this->giveStatus(gp);
-    double concreteBulkDensity;
+    double concreteBulkDensity = 0.0;
+
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -1166,11 +1167,11 @@ void CemhydMatStatus :: dealloc_double_3D(double ***( & mic ), long SYSIZE) {
 
 #ifdef TINYXML
 //functions to read int, double and string with error checking
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, int &val) {
     int success;
     char key [ 256 ];
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
@@ -1178,40 +1179,40 @@ void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char 
 
     sprintf(key, "key%d", position);
     success = elemSelected->QueryIntAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read int value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, long int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, long int &val) {
     int temp;
     QueryNumAttributeExt(xmlFile, elementName, position, temp);
     val = static_cast< long int >(temp);
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, const char *key, int &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, int &val) {
     int success;
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
     }
 
     success = elemSelected->QueryIntAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read int value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, double &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, double &val) {
     int success;
     char key [ 256 ];
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
@@ -1219,34 +1220,34 @@ void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char 
 
     sprintf(key, "key%d", position);
     success = elemSelected->QueryDoubleAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read double value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
-void CemhydMatStatus :: QueryNumAttributeExt(TiXmlDocument *xmlFile, const char *elementName, const char *key, double &val) {
+void CemhydMatStatus :: QueryNumAttributeExt(XMLDocument *xmlFile, const char *elementName, const char *key, double &val) {
     int success;
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLHandle docHandle = XMLHandle(xmlFile);
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
     }
 
     success = elemSelected->QueryDoubleAttribute(key, & val);
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read double value or attribute %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
 }
 
-void CemhydMatStatus :: QueryStringAttributeExt(TiXmlDocument *xmlFile, const char *elementName, int position, char *chars) {
+void CemhydMatStatus :: QueryStringAttributeExt(XMLDocument *xmlFile, const char *elementName, int position, char *chars) {
     int success;
     char key [ 256 ];
-    TiXmlHandle docHandle = TiXmlHandle(xmlFile);
+    XMLHandle docHandle = XMLHandle(xmlFile);
     std :: string str1;
-    TiXmlElement *elemSelected = docHandle.FirstChild(elementName).ToElement();
+    XMLElement *elemSelected = docHandle.FirstChildElement("cemhyd").FirstChildElement(elementName).ToElement();
     if ( elemSelected == NULL ) {
         printf("Cannot find entry %s, terminating, file %s, line %d\n", elementName, __FILE__, __LINE__);
         exit(0);
@@ -1258,11 +1259,11 @@ void CemhydMatStatus :: QueryStringAttributeExt(TiXmlDocument *xmlFile, const ch
     // Change with above whenever packages are updated.
     const char *cstr = elemSelected->Attribute(key);
     if (cstr) {
-        success = TIXML_SUCCESS;
+        success = XML_SUCCESS;
     } else {
-        success = TIXML_NO_ATTRIBUTE;
+        success = XML_NO_ATTRIBUTE;
     }
-    if ( success != TIXML_SUCCESS ) {
+    if ( success != XML_SUCCESS ) {
         printf("Cannot read string value or key %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
@@ -1403,10 +1404,11 @@ int CemhydMatStatus :: readInputFileAndInitialize(const char *inp, bool generate
     F->get_value(0, ( long & )iseed);
 #endif
 #ifdef TINYXML
-    xmlFile = new TiXmlDocument(inp);
+    xmlFile = new XMLDocument();
     countKey = 0;
-    if ( !xmlFile->LoadFile() ) {
-        printf("\nError reading XML file %s or nonletter symbols used, such as =, (file %s, line %d)\n", inp, __FILE__, __LINE__);
+    int errorId = xmlFile->LoadFile(inp);
+    if ( errorId != XML_NO_ERROR ) {
+        printf("\nError reading XML file %s or nonletter symbols used, error id = %d\n", inp, errorId);
         exit(0);
     }
 
@@ -3373,6 +3375,9 @@ void CemhydMatStatus :: stat3d(void) {
 
     printf(" 28    %8ld     %8ld\n", volume [ 28 ], surface [ 28 ]);
 #endif
+    (void)surftot;
+    (void)voltot;
+    
 }
 
 void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
@@ -3885,6 +3890,7 @@ void CemhydMatStatus :: distrib3d(void)
 
     //deallocate cemreal[][][]
     dealloc_long_3D(cemreal, SYSIZE + 1);
+    (void)rhtest;
 }
 
 
@@ -6209,6 +6215,8 @@ void CemhydMatStatus :: dissolve(int cycle) {
 #endif
 
     fflush(stdout);
+    (void)nsurf;
+    (void)calcz;
 }
 /* routine to add nneed one pixel elements of phase randid at random */
 /* locations in microstructure */
@@ -6261,7 +6269,7 @@ void CemhydMatStatus :: addrand(int randid, long int nneed) {
 /* and for all phases (cement= C3S, C2S, C3A, C4AF, and calcium sulfates */
 void CemhydMatStatus :: measuresurf(void)
 {
-    int sx, sy, sz, jx, jy, jz, faceid;
+    int sx, sy, sz, jx=0, jy=0, jz=0, faceid;
 
     for ( sx = 0; sx < SYSIZE; sx++ ) {
         for ( sy = 0; sy < SYSIZE; sy++ ) {
@@ -7810,6 +7818,7 @@ int CemhydMatStatus :: burn3d(int npix, int d1, int d2, int d3)
     delete [] nnewy;
     delete [] nnewz;
     return ( bflag );
+    (void)alpha_burn;
 }
 
 
@@ -8123,6 +8132,7 @@ int CemhydMatStatus :: burnset(int d1, int d2, int d3)
 
     /* Return flag indicating if set has indeed occurred */
     return ( setyet );
+    (void)alpha_burn;
 }
 
 
@@ -8538,6 +8548,7 @@ int CemhydMatStatus :: movecsh(int xcur, int ycur, int zcur, int finalstep, int 
     }
 
     return ( action );
+    (void)sumback;
 }
 
 /* routine to add extra FH3 when gypsum, hemihydrate, anhydrite, CAS2, or */
@@ -8757,6 +8768,8 @@ int CemhydMatStatus :: extettr(int xpres, int ypres, int zpres, int etype)
     }
 
     return ( newact );
+    (void)multf;
+    
 }
 
 /* routine to add extra CH when gypsum, hemihydrate, anhydrite, CaCl2, or */
@@ -9165,6 +9178,7 @@ int CemhydMatStatus :: moveanh(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumback;
 }
 
 /* routine to move a diffusing HEMIHYDRATE species */
@@ -9450,6 +9464,7 @@ int CemhydMatStatus :: movehem(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumback;
 }
 
 /* routine to add extra Freidel's salt when CaCl2 reacts with */
@@ -9894,6 +9909,7 @@ int CemhydMatStatus :: movegyp(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CaCl2 species */
@@ -10143,6 +10159,7 @@ int CemhydMatStatus :: movecacl2(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CAS2 species */
@@ -10389,6 +10406,7 @@ int CemhydMatStatus :: movecas2(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing AS species */
@@ -10537,6 +10555,7 @@ int CemhydMatStatus :: moveas(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CACO3 species */
@@ -10640,6 +10659,8 @@ int CemhydMatStatus :: movecaco3(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)newact;
+    (void)sumgarb;
 }
 
 /* routine to add extra AFm phase when diffusing ettringite reacts */
@@ -10856,6 +10877,7 @@ int CemhydMatStatus :: moveettr(int xcur, int ycur, int zcur, int finalstep)
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to add extra pozzolanic CSH when CH reacts at */
@@ -10985,6 +11007,7 @@ int CemhydMatStatus :: movefh3(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing CH species */
@@ -11098,6 +11121,7 @@ int CemhydMatStatus :: movech(int xcur, int ycur, int zcur, int finalstep, float
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to add extra C3AH6 when diffusing C3A nucleates or reacts at */
@@ -11715,6 +11739,7 @@ int CemhydMatStatus :: movec3a(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to move a diffusing C4A species */
@@ -12260,6 +12285,7 @@ int CemhydMatStatus :: movec4a(int xcur, int ycur, int zcur, int finalstep, floa
     }
 
     return ( action );
+    (void)sumgarb;
 }
 
 /* routine to oversee hydration by updating position of all */
@@ -12454,6 +12480,7 @@ void CemhydMatStatus :: hydrate(int fincyc, int stepmax, float chpar1, float chp
     }
 
     /* end of istep loop */
+    (void)ntodo;
 }
 
 
@@ -14201,6 +14228,8 @@ void CemhydMatStatus :: AnalyticHomogenizationPaste(double &E, double &nu, int p
 
     E = Paste_level.E_hmg;
     nu =  Paste_level.nu_hmg;
+    (void)E_CSH_hmg;
+    (void)nu_CSH_hmg;
 }
 
 //use results from cement paste level and add SCM, inert filler, entrained air, ITZ, FA, CA

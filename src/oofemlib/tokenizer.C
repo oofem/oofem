@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -110,7 +110,7 @@ void Tokenizer :: tokenizeLine(const std::string &currentLine)
             sList.push_back(this->readToken(bpos, currentLine, 0));
         }
     }
-    
+
     // Clear the old stuff and copy list to vector
     this->tokens.clear();
     this->tokens.reserve(nTokens);

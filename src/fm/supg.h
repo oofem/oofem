@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -107,8 +107,9 @@ public:
     }
     virtual ~SUPG() {
         if ( VelocityPressureField ) { delete VelocityPressureField; }
-
         if ( materialInterface ) { delete materialInterface; }
+        if ( nMethod ) { delete nMethod; }
+        if ( lhs ) { delete lhs; }
     }
 
     virtual void solveYourselfAt(TimeStep *tStep);

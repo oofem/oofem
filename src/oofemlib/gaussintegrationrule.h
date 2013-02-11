@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -44,13 +44,13 @@ namespace oofem {
  * The number of integration points and their coordinates and integration weights depends on
  * integration rule type (rule for integration in 1d, 2d, 3d) and required accuracy.
  * The positions and weights are determined by the minimum required of points to integrate a polynomial exactly (while the points are strictly within the domain)
- * 
+ *
  * Tasks:
  * - Returning number of integration points used
  * - Returning requested integration point
  * - Updating itself
  * - Saving and restoring context
- * 
+ *
  * @see GaussPoint
  */
 class GaussIntegrationRule : public IntegrationRule
@@ -88,7 +88,6 @@ public:
     void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
 
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
-
 };
 } // end namespace oofem
 #endif // gaussintegrationrule_h

@@ -219,9 +219,6 @@ double DarcyFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, Tim
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
-
-    return 0;
-
 }
 
 void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)

@@ -38,7 +38,6 @@
 #include "boundaryload.h"
 
 namespace oofem {
-
 /**
  * This class implements a boundary load (force, moment,...) that acts
  * directly on a boundary of some finite element (on side, face, ..).
@@ -83,10 +82,4 @@ private:
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
 };
 } // end namespace oofem
-#endif 
-
-
-
-
-
-
+#endif

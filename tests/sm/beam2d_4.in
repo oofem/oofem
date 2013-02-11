@@ -1,0 +1,38 @@
+beam2d_4.out
+Test of nodal coordinate system
+#only momentum influence to the displacements is taken into account
+#beamShearCoeff is artificially enlarged.
+LinearStatic nsteps 1
+domain 2dBeam
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3 0.  0.0 3.0 bc 3 1 1 0
+node 2 coords 3 0.0 0.0 0.  bc 3 0 0 0
+node 3 coords 3 2.0 0.0 0.  bc 3 0 0 0 load 1 2
+node 4 coords 3 4.0 0.0 0.  bc 3 0 1 0 lcs 6 0.866025 0.0 -0.5  0.0 1.0 0.0
+Beam2d 1 nodes 2 1 2 mat 1 crossSect 1 
+Beam2d 2 nodes 2 2 3 mat 1 crossSect 1 
+Beam2d 3 nodes 2 3 4 mat 1 crossSect 1 
+SimpleCS 1 area 1.e3 Iy 0.0026244 beamShearCoeff 1.e18
+IsoLE 1 d 1. E 25.e6 n 0.2 tAlpha 1.2e-5
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad          2 loadTimeFunction 1 Components 3 0.0 10.0 0.0
+ConstantFunction 1 f(t) 1.
+#
+# exact solution
+#
+#%BEGIN_CHECK% tolerance 1.e-8
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value 2.0145e+00
+#REACTION tStep 1 number 1 dof 2 value -6.5108e+00
+#REACTION tStep 1 number 4 dof 2 value -4.0289e+00
+##
+## check all nodes
+## check element no. 3 force vector
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 1  value 2.0145e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 2  value 3.4892e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 3  value -6.9783e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 4  value -2.0145e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 5  value -3.4892e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 6  value 0.0
+#%END_CHECK%
