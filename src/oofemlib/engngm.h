@@ -201,9 +201,9 @@ protected:
     /// Number of prescribed equations per domain.
     IntArray domainPrescribedNeqs;
     /// Renumbering flag (renumbers equations after each step, necessary if Dirichlet BCs change).
-    int renumberFlag;
+    bool renumberFlag;
     /// Profile optimized numbering flag (using Sloan's algorithm).
-    int profileOpt;
+    bool profileOpt;
     /// Equation numbering completed flag.
     int equationNumberingCompleted;
     /// Number of meta steps.

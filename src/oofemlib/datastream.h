@@ -72,6 +72,8 @@ public:
     virtual int read(double *data, const unsigned int count) = 0;
     /// Reads count char values into array pointed by data.
     virtual int read(char *data, const unsigned int count) = 0;
+    /// Reads count bool values into array pointed by data.
+    virtual int read(bool *data, const unsigned int count) = 0;
     //@}
 
     /**
@@ -90,6 +92,8 @@ public:
     virtual int write(const double *data, const unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
     virtual int write(const char *data, const unsigned int count) = 0;
+    /// Writes count bool values from array pointed by data.
+    virtual int write(const bool *data, const unsigned int count) = 0;
     //@}
 };
 
@@ -121,6 +125,8 @@ public:
     { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
     virtual int read(char *data, const unsigned int count)
     { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int read(bool *data, const unsigned int count)
+    { if ( stream->read(reinterpret_cast<char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
 
     virtual int write(const int *data, const unsigned int count)
     { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
@@ -131,6 +137,8 @@ public:
     virtual int write(const double *data, const unsigned int count)
     { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
     virtual int write(const char *data, const unsigned int count)
+    { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
+    virtual int write(const bool *data, const unsigned int count)
     { if ( stream->write(reinterpret_cast<const char *>(data), sizeof *data) ) { return 1; } else { return 0; } }
 };
 
@@ -161,6 +169,8 @@ public:
     { if ( fread(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int read(char *data, const unsigned int count)
     { if ( fread(data, sizeof( char ), count, stream) == count ) { return 1; } else { return 0; } }
+    virtual int read(bool *data, const unsigned int count)
+    { if ( fread(data, sizeof( bool ), count, stream) == count ) { return 1; } else { return 0; } }
 
     virtual int write(const int *data, const unsigned int count)
     { if ( fwrite(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
@@ -172,6 +182,8 @@ public:
     { if ( fwrite(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int write(const char *data, const unsigned int count)
     { if ( fwrite(data, sizeof( char ), count, stream) == count ) { return 1; } else { return 0; } }
+    virtual int write(const bool *data, const unsigned int count)
+    { if ( fwrite(data, sizeof( bool ), count, stream) == count ) { return 1; } else { return 0; } }
 };
 
 #ifdef __PARALLEL_MODE
@@ -199,12 +211,14 @@ public:
     virtual int read(long *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(double *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(char *data, const unsigned int count) { return buff->unpackArray(data, count); }
+    virtual int read(bool *data, const unsigned int count) { return buff->unpackArray(data, count); }
 
     virtual int write(const int *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const unsigned long *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const long *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const double *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const char *data, const unsigned int count) { return buff->packArray(data, count); }
+    virtual int write(const bool *data, const unsigned int count) { return buff->packArray(data, count); }
 };
 
 
@@ -229,12 +243,14 @@ public:
     virtual int read(long *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(double *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(char *data, const unsigned int count) { return pc->unpackArray(data, count); }
+    virtual int read(bool *data, const unsigned int count) { return pc->unpackArray(data, count); }
 
     virtual int write(const int *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const unsigned long *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const long *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const double *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const char *data, const unsigned int count) { return pc->packArray(data, count); }
+    virtual int write(const bool *data, const unsigned int count) { return pc->packArray(data, count); }
 };
 
 #endif
