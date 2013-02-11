@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -185,33 +185,27 @@ double FloatMatrix :: at(int i, int j) const
     this->checkBounds(i, j);
     return values [ ( j - 1 ) * nRows + i - 1 ];
 }
-#endif
-
 
 double &FloatMatrix :: operator() (int i, int j)
 {
-#ifdef DEBUG
     this->checkBounds(i+1, j+1);
-#endif
-    return values [ ( j ) * nRows + i ];
+    return values [ j * nRows + i ];
 }
-
 
 double FloatMatrix :: operator() (int i, int j) const
 {
-#ifdef DEBUG
     this->checkBounds(i+1, j+1);
-#endif
-    return values [ ( j ) * nRows + i ];
+    return values [ j * nRows + i ];
 }
+#endif
 
 
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
-    int ii, jj, size;
+    int ii, jj, size = src.giveNumberOfRows();
     size = src.giveNumberOfRows();
 #if DEBUG
-    if ( ( size ) != loc.giveSize() ) {
+    if ( size != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
     }
 
@@ -295,20 +289,16 @@ void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix
 {
-    int p;
-    double coeff;
-
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
         OOFEM_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
 
-    p = bMatrix.nColumns;
-    this->resize(aMatrix.nRows, p);
+    this->resize(aMatrix.nRows, bMatrix.nColumns);
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
-        for ( int j = 1; j <= p; j++ ) {
-            coeff = 0.;
+        for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
+            double coeff = 0.;
             for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
                 coeff += aMatrix.at(i, k) * bMatrix.at(k, j);
             }
@@ -442,20 +432,16 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
 void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix^T * bMatrix
 {
-    int p;
-    double coeff;
-
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
         OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
     }
 #  endif
 
-    p = bMatrix.nColumns;
-    this->resize(aMatrix.nColumns, p);
+    this->resize(aMatrix.nColumns, bMatrix.nColumns);
     for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
-        for ( int j = 1; j <= p; j++ ) {
-            coeff = 0.;
+        for ( int j = 1; j <= bMatrix.nColumns; j++ ) {
+            double coeff = 0.;
             for ( int k = 1; k <= aMatrix.nRows; k++ ) {
                 coeff += aMatrix.at(k, i) * bMatrix.at(k, j);
             }
@@ -469,20 +455,16 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix^T
 {
-    int p;
-    double coeff;
-
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nColumns ) {
         OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
     }
 #  endif
 
-    p = bMatrix.nRows;
-    this->resize(aMatrix.nRows, p);
+    this->resize(aMatrix.nRows, bMatrix.nRows);
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
-        for ( int j = 1; j <= p; j++ ) {
-            coeff = 0.;
+        for ( int j = 1; j <= bMatrix.nRows; j++ ) {
+            double coeff = 0.;
             for ( int k = 1; k <= aMatrix.nColumns; k++ ) {
                 coeff += aMatrix.at(i, k) * bMatrix.at(j, k);
             }
@@ -678,16 +660,14 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 // receiver ; the lower half is not modified. Other advantage : it does
 // not compute the transposition of matrix a.
 {
-    double summ;
-
     if ( !this->isNotEmpty() ) {
-        resize(a.nColumns, b.nColumns);
-        zero();
+        this->resize(a.nColumns, b.nColumns);
+        this->zero();
     }
 
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = i; j <= nColumns; j++ ) {
-            summ = 0.;
+            double summ = 0.;
             for ( int k = 1; k <= a.nRows; k++ ) {
                 summ += a.at(k, i) * b.at(k, j);
             }
@@ -701,8 +681,8 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, const FloatArray &b, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        resize(a.giveSize(), b.giveSize());
-        zero();
+        this->resize(a.giveSize(), b.giveSize());
+        this->zero();
     }
 
     for ( int i = 1; i <= nRows; i++ ) {
@@ -719,16 +699,14 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 // If the receiver has a null size, it is expanded.
 // Advantage : does not compute the transposition of matrix a.
 {
-    double summ;
-
     if ( !this->isNotEmpty() ) {
-        resize(a.nColumns, b.nColumns);
-        zero();
+        this->resize(a.nColumns, b.nColumns);
+        this->zero();
     }
 
     for ( int i = 1; i <= nRows; i++ ) {
         for ( int j = 1; j <= nColumns; j++ ) {
-            summ = 0.;
+            double summ = 0.;
             for ( int k = 1; k <= a.nRows; k++ ) {
                 summ += a.at(k, i) * b.at(k, j);
             }
@@ -742,8 +720,8 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        resize(a.giveSize(), b.giveSize());
-        zero();
+        this->resize(a.giveSize(), b.giveSize());
+        this->zero();
     }
 
     for ( int i = 1; i <= nRows; i++ ) {
@@ -939,7 +917,7 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
  * Works only for square matrices.
  */
 {
-    int tsize, n, ii, jj;
+    int n, ii, jj;
 
     if ( ( n = indx.giveSize() ) == 0 ) {
         this->resize(0, 0);
@@ -950,17 +928,15 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
     if ( !src.isSquare() ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : cannot construct submatrix");
     }
-# endif
 
     if ( n != src.nRows ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : giveSubMatrix size mismatch");
     }
 
-    tsize = indx.maximum();
-
-    if ( tsize > size ) {
+    if ( indx.maximum() > size ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
     }
+# endif
 
     this->resize(size, size);
 
@@ -1289,9 +1265,11 @@ void FloatMatrix :: zero() const
 
 void FloatMatrix :: beUnitMatrix()
 {
+#ifdef DEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR3("FloatMatrix::beUnitMatrix : cannot make unit matrix of %d by %d matrix", nRows, nColumns);
     }
+#endif
 
     this->zero();
     for ( int i = 1; i <= nRows; i++ ) {

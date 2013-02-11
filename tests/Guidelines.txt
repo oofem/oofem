@@ -1,0 +1,9 @@
+The test suite allows for quality control by developers. 
+Test-suite guidelines:
+- As few elements and time steps as possible (aim for elements < 5 and time steps < 5)
+- Each test should test one specific component (or possible test a few similar elements inside the same test file)
+- There should be no redundant tests, e.g. maximum one test per element should suffice.
+
+Larger benchmark problems may be added to the benchmark folder, but these should not be expected to be executed regurlarly be developers.
+These benchmarks don't need to be very large. They can be simple showcase example that should be included with the OOFEM distribution.
+If a benchmark problems ever finds a problem that the test-suite misses, a smaller version of the benchmark problem should be added to the test suite.

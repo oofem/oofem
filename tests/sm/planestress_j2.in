@@ -1,0 +1,77 @@
+planestress_j2.out
+Nonlinear plastic bar (2dplanestress computation)
+NonLinearStatic nsteps 6 stepLength 6.  minStepLength 6. rtolv 0.000001 Psi 0.0 MaxIter 30 HPC 2 20 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 21 nelem 12 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 1
+node 1 coords 2  0.000000 0.000000 bc 2 1 1
+node 2 coords 2  0.000000 0.500000 bc 2 1 0
+node 3 coords 2  0.000000 1.000000 bc 2 1 0
+node 4 coords 2  0.500000 0.000000 bc 2 0 1
+node 5 coords 2  0.500000 0.500000 bc 2 0 0
+node 6 coords 2  0.500000 1.000000 bc 2 0 0
+node 7 coords 2  1.000000 0.000000 bc 2 0 1
+node 8 coords 2  1.000000 0.500000 bc 2 0 0
+node 9 coords 2  1.000000 1.000000 bc 2 0 0
+node 10 coords 2  1.500000 0.000000 bc 2 0 1
+node 11 coords 2  1.500000 0.500000 bc 2 0 0
+node 12 coords 2  1.500000 1.000000 bc 2 0 0
+node 13 coords 2  2.000000 0.000000 bc 2 0 1
+node 14 coords 2  2.000000 0.500000 bc 2 0 0
+node 15 coords 2  2.000000 1.000000 bc 2 0 0
+node 16 coords 2  2.500000 0.000000 bc 2 0 1
+node 17 coords 2  2.500000 0.500000 bc 2 0 0
+node 18 coords 2  2.500000 1.000000 bc 2 0 0
+node 19 coords 2  3.000000 0.000000 bc 2 0 1 load 1 2
+node 20 coords 2  3.000000 0.500000 bc 2 0 0 load 1 3
+node 21 coords 2  3.000000 1.000000 bc 2 0 0 load 1 2
+PlaneStress2d 1 nodes 4 1 2 5 4  crossSect 1 mat 1 NIP 1
+PlaneStress2d 2 nodes 4 2 3 6 5  crossSect 1 mat 1 NIP 1
+PlaneStress2d 3 nodes 4 4 5 8 7  crossSect 1 mat 1 NIP 1
+PlaneStress2d 4 nodes 4 5 6 9 8  crossSect 1 mat 1 NIP 1
+PlaneStress2d 5 nodes 4 7 8 11 10  crossSect 1 mat 1 NIP 1
+PlaneStress2d 6 nodes 4 8 9 12 11  crossSect 1 mat 1 NIP 1
+PlaneStress2d 7 nodes 4 10 11 14 13  crossSect 1 mat 1 NIP 1
+PlaneStress2d 8 nodes 4 11 12 15 14  crossSect 1 mat 1 NIP 1
+PlaneStress2d 9 nodes 4 13 14 17 16  crossSect 1 mat 1 NIP 1
+PlaneStress2d 10 nodes 4 14 15 18 17  crossSect 1 mat 1 NIP 1
+PlaneStress2d 11 nodes 4 16 17 20 19  crossSect 1 mat 1 NIP 1
+PlaneStress2d 12 nodes 4 17 18 21 20  crossSect 1 mat 1 NIP 1
+SimpleCS 1 thick 1.0
+j2mat 1 d 1. Ry 1.7321 E 1.0 n 0.2 IHM 0.5  tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 Components 2 0.25 0.0
+NodalLoad 3 loadTimeFunction 1 Components 2 0.50 0.0
+ConstantFunction 1 f(t) 1.0
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## exact solution
+##
+## step 0
+#NODE tStep 0. number 20 dof 1 unknown d value 6.0
+#ELEMENT tStep 0.  number 12 gp 1 keyword ":\s+strains" component 1  value 2.0
+#ELEMENT tStep 0.  number 12 gp 1 keyword "stresses" component 1  value 1.8214e+00
+## step 1
+#NODE tStep 1. number 20 dof 1 unknown d value 12.0
+#ELEMENT tStep 1.  number 12 gp 1 keyword ":\s+strains" component 1  value 4.0
+#ELEMENT tStep 1.  number 12 gp 1 keyword "stresses" component 1  value 2.4881e+00
+## step 2
+#NODE tStep 2. number 20 dof 1 unknown d value 18.0
+#ELEMENT tStep 2.  number 12 gp 1 keyword ":\s+strains" component 1  value 6.0
+#ELEMENT tStep 2.  number 12 gp 1 keyword "stresses" component 1  value 3.1547e+00
+## step 3
+#NODE tStep 3. number 20 dof 1 unknown d value 24.0
+#ELEMENT tStep 3.  number 12 gp 1 keyword ":\s+strains" component 1  value 8.0
+#ELEMENT tStep 3.  number 12 gp 1 keyword "stresses" component 1  value 3.8214e+00
+## step 4
+#NODE tStep 4. number 20 dof 1 unknown d value 30.0
+#ELEMENT tStep 4.  number 12 gp 1 keyword ":\s+strains" component 1  value 10.0
+#ELEMENT tStep 4.  number 12 gp 1 keyword "stresses" component 1  value 4.4881e+00
+## step 5
+#NODE tStep 5. number 20 dof 1 unknown d value 36.0
+#ELEMENT tStep 5.  number 12 gp 1 keyword ":\s+strains" component 1  value 12.0
+#ELEMENT tStep 5.  number 12 gp 1 keyword "stresses" component 1  value 5.1547e+00
+#%END_CHECK%
+

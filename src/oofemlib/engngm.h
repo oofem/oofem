@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -923,7 +923,7 @@ public:
      * Allows programmer to test problem its internal data, before computation begins.
      * @return Nonzero if receiver check is o.k.
      */
-    int checkProblemConsistency();
+    virtual int checkProblemConsistency();
     /**
      * Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
      * invoke initialization by individual init modules.

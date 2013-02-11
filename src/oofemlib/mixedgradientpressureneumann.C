@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -322,6 +322,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
         
         answer.add(detJ*gp->giveWeight(), contrib);
     }
+    delete ir;
 }
 
 
@@ -409,6 +410,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
         
         answer.add(detJ*gp->giveWeight(), contrib);
     }
+    delete ir;
 }
 
 
@@ -571,7 +573,7 @@ void MixedGradientPressureNeumann :: computeTangents(
     if ( !Kff ) {
         OOFEM_ERROR2("MixedGradientPressureNeumann :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure( rve, 1, eid, fnum, fnum );
+    Kff->buildInternalStructure( rve, this->domain->giveNumber(), eid, fnum );
     rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain );
 
     // Setup up indices and locations
@@ -667,7 +669,7 @@ void MixedGradientPressureNeumann :: computeTangents(
         Ed.beEmptyMtrx();
     }
 
-    delete Kff;    
+    delete Kff;
     delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 

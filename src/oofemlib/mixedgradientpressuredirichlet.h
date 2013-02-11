@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -51,14 +51,14 @@ class SparseMtrx;
 class SparseLinearSystemNM;
 
 /**
- * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) = (d_{\mathrm{dev},ij}+ \frac13 d_{\mathrm{vol}} I_{ij})(x_j+\bar{x}_j)} @f$
+ * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) = (d_{\mathrm{dev},ij}+ \frac13 d_{\mathrm{vol}} I_{ij})(x_j+\bar{x}_j)) @f$
  * where @f$ d_{\mathrm{vol}} @f$ is unknown, loaded by a pressure.
  * This is mixed Dirichlet boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
  *
  * @note The 2D case assumes plane strain(rate), as is the case in _2dFlow.
- * @note It is possible to use a non-deviatoric strain rate, in which case, @f$ d_{\mathrm{vol}} @f$ obtains the value of the actual volumetric strain rate minus the volumetric part of @f$ d_{\mathrm{dev} @f$.
+ * @note It is possible to use a non-deviatoric strain rate, in which case, @f$ d_{\mathrm{vol}} @f$ obtains the value of the actual volumetric strain rate minus the volumetric part of @f$ d_{\mathrm{dev}} @f$.
  * @note This is only applicable to momentum balance equation. Both solid or fluids, incompressible or compressible, should work.
  * @note Can only be prescribed to active dofs, so they must be denoted as such in the in the input file.
  *

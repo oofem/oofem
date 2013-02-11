@@ -1,7 +1,0 @@
-test01_nonstat_nonlin.out
-Staggered analysis in 2d - constantly rising temperature field in NonStationaryProblem is sent to NonLinearStatic problem
-StaggeredProblem nsteps 3 deltat 3600 prob1 "test01_nonstat_nonlin_tm.in.p1" prob2 "test01_nonstat_nonlin_sm.in.p2"
-#%BEGIN_CHECK%
-#INCLUDE test01_nonstat_nonlin_tm.in.p1
-#INCLUDE test01_nonstat_nonlin_sm.in.p2
-#%END_CHECK%

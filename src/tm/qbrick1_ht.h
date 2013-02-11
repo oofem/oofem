@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -86,7 +86,6 @@ public:
 
 protected:
     virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 2; }
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);

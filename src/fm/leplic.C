@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -431,7 +431,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
 
     OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Total volume is %e", total_volume);
     if ( orig_reference_fluid_volume > 0.0 ) {
-        OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Volume error is %5.2f%%",
+        OOFEM_LOG_INFO("LEPlic::doInterfaceRemapping: Volume error is %5.2f%%\n",
                        ( ( total_volume - orig_reference_fluid_volume ) / orig_reference_fluid_volume ) * 100.0);
     }
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -401,6 +401,7 @@ void Parser :: reset()
         if ( ( entry = table [ i ] ) ) {
             do {
                 next = entry->next;
+                delete [] entry->string;
                 delete entry;
             } while ( ( entry = next ) );
 

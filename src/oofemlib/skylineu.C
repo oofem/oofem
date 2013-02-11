@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -80,7 +80,7 @@ SkylineUnsym :: ~SkylineUnsym()
             delete *p++;
         }
 
-        delete rowColumns;
+        delete [] rowColumns;
     }
 }
 
@@ -277,7 +277,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
             delete *_p++;
         }
 
-        delete rowColumns;
+        delete [] rowColumns;
         rowColumns = NULL;
         size = 0;
     }
@@ -670,7 +670,7 @@ SkylineUnsym :: growTo(int n)
     }
 
     if ( rowColumns ) {
-        delete rowColumns;
+        delete [] rowColumns;
     }
 
     rowColumns = newRowColumns;

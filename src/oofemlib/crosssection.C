@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -109,7 +109,8 @@ CrossSection :: give(CrossSectionProperty aProperty)
 
 
 bool
-CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat) {
+CrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat)
+{
     return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
 

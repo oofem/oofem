@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -33,7 +33,7 @@
  */
 
 #include "error.h"
-#include "compiler.h"
+#include "compiler.h" // required for portable strncasecmp
 #include "chartype.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -977,7 +977,6 @@ void CylindricalALM  :: convertHPCMap()
     int inode, idof;
     EModelDefaultEquationNumbering dn;
 
-#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
@@ -1026,25 +1025,6 @@ void CylindricalALM  :: convertHPCMap()
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
         calm_HPCWeights.at(i) = weights.at(i);
     }
-
-#else
-    size = calm_HPCDmanDofSrcArray.giveSize() / 2;
-    calm_HPCIndirectDofMask.resize(size);
-    if ( calm_Control == calml_hpc ) {
-        calm_HPCWeights.resize(size);
-    }
-
-    for ( i = 1; i <= size; i++ ) {
-        inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
-        idof  = calm_HPCDmanDofSrcArray.at(2 * i);
-        calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber(dn);
-
-        if ( calm_Control == calml_hpc ) {
-            calm_HPCWeights.at(i) = calm_HPCDmanWeightSrcArray.at(i);
-        }
-    }
-
-#endif
 }
 
 

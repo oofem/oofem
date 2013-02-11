@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -59,6 +59,7 @@ protected:
 public:
     /// Constructor.
     OOFEMTXTDataReader(const char *inputfilename);
+    OOFEMTXTDataReader(const OOFEMTXTDataReader &x);
     virtual ~OOFEMTXTDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
