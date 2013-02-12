@@ -79,6 +79,7 @@ protected:
     int numberOfLayers;
     int numberOfIntegrationPoints; ///< num integration points per layer
     double midSurfaceZcoordFromBottom;
+    double midSurfaceXiCoordFromBottom;
     double totalThick;
     double area;
 
@@ -153,6 +154,9 @@ public:
     }
     double giveMidSurfaceZcoordFromBottom() {
         return this->midSurfaceZcoordFromBottom;
+    }
+    double giveMidSurfaceXiCoordFromBottom() {
+        return this->midSurfaceXiCoordFromBottom;
     }
 
     // identification and auxiliary functions

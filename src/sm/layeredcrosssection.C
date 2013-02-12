@@ -820,6 +820,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 
     // read z-coordinate of mid-surface measured from bottom layer
     midSurfaceZcoordFromBottom = 0.5*this->computeIntegralThick();  // Default: geometric midplane
+    midSurfaceXiCoordFromBottom = 1.0; // add to IR
     IR_GIVE_OPTIONAL_FIELD(ir, midSurfaceZcoordFromBottom, IFT_LayeredCrossSection_midsurf, "midsurf"); // Macro
 
     this->setupLayerMidPlanes();
@@ -906,6 +907,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
 /*
   Maps the local xi-coord (z-coord) in each layer [-1,1] to the corresponding 
   xi-coord in the cross section coordinate system.
+  Also renames the gp numbering from layerwise to glabal
 
         --------  1               --------  1
                |                         |  
@@ -917,6 +919,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
 */
 {
 	double totalThickness = this->computeIntegralThick();
+    int number = 1;
 	for( int layer = 1; layer <= numberOfLayers; layer++ ) {
 		IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
 		
@@ -930,7 +933,8 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(LayeredCrossSection *layere
 			double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
 			double xinew = xi+xi2;
 			iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
-			double temp=0.;
+            iRule->getIntegrationPoint(j-1)->number = number;
+            number++;
 			}
 		}
 

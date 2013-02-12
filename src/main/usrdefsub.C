@@ -451,6 +451,7 @@ EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemM
         enrichItemList [ "crackinterior" ] = enrichItemCreator< CrackInterior >;
         enrichItemList [ "inclusion" ]     = enrichItemCreator< Inclusion >;
         enrichItemList [ "delamination" ]  = enrichItemCreator< Delamination >;
+        enrichItemList [ "multipledelamination" ]  = enrichItemCreator< Delamination >;
     }
 
     return ( enrichItemList.count(aClass) == 1 ) ? enrichItemList [ aClass ](number, xm, domain) : NULL;

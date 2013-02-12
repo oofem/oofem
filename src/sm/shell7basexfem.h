@@ -61,8 +61,21 @@ class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 protected:
 
     virtual double giveGlobalZcoord(GaussPoint *gp);
+    std::list< std::pair<int, double> > delaminationXiCoordList;
+    void setupDelaminationXiCoordList();
+    void setupDelaminationXiCoordsAtGP();
+
+    std::list<std::pair<int, int> > gpDelaminationGroupList; // (gp#, dGroup#)
+    void setupGPDelaminationGroupList();
+    int giveDelaminationGroupAt(double zeta); 
+    void giveDelaminationGroupXiLimits(int &dGroup, double &zTop, double &zBottom);
+    double giveDelaminationGroupMidXi(int dGroup);
+
     XfemManager *xMan; //=  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
 
+    static bool sortFunc(std::pair<int, double> a, std::pair<int, double> b) {
+        return a.second < b.second;
+    }
     
 public:
     // constructor
@@ -74,7 +87,7 @@ public:
     
     virtual Interface *giveInterface(InterfaceType it);
 	
-    //virtual IRResultType initializeFrom(InputRecord *ir){ return IRRT_OK; };
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 };
 

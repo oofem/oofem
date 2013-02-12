@@ -95,6 +95,7 @@ public:
 
     /// Finds out whether a DofManager is enriched.
     bool isDofManEnriched(int nodeNumber);
+    //bool isDofManEnriched(DofManager *dofMan);
     /// Checks whether EnrichmentItem interacts element. - check if el. is enriched by this particular EI
    // bool interacts(Element *element){ return this->isElementEnriched(element); }; // old method
     bool isElementEnriched(Element *element); 
@@ -120,11 +121,12 @@ protected:
 
     // New -JB
     /// Geometry list.
-    AList< BasicGeometry > *geometryList;
+    AList< BasicGeometry > *enrichementDomainList;
     /// Enrichment function list.
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
-    int numberOfGeometryItems;
+    //int numberOfGeometryItems;
+    int numberOfEnrichementDomains;
 };
 
 /** Concrete representation of EnrichmentItem. */
@@ -155,30 +157,41 @@ public:
 };
 
 
-class Delamination : public EnrichmentItem //, LayeredCrossSection 
+
+// DELAMINATION
+
+class Delamination : public EnrichmentItem 
 {
-    // maybe layeredDelamination?
 public:
-    //Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain), LayeredCrossSection(n, aDomain){}
-    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
-    {  }
+    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    int numberOfDelaminations;
-    int giveNumberOfDelaminations() { return numberOfDelaminations; };
+    //FloatArray delaminationZCoords;
+        //delaminationXiCoords;
+
+
+    int numberOfEnrichmentDomains;
+    int giveNumberOfEnrichmentDomains() { return numberOfEnrichmentDomains; };
+
     
+    FloatArray enrichmentDomainXiCoords; // must they be ordered?
+    std::list<std::pair<int, double> > delaminationXiCoordList;
+
+    
+    double giveDelaminationZCoord(int n, Element *element); 
 
     int giveDelaminationGroupAt(double z);
-    FloatArray delaminationZCoords; // must they be ordered?
-    double giveDelaminationZCoord(int n) { return delaminationZCoords.at(n); }; 
-    
     FloatArray delaminationGroupMidZ(int dGroup);
     double giveDelaminationGroupMidZ(int dGroup, Element *e);
     
     FloatArray delaimnationGroupThickness;
     double giveDelaminationGroupThickness(int dGroup, Element *e);
 
-void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
+    void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
+
+
+    
+
 
 #if 0
     void updateIntegrationRule(IntegrationRule **layerIntegrationRulesArray){
@@ -212,6 +225,35 @@ void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, El
 
     }
 #endif
+};
+
+
+class MultipleDelamination : public EnrichmentItem  
+{
+public:
+    MultipleDelamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
+    virtual const char *giveClassName() const { return "MultipleDelamination"; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    
+    AList< EnrichmentItem > *delaminationList;
+    //AList< BasicGeometry > *enrichementDomainList;
+
+    int numberOfDelaminations;
+    int giveNumberOfDelaminations() { return numberOfDelaminations; };
+    
+    FloatArray delaminationZCoords; // must they be ordered?
+    double giveDelaminationZCoord(int n) { return delaminationZCoords.at(n); }; 
+
+    int giveDelaminationGroupAt(double z);
+    FloatArray delaminationGroupMidZ(int dGroup);
+    double giveDelaminationGroupMidZ(int dGroup, Element *e);
+    
+    FloatArray delaimnationGroupThickness;
+    double giveDelaminationGroupThickness(int dGroup, Element *e);
+
+    void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
+
+
 };
 
 

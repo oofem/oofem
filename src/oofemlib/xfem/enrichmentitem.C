@@ -52,23 +52,23 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
 
     //new JB
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
-    this->geometryList = new AList< BasicGeometry >(0);
+    this->enrichementDomainList = new AList< BasicGeometry >(0); // Should be an enrichmentdomain type or something similar
     numberOfEnrichmentFunctions = 0;    
-    numberOfGeometryItems = 0;  
+    numberOfEnrichementDomains = 0;  
 }
 // remove - should ask for specific geom. can be multiple?
 BasicGeometry *EnrichmentItem :: giveGeometry()
 {
     //return xmanager->giveGeometry(this->geometry);
     //return this->giveGeometry( this->geometry );
-    return this->geometryList->at(1);
+    return this->enrichementDomainList->at(1);
 }
 
 BasicGeometry *EnrichmentItem :: giveGeometry(int n)
 // Returns the n-th geometry.
 {
-    if ( this->geometryList->includes(n) ) {
-        return this->geometryList->at(n);
+    if ( this->enrichementDomainList->includes(n) ) {
+        return this->enrichementDomainList->at(n);
     } else {
         OOFEM_ERROR2("giveGeometry: undefined geometry (%d)", n);
     }
@@ -94,14 +94,18 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 
 bool EnrichmentItem :: isElementEnriched(Element *element) 
 {
-    //return this->giveGeometry()->intersects(element);
-    return this->giveGeometry()->isInside(element);
+    for ( int i = 1; element->giveNumberOfDofManagers(); i++ ) {
+        if ( this->isDofManEnriched( element->giveDofManagerNumber(i) ) ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 
-bool EnrichmentItem :: isDofManEnriched(int nodeNumber)
+bool EnrichmentItem :: isDofManEnriched(int dofManNumber)
 {
-    bool ret = false;
+ /*   bool ret = false;
     // gets neighbouring elements of a node
     const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
     for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
@@ -111,8 +115,18 @@ bool EnrichmentItem :: isDofManEnriched(int nodeNumber)
             break;
         }
     }
-
     return ret;
+    */
+
+    for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
+        BasicGeometry *bg = this->enrichementDomainList->at(i);
+        FloatArray nodeCoords = *domain->giveDofManager( dofManNumber )->giveCoordinates();
+        if ( bg->isInside(nodeCoords) ){
+            return true;
+        }
+        
+    }
+    return false;
 }
 
 
@@ -145,23 +159,15 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-
     this->geometry = 0;
     this->enrichmentFunction = 0;
-//    IR_GIVE_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro// Macro
-    IR_GIVE_FIELD(ir, numberOfGeometryItems, IFT_XfemManager_numberOfGeometryItems, "numberofgeometryitems");
     
-
     //IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    IR_GIVE_FIELD(ir, enrichmentDomainNumbers, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    int numEnrichementDomains = this->enrichmentDomainNumbers.giveSize();
-   // this->geometryList->growTo( numEnrichementDomains  );
-       // for ( int i = 1; i <= numEnrichementDomains; i++ ) {
-       //     this->geometryList->at(i) = 
-       // }
+    IR_GIVE_FIELD(ir, enrichmentDomainNumbers, IFT_EnrichmentItem_enrichmentdomains, "enrichmentdomains"); // Macro
+    this->numberOfEnrichementDomains = this->enrichmentDomainNumbers.giveSize();
 
 
-    
+
     IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
     
     return IRRT_OK;
@@ -214,8 +220,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     
-    geometryList->growTo(numberOfGeometryItems);
-    for ( i = 1; i <= numberOfGeometryItems; i++ ) {
+    enrichementDomainList->growTo(numberOfEnrichementDomains);
+    for ( i = 1; i <= numberOfEnrichementDomains; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
         result = mir->giveRecordKeywordField(name);
         if ( result != IRRT_OK ) {
@@ -228,7 +234,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown geometry (%s)", name.c_str() );
         }
 
-        geometryList->put(i, ge);
+        enrichementDomainList->put(i, ge);
         ge->initializeFrom(mir);
     }
 
@@ -249,21 +255,47 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     int material = 0;
     numberOfEnrichmentFunctions = 1;
 
-    IR_GIVE_FIELD(ir, this->delaminationZCoords, IFT_EnrichmentItem_Delamination_delaminationZCoords, "delaminationzcoords"); // Macro
-    this->numberOfDelaminations = this->delaminationZCoords.giveSize();
+    IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, IFT_EnrichmentItem_Delamination_delaminationXiCoords, "delaminationxicoords"); // Macro
+    this->numberOfEnrichmentDomains = this->enrichmentDomainXiCoords.giveSize();
 
     //write an instanciate method
     
     return IRRT_OK;
 }
 
+
+
+
+    
+
+
+double 
+Delamination :: giveDelaminationZCoord(int n, Element *element) 
+{ 
+    AList<double> *xiCoordList;
+    int nDelam = this->giveNumberOfEnrichmentDomains(); // max possible number
+    int pos = 1;
+    for ( int i = 1; i <= nDelam; i++ ) {
+        if( this->isElementEnriched(element) ) {
+            //xiCoordList.put( pos, this->delaminationZCoords.at(i) );
+            pos++;
+        } 
+    }
+    return 0.;;//
+    
+
+    
+}; 
+
+
 int
 Delamination :: giveDelaminationGroupAt(double zeta) 
 {
     //double zRef = Shell7Base :: giveLocalZetaCoord(gp);
-    int nDelam = this->giveNumberOfDelaminations();
+    int nDelam = this->giveNumberOfEnrichmentDomains();
     for ( int j = 1; j <= nDelam; j++ ) {
-        double zDelam = this->giveDelaminationZCoord(j);
+        //double zDelam = this->giveDelaminationZCoord(j);
+        double zDelam = 0.;
         if ( zeta  < zDelam ) { //belong to the delamination group just below delamination #j. How to deal with poins that lie onthe boundary?
             return j;            
         }
@@ -294,19 +326,18 @@ Delamination :: giveDelaminationGroupThickness(int dGroup, Element *e)
 void 
 Delamination :: giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e)
 {
-    int nDelam = this->giveNumberOfDelaminations();
-    //CrossSection *cs = e->giveCrossSection();
+    int nDelam = this->giveNumberOfEnrichmentDomains();
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * > (e->giveCrossSection());
     
     if ( dGroup == 1 ) {
         zBottom = - layeredCS->giveMidSurfaceZcoordFromBottom();
-        zTop    =  this->giveDelaminationZCoord(dGroup);
+        zTop    =  0.;//this->giveDelaminationZCoord(dGroup);
     } else if (dGroup == nDelam + 1) {
-        zBottom =  this->giveDelaminationZCoord(dGroup-1);
+        zBottom =  0.;//this->giveDelaminationZCoord(dGroup-1);
         zTop    = -layeredCS->giveMidSurfaceZcoordFromBottom() + layeredCS->computeIntegralThick();
     } else {
-        zBottom =  this->giveDelaminationZCoord(dGroup-1);
-        zTop    =  this->giveDelaminationZCoord(dGroup);
+        zBottom =  0.;//this->giveDelaminationZCoord(dGroup-1);
+        zTop    =  0.;//this->giveDelaminationZCoord(dGroup);
     }
 #if DEBUG
     if ( zBottom > zTop ) {

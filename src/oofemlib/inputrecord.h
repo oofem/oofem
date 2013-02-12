@@ -1317,11 +1317,12 @@ enum InputFieldType {
     IFT_Meshing_material,
     IFT_Meshing_bc,
 
+    IFT_EnrichmentItem_enrichmentdomains,
     IFT_EnrichmentItem_geometryItemNr,
     IFT_EnrichmentItem_enrichmentFunctionNr,
     IFT_EnrichmentItem_materialNr,
 
-    IFT_EnrichmentItem_Delamination_delaminationZCoords,
+    IFT_EnrichmentItem_Delamination_delaminationXiCoords,
 
     IFT_BSplineInterpolation_degree,
     IFT_BSplineInterpolation_knotVectorU,
