@@ -112,7 +112,7 @@ protected:
     /// List of slave integration points.
     GaussPoint **gaussPointArray;
     //Disctionary of managed MaterialStatuses
-    TDictionary<classType,IntegrationPointStatus> statusDict;
+    TDictionary<int,IntegrationPointStatus> statusDict;
 
 public:
     /**
@@ -160,10 +160,10 @@ public:
     CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
     /**
      * Returns reference to associated material status (NULL if not defined).
-     * @param i classID of class requesting associated status
+     * @param n Material number
      */
-    IntegrationPointStatus *giveMaterialStatus(classType i) { 
-    return statusDict.at(i); 
+    IntegrationPointStatus *giveMaterialStatus(int n) { 
+        return statusDict.at(n); 
     }
     /**
      * Sets Material status managed by receiver.
@@ -171,12 +171,12 @@ public:
      * @param i classID of class storing status
      * @return Pointer to new status.
      */
-    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr,classType i)
+    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr, int n)
     {
-      if (this->statusDict.includes(i)) {
+      if (this->statusDict.includes(n)) {
         OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
       } 
-      this->statusDict.add(i, ptr);
+      this->statusDict.add(n, ptr);
       return ptr;
     }
     /**
