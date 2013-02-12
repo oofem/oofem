@@ -282,6 +282,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     double rootSize, resolutionLimit;
     FloatArray minc(3), maxc(3), * coords;
     DofManager *dman;
+    Node *node;
 
     // test if tree already built
     if ( rootCell ) {
@@ -299,8 +300,9 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     // first determine domain extends (bounding box), and check for degenerated domain type
     for ( int i = 1; i <= nnode; i++ ) {
         dman = domain->giveDofManager(i);
-        if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) ) {
-            coords = ( ( ( Node * ) dman )->giveCoordinates() );
+        node = dynamic_cast< Node* >( dman );
+        if ( node ) {
+            coords = node->giveCoordinates();
             if ( init ) {
                 init = 0;
                 for ( int j = 1; j <= coords->giveSize(); j++ ) {
@@ -350,8 +352,9 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     // insert domain nodes into tree
     for ( int i = 1; i <= nnode; i++ ) {
         dman = domain->giveDofManager(i);
-        if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) ) {
-            coords = ( ( ( Node * ) dman )->giveCoordinates() );
+        node = dynamic_cast< Node* >( dman );
+        if ( node ) {
+            coords = node->giveCoordinates();
             this->insertNodeIntoOctree(this->rootCell, i, * coords);
         }
     }

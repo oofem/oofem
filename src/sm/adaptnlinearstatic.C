@@ -236,8 +236,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     double mc1, mc2, mc3;
     timer.startTimer();
 
-    if ( sourceProblem->giveClassID() != AdaptiveNonLinearStaticClass ) {
-        _error("sory");
+    if ( dynamic_cast< AdaptiveNonLinearStatic* >( sourceProblem ) ) {
+        _error("AdaptiveNonLinearStatic :: initializeAdaptiveFrom - source problem must also be AdaptiveNonlinearStatic.");
     }
 
     this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );

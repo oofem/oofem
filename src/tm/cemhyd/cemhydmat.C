@@ -386,7 +386,9 @@ CemhydMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Ma
     }
 }
 
-int CemhydMat :: initMaterial(Element *element) {
+int
+CemhydMat :: initMaterial(Element *element)
+{
     IntegrationRule *iRule;
     GaussPoint *gp;
     CemhydMatStatus *ms;

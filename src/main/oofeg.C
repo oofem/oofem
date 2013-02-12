@@ -1057,7 +1057,7 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 
         for ( i = 1; i <= nnodes; i++ ) {
             dman = domain->giveDofManager(i);
-            if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) ) {
+            if ( dynamic_cast< Node * >( dman ) ) {
                 if ( init ) {
                     for ( j = 1; j <= 3; j++ ) {
                         maxcoords [ j - 1 ] = mincoords [ j - 1 ] = domain->giveNode(i)->giveCoordinate(j);

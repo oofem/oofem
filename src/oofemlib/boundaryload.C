@@ -39,7 +39,8 @@
 
 namespace oofem {
 void
-BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)  {
+BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
+{
     // returns component array for elements which use direct formulae
     Load :: computeComponentArrayAt(answer, tStep, mode);
 }

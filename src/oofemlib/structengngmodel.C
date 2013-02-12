@@ -265,7 +265,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
         indofs = inode->giveNumberOfDofs();
         for ( j = 1; j <= indofs; j++ ) {
             jdof = inode->giveDof(j);
-            if ( ( jdof->giveClassID() != SimpleSlaveDofClass ) && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
+            if ( jdof->isPrimaryDof() && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
                 rindex = jdof->__givePrescribedEquationNumber();
                 if ( rindex ) {
                     count++;

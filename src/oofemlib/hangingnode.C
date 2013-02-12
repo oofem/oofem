@@ -124,8 +124,8 @@ int HangingNode :: checkConsistency()
     // Initialize slave dofs (inside check of consistency of receiver and master dof)
     const IntArray &masterNodes = e->giveDofManArray();
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
-            SlaveDof *sdof = ( SlaveDof * ) dofArray [ i - 1 ];
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >( dofArray [ i - 1 ] );
+        if ( sdof ) {
             DofIDItem id = sdof->giveDofID();
             fei = e->giveInterpolation(id);
             if (!fei) {

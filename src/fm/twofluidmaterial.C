@@ -74,7 +74,8 @@ TwoFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    return this->giveMaterial(masterMat)->hasMaterialModeCapability(mode);
+    return this->giveMaterial(0)->hasMaterialModeCapability(mode) && 
+           this->giveMaterial(1)->hasMaterialModeCapability(mode);
 }
 
 

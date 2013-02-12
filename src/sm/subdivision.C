@@ -3568,29 +3568,24 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         if ( parent ) {
             parentNodePtr = domain->giveNode(parent);
             // inherit all data from parent (bc, ic, load, etc.)
-            node = CreateUsrDefDofManagerOfType(parentNodePtr->giveClassID(), inode, * dNew);
+            node = CreateUsrDefDofManagerOfType(parentNodePtr->giveClassName(), inode, * dNew);
             ndofs = parentNodePtr->giveNumberOfDofs();
             node->setNumberOfDofs(ndofs);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
-            dof = NULL;
             for ( idof = 1; idof <= ndofs; idof++ ) {
                 idofPtr = parentNodePtr->giveDof(idof);
-                if ( idofPtr->giveClassID() == MasterDofClass ) {
+                if ( idofPtr->isPrimaryDof() ) {
                     dof = new MasterDof( idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
-                } else if ( idofPtr->giveClassID() == SimpleSlaveDofClass ) {
-                    SimpleSlaveDof *simpleSlaveDofPtr;
-                    simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof * >(idofPtr);
-                    // giveMasterDofManArray ???? dof.h   // HUHU
+                } else {
+                    SimpleSlaveDof *simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof * >(idofPtr);
                     if ( simpleSlaveDofPtr ) {
                         dof = new SimpleSlaveDof( idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
-                        OOFEM_ERROR3("Subdivision::createMesh: dynamic cast failed for dof %d of node %d", idof, inode);
+                        OOFEM_ERROR("Subdivision :: createMesh: unsupported DOF type");
+                        dof = NULL;
                     }
-                } else {
-                    OOFEM_ERROR("Subdivision :: createMesh: unsupported DOF type");
                 }
-
                 node->setDof(idof, dof);
             }
 
@@ -3814,7 +3809,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
         if ( parent ) {
             parentElementPtr = domain->giveElement(parent);
-            elem = CreateUsrDefElementOfType(parentElementPtr->giveClassID(), eNum, * dNew);
+            elem = CreateUsrDefElementOfType(parentElementPtr->giveClassName(), eNum, * dNew);
             ( * dNew )->setElement(eNum, elem);
             elem->setDofManagers( * mesh->giveElement(ielem)->giveNodes() );
             elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );

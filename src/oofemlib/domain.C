@@ -313,18 +313,18 @@ ElementSide *
 Domain :: giveSide(int n)
 // Returns the n-th element side.
 {
-    DofManager *side = NULL;
-
-    if ( dofManagerList->includes(n) ) {
-        side = dofManagerList->at(n);
-        if ( side->giveClassID() != ElementSideClass ) {
-            _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
-        }
-    } else {
+    ElementSide *side = NULL;
+#ifdef DEBUG
+    if ( !dofManagerList->includes(n) ) {
         _error2("giveSide: undefined dofManager (%d)", n);
     }
+#endif
 
-    return ( ElementSide * ) side;
+    side = dynamic_cast< ElementSide* >( dofManagerList->at(n) );
+    if ( !side ) {
+        _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
+    }
+    return side;
 }
 
 
@@ -1240,25 +1240,25 @@ Domain :: giveErrorEstimator() {
 
 
 
-#define SAVE_COMPONENTS(size, type, giveMethod)   \
-    {                                             \
+#define SAVE_COMPONENTS(size, type, giveMethod)    \
+    {                                               \
         type *obj;                                  \
         for ( i = 1; i <= size; i++ ) {             \
             obj = giveMethod(i);                    \
             if ( ( mode & CM_Definition ) ) {       \
-                ct =  ( int ) obj->giveClassID();     \
+                ct =  ( int ) obj->giveClassID();   \
                 if ( !stream->write(& ct, 1) ) {    \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \
             if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
-                      THROW_CIOERR(iores);                \
-                  }                                       \
-                  }                                           \
-                  }
+                THROW_CIOERR(iores);                \
+            }                                       \
+        }                                           \
+    }
 
 #define RESTORE_COMPONENTS(size, type, resizeMethod, creator, giveMethod, setMethod) \
-    {                                         \
+    {                                           \
         type *obj;                              \
         if ( mode & CM_Definition ) {           \
             resizeMethod(size);                 \
@@ -1274,13 +1274,13 @@ Domain :: giveErrorEstimator() {
                 obj = giveMethod(i);            \
             }                                   \
             if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
-                      THROW_CIOERR(iores);            \
-                  }                                   \
-                  if ( mode & CM_Definition ) {       \
-                      setMethod(i, obj);              \
-                  }                                   \
-                  }                                       \
-                  }
+                THROW_CIOERR(iores);            \
+            }                                   \
+            if ( mode & CM_Definition ) {       \
+                setMethod(i, obj);              \
+            }                                   \
+        }                                       \
+    }
 
 #define DOMAIN_NCOMP 9
 

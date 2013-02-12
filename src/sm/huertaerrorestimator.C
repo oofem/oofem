@@ -51,6 +51,7 @@
 #include "eleminterpunknownmapper.h"
 #include "buffereddatareader.h"
 #include "adaptnlinearstatic.h"
+#include "adaptlinearstatic.h"
 #include "verbose.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -173,15 +174,13 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
                    d->giveEngngModel()->giveCurrentStep()->giveNumber() );
 #endif
 
-    switch ( d->giveEngngModel()->giveClassID() ) {
-    case AdaptiveLinearStaticClass:
+    if ( dynamic_cast< AdaptiveLinearStatic * >( d->giveEngngModel() ) ) {
         this->mode = HEE_linear;
-        break;
-    case AdaptiveNonLinearStaticClass:
+    } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( d->giveEngngModel() ) ) {
         this->mode = HEE_nlinear;
-        break;
-    default:
+    } else {
         _error("estimateError: Unsupported analysis type");
+        this->mode = HEE_linear;
     }
 
     // check if each node has default number of dofs
@@ -3103,10 +3102,11 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         refinedProblem->solveYourself();
         refinedProblem->terminateAnalysis();
     } else {
-        if ( refinedProblem->giveClassID() == AdaptiveNonLinearStaticClass ) {
+        AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >( refinedProblem );
+        if ( prob ) {
             ( ( AdaptiveNonLinearStatic * ) refinedProblem )->initializeAdaptiveFrom(problem);
         } else {
-            _error("sorry");
+            OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
         }
     }
 
@@ -3672,10 +3672,11 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         refinedProblem->solveYourself();
         refinedProblem->terminateAnalysis();
     } else {
-        if ( refinedProblem->giveClassID() == AdaptiveNonLinearStaticClass ) {
+        AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >( refinedProblem );
+        if ( prob ) {
             ( ( AdaptiveNonLinearStatic * ) refinedProblem )->initializeAdaptiveFrom(problem);
         } else {
-            _error("sorry");
+            OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
         }
     }
 
@@ -4156,13 +4157,11 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     sprintf(line, "Refined problem on %s %d", problemName, problemId);
     refinedReader.appendInputString(line);
 
-    switch ( problem->giveClassID() ) {
-    case AdaptiveLinearStaticClass:
+    if ( dynamic_cast< AdaptiveLinearStatic * >( problem ) ) {
         sprintf(line, "LinearStatic nsteps 1 renumber %d %s %s %s",
                 renumber, skipUpdateString, useContextString, parallelFlagString);
         refinedReader.appendInputString(line);
-        break;
-    case AdaptiveNonLinearStaticClass:
+    } else if ( dynamic_cast< AdaptiveNonLinearStatic * >( problem ) ) {
         nmstep = tStep->giveMetaStepNumber();
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
@@ -4329,7 +4328,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             // it makes not too much sense to solve exact problem from beginning if adaptive restart is used
             // because the mesh may be already derefined in regions of no interest (but anyway ...)
             // however if adaptive restart is applied, number of current step does not correspond to the time
-            // (step number = time + 1) because step number was encreased when recovering equilibrium at the last time;
+            // (step number = time + 1) because step number was increased when recovering equilibrium at the last time;
             // therefore problem -> giveCurrentStep() -> giveNumber() is not used and the number of steps is
             // recovered from the current time
 
@@ -4395,9 +4394,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
             refinedReader.appendInputString(str);
         }
-
-        break;
-    default:
+    } else {
         _error("setupRefinedProblemProlog: Unsupported analysis type");
     }
 

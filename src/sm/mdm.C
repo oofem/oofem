@@ -41,6 +41,7 @@
 #include "isolinearelasticmaterial.h"
 #include "mmaclosestiptransfer.h"
 #include "nonlocalmaterialext.h"
+#include "microplane.h"
 #include "contextioerr.h"
 
 namespace oofem {
@@ -69,7 +70,7 @@ MMAClosestIPTransfer MDM :: mapper2;
 MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    if ( gp->giveClassID() == MicroplaneClass ) {
+    if ( dynamic_cast< Microplane* >( gp ) ) {
         return NULL;
     } else {
         return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);

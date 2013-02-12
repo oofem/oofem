@@ -108,45 +108,41 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD( ( mStep->giveAttributesRecord() ), _val, IFT_NonLinearStatic_controlmode, "controllmode" ); // for backward compatibility
     NonLinearStatic_controlType mode = ( NonLinearStatic_controlType ) _val;
 
-    SparseNonLinearSystemNM *nm = NULL;
     if ( mode == nls_indirectControl ) {
         if ( nMethod ) {
-            if ( nMethod->giveClassID() == CylindricalALMSolverClass ) {
+            if ( dynamic_cast< CylindricalALM * >( nMethod ) ) {
                 return nMethod;
             } else {
                 delete nMethod;
             }
         }
 
-        nm = ( SparseNonLinearSystemNM * ) new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
-        nMethod = nm;
+        this->nMethod = new CylindricalALM(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else if ( mode == nls_directControl ) {
         if ( nMethod ) {
-            if ( nMethod->giveClassID() == NRSolverClass ) {
+            if ( dynamic_cast< NRSolver * >( nMethod ) ) {
                 return nMethod;
             } else {
                 delete nMethod;
             }
         }
 
-        nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-        nMethod = nm;
+        this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else if ( mode == nls_directControl2 ) {
         if ( nMethod ) {
-            if ( nMethod->giveClassID() == NRSolverClass ) {
+            if ( dynamic_cast< NRSolver2 * >( nMethod ) ) {
                 return nMethod;
             } else {
                 delete nMethod;
             }
         }
 
-        nm = ( SparseNonLinearSystemNM * ) new NRSolver2(1, this->giveDomain(1), this, EID_MomentumBalance);
-        nMethod = nm;
+        this->nMethod = new NRSolver2(1, this->giveDomain(1), this, EID_MomentumBalance);
     } else {
         _error("giveNumericalMethod: unsupported controlMode");
     }
 
-    return nm;
+    return this->nMethod;
 }
 
 

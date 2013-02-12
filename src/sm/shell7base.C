@@ -43,7 +43,8 @@
 #include "gausspnt.h"
 #include "feinterpol3d.h"
 #include "boundaryload.h"
-
+#include "constantpressureload.h"
+#include "constantsurfaceload.h"
 
 namespace oofem {
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface()
@@ -387,13 +388,13 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     // Add contribution due to pressure load
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
 
-    for ( int i = 1; i <= nLoads; i++ ) {     // For each pressre load that is applied
+    for ( int i = 1; i <= nLoads; i++ ) {     // For each pressure load that is applied
         int load_number = this->boundaryLoadArray.at(2 * i - 1);
         int iSurf = this->boundaryLoadArray.at(2 * i);         // load_id
         Load *load;
         load = this->domain->giveLoad(load_number);
 
-        if ( load->giveClassID() == ConstantPressureLoadClass ) {
+        if ( dynamic_cast< ConstantPressureLoad * >( load ) ) {
             FloatMatrix K_pressure;
             this->computePressureTangentMatrix(K_pressure, load, iSurf, tStep);
             temp.add(K_pressure);
@@ -1744,12 +1745,12 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
     m.setValues( 3,  genEps.at(13),  genEps.at(14),  genEps.at(15) );
     gam =  genEps.at(18);
 
-    if ( surfLoad->giveClassID() == ConstantPressureLoadClass ) {
+    if ( dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) {
         this->evalCovarBaseVectorsAt(gp, g1, g2, g3, genEps);         // m=g3
         surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure components
         traction.beVectorProductOf(g1, g2);        // normal vector (unnormalized)
         traction.times( -load.at(1) );
-    } else if ( surfLoad->giveClassID() == ConstantSurfaceLoadClass )   {
+    } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) )   {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), VM_Total);        // traction vector
     } else  {
         _error("computePressureForceAt: incompatible load type");

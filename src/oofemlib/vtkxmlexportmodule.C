@@ -1033,10 +1033,11 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
         } else if ( type == ISVT_VECTOR ) {
 
             //rotate back from nodal CS to global CS if applies
-            if ( (dman->giveClassID() == NodeClass) && d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
+            Node *node = dynamic_cast< Node* >( dman );
+            if ( node && node->hasLocalCS() ) {
                 iVal.resize(3);
                 iValLCS = iVal;
-                iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
+                iVal.beTProductOf(* node->giveLocalCoordinateTriplet(), iValLCS);
             }
 
 #ifdef __VTK_MODULE
