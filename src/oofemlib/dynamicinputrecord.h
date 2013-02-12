@@ -56,6 +56,7 @@ protected:
     //std::map<InputFieldType, void*> record;
     std::map<InputFieldType, int>  intRecord;
     std::map<InputFieldType, double> doubleRecord;
+    std::map<InputFieldType, bool>  boolRecord;
     std::map<InputFieldType, std::string> stringRecord;
     std::map<InputFieldType, FloatArray> floatArrayRecord;
     std::map<InputFieldType, IntArray> intArrayRecord;
@@ -81,6 +82,7 @@ public:
     virtual IRResultType giveRecordKeywordField(std::string &answer);
     virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(bool &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(std::string &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(IntArray &answer, InputFieldType fieldID, const char *idString);
@@ -88,7 +90,6 @@ public:
     virtual IRResultType giveField(std::vector< std::string > &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
-    virtual IRResultType giveField(double &answer, int tokenNumber);
     
     virtual bool hasField(InputFieldType fieldID, const char *idString);
     virtual void printYourself();
@@ -96,6 +97,7 @@ public:
     virtual void setRecordKeywordField(const std::string &keyword, int number);
     virtual void setField(int item, InputFieldType fieldID);
     virtual void setField(double item, InputFieldType fieldID);
+    virtual void setField(bool item, InputFieldType fieldID);
     virtual void setField(const std::string &item, InputFieldType fieldID);
     virtual void setField(const FloatArray &item, InputFieldType fieldID);
     virtual void setField(const IntArray &item, InputFieldType fieldID);

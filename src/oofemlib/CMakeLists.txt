@@ -84,7 +84,6 @@ set (core_ltf
     peak.C
     piecewis.C
     piecewisper.C
-    piecewisblock.C
     usrdeftimefunct.C
     )
 

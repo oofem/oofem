@@ -36,7 +36,6 @@
 #include "constant.h"
 #include "peak.h"
 #include "piecewis.h"
-#include "piecewisblock.h"
 #include "piecewisper.h"
 #include "heavisideltf.h"
 #include "usrdeftimefunct.h"
@@ -44,7 +43,6 @@
 REGISTER_CLASS(ConstantFunction, "constantfunction", ConstantFunctionClass)
 REGISTER_CLASS(PeakFunction, "peakfunction", PeakFunctionClass)
 REGISTER_CLASS(PiecewiseLinFunction, "piecewiselinfunction", PiecewiseLinFunctionClass)
-REGISTER_CLASS(PiecewiseLinFunctionBlock, "piecewiselinfunctionblock", PiecewiseLinFunctionBlockClass)
 REGISTER_CLASS(PeriodicPiecewiseLinFunction, "periodicpiecewiselinfunction", PeriodicPiecewiseLinFunctionClass)
 REGISTER_CLASS(HeavisideLTF, "heavisideltf", HeavisideLTFClass)
 REGISTER_CLASS(UserDefinedLoadTimeFunction, "usrdefltf", UserDefinedLoadTimeFunctionClass)

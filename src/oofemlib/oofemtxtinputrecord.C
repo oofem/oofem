@@ -164,6 +164,25 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType fieldID, const c
 }
 
 IRResultType
+OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType fieldID, const char *idString)
+{
+    int val;
+    int indx = this->giveKeywordIndx(idString);
+    if ( indx ) {
+        if ( scanInteger(tokenizer.giveToken(indx + 1), val) == 0 ) {
+            return IRRT_BAD_FORMAT;
+        }
+
+        setReadFlag(indx);
+        setReadFlag(indx + 1);
+        answer = val != 0;
+        return IRRT_OK;
+    } else {
+        return IRRT_NOTFOUND;
+    }
+}
+
+IRResultType
 OOFEMTXTInputRecord :: giveField(std::string &answer, InputFieldType fieldI, const char *idString)
 {
     int indx = 0;
@@ -378,19 +397,6 @@ OOFEMTXTInputRecord :: giveField(std::list< Range > &list, InputFieldType fieldI
         return IRRT_NOTFOUND;
     }
 }
-
-IRResultType
-OOFEMTXTInputRecord :: giveField(double &answer, int tokenNumber)
-{
-    if ( scanDouble(tokenizer.giveToken(tokenNumber), answer) == 0 ) {
-        OOFEM_ERROR4("Double not found on line %d in token number %d, string %s", this->lineNumber, tokenNumber, this->record.c_str() );
-        return IRRT_BAD_FORMAT;
-    }
-
-    setReadFlag(tokenNumber);
-    return IRRT_OK;
-}
-
 
 bool
 OOFEMTXTInputRecord :: hasField(InputFieldType fieldID, const char *idString)

@@ -87,6 +87,7 @@ public:
     virtual IRResultType giveRecordKeywordField(std::string &answer);
     virtual IRResultType giveField(int &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(double &answer, InputFieldType fieldID, const char *idString);
+    virtual IRResultType giveField(bool &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(std::string &answer, InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(FloatArray &answer, InputFieldType fieldI, const char *idString);
     virtual IRResultType giveField(IntArray &answer, InputFieldType fieldID, const char *idString);
@@ -95,7 +96,6 @@ public:
     virtual IRResultType giveField(Dictionary &answer, InputFieldType fieldID, const char *idString);
     virtual IRResultType giveField(std::list< Range > &answer, InputFieldType fieldID, const char *idString);
 
-    virtual IRResultType giveField(double &answer, int tokenNumber);
     virtual bool hasField(InputFieldType fieldID, const char *idString);
     virtual void printYourself();
 
