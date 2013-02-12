@@ -53,7 +53,6 @@ class GaussPoint;
 class TwoFluidMaterial : public FluidDynamicMaterial
 {
 protected:
-    int masterMat;
     int slaveMaterial [ 2 ];
 
 public:
@@ -62,7 +61,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    TwoFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { masterMat = 0; }
+    TwoFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
     virtual ~TwoFluidMaterial() { }
 

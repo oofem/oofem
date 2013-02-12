@@ -44,35 +44,11 @@ namespace oofem {
 int
 TwoFluidMaterial :: checkConsistency()
 {
-    if ( this->giveMaterial(0)->giveClassID() !=
-        this->giveMaterial(1)->giveClassID() ) {
-        if ( ( this->giveMaterial(0)->giveClassID() == NewtonianFluidMaterialClass ) &&
-            ( this->giveMaterial(1)->giveClassID() == BinghamFluidMaterialClass ) ) {
-            masterMat = 1;
-        } else if ( ( this->giveMaterial(0)->giveClassID() == BinghamFluidMaterialClass ) &&
-                   ( this->giveMaterial(1)->giveClassID() == NewtonianFluidMaterialClass ) ) {
-            masterMat = 0;
-        } else {
-            /*
-             * This is here necessary, because these two materials can share same material status in gp.
-             * It can be more general, but support for multiple statuses in gp should be implemented
-             */
-            _error("checkConsistency: Materials should be of the same type");
-        }
-    } else {
-        masterMat = 0;
-    }
-
-    this->giveMaterial(0)->checkConsistency();
-    this->giveMaterial(1)->checkConsistency();
-    return 1;
+    return this->giveMaterial(0)->checkConsistency() && this->giveMaterial(1)->checkConsistency();
 }
 
 int
 TwoFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
 {
     return this->giveMaterial(0)->hasMaterialModeCapability(mode) && 
            this->giveMaterial(1)->hasMaterialModeCapability(mode);
@@ -152,21 +128,15 @@ TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
     }
 
     return 0.0;
-    //_error("give: sorry, do not know, how to return any property for two fluid material");
-    //return 0.0;
 }
 
 
 MaterialStatus *
 TwoFluidMaterial :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- * NOTE:
- * we do rely on the fact, that the two salve materials are of the same type, so they can share
- * same material status !!! This is checked in checkConsistency() service.
- */
 {
-    return this->giveMaterial(masterMat)->CreateStatus(gp);
+    // We can only return one of these, so we return the first one.
+    this->giveMaterial(1)->giveStatus(gp);
+    return this->giveMaterial(0)->giveStatus(gp);
 }
 
 
@@ -175,16 +145,14 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
 {
     double vof = this->giveTempVOF(gp);
     FloatArray v0, v1;
-    int i, size = eps.giveSize();
     FluidDynamicMaterialStatus *status = ( FluidDynamicMaterialStatus * ) this->giveStatus(gp);
 
     this->giveMaterial(0)->computeDeviatoricStressVector(v0, gp, eps, tStep);
     this->giveMaterial(1)->computeDeviatoricStressVector(v1, gp, eps, tStep);
 
-    answer.resize(size);
-    for ( i = 1; i <= size; i++ ) {
-        answer.at(i) = ( 1.0 - vof ) * v0.at(i) + vof *v1.at(i);
-    }
+    answer.resize(0);
+    answer.add(1.0 - vof, v0);
+    answer.add(vof, v1);
 
     status->letTempDeviatoricStressVectorBe(answer);
 }
@@ -194,20 +162,14 @@ TwoFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatRespon
                                                   TimeStep *atTime)
 {
     FloatMatrix a0, a1;
-    int i, j, size;
     double vof = this->giveTempVOF(gp);
-    //FluidDynamicMaterialStatus* status = (FluidDynamicMaterialStatus*) this->giveStatus(gp);
 
     this->giveMaterial(0)->giveDeviatoricStiffnessMatrix(a0, mode, gp, atTime);
     this->giveMaterial(1)->giveDeviatoricStiffnessMatrix(a1, mode, gp, atTime);
 
-    size = a1.giveNumberOfRows();
-    answer.resize(size, size);
-    for ( i = 1; i <= size; i++ ) {
-        for ( j = 1; j <= size; j++ ) {
-            answer.at(i, j) = ( 1.0 - vof ) * a0.at(i, j) + vof *a1.at(i, j);
-        }
-    }
+    answer.beEmptyMtrx();
+    answer.add(1.0 - vof, a0);
+    answer.add(vof, a1);
 }
 
 double

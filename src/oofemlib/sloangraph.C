@@ -131,37 +131,6 @@ void SloanGraph :: initialize()
     }
     ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
-    // loop over dof managers and test if there are some "slave" or rigidArm connection
-    // if yes, such dependency is reflected in the graph by introducing additional
-    // graph edges between slaves and corresponding masters
-    /*
-     * DofManager* iDofMan;
-     * for (i=1; i <= nnodes; i++){
-     * if (domain->giveDofManager (i)->hasAnySlaveDofs()) {
-     * iDofMan = domain->giveDofManager (i);
-     * if (iDofMan->giveClassID() == RigidArmNodeClass) {
-     *   // rigid arm node -> has only one master
-     *   int master = ((RigidArmNode*)iDofMan)->giveMasterDofMngr()->giveNumber();
-     *   // add edge
-     *   this->giveNode(i)->addNeighbor (master);
-     *   this->giveNode(master)->addNeighbor(i);
-     *
-     * } else {
-     * // slave dofs are present in dofManager
-     * // first - ask for masters, these may be different for each dof
-     *   int j;
-     *   for (j=1; j<=iDofMan->giveNumberOfDofs(); j++)
-     *     if (iDofMan->giveDof (j)->giveClassID() == SimpleSlaveDofClass) {
-     *       int master = ((SimpleSlaveDof*) iDofMan->giveDof (j))->giveMasterDofManagerNum();
-     *       // add edge
-     *       this->giveNode(i)->addNeighbor (master);
-     *       this->giveNode(master)->addNeighbor(i);
-     *
-     *     }
-     * }
-     * }
-     * } // end dof man loop */
-
     std :: set< int, std :: less< int > >masters;
     std :: set< int, std :: less< int > > :: iterator it;
 
@@ -173,11 +142,10 @@ void SloanGraph :: initialize()
             // first - ask for masters, these may be different for each dof
             masters.clear();
             iDofMan = domain->giveDofManager(i);
-            int j, k;
-            for ( j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
+            for ( int j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
                 if ( !iDofMan->giveDof(j)->isPrimaryDof() ) {
                     iDofMan->giveDof(j)->giveMasterDofManArray(dofMasters);
-                    for ( k = 1; k <= dofMasters.giveSize(); k++ ) {
+                    for ( int k = 1; k <= dofMasters.giveSize(); k++ ) {
                         masters.insert( dofMasters.at(k) );
                     }
                 }
