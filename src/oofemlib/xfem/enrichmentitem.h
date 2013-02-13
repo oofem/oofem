@@ -93,21 +93,17 @@ public:
     /// Accessor.
     IntArray *getDofIdArray() { return & dofsId; }
 
-    /// Finds out whether a DofManager is enriched.
+
     bool isDofManEnriched(int nodeNumber);
-    //bool isDofManEnriched(DofManager *dofMan);
-    /// Checks whether EnrichmentItem interacts element. - check if el. is enriched by this particular EI
-   // bool interacts(Element *element){ return this->isElementEnriched(element); }; // old method
+    bool isDofManEnrichedByEnrichmentDomain(int dofManNumber, int edNumber);
     bool isElementEnriched(Element *element); 
+    bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
 
-
-    
-    virtual Material *giveMaterial() { return NULL; }
-    
     /// Updates receiver geometry to the state reached at given time step.
     /// Geometry update; calls individual enrichment item updateGeometry method.
     virtual void updateGeometry(TimeStep *tStep) {}
-        
+    int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
+
 protected:
     /// Link to associated Xfem manager.
     XfemManager *xmanager;
@@ -126,7 +122,8 @@ protected:
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
     //int numberOfGeometryItems;
-    int numberOfEnrichementDomains;
+    int numberOfEnrichmentDomains;
+
 };
 
 /** Concrete representation of EnrichmentItem. */
@@ -170,10 +167,6 @@ public:
         //delaminationXiCoords;
 
 
-    int numberOfEnrichmentDomains;
-    int giveNumberOfEnrichmentDomains() { return numberOfEnrichmentDomains; };
-
-    
     FloatArray enrichmentDomainXiCoords; // must they be ordered?
     std::list<std::pair<int, double> > delaminationXiCoordList;
 
@@ -190,42 +183,21 @@ public:
     void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
 
 
-    
-
-
-#if 0
-    void updateIntegrationRule(IntegrationRule **layerIntegrationRulesArray){
-	    for( int layer = 1; layer <= numberOfLayers; layer++ ) {
-		    IntegrationRule *iRule = layerIntegrationRulesArray [layer-1]; 
-		
-		    for( int j = 1; j <= iRule->getNumberOfIntegrationPoints(); j++ ) {
-			    GaussPoint *gp = iRule->getIntegrationPoint(j-1);
-                int dGroup = giveDelaminationGroupAt();
-                double dMidZ = giveDelaminationGroupMidZ(dGroup);
-                double dThickness = giveDelaminationGroupThickness(dGroup);
-                double b = dMidZ + 0.5*dThickness;
-                double a = dMidZ - 0.5*dThickness;
-                //remap the xi-coords -> 1-2(b-x)/(b-a)
-
-           	    double totalThickness = this->computeIntegralThick();
-
-
-			// Map local layer cs to local shell cs
-            /*
-			double zMid_i = layeredCS->giveLayerMidZ(layer);
-            double xiMid_i = 1.0 - 2.0*(totalThickness - this->midSurfaceZcoordFromBottom - zMid_i)/totalThickness; 
-			double xi = xiMid_i; 
-			double xi2 = gp->coordinates->at(3)*layeredCS->giveLayerThickness(layer)/totalThickness;
-			double xinew = xi+xi2;
-			iRule->getIntegrationPoint(j-1)->coordinates->at(3) = xinew;
-			double temp=0.;
-            */
-			}
-		}
-
-    }
-#endif
 };
+
+
+class GeometryDofManSwarm 
+{
+public:
+    GeometryDofManSwarm();
+    virtual const char *giveClassName() const { return "GeometryDofManSwarmClass"; }
+   
+
+
+};
+
+
+
 
 
 class MultipleDelamination : public EnrichmentItem  

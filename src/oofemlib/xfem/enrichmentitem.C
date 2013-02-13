@@ -54,7 +54,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichementDomainList = new AList< BasicGeometry >(0); // Should be an enrichmentdomain type or something similar
     numberOfEnrichmentFunctions = 0;    
-    numberOfEnrichementDomains = 0;  
+    numberOfEnrichmentDomains = 0;  
 }
 // remove - should ask for specific geom. can be multiple?
 BasicGeometry *EnrichmentItem :: giveGeometry()
@@ -94,8 +94,18 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 
 bool EnrichmentItem :: isElementEnriched(Element *element) 
 {
-    for ( int i = 1; element->giveNumberOfDofManagers(); i++ ) {
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         if ( this->isDofManEnriched( element->giveDofManagerNumber(i) ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(Element *element, int edNumber) 
+{
+    for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
+        if ( isDofManEnrichedByEnrichmentDomain(i, edNumber) ){
             return true;
         }
     }
@@ -105,29 +115,26 @@ bool EnrichmentItem :: isElementEnriched(Element *element)
 
 bool EnrichmentItem :: isDofManEnriched(int dofManNumber)
 {
- /*   bool ret = false;
-    // gets neighbouring elements of a node
-    const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
-        // for each of the neighbouring elements finds out whether it interacts with this EnrichmentItem
-        if ( this->isElementEnriched( domain->giveElement( neighbours->at(i) ) ) ) {
-            ret = true;
-            break;
-        }
-    }
-    return ret;
-    */
-
     for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
-        BasicGeometry *bg = this->enrichementDomainList->at(i);
-        FloatArray nodeCoords = *domain->giveDofManager( dofManNumber )->giveCoordinates();
-        if ( bg->isInside(nodeCoords) ){
+        if ( isDofManEnrichedByEnrichmentDomain(dofManNumber, i) ){
             return true;
         }
-        
     }
     return false;
 }
+
+bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(int dofManNumber, int edNumber)
+{
+    BasicGeometry *bg = this->enrichementDomainList->at(edNumber);
+    for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
+        FloatArray nodeCoords = *domain->giveDofManager( dofManNumber )->giveCoordinates();
+        if ( bg->isInside(nodeCoords) ){
+            return true;
+        }        
+    }
+    return false;
+}
+
 
 
 
@@ -164,7 +171,7 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     
     //IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
     IR_GIVE_FIELD(ir, enrichmentDomainNumbers, IFT_EnrichmentItem_enrichmentdomains, "enrichmentdomains"); // Macro
-    this->numberOfEnrichementDomains = this->enrichmentDomainNumbers.giveSize();
+    this->numberOfEnrichmentDomains = this->enrichmentDomainNumbers.giveSize();
 
 
 
@@ -220,8 +227,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     
-    enrichementDomainList->growTo(numberOfEnrichementDomains);
-    for ( i = 1; i <= numberOfEnrichementDomains; i++ ) {
+    enrichementDomainList->growTo(numberOfEnrichmentDomains);
+    for ( i = 1; i <= numberOfEnrichmentDomains; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
         result = mir->giveRecordKeywordField(name);
         if ( result != IRRT_OK ) {
@@ -256,7 +263,12 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     numberOfEnrichmentFunctions = 1;
 
     IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, IFT_EnrichmentItem_Delamination_delaminationXiCoords, "delaminationxicoords"); // Macro
-    this->numberOfEnrichmentDomains = this->enrichmentDomainXiCoords.giveSize();
+    if ( this->numberOfEnrichmentDomains != this->enrichmentDomainXiCoords.giveSize() ) {
+        OOFEM_ERROR3( "EnrichmentItem :: initializeFrom: size of enrichmentDomainXiCoords (%i) differs from numberOfEnrichmentDomains (%i)", 
+           this->enrichmentDomainXiCoords.giveSize(), this->numberOfEnrichmentDomains );
+    }
+
+    
 
     //write an instanciate method
     

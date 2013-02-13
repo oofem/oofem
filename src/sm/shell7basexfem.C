@@ -94,7 +94,7 @@ Shell7BaseXFEM :: setupDelaminationXiCoordList()
             int numED = dei->giveNumberOfEnrichmentDomains(); // numEnrDomains max possible number
             int pos = 1;
             for ( int j = 1; j <= numED; j++ ) {
-                if( dei->isElementEnriched(this->element) ) { // should check particular ED
+                if( dei->isElementEnrichedByEnrichmentDomain(this->element, j) ) { 
                     std::pair<int, double> pid;
                     pid.first  = pos;
                     pid.second = dei->enrichmentDomainXiCoords.at(j); 
