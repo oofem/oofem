@@ -121,6 +121,7 @@ public:
     /// Destructor.
     virtual ~MasterDof()   { delete unknowns; }
 
+    virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }
     virtual classType giveClassID() const { return MasterDofClass; }
 

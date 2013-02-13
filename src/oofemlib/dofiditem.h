@@ -38,16 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Mask defining the physical meaning of particular DOF in node.
- * Mask arrays are also used in elements, where these arrays
- * are determining required DOFs needed by element and which are then
- * requested on particular nodes. They are used in function
- * Node::giveLocationArray which returns equations numbers
- * corresponding to selected dofs.
- * @deprecated{Use DofIDItem}
- */
-typedef char DofID;
 
 #define DofIDItem_DEF \
     ENUM_ITEM_WITH_VALUE(Undef, 0) /* Error value */ \
@@ -70,9 +60,10 @@ typedef char DofID;
     ENUM_ITEM_WITH_VALUE(X_1, 15) /* Start of xfemManager xfemdof pool */ \
     ENUM_ITEM_WITH_VALUE(X_N, 30) /* End of xfemManager xfemdof pool */ \
     ENUM_ITEM_WITH_VALUE(w_u, 31) /* u-component of change in director field (in direction of x-axis) */ \
-	ENUM_ITEM_WITH_VALUE(w_v, 32) /* v-component of change in director field (in direction of y-axis) */ \
-	ENUM_ITEM_WITH_VALUE(w_w, 33) /* w-component of change in director field (in direction of z-axis) */ \
-	ENUM_ITEM_WITH_VALUE(gam, 34) /* inhomogenous thickness strain in direction of the directorfield m */ \
+    ENUM_ITEM_WITH_VALUE(w_v, 32) /* v-component of change in director field (in direction of y-axis) */ \
+    ENUM_ITEM_WITH_VALUE(w_w, 33) /* w-component of change in director field (in direction of z-axis) */ \
+    ENUM_ITEM_WITH_VALUE(gam, 34) /* inhomogenous thickness strain in direction of the directorfield m */
+
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
  * available DOFs.

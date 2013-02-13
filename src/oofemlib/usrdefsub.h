@@ -293,7 +293,7 @@ DofManager *CreateUsrDefDofManagerOfType(classType type, int num, Domain *d);
  * @param d    Dofmanager to which new dof belongs.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-Dof *CreateUsrDefDofOfType(classType type, int num, DofManager *d);
+Dof *CreateUsrDefDofOfType(dofType type, int num, DofManager *d);
 /**
  * Creates new instance of user defined boundary condition  corresponding to given id.
  * @param type Id determining the type of new instance.

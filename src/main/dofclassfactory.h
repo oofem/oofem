@@ -32,12 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "doftype.h"
 #include "masterdof.h"
 #include "simpleslavedof.h"
 #include "slavedof.h"
 #include "activedof.h"
 
-REGISTER_CLASS(MasterDof, MasterDofClass)
-REGISTER_CLASS(SimpleSlaveDof, SimpleSlaveDofClass)
-REGISTER_CLASS(SlaveDof, SlaveDofClass)
-REGISTER_CLASS(ActiveDof, ActiveDofClass)
+REGISTER_CLASS(MasterDof, DT_master)
+REGISTER_CLASS(SimpleSlaveDof, DT_simpleSlave)
+REGISTER_CLASS(SlaveDof, DT_slave)
+REGISTER_CLASS(ActiveDof, DT_active)

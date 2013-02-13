@@ -92,6 +92,7 @@ public:
     /// Destructor.
     virtual ~SimpleSlaveDof() { }
 
+    virtual dofType giveDofType() { return DT_simpleSlave; }
     virtual const char *giveClassName() const { return "SimpleSlaveDof"; }
     virtual classType giveClassID() const { return SimpleSlaveDofClass; }
     /**

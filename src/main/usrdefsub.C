@@ -253,9 +253,9 @@ SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type)
 }
 
 // ================ DOF CLASS FACTORY==================
-Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
+Dof *CreateUsrDefDofOfType(dofType type, int number, DofManager *dman)
 {
-  return classFactory.createDof (type, number, dman);
+  return classFactory.createDof(type, number, dman);
 }
 
 // ================ SparseLinearSystemNM CLASS FACTORY==================

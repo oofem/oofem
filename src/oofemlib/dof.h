@@ -44,6 +44,7 @@
 #include "equationid.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
+#include "doftype.h"
 #include "contextioresulttype.h"
 
 namespace oofem {
@@ -118,6 +119,8 @@ public:
     /// Destructor.
     virtual ~Dof() { }
 
+    /// Returns the type of the receiver.
+    virtual dofType giveDofType() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "Dof"; }
     /// Returns classType id of receiver.
