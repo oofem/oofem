@@ -16,6 +16,15 @@ targets/
 *.log
 *.toc
 *.lof
+*.synctex.gz
+*.run.xml
+*.bcf
+*-blx.bib
+*.blg
+
+
+.*.kate-swp
+*.backup
 *kdev*
 
 makefile
