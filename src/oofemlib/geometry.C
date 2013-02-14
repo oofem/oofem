@@ -534,4 +534,23 @@ void Circle :: printYourself()
     vertices->at(1)->printYourself();
     printf("\n");
 }
+
+
+
+IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    IntArray idList;
+    
+    IR_GIVE_FIELD(ir, idList, IFT_Identification, "nodeid"); // Macro
+    
+    for (int i=1; i<=idList.giveSize(); i++) {
+        this->idList.push_back( idList.at(i) );
+    }
+    return IRRT_OK;
+}
+
+
+
 } // end namespace oofem

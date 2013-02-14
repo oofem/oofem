@@ -170,6 +170,30 @@ public:
     virtual bool isInside(FloatArray &point);
     virtual void printYourself();
 };
+
+
+class PointSwarm : public BasicGeometry
+{
+protected:
+    std::list< int > idList;
+public:
+    PointSwarm() : BasicGeometry() { }
+    virtual ~PointSwarm() { }
+    PointSwarm(std::list<int> pointsID);
+
+    /// Computes the normal distance to the surface not to the center.
+   // virtual double computeDistanceTo(FloatArray *point);
+   virtual IRResultType initializeFrom(InputRecord *ir);
+   // virtual const char *giveClassName() const { return "Circle"; }
+   // virtual bool intersects(Element *element);
+   // virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints);
+   // virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
+   // virtual bool isOutside(BasicGeometry *bg);
+   // virtual bool isInside(Element *element);
+   // virtual bool isInside(FloatArray &point);
+    
+};
+
 } // end namespace oofem
 #endif  // geometry_h
 

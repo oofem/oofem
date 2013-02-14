@@ -492,10 +492,37 @@ BasicGeometry *CreateUsrDefGeometry(const char *aClass)
     if ( geometryList.size() == 0 ) {
         geometryList [ "line" ] = geometryCreator< Line >;
         geometryList [ "circle" ] = geometryCreator< Circle >;
+        geometryList [ "pointswarm" ] = geometryCreator< PointSwarm >; // just temporary
     }
 
     return ( geometryList.count(aClass) == 1 ) ? geometryList [ aClass ]() : NULL;
 }
+/*
+template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
+std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
+
+EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
+{
+    // go through the supported geometry descriptions
+    BasicGeometry *bg = CreateUsrDefGeometry(aClass); // for basic geometry
+    //...
+    
+    return ( enrichmentDomainList.count(aClass) == 1 ) ? enrichmentDomainList [ aClass ]() : NULL;
+}
+*/
+
+template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
+std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
+
+EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
+{
+    if ( enrichmentDomainList.size() == 0 ) {
+        enrichmentDomainList [ "dofmanlist" ] = enrichmentDomainCreator< DofManList >;
+        enrichmentDomainList [ "wholedomain" ] = enrichmentDomainCreator< WholeDomain >;
+    }
+    return ( enrichmentDomainList.count(aClass) == 1 ) ? enrichmentDomainList [ aClass ]() : NULL;
+}
+
 BasicGeometry *CreateUsrDefGeometry(classType type)
 {
   OOFEM_ERROR("CreateUsrDefGeometry: Unknown type\n");

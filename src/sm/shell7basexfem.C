@@ -76,10 +76,61 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
     
     return (xiRef - xiMid)*layeredCS->computeIntegralThick(); // new xi-coord measured from dGroup c.s. 
     
-    this->delaminationXiCoordList.clear();
-    this->gpDelaminationGroupList.clear();
 }
 
+
+void
+Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC)
+{
+    // Continuous part
+    FloatArray g1c, g2c, g3c;
+    Shell7Base :: evalCovarBaseVectorsAt(gp, g1c, g2c, g3c, genEpsC);
+
+    // Discontinuous part
+    FloatArray g1d, g2d, g3d, dGenEps;
+
+    discEvalCovarBaseVectorsAt(gp, g1d, g2d, g3d, dGenEps)
+
+}
+
+
+void
+Shell7BaseXFEM :: discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1d, FloatArray &g2d, FloatArray &g3d, FloatArray &dGenEps)
+{
+
+    FloatArray lcoords = * gp->giveCoordinates();
+	double zeta = giveGlobalZcoord(gp);
+
+    FloatArray dxdxi1, dxdxi2, dmdxi1, dmdxi2, m;
+    this->discGiveGeneralizedStrainComponents(dGenEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m);
+
+    g1d = dxdxi1;
+    g1d.add(zeta, dmdxi1);
+    g2d = dxdxi2;
+    g2d.add(zeta, dmdxi2);
+    g3d = m;
+    
+}
+
+
+
+void
+Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
+{
+    // Returns the solution vector of discontinuous dofs dx_d & dm_d
+    //this->giveInitialSolutionVector(answer);
+    FloatArray temp;
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
+    answer.assemble( temp, this->giveOrdering(AllInv) );
+}
+
+
+
+
+
+// Delamination specific
+
+#if 1
 
 void
 Shell7BaseXFEM :: setupDelaminationXiCoordList()
@@ -135,7 +186,8 @@ Shell7BaseXFEM :: setupGPDelaminationGroupList()
 
 int
 Shell7BaseXFEM :: giveDelaminationGroupAt(double xi) 
-{
+{   
+    // Starts ordering from 0
     std::list< std::pair<int, double> >::const_iterator iter;
     iter = this->delaminationXiCoordList.begin();
 
@@ -192,7 +244,7 @@ Shell7BaseXFEM :: giveDelaminationGroupMidXi(int dGroup)
     return 0.5 * ( xiTop + xiBottom );
 }
 
-
+#endif
 
 
 

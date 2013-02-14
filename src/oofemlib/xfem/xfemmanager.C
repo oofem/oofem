@@ -212,16 +212,16 @@ int XfemManager :: computeFictPosition()
     // this is supposed to be used for creation of locationArray for a dofmanager
     // the function returns simultaneously the last dof
     //
-    // Set up additional dofs due to enrichment 
+    // Set up additional dofs due to enrichment? 
     int nrNodes = emodel->giveDomain(1)->giveNumberOfDofManagers();
     int count = this->giveDomain()->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance); // total number of dofs in model
     IntArray edofs;
     for ( int j = 1; j <= nrNodes; j++ ) {
         IntArray *dofs = new IntArray();
-
+        DofManager *dMan = emodel->giveDomain(1)->giveDofManager(j); 
         for ( int i = 1; i <= this->enrichmentItemList->giveSize(); i++ ) {
             int dofSize = enrichmentItemList->at(i)->getDofIdArray()->giveSize();
-            if ( enrichmentItemList->at(i)->isDofManEnriched(j) ) {
+            if ( enrichmentItemList->at(i)->isDofManEnriched(dMan) ) {
                 edofs.resize(dofSize);
                 for ( int k = 1; k <= dofSize; k++ ) {
                     count++;

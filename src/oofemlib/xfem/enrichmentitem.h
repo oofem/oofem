@@ -41,6 +41,8 @@
 #include "enrichmentfunction.h"
 #include "layeredcrosssection.h"
 
+#include "enrichmentdomain.h"
+
 namespace oofem {
 class BasicGeometry;
 
@@ -94,8 +96,8 @@ public:
     IntArray *getDofIdArray() { return & dofsId; }
 
 
-    bool isDofManEnriched(int nodeNumber);
-    bool isDofManEnrichedByEnrichmentDomain(int dofManNumber, int edNumber);
+    bool isDofManEnriched(DofManager *dMan);
+    bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber);
     bool isElementEnriched(Element *element); 
     bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
 
@@ -110,19 +112,26 @@ protected:
     /// Geometry associated with EnrichmentItem.
     int geometry;
     IntArray enrichmentDomainNumbers;
+
     /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
     /// Additional dofIds from Enrichment. - depends on problem type and spatial dimension
     IntArray dofsId;
 
-    // New -JB
+    
     /// Geometry list.
     AList< BasicGeometry > *enrichementDomainList;
+    int numberOfEnrichmentDomains;
+    
+    /// new geometry object
+    AList< EnrichmentDomain > *enrDomainList;
+    
+
     /// Enrichment function list.
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
-    //int numberOfGeometryItems;
-    int numberOfEnrichmentDomains;
+    int numberOfEnrichmentTypes; // number of unique enrichment domain objects 
+    
 
 };
 
@@ -186,13 +195,14 @@ public:
 };
 
 
-class GeometryDofManSwarm 
+class GeometryPointSwarm 
 {
 public:
-    GeometryDofManSwarm();
-    virtual const char *giveClassName() const { return "GeometryDofManSwarmClass"; }
+    GeometryPointSwarm();
+    virtual ~GeometryPointSwarm();
+    virtual const char *giveClassName() const { return "GeometryPointSwarmClass"; }
    
-
+    std::list< int > vertexList;
 
 };
 

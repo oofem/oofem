@@ -53,6 +53,7 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
     //new JB
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichementDomainList = new AList< BasicGeometry >(0); // Should be an enrichmentdomain type or something similar
+    this->enrDomainList = new AList< EnrichmentDomain >(0); 
     numberOfEnrichmentFunctions = 0;    
     numberOfEnrichmentDomains = 0;  
 }
@@ -95,7 +96,7 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 bool EnrichmentItem :: isElementEnriched(Element *element) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        if ( this->isDofManEnriched( element->giveDofManagerNumber(i) ) ) {
+        if ( this->isDofManEnriched( element->giveDofManager(i) ) ) {
             return true;
         }
     }
@@ -105,7 +106,8 @@ bool EnrichmentItem :: isElementEnriched(Element *element)
 bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(Element *element, int edNumber) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        if ( isDofManEnrichedByEnrichmentDomain(i, edNumber) ){
+        DofManager *dMan = element->giveDofManager(i);
+        if ( isDofManEnrichedByEnrichmentDomain(dMan, edNumber) ){
             return true;
         }
     }
@@ -113,26 +115,20 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(Element *element, int
 }
 
 
-bool EnrichmentItem :: isDofManEnriched(int dofManNumber)
+bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
 {
     for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
-        if ( isDofManEnrichedByEnrichmentDomain(dofManNumber, i) ){
+        if ( isDofManEnrichedByEnrichmentDomain(dMan, i) ){
             return true;
         }
     }
     return false;
 }
 
-bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(int dofManNumber, int edNumber)
+bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber)
 {
-    BasicGeometry *bg = this->enrichementDomainList->at(edNumber);
-    for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
-        FloatArray nodeCoords = *domain->giveDofManager( dofManNumber )->giveCoordinates();
-        if ( bg->isInside(nodeCoords) ){
-            return true;
-        }        
-    }
-    return false;
+    EnrichmentDomain *ed = this->enrDomainList->at(edNumber);
+    return ed->isDofManagerEnriched(dMan);
 }
 
 
@@ -170,9 +166,9 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     this->enrichmentFunction = 0;
     
     //IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    IR_GIVE_FIELD(ir, enrichmentDomainNumbers, IFT_EnrichmentItem_enrichmentdomains, "enrichmentdomains"); // Macro
+    IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, IFT_EnrichmentItem_enrichmentdomains, "enrichmentdomains"); // Macro
     this->numberOfEnrichmentDomains = this->enrichmentDomainNumbers.giveSize();
-
+    //int test = this->enrichmentDomainNumbers.maximum();
 
 
     IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
@@ -205,6 +201,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     EnrichmentItem *ei;
     EnrichmentFunction *ef;
     BasicGeometry *ge;
+    EnrichmentDomain *ed;
     InputRecord *mir;
 
 
@@ -228,22 +225,34 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
     
     enrichementDomainList->growTo(numberOfEnrichmentDomains);
+    enrDomainList->growTo(numberOfEnrichmentDomains);
+
     for ( i = 1; i <= numberOfEnrichmentDomains; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
         result = mir->giveRecordKeywordField(name);
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
-
+#if 0
         ge = CreateUsrDefGeometry( name.c_str() );
-
+        enrichementDomainList->put(i, ge);
+        ge->initializeFrom(mir);
+        
         if ( ge == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown geometry (%s)", name.c_str() );
         }
+#endif
 
-        enrichementDomainList->put(i, ge);
-        ge->initializeFrom(mir);
+        // new
+
+        ed = CreateUsrDefEnrichmentDomain( name.c_str() ); 
+        this->enrDomainList->put(i, ed);
+        ed->initializeFrom(mir);
     }
+
+
+    
+
 
 #ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated enrichment items ", nnode)

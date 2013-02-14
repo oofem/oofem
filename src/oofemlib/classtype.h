@@ -473,6 +473,7 @@ enum classType {
     ParmetisLoadBalancerClass,
 
     BasicGeometryClass,
+    EnrichmentDomainClass,
 
     StokesFlowVelocityHomogenizationClass,
     RVEStokesFlowClass,

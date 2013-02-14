@@ -107,7 +107,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
         // adds up the number of the dofs from an enrichment item
         // for each node
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-            if ( er->isDofManEnriched( dofManArray.at(j) ) ) {
+            if ( er->isDofManEnriched( this->giveDofManager( dofManArray.at(j) ) ) ) {
                 FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
                 // ef is a FloatArray containing the value of EnrichmentFunction in a specific for all enriched dofs
                 
@@ -167,7 +167,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
         DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );
         for ( int j = 1; j <= xf->giveNumberOfEnrichmentItems(); j++ ) {
             EnrichmentItem *er = xf->giveEnrichmentItem(j);
-            if ( er->isDofManEnriched( dofManArray.at(i) ) ) {
+            if ( er->isDofManEnriched( dm ) ) {
                 IntArray *dofIdAr = er->getDofIdArray();
                 for ( int k = 1; k <= dofIdAr->giveSize(); k++ ) {
                     if ( dm->hasDofID( ( DofIDItem ) dofIdAr->at(k) ) == false ) {
@@ -222,7 +222,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *er = xf->giveEnrichmentItem(i);
-        if ( er->isDofManEnriched( dofManArray.at(inode) ) ) {
+        if ( er->isDofManEnriched( this->giveDofManager( dofManArray.at(inode) ) ) ) {
             IntArray *dofIdAr = er->getDofIdArray();
             for ( int j = 1; j <= dofIdAr->giveSize(); j++ ) {
                 answer.followedBy( dofIdAr->at(j) );

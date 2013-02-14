@@ -76,6 +76,7 @@ class MesherInterface;
 class EnrichmentItem;
 class EnrichmentFunction;
 class BasicGeometry;
+class EnrichmentDomain;
 class Patch;
 class NodalRecoveryModel;
 class LoadBalancerMonitor;
@@ -349,7 +350,7 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(classType type, int num, Doma
  */
 BasicGeometry *CreateUsrDefGeometry(const char *name);
 BasicGeometry *CreateUsrDefGeometry(classType type);
- 
+EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *name);
 /**
  * Creates new instance of patch.
  * @param ptype Id determining the type of new instance.

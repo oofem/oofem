@@ -188,6 +188,7 @@ set (core_xfem
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
     xfem/patchintegrationrule.C
+    xfem/enrichmentdomain.C
     )
 
 set (core_parallel
