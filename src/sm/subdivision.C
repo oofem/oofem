@@ -393,7 +393,8 @@ Subdivision :: RS_Element :: giveTopParent()
 
 
 Subdivision :: RS_Triangle :: RS_Triangle(int number, RS_Mesh *mesh, int parent, IntArray &nodes) :
-    Subdivision :: RS_Element(number, mesh, parent, nodes) {
+    Subdivision :: RS_Element(number, mesh, parent, nodes)
+{
     irregular_nodes.resize(3);
     irregular_nodes.zero();
     neghbours_base_elements.resize(3);
@@ -409,7 +410,8 @@ Subdivision :: RS_Triangle :: RS_Triangle(int number, RS_Mesh *mesh, int parent,
 
 
 Subdivision :: RS_Tetra :: RS_Tetra(int number, RS_Mesh *mesh, int parent, IntArray &nodes) :
-    Subdivision :: RS_Element(number, mesh, parent, nodes) {
+    Subdivision :: RS_Element(number, mesh, parent, nodes)
+{
     irregular_nodes.resize(6);
     irregular_nodes.zero();
     side_leIndex.resize(4);
@@ -565,7 +567,8 @@ Subdivision :: RS_Tetra :: evaluateLongestEdge()
 
 
 int
-Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode) {
+Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode)
+{
     /* returns zero, if triangle does not have iNode or jNode */
     int in = 0, jn = 0;
 
@@ -603,7 +606,8 @@ Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode) {
 
 
 int
-Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode) {
+Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode)
+{
     /* returns zero, if tetra does not have iNode or jNode */
     int in = 0, jn = 0;
 
@@ -649,7 +653,8 @@ Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode) {
 
 
 void
-Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue) {
+Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue)
+{
     /* this is symbolic bisection - no new elements are added, only irregular nodes are introduced */
     int inode, jnode, iNode, jNode, iNum, eInd;
     double density;
@@ -778,7 +783,8 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
 
 
 void
-Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue) {
+Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list< int > &sharedIrregularsQueue)
+{
     /* this is symbolic bisection - no new elements are added, only irregular nodes are introduced */
     int i, j, inode, jnode, iNode, jNode, ngb, eIndex, eInd, reg, iNum, side, cnt = 0, elems;
     // array ed_side contains face numbers NOT shared by the edge (indexing from 1)
@@ -3976,7 +3982,8 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
 
 void
-Subdivision :: bisectMesh() {
+Subdivision :: bisectMesh()
+{
     int ie, nelems = mesh->giveNumberOfElements(), nelems_old = 0, terminal_local_elems = nelems;
     int nnodes = mesh->giveNumberOfNodes(), nnodes_old;
     double iedensity, rdensity;
@@ -4876,7 +4883,8 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
 }
 
 void
-Subdivision :: assignGlobalNumbersToSharedIrregulars() {
+Subdivision :: assignGlobalNumbersToSharedIrregulars()
+{
     // there are some shared irregulars -> data exchange
     CommunicatorBuff cb(this->giveNumberOfProcesses(), CBT_dynamic);
     Communicator com(domain->giveEngngModel(), &cb, this->giveRank(),
@@ -5019,7 +5027,8 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
 
 
 bool
-Subdivision :: isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myrank) {
+Subdivision :: isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myrank)
+{
     if ( node->isIrregular() ) {
         if ( node->giveParallelMode() == DofManager_shared ) {
             int i, minpart, npart;
@@ -5045,7 +5054,8 @@ Subdivision :: isNodeLocalSharedIrregular(Subdivision :: RS_Node *node, int myra
 
 
 bool
-Subdivision :: isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank) {
+Subdivision :: isNodeLocalIrregular(Subdivision :: RS_Node *node, int myrank)
+{
     if ( node->isIrregular() ) {
         if ( node->giveParallelMode() == DofManager_local ) {
             return true;

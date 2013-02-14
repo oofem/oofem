@@ -671,12 +671,12 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     CemhydMat *cem;
     for ( j = 1; j <= nelem; j++ ) {
         element = ( TransportElement * ) domain->giveElement(j);
+        cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
-        if ( element->giveMaterial()->giveClassID() == CemhydMatClass ) {
+        if ( cem ) {
             element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
             element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
             element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
-            cem = ( CemhydMat * ) element->giveMaterial();
             cem->clearWeightTemperatureProductVolume(element);
             cem->storeWeightTemperatureProductVolume(element, stepWhenIcApply);
         }
@@ -685,8 +685,8 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     //perform averaging on each material instance of CemhydMatClass
     int nmat = domain->giveNumberOfMaterialModels();
     for ( j = 1; j <= nmat; j++ ) {
-        if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
-            cem = ( CemhydMat * ) domain->giveMaterial(j);
+        cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
+        if ( cem ) {
             cem->averageTemperature();
         }
     }

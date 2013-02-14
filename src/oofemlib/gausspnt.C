@@ -37,7 +37,8 @@
 #include "material.h"
 
 namespace oofem {
-  GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
+
+GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
 // Constructor. Creates a Gauss point belonging to element e, with number
 // n, with coordinates a, with weight w.
 {
@@ -63,7 +64,6 @@ GaussPoint :: ~GaussPoint()
             delete gaussPointArray [ i ];
         }
 
-        //  delete [numberOfGp] gaussPointArray ;
         delete [] gaussPointArray;
     }
 

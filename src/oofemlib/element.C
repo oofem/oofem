@@ -687,19 +687,12 @@ Element :: isActivated(TimeStep *tStep)
     }
 }
 
-
-
 void
 Element :: initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
-//
-// call material->initGpForNewStep() for all GPs.
-//
 {
-    int i;
-
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->initForNewStep();
     }
 }

@@ -35,7 +35,6 @@
 #include "dictionr.h"
 #include "logger.h"
 #include "datastream.h"
-#include "classtype.h"
 #include "contextioerr.h"
 #include "contextmode.h"
 

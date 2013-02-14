@@ -149,18 +149,21 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 int
-Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime) {
+Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
     answer.resize(0);
     return 0;
 }
 
 int
-Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint) {
+Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
     return 0;
 }
 
 int
-Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode) {
+Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
     answer.resize(0);
     return 0;
 }
@@ -294,7 +297,8 @@ Material :: initGpForNewStep(GaussPoint *gp)
 }
 
 int
-Material :: initMaterial(Element *element) {
+Material :: initMaterial(Element *element)
+{
     return 0;
 }
 

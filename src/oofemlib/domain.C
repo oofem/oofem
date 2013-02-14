@@ -1234,7 +1234,8 @@ double Domain :: giveVolume()
 }
 
 ErrorEstimator *
-Domain :: giveErrorEstimator() {
+Domain :: giveErrorEstimator()
+{
     return engineeringModel->giveDomainErrorEstimator(this->number);
 }
 

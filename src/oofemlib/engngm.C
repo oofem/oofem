@@ -802,9 +802,9 @@ EngngModel :: updateYourself(TimeStep *stepN)
 
 #ifdef __CEMHYD_MODULE
             //store temperature and associated volume on each GP before performing averaging
-            if ( elem->giveMaterial()->giveClassID() == CemhydMatClass ) {
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
+            if ( cem ) {
                 TransportElement *element = ( TransportElement * ) elem;
-                CemhydMat *cem = ( CemhydMat * ) element->giveMaterial();
                 cem->clearWeightTemperatureProductVolume(element);
                 cem->storeWeightTemperatureProductVolume(element, stepN);
             }
@@ -819,8 +819,8 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #ifdef __CEMHYD_MODULE
         //perform averaging on each material instance
         for ( int j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
-            if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
-                CemhydMat *cem = ( CemhydMat * ) domain->giveMaterial(j);
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( domain->giveMaterial(j) );
+            if ( cem ) {
                 cem->averageTemperature();
             }
         }
