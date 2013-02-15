@@ -61,10 +61,6 @@
 #include "initmodulemanager.h"
 #include "usrdefsub.h"
 
-#ifdef __CEMHYD_MODULE
- #include "cemhydmat.h"
-#endif
-
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
@@ -799,37 +795,12 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #endif
             elem->updateYourself(stepN);
             //elem -> printOutputAt(File, stepN) ;
-
-#ifdef __CEMHYD_MODULE
-            //store temperature and associated volume on each GP before performing averaging
-            CemhydMat *cem = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
-            if ( cem ) {
-                TransportElement *element = ( TransportElement * ) elem;
-                cem->clearWeightTemperatureProductVolume(element);
-                cem->storeWeightTemperatureProductVolume(element, stepN);
-            }
-
-#endif
         }
 
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", nelem)
 #  endif
 
-#ifdef __CEMHYD_MODULE
-        //perform averaging on each material instance
-        for ( int j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
-            CemhydMat *cem = dynamic_cast< CemhydMat * >( domain->giveMaterial(j) );
-            if ( cem ) {
-                cem->averageTemperature();
-            }
-        }
-
-#endif
-
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated Materials ", nelem)
-#  endif
     }
 
     // if there is an error estimator, it should be updated so that values can be exported.

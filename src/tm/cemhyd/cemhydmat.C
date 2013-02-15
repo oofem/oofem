@@ -446,7 +446,8 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
     }
 }
 
-void CemhydMat :: averageTemperature(void) {
+void CemhydMat :: averageTemperature()
+{
     if ( !eachGP ) {
         MasterCemhydMatStatus->setAverageTemperatureVolume( MasterCemhydMatStatus->giveAverageTemperature() / MasterCemhydMatStatus->giveTotalVolume(), MasterCemhydMatStatus->giveTotalVolume() );
     }

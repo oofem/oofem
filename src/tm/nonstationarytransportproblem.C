@@ -48,7 +48,7 @@
 
 #ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
-#endif //__CEMHYD_MODULE
+#endif
 
 namespace oofem {
 NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
@@ -355,6 +355,32 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
 {
     this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
+
+    ///@todo Find a cleaner way to do these cemhyd hacks
+#ifdef __CEMHYD_MODULE
+    for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
+        Domain *d = this->giveDomain(idomain);
+        for ( int i = 1; i <= d->giveNumberOfElements(); ++i ) {
+            TransportElement *elem = static_cast< TransportElement * >( d->giveElement(i) );
+            //store temperature and associated volume on each GP before performing averaging
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
+            if ( cem ) {
+                cem->clearWeightTemperatureProductVolume(elem);
+                cem->storeWeightTemperatureProductVolume(elem, stepN);
+            }
+        }
+        //perform averaging on each material instance
+        for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( d->giveMaterial(i) );
+            if ( cem ) {
+                cem->averageTemperature();
+            }
+        }
+    }
+#ifdef VERBOSE
+    VERBOSE_PRINT0("Updated Materials ",0)
+#endif
+#endif
 }
 
 
@@ -732,6 +758,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
 void
 NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
 {
+    ///@todo Verify this, the function is completely unused.
     Domain *domain = this->giveDomain(1);
     int ielem, i;
     int nelem = domain->giveNumberOfElements();
