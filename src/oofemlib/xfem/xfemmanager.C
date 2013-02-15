@@ -111,12 +111,10 @@ void XfemManager :: getInteractedEI(IntArray &answer, Element *elem)
 
 bool XfemManager :: isElementEnriched(Element *elem)
 {
-    // new
     // Loop over all EI which asks if el is E. 
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ){ 
             return true; 
-            break;   
         };
     } 
     return false;
@@ -124,17 +122,10 @@ bool XfemManager :: isElementEnriched(Element *elem)
 
 
 bool XfemManager :: isNodeEnriched(int nodeNumber)
-{// not trivial to answer. element may be enriched but not neccessarily the node. depends on the EI and the geom.
-    /*
-    XfemManager :: XfemType nodeEnrType = this->computeNodeEnrichmentType(nodeNumber);
-    if ( nodeEnrType != 0 ) {
-        return true;
-    } else {
-        return false;
-    }
-    */
+{
+    // Rewrite!
 
-
+    // not trivial to answer. element may be enriched but not neccessarily the node. depends on the EI and the geom.
     // 1. Check if neigh. el. are enriched
     // 2. if so, say that all nodes are E. even though some of the dofs may be prescribed to zero. A simple solution.
     // Give elsements surrounding the given node
@@ -191,8 +182,8 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
         interactedEnrEl.zero();
     }
     // very specialized
-    // only fo 2d. Wont wok if several ei are active in the neighboring elemént to a node.
-    // one node could also have several TYPEs, Tip + iclusion etc.
+    // only for 2d. Wont wok if several ei are active in the neighboring elemént to a node.
+    // one node could also have several TYPEs, Tip + inclusion etc.
     if ( intersectionCount == 0 ) {
         ret = STANDARD;
     } else if ( intersectionCount == 1 ) {
@@ -212,27 +203,34 @@ int XfemManager :: computeFictPosition()
     // this is supposed to be used for creation of locationArray for a dofmanager
     // the function returns simultaneously the last dof
     //
-    // Set up additional dofs due to enrichment? 
-    int nrNodes = emodel->giveDomain(1)->giveNumberOfDofManagers();
+    // Goes through all dofman and computes new dofs due to enrichment. Returns the new total number of dofs. 
+    int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
+
+    emodel->giveDomain(1)->giveDofManager(1)->printYourself();
+
     int count = this->giveDomain()->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance); // total number of dofs in model
     IntArray edofs;
-    for ( int j = 1; j <= nrNodes; j++ ) {
+    for ( int j = 1; j <= nrDofMan; j++ ) {
         IntArray *dofs = new IntArray();
         DofManager *dMan = emodel->giveDomain(1)->giveDofManager(j); 
         for ( int i = 1; i <= this->enrichmentItemList->giveSize(); i++ ) {
-            int dofSize = enrichmentItemList->at(i)->getDofIdArray()->giveSize();
-            if ( enrichmentItemList->at(i)->isDofManEnriched(dMan) ) {
+            EnrichmentItem *ei = this->giveEnrichmentItem(i);
+            if ( ei->isDofManEnriched(dMan) ) {
+                int dofSize = ei->getDofIdArray()->giveSize();
                 edofs.resize(dofSize);
                 for ( int k = 1; k <= dofSize; k++ ) {
                     count++;
                     edofs.at(k) = count;
                 }
-
                 dofs->followedBy(edofs);
             }
         }
 
         fictPosition->put(j, dofs);
+
+        // test remove!!
+        dMan->appendDof( new MasterDof( 8, dMan, ( DofIDItem ) ( 4 ) ) );
+        dMan->printYourself();
     }
 
     return count;
@@ -284,10 +282,10 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         ei->initializeFrom(mir);
         //new
         ei->instanciateYourself(dr);
-        int eindofs = ei->giveNumberOfDofs();
+        int eindofs = ei->giveNumberOfDofs(); // depends on EI type, element type and spatial dimension
         IntArray dofIds(eindofs);
         for ( int j = 1; j <= eindofs; j++ ) {
-            dofIds.at(j) = this->allocateNewDofID();
+            dofIds.at(j) = this->allocateNewDofID();    // Will not get me far with the 15 available dofID's for XFEM
         }
 
         ei->setDofIdArray(dofIds);

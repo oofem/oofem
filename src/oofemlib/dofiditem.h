@@ -69,10 +69,10 @@ typedef char DofID;
     ENUM_ITEM_WITH_VALUE(C_1, 14) /* Mass concentration of the first constituent */ \
     ENUM_ITEM_WITH_VALUE(X_1, 15) /* Start of xfemManager xfemdof pool */ \
     ENUM_ITEM_WITH_VALUE(X_N, 30) /* End of xfemManager xfemdof pool */ \
-    ENUM_ITEM_WITH_VALUE(w_u, 31) /* u-component of change in director field (in direction of x-axis) */ \
-	ENUM_ITEM_WITH_VALUE(w_v, 32) /* v-component of change in director field (in direction of y-axis) */ \
-	ENUM_ITEM_WITH_VALUE(w_w, 33) /* w-component of change in director field (in direction of z-axis) */ \
-	ENUM_ITEM_WITH_VALUE(gam, 34) /* inhomogenous thickness strain in direction of the directorfield m */ \
+    ENUM_ITEM_WITH_VALUE(W_u, 31) /* u-component of change in director field (in direction of x-axis) */ \
+	ENUM_ITEM_WITH_VALUE(W_v, 32) /* v-component of change in director field (in direction of y-axis) */ \
+	ENUM_ITEM_WITH_VALUE(W_w, 33) /* w-component of change in director field (in direction of z-axis) */ \
+	ENUM_ITEM_WITH_VALUE(Gamma, 34) /* inhomogenous thickness strain in direction of the directorfield m */ \
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
  * available DOFs.

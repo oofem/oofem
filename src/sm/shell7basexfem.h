@@ -83,6 +83,8 @@ protected:
     void discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &gd1, FloatArray &gd2, FloatArray &gd3, FloatArray &genEps);
     void discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dxdxi1, FloatArray &dxdxi2, FloatArray &dmdxi1, 
          FloatArray &dmdxi2, FloatArray &m);
+    void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
+         const FloatMatrix &B22, const FloatMatrix &B32);
     void discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
 
 

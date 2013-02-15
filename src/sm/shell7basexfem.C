@@ -79,6 +79,9 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
 }
 
 
+
+
+
 void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC)
 {
@@ -87,11 +90,21 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
     Shell7Base :: evalCovarBaseVectorsAt(gp, g1c, g2c, g3c, genEpsC);
 
     // Discontinuous part
-    FloatArray g1d, g2d, g3d, dGenEps;
-
-    discEvalCovarBaseVectorsAt(gp, g1d, g2d, g3d, dGenEps)
-
+    xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+            // FloatArray g1d, g2d, g3d, dGenEps;
+            // discComputeGeneralizedStrainVector(dGenEps, dSolVec, B11, B22, B32);
+            // discGiveGeneralizedStrainComponents(dGenEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m);
+            // discEvalCovarBaseVectorsAt(gp, g1d, g2d, g3d, dGenEps);
+            // add contribution g1d += g1d_temp  
+            }
+        }
+    }
 }
+
 
 
 void
@@ -123,6 +136,46 @@ Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tS
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
+
+
+
+
+void
+Shell7BaseXFEM :: discComputeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
+                                                     const FloatMatrix &B22, const FloatMatrix &B32) {
+    answer.resize(15);
+    answer.zero();
+    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+    int ndofs_gam = this->giveNumberOfFieldDofs(InhomStrain);
+    for ( int i = 1; i <= ndofs_xm; i++ ) {
+        for ( int j = 1; j <= 6; j++ ) {
+            answer.at(j)  += B11.at(j, i) * solVec.at(i);            // dx/dxi
+            answer.at(6 + j)  += B22.at(j, i) * solVec.at(i + ndofs_xm);      // dm/dxi
+        }
+    }
+
+    for ( int i = 1; i <= ndofs_xm; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            answer.at(12 + j) += B32.at(j, i) * solVec.at(i + ndofs_xm);      // m
+        }
+    }
+
+}
+
+
+void
+Shell7BaseXFEM :: discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1, 
+         FloatArray &dmdxi2, FloatArray &m) {
+    // generealized strain vector for discontinuous part  [dxdxi, dmdxi, m]^T
+    dphidxi1.setValues( 3, genEps.at(1), genEps.at(2), genEps.at(3) );
+    dphidxi2.setValues( 3, genEps.at(4), genEps.at(5), genEps.at(6) );
+    dmdxi1.setValues( 3, genEps.at(7), genEps.at(8), genEps.at(9) );
+    dmdxi2.setValues( 3, genEps.at(10), genEps.at(11), genEps.at(12) );
+    m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
+}
+
+
+
 
 
 

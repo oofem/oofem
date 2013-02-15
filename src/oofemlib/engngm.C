@@ -359,7 +359,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
         
         int last = xm->computeFictPosition();
         this->setNumberOfEquations(1, last);
-        //Jim
+        //Jim - removed
         //xm->updateIntegrationRule();
     }
 
