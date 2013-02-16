@@ -569,41 +569,35 @@ file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/testhelper.py
 os.chdir(sys.argv[2])
 if sys.argv[4] == 'p':
     files = glob.glob(sys.argv[1]+'.[0-9]*')
-    mpicommand = 'mpirun -np '+str(len(files)) + ' '
-    parallel = ' -p'
+    command = ['mpirun','-np',str(len(files)),sys.argv[3],'-p','-f',sys.argv[1],'-l','2'] 
 else:
     files = [sys.argv[1]]
-    mpicommand = ''
-    parallel = ''
-if len(sys.argv) == 6:
-    flags = ' ' + sys.argv[5]
-else:
-    flags = ''
-command = mpicommand + sys.argv[3] + parallel + ' -f ' + sys.argv[1] + ' -l 2' + flags 
-print('Executing: ' + command)
-if os.system(command):
+    command = [sys.argv[3],'-f',sys.argv[1],'-l','2'] 
+command.extend(sys.argv[5:])
+print('Executing: ', command)
+if subprocess.call(command):
 	exit(1)
 else:
-        for f in files:
-	    python=\"${PYTHON_EXECUTABLE}\"
-            extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
-            print('Executing: ', [python, extractor, '-f', f, '-c'])
-	    if subprocess.call([python, extractor, '-f', f, '-c']):
-		exit(2)
+    for f in files:
+        python=\"${PYTHON_EXECUTABLE}\"
+        extractor = \"${oofem_SOURCE_DIR}/tools/extractor.py\"
+        print('Executing: ', [python, extractor, '-f', f, '-c'])
+        if subprocess.call([python, extractor, '-f', f, '-c']):
+            exit(2)
 exit(0)
 ")
 
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests/)
-    add_test (NAME partest_4test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd}" "p" "-ksp_rtol 1.e-15")
+    add_test (NAME partest_4test_np4 COMMAND ${test_cmd} 4test.oofem.in ${par_dir}/4test "${oofem_cmd}" "p" "-ksp_rtol" "1.e-15")
     add_test (NAME partest_bar_np4 COMMAND ${test_cmd} bar.oofem.in ${par_dir}/bar "${oofem_cmd}" "p")
     add_test (NAME partest_barnl_np4 COMMAND ${test_cmd} barnl.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
     add_test (NAME partest_barnl_np2 COMMAND ${test_cmd} barnl2.oofem.in ${par_dir}/barnl "${oofem_cmd}" "p")
     add_test (NAME partest_brazil_np2 COMMAND ${test_cmd} brazil_2d_nl2.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
     add_test (NAME partest_brazil_np4 COMMAND ${test_cmd} brazil_2d_nl4.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
     add_test (NAME partest_brazil_np7 COMMAND ${test_cmd} brazil_2d_nl7.oofem.in ${par_dir}/brazil "${oofem_cmd}" "p")
-    add_test (NAME partest_brazil3d_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd}" "p" "-ksp_rtol 1.e-15 -ksp_type cg")
+    add_test (NAME partest_brazil3d_np7 COMMAND ${test_cmd} brazil_3d_nl.oofem.in ${par_dir}/brazil3d "${oofem_cmd}" "p" "-ksp_rtol" "1.e-15" "-ksp"_"type cg")
     add_test (NAME partest_dyn_bar01_np2 COMMAND ${test_cmd} bar01.oofem.in ${par_dir}/dyn_bar01 "${oofem_cmd}" "p")
     add_test (NAME partest_dyn_bar02_np2 COMMAND ${test_cmd} bar02.oofem.in ${par_dir}/dyn_bar02 "${oofem_cmd}" "p")
     add_test (NAME partest_dyn_bar03_np2 COMMAND ${test_cmd} bar03.oofem.in ${par_dir}/dyn_bar03 "${oofem_cmd}" "p")
