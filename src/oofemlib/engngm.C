@@ -345,6 +345,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     //gim -> getInput();
     // Milan ??????????????????
 
+#if 0
     // instantiate xfemmanager
     XfemManager *xm;
     xfemManagerList->growTo(nxfemman);
@@ -362,7 +363,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
         //Jim - removed
         //xm->updateIntegrationRule();
     }
-
+#endif
     // check emodel input record if no default metastep, since all has been read
     if ( inputReaderFinish ) {
         ir->finish();

@@ -42,7 +42,7 @@
 #include "layeredcrosssection.h"
 
 #include "enrichmentdomain.h"
-
+#include "dofiditem.h"
 namespace oofem {
 class BasicGeometry;
 
@@ -85,6 +85,8 @@ public:
     /// Accessor.
     //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
     EnrichmentFunction *giveEnrichmentFunction(int n);
+    int numberOfEnrichmentfunctions;
+    int giveNumberOfEnrichmentfunctions() { return numberOfEnrichmentfunctions; }
 
     /// Gives number of dofs.
     //int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
@@ -93,7 +95,8 @@ public:
     /// Sets DofId Array of an Enrichment Item.
     void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
     /// Accessor.
-    IntArray *getDofIdArray() { return & dofsId; }
+    //IntArray *getDofIdArray() { return & dofsId; }  // old
+    IntArray *getDofIdArray();
 
 
     bool isDofManEnriched(DofManager *dMan);
@@ -103,8 +106,17 @@ public:
 
     /// Updates receiver geometry to the state reached at given time step.
     /// Geometry update; calls individual enrichment item updateGeometry method.
-    virtual void updateGeometry(TimeStep *tStep) {}
+    virtual void updateGeometry(TimeStep *tStep) {};
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
+
+
+    enum NodeEnrichmentType {
+        STANDARD = 0,    // No enrichment
+        SPLIT = 1,       // divide into strong and weak?
+        TIP = 2,         // Crack tip enrichment (branch functions)
+        DELAMINATION = 3 //       
+    };
+
 
 protected:
     /// Link to associated Xfem manager.
@@ -115,7 +127,7 @@ protected:
 
     /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
-    /// Additional dofIds from Enrichment. - depends on problem type and spatial dimension
+    /// Additional dofIds from Enrichment. -JB depends on problem type and spatial dimension
     IntArray dofsId;
 
     
@@ -172,8 +184,13 @@ public:
     Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    //FloatArray delaminationZCoords;
-        //delaminationXiCoords;
+    
+    
+    IntArray enrichesDofsOfType() { 
+        IntArray answer;
+        answer.setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+        return answer;
+    };
 
 
     FloatArray enrichmentDomainXiCoords; // must they be ordered?

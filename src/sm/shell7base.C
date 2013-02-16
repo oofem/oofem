@@ -75,7 +75,7 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 void
 Shell7Base :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer.setValues(7, D_u, D_v, D_w, w_u, w_v, w_w, gam);
+    answer.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
 }
 
 
@@ -2018,9 +2018,9 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     if ( type == IST_DirectorField ) {
         answer.resize(3);
         answer = this->giveInitialNodeDirector(node);
-        answer.at(1) += this->giveNode(node)->giveDofWithID(w_u)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        answer.at(2) += this->giveNode(node)->giveDofWithID(w_v)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        answer.at(3) += this->giveNode(node)->giveDofWithID(w_w)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        answer.at(1) += this->giveNode(node)->giveDofWithID(W_u)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        answer.at(2) += this->giveNode(node)->giveDofWithID(W_v)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        answer.at(3) += this->giveNode(node)->giveDofWithID(W_w)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         answer.times( this->giveCrossSection()->give(CS_Thickness) );
     } else {
         answer.resize(0);

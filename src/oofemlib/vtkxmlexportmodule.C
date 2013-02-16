@@ -1106,7 +1106,7 @@ VTKXMLExportModule :: getPrimaryVariable(FloatArray &answer, DofManager *dman, T
         
         for (int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
             id = dman->giveDof(j)->giveDofID();
-            if ( ( id == w_u ) || ( id == w_v ) || ( id == w_w )  ) {
+            if ( ( id == W_u ) || ( id == W_v ) || ( id == W_w )  ) {
                 dofIDMask.followedBy(id);
             }
             //eid = EID_ConservationEquation;

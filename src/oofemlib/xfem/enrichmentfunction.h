@@ -105,7 +105,7 @@ class BranchFunction : public EnrichmentFunction
 public:
 
     BranchFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
-        this->numberOfDofs = 2;
+        this->numberOfDofs = 4;
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);
@@ -117,7 +117,7 @@ class RampFunction : public EnrichmentFunction
 public:
 
     RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
-        this->numberOfDofs = 2;
+        this->numberOfDofs =1;
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);

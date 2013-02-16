@@ -360,6 +360,7 @@ enum InputFieldType {
     IFT_Domain_nbarrier,
     IFT_Domain_nrfg,
     IFT_Domain_topology,
+    IFT_Domain_nxfemman,
 
     IFT_DofManager_ndofs,
     IFT_DofManager_dofidmask,

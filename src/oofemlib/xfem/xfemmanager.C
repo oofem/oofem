@@ -196,6 +196,48 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 }
 
 
+#if 1
+int XfemManager :: computeFictPosition()
+{   
+    // Creates new dofs due to enrichment
+    int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
+
+    int count = 1;
+
+    IntArray edofs;
+    for ( int i = 1; i <= nrDofMan; i++ ) {
+        DofManager *dMan = emodel->giveDomain(1)->giveDofManager(i); 
+        for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
+            EnrichmentItem *ei = this->giveEnrichmentItem(j);
+            for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
+                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
+                    
+                    //ei->getDofIdArray
+                    IntArray *dofs = new IntArray();
+
+                    int dofSize = ei->getDofIdArray()->giveSize();
+                    edofs.resize(dofSize);
+                    for ( int k = 1; k <= dofSize; k++ ) {
+                        count++;
+                        edofs.at(k) = count;
+                    }
+                    dofs->followedBy(edofs);
+                }
+            }
+        }
+
+
+        // test remove!!
+        dMan->appendDof( new MasterDof( 8, dMan, ( DofIDItem ) ( 4 ) ) );
+        dMan->printYourself();
+    }
+
+    return count;
+}
+
+#else
+
+
 int XfemManager :: computeFictPosition()
 {   // Stupid name!
     // gives for a particular node position of its fictitious node
@@ -235,7 +277,7 @@ int XfemManager :: computeFictPosition()
 
     return count;
 }
-
+#endif
 
 
 

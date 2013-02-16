@@ -221,6 +221,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
         enrichmentFunctionList->put(i, ef);
         ef->initializeFrom(mir);
+        
     }
 
     
@@ -250,10 +251,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         ed->initializeFrom(mir);
     }
 
-
-    
-
-
 #ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated enrichment items ", nnode)
 #endif
@@ -261,7 +258,24 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 }
 
 
-// DELAMINATION
+IntArray 
+*EnrichmentItem :: getDofIdArray() 
+{ 
+    for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) { 
+        EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
+        ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
+
+    }
+    return & dofsId; 
+} 
+
+
+    
+
+
+/**
+ * DELAMINATION
+ */
 
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {

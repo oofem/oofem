@@ -62,6 +62,20 @@ Interface
     }
 }
 
+
+void 
+Shell7BaseXFEM :: giveNumberOFEnrichmentDofsForDofMan( int answer)
+{
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    for ( int i =1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
+            bool val = ei->isElementEnrichedByEnrichmentDomain(this, j);
+        }
+    }
+}
+
+
 double 
 Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp) 
 {
@@ -190,7 +204,7 @@ Shell7BaseXFEM :: setupDelaminationXiCoordList()
 {
     if ( this->delaminationXiCoordList.size()==0 ) {
     // Stores a paired list with the EnrichmentDomain# and the corresponding xi-coord of the delamination.
-    xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    xMan =  this->giveDomain()->giveXfemManager(1); // When does one need several xfemman?
     int numEI = xMan->giveNumberOfEnrichmentItems();
     for ( int i = 1; i <= numEI; i++ ) {
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );

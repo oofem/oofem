@@ -90,6 +90,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     crossSectionList      = new AList< CrossSection >(0);
     nonlocalBarierList    = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
+    xfemManagerList = new AList< XfemManager >(0);
     xfemManager           = NULL;
 
     dType                 = _unknownMode;
@@ -432,7 +433,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     int i, num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nxfemman;
     DofManager *node;
     Element *elem;
     Material *mat;
@@ -442,7 +443,7 @@ Domain :: instanciateYourself(DataReader *dr)
     CrossSection *crossSection;
     NonlocalBarrier *barrier;
     RandomFieldGenerator *rfg;
-
+    XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
 
@@ -480,6 +481,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
     IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
     IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
+    IR_GIVE_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
 
     // read optional number of nonlocalBarriers
@@ -778,6 +780,27 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
 
+// instantiate xfemmanager
+    XfemManager *xm;
+    xfemManagerList->growTo(nxfemman);
+    for ( int i = 1; i <= nxfemman; i++ ) {
+        xm =  new XfemManager(this->giveEngngModel(), i);
+        ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
+        // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
+        // or we have to make a reference from EnrichmentItem also
+        xfemManagerList->put(i, xm);
+        xm->initializeFrom(ir);
+        xm->instanciateYourself(dr);
+        
+        //int last = xm->computeFictPosition();
+        //this->setNumberOfEquations(1, last);
+        //Jim - removed
+        //xm->updateIntegrationRule();
+    }
+
+
+
+
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
     for ( i = 1; i <= nnode; i++ ) {
@@ -800,6 +823,18 @@ Domain :: instanciateYourself(DataReader *dr)
 
     return 1;
 }
+
+XfemManager *
+Domain :: giveXfemManager(int i)
+{
+    if ( xfemManagerList->includes(i) ) {
+        return this->xfemManagerList->at(i);
+    } else {
+        _error2("giveXfemManager: undefined xfem manager (%d)", i);
+        return NULL; // return NULL to prevent compiler warnings
+    }
+}
+
 
 void
 Domain :: postInitialize()
@@ -881,7 +916,7 @@ Domain :: giveDefaultNodeDofIDArry()
     }  else if ( dType == _3dIncompressibleFlow ) {
         defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
 	}  else if ( dType == _3dDirShellMode ) {
-        defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, w_u, w_v, w_w, gam);
+        defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
     }

@@ -97,10 +97,10 @@ public:
 
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
-    
     virtual Interface *giveInterface(InterfaceType it);
 	
     virtual IRResultType initializeFrom(InputRecord *ir);
+    void giveNumberOFEnrichmentDofsForDofMan( int answer);
 
 };
 

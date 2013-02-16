@@ -162,6 +162,8 @@ private:
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager.
     XfemManager *xfemManager;
+    AList< XfemManager > *xfemManagerList;
+     
     /// Topology description
     TopologyDescription *topology;
 
@@ -377,6 +379,9 @@ public:
     
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);
+
+    XfemManager *giveXfemManager(int i);
+    /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.
      * @param topo New topology description for receiver.
