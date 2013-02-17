@@ -93,7 +93,7 @@ class DiscontinuousFunction : public EnrichmentFunction
 public:
 
     DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
-        this->numberOfDofs = 2;
+        this->numberOfDofs = 1;
     }
     double evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei);
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);

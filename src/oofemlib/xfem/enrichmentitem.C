@@ -185,8 +185,8 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     int material = 0;
     IR_GIVE_FIELD(ir, material, IFT_EnrichmentItem_materialNr, "material"); // Macro
     this->mat = this->giveDomain()->giveMaterial(material);
-    numberOfEnrichmentFunctions = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
+    //this->numberOfEnrichmentFunctions = 1;
+    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
     return IRRT_OK;
 }
 
@@ -261,29 +261,49 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 IntArray 
 *EnrichmentItem :: getDofIdArray() 
 { 
+    // returns the array of dofs a particular EI s
+    IntArray dofIdArray;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) { 
         EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
+        // This is per regular dof
         ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
 
     }
-    return & dofsId; 
+    return &dofIdArray; 
 } 
 
+int 
+EnrichmentItem :: giveNumberOfEnrDofs() 
+{ 
+    // returns the array of dofs a particular EI s
+    int temp=0;
+    for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) { 
+        EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
+        // This is per regular dof
+        temp += ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
 
+    }
+    return temp; 
+} 
     
 
 
 /**
  * DELAMINATION
  */
+Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+{
+    enrichesDofsWithIDArray.setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+}
 
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
+    this->numberOfEnrichmentFunctions = 1; // must be set before EnrichmentItem :: initializeFrom(ir) is called
     EnrichmentItem :: initializeFrom(ir);
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int material = 0;
-    numberOfEnrichmentFunctions = 1;
+    
 
     IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, IFT_EnrichmentItem_Delamination_delaminationXiCoords, "delaminationxicoords"); // Macro
     if ( this->numberOfEnrichmentDomains != this->enrichmentDomainXiCoords.giveSize() ) {

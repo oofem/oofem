@@ -66,7 +66,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const { return "EnrichmentItem"; }
-
+    IntArray giveEnrichesDofsWithIDArray() { return this->enrichesDofsWithIDArray; }
+    int giveNumberOfEnrDofs();
     /// Accessor. should there be support for several geom. objects describing one EI, probably yes. Ex. inclusion given as union of several geom.s?
     BasicGeometry *giveGeometry(int i);
     BasicGeometry *giveGeometry();
@@ -85,8 +86,8 @@ public:
     /// Accessor.
     //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
     EnrichmentFunction *giveEnrichmentFunction(int n);
-    int numberOfEnrichmentfunctions;
-    int giveNumberOfEnrichmentfunctions() { return numberOfEnrichmentfunctions; }
+    int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
+
 
     /// Gives number of dofs.
     //int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
@@ -124,7 +125,7 @@ protected:
     /// Geometry associated with EnrichmentItem.
     int geometry;
     IntArray enrichmentDomainNumbers;
-
+    IntArray enrichesDofsWithIDArray;
     /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
     /// Additional dofIds from Enrichment. -JB depends on problem type and spatial dimension
@@ -180,17 +181,13 @@ public:
 
 class Delamination : public EnrichmentItem 
 {
+private:
+    
 public:
-    Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
+    //Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+    Delamination(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    
-    
-    IntArray enrichesDofsOfType() { 
-        IntArray answer;
-        answer.setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
-        return answer;
-    };
 
 
     FloatArray enrichmentDomainXiCoords; // must they be ordered?

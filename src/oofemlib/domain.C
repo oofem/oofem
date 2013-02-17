@@ -792,6 +792,7 @@ Domain :: instanciateYourself(DataReader *dr)
         xm->initializeFrom(ir);
         xm->instanciateYourself(dr);
         
+        xm->createEnrichedDofs();
         //int last = xm->computeFictPosition();
         //this->setNumberOfEquations(1, last);
         //Jim - removed

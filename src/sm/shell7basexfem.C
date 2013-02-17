@@ -334,7 +334,6 @@ Shell7BaseXFEM :: setupDelaminationXiCoordsAtGP()
 
     xMan = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     int numEI = xMan->giveNumberOfEnrichmentItems();
-    Element *e = this->element;
     for ( int i = 1; i <= numEI; i++ ) {
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
         if ( dei ) {

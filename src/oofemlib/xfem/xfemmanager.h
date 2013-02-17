@@ -106,7 +106,7 @@ public:
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
     
     /// Computes for each node position of its fictitious node. - What is this used for?
-    int computeFictPosition();
+    void createEnrichedDofs();
 
     /// Computes the type of node enrichment, returns zero if the node is not enriched.
     XfemType computeNodeEnrichmentType(int nodeNumber); // ask node for EI and then type. but could be several?

@@ -488,12 +488,14 @@ public:
     bool isShared() { if ( parallel_mode == DofManager_shared ) { return true; } else { return false; } }
 #endif
 
+    IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public
+
 protected:
     virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
 
     /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
-    IntArray *giveCompleteGlobalDofIDArray() const;
+    
 };
 } // end namespace oofem
 #endif // dofmanager_h

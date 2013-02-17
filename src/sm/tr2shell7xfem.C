@@ -122,7 +122,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         if( layeredCS == NULL ){
             OOFEM_ERROR("Tr2Shell7XFEM only supports layered cross section");
         }
-        int numberOfLayers = layeredCS->give(CS_NumLayers);
+        int numberOfLayers = layeredCS->giveNumberOfLayers();
         layerIntegrationRulesArray = new IntegrationRule * [ numberOfLayers ];
 
 		// may need to extend this to handle Newton-Cotes integration in the thickness direction

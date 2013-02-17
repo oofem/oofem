@@ -96,6 +96,9 @@ XfemManager :: clear()
 
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
+
+
+
 // computeActiveEIforElement
 void XfemManager :: getInteractedEI(IntArray &answer, Element *elem)
 {
@@ -197,42 +200,70 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
 
 
 #if 1
-int XfemManager :: computeFictPosition()
+void 
+XfemManager :: createEnrichedDofs()
 {   
     // Creates new dofs due to enrichment
     int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
+    IntArray dofIdArray;
+    int dofIdPosition = 1000; // replace with function call - giveFreeDofID or something
+    for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
+        
+        EnrichmentItem *ei = this->giveEnrichmentItem(j);
+        // list of dof Id's that can be enriched by a particular EI, e.g. [D_u, D_v, D_w] 
+        IntArray enrichesDofsWithIDArray = ei->giveEnrichesDofsWithIDArray(); 
+        enrichesDofsWithIDArray.printYourself();
+        // max number of possible enr. dofs per enr.domain 
+        int dofAllocSize = enrichesDofsWithIDArray.giveSize() * ei->giveNumberOfEnrDofs(); 
+        for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
 
-    int count = 1;
-
-    IntArray edofs;
-    for ( int i = 1; i <= nrDofMan; i++ ) {
-        DofManager *dMan = emodel->giveDomain(1)->giveDofManager(i); 
-        for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
-            EnrichmentItem *ei = this->giveEnrichmentItem(j);
-            for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
+            // create new dofs
+            for ( int i = 1; i <= nrDofMan; i++ ) {
+                DofManager *dMan = this->giveDomain()->giveDofManager(i); 
                 if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
                     
-                    //ei->getDofIdArray
-                    IntArray *dofs = new IntArray();
-
-                    int dofSize = ei->getDofIdArray()->giveSize();
-                    edofs.resize(dofSize);
-                    for ( int k = 1; k <= dofSize; k++ ) {
-                        count++;
-                        edofs.at(k) = count;
+                    IntArray *dManIDArray = dMan->giveCompleteGlobalDofIDArray(); // all the 'regular' dof id's
+                    dManIDArray->printYourself();
+                   
+                    IntArray dofMask(enrichesDofsWithIDArray.giveSize()); 
+                    dofMask.zero();
+                    // check if dofman has any of the supported enr.dofs
+                    int count=0; // how many dofs should be enriched
+                    for ( int n = 1; n <= enrichesDofsWithIDArray.giveSize(); n++ ) {
+                        if ( dMan->hasDofID( (DofIDItem) enrichesDofsWithIDArray.at(n)) ) {
+                         // should create new dof   
+                            count++;
+                            dofMask.at(count) = n;
+                            
+                        }
                     }
-                    dofs->followedBy(edofs);
+                   // dofMask.printYourself();
+
+                    dofIdArray.resize(count);
+                    for ( int o = 1; o <= count; o++ ) {
+                        dofIdArray.at(o) = dofIdPosition + (k-1)*dofAllocSize + dofMask.at(o) ;
+                    }
+                    dofIdArray.printYourself();
+
+                    int nDofs = dMan->giveNumberOfDofs();
+                    for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {                      
+                        dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
+                    }
+
+                    dMan->printYourself();
+
                 }
             }
         }
 
+        
 
-        // test remove!!
-        dMan->appendDof( new MasterDof( 8, dMan, ( DofIDItem ) ( 4 ) ) );
-        dMan->printYourself();
+
+
+
     }
 
-    return count;
+    
 }
 
 #else
