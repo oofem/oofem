@@ -749,7 +749,7 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -809,7 +809,7 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {

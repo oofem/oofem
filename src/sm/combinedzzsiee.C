@@ -125,8 +125,6 @@ CombinedZZSIRemeshingCriteria :: giveRequiredDofManDensity(int num, TimeStep *tS
     } else {
         return zzrc.giveRequiredDofManDensity(num, tStep, relative);
     }
-
-    return 0.0; // to make compiler happy
 }
 
 

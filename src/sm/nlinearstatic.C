@@ -312,8 +312,6 @@ double NonLinearStatic :: giveUnknownComponent(UnknownType chc, ValueModeType mo
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
-
-    return 0.0;
 }
 
 
@@ -685,7 +683,7 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -753,7 +751,7 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {

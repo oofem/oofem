@@ -842,8 +842,6 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
 
     }
-
-    return 0;
 }
 
 int

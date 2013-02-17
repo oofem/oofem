@@ -450,7 +450,7 @@ contextIOResultType LinearStability :: saveContext(DataStream *stream, ContextMo
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     OOFEM_LOG_INFO("Storing context \n");
     if ( stream == NULL ) {
@@ -499,7 +499,7 @@ contextIOResultType LinearStability :: restoreContext(DataStream *stream, Contex
     int istep = 1, iversion = 1;
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(activeVector, version, obj);
     if ( eigVal.isEmpty() ) { // not restored before

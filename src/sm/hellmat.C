@@ -2189,7 +2189,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
     ValueModeType mode = VM_Incremental;
     MaterialMode mmode = gp->giveMaterialMode();
-    double E, dt;
+    double E=-1.0, dt;
     // clear temporary status variables - maybe unnecessary
     initTempStatus(gp);
     // if needed, update auxiliary status values in gp and material
@@ -2308,6 +2308,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         // auxiliary variables for 2D
         // !! CORNER !!
         _error("2D Plane stress plasticity not implemented!");
+#if 0
         double sigx, sigy, tau, tc, rc, fca, dl, fDP, Itrial, snorm;
         FloatArray depsp(3);
         ActiveSurface as;
@@ -2377,6 +2378,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         fullStressVector(0) = redStressVector(0);
         fullStressVector(1) = redStressVector(1);
         fullStressVector(5) = redStressVector(2);
+#endif
     }
     // ====== 2D Konec ======
     else {

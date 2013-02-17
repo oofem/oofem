@@ -297,7 +297,7 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream *stream, Context
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -340,7 +340,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
     int activeVector = this->resolveCorrespondingEigenStepNumber(obj);
     int istep = 1, iversion = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( restoreFlag == 0 ) { // not restored before
         if ( stream == NULL ) {

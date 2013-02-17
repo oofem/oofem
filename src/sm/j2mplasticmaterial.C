@@ -505,7 +505,5 @@ J2MPlasticMaterial :: giveIsotropicHardeningVar(const FloatArray &stressSpaceHar
     } else {
         return stressSpaceHardeningVars.at(1);
     }
-
-    return 0.;
 }
 } // end namespace oofem

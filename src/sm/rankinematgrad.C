@@ -218,7 +218,7 @@ RankineMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
-    MaterialMode plReturnMode;
+    MaterialMode plReturnMode = _Unknown;
     if ( mode == _PlaneStressGrad ) {
         plReturnMode = _PlaneStress;
     } else {

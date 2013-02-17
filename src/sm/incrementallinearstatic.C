@@ -324,7 +324,7 @@ contextIOResultType IncrementalLinearStatic :: saveContext(DataStream *stream, C
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -354,7 +354,7 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
 {
     int closeFlag = 0, istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {

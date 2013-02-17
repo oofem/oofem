@@ -434,12 +434,12 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
         // TRAPEZOIDAL INTEGRATION RULE
         if ( atTime->isTheFirstStep() ) {
-            etaR = this->giveInitViscosity(atTime) /  this->computePsiR(gp, atTime, 0.);
+            etaR = this->giveInitViscosity(atTime) /  this->computePsiR(gp, atTime, 0);
         } else {
-            etaR = status->giveFlowTermViscosity() /  this->computePsiR(gp, atTime, 0.);
+            etaR = status->giveFlowTermViscosity() /  this->computePsiR(gp, atTime, 0);
         }
 
-        dEtaR =  eta /  this->computePsiR(gp, atTime, 1.) - etaR;
+        dEtaR =  eta /  this->computePsiR(gp, atTime, 1) - etaR;
         if (  fabs(dEtaR) > 1.e-4 * etaR ) {
             L = log(1 + dEtaR / etaR);
             Cf = dt * ( 1. - etaR * L / dEtaR ) / dEtaR;
@@ -766,7 +766,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
     if ( ( status->giveHum() == -1. ) && ( status->giveHumIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
         Field *tf;
-        int err, wflag;
+        int err, wflag = 0; // assumed that wflag initializes to 0?
         FloatArray gcoords;
         FloatArray et2, ei2; // total and incremental values of water mass
 
@@ -822,7 +822,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *atTime, int option)
     if ( ( status->giveT() == -1. ) && ( status->giveTIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
         Field *tf;
-        int err, tflag;
+        int err, tflag = 0; // assumed that wflag initializes to 0?
         FloatArray gcoords;
         FloatArray et1, ei1; // total and incremental values of temperature
 

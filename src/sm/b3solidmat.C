@@ -54,7 +54,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     // units must be in MPa, m???, MN.
     //
 
-    double fc, c, wc, ac, alpha1 = 1.0, alpha2 = 1.0;
+    double fc = -1.0, c = -1.0, wc = -1.0, ac = -1.0, alpha1 = 1.0, alpha2 = 1.0;
     double initHum; //MPS shrinkage parameter - initial value of humidity (range 0.2-0.98)
     double finalHum; //MPS shrinkage parameter - final value of humidity (range 0.2-0.98)
 

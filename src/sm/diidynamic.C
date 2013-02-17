@@ -645,7 +645,7 @@ contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mo
 {
     int closeFlag = 0;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -695,7 +695,7 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
-    FILE *file;
+    FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {

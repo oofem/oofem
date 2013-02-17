@@ -616,10 +616,7 @@ DustMaterial :: giveIntVarCompFullIndx(IntArray &answer,
                                        InternalStateType type,
                                        MaterialMode mmode)
 {
-    switch ( type ) {
-    default:
-        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
-    }
+    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 }
 
 InternalStateValueType

@@ -81,8 +81,6 @@ QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 
     this->computeGaussPoints();
     return IRRT_OK;
-    this->computeGaussPoints();
-    return IRRT_OK;
 }
 
 void

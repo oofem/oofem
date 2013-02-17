@@ -139,7 +139,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 //called in each iteration, support for 3D and 1D material mode
 void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
-    int i, i_max, s;
+    int i_max = 0, s;
     double delta, sigma, charLen, tmp=0., Gf_tmp;
     CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
     Element *element = gp->giveElement();
@@ -201,7 +201,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
 
     //proceed 6 components for 3D or 1 component for 1D, damage evolution is based on the evolution of strains
     //xx, yy, zz, yz, zx, xy
-    for ( i = 1; i <= i_max; i++ ) {
+    for (int i = 1; i <= i_max; i++ ) {
         if ( tempStressVectorL.at(i) >= 0. ) { //unequilibrated stress, tension
             inputFGf = & inputTension; //contains pairs (stress - fracture energy)
             s = 0;
@@ -516,10 +516,9 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {
     CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
     FloatArray charLenModes(6);
     FloatArray *inputFGf;
-    double l_ch, ft, Gf, elem_h, modulus;
-    int i, j;
+    double l_ch, ft, Gf, elem_h, modulus = -1.0;
 
-    for ( j = 0; j <= 1; j++ ) {
+    for ( int j = 0; j <= 1; j++ ) {
         if ( j == 0 ) {
             inputFGf = & inputTension;
         } else {
@@ -529,7 +528,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {
         switch ( mMode ) {
         case _3dMat:
             this->giveCharLengthForModes(charLenModes, gp);
-            for ( i = 1; i <= 6; i++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
                 ft = fabs( ( * inputFGf ).at(2 * i - 1) );
                 Gf = ( * inputFGf ).at(2 * i);
                 switch ( i ) {
@@ -572,6 +571,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {
             l_ch = modulus * Gf / ft / ft;
             elem_h = st->elemCharLength.at(1);
             if ( elem_h > 2 * l_ch ) {
+                int i = 1; // i=1 for case _1dMat?
                 if ( this->allowSnapBack.contains(i + 6 * j) ) {
                     OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
                 } else   {

@@ -111,7 +111,6 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
     default:
         return 0.0;
     }
-    return 0.0;
 }
 
 IRResultType

@@ -52,7 +52,7 @@ B3Material :: initializeFrom(InputRecord *ir)
     // units must be in Mpa, m, MN.
     //
     //
-    double fc, c, wc, ac, alpha1 = 0.0, alpha2 = 0.0;
+    double fc = 0.0, c = 0.0, wc = 0.0, ac = 0.0, alpha1 = 0.0, alpha2 = 0.0;
     MaxwellChainMaterial :: initializeFrom(ir);
 
     int mode = 0;

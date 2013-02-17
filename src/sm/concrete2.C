@@ -167,8 +167,6 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
             // error ("give: property not defined");
         }
     }
-
-    return 0.;
 }
 
 
@@ -250,7 +248,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
 // Note: formulated in Full stress strain space
 {
     double us, SCC, SCT, psi2, comp, tol = 0.0, crit = 0.0, nez = 0.0, effstold = 0.0, dezold = 0.0, effst = 0.0, dez = 0.0;
-    double epsult = 0.0, ep1, ep2, ep3, relus, G, ez;
+    double epsult = 0.0, ep1 = -1.0, ep2 = -1.0, ep3 = -1.0, relus, G, ez;
     int ifsh, i, ifplas, ifupd;
     FloatArray plasticStrainVector, plasticStrainIncrementVector;
 

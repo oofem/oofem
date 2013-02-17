@@ -853,7 +853,7 @@ void
 RankineMatStatus :: computeWork(GaussPoint *gp, MaterialMode mode, double gf)
 {
     // int n = deps.giveSize(); // would not work for gradient version
-    int n;
+    int n = -1;
     if ( mode == _PlaneStress || mode == _PlaneStressGrad ) {
         n = 3;
     } else {

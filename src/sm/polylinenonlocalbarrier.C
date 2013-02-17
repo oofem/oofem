@@ -179,8 +179,6 @@ PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, cons
         linePGP.subtract(coordsGP);
         return linePGP.computeNorm();
     }
-
-    return 0;
 }
 
 

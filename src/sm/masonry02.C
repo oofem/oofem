@@ -725,7 +725,8 @@ Masonry02 :: computeF3HardeningGradient(double k)
         double st = ( computeF3HardeningLaw(k) - src );
         return st / k;
     }
-
+ // Unreachable code - commeted out
+#if 0
     /*
      * if (k==0.) {
      * //return 1.e20;
@@ -751,9 +752,9 @@ Masonry02 :: computeF3HardeningGradient(double k)
 
 
 
+#endif
 
-
-
+#if 0
 
     if ( k < 0. ) {
         double grad = -2.0 * ( ( sic - spc ) / kp / kp ) * kp;
@@ -781,5 +782,7 @@ Masonry02 :: computeF3HardeningGradient(double k)
     }
 
     return 0.0;
+#endif
+
 }
 } // end namespace oofem
