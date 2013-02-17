@@ -56,6 +56,7 @@ EPixel oofegGraphicContext :: deformedElementColor;
 EPixel oofegGraphicContext :: crackPatternColor;
 EPixel oofegGraphicContext :: activeCrackColor;
 EPixel oofegGraphicContext :: yieldPlotColors [ OOFEG_YIELD_STEPS ];
+EPixel oofegGraphicContext :: crossSectionColor;
 EPixel oofegGraphicContext :: standardSparseProfileColor, oofegGraphicContext :: extendedSparseProfileColor;
 EPixel oofegGraphicContext :: geometryColor;
 int oofegGraphicContext :: activeStep = -1;
@@ -65,7 +66,7 @@ double oofegGraphicContext :: zprofilescale = 0.0;
 int oofegGraphicContext :: activeEigVal = 1;
 int oofegGraphicContext :: activeYieldStep;
 IntArray oofegGraphicContext :: matRegFilter;
-std::list< Range >oofegGraphicContext :: element_filter;
+std :: list< Range >oofegGraphicContext :: element_filter;
 SmootherType oofegGraphicContext :: smootherType;
 ScalarAlgorithmType oofegGraphicContext :: scalarAlgo = SA_ISO_SURF;
 int oofegGraphicContext :: intVarDefGeoFlag = 0;
@@ -110,6 +111,8 @@ oofegGraphicContext :: init(EngngModel *d)
         yieldPlotColors [ 0 ] = ColorGetPixelFromString(const_cast< char * >("pink"), & suc);
         yieldPlotColors [ 1 ] = ColorGetPixelFromString(const_cast< char * >("PaleVioletRed"), & suc);
         yieldPlotColors [ 2 ] = ColorGetPixelFromString(const_cast< char * >("maroon"), & suc);
+
+        crossSectionColor = ColorGetPixelFromString(const_cast< char * >("blue"), & suc);
 
         activeDomain = 1;
 
@@ -160,7 +163,7 @@ oofegGraphicContext :: testElementGraphicActivity(Element *e)
     if ( element_filter.empty() ) {
         return matFilterState;
     } else {
-        std::list< Range > :: iterator rangeIter;
+        std :: list< Range > :: iterator rangeIter;
         for ( rangeIter = this->element_filter.begin(); rangeIter != this->element_filter.end(); ++rangeIter ) {
             if ( ( * rangeIter ).test( e->giveNumber() ) ) {
                 elemFiltState = 1;
@@ -261,4 +264,3 @@ oofegGraphicContext :: updateFringeTableMinMax(double *s, int size)
 }
 } // end namespace oofem
 #endif
-
