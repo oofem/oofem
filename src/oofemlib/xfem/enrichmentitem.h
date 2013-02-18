@@ -125,6 +125,7 @@ public:
 
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
     void setStartOfDofIdPool(int number) { this->startOfDofIdPool = number; };
+    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber);
 
 protected:
     /// Link to associated Xfem manager.

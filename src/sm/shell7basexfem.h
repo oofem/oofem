@@ -85,9 +85,9 @@ protected:
          FloatArray &dmdxi2, FloatArray &m);
     void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
          const FloatMatrix &B22, const FloatMatrix &B32);
-    void discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
+    void discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &eiDofIdArray, TimeStep *tStep);
 
-
+    void computeDiscGeneralizedStrainComponents(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
 
     // compute solution vector
     void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);

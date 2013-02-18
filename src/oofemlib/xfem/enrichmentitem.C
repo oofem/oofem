@@ -280,6 +280,24 @@ IntArray
     return &dofIdArray; 
 } 
 */
+void
+EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
+{
+    // Computes an array containing the dofId's that should be created as new dofs.
+    IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
+    //enrichesDofsWithIdArray->printYourself();
+    
+    int eiEnrSize = enrichesDofsWithIdArray->giveSize();
+    answer.resize(eiEnrSize);
+    int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
+    for ( int i = 1; i <= eiEnrSize; i++ ) {
+        answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + i; 
+    }
+   
+    //answer.printYourself();
+
+}
+
 
 void
 EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)

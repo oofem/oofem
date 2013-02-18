@@ -106,23 +106,49 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
     
     
     // Discontinuous part
+    FloatArray g1d(3), g2d(3), g3d(3);
+    g1d.zero(); g2d.zero(); g3d.zero();
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     xMan =  this->giveDomain()->giveXfemManager(1);
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-                FloatArray dSolVec;
-                this->discGiveUpdatedSolutionVector(dSolVec, tStep);
 
-            // FloatArray g1d, g2d, g3d, dGenEps;
-            // discComputeGeneralizedStrainVector(dGenEps, dSolVec, B11, B22, B32);
-            // discGiveGeneralizedStrainComponents(dGenEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m);
-            // discEvalCovarBaseVectorsAt(gp, g1d, g2d, g3d, dGenEps);
-            // add contribution g1d += g1d_temp  
+                // should check enr. fnc.
+                //dei->giveEnrichmentFunction(1) // want a regular heaviside fnc
+                // dei->giveDelaminationGroupAt( gp->giveCoordinate(3) )
+
+                FloatArray g1d_temp, g2d_temp, g3d_temp, dGenEps;
+                computeDiscGeneralizedStrainComponents(dGenEps, gp, dei, j, tStep);
+                
+                discEvalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
+
+                // sum up contribution 
+                g1d.add(g1d_temp); g2d.add(g1d_temp); g3d.add(g3d_temp);
             }
         }
     }
+
+    g1 = g1c; g1.add(g1d);
+    g2 = g2c; g2.add(g2d);
+    g3 = g3c; g3.add(g3d);
+    g1.printYourself();
+    g2.printYourself();
+    g3.printYourself();
+}
+
+
+void
+Shell7BaseXFEM :: computeDiscGeneralizedStrainComponents(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep)
+{
+    FloatArray dSolVec;
+    IntArray eiDofIdArray;
+    ei->giveEIDofIdArray(eiDofIdArray, enrichmentDomainNumber);
+    this->discGiveUpdatedSolutionVector(dSolVec, eiDofIdArray, tStep);
+    FloatMatrix B11, B22, B32, B43, B53;
+    this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+    discComputeGeneralizedStrainVector(answer, dSolVec, B11, B22, B32);
 }
 
 
@@ -148,13 +174,12 @@ Shell7BaseXFEM :: discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1d, Fl
 
 
 void
-Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
+Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &eiDofIdArray, TimeStep *tStep)
 {
     // Returns the solution vector of discontinuous dofs dx_d & dm_d
-    //this->giveInitialSolutionVector(answer);
-    FloatArray temp;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
-    answer.assemble( temp, this->giveOrdering(AllInv) );
+    temp_computeVectorOf(eiDofIdArray, VM_Total, tStep, answer);
+    //answer.printYourself();
+
 }
 
 
@@ -186,16 +211,15 @@ Shell7BaseXFEM :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, Ti
             }
         }
 
-        answer.printYourself();
-
         //this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
-        nDofs = vec.giveSize();
-        for ( int j = 1; j <= nDofs; j++ ) {
-            answer.at(++k) = vec.at(j);
-        }
+        //nDofs = vec.giveSize();
+        //for ( int j = 1; j <= nDofs; j++ ) {
+        //    answer.at(++k) = vec.at(j);
+        //}
+ 
         
     }
-
+    answer.printYourself();
     /*
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, type, dofIDMask);
