@@ -56,7 +56,15 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
     this->enrDomainList = new AList< EnrichmentDomain >(0); 
     numberOfEnrichmentFunctions = 0;    
     numberOfEnrichmentDomains = 0;  
+    this->enrichesDofsWithIdArray = new IntArray;
 }
+
+EnrichmentItem :: ~EnrichmentItem()
+{
+    delete this->enrichesDofsWithIdArray;
+}
+
+
 // remove - should ask for specific geom. can be multiple?
 BasicGeometry *EnrichmentItem :: giveGeometry()
 {
@@ -257,7 +265,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
-
+/*
 IntArray 
 *EnrichmentItem :: getDofIdArray() 
 { 
@@ -271,6 +279,37 @@ IntArray
     }
     return &dofIdArray; 
 } 
+*/
+
+void
+EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)
+{
+    // Computes an array containing the dofId's that should be created as new dofs.
+    IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
+    //enrichesDofsWithIdArray->printYourself();
+    
+    int eiEnrSize = enrichesDofsWithIdArray->giveSize();
+    
+    // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan. 
+    // Store matches in dofMask
+    IntArray dofMask(eiEnrSize); dofMask.zero();
+    int count = 0; 
+    for ( int i = 1; i <= eiEnrSize; i++ ) {
+        if ( dMan->hasDofID( (DofIDItem) enrichesDofsWithIdArray->at(i) ) ) {
+            count++;
+            dofMask.at(count) = i;
+        }
+    }
+    //dofMask.printYourself();
+
+    answer.resize(count);
+    int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
+    for ( int i = 1; i <= count; i++ ) {
+        answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + dofMask.at(i) ;
+    }
+    //answer.printYourself();
+
+}
 
 int 
 EnrichmentItem :: giveNumberOfEnrDofs() 
@@ -292,9 +331,10 @@ EnrichmentItem :: giveNumberOfEnrDofs()
  * DELAMINATION
  */
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
-{
-    enrichesDofsWithIDArray.setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+{ 
+    this->enrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
 }
+
 
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {

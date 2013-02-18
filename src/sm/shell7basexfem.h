@@ -79,7 +79,7 @@ protected:
     
 
 
-    void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC);
+    virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC);
     void discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &gd1, FloatArray &gd2, FloatArray &gd3, FloatArray &genEps);
     void discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dxdxi1, FloatArray &dxdxi2, FloatArray &dmdxi1, 
          FloatArray &dmdxi2, FloatArray &m);
@@ -88,6 +88,9 @@ protected:
     void discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
 
 
+
+    // compute solution vector
+    void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
 
 
 public:

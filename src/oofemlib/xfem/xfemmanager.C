@@ -69,15 +69,15 @@ XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
     this->emodel = emodel;
     this->domainIndex = domainIndex;
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
-    this->fictPosition = new AList< IntArray >();
+    //this->fictPosition = new AList< IntArray >();
     numberOfEnrichmentItems = 0;
-    dofIdPos = 0;
+    startOfDofIdPool = 1000; // Should be something more general!
 }
 
 XfemManager :: ~XfemManager()
 {
     delete enrichmentItemList;
-    delete fictPosition;
+    //delete fictPosition;
 }
 
 void
@@ -86,10 +86,10 @@ XfemManager :: clear()
     delete enrichmentItemList;
     enrichmentItemList = NULL;
 
-    delete fictPosition;
-    fictPosition = NULL;
+    //delete fictPosition;
+    //fictPosition = NULL;
     numberOfEnrichmentItems = 0;
-    dofIdPos = 0;
+    startOfDofIdPool = 0;
 }
 
 
@@ -206,64 +206,28 @@ XfemManager :: createEnrichedDofs()
     // Creates new dofs due to enrichment
     int nrDofMan = emodel->giveDomain(1)->giveNumberOfDofManagers();
     IntArray dofIdArray;
-    int dofIdPosition = 1000; // replace with function call - giveFreeDofID or something
+ 
     for (int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
         
         EnrichmentItem *ei = this->giveEnrichmentItem(j);
-        // list of dof Id's that can be enriched by a particular EI, e.g. [D_u, D_v, D_w] 
-        IntArray enrichesDofsWithIDArray = ei->giveEnrichesDofsWithIDArray(); 
-        enrichesDofsWithIDArray.printYourself();
-        // max number of possible enr. dofs per enr.domain 
-        int dofAllocSize = enrichesDofsWithIDArray.giveSize() * ei->giveNumberOfEnrDofs(); 
         for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
 
             // create new dofs
             for ( int i = 1; i <= nrDofMan; i++ ) {
                 DofManager *dMan = this->giveDomain()->giveDofManager(i); 
                 if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
-                    
-                    IntArray *dManIDArray = dMan->giveCompleteGlobalDofIDArray(); // all the 'regular' dof id's
-                    dManIDArray->printYourself();
-                   
-                    IntArray dofMask(enrichesDofsWithIDArray.giveSize()); 
-                    dofMask.zero();
-                    // check if dofman has any of the supported enr.dofs
-                    int count=0; // how many dofs should be enriched
-                    for ( int n = 1; n <= enrichesDofsWithIDArray.giveSize(); n++ ) {
-                        if ( dMan->hasDofID( (DofIDItem) enrichesDofsWithIDArray.at(n)) ) {
-                         // should create new dof   
-                            count++;
-                            dofMask.at(count) = n;
-                            
-                        }
-                    }
-                   // dofMask.printYourself();
-
-                    dofIdArray.resize(count);
-                    for ( int o = 1; o <= count; o++ ) {
-                        dofIdArray.at(o) = dofIdPosition + (k-1)*dofAllocSize + dofMask.at(o) ;
-                    }
-                    dofIdArray.printYourself();
+                    ei->computeDofIdArray(dofIdArray, dMan, k);
 
                     int nDofs = dMan->giveNumberOfDofs();
                     for ( int m = 1; m<= dofIdArray.giveSize(); m++ ) {                      
                         dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );   
                     }
-
-                    dMan->printYourself();
-
+                    //dMan->printYourself();
                 }
-            }
+            }        
         }
-
-        
-
-
-
-
     }
 
-    
 }
 
 #else
@@ -335,7 +299,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     BasicGeometry *ge;
     InputRecord *mir;
 
-    
+    int startOfDofIdPool_temp = 1000;
     enrichmentItemList->growTo(numberOfEnrichmentItems);
     for ( i = 0; i < numberOfEnrichmentItems; i++ ) {
         mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i + 1);
@@ -353,16 +317,28 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 
 
         ei->initializeFrom(mir);
+        
         //new
         ei->instanciateYourself(dr);
+
+        ei->setStartOfDofIdPool( startOfDofIdPool_temp );
+        int xDofPoolAllocSize = ei->giveEnrichesDofsWithIdArray()->giveSize() * ei->giveNumberOfEnrDofs() * ei->giveNumberOfEnrichmentDomains();        
+        startOfDofIdPool_temp += xDofPoolAllocSize;
+        
+        
+        // OLD
+        /*
         int eindofs = ei->giveNumberOfDofs(); // depends on EI type, element type and spatial dimension
         IntArray dofIds(eindofs);
         for ( int j = 1; j <= eindofs; j++ ) {
             dofIds.at(j) = this->allocateNewDofID();    // Will not get me far with the 15 available dofID's for XFEM
         }
-
         ei->setDofIdArray(dofIds);
+        */
         enrichmentItemList->put(i + 1, ei);
+
+        this->createEnrichedDofs();
+
     }
 
 #ifdef VERBOSE
@@ -374,9 +350,9 @@ int XfemManager :: instanciateYourself(DataReader *dr)
 DofIDItem XfemManager :: allocateNewDofID()
 {
     int answer = 0;
-    if ( dofIdPos < ( X_N - X_1 ) ) {
-        answer = dofIdPos + X_1;
-        dofIdPos++;
+    if ( startOfDofIdPool < ( X_N - X_1 ) ) {
+        answer = startOfDofIdPool + X_1;
+        startOfDofIdPool++;
     }
 
     return ( DofIDItem ) answer;

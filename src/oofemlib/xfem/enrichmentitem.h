@@ -62,11 +62,11 @@ class EnrichmentItem : public FEMComponent
 public:
     /// Constructor.
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
-
+    virtual ~EnrichmentItem();
     virtual IRResultType initializeFrom(InputRecord *ir);
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const { return "EnrichmentItem"; }
-    IntArray giveEnrichesDofsWithIDArray() { return this->enrichesDofsWithIDArray; }
+    IntArray *giveEnrichesDofsWithIdArray() { return this->enrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs();
     /// Accessor. should there be support for several geom. objects describing one EI, probably yes. Ex. inclusion given as union of several geom.s?
     BasicGeometry *giveGeometry(int i);
@@ -83,6 +83,8 @@ public:
     /// Checks whether a Geometry is inside or outside. - what if the geometry is not closed? like a set of segments
     bool isOutside(BasicGeometry *bg);
     
+
+
     /// Accessor.
     //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
     EnrichmentFunction *giveEnrichmentFunction(int n);
@@ -97,7 +99,10 @@ public:
     void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
     /// Accessor.
     //IntArray *getDofIdArray() { return & dofsId; }  // old
-    IntArray *getDofIdArray();
+    //IntArray *getDofIdArray();
+
+    void computeDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber);
+
 
 
     bool isDofManEnriched(DofManager *dMan);
@@ -118,6 +123,8 @@ public:
         DELAMINATION = 3 //       
     };
 
+    int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
+    void setStartOfDofIdPool(int number) { this->startOfDofIdPool = number; };
 
 protected:
     /// Link to associated Xfem manager.
@@ -125,12 +132,12 @@ protected:
     /// Geometry associated with EnrichmentItem.
     int geometry;
     IntArray enrichmentDomainNumbers;
-    IntArray enrichesDofsWithIDArray;
+    IntArray *enrichesDofsWithIdArray;
     /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
     /// Additional dofIds from Enrichment. -JB depends on problem type and spatial dimension
     IntArray dofsId;
-
+    int startOfDofIdPool; // points to the first available dofId number 
     
     /// Geometry list.
     AList< BasicGeometry > *enrichementDomainList;
@@ -144,6 +151,7 @@ protected:
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
     int numberOfEnrichmentTypes; // number of unique enrichment domain objects 
+    
     
 
 };

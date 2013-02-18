@@ -162,6 +162,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
 
+    /* JB
     // for all enrichment items which element interacts
     for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
         DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );
@@ -173,7 +174,8 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
                     if ( dm->hasDofID( ( DofIDItem ) dofIdAr->at(k) ) == false ) {
                         int sz = dm->giveNumberOfDofs();
                         Dof *df = new MasterDof( sz + 1, dm, 0, 0, ( DofIDItem ) dofIdAr->at(k) );
-                        int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
+                        //int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
+                        int eqN = 1; // temporary
                         df->setEquationNumber(eqN);
                         dm->appendDof(df);
                     }
@@ -181,7 +183,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
             }
         }
     }
-
+    */
     locationArray.resize(0);
     IntArray enriched;
     enriched.resize(0);
@@ -218,6 +220,7 @@ int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
 void
 PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
+    /*
     PlaneStress2d :: giveDofManDofIDMask(inode, EID_MomentumBalance, answer);
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
@@ -229,6 +232,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
             }
         }
     }
+    */
 }
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)

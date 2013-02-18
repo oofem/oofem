@@ -71,11 +71,9 @@ protected:
     /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
 
-    /// Map giving for a node a position of its fictitious node.    - What is this? //JB
-    AList< IntArray > *fictPosition;
 
     /// Index of next available dofId from pool.
-    int dofIdPos;
+    int startOfDofIdPool;
     int numberOfEnrichmentItems;
 
 public:
@@ -126,7 +124,7 @@ public:
     Domain *giveDomain();
 
     /// Accessor.
-    IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
+    //IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
 
 
     /// Clear the receiver

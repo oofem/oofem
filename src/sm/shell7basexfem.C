@@ -79,6 +79,7 @@ Shell7BaseXFEM :: giveNumberOFEnrichmentDofsForDofMan( int answer)
 double 
 Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp) 
 {
+
     this->setupDelaminationXiCoordList();
     this->setupGPDelaminationGroupList();
 
@@ -102,13 +103,18 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
     // Continuous part
     FloatArray g1c, g2c, g3c;
     Shell7Base :: evalCovarBaseVectorsAt(gp, g1c, g2c, g3c, genEpsC);
-
+    
+    
     // Discontinuous part
-    xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+    xMan =  this->giveDomain()->giveXfemManager(1);
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                FloatArray dSolVec;
+                this->discGiveUpdatedSolutionVector(dSolVec, tStep);
+
             // FloatArray g1d, g2d, g3d, dGenEps;
             // discComputeGeneralizedStrainVector(dGenEps, dSolVec, B11, B22, B32);
             // discGiveGeneralizedStrainComponents(dGenEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m);
@@ -149,6 +155,60 @@ Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, TimeStep *tS
     FloatArray temp;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
     answer.assemble( temp, this->giveOrdering(AllInv) );
+}
+
+
+
+void
+Shell7BaseXFEM :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+{
+    // Routine to extract vector given an array of dofid items
+    int k, nDofs;
+    IntArray dofIDMask;
+    FloatMatrix G2L;
+    FloatArray vec;
+    answer.resize( dofIdArray.giveSize() * numberOfDofMans );
+    answer.zero();
+    k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        DofManager *dMan = this->giveDofManager(i);
+
+        //dMan->giveUnknownVector(answer, dofIdArray, EID_MomentumBalance, VM_Total, stepN);
+
+        //answer.printYourself();
+
+        
+        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
+            Dof *d = dMan->giveDof(j);
+            k++;
+            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
+                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN);
+            }
+        }
+
+        answer.printYourself();
+
+        //this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
+        nDofs = vec.giveSize();
+        for ( int j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
+        
+    }
+
+    /*
+    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, type, dofIDMask);
+        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
+        nDofs = vec.giveSize();
+        for ( int j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
+    }
+    */
+    if (this->computeGtoLRotationMatrix(G2L)) {
+        answer.rotatedWith(G2L, 'n');
+    }
 }
 
 
