@@ -350,7 +350,7 @@ EnrichmentItem :: giveNumberOfEnrDofs()
  */
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 { 
-    this->enrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
+    this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
 }
 
 
@@ -416,6 +416,16 @@ Delamination :: giveDelaminationGroupAt(double zeta)
     }
     return nDelam + 1;
             
+}
+
+double 
+Delamination :: heaviside(double xi, double xi0)
+{
+    if( xi < xi0 ) {
+        return 0.0;
+    } else {
+        return 1.0;
+    }
 }
 
 

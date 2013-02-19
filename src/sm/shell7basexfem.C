@@ -63,19 +63,6 @@ Interface
 }
 
 
-void 
-Shell7BaseXFEM :: giveNumberOFEnrichmentDofsForDofMan( int answer)
-{
-    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
-    for ( int i =1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
-            bool val = ei->isElementEnrichedByEnrichmentDomain(this, j);
-        }
-    }
-}
-
-
 double 
 Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp) 
 {
@@ -102,40 +89,31 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
 {
     // Continuous part
     FloatArray g1c, g2c, g3c;
-    Shell7Base :: evalCovarBaseVectorsAt(gp, g1c, g2c, g3c, genEpsC);
-    
-    
-    // Discontinuous part
-    FloatArray g1d(3), g2d(3), g3d(3);
-    g1d.zero(); g2d.zero(); g3d.zero();
+    Shell7Base :: evalCovarBaseVectorsAt(gp, g1, g2, g3, genEpsC);
+
+    // Discontinuous part - ///@todo naive imlementation should be changed
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     xMan =  this->giveDomain()->giveXfemManager(1);
-    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
+        EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
+
         for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
-
-                // should check enr. fnc.
-                //dei->giveEnrichmentFunction(1) // want a regular heaviside fnc
-                // dei->giveDelaminationGroupAt( gp->giveCoordinate(3) )
-
+                double xi0 = dei->enrichmentDomainXiCoords.at(j);
+                double H = dei->heaviside(gp->giveCoordinate(3), xi0);        
+                
                 FloatArray g1d_temp, g2d_temp, g3d_temp, dGenEps;
                 computeDiscGeneralizedStrainComponents(dGenEps, gp, dei, j, tStep);
-                
-                discEvalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
+                Shell7Base :: evalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
 
-                // sum up contribution 
-                g1d.add(g1d_temp); g2d.add(g1d_temp); g3d.add(g3d_temp);
+                g1.add(H,g1d_temp); g2.add(H,g2d_temp); g3.add(H,g3d_temp);
             }
         }
     }
+    //g1.add(g1d);    g2.add(g2d);    g3.add(g3d);
+    //g1.printYourself();    g2.printYourself();    g3.printYourself();
 
-    g1 = g1c; g1.add(g1d);
-    g2 = g2c; g2.add(g2d);
-    g3 = g3c; g3.add(g3d);
-    g1.printYourself();
-    g2.printYourself();
-    g3.printYourself();
 }
 
 
@@ -147,12 +125,48 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainComponents(FloatArray &answer, Gau
     ei->giveEIDofIdArray(eiDofIdArray, enrichmentDomainNumber);
     this->discGiveUpdatedSolutionVector(dSolVec, eiDofIdArray, tStep);
     FloatMatrix B11, B22, B32, B43, B53;
-    this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
-    discComputeGeneralizedStrainVector(answer, dSolVec, B11, B22, B32);
+    Shell7Base :: computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+    Shell7Base :: computeGeneralizedStrainVector(answer, dSolVec, B11, B22, B32, B43, B53);
 }
 
 
 
+void
+Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &eiDofIdArray, TimeStep *tStep)
+{
+    // Returns the solution vector of discontinuous dofs dx_d & dm_d
+    temp_computeVectorOf(eiDofIdArray, VM_Total, tStep, answer);
+    //eiDofIdArray.printYourself();
+    //answer.printYourself();
+}
+
+
+
+void
+Shell7BaseXFEM :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+{
+    // Routine to extract vector given an array of dofid items
+    // If a certain dofId does not exist a zero is used as value
+    answer.resize( dofIdArray.giveSize() * numberOfDofMans );
+    answer.zero();
+    int k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        DofManager *dMan = this->giveDofManager(i);        
+        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
+            Dof *d = dMan->giveDof(j);
+            k++;
+            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
+                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo EID_MomentumBalance is just a dummy argument in this case and feels redundant
+            }
+        }
+    }
+    //answer.printYourself();
+
+}
+
+
+
+# if 0
 void
 Shell7BaseXFEM :: discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1d, FloatArray &g2d, FloatArray &g3d, FloatArray &dGenEps)
 {
@@ -170,71 +184,6 @@ Shell7BaseXFEM :: discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1d, Fl
     g3d = m;
     
 }
-
-
-
-void
-Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &eiDofIdArray, TimeStep *tStep)
-{
-    // Returns the solution vector of discontinuous dofs dx_d & dm_d
-    temp_computeVectorOf(eiDofIdArray, VM_Total, tStep, answer);
-    //answer.printYourself();
-
-}
-
-
-
-void
-Shell7BaseXFEM :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
-{
-    // Routine to extract vector given an array of dofid items
-    int k, nDofs;
-    IntArray dofIDMask;
-    FloatMatrix G2L;
-    FloatArray vec;
-    answer.resize( dofIdArray.giveSize() * numberOfDofMans );
-    answer.zero();
-    k = 0;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        DofManager *dMan = this->giveDofManager(i);
-
-        //dMan->giveUnknownVector(answer, dofIdArray, EID_MomentumBalance, VM_Total, stepN);
-
-        //answer.printYourself();
-
-        
-        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
-            Dof *d = dMan->giveDof(j);
-            k++;
-            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN);
-            }
-        }
-
-        //this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
-        //nDofs = vec.giveSize();
-        //for ( int j = 1; j <= nDofs; j++ ) {
-        //    answer.at(++k) = vec.at(j);
-        //}
- 
-        
-    }
-    answer.printYourself();
-    /*
-    for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-        this->giveInternalDofManDofIDMask(i, type, dofIDMask);
-        this->giveInternalDofManager(i)->giveUnknownVector(vec, dofIDMask, type, u, stepN);
-        nDofs = vec.giveSize();
-        for ( int j = 1; j <= nDofs; j++ ) {
-            answer.at(++k) = vec.at(j);
-        }
-    }
-    */
-    if (this->computeGtoLRotationMatrix(G2L)) {
-        answer.rotatedWith(G2L, 'n');
-    }
-}
-
 
 
 
@@ -271,7 +220,7 @@ Shell7BaseXFEM :: discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatA
     dmdxi2.setValues( 3, genEps.at(10), genEps.at(11), genEps.at(12) );
     m.setValues( 3, genEps.at(13), genEps.at(14), genEps.at(15) );
 }
-
+#endif
 
 
 

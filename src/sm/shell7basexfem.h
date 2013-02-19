@@ -80,11 +80,11 @@ protected:
 
 
     virtual void evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC);
-    void discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &gd1, FloatArray &gd2, FloatArray &gd3, FloatArray &genEps);
-    void discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dxdxi1, FloatArray &dxdxi2, FloatArray &dmdxi1, 
-         FloatArray &dmdxi2, FloatArray &m);
-    void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
-         const FloatMatrix &B22, const FloatMatrix &B32);
+    //void discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &gd1, FloatArray &gd2, FloatArray &gd3, FloatArray &genEps);
+    //void discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatArray &dxdxi1, FloatArray &dxdxi2, FloatArray &dmdxi1, 
+    //     FloatArray &dmdxi2, FloatArray &m);
+    //void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
+    //     const FloatMatrix &B22, const FloatMatrix &B32);
     void discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &eiDofIdArray, TimeStep *tStep);
 
     void computeDiscGeneralizedStrainComponents(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
@@ -103,7 +103,6 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 	
     virtual IRResultType initializeFrom(InputRecord *ir);
-    void giveNumberOFEnrichmentDofsForDofMan( int answer);
 
 };
 

@@ -114,7 +114,7 @@ public:
     /// Geometry update; calls individual enrichment item updateGeometry method.
     virtual void updateGeometry(TimeStep *tStep) {};
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
-
+    
 
     enum NodeEnrichmentType {
         STANDARD = 0,    // No enrichment
@@ -126,6 +126,8 @@ public:
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
     void setStartOfDofIdPool(int number) { this->startOfDofIdPool = number; };
     void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber);
+
+
 
 protected:
     /// Link to associated Xfem manager.
@@ -213,7 +215,7 @@ public:
     double giveDelaminationGroupThickness(int dGroup, Element *e);
 
     void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
-
+    double heaviside(double xi, double xi0);
 
 };
 
