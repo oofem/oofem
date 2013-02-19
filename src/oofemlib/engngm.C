@@ -626,9 +626,6 @@ EngngModel :: forceEquationNumbering(int id)
 
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->invalidateLocationArray();
-    }
 
     return domainNeqs.at(id);
 }

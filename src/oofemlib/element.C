@@ -64,14 +64,12 @@ Element :: Element(int n, Domain *aDomain) :
     numberOfDofMans    = 0;
     numberOfIntegrationRules = 0;
     activityLtf = 0;
-    locationArray      = NULL;
     integrationRulesArray  = NULL;
 }
 
 
 Element :: ~Element()
 {
-    delete locationArray;
     if ( integrationRulesArray ) {
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
             delete integrationRulesArray [ i ];
@@ -239,25 +237,21 @@ Element :: computeNumberOfGlobalDofs(EquationID eid)
 int
 Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
 {
-    if ( this->locationArray ) {
-        return this->locationArray->giveSize();
-    } else {
-        int i, answer = 0;
-        IntArray nodeDofIDMask, dofMask;
+    int i, answer = 0;
+    IntArray nodeDofIDMask, dofMask;
 
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
-            this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-            this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-            answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
-        }
-
-        for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
-            this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-            this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-            answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
-        }
-        return answer;
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
     }
+
+    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+    }
+    return answer;
 }
 
 
@@ -370,33 +364,31 @@ Element :: giveBoundaryLoadArray()
 
 
 void
-Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const UnknownNumberingScheme &s) const
+Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray) const
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
-    if ( s.isDefault() && this->locationArray ) {
-        locationArray = * this->locationArray;
-        return;
-    } else {
-        IntArray dofIDMask;
-        IntArray nodalArray;
-        locationArray.resize(0);
-        for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
-            this->giveDofManDofIDMask(i, eid, dofIDMask);
-            this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
-            locationArray.followedBy(nodalArray);
-        }
-        for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
-            this->giveInternalDofManDofIDMask(i, eid, dofIDMask);
-            this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
-            locationArray.followedBy(nodalArray);
-        }
+    IntArray dofIDMask;
+    IntArray nodalArray;
+    locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
+    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, eid, dofIDMask);
+        this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) dofIdArray->followedBy(dofIDMask);
+    }
+    for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
+        this->giveInternalDofManDofIDMask(i, eid, dofIDMask);
+        this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
+        if (dofIdArray) dofIdArray->followedBy(dofIDMask);
     }
 }
 
 
 void
-Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s)
+Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIdArray)
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
 {
@@ -406,31 +398,13 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
     locationArray.resize(0);
+    if (dofIdArray) dofIdArray->resize(0);
     for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
         this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
         this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
+        if (dofIdArray) dofIdArray->followedBy(dofIDMask);
     }
-}
-
-
-void
-Element :: invalidateLocationArray()
-{
-    // invalidates current location array in receiver
-    // next call of giveLocationArray() will assemble
-    // new location array
-    // used mainly for model supporting dynamic changes of
-    // static system
-
-
-    // force assembling
-    // of new location array
-    if ( locationArray ) {
-        delete locationArray;
-    }
-
-    locationArray = NULL;
 }
 
 

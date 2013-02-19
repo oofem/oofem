@@ -290,9 +290,6 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
 
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->invalidateLocationArray();
-    }
 
     return domainNeqs.at(id);
 #endif
