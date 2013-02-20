@@ -72,6 +72,19 @@ protected:
     double giveDelaminationGroupMidXi(int dGroup);
 
     XfemManager *xMan; //=  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    
+    static bool __initializedFieldDofId;
+    static IntArray dofId_Midplane;
+    static IntArray dofId_Director;
+    static IntArray dofId_InhomStrain;
+    static bool initDofId() {
+        dofId_Midplane.setValues(3, D_u, D_v, D_w);
+        dofId_Director.setValues(3,W_u, W_v, W_w);
+        dofId_InhomStrain.setValues(1, Gamma);
+        return true;
+    }
+
+    virtual IntArray giveFieldDofId(SolutionField fieldType) const;
 
     static bool sortFunc(std::pair<int, double> a, std::pair<int, double> b) {
         return a.second < b.second;
@@ -91,7 +104,11 @@ protected:
 
     // compute solution vector
     void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord,  
+        double xi0, EnrichmentItem *ei, int enrichmentDomainNumber);
 
+    void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, EnrichmentItem *ei, int enrichmentDomainNumber, SolutionField field);
 
 public:
     // constructor
@@ -103,7 +120,7 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 	
     virtual IRResultType initializeFrom(InputRecord *ir);
-
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 };
 
 

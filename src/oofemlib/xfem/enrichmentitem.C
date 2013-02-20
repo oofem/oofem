@@ -318,7 +318,7 @@ EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enri
             dofMask.at(count) = i;
         }
     }
-    //dofMask.printYourself();
+    dofMask.printYourself();
 
     answer.resize(count);
     int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
@@ -400,7 +400,7 @@ Delamination :: giveDelaminationZCoord(int n, Element *element)
     
 }; 
 
-
+// Remove!
 int
 Delamination :: giveDelaminationGroupAt(double zeta) 
 {

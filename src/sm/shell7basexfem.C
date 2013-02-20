@@ -37,11 +37,14 @@
 #include "enrichmentitem.h"
 
 namespace oofem {
-    
-
+    IntArray Shell7BaseXFEM :: dofId_Midplane(3);
+	IntArray Shell7BaseXFEM :: dofId_Director(3);
+    IntArray Shell7BaseXFEM :: dofId_InhomStrain(1); 
+	bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
     //xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+
 }
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
@@ -80,8 +83,26 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
     
 }
 
+void
+Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+{
+    Shell7Base ::giveDofManDofIDMask(inode, ut, answer);
 
+    //xMan =  this->giveDomain()->giveXfemManager(1);
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                IntArray eiDofIdArray;
+                dei->giveEIDofIdArray(eiDofIdArray, j);
+                answer.followedBy(eiDofIdArray);
+            }
+        }
+    }
+ 
 
+    //answer.followedBy
+}
 
 
 void
@@ -166,6 +187,196 @@ Shell7BaseXFEM :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, Ti
 
 
 
+
+void
+Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+//
+// Computes internal forces as a summation of: sectional forces + convective mass force
+{
+    // Test 
+    // compute number of xDofs
+    xMan =  this->giveDomain()->giveXfemManager(1);
+    EnrichmentItem *ei = xMan->giveEnrichmentItem(1);
+    int nXdofs = ei->giveNumberOfEnrichmentDomains() * ei->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfDofManagers(); 
+    
+
+    answer.resize( this->giveNumberOfDofs() + nXdofs);
+    answer.zero();
+    
+    FloatArray solVec;
+
+    // continuous part
+    this->giveUpdatedSolutionVector(solVec, tStep);
+    this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
+
+    // disccontinuous part
+    
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
+
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                IntArray eiDofIdArray;
+                dei->giveEIDofIdArray(eiDofIdArray, j);
+                eiDofIdArray.printYourself();
+                this->discGiveUpdatedSolutionVector(solVec, eiDofIdArray, tStep);
+                double xi0 = dei->enrichmentDomainXiCoords.at(j);
+                this->discComputeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord, xi0, dei, j);                      
+                //IntArray ord_phix, ord_mx, ord_gamx;
+                answer.printYourself();
+
+            }
+        }
+    }
+ 
+}
+
+
+void 
+Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei, int enrichmentDomainNumber, SolutionField field)
+{
+    // Routine to extract vector given an array of dofid items
+    // If a certain dofId does not exist a zero is used as value
+    IntArray eiDofIdArray;
+    ei->giveEIDofIdArray(eiDofIdArray, enrichmentDomainNumber);
+
+    IntArray ordering_cont = this->giveOrdering(field);
+    IntArray fieldDofId    = this->giveFieldDofId(field);
+
+    IntArray ordering_temp, temp;
+    ordering_temp.resize(ordering_cont.giveSize());
+    temp.resize(ordering_cont.giveSize());
+
+    int k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        DofManager *dMan = this->giveDofManager(i);
+        int pos = (i-1)*fieldDofId.giveSize();
+        int pos2 = (i-1)*eiDofIdArray.giveSize();
+        if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,enrichmentDomainNumber) ){
+
+            for (int j = 1; j <= fieldDofId.giveSize(); j++ ) {
+                if ( dMan->hasDofID( (DofIDItem) fieldDofId.at(j) ) ) {
+                    k++;
+                    ordering_temp.at(k) = ordering_cont.at(j + pos);
+                    temp.at(k) = j + pos;
+                }
+            }
+        }
+    }
+      
+    IntArray ordering; orderingArray.resize(k), activeDofsArray.resize(k);
+    ///@todo will not work if there are several ei
+    int shift = this->giveNumberOfDofs() + eiDofIdArray.giveSize()*numberOfDofMans*(enrichmentDomainNumber-1); 
+    for ( int i = 1; i <= k; i++ ) {
+        orderingArray.at(i) = ordering_temp.at(i) + shift;
+        activeDofsArray.at(i) = temp.at(i);
+        //activeDofsArray.at(i) = ordering_temp.at(i);
+    }
+
+}
+
+
+void
+Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord, 
+                    double xi0, EnrichmentItem *ei, int enrichmentDomainNumber)
+//
+{
+    FloatMatrix B;
+    FloatArray BtF, f, genEps;
+    //answer.resize( this->giveNumberOfDofs() );
+    //answer.zero();
+
+    
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
+    int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion of types
+    FloatArray f1(18), f2(18), f3(6);
+    f1.zero();
+    f2.zero();
+    f3.zero();
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+
+        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+
+            if ( gp->giveCoordinate(3) > xi0 ) { // Should be enriched ///@todo not general!
+
+                FloatMatrix B11, B22, B32, B43, B53;
+                this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+                this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+
+			    double zeta = giveGlobalZcoord(gp);
+                FloatArray N, M, T, Ms;
+                double Ts = 0.;
+                this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, zeta);
+
+                // Computation of sectional forces: f = B^t*[N M T Ms Ts]^t
+                FloatArray f1temp(18), f2temp(18), f3temp(6), temp;
+                // f1 = BT11*N
+                f1temp.beTProductOf(B11, N);
+
+                // f2 = BT22*M + BT32*T
+                f2temp.beTProductOf(B22, M);
+                temp.beTProductOf(B32, T);
+                f2temp.add(temp);
+
+                // f3 = BT43*Ms + BT53*Ts
+                f3temp.beTProductOf(B43, Ms);
+                for ( int i = 1; i <= 6; i++ ) {
+                    f3temp.at(i) += B53.at(1, i) * Ts;
+                }
+
+                double dV = this->computeVolumeAroundLayer(gp, layer);
+                f1.add(dV, f1temp);
+                f2.add(dV, f2temp);
+                f3.add(dV, f3temp);
+            
+            }
+
+        }
+    }
+
+    // Should assemble to xfem dofs
+    IntArray ordering_phibar, ordering_m, ordering_gam;
+    IntArray activeDofs_phibar, activeDofs_m, activeDofs_gam;
+    //IntArray ordering_phibar = computeOrderingArray(ei, enrichmentDomainNumber, Midplane);
+    //IntArray ordering_m      = computeOrderingArray(ei, enrichmentDomainNumber, Director);
+    //IntArray ordering_gam    = computeOrderingArray(ei, enrichmentDomainNumber, InhomStrain);
+
+    computeOrderingArray(ordering_phibar, activeDofs_phibar, ei, enrichmentDomainNumber, Midplane);
+    computeOrderingArray(ordering_m, activeDofs_m, ei, enrichmentDomainNumber, Director);
+    computeOrderingArray(ordering_gam, activeDofs_gam, ei, enrichmentDomainNumber, InhomStrain);
+
+    ordering_phibar.printYourself();
+    ordering_m.printYourself();
+    ordering_gam.printYourself();
+
+    //activeDofs_m.add(3);
+    //activeDofs_gam.add(6);
+
+    activeDofs_phibar.printYourself();
+    activeDofs_m.printYourself();
+    activeDofs_gam.printYourself();
+    
+    FloatArray f1Ass, f2Ass, f3Ass;
+
+    f1Ass.beSubArrayOf(f1,activeDofs_phibar);
+    f2Ass.beSubArrayOf(f2,activeDofs_m);
+    f3Ass.beSubArrayOf(f3,activeDofs_gam);
+    answer.assemble(f1Ass, ordering_phibar);
+    answer.assemble(f2Ass, ordering_m);
+    answer.assemble(f3Ass, ordering_gam);
+
+}
+
+
+
+
+
+
+
+
 # if 0
 void
 Shell7BaseXFEM :: discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1d, FloatArray &g2d, FloatArray &g3d, FloatArray &dGenEps)
@@ -223,6 +434,25 @@ Shell7BaseXFEM :: discGiveGeneralizedStrainComponents(FloatArray &genEps, FloatA
 #endif
 
 
+
+
+
+
+
+
+
+IntArray
+Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const {
+    if ( fieldType == Midplane ) {
+        return this->dofId_Midplane;
+	} else if ( fieldType == Director  )   {
+        return this->dofId_Director;
+	} else if ( fieldType == InhomStrain  )   {
+        return this->dofId_InhomStrain;
+	} else {
+		_error("giveOrdering: unknown fieldType");
+	}
+}
 
 
 

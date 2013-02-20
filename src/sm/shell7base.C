@@ -1125,8 +1125,8 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 {
     FloatMatrix B;
     FloatArray BtF, f, genEps;
-    answer.resize( this->giveNumberOfDofs() );
-    answer.zero();
+    //answer.resize( this->giveNumberOfDofs() );
+    //answer.zero();
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
     int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion of types
