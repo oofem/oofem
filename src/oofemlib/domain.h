@@ -164,6 +164,9 @@ private:
     XfemManager *xfemManager;
     /// Topology description
     TopologyDescription *topology;
+    
+    /// Keeps track of next free dof ID (for special Lagrange multipliers, XFEM and such)
+    int freeDofID;
 
 #ifdef __PARALLEL_MODE
     /**
@@ -448,6 +451,17 @@ public:
      * @return Total volume.
      */
     double giveVolume();
+    
+    /**
+     * Gives the next free dof ID.
+     * Useful for XFEM and other boundary conditions that introduce other unique Lagrange multipliers.
+     * @return The next free dof ID.
+     */
+    int giveNextFreeDofID();
+    /**
+     * Resets the free dof IDs.
+     */
+    void resetFreeDofID();
 
     /**
      * Returns receiver's associated connectivity table.

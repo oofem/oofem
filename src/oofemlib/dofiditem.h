@@ -72,6 +72,7 @@ namespace oofem {
  */
 enum DofIDItem {
     DofIDItem_DEF
+    MaxDofID
 };
 
 #undef ENUM_ITEM

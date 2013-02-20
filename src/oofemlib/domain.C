@@ -102,6 +102,8 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
 
     nonlocalUpdateStateCounter = 0;
 
+    freeDofID = MaxDofID;
+
 #ifdef __PARALLEL_MODE
     dmanMapInitialized = elementMapInitialized = false;
     transactionManager = NULL;
@@ -187,17 +189,17 @@ Domain :: clear()
 #endif
 }
 
+
 Element *
 Domain :: giveElement(int n)
 // Returns the n-th element. Generates error if it is not defined yet.
 {
-    if ( elementList->includes(n) ) {
-        return elementList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !elementList->includes(n) ) {
         _error2("giveElement: undefined element (%d)", n);
     }
-
-    return NULL;
+#endif
+    return elementList->at(n);
 }
 
 
@@ -226,13 +228,12 @@ GeneralBoundaryCondition *
 Domain :: giveBc(int n)
 // Returns the n-th bc. Generates the error if not defined.
 {
-    if ( bcList->includes(n) ) {
-        return bcList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !bcList->includes(n) ) {
         _error2("giveBc: undefined bc (%d)", n);
     }
-
-    return NULL;
+#endif
+    return bcList->at(n);
 }
 
 
@@ -240,13 +241,13 @@ InitialCondition *
 Domain :: giveIc(int n)
 // Returns the n-th ic. Generates the error if not defined.
 {
-    if ( icList->includes(n) ) {
-        return icList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !icList->includes(n) ) {
         _error2("giveIc: undefined ic (%d)", n);
     }
+#endif
 
-    return NULL;
+    return icList->at(n);
 }
 
 
@@ -255,15 +256,13 @@ Domain :: giveLoadTimeFunction(int n)
 // Returns the n-th load-time function. Creates this fuction if it does
 // not exist yet.
 {
-    if ( loadTimeFunctionList->includes(n) ) {
-        return loadTimeFunctionList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !loadTimeFunctionList->includes(n) ) {
         _error2("giveLoadTimeFunction: undefined load-time function (%d)", n);
-        //      ltf = (LoadTimeFunction*) LoadTimeFunction(n,this).typed() ;
-        //      loadTimeFunctionList -> put(n,ltf) ;}
     }
+#endif
 
-    return NULL;
+    return loadTimeFunctionList->at(n);
 }
 
 
@@ -272,15 +271,13 @@ Domain :: giveMaterial(int n)
 // Returns the n-th material. Creates this material if it does not exist
 // yet.
 {
-    if ( materialList->includes(n) ) {
-        return materialList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !materialList->includes(n) ) {
         _error2("giveMaterial: undefined material (%d)", n);
-        //      mat = new Material(n,this) ;
-        //      materialList  -> put(n,mat) ;}
     }
+#endif
 
-    return NULL;
+    return materialList->at(n);
 }
 
 
@@ -313,18 +310,23 @@ ElementSide *
 Domain :: giveSide(int n)
 // Returns the n-th element side.
 {
-    ElementSide *side = NULL;
 #ifdef DEBUG
+    ElementSide *side = NULL;
+
     if ( !dofManagerList->includes(n) ) {
         _error2("giveSide: undefined dofManager (%d)", n);
     }
-#endif
 
     side = dynamic_cast< ElementSide* >( dofManagerList->at(n) );
     if ( !side ) {
         _error2("giveSide: incompatible type of dofManager %d, can not convert", n);
     }
     return side;
+    
+#else
+    return static_cast< ElementSide* >( dofManagerList->at(n) );
+    
+#endif
 }
 
 
@@ -332,15 +334,12 @@ DofManager *
 Domain :: giveDofManager(int n)
 // Returns the n-th node. Creates this node if it does not exist yet.
 {
-    if ( dofManagerList->includes(n) ) {
-        return dofManagerList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !dofManagerList->includes(n) ) {
         _error2("giveDofManager: undefined dofManager (%d)", n);
-        //      node = new Node(n,this) ;
-        //      nodeList  -> put(n,node) ;}
     }
-
-    return NULL;
+#endif
+    return dofManagerList->at(n);
 }
 
 
@@ -349,13 +348,12 @@ Domain :: giveCrossSection(int n)
 // Returns the n-th cross section.
 // yet.
 {
-    if ( crossSectionList->includes(n) ) {
-        return crossSectionList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !crossSectionList->includes(n) ) {
         _error2("giveCrossSection: undefined cross section (%d)", n);
     }
-
-    return NULL;
+#endif
+    return crossSectionList->at(n);
 }
 
 
@@ -363,13 +361,12 @@ NonlocalBarrier *
 Domain :: giveNonlocalBarrier(int n)
 // Returns the n-th NonlocalBarrier.
 {
-    if ( nonlocalBarierList->includes(n) ) {
-        return nonlocalBarierList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !nonlocalBarierList->includes(n) ) {
         _error2("giveNonlocalBarrier: undefined barrier (%d)", n);
     }
-
-    return NULL;
+#endif
+    return nonlocalBarierList->at(n);
 }
 
 
@@ -377,13 +374,13 @@ RandomFieldGenerator *
 Domain :: giveRandomFieldGenerator(int n)
 // Returns the n-th RandomFieldGenerator.
 {
-    if ( randomFieldGeneratorList->includes(n) ) {
-        return randomFieldGeneratorList->at(n);
-    } else {
+#ifdef DEBUG
+    if ( !randomFieldGeneratorList->includes(n) ) {
         _error2("giveRandomFieldGenerator: undefined generator (%d)", n);
     }
+#endif
 
-    return NULL;
+    return randomFieldGeneratorList->at(n);
 }
 
 
@@ -392,13 +389,13 @@ Domain :: giveEngngModel()
 // Returns the time integration algorithm. Creates it if it does not
 // exist yet.
 {
-    if ( engineeringModel ) {
-        return engineeringModel;
-    } else {
+#ifdef DEBUG
+    if ( !engineeringModel ) {
         _error("giveEngngModel: Not defined");
     }
+#endif
 
-    return NULL;
+    return engineeringModel;
 }
 
 void Domain :: resizeDofManagers(int _newSize) { dofManagerList->growTo(_newSize); }
@@ -1231,6 +1228,18 @@ double Domain :: giveVolume()
     }
 
     return volume;
+}
+
+int
+Domain :: giveNextFreeDofID()
+{
+    return this->freeDofID++;
+}
+
+void
+Domain :: resetFreeDofID()
+{
+    this->freeDofID = MaxDofID;
 }
 
 ErrorEstimator *
