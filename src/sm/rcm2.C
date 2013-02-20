@@ -268,7 +268,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
 
             if ( dSigma.giveSize() == 0 ) {
                 fullDSigma.beProductOf(de, strainIncrement);
-                dSigma.beSubArrayOf(fullDSigma, crackMapping);
+                dSigma.beSubArrayOf(fullDSigma, crackMapping); //@todo fix! used old version of method beSubArrayOf
             }
 
             decr.solveForRhs(dSigma, crackStrainIterativeIncrement);
@@ -321,7 +321,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
         // dSigma = sigmaEl - sigmaCr for active cracks
         fullDSigma = sigmaEl;
         fullDSigma.subtract(sigmaCr);
-        dSigma.beSubArrayOf(fullDSigma, crackMapping);
+        dSigma.beSubArrayOf(fullDSigma, crackMapping); //@todo fix! used old version of method beSubArrayOf
         // find max error in dSigma
         // if max err < allovedErr -> stop iteration
         // allowed Err is computed relative to Ft;
