@@ -150,6 +150,8 @@ PetscContext :: scatterG2N(Vec src, Vec dest, InsertMode mode)
             ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
             ISCreateStride(comm, neqs, 0, 1, & naturalIS);
             VecScatterCreate(dest, naturalIS, src, globalIS, & n2gvecscat);
+            ISDestroy( & naturalIS );
+            ISDestroy( & globalIS );
         }
 
         VecScatterBegin(n2gvecscat, src, dest, mode, SCATTER_REVERSE); //
@@ -214,6 +216,8 @@ PetscContext :: scatterN2G(Vec src, Vec dest, InsertMode mode)
             ISCreateGeneral(comm, neqs, this->giveN2Gmap()->giveN2Gmap()->givePointer(), PETSC_USE_POINTER, & globalIS);
             ISCreateStride(comm, neqs, 0, 1, & naturalIS);
             VecScatterCreate(src, naturalIS, dest, globalIS, & n2gvecscat);
+            ISDestroy( & naturalIS );
+            ISDestroy( & globalIS );
         }
 
         VecScatterBegin(n2gvecscat, src, dest, mode, SCATTER_FORWARD); //
