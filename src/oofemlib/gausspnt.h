@@ -173,11 +173,11 @@ public:
      */
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr, int n)
     {
-      if (this->statusDict.includes(n)) {
-        OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
-      } 
-      this->statusDict.add(n, ptr);
-      return ptr;
+        if (this->statusDict.includes(n)) {
+            OOFEM_ERROR (" MaterialStatus::setMaterialStatus status already exist");
+        }
+        this->statusDict.add(n, ptr);
+        return ptr;
     }
     /**
      * Returns index-th slave gauss point of receiver.
