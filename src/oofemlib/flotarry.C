@@ -310,60 +310,21 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int 
 
 void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 //
-// Returns subVector of receiver with size equal to the index array
+// Returns a subVector of the receiver constructed from an index array.
 // this->at(i) = src.at(indx->at(i))
 //
 {
-#if 1
-
-    int i, ii, n, isize;
-
-    n = indx.giveSize();
-
-#ifdef DEBUG
-    
-    for ( isize = 0, i = 0; i < n; i++ ) {
-        if ( indx(i) > isize ) {
-            isize = indx(i);
-        }
+#ifdef DEBUG  
+    if ( indx.maximum() > src.giveSize() || indx.minimum() < 1 ) {
+        OOFEM_ERROR("FloatArray :: beSubArrayOf - index points outside of source");
     }
-    if ( isize > src.giveSize()) {
-        OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch, index points outside of source");
-    }
-
 #endif
 
+    int n = indx.giveSize();
     this->resize(n);
-    for ( i = 1; i <= n; i++ ) {
-        this->at(i) = src.at(indx.at(i)) ;
+    for ( int i = 1; i <= n; i++ ) {
+        this->at(i) = src.at( indx.at(i) ) ;
     }
-
-#else
-    int i, ii, n, isize;
-
-    n = indx.giveSize();
-
-#ifdef DEBUG
-    if ( src.size != n ) {
-        OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
-    }
-
-#endif
-
-    for ( isize = 0, i = 0; i < n; i++ ) {
-        if ( indx(i) > isize ) {
-            isize = indx(i);
-        }
-    }
-
-    this->resize(isize);
-    for ( i = 0; i < n; i++ ) {
-        ii = indx(i);
-        if ( ii > 0 ) {
-            this->values [ ii-1 ] = src.values [ i ];
-        }
-    }
-#endif
 }
 
 

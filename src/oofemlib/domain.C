@@ -478,7 +478,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
     IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
     IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
-    IR_GIVE_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_Domain_nxfemman, "nxfemman"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, IFT_Domain_topology, "topology"); // Macro
 
     // read optional number of nonlocalBarriers
@@ -831,6 +831,12 @@ Domain :: giveXfemManager(int i)
         _error2("giveXfemManager: undefined xfem manager (%d)", i);
         return NULL; // return NULL to prevent compiler warnings
     }
+}
+
+bool
+Domain :: hasXfemManager(int i)
+{
+    return xfemManagerList->includes(i);
 }
 
 

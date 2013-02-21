@@ -43,6 +43,7 @@
 //#include "nlstructuralelement.h"
 #include "shell7base.h"
 #include "xfemelementinterface.h"
+#include "enrichmentitem.h"
 namespace oofem {
 
 class FEI3dTrQuad;
@@ -71,7 +72,7 @@ protected:
     void giveDelaminationGroupXiLimits(int &dGroup, double &zTop, double &zBottom);
     double giveDelaminationGroupMidXi(int dGroup);
 
-    XfemManager *xMan; //=  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xMan;
     
     static bool __initializedFieldDofId;
     static IntArray dofId_Midplane;
@@ -103,7 +104,7 @@ protected:
     void computeDiscGeneralizedStrainComponents(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
 
     // compute solution vector
-    void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    //void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord,  
         double xi0, EnrichmentItem *ei, int enrichmentDomainNumber);
@@ -121,6 +122,7 @@ public:
 	
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual int giveNumberOfDofs();
 };
 
 

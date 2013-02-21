@@ -71,7 +71,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
 }
 
 
-bool DofManList :: isDofManagerEnriched(DofManager *dMan)
+bool DofManList :: isDofManagerEnriched(const DofManager *dMan)
 {
     int dManNumber = dMan->giveNumber();
     std::list< int > :: iterator p;

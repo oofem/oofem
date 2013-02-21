@@ -69,7 +69,8 @@ public:
 
 
     // Element specific
-    virtual int giveNumberOfDofs() = 0;
+    //virtual int giveNumberOfDofs() = 0;
+    virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
     virtual Element_Geometry_Type giveGeometryType() const = 0;
@@ -185,6 +186,7 @@ virtual double giveGlobalZcoord(GaussPoint *gp);
 
 
     // Solution vectors
+    void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
                                         const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
     void computeSolutionFields(FloatArray &xbar, FloatArray &m, double &gam, const FloatArray &solVec, const FloatMatrix &N11, const FloatMatrix &N22, const FloatMatrix &N33);

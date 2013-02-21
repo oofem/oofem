@@ -497,19 +497,7 @@ BasicGeometry *CreateUsrDefGeometry(const char *aClass)
 
     return ( geometryList.count(aClass) == 1 ) ? geometryList [ aClass ]() : NULL;
 }
-/*
-template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
-std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
 
-EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
-{
-    // go through the supported geometry descriptions
-    BasicGeometry *bg = CreateUsrDefGeometry(aClass); // for basic geometry
-    //...
-    
-    return ( enrichmentDomainList.count(aClass) == 1 ) ? enrichmentDomainList [ aClass ]() : NULL;
-}
-*/
 
 template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
 std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;

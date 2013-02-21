@@ -46,6 +46,7 @@
 #include "flotmtrx.h"
 
 namespace oofem {
+
 void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together)
 {
     Delaunay dl;
@@ -54,7 +55,7 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triang
 
 void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
-    XfemManager *xf = this->element->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->element->giveDomain()->giveXfemManager(1);
     if ( xf->isElementEnriched(element) ) {
         IntArray interactedEI;
         xf->getInteractedEI(interactedEI, element);
@@ -101,7 +102,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2)
 {
-    XfemManager *xf = this->element->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->element->giveDomain()->giveXfemManager(1);
     IntArray interactedEI;
     xf->getInteractedEI(interactedEI, element); //give the EI's for the el
     // in intersecPoints the points of Element with interaction to EnrichmentItem will be stored

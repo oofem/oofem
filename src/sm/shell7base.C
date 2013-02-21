@@ -81,6 +81,12 @@ Shell7Base :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 
 
 int
+Shell7Base :: giveNumberOfDofs() 
+{
+    return giveNumberOfFieldDofs(All);
+}
+
+int
 Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     // should it return coord in reference or updated config?
@@ -2038,19 +2044,47 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 #if 1
 
 void
+Shell7Base :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+{
+    // Routine to extract vector given an array of dofid items
+    // If a certain dofId does not exist a zero is used as value
+    answer.resize( dofIdArray.giveSize() * numberOfDofMans );
+    answer.zero();
+    int k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        DofManager *dMan = this->giveDofManager(i);        
+        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
+            Dof *d = dMan->giveDof(j);
+            k++;
+            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
+                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo EID_MomentumBalance is just a dummy argument in this case and feels redundant
+            }
+        }
+    }
+    //answer.printYourself();
+
+}
+
+void
 Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
 {
     // Computes updated solution as: x = X + dx, m = M + dM, gam = 0 + dgam
     this->giveInitialSolutionVector(answer);
     FloatArray temp;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
+    //this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
+
+    int dummy = 0;
+    IntArray dofIdArray;
+    Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
+    this->temp_computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
 
 
 void
 Shell7Base :: giveInitialSolutionVector(FloatArray &answer) {
-    answer.resize( this->giveNumberOfDofs() );
+    answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
     int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
     // Reference position and directors
@@ -2362,6 +2396,8 @@ Shell7Base :: giveFieldSize(SolutionField fieldType)
         return 3;
     } else if ( fieldType == InhomStrain  ) {
         return 1;
+    } else if ( fieldType == All  ) {
+        return 7;
     } else {
         _error("giveFieldSize: unknown fieldType");
         return 0;

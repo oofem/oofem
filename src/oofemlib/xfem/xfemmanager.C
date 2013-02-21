@@ -100,7 +100,7 @@ Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
 
 // computeActiveEIforElement
-void XfemManager :: getInteractedEI(IntArray &answer, Element *elem)
+void XfemManager :: getInteractedEI(IntArray &answer, const Element *elem)
 {
     int count = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
@@ -112,7 +112,7 @@ void XfemManager :: getInteractedEI(IntArray &answer, Element *elem)
     }
 }
 
-bool XfemManager :: isElementEnriched(Element *elem)
+bool XfemManager :: isElementEnriched(const Element *elem)
 {
     // Loop over all EI which asks if el is E. 
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){
@@ -320,8 +320,8 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         
         //new
         ei->instanciateYourself(dr);
-
-        ei->setStartOfDofIdPool( startOfDofIdPool_temp );
+        ei->setStartOfDofIdPool( this->giveDomain()->giveNextFreeDofID() );
+        //ei->setStartOfDofIdPool( startOfDofIdPool_temp );
         int xDofPoolAllocSize = ei->giveEnrichesDofsWithIdArray()->giveSize() * ei->giveNumberOfEnrDofs() * ei->giveNumberOfEnrichmentDomains();        
         startOfDofIdPool_temp += xDofPoolAllocSize;
         

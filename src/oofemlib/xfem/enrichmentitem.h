@@ -93,7 +93,7 @@ public:
 
     /// Gives number of dofs.
     //int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
-    int giveNumberOfDofs() { return 1; } // should loop over all EF and ask them - what should be meant. active dofs? total or enriched?
+    //int giveNumberOfDofs() { return 1; } // should loop over all EF and ask them - what should be meant. active dofs? total or enriched?
 
     /// Sets DofId Array of an Enrichment Item.
     void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
@@ -105,10 +105,10 @@ public:
 
 
 
-    bool isDofManEnriched(DofManager *dMan);
-    bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber);
-    bool isElementEnriched(Element *element); 
-    bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
+    bool isDofManEnriched(const DofManager *dMan);
+    bool isDofManEnrichedByEnrichmentDomain(const DofManager *dMan, int edNumber);
+    bool isElementEnriched(const Element *element); 
+    bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
 
     /// Updates receiver geometry to the state reached at given time step.
     /// Geometry update; calls individual enrichment item updateGeometry method.

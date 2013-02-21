@@ -55,7 +55,6 @@
 #include "logger.h"
 #include "errorestimator.h"
 #include "contextioerr.h"
-#include "xfemmanager.h"
 #include "outputmanager.h"
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
@@ -92,7 +91,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     equationNumberingCompleted = 0;
     ndomains = 0;
     nMetaSteps = 0;
-    nxfemman = 0;
     profileOpt = false;
     nonLinFormulation = UNKNOWN;
 
@@ -100,7 +98,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
     domainList            = new AList< Domain >(0);
     metaStepList          = new AList< MetaStep >(0);
-    xfemManagerList       = new AList< XfemManager >(0);
 
     contextOutputMode     = COM_NoContext;
     contextOutputStep     = 0;
@@ -201,7 +198,6 @@ EngngModel :: ~EngngModel()
 
     delete domainList;
     delete metaStepList;
-    delete xfemManagerList;
 
 #ifdef __PETSC_MODULE
     delete petscContextList;
@@ -391,8 +387,6 @@ EngngModel :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, profileOpt, IFT_EngngModel_profileOpt, "profileopt");                // Macro
     nMetaSteps   = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, IFT_EngngModel_nmsteps, "nmsteps");                // Macro
-    nxfemman   = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_EngngModel_nxfemman, "nxfemman");          // Macro
     int _val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_EngngModel_nonLinFormulation, "nonlinform");
     nonLinFormulation = ( fMode ) _val;
@@ -1711,24 +1705,6 @@ EngngModel :: setDomain(int i, Domain *ptr)
     }
 }
 
-
-
-XfemManager *
-EngngModel :: giveXfemManager(int i)
-{
-    if ( xfemManagerList->includes(i) ) {
-        return this->xfemManagerList->at(i);
-    } else {
-        _error2("giveXfemManager: undefined xfem manager (%d)", i);
-        return NULL; // return NULL to prevent compiler warnings
-    }
-}
-
-bool
-EngngModel :: hasXfemManager(int i)
-{
-    return xfemManagerList->includes(i);
-}
 
 
 #ifdef __PETSC_MODULE

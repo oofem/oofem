@@ -43,6 +43,7 @@
 #include "xfemelementinterface.h"
 #include "structuralcrosssection.h"
 #include "enrichmentitem.h"
+#include "xfemmanager.h"
 
 namespace oofem {
 Interface *
@@ -83,7 +84,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
 
     // assemble xfem part of strain-displacement matrix
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     int counter = 0;
     AList< FloatMatrix >additionals;
     additionals.put(1, simple);
@@ -91,7 +92,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     // loop over enrichment items
     for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *er = xf->giveEnrichmentItem(i);
-        int erndofs = er->giveNumberOfDofs();
+        int erndofs = 0 ; //er->giveNumberOfDofs();
         
         // enrichment function at the gauss point     
         // should ask after specific EF in a loop
@@ -159,7 +160,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s, IntArray *dofIds) const
 {
     IntArray interactedEI;
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
 
     /* JB
@@ -237,7 +238,7 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     if ( xf->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
         StructuralMaterial *sm = ( StructuralMaterial * ) this->giveDomain()->giveMaterial( pir->giveMaterial() );
@@ -287,7 +288,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatArray Epsilon;
     this->computeStrainVector(Epsilon, gp, stepN);
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     if ( xf->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
         StructuralMaterial *sm = ( StructuralMaterial * ) this->giveDomain()->giveMaterial( pir->giveMaterial() );

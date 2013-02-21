@@ -88,10 +88,10 @@ public:
      * Gets interacted enrichment items for a particular element, the enrichment items
      * are referenced by a number from the domain - Don't like the name 'interacted' // JB
      */
-    void getInteractedEI(IntArray &answer, Element *elem);
+    void getInteractedEI(IntArray &answer, const Element *elem);
     
     /// Checks whether an element is interacted.
-    bool isElementEnriched(Element *elem);
+    bool isElementEnriched(const Element *elem);
 
     /// Checks whether a node is interacted. or 'isEnriched'
     bool isEnriched(int nodeNumber){ return isNodeEnriched(nodeNumber); };

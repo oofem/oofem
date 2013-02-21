@@ -54,7 +54,6 @@
 #include "contextoutputmode.h"
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
-#include "xfemmanager.h"
 #include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
@@ -88,7 +87,6 @@ class MetaStep;
 class MaterialInterface;
 class SparseMtrx;
 class NumericalMethod;
-class XfemManager;
 class InitModuleManager;
 class ExportModuleManager;
 class FloatMatrix;
@@ -256,10 +254,6 @@ protected:
     EngngModelTimer timer;
     /// Flag indicating that the receiver runs in parallel.
     int parallelFlag;
-    /// List of Xfemmanagers.
-    AList< XfemManager > *xfemManagerList;
-    /// Number of Xfemmanagers.
-    int nxfemman;
     /// Type of non linear formulation (total or updated formulation).
     enum fMode nonLinFormulation;
     /// Error estimator. Useful for adaptivity, or simply printing errors output.
@@ -322,10 +316,6 @@ public:
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
     /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
-    /** Returns XfemManager at a particular position */
-    XfemManager *giveXfemManager(int n);
-    /** Return true if XfemManager at a particular position is available */
-    bool hasXfemManager(int n);
     void setNumberOfEquations(int id, int neq) {
         numberOfEquations = neq;
         domainNeqs.at(id) = neq;

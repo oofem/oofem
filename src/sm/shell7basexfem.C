@@ -35,6 +35,7 @@
 #include "shell7basexfem.h"
 #include "shell7base.h"
 #include "enrichmentitem.h"
+#include "xfemmanager.h"
 
 namespace oofem {
     IntArray Shell7BaseXFEM :: dofId_Midplane(3);
@@ -43,8 +44,7 @@ namespace oofem {
 	bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
-    //xMan =  this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-
+    //this->xMan =  this->giveDomain()->giveXfemManager(1);
 }
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
@@ -83,25 +83,28 @@ Shell7BaseXFEM :: giveGlobalZcoord(GaussPoint *gp)
     
 }
 
+
+
+
 void
 Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
+    // Continuous part
     Shell7Base ::giveDofManDofIDMask(inode, ut, answer);
 
-    //xMan =  this->giveDomain()->giveXfemManager(1);
+    // Discontinuous part
+    DofManager *dMan = this->giveDofManager(inode);
+    XfemManager *xMan =  this->giveDomain()->giveXfemManager(1);
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
-        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
-            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
                 IntArray eiDofIdArray;
-                dei->giveEIDofIdArray(eiDofIdArray, j);
+                ei->giveEIDofIdArray(eiDofIdArray, j);
                 answer.followedBy(eiDofIdArray);
             }
         }
     }
- 
-
-    //answer.followedBy
 }
 
 
@@ -132,9 +135,6 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
             }
         }
     }
-    //g1.add(g1d);    g2.add(g2d);    g3.add(g3d);
-    //g1.printYourself();    g2.printYourself();    g3.printYourself();
-
 }
 
 
@@ -163,26 +163,29 @@ Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &ei
 
 
 
-void
-Shell7BaseXFEM :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+int
+Shell7BaseXFEM :: giveNumberOfDofs()
 {
-    // Routine to extract vector given an array of dofid items
-    // If a certain dofId does not exist a zero is used as value
-    answer.resize( dofIdArray.giveSize() * numberOfDofMans );
-    answer.zero();
-    int k = 0;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        DofManager *dMan = this->giveDofManager(i);        
-        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
-            Dof *d = dMan->giveDof(j);
-            k++;
-            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo EID_MomentumBalance is just a dummy argument in this case and feels redundant
+    // Continuous part
+    int nDofs = Shell7Base ::giveNumberOfDofs();
+
+    // Discontinuous part
+    XfemManager *xMan =  this->giveDomain()->giveXfemManager(1);
+
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        DofManager *dMan = this->giveDofManager(i);
+        for ( int j = 1; j <= xMan->giveNumberOfEnrichmentItems(); j++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(j);
+            for ( int k = 1; k <= ei->giveNumberOfEnrichmentDomains(); k++ ) {
+                if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,k) ) {
+                    IntArray eiDofIdArray;
+                    ei->giveEIDofIdArray(eiDofIdArray, k);
+                    nDofs += eiDofIdArray.giveSize();
+                }
             }
         }
     }
-    //answer.printYourself();
-
+    return nDofs;
 }
 
 
@@ -193,23 +196,23 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 //
 // Computes internal forces as a summation of: sectional forces + convective mass force
 {
-    // Test 
+
     // compute number of xDofs
     xMan =  this->giveDomain()->giveXfemManager(1);
-    EnrichmentItem *ei = xMan->giveEnrichmentItem(1);
-    int nXdofs = ei->giveNumberOfEnrichmentDomains() * ei->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfDofManagers(); 
+//    EnrichmentItem *ei = xMan->giveEnrichmentItem(1);
+//    int nXdofs = ei->giveNumberOfEnrichmentDomains() * ei->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfDofManagers(); 
     
 
-    answer.resize( this->giveNumberOfDofs() + nXdofs);
+    answer.resize( this->giveNumberOfDofs() );
     answer.zero();
     
     FloatArray solVec;
 
-    // continuous part
+    // Continuous part
     this->giveUpdatedSolutionVector(solVec, tStep);
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
 
-    // disccontinuous part
+    // Disccontinuous part
     
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
@@ -218,12 +221,9 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
                 IntArray eiDofIdArray;
                 dei->giveEIDofIdArray(eiDofIdArray, j);
-                eiDofIdArray.printYourself();
                 this->discGiveUpdatedSolutionVector(solVec, eiDofIdArray, tStep);
                 double xi0 = dei->enrichmentDomainXiCoords.at(j);
                 this->discComputeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord, xi0, dei, j);                      
-                //IntArray ord_phix, ord_mx, ord_gamx;
-                answer.printYourself();
 
             }
         }
@@ -257,7 +257,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
             for (int j = 1; j <= fieldDofId.giveSize(); j++ ) {
                 if ( dMan->hasDofID( (DofIDItem) fieldDofId.at(j) ) ) {
                     k++;
-                    ordering_temp.at(k) = ordering_cont.at(j + pos);
+                    ordering_temp.at(k) = ordering_cont.at(k);
                     temp.at(k) = j + pos;
                 }
             }
@@ -266,11 +266,10 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
       
     IntArray ordering; orderingArray.resize(k), activeDofsArray.resize(k);
     ///@todo will not work if there are several ei
-    int shift = this->giveNumberOfDofs() + eiDofIdArray.giveSize()*numberOfDofMans*(enrichmentDomainNumber-1); 
+    int shift = Shell7Base :: giveNumberOfDofs(); 
     for ( int i = 1; i <= k; i++ ) {
         orderingArray.at(i) = ordering_temp.at(i) + shift;
         activeDofsArray.at(i) = temp.at(i);
-        //activeDofsArray.at(i) = ordering_temp.at(i);
     }
 
 }
@@ -340,27 +339,23 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     // Should assemble to xfem dofs
     IntArray ordering_phibar, ordering_m, ordering_gam;
     IntArray activeDofs_phibar, activeDofs_m, activeDofs_gam;
-    //IntArray ordering_phibar = computeOrderingArray(ei, enrichmentDomainNumber, Midplane);
-    //IntArray ordering_m      = computeOrderingArray(ei, enrichmentDomainNumber, Director);
-    //IntArray ordering_gam    = computeOrderingArray(ei, enrichmentDomainNumber, InhomStrain);
 
     computeOrderingArray(ordering_phibar, activeDofs_phibar, ei, enrichmentDomainNumber, Midplane);
     computeOrderingArray(ordering_m, activeDofs_m, ei, enrichmentDomainNumber, Director);
     computeOrderingArray(ordering_gam, activeDofs_gam, ei, enrichmentDomainNumber, InhomStrain);
 
+/*
     ordering_phibar.printYourself();
     ordering_m.printYourself();
     ordering_gam.printYourself();
 
-    //activeDofs_m.add(3);
-    //activeDofs_gam.add(6);
-
     activeDofs_phibar.printYourself();
     activeDofs_m.printYourself();
     activeDofs_gam.printYourself();
-    
-    FloatArray f1Ass, f2Ass, f3Ass;
+    */
 
+
+    FloatArray f1Ass, f2Ass, f3Ass;
     f1Ass.beSubArrayOf(f1,activeDofs_phibar);
     f2Ass.beSubArrayOf(f2,activeDofs_m);
     f3Ass.beSubArrayOf(f3,activeDofs_gam);
@@ -595,7 +590,7 @@ Shell7BaseXFEM :: setupDelaminationXiCoordsAtGP()
     std::pair<int, double> pid;
     std::list<std::pair<int, double> > *delaminationXiCoordList;
 
-    xMan = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    xMan = this->giveDomain()->giveXfemManager(1);
     int numEI = xMan->giveNumberOfEnrichmentItems();
     for ( int i = 1; i <= numEI; i++ ) {
         Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );

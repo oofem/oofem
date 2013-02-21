@@ -384,6 +384,7 @@ public:
     void setXfemManager(XfemManager *xfemManager);
 
     XfemManager *giveXfemManager(int i);
+    bool hasXfemManager(int i);
     /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.
