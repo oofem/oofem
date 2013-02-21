@@ -39,6 +39,7 @@
 #include "sparsemtrxtype.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
+#include "timediscretizationtype.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

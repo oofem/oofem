@@ -38,6 +38,7 @@
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
+#include "timediscretizationtype.h"
 
 namespace oofem {
 /**

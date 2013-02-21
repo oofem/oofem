@@ -37,6 +37,7 @@
 
 #include "interface.h"
 #include "alist.h"
+#include "xfemmanager.h"
 
 namespace oofem {
 class FloatArray;
@@ -63,6 +64,7 @@ public:
     void XfemElementInterface_prepareNodesForDelaunay(AList< FloatArray > *answer1, AList< FloatArray > *answer2);
 protected:
     Element *element;
+    XfemManager *xMan;
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h
