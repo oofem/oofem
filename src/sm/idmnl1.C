@@ -369,7 +369,8 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
 
     //Loop over all Gauss Points which are in gp's integration domain
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        GaussPoint *gp = ( * pos ).nearGp;
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( gp->giveMaterialStatus( gp->giveMaterial()->giveNumber() ) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
             double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, ( * pos ).nearGp, ( * pos ).weight); //Compute New Weight
@@ -544,10 +545,10 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
-        if ( rmat->giveClassID() == this->giveClassID() ) {
-            rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
-            coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / status->giveIntegrationScale();
+        rmat = dynamic_cast< IDNLMaterial * > ( pos->nearGp->giveMaterial() );
+        if ( rmat ) {
+            rmat->giveRemoteNonlocalStiffnessContribution( pos->nearGp, rloc, s, rcontrib, atTime );
+            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
             //   printf ("\nelement %d:", gp->giveElement()->giveNumber());
             //   lcontrib.printYourself();
             //   rcontrib.printYourself();
@@ -622,9 +623,11 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     std::list< localIntegrationRecord > :: iterator pos;
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
-        if ( rmat->giveClassID() == this->giveClassID() ) {
+        rmat = dynamic_cast< IDNLMaterial *>( ( * pos ).nearGp->giveMaterial() );
+        if ( rmat ) {
             ( ( * pos ).nearGp )->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        } else {
+            continue;
         }
 
         n = loc.giveSize();

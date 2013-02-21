@@ -501,8 +501,8 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
         answer.resize(12);
         answer.zero();
 
-        switch ( edgeLoad->giveClassID() ) {
-        case ConstantEdgeLoadClass:
+        switch ( edgeLoad->giveApproxOrder() ) {
+        case 0:
 
             //edgeLoad->computeComponentArrayAt(components, tStep, mode);
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
@@ -544,8 +544,8 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             answer.at(11) = ( 1. ) * fz * l * l / 12. + fmy * l * kappay / ( 1. + 2. * kappay );
             answer.at(12) = ( -1. ) * fy * l * l / 12. + fmz * l * kappaz / ( 1. + 2. * kappaz );
             break;
-        case LinearEdgeLoadClass:
 
+        case 1:
             /*
              * coords.at(1) = -1.;
              * edgeLoad->computeValueAt(components, tStep, coords, mode);
@@ -628,6 +628,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             answer.at(12) = ( -1. ) * fy * l * l / 12. - dfy * l * l * ( 5. * kappaz + 3. ) / ( 60. * ( 1. + 2. * kappaz ) ) +
                             fmz * l * kappaz / ( 1. + 2. * kappaz ) + dfmz * l * ( 8. * kappaz + 1. ) / ( 12. * ( 1. + 2. * kappaz ) );
             break;
+
         default:
             _error("computeEdgeLoadVectorAt: unsupported load type");
         }

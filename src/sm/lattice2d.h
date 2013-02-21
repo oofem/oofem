@@ -95,6 +95,9 @@ public:
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     virtual void drawSpecial(oofegGraphicContext &gc);
+    void drawRawCrossSections(oofegGraphicContext &gc);
+    void giveCrossSectionCoordinates(FloatArray &coords);
+    void drawDeformedCrossSections(oofegGraphicContext &, UnknownType);
 #endif
 
 protected:

@@ -386,15 +386,15 @@ CemhydMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Ma
     }
 }
 
-int CemhydMat :: initMaterial(Element *element) {
+int
+CemhydMat :: initMaterial(Element *element)
+{
     IntegrationRule *iRule;
     GaussPoint *gp;
     CemhydMatStatus *ms;
-    int i;
-
 
     iRule = element->giveDefaultIntegrationRulePtr();
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         if ( !MasterCemhydMatStatus && !eachGP ) {
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 1);
@@ -405,7 +405,7 @@ int CemhydMat :: initMaterial(Element *element) {
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 0);
         }
 
-        gp->setMaterialStatus(ms, this->giveClassID());
+        gp->setMaterialStatus(ms, this->giveNumber());
     }
 
     return 1;
@@ -446,7 +446,8 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
     }
 }
 
-void CemhydMat :: averageTemperature(void) {
+void CemhydMat :: averageTemperature()
+{
     if ( !eachGP ) {
         MasterCemhydMatStatus->setAverageTemperatureVolume( MasterCemhydMatStatus->giveAverageTemperature() / MasterCemhydMatStatus->giveTotalVolume(), MasterCemhydMatStatus->giveTotalVolume() );
     }

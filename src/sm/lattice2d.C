@@ -355,6 +355,7 @@ Lattice2d :: drawYourself(oofegGraphicContext &gc)
 
     if ( mode == OGC_rawGeometry ) {
         this->drawRawGeometry(gc);
+        this->drawRawCrossSections(gc);
     } else if ( mode == OGC_deformedGeometry ) {
         this->drawDeformedGeometry(gc, DisplacementVector);
     } else if ( mode == OGC_eigenVectorGeometry ) {
@@ -368,10 +369,8 @@ Lattice2d :: drawYourself(oofegGraphicContext &gc)
     }
 }
 
-
-
-
-void Lattice2d :: drawRawGeometry(oofegGraphicContext &gc)
+void
+Lattice2d :: drawRawGeometry(oofegGraphicContext &gc)
 {
     GraphicObj *go;
 
@@ -397,7 +396,8 @@ void Lattice2d :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void
+Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 {
     GraphicObj *go;
 
@@ -498,5 +498,78 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
         }
     }
 }
+
+void
+Lattice2d :: drawRawCrossSections(oofegGraphicContext &gc)
+{
+    GraphicObj *go;
+
+    //  if (!go) { // create new one
+    WCRec p [ 2 ]; /* poin */
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getCrossSectionColor() );
+    EASValsSetLayer(OOFEG_RAW_CROSSSECTION_LAYER);
+
+    FloatArray coords;
+    this->giveCrossSectionCoordinates(coords);
+
+    p [ 0 ].x = ( FPNum ) coords.at(1);
+    p [ 0 ].y = ( FPNum ) coords.at(2);
+    p [ 0 ].z = ( FPNum ) coords.at(3);
+    p [ 1 ].x = ( FPNum ) coords.at(4);
+    p [ 1 ].y = ( FPNum ) coords.at(5);
+    p [ 1 ].z = ( FPNum ) coords.at(6);
+
+    go = CreateLine3D(p);
+    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
+    EGAttachObject(go, ( EObjectP ) this);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
+
+void
+Lattice2d :: giveCrossSectionCoordinates(FloatArray &coords)
+{
+    double x1, y1, x2, y2;
+    x1 = this->giveNode(1)->giveCoordinate(1);
+    y1 = this->giveNode(1)->giveCoordinate(2);
+    x2 = this->giveNode(2)->giveCoordinate(1);
+    y2 = this->giveNode(2)->giveCoordinate(2);
+
+    //Compute normal and shear direction
+    FloatArray normalDirection;
+    FloatArray shearDirection;
+    normalDirection.resize(2);
+    normalDirection.zero();
+    shearDirection.resize(2);
+    shearDirection.zero();
+    normalDirection.at(1) = x2 - x1;
+    normalDirection.at(2) = y2 - y1;
+    normalDirection.normalize();
+    if ( normalDirection.at(2) == 0. ) {
+        shearDirection.at(1) = 0.;
+        shearDirection.at(2) = 1.;
+    } else   {
+        shearDirection.at(1) = 1.0;
+        shearDirection.at(2) =
+            -normalDirection.at(1) / normalDirection.at(2);
+    }
+
+    shearDirection.normalize();
+
+    coords.resize(6);
+    coords.at(1) = this->gpCoords.at(1) - shearDirection.at(1) * this->width / 2.;
+    coords.at(2) = this->gpCoords.at(2) - shearDirection.at(2) * this->width / 2.;
+    coords.at(3) = 0.;
+    coords.at(4) = this->gpCoords.at(1) + shearDirection.at(1) * this->width / 2.;
+    coords.at(5) = this->gpCoords.at(2) + shearDirection.at(2) * this->width / 2.;
+    coords.at(6) = 0.;
+
+    return;
+}
+
 #endif
 } // end namespace oofem

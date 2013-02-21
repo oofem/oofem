@@ -583,7 +583,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 
     // store dof types
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        _val =  this->giveDof(i)->giveClassID();
+        _val = this->giveDof(i)->giveDofType();
         if ( !stream->write(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -662,7 +662,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     if ( samedofs ) {
         // if size match, check types
         for ( int i = 1; i <= _numberOfDofs; i++ ) {
-            if ( this->giveDof(i)->giveClassID() != dtypes.at(i) ) {
+            if ( this->giveDof(i)->giveDofType() != dtypes.at(i) ) {
                 samedofs = false;
                 break;
             }
@@ -683,7 +683,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         // allocate new ones
         dofArray = new Dof * [ _numberOfDofs ];
         for ( int i = 0; i < _numberOfDofs; i++ ) {
-            dofArray [ i ] = CreateUsrDefDofOfType( ( classType ) dtypes(i), i + 1, this );
+            dofArray [ i ] = CreateUsrDefDofOfType( ( dofType ) dtypes(i), i + 1, this );
         }
 
         numberOfDofs = _numberOfDofs;

@@ -39,6 +39,7 @@
 #include "element.h"
 #include "conTable.h"
 #include "mathfem.h"
+#include "planstrss.h"
 
 #include <list>
 
@@ -89,8 +90,8 @@ FreemInterface :: createInput(Domain *d, TimeStep *stepN)
 
     for ( i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
-        if ( ielem->giveClassID() != PlaneStress2dClass ) {
-            OOFEM_ERROR("FreemInterface::createInput : unsupported element type");
+        if ( dynamic_cast< PlaneStress2d * >( ielem ) ) {
+            OOFEM_ERROR("FreemInterface::createInput : unsupported element type (not PlaneStress2d)");
         }
 
         fprintf( outputStrem, "backgroundMeshElem %d  nodes 4 %d %d %d %d\n", i,
@@ -120,7 +121,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
 
     // loop over nodes
     for ( int i = 1; i <= nnodes; i++ ) {
-        if ( !( ( d->giveDofManager(i)->giveClassID() == NodeClass ) || ( d->giveDofManager(i)->giveClassID() == RigidArmNodeClass ) ) ) {
+        if ( !dynamic_cast< Node* >( d->giveDofManager(i) ) ) {
             continue;
         }
 

@@ -332,7 +332,7 @@ Node :: checkConsistency()
     result = result && DofManager :: checkConsistency();
 
     for ( int i = 1; i <= ndofs; i++ ) {
-        if ( this->giveDof(i)->giveClassID() == SimpleSlaveDofClass ) {
+        if ( dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) ) ) {
             nslaves++;
         }
     }
@@ -342,16 +342,16 @@ Node :: checkConsistency()
     }
 
     IntArray masterDofManagers(nslaves);
-    int numberOfMDM = 0; // counter of diferent master dofManagers
-    int j, master, alreadyFound = 0;
-    Dof *idof;
+    int numberOfMDM = 0; // counter of different master dofManagers
+    int master, alreadyFound = 0;
     Node *masterNode;
 
     for ( int i = 1; i <= ndofs; i++ ) {
-        if ( ( idof = this->giveDof(i) )->giveClassID() == SimpleSlaveDofClass ) {
+        SimpleSlaveDof *sdof = dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) );
+        if ( sdof ) {
             alreadyFound  = 0;
-            master = ( ( SimpleSlaveDof * ) idof )->giveMasterDofManagerNum();
-            for ( j = 1; j <= numberOfMDM; j++ ) {
+            master = sdof->giveMasterDofManagerNum();
+            for ( int j = 1; j <= numberOfMDM; j++ ) {
                 if ( masterDofManagers.at(j) == master ) {
                     alreadyFound = 1;
                     break;
@@ -679,9 +679,8 @@ Node :: drawYourself(oofegGraphicContext &gc)
 
         bool ordinary = true;
 
-        int idof;
-        for ( idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
-            if ( this->giveDof(1)->giveClassID() == SimpleSlaveDofClass ) {
+        for ( int idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
+            if ( this->giveDof(idof)->isPrimaryDof() ) {
                 ordinary = false;
                 break;
             }

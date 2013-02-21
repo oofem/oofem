@@ -52,12 +52,12 @@ RigidArmNode :: allocAuxArrays()
     masterContribution = new FloatArray * [ numberOfDofs ];
 
     for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
-            masterDofID [ i - 1 ] = new IntArray;
-            masterContribution [ i - 1 ] = new FloatArray;
-        } else {
+        if ( dofArray [ i - 1 ]->isPrimaryDof() ) {
             masterDofID [ i - 1 ] = NULL;
             masterContribution [ i - 1 ] = NULL;
+        } else {
+            masterDofID [ i - 1 ] = new IntArray;
+            masterContribution [ i - 1 ] = new FloatArray;
         }
     }
 }
@@ -130,7 +130,7 @@ RigidArmNode :: checkConsistency()
     // check if created DOFs (dofType) compatible with mastermask
     ndofs = master->giveNumberOfDofs();
     for ( i = 1; i <= numberOfDofs; i++ ) {
-        if ( masterMask->at(i) && ( dofArray [ i - 1 ]->giveClassID() == MasterDofClass ) ) {
+        if ( masterMask->at(i) && dofArray [ i - 1 ]->isPrimaryDof() ) {
             _error("checkConsistency: incompatible mastermask and doftype data");
         }
     }
@@ -155,8 +155,9 @@ RigidArmNode :: checkConsistency()
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( i = 1; i <= numberOfDofs; i++ ) {
-        if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
-            ( ( SlaveDof * ) dofArray [ i - 1 ] )->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
+        SlaveDof *sdof = dynamic_cast< SlaveDof* >( dofArray [ i - 1 ] );
+        if ( sdof ) {
+            sdof->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
         }
     }
 

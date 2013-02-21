@@ -115,7 +115,7 @@ public:
     /// Store temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void storeWeightTemperatureProductVolume(Element *element, TimeStep *tStep);
     /// Perform averaging on a master CemhydMatStatus.
-    virtual void averageTemperature(void);
+    virtual void averageTemperature();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     /// Use different methods to evaluate material parameters

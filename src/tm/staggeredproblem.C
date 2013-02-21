@@ -95,7 +95,6 @@ StaggeredProblem :: instanciateDefaultMetaStep(InputRecord *ir)
 int
 StaggeredProblem :: instanciateSlaveProblems()
 {
-    int i;
     EngngModel *timeDefProb = NULL, *slaveProb;
 
     //first instantiate master problem if defined
@@ -105,7 +104,7 @@ StaggeredProblem :: instanciateSlaveProblems()
         emodelList->put(timeDefinedByProb, timeDefProb);
     }
 
-    for ( i = 1; i <= nModels; i++ ) {
+    for ( int i = 1; i <= nModels; i++ ) {
         if ( emodelList->includes(i) ) {
             continue;
         }
@@ -151,6 +150,8 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], IFT_StaggeredProblem_prob1, "prob1"); // Macro
     IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], IFT_StaggeredProblem_prob2, "prob2"); // Macro
+
+    renumberFlag = true; // The staggered problem itself should always try to check if the sub-problems needs renumbering.
 
     return IRRT_OK;
 }
@@ -307,7 +308,7 @@ StaggeredProblem :: solveYourself()
                 sp->giveNextStep();
 
                 // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
-                if ( this->requiresEquationRenumbering( sp->giveCurrentStep() ) || this->giveClassID() == classType(StaggeredProblemClass) ) {
+                if ( this->requiresEquationRenumbering( sp->giveCurrentStep() ) ) {
                     this->forceEquationNumbering();
                 }
 
@@ -374,7 +375,8 @@ StaggeredProblem :: updateYourself(TimeStep *stepN)
 }
 
 void
-StaggeredProblem :: terminate(TimeStep *tStep) {
+StaggeredProblem :: terminate(TimeStep *tStep)
+{
     for ( int i = 1; i <= nModels; i++ ) {
         this->giveSlaveProblem(i)->terminate(tStep);
     }
@@ -484,21 +486,24 @@ StaggeredProblem :: setRenumberFlag()
 }
 
 #ifdef __OOFEG
-void StaggeredProblem :: drawYourself(oofegGraphicContext &context) {
+void StaggeredProblem :: drawYourself(oofegGraphicContext &context)
+{
     int ap = context.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= nModels ) ) {
         this->giveSlaveProblem(ap)->drawYourself(context);
     }
 }
 
-void StaggeredProblem :: drawElements(oofegGraphicContext &context) {
+void StaggeredProblem :: drawElements(oofegGraphicContext &context)
+{
     int ap = context.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= nModels ) ) {
         this->giveSlaveProblem(ap)->drawElements(context);
     }
 }
 
-void StaggeredProblem :: drawNodes(oofegGraphicContext &context) {
+void StaggeredProblem :: drawNodes(oofegGraphicContext &context)
+{
     int ap = context.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= nModels ) ) {
         this->giveSlaveProblem(ap)->drawNodes(context);

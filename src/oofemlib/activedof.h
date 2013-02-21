@@ -84,6 +84,7 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
+    virtual dofType giveDofType() { return DT_active; }
     virtual const char *giveClassName() const { return "ActiveDof"; }
     virtual classType giveClassID() const { return ActiveDofClass; }
 

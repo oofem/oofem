@@ -1,4 +1,4 @@
-4test.oofem.out
+planestress.oofem.out
 1D PETSc test
 linearstatic nsteps 1 lstype 3 smtype 7
 domain 2dPlaneStress

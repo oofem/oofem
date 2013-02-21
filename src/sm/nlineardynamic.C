@@ -99,21 +99,13 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
         _error("giveNumericalMethod: undefined meta step");
     }
 
-    SparseNonLinearSystemNM *nm = NULL;
-
-    if ( nMethod ) {
-        if ( nMethod->giveClassID() == NRSolverClass ) {
-            nMethod->reinitialize();
-            return nMethod;
-        } else {
-            delete nMethod;
-        }
+    if ( this->nMethod ) {
+        nMethod->reinitialize();
+        return nMethod;
     }
 
-    nm = ( SparseNonLinearSystemNM * ) new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
-    nMethod = nm;
-
-    return nm;
+    this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance);
+    return this->nMethod;
 }
 
 

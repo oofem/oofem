@@ -149,18 +149,21 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 int
-Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime) {
+Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
     answer.resize(0);
     return 0;
 }
 
 int
-Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint) {
+Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
     return 0;
 }
 
 int
-Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode) {
+Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
     answer.resize(0);
     return 0;
 }
@@ -183,11 +186,11 @@ contextIOResultType
 Material :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material status (saves state variables, that completely describe
-// current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
+// current state) stored in gp->matstatusDict with key = this->giveNumber()
 // storing of corresponding context if it is defined for current material in
 // gp status dictionary should be performed here by overloading this function.
 // (such code should invoke also corresponding function for yield conditions,
-//  submaterials and so on)
+// submaterials and so on)
 //
 
 //
@@ -214,7 +217,7 @@ contextIOResultType
 Material :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material status (saves state variables, that completely describe
-// current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
+// current state) stored in gp->matstatusDict with key = this->giveNumber()
 // restoring of corresponding context if it is defined for current material in
 // gp status dictionary should be performed here by overloading this function.
 // (such code should invoke also corresponding function for yield conditions,
@@ -248,7 +251,7 @@ Material :: giveStatus(GaussPoint *gp) const
  */
 {
     MaterialStatus *status;
-    status = (MaterialStatus*) gp->giveMaterialStatus(this->giveClassID());
+    status = (MaterialStatus*) gp->giveMaterialStatus( this->giveNumber() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
@@ -257,7 +260,7 @@ Material :: giveStatus(GaussPoint *gp) const
         // dont include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status,this->giveClassID());
+            gp->setMaterialStatus(status, this->giveNumber());
         }
     }
 
@@ -294,7 +297,8 @@ Material :: initGpForNewStep(GaussPoint *gp)
 }
 
 int
-Material :: initMaterial(Element *element) {
+Material :: initMaterial(Element *element)
+{
     return 0;
 }
 

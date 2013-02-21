@@ -38,16 +38,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Mask defining the physical meaning of particular DOF in node.
- * Mask arrays are also used in elements, where these arrays
- * are determining required DOFs needed by element and which are then
- * requested on particular nodes. They are used in function
- * Node::giveLocationArray which returns equations numbers
- * corresponding to selected dofs.
- * @deprecated{Use DofIDItem}
- */
-typedef char DofID;
 
 #define DofIDItem_DEF \
     ENUM_ITEM_WITH_VALUE(Undef, 0) /* Error value */ \
@@ -82,6 +72,7 @@ typedef char DofID;
  */
 enum DofIDItem {
     DofIDItem_DEF
+    MaxDofID
 };
 
 #undef ENUM_ITEM

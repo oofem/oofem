@@ -156,7 +156,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     }
 }
 
-void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const
+void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s, IntArray *dofIds) const
 {
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);

@@ -37,6 +37,7 @@
 #include "structuralelement.h"
 #include "materialinterface.h"
 #include "gausspnt.h"
+#include "truss3d.h"
 
 #include <vector>
 
@@ -143,7 +144,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                     elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
-                    if ( elem->giveClassID() == Truss3dClass ) {
+                    if ( dynamic_cast< Truss3d * >( elem ) ) {
                         elem->giveLocalCoordinateSystem(baseGCS);
                         //this->giveStressVectorTranformationMtrx(transfMatrix,baseGCS,1);//from structuralMaterial
                         //baseGCS.printYourself();

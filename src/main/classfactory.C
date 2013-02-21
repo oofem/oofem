@@ -186,7 +186,7 @@ case id:                                    \
     return answer;
 }
 
-  Dof *ClassFactory :: createDof(classType type, int num, DofManager* dman)
+  Dof *ClassFactory :: createDof(dofType type, int num, DofManager* dman)
   {
 #undef REGISTER_CLASS
 #define REGISTER_CLASS(_class, id)  \

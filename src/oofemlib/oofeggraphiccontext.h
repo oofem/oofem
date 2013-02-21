@@ -42,9 +42,9 @@
  #include "intarray.h"
  #include "nodalrecoverymodel.h"
  #include "internalstatemode.h"
- 
+
  #include <list>
- 
+
 //
 // for c++ compiler to be successful on some c files
 //
@@ -104,7 +104,8 @@ namespace oofem {
  #define OOFEG_NATURALBC_LAYER            7
  #define OOFEG_SPARSE_PROFILE_LAYER       8
  #define OOFEG_DEBUG_LAYER                9
- #define OOFEG_LAST_LAYER                10
+ #define OOFEG_RAW_CROSSSECTION_LAYER      10
+ #define OOFEG_LAST_LAYER                11
 class EngngModel;
 class Element;
 class Range;
@@ -145,6 +146,7 @@ protected:
     static EPixel yieldPlotColors [ OOFEG_YIELD_STEPS ];
     static EPixel standardSparseProfileColor, extendedSparseProfileColor;
     static EPixel geometryColor;
+    static EPixel crossSectionColor;
 
     static int activeStep, activeStepVersion;
     static double defScale;
@@ -156,7 +158,7 @@ protected:
     static IntArray matRegFilter;
 
     // element filter
-    static std::list< Range >element_filter;
+    static std :: list< Range >element_filter;
 
     static ScalarAlgorithmType scalarAlgo;
     // smoother type
@@ -212,6 +214,7 @@ public:
     EPixel getActiveCrackColor() { return activeCrackColor; }
     EPixel getYieldPlotColor(double ratio)
     { return this->GR_giveColorFromUserColorTable(yieldPlotColors, OOFEG_YIELD_STEPS, ratio); }
+    EPixel getCrossSectionColor()    { return crossSectionColor; }
     EPixel getStandardSparseProfileColor() { return standardSparseProfileColor; }
     EPixel getExtendedSparseProfileColor() { return extendedSparseProfileColor; }
     EPixel getGeometryColor() { return geometryColor; }
@@ -239,6 +242,7 @@ public:
     void setCrackPatternColor(EPixel color) { crackPatternColor = color; }
     void setActiveCrackColor(EPixel color) { activeCrackColor  = color; }
     void setGeometryColor(EPixel color) { geometryColor = color; }
+    void setCrossSectionColor(EPixel color) { crossSectionColor = color; }
     void setActiveStep(int n) { activeStep = n; }
     void setActiveStepVersion(int n) { activeStepVersion = n; }
     void setDefScale(double n)   { defScale = n; }
@@ -327,5 +331,3 @@ extern void deleteLayerGraphics(int iLayer);
 
 #endif
 #endif // oofeggraphiccontext_h
-
-

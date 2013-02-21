@@ -109,7 +109,9 @@ static void OOFEGReturnHitInCmd(Widget w, XEvent *event, String *params,
 
 static XtTranslations tt1;
 static XtActionsRec oofeg_remap_return[] = {
-    { ( String ) "oofegretActCmd", OOFEGReturnHitInCmd },
+{
+    ( String ) "oofegretActCmd", OOFEGReturnHitInCmd
+},
 };
 
 static int oofeg_box_setup = 0;
@@ -222,7 +224,7 @@ void updateISA(oofegGraphicContext *context);
 void updateGraphics();
 
 static const char *OOFEG_layer_names[] = {
-    "GEOMETRY LAYER", "DEFORMED GEOMETRY", "NODE ANNOTATION", "ELEMENT ANNOTATION", "VARPLOT CONTOURS", "CRACK PATTERNS", "IC-BC ANNOTATIONS", "NATURAL_BC", "SPARSE PROFILE LAYER", "DEBUG LAYER"
+    "GEOMETRY LAYER", "DEFORMED GEOMETRY", "NODE ANNOTATION", "ELEMENT ANNOTATION", "VARPLOT CONTOURS", "CRACK PATTERNS", "IC-BC ANNOTATIONS", "NATURAL_BC", "SPARSE PROFILE LAYER", "DEBUG LAYER", "CROSSSECTION LAYER"
 };
 
 
@@ -268,8 +270,8 @@ static DrawMode oofeg_draw_modes[] = {
     densityField                // 22
 };
 
-std::string jobName = "";
-std::string viewTitle = "";
+std :: string jobName = "";
+std :: string viewTitle = "";
 
 oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 EView *myview;
@@ -324,12 +326,12 @@ main(int argc, char *argv[])
                 fprintf(stderr, "\nCan't use -p, not compiled with parallel support\a\n\n");
                 exit(EXIT_FAILURE);
 #endif
-            } 
+            }
         }
     }
 
     if ( !inputFileFlag ) {
-        std::string input;
+        std :: string input;
         :: giveInputDataFileName(input);
         inputFileName << input;
     }
@@ -338,23 +340,25 @@ main(int argc, char *argv[])
     if ( parallelFlag ) {
         inputFileName << "." << rank;
     }
+
 #endif
 
-    OOFEMTXTDataReader dr(inputFileName.str().c_str());
+    OOFEMTXTDataReader dr( inputFileName.str().c_str() );
 
     // extract job name
-    std::string temp = inputFileName.str();
+    std :: string temp = inputFileName.str();
     // extract job name
     size_t k = temp.size();
     while ( k ) {
         k--;
-        if ( temp[k] == '/' ) {
+        if ( temp [ k ] == '/' ) {
             k++;
             break;
         }
     }
-    std::string jobName = temp.substr(k);
-    std::string viewTitle = "OOFEG ("+jobName+")";
+
+    std :: string jobName = temp.substr(k);
+    std :: string viewTitle = "OOFEG (" + jobName + ")";
 
     problem = InstanciateProblem(& dr, _postProcessor, 0, NULL, parallelFlag);
     dr.finish();
@@ -375,7 +379,7 @@ main(int argc, char *argv[])
 
 
     ESIBuildInterface(mask, argc, argv);
-    myview  =  ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("OOFEG"), 
+    myview  =  ElixirNewView(const_cast< char * >( viewTitle.c_str() ), const_cast< char * >("OOFEG"),
                              const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                              const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
@@ -398,7 +402,7 @@ main(int argc, char *argv[])
     }
 
     if ( oofeg_box_setup ) {
-        oofeg_display_message( OOFEG_VERSION );
+        oofeg_display_message(OOFEG_VERSION);
     }
 
     updateISA(gc);
@@ -520,7 +524,7 @@ void ESICustomize(Widget parent_pane)
                                                   commandWidgetClass, grey_scale_setup_palette,
                                                   al, ac, pass_setgreyscale_command, ( XtPointer ) 0);
                 XtAppAddActions( XtWidgetToApplicationContext( ESITopLevelWidget() ),
-                                oofeg_remap_return, XtNumber(oofeg_remap_return) );
+                                 oofeg_remap_return, XtNumber(oofeg_remap_return) );
                 tt1 = XtParseTranslationTable("#override <KeyPress>Return: oofegretActCmd(0)");
                 XtOverrideTranslations(greyscale_min, tt1);
                 XtOverrideTranslations(greyscale_max, tt1);
@@ -591,7 +595,7 @@ void ESICustomize(Widget parent_pane)
                                                   commandWidgetClass, color_scale_setup_palette,
                                                   al, ac, pass_setscale_command, ( XtPointer ) 0);
                 XtAppAddActions( XtWidgetToApplicationContext( ESITopLevelWidget() ),
-                                oofeg_remap_return, XtNumber(oofeg_remap_return) );
+                                 oofeg_remap_return, XtNumber(oofeg_remap_return) );
                 tt1 = XtParseTranslationTable("#override <KeyPress>Return: oofegretActCmd(0)");
                 XtOverrideTranslations(scale_min, tt1);
                 XtOverrideTranslations(scale_max, tt1);
@@ -674,7 +678,7 @@ void ESICustomize(Widget parent_pane)
                                                       commandWidgetClass, animate_setup_palette,
                                                       al, ac, pass_setanimate_command, ( XtPointer ) 0);
             XtAppAddActions( XtWidgetToApplicationContext( ESITopLevelWidget() ),
-                            oofeg_remap_return, XtNumber(oofeg_remap_return) );
+                             oofeg_remap_return, XtNumber(oofeg_remap_return) );
             tt1 = XtParseTranslationTable("#override <KeyPress>Return: oofegretActCmd(0)");
             XtOverrideTranslations(scale_min, tt1);
             XtOverrideTranslations(scale_max, tt1);
@@ -683,7 +687,6 @@ void ESICustomize(Widget parent_pane)
         /* CUSTOM / PLOT */
         oofeg_add_palette("< Mesh Plot >", parent_pane, & plot_palette);
         oofeg_add_button("GEO_PLOT", "Geom Plot", commandWidgetClass, plot_palette, GeoPlot, NULL);
-
         oofeg_add_palette("< DofMan Plot >", plot_palette, & dofman_menu);
         oofeg_add_button("DOFMAN_PLOT", "Node Geometry", commandWidgetClass, dofman_menu, nodePlot, NULL);
         oofeg_add_button("DOFMANNUM_PLOT", "DofMan Numbers", commandWidgetClass, dofman_menu, nodeAnnPlot, NULL);
@@ -718,7 +721,7 @@ void ESICustomize(Widget parent_pane)
                 oofeg_add_menu_item( "ISO_LINE_PLOT", "IsoLine Plot", plotalgo_palette, plotAlgosel, ( XtPointer ) ( vectorAddr + 1 ) );
                 oofeg_add_menu_item( "ISO_LANDPROFILE", "Z-Profile Plot", plotalgo_palette, plotAlgosel, ( XtPointer ) ( vectorAddr + 2 ) );
                 oofeg_add_menu_item( "ISO_LANDCOLORPROFILE", "Z-ColorProfile Plot", plotalgo_palette,
-                                    plotAlgosel, ( XtPointer ) ( vectorAddr + 3 ) );
+                                     plotAlgosel, ( XtPointer ) ( vectorAddr + 3 ) );
             }
 
             oofeg_add_palette("< Scalar plot >", varplot_palette, & scalarplot_palette);
@@ -734,11 +737,11 @@ void ESICustomize(Widget parent_pane)
                     oofeg_add_menu_item( "SXY_PLOT", "Sxy Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", stressForce_palette, emptyaction, NULL);
                     oofeg_add_menu_item( "S11_PLOT", "S11 Stress/Force Plot", stressForce_palette,
-                                        princstresscompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                                         princstresscompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
                     oofeg_add_menu_item( "S22_PLOT", "S22 Stress/Force Plot", stressForce_palette,
-                                        princstresscompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+                                         princstresscompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
                     oofeg_add_menu_item( "S33_PLOT", "S33 Stress/Force Plot", stressForce_palette,
-                                        princstresscompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                                         princstresscompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
                 }
                 oofeg_add_popdown_menu("< Strain plot >", scalarplot_palette, & scalarstrain_palette);
                 {
@@ -766,11 +769,11 @@ void ESICustomize(Widget parent_pane)
                     oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalarplasticstrain_palette, emptyaction, NULL);
                     oofeg_add_menu_item( "E11_PLOT", "Eps_11 ", scalarplasticstrain_palette,
-                                        princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                                         princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
                     oofeg_add_menu_item( "E22_PLOT", "Eps_22", scalarplasticstrain_palette,
-                                        princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+                                         princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
                     oofeg_add_menu_item( "E33_PLOT", "Eps_33", scalarplasticstrain_palette,
-                                        princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                                         princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
                 }
 
                 oofeg_add_popdown_menu("< Beam Forces/Moments>", scalarplot_palette, & bendingMoment_palette);
@@ -818,33 +821,33 @@ void ESICustomize(Widget parent_pane)
                 //emj
 
                 oofeg_add_button( "TEMPERATURE_PLOT", "Temperature field", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 17 ) );
+                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 17 ) );
 
                 oofeg_add_button( "CONCENTRATION1_PLOT", "MassConcentration(1)", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 18 ) );
+                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 18 ) );
 
                 oofeg_add_button( "PRESSURE_PLOT", "Pressure", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 20 ) );
+                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 20 ) );
 
                 oofeg_add_button( "VOF_PLOT", "VOF Fraction", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 21 ) );
+                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 21 ) );
 
                 oofeg_add_button( "DENSITY_PLOT", "Density", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 22 ) );
+                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 22 ) );
 
 
                 oofeg_add_popdown_menu("< Error plot >", scalarplot_palette, & scalarerror_palette);
                 {
                     oofeg_add_menu_item( "Error_Indicator", "Error Indicator ", scalarerror_palette,
-                                        errorcompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                                         errorcompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
                     oofeg_add_menu_item( "ERROR_STRESSINTERRIOR", "Stress Error", scalarerror_palette,
-                                        errorcompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+                                         errorcompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
                     oofeg_add_menu_item( "ERROR_PRIMARYUNKNOWN", "Unknown Error", scalarerror_palette,
-                                        errorcompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                                         errorcompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
                 }
 
                 oofeg_add_button( "MESHDENS_PLOT", "RelMesh Density", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 16 ) );
+                                  varPlot, ( XtPointer ) ( oofeg_draw_modes + 16 ) );
 
                 oofeg_add_dialog(NULL, "Set ZProfScale", "Input z-Profile Scale (0 <= scale < MAX_Scale)", "0.0", scalarplot_palette,
                                  apply_change, "SET_ZPROF_SCALE", ESIDialogValueNumber, NULL);
@@ -852,28 +855,28 @@ void ESICustomize(Widget parent_pane)
 
             oofeg_add_palette("< Vector plot >", varplot_palette, & vectorplot_palette);
             oofeg_add_button( "VELOCITY_PLOT", "Velocity", commandWidgetClass, vectorplot_palette,
-                             varPlot, ( XtPointer ) ( oofeg_draw_modes + 19 ) );
+                              varPlot, ( XtPointer ) ( oofeg_draw_modes + 19 ) );
 
             oofeg_add_palette("< Tensor plot >", varplot_palette, & tensorplot_palette);
 
 
             oofeg_add_button( "YIELD_PLOT", "Plot YieldedElems",
-                             commandWidgetClass, varplot_palette, varPlot, ( XtPointer ) ( oofeg_draw_modes + 12 ) );
+                              commandWidgetClass, varplot_palette, varPlot, ( XtPointer ) ( oofeg_draw_modes + 12 ) );
 
             oofeg_add_button( "CRACK_PLOT", "Plot CrackPattern",
-                             commandWidgetClass, varplot_palette, varPlot, ( XtPointer ) ( oofeg_draw_modes + 13 ) );
+                              commandWidgetClass, varplot_palette, varPlot, ( XtPointer ) ( oofeg_draw_modes + 13 ) );
         }
 
         oofeg_add_palette("< Set smoother >", varplot_palette, & smoother_palette);
         {
             oofeg_add_button( "NodalAveraging", "NodalAveraging Smoother",
-                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 0 ) );
+                              commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 0 ) );
 
             oofeg_add_button( "ZieZhu", "ZZ Smoother",
-                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 1 ) );
+                              commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 1 ) );
 
             oofeg_add_button( "SPR", "SPR Smoother",
-                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 2 ) );
+                              commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 2 ) );
         }
     }
 
@@ -1032,6 +1035,7 @@ void defPlot(Widget wid, XtPointer cl, XtPointer cd)
 }
 
 
+
 void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 {
     int init = 1, id, i, j, nnodes;
@@ -1057,7 +1061,7 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 
         for ( i = 1; i <= nnodes; i++ ) {
             dman = domain->giveDofManager(i);
-            if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) ) {
+            if ( dynamic_cast< Node * >(dman) ) {
                 if ( init ) {
                     for ( j = 1; j <= 3; j++ ) {
                         maxcoords [ j - 1 ] = mincoords [ j - 1 ] = domain->giveNode(i)->giveCoordinate(j);
@@ -1840,7 +1844,7 @@ char *readSimpleString(char *source, char *simpleString, char **remain)
     char *curr = source;
     char *ss = simpleString;
 
-    while ( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || ! * curr ) {
+    while ( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || !* curr ) {
         curr++;
     }
 
@@ -1849,7 +1853,7 @@ char *readSimpleString(char *source, char *simpleString, char **remain)
         exit(1);
     }
 
-    while ( !( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || ! * curr ) ) {
+    while ( !( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || !* curr ) ) {
         * ss++ = * curr++;
     }
 
@@ -2532,7 +2536,7 @@ void
 oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
-    view = ElixirNewView(const_cast< char * >(viewTitle.c_str()), const_cast< char * >("SimpleXF"), 
+    view = ElixirNewView(const_cast< char * >( viewTitle.c_str() ), const_cast< char * >("SimpleXF"),
                          const_cast< char * >(OOFEG_BACKGROUND_COLOR),
                          const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
@@ -2545,7 +2549,7 @@ oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 void
 oofeg_close_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
-    EVSetApplyToViewFunction( ( void(*) (EView *, caddr_t, WCRec *) )oofeg_destroy_frame, NULL, NULL );
+    EVSetApplyToViewFunction( ( void ( * )(EView *, caddr_t, WCRec *) )oofeg_destroy_frame, NULL, NULL );
     EVSetApplyToViewPreventRedisplay(YES);
     EMPushHandler(ESIModel(), EVApplyToViewHandler, NULL);
 }
@@ -2636,7 +2640,7 @@ void drawData(oofegGraphicContext &gc)
 {
     // switch some off render modes
     EView *v;
-    IntArray rm( list_length ( age_model->dependent_views ) );
+    IntArray rm( list_length(age_model->dependent_views) );
     ERenderingType rt;
     int i = 1;
 

@@ -333,9 +333,6 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
     }
 
     this->nMethod = new NRSolver(1, this->giveDomain(1), this, EID_MomentumBalance_ConservationEquation);
-    if ( !nMethod ) {
-        OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
-    }
     return this->nMethod;
 }
 

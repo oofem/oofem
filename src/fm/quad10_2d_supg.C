@@ -91,30 +91,6 @@ Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 }
 
 
-void Quad10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme &s) const
-// Returns the location array of the receiver. This array is obtained by
-// simply appending the location array of every node of the receiver.
-{
-    IntArray nodeDofIDMask;
-    IntArray nodalArray;
-    int i;
-
-
-    locationArray.resize(0);
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
-        locationArray.followedBy(nodalArray);
-    }
-
-    for ( i = 1; i <= 1; i++ ) {
-        this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveInternalDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
-        locationArray.followedBy(nodalArray);
-    }
-}
-
-
 int
 Quad10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {

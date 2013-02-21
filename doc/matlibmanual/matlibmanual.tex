@@ -3768,16 +3768,22 @@ Supported modes& \_2dHeat\\
 \subsection{Isotropic linear material for moisture transport -- IsoLinMoisture}
 \label{IsoLinMoistureMat}
 Linear isotropic material model for moisture transport problems described
-by the linear diffusion equation
+by the linear diffusion equation\footnote{Note that the symbols $k$ and $c$
+in \refeq{lindiff} have a different meaning than in \refeq{lindiffheat}.
+The reason is that the nonlinear model for moisture transport described
+in Section \ref{sec:NlIsoMoistureMat} traditionally
+uses $c$ for permeability and \refeq{lindiff} should be obtained
+as a special case of \refeq{nlisomoisture:governing}. 
+On the other hand, the heat conduction model
+from Section \ref{IsoLET} was implemented earlier and the input parameters
+are directly called $k$ and $c$, so changing this notation now could lead
+to confusion for some older input files.}
 \begin{equation}\label{lindiff}
-c\frac{\partial h}{\partial t} = \nabla \cdot \left( k \nabla h \right)
+k\frac{\partial h}{\partial t} = \nabla \cdot \left( c \nabla h \right)
 \end{equation}
-where $h$ is the relative humidity, $c$ is the moisture capacity,
-and $k$ is the moisture permeability.\footnote{The notation in
-\refeq{lindiff} is not standard. For instance, 
-Ba\v{z}ant uses $c$ for the moisture permeability
-and $k$ for the inverse moisture capacity. Here, the objective is to 
-avoid confusion between parameters in \refeq{lindiff0} and \refeq{lindiff}.}
+where $h$ is the pore relative humidity (dimensionless, between 0 and 1), 
+$k$ is the moisture capacity [kg/m$^3$],
+and $c$ is the moisture permeability [kg/m$\cdot$s].
 The model parameters are summarized
 in Tab.~\ref{IsoLinmoistureMat_table}.
 
@@ -3803,15 +3809,15 @@ Supported modes& \_2dHeat\\
 
 \subsection{Isotropic material for moisture transport based on Ba\v{z}ant
   and Najjar -- BazantNajjarMoisture}
-\label{BazantNajjarMoistureMat}
-Nonlinear isotropic material for moisture transport in cementitious
-materials. A detailed description of this material model can be found
-in reference \cite{Bazant:72}. The governing equation 
+\label{sec:BazantNajjarMoistureMat}
+This is a specific model for nonlinear moisture transport in isotropic cementitious
+materials, based on \cite{Bazant:72}.
+The governing equation 
 \begin{equation}\label{BNmodel:governing}
 \frac{\partial h}{\partial t} = \nabla \cdot \left( C(h) \nabla h \right)
 \end{equation} 
-was derived
-assuming that the slope of the sorption isotherm is linear, i.e.\ the
+is a special case of \refeq{nlisomoisture:governing}, valid under
+the assumption that the slope of the sorption isotherm is linear, i.e.\ the
 moisture capacity is constant.
 In \refeq{BNmodel:governing}, $h$ is the relative humidity and $C(h)$ is the
 humidity-dependent diffusivity approximated by
@@ -3857,6 +3863,196 @@ Supported modes& \_2dHeat\\
 \label{BazantNajjarMoistureMat}
 %\end{center}
 \end{table}
+
+
+
+\subsection{Nonlinear isotropic material for moisture transport -- NlIsoMoisture}
+\label{sec:NlIsoMoistureMat}
+This is a more general model for nonlinear moisture transport in isotropic 
+porous
+materials, based on a nonlinear sorption isotherm (relation between 
+the pore relative humidity $h$ and the water content $w$) 
+and on a humidity-dependent
+moisture permeability.
+The governing differential equation reads
+\begin{equation}\label{nlisomoisture:governing}
+k(h) \frac{\partial h}{\partial t} = \nabla \cdot \left[ c(h) \nabla h \right]
+\end{equation} 
+where 
+$k(h)$ [kg/m$^3$] is the humidity-dependent moisture capacity (derivative of
+the moisture content with respect to the relative humidity), and $c(h)$
+[kg/m$\cdot$s] is the moisture permeability. 
+
+So far, six different functions for the {\bf sorption
+isotherm} have been implemented  (in fact, what matters for the model
+is not the isotherm itself but its derivative---the moisture capacity):
+\begin{enumerate}
+
+\item
+{\bf Linear} isotherm ($isothermType=0$) is characterized only by its
+slope given by parameter $moistureCapacity$.
+
+\item
+{\bf Piecewise linear} isotherm ($isothermType=1$) is defined by two 
+arrays
+with the values of pore relative humidity $iso\_h$ and the
+corresponding values of moisture content $iso\_w(h)$. The arrays must be of
+the same size. 
+
+\item
+{\bf Ricken} isotherm \cite{Kuenzel}
+($isothermType=2$), which is widely used for sorption of porous building
+materials. It is
+expressed by the equation
+\begin{equation}\label{nlisomoisture:ricken}
+w(h) = w_0 - \frac{\ln(1-h)}{d}
+\end{equation} 
+where $w_0$ [kg/m$^3$] is the water content at $h=0$ and $d$ [m$^3$/kg] is
+an approximation coefficient. In the input record, only $d$ must be specified 
+($w_0$ is not needed). Note that for $h=1$ this isotherm
+gives an infinite moisture content. 
+
+\item
+Isotherm proposed by {\bf Kuenzel} \cite{Kuenzel} ($isothermType=3$) 
+in the form 
+\begin{equation}\label{nlisomoisture:kuenzel}
+w(h) = w_f \frac{(b-1)h}{b-h}
+\end{equation} 
+where $w_f$ [kg/m$^3$] is the moisture content at free saturation and
+$b$ is a dimensionless approximation factor greater than 1.
+
+\item
+Isotherm proposed by {\bf Hansen} \cite{Hansen} ($isothermType=4$) in the form
+\begin{equation}\label{nlisomoisture:hansen}
+u(h) = u_h \left(1- \frac{\ln h}{A} \right)^{-1/n}
+\end{equation} 
+characterizes the amount of adsorbed water 
+by the moisture ratio $u$ [kg/kg]. To obtain the
+moisture content $w$, it is necessary to multiply the moisture ratio
+by the density of the solid phase. In (\ref{nlisomoisture:hansen}),
+ $u_h$ is the maximum hygroscopically
+bound water by adsorption, and $A$ and $n$ are constants
+obtained by fitting of experimental data.
+
+\item
+The {\bf BSB} isotherm \cite{BSB} ($isothermType=5$) is an improved
+version of the famous BET isotherm. It is expressed in terms
+of the moisture ratio
+\begin{equation}\label{nlisomoisture:BSB}
+u(h) = \frac{C k V_m h}{(1-k h)(1+(C-1)k h)}
+\end{equation} 
+where $V_m$ is the monolayer capacity, and $C$ depends on the absolute
+temperature $T$ and on the difference between the heat of adsorption and
+condensation. Empirical formulae for estimation of the parameters can
+be found in \cite{Xi}. Note that these formulae hold quite accurately
+for cement paste only; a reduction of the moisture ratio is necessary 
+if the isotherm
+should be applied for concrete. 
+\end{enumerate}
+
+The present implementation covers three functions for 
+{\bf moisture permeability}:
+\begin{enumerate}
+
+\item
+{\bf Piecewise linear} permeability  ($permeabilityType=0$) 
+is defined by two arrays
+with the values of pore relative humidity $perm\_h$ and the
+corresponding values of moisture content $perm\_c(h)$. The arrays must be of
+the same size. 
+
+\item
+The {\bf Ba\v{z}ant-Najjar} 
+permeability function ($permeabilityType=1$) is given by the same
+formula (\ref{BNmodel:diffusivity}) as the diffusivity in 
+Section \ref{sec:BazantNajjarMoistureMat}. All parameters have a similar
+meaning as in (\ref{BNmodel:diffusivity}) but  $c1$ is now the
+moisture permeability at full saturation [kg/m$\cdot$s].
+
+\item
+Permeability function proposed by {\bf Xi et al.} \cite{Xi}
+($permeabilityType=2$) reads
+\begin{equation}\label{nlisomoisture:Xi}
+c(h) = \alpha_h + \beta_h \left[ 1 - 2^{-10^{\gamma_h(h-1)}} \right]
+\end{equation} 
+where $\alpha_h$, $\beta_h$ and $\gamma_h$ are parameters that can be
+evaluated using empirical mixture-based formulae presented in \cite{Xi}. 
+However, if those formulae are used outside the range of water-cement 
+ratios for which they were calibrated, the
+permeability may become negative. Also the physical units are unclear.
+\end{enumerate}
+
+Note that the Bajant-Najjar 
+model from Section \ref{sec:BazantNajjarMoistureMat} 
+can be obtained as a special
+case of the present model if $permeabilityType$ is set to 1
+and $isothermType$ is set to 0. 
+The ratio $c1/moistureCapacity$ then corresponds to the diffusivity
+parameter $C_1$ from \refeq{BNmodel:governing}.
+
+The model parameters are summarized in Tab.~\ref{NlIsoMoistureMat}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Nonlinear isotropic material for moisture transport \\
+\hline
+Record Format & \descitem{NlIsoMoistureMat} \elemparam{num}{in}
+\elemparam{d}{rn} \elemparam{isothermType}{in} \elemparam{permeabilityType}{in}
+\optelemparam{rhodry}{rn} \optelemparam{capa}{rn}
+\optelemparam{iso\_h}{ra} \optelemparam{iso\_w(h)}{ra}
+\optelemparam{dd}{rn} \optelemparam{wf}{rn} \optelemparam{b}{rn}
+\optelemparam{uh}{rn} \optelemparam{A}{rn} \optelemparam{nn}{rn}
+\optelemparam{c}{rn} \optelemparam{k}{rn} \optelemparam{Vm}{rn}
+\optelemparam{perm\_h}{ra} \optelemparam{perm\_c(h)}{ra}
+\optelemparam{c1}{rn} \optelemparam{n}{rn} \optelemparam{alpha0}{rn}
+\optelemparam{hc}{rn} \optelemparam{alphah}{rn}
+\optelemparam{betah}{rn} \optelemparam{gammah}{rn} \\
+Parameters &- \param{num} material model number \\
+&- \param{d} material density \\
+&- \param{isothermType} isotherm function as listed above (0, 1, ...5)
+\\
+&- \param{permeabilityType} moisture permeability function as listed
+above (0, 1, 2) \\
+&- \param{rhodry} [kg/m$^3$] density of dry material (for $isothermType=4$ and 5) \\
+&- \param{capa} [kg/m$^3$] moisture capacity (for $isothermType=0$) \\
+&- \param{iso\_h} [-] humidity array (for $isothermType=1$) \\
+&- \param{iso\_w(h)} [kg/m$^3$] moisture content array (for
+$isothermType=1$) \\
+&- \param{dd} [-] parameter (for $isothermType=2$)\\
+&- \param{wf} [kg/m$^3$] is the moisture content at free saturation
+(for $isothermType=3$) \\
+&- \param{b} [-] parameter (for $isothermType=3$) \\
+&- \param{uh} [kg/kg] maximum hygroscopically
+bound water by adsorption (for $isothermType=4$) \\
+&- \param{A} [-] parameter (for $isothermType=4$) \\
+&- \param{n} [-] parameter (for $isothermType=4$) \\
+&- \param{Vm} (for $isothermType=5$) \\
+&- \param{k} (for $isothermType=5$) \\
+&- \param{C} (for $isothermType=5$) \\
+&- \param{perm\_h} [-] humidity array (for $permeabilityType=0$) \\
+&- \param{perm\_c(h)} [kg m$^{-1}$ s$^{-1}$] moisture permeability
+array (for $permeabilityType=0$) \\
+&- \param{c1} [kg m$^{-1}$ s$^{-1}$] moisture permeability at full
+saturation (for $permeabilityType=1$) \\
+&- \param{n} [-] exponent (for $permeabilityType=1$) \\
+&- \param{alpha0} [-] ratio between minimum and maximum diffusivity
+(for $permeabilityType=1$) \\
+&- \param{hc} [-] relative humidity at which the diffusivity is exactly
+between its minimum and maximum value (for $permeabilityType=1$) \\
+&- \param{alphah} [kg m$^{-1}$ s$^{-1}$] (for $permeabilityType=2$) \\
+&- \param{betah} [kg m$^{-1}$ s$^{-1}$] (for $permeabilityType=2$) \\
+&- \param{gammah} [-] (for $permeabilityType=2$) \\
+
+Supported modes& \_2dHeat \\
+\hline
+\end{tabular}
+\caption{Nonlinear isotropic material for moisture transport - summary.}
+\label{NlIsoMoistureMat}
+%\end{center}
+\end{table}
+
+
 
 \subsection{Material for cement hydration - CemhydMat}
 \label{Cemhyd}
@@ -4667,14 +4863,24 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
 \bibitem{Bazant:72} Z.P.~Ba\v{z}ant, L.J.~Najjar.
 \newblock  Nonlinear water diffusion in nonsaturated concrete.
 \newblock {\em Materials and Structures}, 5:3--20, 1972.
-\bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size Effect in Concrete and Other Quasibrittle  Materials, CRC Press, 1998.
+\bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size
+  Effect in Concrete and Other Quasibrittle  Materials, CRC Press,
+  1998.
+\bibitem{BSB} S. Brunauer, J. Skalny, E.E. Bodor: J. Colloid Interface
+  Sci, 30, 1969.
 \bibitem{NISTIR7232} D.P. Bentz: CEMHYD3D: A Three-Dimensional Cement Hydration and Microstructure Development Modeling Package. Version 3.0., NIST Building and Fire Research Laboratory, Gaithersburg, Maryland, Technical report, 2005.
 \bibitem{Cervera:99} M.~Cervera, J.~Oliver, and T.~Prato: Thermo-chemo-mechanical model for concrete. I: Hydration and aging. {\em Journal of Engineering Mechanics ASCE}, 125(9):1018--1027, 1999.
 \bibitem{Gawin:06a} D.~Gawin, F.~Pesavento, and B.~A. Schrefler: Hygro-thermo-chemo-mechanical modelling of concrete at early ages and beyond. Part I: Hydration and hygro-thermal phenomena. {\em International Journal for Numerical Methods in Engineering}, 67(3):299--331, 2006.
 \bibitem{GraJir} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Damage-plastic model for concrete failure.
 \newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
-\bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of structures, John Wiley, 2001.
+\bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of
+  structures, John Wiley, 2001.
+\bibitem{Hansen} P.F. Hansen: Coupled Moisture/Heat Transport in
+  Cross Sections of Structures, Beton og Konstruktionsinstituttet, 1985.
+\bibitem{Kuenzel} H.M. K{\"u}nzel, H.M.: Simultaneous heat and
+  moisture transport in building components, Ph.D. thesis, IRB-Verlag,
+  1995.
 \bibitem{mdm} M. Jir\'{a}sek: Comments on microplane theory, Mechanics of Quasi-Brittle Materials and Structures, ed. G. Pijaudier-Cabot, Z. Bittnar, and B. G\'{e}rard, Herm\`{e}s Science Publications, Paris, 1999, pp. 57-77.
 \bibitem{Rots} B. Lourenco, J.G. Rots: Multisurface Interface Model for Analysis of Masonry Structures, Journal of Engng Mech, vol. 123, No. 7, 1997.
 \bibitem{ortiz} M. Ortiz, E.P. Popov: Accuracy and stability of integration algorithms for elasto-plastic constitutive relations, Int. J. Numer. Methods Engrg, 21, 1561-1576, 1985.
@@ -4684,7 +4890,12 @@ Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf
 \bibitem{simo} J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
 \bibitem{Schindler:2005} A. K. Schindler and K. J. Folliard: Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 102, 24 - 33, 2005.
 \bibitem{SimoPister} J.C. Simo, K.S. Pister: Remarks on rate constitutive equations for finite deformation problems: computational implications, Comp Methods in Applied Mech and Engng, 46, 201-215, 1984.
-\bibitem{Smilauer:09} V. \v{S}milauer and T. Krej\v{c}\'i, Multiscale Model for Temperature Distribution in Hydrating Concrete, International Journal for Multiscale Computational Engineering, 7 (2), 135-151, 2009.
+\bibitem{Smilauer:09} V. \v{S}milauer and T. Krej\v{c}\'i, Multiscale
+  Model for Temperature Distribution in Hydrating Concrete,
+  International Journal for Multiscale Computational Engineering, 7
+  (2), 135-151, 2009.
+\bibitem{Xi} Y. Xi, Z.P. Ba\v{z}ant, H.M. Jennings: Moisture Diffusion
+  in Cementitious Materials, Advn Cem Bas Mat, 1994.
 \end{thebibliography}
 
 \end{document}

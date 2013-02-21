@@ -61,10 +61,6 @@
 #include "initmodulemanager.h"
 #include "usrdefsub.h"
 
-#ifdef __CEMHYD_MODULE
- #include "cemhydmat.h"
-#endif
-
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
@@ -633,9 +629,6 @@ EngngModel :: forceEquationNumbering(int id)
 
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->invalidateLocationArray();
-    }
 
     return domainNeqs.at(id);
 }
@@ -701,7 +694,7 @@ EngngModel :: solveYourself()
             this->giveNextStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
-            if ( this->requiresEquationRenumbering( this->giveCurrentStep() ) || this->giveClassID() == classType(StaggeredProblemClass) ) {
+            if ( this->requiresEquationRenumbering( this->giveCurrentStep() ) ) {
                 this->forceEquationNumbering();
             }
 
@@ -802,37 +795,12 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #endif
             elem->updateYourself(stepN);
             //elem -> printOutputAt(File, stepN) ;
-
-#ifdef __CEMHYD_MODULE
-            //store temperature and associated volume on each GP before performing averaging
-            if ( elem->giveMaterial()->giveClassID() == CemhydMatClass ) {
-                TransportElement *element = ( TransportElement * ) elem;
-                CemhydMat *cem = ( CemhydMat * ) element->giveMaterial();
-                cem->clearWeightTemperatureProductVolume(element);
-                cem->storeWeightTemperatureProductVolume(element, stepN);
-            }
-
-#endif
         }
 
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", nelem)
 #  endif
 
-#ifdef __CEMHYD_MODULE
-        //perform averaging on each material instance
-        for ( int j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
-            if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
-                CemhydMat *cem = ( CemhydMat * ) domain->giveMaterial(j);
-                cem->averageTemperature();
-            }
-        }
-
-#endif
-
-#  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated Materials ", nelem)
-#  endif
     }
 
     // if there is an error estimator, it should be updated so that values can be exported.

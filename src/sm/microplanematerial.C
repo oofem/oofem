@@ -93,7 +93,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
 {
     IntegrationPointStatus *status;
 
-    status = gp->giveMaterialStatus(this->giveClassID());
+    status = gp->giveMaterialStatus( this->giveNumber() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateMicroplaneStatus(gp);
@@ -101,7 +101,7 @@ MicroplaneMaterial :: giveMicroplaneStatus(GaussPoint *gp)
         // don't include it. specific instance
         // does not have status.
         if ( status != NULL ) {
-            gp->setMaterialStatus(status, this->giveClassID());
+            gp->setMaterialStatus(status, this->giveNumber());
         }
     }
 

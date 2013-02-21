@@ -184,12 +184,12 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
 
     for ( i = 1; i <= ndofman; i++ ) {
         dman = domain->giveDofManager(i);
+        inode = dynamic_cast< Node* >( dman );
         // skip dofmanagers with no position information
-        if ( ( dman->giveClassID() != NodeClass ) && ( dman->giveClassID() != RigidArmNodeClass ) && ( dman->giveClassID() != HangingNodeClass ) ) {
+        if ( !inode ) {
             continue;
         }
 
-        inode = ( Node * ) dman;
         // get node coordinates
         x = * ( inode->giveCoordinates() );
         // get velocity field v(tn, x(tn)) for dof manager

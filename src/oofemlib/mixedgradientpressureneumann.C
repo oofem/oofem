@@ -63,7 +63,7 @@ MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) :
     this->sigmaDev = new Node(1, d); // Node number lacks meaning here.
     for (int i = 0; i < components; i++) {
         // Just putting in X_i id-items since they don't matter.
-        sigmaDev->appendDof(new MasterDof(i+1, sigmaDev, (DofIDItem)(X_1+i) ));
+        sigmaDev->appendDof(new MasterDof(i+1, sigmaDev, (DofIDItem)(d->giveNextFreeDofID()) ));
     }
 }
 

@@ -259,7 +259,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
         }
 
         le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-        // remember le in cooresponding status
+        // remember le in corresponding status
         status->setLe(le);
     }
 }
@@ -277,13 +277,13 @@ LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status;
 
-    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveClassID() );
+    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveNumber() );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
 
         if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveClassID() );
+            gp->setMaterialStatus( status, this->giveNumber() );
             this->_generateStatusVariables(gp);
         }
     }

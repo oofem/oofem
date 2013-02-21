@@ -63,23 +63,11 @@ Dof *SimpleSlaveDof :: giveMasterDof() const
     // checks dof compatibility and slave to slave references
 
     if ( this->masterDofIndx == -1 ) {
-        this->masterDofIndx = dofManager->giveDomain()->giveDofManager(masterDofMngr)
-                              ->findDofWithDofId(this->dofID);
-
-        if ( this->masterDofIndx ) {
-            /*
-             * classType masterDofCT = dofManager->giveDomain()->giveDofManager(masterDofMngr)->
-             * giveDof(masterDofIndx)->giveClassID();
-             * if ((masterDofCT != MasterDofClass)&&(masterDofCT != SharedMasterDofClass)&&(masterDofCT != RemoteMasterDofClass)) {
-             *
-             * _error ("giveMasterDof: slaveDof to slaveDof reference not allowed");
-             * }
-             */
-        } else {
+        this->masterDofIndx = dofManager->giveDomain()->giveDofManager(masterDofMngr)->findDofWithDofId(this->dofID);
+        if ( !this->masterDofIndx ) {
             _error("giveMasterDof: no dof with dofID in master found");
         }
     }
-
     return dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveDof(masterDofIndx);
 }
 

@@ -211,14 +211,14 @@ public:
     virtual int read(long *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(double *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(char *data, const unsigned int count) { return buff->unpackArray(data, count); }
-    virtual int read(bool *data, const unsigned int count) { return buff->unpackArray(data, count); }
+    virtual int read(bool *data, const unsigned int count) { return 0; }
 
     virtual int write(const int *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const unsigned long *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const long *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const double *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const char *data, const unsigned int count) { return buff->packArray(data, count); }
-    virtual int write(const bool *data, const unsigned int count) { return buff->packArray(data, count); }
+    virtual int write(const bool *data, const unsigned int count) { return 0; }
 };
 
 
@@ -243,14 +243,14 @@ public:
     virtual int read(long *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(double *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(char *data, const unsigned int count) { return pc->unpackArray(data, count); }
-    virtual int read(bool *data, const unsigned int count) { return pc->unpackArray(data, count); }
+    virtual int read(bool *data, const unsigned int count) { return 0; }
 
     virtual int write(const int *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const unsigned long *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const long *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const double *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const char *data, const unsigned int count) { return pc->packArray(data, count); }
-    virtual int write(const bool *data, const unsigned int count) { return pc->packArray(data, count); }
+    virtual int write(const bool *data, const unsigned int count) { return 0; }
 };
 
 #endif
