@@ -369,7 +369,8 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
 
     //Loop over all Gauss Points which are in gp's integration domain
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        GaussPoint *gp = ( * pos ).nearGp;
+        nonlocStatus = static_cast< IDNLMaterialStatus * >( gp->giveMaterialStatus( gp->giveMaterial()->giveNumber() ) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         if ( this->nlvar == NLVT_StressBased && flag == 1 ) { //Check if Stress Based Averaging is requested and calculate nonlocal contribution
             double stressBasedWeight = computeStressBasedWeight(eigenVectorAngle, sigmaRatio, gp, ( * pos ).nearGp, ( * pos ).weight); //Compute New Weight
