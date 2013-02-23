@@ -153,7 +153,7 @@ virtual double giveGlobalZcoord(GaussPoint *gp);
 
     // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
     void computeLinearizedStiffness(GaussPoint * gp,  Material * mat, TimeStep * tStep,
                                     FloatArray & S1g, FloatArray & S2g, FloatArray & S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
@@ -187,6 +187,7 @@ virtual double giveGlobalZcoord(GaussPoint *gp);
 
     // Solution vectors
     void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    void temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
                                         const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
     void computeSolutionFields(FloatArray &xbar, FloatArray &m, double &gam, const FloatArray &solVec, const FloatMatrix &N11, const FloatMatrix &N22, const FloatMatrix &N33);

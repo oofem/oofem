@@ -285,7 +285,6 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 {
     // Computes an array containing the dofId's that should be created as new dofs.
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    //enrichesDofsWithIdArray->printYourself();
     
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
     answer.resize(eiEnrSize);
@@ -294,8 +293,6 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
         answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + i; 
     }
    
-    //answer.printYourself();
-
 }
 
 
@@ -304,7 +301,6 @@ EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enri
 {
     // Computes an array containing the dofId's that should be created as new dofs.
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    //enrichesDofsWithIdArray->printYourself();
     
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
     
@@ -318,14 +314,12 @@ EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enri
             dofMask.at(count) = i;
         }
     }
-    dofMask.printYourself();
 
     answer.resize(count);
     int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
     for ( int i = 1; i <= count; i++ ) {
         answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + dofMask.at(i) ;
     }
-    //answer.printYourself();
 
 }
 

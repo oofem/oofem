@@ -36,12 +36,13 @@
 #include "shell7base.h"
 #include "enrichmentitem.h"
 #include "xfemmanager.h"
+#include "constantpressureload.h"
 
 namespace oofem {
     IntArray Shell7BaseXFEM :: dofId_Midplane(3);
-	IntArray Shell7BaseXFEM :: dofId_Director(3);
+    IntArray Shell7BaseXFEM :: dofId_Director(3);
     IntArray Shell7BaseXFEM :: dofId_InhomStrain(1); 
-	bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
+    bool Shell7BaseXFEM :: __initializedFieldDofId = Shell7BaseXFEM :: initDofId();
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
     //this->xMan =  this->giveDomain()->giveXfemManager(1);
@@ -210,6 +211,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 
     // Continuous part
     this->giveUpdatedSolutionVector(solVec, tStep);
+    solVec.printYourself();
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
 
     // Disccontinuous part
@@ -228,7 +230,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             }
         }
     }
- 
+    answer.printYourself();
 }
 
 
@@ -275,6 +277,337 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
 }
 
 
+
+void
+Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+
+    
+    answer.resize( this->giveNumberOfDofs() );
+    answer.zero();
+    
+    FloatMatrix temp;
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep);
+    
+    this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
+
+
+    #if 0
+    // Add contribution due to pressure load
+    int nLoads = this->boundaryLoadArray.giveSize() / 2;
+
+    for ( int i = 1; i <= nLoads; i++ ) {     // For each pressure load that is applied
+        int load_number = this->boundaryLoadArray.at(2 * i - 1);
+        int iSurf = this->boundaryLoadArray.at(2 * i);         // load_id
+        Load *load;
+        load = this->domain->giveLoad(load_number);
+
+        if ( dynamic_cast< ConstantPressureLoad * >( load ) ) {
+            FloatMatrix K_pressure;
+            this->computePressureTangentMatrix(K_pressure, load, iSurf, tStep);
+            temp.add(K_pressure);
+        }
+    }
+    #endif
+}
+
+
+void
+Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep)
+{
+    FloatMatrix A [ 3 ] [ 3 ];
+    FloatMatrix F1 [ 3 ];
+    FloatArray t1(3), t2(3), t3(3);
+    FloatArray f3 [ 2 ], f4, f5;
+
+    FloatMatrix L11(6, 6), L12(6, 6), L13(6, 3), L14(6, 2), L15(6, 1),
+    L22(6, 6), L23(6, 3), L24(6, 2), L25(6, 1),
+    L33(3, 3), L34(3, 2), L35(3, 1),
+    L44(2, 2), L45(2, 1),
+    L55(1, 1);
+    FloatMatrix B11, B22, B32, B43, B53;
+    FloatArray S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
+    FloatMatrix K11(18, 18), K12(18, 18), K13(18, 6), K22(18, 18), K23(18, 6), K33(6, 6);
+    K11.zero(), K12.zero(), K13.zero(), K22.zero(), K23.zero(), K33.zero();
+
+    FloatMatrix K11temp1, K12temp1, K13temp1, K22temp1, K22temp2, K23temp1, K23temp2, K33temp1, K33temp2;
+
+    //FloatArray solVec;
+    //this->giveUpdatedSolutionVector(solVec, tStep);
+
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
+    int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
+
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+
+            double gam, dg1, dg2;
+
+            this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+            FloatArray genEps;
+            this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+            this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dg1, dg2, gam);
+
+
+            // Material stiffness
+            Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
+
+            // Tangent stiffness
+ #if 1
+            // thickness coefficients
+            double zeta = giveGlobalZcoord(gp);
+            double a = zeta + 0.5 * gam * zeta * zeta;
+            double b = 0.5 * zeta * zeta;
+            double c = 1. + gam * zeta;
+
+            // f1(alpha) = b*A(alpha,beta)*dg(beta) + c*A(alpha,3);
+            F1 [ 0 ].resize(0, 0);
+            F1 [ 1 ].resize(0, 0);
+            F1 [ 2 ].resize(0, 0);
+            F1 [ 0 ].add(dg1 * b, A [ 0 ] [ 0 ]);
+            F1 [ 0 ].add(dg2 * b, A [ 0 ] [ 1 ]);
+            F1 [ 0 ].add(c, A [ 0 ] [ 2 ]);
+            F1 [ 1 ].add(dg1 * b, A [ 1 ] [ 0 ]);
+            F1 [ 1 ].add(dg2 * b, A [ 1 ] [ 1 ]);
+            F1 [ 1 ].add(c, A [ 1 ] [ 2 ]);
+            F1 [ 2 ].add(dg1 * b, A [ 2 ] [ 0 ]);
+            F1 [ 2 ].add(dg2 * b, A [ 2 ] [ 1 ]);
+            F1 [ 2 ].add(c, A [ 2 ] [ 2 ]);
+
+            //f3(alpha) = b*A(alpha,beta)*dm(beta) + zeta*A(alpha,3)*m;
+            f3 [ 0 ].resize(0);
+            f3 [ 1 ].resize(0);
+            t1.beProductOf(A [ 0 ] [ 0 ], dm1);
+            t2.beProductOf(A [ 0 ] [ 1 ], dm2);
+            t3.beProductOf(A [ 0 ] [ 2 ], m);
+            f3 [ 0 ].add(b, t1);
+            f3 [ 0 ].add(b, t2);
+            f3 [ 0 ].add(zeta, t3);
+
+            //f32 = b*( A.at(2,1)*dm1 + A.at(2,2)*dm2 )  + zeta*A.at(2,3)*m;
+            t1.beProductOf(A [ 1 ] [ 0 ], dm1);
+            t2.beProductOf(A [ 1 ] [ 1 ], dm2);
+            t3.beProductOf(A [ 1 ] [ 2 ], m);
+            f3 [ 1 ].add(b, t1);
+            f3 [ 1 ].add(b, t2);
+            f3 [ 1 ].add(zeta, t3);
+
+
+            //f4 = b*dm(alpha)*A(alpha,3) + zeta*A(3,3)*m;
+            f4.resize(0);
+            t1.beTProductOf(A [ 0 ] [ 2 ], dm1);
+            t2.beTProductOf(A [ 1 ] [ 2 ], dm2);
+            t3.beTProductOf(A [ 2 ] [ 2 ], m);
+            f4.add(b, t1);
+            f4.add(b, t2);
+            f4.add(zeta, t3);
+
+            // f5 = b*F1(alpha)*dm(alpha) + zeta*F2*m + zeta*N3
+            f5.resize(0);
+            t1.beTProductOf(F1 [ 0 ], dm1);
+            t2.beTProductOf(F1 [ 1 ], dm2);
+            t3.beTProductOf(F1 [ 2 ], m);
+            f5.add(b, t1);
+            f5.add(b, t2);
+            f5.add(zeta, t3);
+            f5.add(zeta, S3g);
+
+
+            /*
+             *
+             *     A     a*A            F1           b*A*m             f3
+             *    a*A    a^2*A          a*F1         a*b*A*m         a*f3+b*N
+             *    F1     a*F1     b*F1*dgam+c*F2     b*(F1*m+N)        f5
+             *    b*A*m  a*b*A*m    b*(F1*m+N)       b^2*m*A*m     b*m*f3
+             *    f3     a*f3+b*N       f5           b*m*f3    b*dm*f3+zeta*m*f4
+             */
+
+            // L(1,1) = A(alpha,beta)
+            L11.setSubMatrix(A [ 0 ] [ 0 ], 1, 1);
+            L11.setSubMatrix(A [ 0 ] [ 1 ], 1, 4);
+            L11.setSubMatrix(A [ 1 ] [ 0 ], 4, 1);
+            L11.setSubMatrix(A [ 1 ] [ 1 ], 4, 4);
+
+            // L(1,2) = a*A(alpha,beta)
+            L12 = L11;
+            L12.times(a);
+
+            // L(1,3) = F1(alpha)
+            L13.setSubMatrix(F1 [ 0 ], 1, 1);
+            L13.setSubMatrix(F1 [ 1 ], 4, 1);
+
+            // L(1,4) = b*A*m
+            L14.zero();
+            t1.beProductOf(A [ 0 ] [ 0 ], m);
+            t2.beProductOf(A [ 0 ] [ 1 ], m);
+            L14.addSubVectorCol(t1, 1, 1);
+            L14.addSubVectorCol(t2, 1, 2);
+            t1.beProductOf(A [ 1 ] [ 0 ], m);
+            t2.beProductOf(A [ 1 ] [ 1 ], m);
+            L14.addSubVectorCol(t1, 4, 1);
+            L14.addSubVectorCol(t2, 4, 2);
+            L14.times(b);
+
+            // L(1,5) = f3(alpha)
+            L15.zero();
+            L15.addSubVectorCol(f3 [ 0 ], 1, 1);
+            L15.addSubVectorCol(f3 [ 1 ], 4, 1);
+
+
+            // L(2,2) = a^2*A(alpha,beta)= a*L12
+            L22 = L12;
+            L22.times(a);
+
+            // L(2,3) = a*F1(alpha) = a*L13
+            L23 = L13;
+            L23.times(a);
+
+            // L(2,4) = a*F1(alpha)=a*L14
+            L24 = L14;
+            L24.times(a);
+
+            // L(2,5) = a*f3(alpha) + b*N(alpha)
+            L25.zero();
+            L25.addSubVectorCol(S1g, 1, 1);
+            L25.addSubVectorCol(S2g, 4, 1);
+            L25.times(b);
+            L25.add(a, L15);
+
+
+            // L(3,3) = b*F1(beta)*dgam(beta) + c*F2
+            L33.resize(0, 0);
+            L33.add(dg1 * b, F1 [ 0 ]);
+            L33.add(dg2 * b, F1 [ 1 ]);
+            L33.add(c, F1 [ 2 ]);
+
+
+            // L(3,4) = b*( F1(beta)*m + N(beta) )
+            t1.beTProductOf(F1 [ 0 ], m);
+            t1.add(S1g);
+            t1.times(b);
+            t2.beTProductOf(F1 [ 1 ], m);
+            t2.add(S2g);
+            t2.times(b);
+            L34.setColumn(t1, 1);
+            L34.setColumn(t2, 2);
+
+            // L(3,5) = f5
+            L35.setColumn(f5, 1);
+
+            // L(4,4) = b^2*m*A*m (2x2)
+            t1.beProductOf(A [ 0 ] [ 0 ], m);
+            L44.at(1, 1) = t1.dotProduct(m);
+            t1.beProductOf(A [ 0 ] [ 1 ], m);
+            L44.at(1, 2) = t1.dotProduct(m);
+            t1.beProductOf(A [ 1 ] [ 0 ], m);
+            L44.at(2, 1) = t1.dotProduct(m);
+            t1.beProductOf(A [ 1 ] [ 1 ], m);
+            L44.at(2, 2) = t1.dotProduct(m);
+            L44.times(b * b);
+
+            // L(4,5) = b*m*f3(alpha)
+            L45.at(1, 1) = b * m.dotProduct(f3 [ 0 ]);
+            L45.at(2, 1) = b * m.dotProduct(f3 [ 1 ]);
+
+            // L(5,5) = b*m*f3(alpha)
+            L55.at(1, 1) = b * dm1.dotProduct(f3 [ 0 ]) + b * dm2.dotProduct(f3 [ 1 ]) + zeta * m.dotProduct(f4);
+ #endif
+            // K11 = BT11*L11*B11
+            // K11 = BT11*K11temp1
+            K11temp1.beProductOf(L11, B11);
+
+            // K12 = BT11*(L12*B22+L13*B32)
+            // K12 = BT11*K12temp1
+            K12temp1.beProductOf(L12, B22);
+            K12temp1.addProductOf(L13, B32);
+
+            // K13 = BT11*(L14*B43 + L15*B53)
+            // K13 = BT11*K13temp1
+            K13temp1.beProductOf(L14, B43);
+            K13temp1.addProductOf(L15, B53);
+
+            // K22 = BT22*(L22*B22 + L23*B32) + BT32*(L32*B22 + L33*B32)
+            // K22 = BT22*K22temp1            + BT32*K22temp2
+            K22temp1.beProductOf(L22, B22);
+            K22temp1.addProductOf(L23, B32);
+            K22temp2.beTProductOf(L23, B22);
+            K22temp2.addProductOf(L33, B32);
+
+            // K23 = BT22*(L24*B43 + L25*B53) + BT32*(L34*B43 + L35*B53)
+            // K23 = BT22*K23temp1            + BT32*K23temp2
+            K23temp1.beProductOf(L24, B43);
+            K23temp1.addProductOf(L25, B53);
+            K23temp2.beProductOf(L34, B43);
+            K23temp2.addProductOf(L35, B53);
+            // K23 = (BT22*L24 + BT32*L34)*B43 + (BT22*L25 + BT32*L35)*B53 // TODO: This order would be faster
+            //K23temp1.TbeProductOf(B22,L24);
+            //K23temp1.addTProductOf(B32,L34);
+            //K23temp2.beTProductOf(L22,L25);
+            //K23temp2.addTProductOf(B32,L35);
+
+
+            // K33 = BT43*(L44*B43 + L45*B53) + BT53*(L54*B43 + L55*B53)
+            // K33 = BT43*K33temp1            + BT53*K33temp2
+            K33temp1.beProductOf(L44, B43);
+            K33temp1.addProductOf(L45, B53);
+            K33temp2.beTProductOf(L45, B43);
+            K33temp2.add(L55.at(1, 1), B53);            // L55 is just a scalar (and K33temp2 is just an array)
+
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+
+            K11.plusProductSymmUpper(B11, K11temp1, dV);
+            K12.plusProductUnsym(B11, K12temp1, dV);
+            K13.plusProductUnsym(B11, K13temp1, dV);
+
+            K22.plusProductSymmUpper(B22, K22temp1, dV);
+            K22.plusProductSymmUpper(B32, K22temp2, dV);
+
+            K23.plusProductUnsym(B22, K23temp1, dV);
+            K23.plusProductUnsym(B32, K23temp2, dV);
+            // Potential minor optimization, actually use FloatArray for anything that only has a single column
+            //tmpA.beProductOf(K23temp1, B43); K23.add(dV, tmpA);
+            //K23.plusDyadUnsymm(K33temp2, B53, dV);
+
+            K33.plusProductSymmUpper(B43, K33temp1, dV);
+            K33.plusProductSymmUpper(B53, K33temp2, dV);
+            //K33.plusDyadSymmUpper(B53, K33temp2, dV); // Potential minor optimization (probably not worth it)
+        }
+    }
+
+    K11.symmetrized();
+    K22.symmetrized();
+    K33.symmetrized();
+
+    IntArray ordering_phibar = giveOrdering(Midplane);
+    IntArray ordering_m = giveOrdering(Director);
+    IntArray ordering_gam = giveOrdering(InhomStrain);
+
+    answer.assemble(K11, ordering_phibar, ordering_phibar);
+    answer.assemble(K12, ordering_phibar, ordering_m);
+    answer.assemble(K13, ordering_phibar, ordering_gam);
+    answer.assemble(K22, ordering_m,      ordering_m);
+    answer.assemble(K23, ordering_m,      ordering_gam);
+    answer.assemble(K33, ordering_gam,    ordering_gam);
+
+    FloatMatrix K21, K31, K32;
+    K21.beTranspositionOf(K12);
+    K31.beTranspositionOf(K13);
+    K32.beTranspositionOf(K23);
+    answer.assemble(K21, ordering_m,      ordering_phibar);
+    answer.assemble(K31, ordering_gam,    ordering_phibar);
+    answer.assemble(K32, ordering_gam,    ordering_m);
+}
+
+
+
 void
 Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord, 
                     double xi0, EnrichmentItem *ei, int enrichmentDomainNumber)
@@ -305,7 +638,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
                 this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
                 this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
 
-			    double zeta = giveGlobalZcoord(gp);
+                double zeta = giveGlobalZcoord(gp);
                 FloatArray N, M, T, Ms;
                 double Ts = 0.;
                 this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, zeta);
@@ -378,7 +711,7 @@ Shell7BaseXFEM :: discEvalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1d, Fl
 {
 
     FloatArray lcoords = * gp->giveCoordinates();
-	double zeta = giveGlobalZcoord(gp);
+    double zeta = giveGlobalZcoord(gp);
 
     FloatArray dxdxi1, dxdxi2, dmdxi1, dmdxi2, m;
     this->discGiveGeneralizedStrainComponents(dGenEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m);
@@ -440,13 +773,13 @@ IntArray
 Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const {
     if ( fieldType == Midplane ) {
         return this->dofId_Midplane;
-	} else if ( fieldType == Director  )   {
+    } else if ( fieldType == Director  )   {
         return this->dofId_Director;
-	} else if ( fieldType == InhomStrain  )   {
+    } else if ( fieldType == InhomStrain  )   {
         return this->dofId_InhomStrain;
-	} else {
-		_error("giveOrdering: unknown fieldType");
-	}
+    } else {
+        _error("giveOrdering: unknown fieldType");
+    }
 }
 
 

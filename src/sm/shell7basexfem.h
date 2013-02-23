@@ -111,6 +111,11 @@ protected:
 
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, EnrichmentItem *ei, int enrichmentDomainNumber, SolutionField field);
 
+
+        // Tangent matrices
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
+
 public:
     // constructor
     Shell7BaseXFEM(int n, Domain *d);   // : Shell7Base(n, d),  XfemElementInterface(this);
@@ -119,7 +124,7 @@ public:
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
     virtual Interface *giveInterface(InterfaceType it);
-	
+    
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int giveNumberOfDofs();

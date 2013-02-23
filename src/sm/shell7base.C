@@ -112,7 +112,7 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, Floa
 {
     double x, y, z, Mx, My, Mz, zeta;
     FloatArray lcoords = * gp->giveCoordinates();
-	zeta = giveGlobalZcoord(gp);
+    zeta = giveGlobalZcoord(gp);
     FloatArray N, M;
     FloatMatrix dNdxi, Mmat;
 
@@ -313,7 +313,7 @@ void
 Shell7Base :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEps)
 {
     FloatArray lcoords = * gp->giveCoordinates();
-	double zeta = giveGlobalZcoord(gp);
+    double zeta = giveGlobalZcoord(gp);
 
     FloatArray dxdxi, dxdxi1, dxdxi2, m, dmdxi, dmdxi1, dmdxi2, dgamdxi,  test;
     double dgamdxi1, dgamdxi2, gam;
@@ -389,7 +389,9 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     //this->computeMassMatrix(mass, tStep);
 
     FloatMatrix temp;
-    this->computeBulkTangentMatrix(answer, rMode, tStep);
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep);
+    this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
 
     // Add contribution due to pressure load
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -410,7 +412,7 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 
 
 void
-Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep)
 {
     FloatMatrix A [ 3 ] [ 3 ];
     FloatMatrix F1 [ 3 ];
@@ -429,8 +431,8 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
 
     FloatMatrix K11temp1, K12temp1, K13temp1, K22temp1, K22temp2, K23temp1, K23temp2, K33temp1, K33temp2;
 
-    FloatArray solVec;
-    this->giveUpdatedSolutionVector(solVec, tStep);
+    //FloatArray solVec;
+    //this->giveUpdatedSolutionVector(solVec, tStep);
 
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
@@ -459,7 +461,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, MatResponseMode rMod
             // Tangent stiffness
  #if 1
             // thickness coefficients
-			double zeta = giveGlobalZcoord(gp);
+            double zeta = giveGlobalZcoord(gp);
             double a = zeta + 0.5 * gam * zeta * zeta;
             double b = 0.5 * zeta * zeta;
             double c = 1. + gam * zeta;
@@ -1120,9 +1122,13 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
 
+    answer.resize( this->giveNumberOfDofs() );
+    answer.zero();
+
+    //FloatArray temp;
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
 
-    // How to treat the convective force? Only active during dynamic simulations
+    ///@todo How to treat the convective force? Only active during dynamic simulations
 }
 
 
@@ -1151,7 +1157,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
             this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
 
-			double zeta = giveGlobalZcoord(gp);
+            double zeta = giveGlobalZcoord(gp);
             FloatArray N, M, T, Ms;
             double Ts = 0.;
             this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, zeta);
@@ -1468,7 +1474,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
              */
 
 
-			double zeta = giveGlobalZcoord(gp);
+            double zeta = giveGlobalZcoord(gp);
             double fac1 = 4;
             double fac2 = 2.0 * zeta * ( 2.0 + gam * zeta );
             double fac3 = 2.0 * zeta * zeta;
@@ -2061,7 +2067,33 @@ Shell7Base :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeSt
             }
         }
     }
-    //answer.printYourself();
+}
+
+//(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+void
+Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+{
+    // Routine to extract vector given an array of dofid items
+    // If a certain dofId does not exist a zero is used as value
+
+
+    IntArray bNodes;
+    this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+    answer.resize( dofIdArray.giveSize() * bNodes.giveSize() );
+    answer.zero();
+    int k = 0;
+    for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
+        DofManager *dMan = this->giveDofManager(bNodes.at(i));        
+        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
+            Dof *d = dMan->giveDof(j);
+            k++;
+            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
+                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo EID_MomentumBalance is just a dummy argument in this case and feels redundant
+            }
+        }
+    }
+
 
 }
 
@@ -2107,7 +2139,11 @@ Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge,
 {
     this->edgeGiveInitialSolutionVector(answer, iedge);
     FloatArray temp;
-    this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, temp);
+    //this->computeBoundaryVectorOf(iedge, EID_MomentumBalance, VM_Total, tStep, temp);
+    int dummy = 0;
+    IntArray dofIdArray;
+    Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
+    this->temp_computeBoundaryVectorOf(dofIdArray, iedge, VM_Total, tStep, temp);
     answer.assemble( temp, this->giveOrdering(EdgeInv) );
 }
 

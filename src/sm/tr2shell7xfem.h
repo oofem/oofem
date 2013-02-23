@@ -62,31 +62,31 @@ protected:
     int numberOfGaussPoints;	
     static FEI3dTrQuad interpolation;
     static bool __initialized;
-	static IntArray ordering_phibar;
-	static IntArray ordering_m;
-	static IntArray ordering_gam;
+    static IntArray ordering_phibar;
+    static IntArray ordering_m;
+    static IntArray ordering_gam;
     static IntArray ordering_all;
     static IntArray ordering_gr;
     static IntArray ordering_gr_edge;
     static bool initOrdering() {
         ordering_phibar.setValues(18, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38);
-		ordering_m.setValues(18, 4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41);
-		ordering_gam.setValues(6, 7, 14, 21, 28, 35, 42);
+        ordering_m.setValues(18, 4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41);
+        ordering_gam.setValues(6, 7, 14, 21, 28, 35, 42);
         ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30 ,31, 36, 37, 38,
                                    4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33 ,34, 39, 40, 41,
                                    7, 14, 21, 28, 35, 42);
-	    ordering_gr.setValues(42, 1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
-	                          10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
-	                          34, 35, 36, 42);
-	    ordering_gr_edge.setValues(21, 1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21);
+        ordering_gr.setValues(42, 1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
+                              10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
+                              34, 35, 36, 42);
+        ordering_gr_edge.setValues(21, 1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21);
         return true;
     }
 
     virtual IntArray giveOrdering(SolutionField fieldType) const;
 
-	//specific
+    //specific
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-	void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
@@ -95,7 +95,7 @@ protected:
     virtual void computeGaussPoints();
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
-	//only used for debuging 
+    //only used for debuging 
     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
 
     virtual FEInterpolation *giveInterpolation();
@@ -106,14 +106,15 @@ public:
     virtual ~Tr2Shell7XFEM() { }		// destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     //virtual int giveNumberOfDofs()           { return 42; }
-    virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
+    //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
+    //virtual int giveNumberOfDofs()           { return 42+14; }///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofs()       { return 21; }
     //virtual int giveNumberOfEdgeDofs()       { return 35; } ///@todo temporary! remove!
     virtual int giveNumberOfEdgeDofManagers(){ return 3;  }
     virtual const char *giveClassName()                const { return "Tr2Shell7XFEM"; }
     virtual classType giveClassID()                    const { return Tr2Shell7XFEMClass; }
     virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
-	virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
+    virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
 
 
 };

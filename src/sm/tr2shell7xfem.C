@@ -48,28 +48,28 @@
 namespace oofem {
     FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
-	IntArray Tr2Shell7XFEM :: ordering_phibar(18);
-	IntArray Tr2Shell7XFEM :: ordering_m(18);
-	IntArray Tr2Shell7XFEM :: ordering_gam(6);
+    IntArray Tr2Shell7XFEM :: ordering_phibar(18);
+    IntArray Tr2Shell7XFEM :: ordering_m(18);
+    IntArray Tr2Shell7XFEM :: ordering_gam(6);
     IntArray Tr2Shell7XFEM :: ordering_all(42);
-	IntArray Tr2Shell7XFEM :: ordering_gr(42);
+    IntArray Tr2Shell7XFEM :: ordering_gr(42);
     IntArray Tr2Shell7XFEM :: ordering_gr_edge(21);
-	bool Tr2Shell7XFEM :: __initialized = Tr2Shell7XFEM :: initOrdering();
+    bool Tr2Shell7XFEM :: __initialized = Tr2Shell7XFEM :: initOrdering();
     
 
 
 Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDomain)
 {
-	this->numberOfDofMans = 6;
+    this->numberOfDofMans = 6;
 }
 
 IntArray
 Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const {
     if ( fieldType == Midplane ) {
-		return this->ordering_phibar;
-	} else if ( fieldType == Director  )   {
+        return this->ordering_phibar;
+    } else if ( fieldType == Director  )   {
         return this->ordering_m;
-	} else if ( fieldType == InhomStrain  )   {
+    } else if ( fieldType == InhomStrain  )   {
         return this->ordering_gam;
     } else if ( fieldType == All  )   {
         return this->ordering_all;
@@ -77,16 +77,16 @@ Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const {
         return this->ordering_gr;
     } else if ( fieldType == EdgeInv  )   {
         return this->ordering_gr_edge;
-	} else {
-		_error("giveOrdering: unknown fieldType");
-	}
+    } else {
+        _error("giveOrdering: unknown fieldType");
+    }
 }
 
 
 void 
 Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords){
-	nodeLocalXiCoords.setValues( 6, 1., 0., 0., .5, 0., .5); // corner nodes then midnodes, uncertain of node numbering
-	nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
+    nodeLocalXiCoords.setValues( 6, 1., 0., 0., .5, 0., .5); // corner nodes then midnodes, uncertain of node numbering
+    nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
 }
 
 
@@ -125,14 +125,14 @@ Tr2Shell7XFEM :: computeGaussPoints()
         int numberOfLayers = layeredCS->giveNumberOfLayers();
         layerIntegrationRulesArray = new IntegrationRule * [ numberOfLayers ];
 
-		// may need to extend this to handle Newton-Cotes integration in the thickness direction
+        // may need to extend this to handle Newton-Cotes integration in the thickness direction
         for( int i = 1; i <= numberOfLayers; i++ ){
             layerIntegrationRulesArray[ i-1 ]= new GaussIntegrationRule(1, this);
             layerIntegrationRulesArray[ i-1 ]->SetUpPointsOnWedge(nPointsTri, layeredCS->giveNumIntegrationPointsInLayer(), _3dMat); 
 
-		}
+        }
 
-		layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
+        layeredCS->mapLayerGpCoordsToShellCoords(layeredCS, layerIntegrationRulesArray);
         layeredCS->printYourself();
 
     }
@@ -152,11 +152,11 @@ Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
     if ( iEdge == 1 )        { // edge between nodes 1-4-2
         //answer.setValues(21, 1, 2, 3, 4, 5, 6, 7,   8, 9, 10, 11, 12, 13, 14,   22, 23, 24, 25, 26, 27, 28);
-		answer.setValues(21, 1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28);
+        answer.setValues(21, 1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28);
 
     } else if ( iEdge == 2 ) { // edge between nodes 2-5-3
         //answer.setValues(21,   8, 9, 10, 11, 12, 13, 14,   15, 16, 17, 18, 19, 20, 21,   29, 30, 31, 32, 33, 34, 35 );
-		answer.setValues(21,   8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35 );
+        answer.setValues(21,   8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35 );
 
     } else if ( iEdge == 3 ) { // edge between nodes 3-6-1
         //answer.setValues(21,   15, 16, 17, 18, 19, 20, 21,   1, 2, 3, 4, 5, 6, 7,   36, 37, 38, 39, 40, 41, 42);
@@ -187,19 +187,19 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 double 
 Tr2Shell7XFEM :: computeVolumeAround(GaussPoint *gp){
-	FloatArray G1, G2, G3, temp;
-	double detJ;
-	this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
-	temp.beVectorProductOf(G1, G2);
+    FloatArray G1, G2, G3, temp;
+    double detJ;
+    this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
+    temp.beVectorProductOf(G1, G2);
     detJ = temp.dotProduct(G3)*0.5*this->giveCrossSection()->give(CS_Thickness); 
     return detJ * gp->giveWeight();
 }
 
 double 
 Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp){
-	FloatArray G1, G2, G3, temp;
-	this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
-	temp.beVectorProductOf(G1, G2);
+    FloatArray G1, G2, G3, temp;
+    this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
+    temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
     return detJ * gp->giveWeight()*0.5 ;
 }
@@ -209,10 +209,10 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp){
 
 double 
 Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer){
-	FloatArray G1, G2, G3, temp;
-	double detJ;
-	this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
-	temp.beVectorProductOf(G1, G2);
+    FloatArray G1, G2, G3, temp;
+    double detJ;
+    this->evalInitialCovarBaseVectorsAt(gp,G1, G2, G3);
+    temp.beVectorProductOf(G1, G2);
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >(this->giveCrossSection());
     detJ = temp.dotProduct(G3)*0.5*layeredCS->giveLayerThickness(layer);
     return detJ * gp->giveWeight();
