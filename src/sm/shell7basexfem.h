@@ -112,9 +112,14 @@ protected:
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, EnrichmentItem *ei, int enrichmentDomainNumber, SolutionField field);
 
 
-        // Tangent matrices
+    // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
+    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep,
+        double xi0, EnrichmentItem *ei, int enrichmentDomainNumber);
+
+
+    // Mass matrices
+    void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 
 
 public:
     // constructor

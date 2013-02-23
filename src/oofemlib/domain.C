@@ -919,7 +919,7 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.setValues(3, V_u, V_v, P_f);
     }  else if ( dType == _3dIncompressibleFlow ) {
         defaultNodeDofIDArry.setValues(4, V_u, V_v, V_w, P_f);
-	}  else if ( dType == _3dDirShellMode ) {
+    }  else if ( dType == _3dDirShellMode ) {
         defaultNodeDofIDArry.setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
     } else {
         _error2( "giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType) );
@@ -985,9 +985,9 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _2dIncompressibleFlow;
     } else if ( !strncasecmp(typeName, "3dincompflow", 12) ) {
         dType = _3dIncompressibleFlow;
-	} else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
+    } else if  ( !strncasecmp(typeName, "3ddirshell", 10) ) {
         dType = _3dDirShellMode;
-	} else if  ( !strncasecmp(typeName, "3d", 2) ) {
+    } else if  ( !strncasecmp(typeName, "3d", 2) ) {
         dType = _3dMode;
     } else {
         _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);

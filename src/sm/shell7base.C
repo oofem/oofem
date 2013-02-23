@@ -388,6 +388,10 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     //this->computeMassMatrixNum(massNum, tStep);
     //this->computeMassMatrix(mass, tStep);
 
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+
     FloatMatrix temp;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
@@ -434,9 +438,10 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
     //FloatArray solVec;
     //this->giveUpdatedSolutionVector(solVec, tStep);
 
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
-    answer.zero();
+    //int ndofs = this->giveNumberOfDofs();
+    //answer.resize(ndofs, ndofs);
+    //answer.zero();
+
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
     int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
 
@@ -617,7 +622,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
 
             // L(5,5) = b*m*f3(alpha)
             L55.at(1, 1) = b * dm1.dotProduct(f3 [ 0 ]) + b * dm2.dotProduct(f3 [ 1 ]) + zeta * m.dotProduct(f4);
- #endif
+#endif
             // K11 = BT11*L11*B11
             // K11 = BT11*K11temp1
             K11temp1.beProductOf(L11, B11);

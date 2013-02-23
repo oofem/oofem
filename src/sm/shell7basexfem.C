@@ -282,39 +282,39 @@ void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 
-    
-    answer.resize( this->giveNumberOfDofs() );
+    int ndofs = this->giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
     answer.zero();
     
     FloatMatrix temp;
     FloatArray solVec;
+    // Continuous part
     this->giveUpdatedSolutionVector(solVec, tStep);
-    
     this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
 
+    // Disccontinuous part
+    
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) ); // should check success
 
-    #if 0
-    // Add contribution due to pressure load
-    int nLoads = this->boundaryLoadArray.giveSize() / 2;
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                IntArray eiDofIdArray;
+                dei->giveEIDofIdArray(eiDofIdArray, j);
+                this->discGiveUpdatedSolutionVector(solVec, eiDofIdArray, tStep);
+                double xi0 = dei->enrichmentDomainXiCoords.at(j);
 
-    for ( int i = 1; i <= nLoads; i++ ) {     // For each pressure load that is applied
-        int load_number = this->boundaryLoadArray.at(2 * i - 1);
-        int iSurf = this->boundaryLoadArray.at(2 * i);         // load_id
-        Load *load;
-        load = this->domain->giveLoad(load_number);
+                discComputeBulkTangentMatrix(answer, solVec, rMode, tStep, xi0, dei, j);
 
-        if ( dynamic_cast< ConstantPressureLoad * >( load ) ) {
-            FloatMatrix K_pressure;
-            this->computePressureTangentMatrix(K_pressure, load, iSurf, tStep);
-            temp.add(K_pressure);
+            }
         }
     }
-    #endif
 }
 
 
 void
-Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep)
+Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep,
+                    double xi0, EnrichmentItem *ei, int enrichmentDomainNumber)
 {
     FloatMatrix A [ 3 ] [ 3 ];
     FloatMatrix F1 [ 3 ];
@@ -336,9 +336,9 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     //FloatArray solVec;
     //this->giveUpdatedSolutionVector(solVec, tStep);
 
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
-    answer.zero();
+    //int ndofs = this->giveNumberOfDofs();
+    //answer.resize(ndofs, ndofs);
+    //answer.zero();
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
     int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
 
@@ -586,9 +586,28 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     K22.symmetrized();
     K33.symmetrized();
 
-    IntArray ordering_phibar = giveOrdering(Midplane);
-    IntArray ordering_m = giveOrdering(Director);
-    IntArray ordering_gam = giveOrdering(InhomStrain);
+    IntArray ordering_phibar, ordering_m, ordering_gam;
+    IntArray activeDofs_phibar, activeDofs_m, activeDofs_gam;
+
+    computeOrderingArray(ordering_phibar, activeDofs_phibar, ei, enrichmentDomainNumber, Midplane);
+    computeOrderingArray(ordering_m, activeDofs_m, ei, enrichmentDomainNumber, Director);
+    computeOrderingArray(ordering_gam, activeDofs_gam, ei, enrichmentDomainNumber, InhomStrain);
+
+
+    FloatMatrix K11Ass, K12Ass, K13Ass, K22Ass, K23Ass, K33Ass, mat1, mat2(3,3);
+    IntArray index;
+    mat2.at(1,1) = 1.; mat2.at(1,2) = 2.; mat2.at(1,3) = 3.;
+    mat2.at(2,1) = 4.; mat2.at(2,2) = 5.; mat2.at(2,3) = 6.;
+    mat2.at(3,1) = 7.; mat2.at(3,2) = 8.; mat2.at(3,3) = 9.;
+    index.setValues(3, 1, 3, 5);
+    mat1.beSubMatrixOfSizeOf(mat2, index, 6);
+    mat2.printYourself();
+    index.printYourself();
+    mat1.printYourself();
+    
+    mat1.beSubMatrixOf(mat2, index);
+    mat1.printYourself();
+
 
     answer.assemble(K11, ordering_phibar, ordering_phibar);
     answer.assemble(K12, ordering_phibar, ordering_m);
@@ -699,6 +718,138 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 }
 
 
+
+
+
+
+void
+Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
+    // Num refers in this case to  numerical integration in both in-plane and through the thickness.
+    // For analytically integrated throught he thickness, see computeMassMatrix
+
+
+    FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
+    FloatArray solVec, unknowns;
+    this->giveUpdatedSolutionVector(solVec, tStep);
+    int ndofs = this->giveNumberOfDofs();
+    temp.resize(ndofs, ndofs);
+    temp.zero();
+
+
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
+    int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion of data
+
+    FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6);
+    M11.zero();
+    M12.zero();
+    M13.zero();
+    M22.zero();
+    M23.zero();
+    M33.zero();
+
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRuleL = layerIntegrationRulesArray [ layer - 1 ];
+        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+
+        for ( int j = 1; j <= iRuleL->getNumberOfIntegrationPoints(); j++ ) {
+            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+
+            FloatMatrix N11, N22, N33;
+            this->computeNmatricesAt(gp, N11, N22, N33);
+            FloatArray xbar, m;
+            double gam = 0.;
+            this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
+            //this->computeNmatrixAt(gp, N);
+            //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
+            //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
+            //double gam = unknowns.at(7);
+
+
+            /* Consistent mass matrix M = int{N^t*mass*N}
+             *
+             *         3    3    1
+             *         3 [a*I  b*I   c*m      [A  B  C
+             * mass =   3       d*I   e*m    =     D  E
+             *         1  sym       f*m.m]     sym   F]
+             */
+
+
+            double zeta = giveGlobalZcoord(gp);
+            double fac1 = 4;
+            double fac2 = 2.0 * zeta * ( 2.0 + gam * zeta );
+            double fac3 = 2.0 * zeta * zeta;
+            double fac4 = zeta * zeta * ( 2.0 + gam * zeta ) * ( 2.0 + gam * zeta );
+            double fac5 = zeta * zeta * zeta * ( 2.0 + gam * zeta );
+            double fac6 = zeta * zeta * zeta * zeta;
+            FloatMatrix mass11(3, 3), mass12(3, 3), mass13(3, 1), mass21(3, 3), mass22(3, 3), mass23(3, 1), mass31(1, 3), mass32(1, 3), mass33(1, 1);
+            mass11.zero();
+            mass12.zero();
+            mass13.zero();
+            mass21.zero();
+            mass22.zero();
+            mass23.zero();
+            mass31.zero();
+            mass32.zero();
+            mass33.zero();
+            mass.resize(7, 7);
+            mass11.at(1, 1) = mass11.at(2, 2) = mass11.at(3, 3) = fac1;          // A
+            mass12.at(1, 1) = mass12.at(2, 2) = mass12.at(3, 3) = fac2;          // B
+            mass13.at(1, 1) = fac3 * m.at(1);
+            mass13.at(2, 1) = fac3 * m.at(2);
+            mass13.at(3, 1) = fac3 * m.at(3);            // C
+            mass22.at(1, 1) = mass22.at(2, 2) = mass22.at(3, 3) = fac4;          // D
+            mass23.at(1, 1) = fac5 * m.at(1);
+            mass23.at(2, 1) = fac5 * m.at(2);
+            mass23.at(3, 1) = fac5 * m.at(3);            // E
+            mass33.at(1, 1) = fac6 * m.dotProduct(m);            // F
+            mass21.beTranspositionOf(mass12);
+            mass31.beTranspositionOf(mass13);
+            mass32.beTranspositionOf(mass23);
+            //mass.symmetrized();
+
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            double rho = mat->give('d', gp);
+
+            FloatMatrix M11temp, M12temp, M13temp, M22temp, M23temp, M33temp;
+            this->computeTripleProduct(M11temp, N11, mass11, N11);
+            this->computeTripleProduct(M12temp, N11, mass12, N22);
+            this->computeTripleProduct(M13temp, N11, mass13, N33);
+            this->computeTripleProduct(M22temp, N22, mass22, N22);
+            this->computeTripleProduct(M23temp, N22, mass23, N33);
+            this->computeTripleProduct(M33temp, N33, mass33, N33);
+            M11.add(0.25 * rho * dV, M11temp);
+            M12.add(0.25 * rho * dV, M12temp);
+            M13.add(0.25 * rho * dV, M13temp);
+            M22.add(0.25 * rho * dV, M22temp);
+            M23.add(0.25 * rho * dV, M23temp);
+            M33.add(0.25 * rho * dV, M33temp);
+        }
+
+        //M33.printYourself();
+        answer.resize(ndofs, ndofs);
+        answer.zero();
+
+        IntArray ordering_phibar = giveOrdering(Midplane);
+        IntArray ordering_m = giveOrdering(Director);
+        IntArray ordering_gam = giveOrdering(InhomStrain);
+        answer.assemble(M11, ordering_phibar, ordering_phibar);
+        answer.assemble(M12, ordering_phibar, ordering_m);
+        answer.assemble(M13, ordering_phibar, ordering_gam);
+        answer.assemble(M22, ordering_m,      ordering_m);
+        answer.assemble(M23, ordering_m,      ordering_gam);
+        answer.assemble(M33, ordering_gam,    ordering_gam);
+
+        FloatMatrix M21, M31, M32;
+        M21.beTranspositionOf(M12);
+        M31.beTranspositionOf(M13);
+        M32.beTranspositionOf(M23);
+        answer.assemble(M21, ordering_m,      ordering_phibar);
+        answer.assemble(M31, ordering_gam,    ordering_phibar);
+        answer.assemble(M32, ordering_gam,    ordering_m);
+        answer.symmetrized();
+
+    }
+}
 
 
 
