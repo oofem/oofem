@@ -307,7 +307,7 @@ public:
      * value of src->at(i,j) will be stored. If one of indx->at(i), indx->at(j) indexes is
      * less or equal to zero, then on this position zero will be stored.
      */
-    void beSubMatrixOf(const FloatMatrix &src, const IntArray &indx);
+    void beSubMatrixOf(const FloatMatrix &src, const IntArray &indx) { this->beSubMatrixOfSizeOf(src, indx, 0); };
     /**
      * Assigns to the receiver the sub matrix of another matrix.
      * Works only for square matrices. Should produce bigger matrix than source matrix.
@@ -318,7 +318,7 @@ public:
      * less or equal to zero, then on this position zero will be stored.
      * @param size Receiver becomes square (size, size) matrix.
      */
-    void beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size);
+    void beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size=0);
     /**
      * Adds given vector to receiver starting at given position.
      * @param src Source matrix.
@@ -493,9 +493,9 @@ public:
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
-	 * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
-	 * If size(aArray) = 6, a symmetric matrix will be created.
-	 * @param aArray Array to transform.
+     * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
+     * If size(aArray) = 6, a symmetric matrix will be created.
+     * @param aArray Array to transform.
      */
     void beMatrixForm(const FloatArray &aArray);
 

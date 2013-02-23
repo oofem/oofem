@@ -523,39 +523,6 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
 }
 
 
-void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
-                             int topRow, int bottomRow, int topCol, int bottomCol)
-/*
- * modifies receiver to be  submatrix of the src matrix
- * size of receiver  submatrix is determined from
- * input parameters
- */
-{
-#ifdef DEBUG
-    if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
-    }
-
-    if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
-        ( ( bottomCol - topCol ) > src.nColumns ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
-    }
-#endif
-
-
-    int topRm1, topCm1;
-    topRm1 = topRow - 1;
-    topCm1 = topCol - 1;
-
-    // allocate return value
-    this->resize(bottomRow - topRm1, bottomCol - topCm1);
-    for ( int i = topRow; i <= bottomRow; i++ ) {
-        for ( int j = topCol; j <= bottomCol; j++ ) {
-            this->at(i - topRm1, j - topCm1) = src.at(i, j);
-        }
-    }
-}
-
 
 void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 {
@@ -859,45 +826,35 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 }
 
 
-void
-FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
+                             int topRow, int bottomRow, int topCol, int bottomCol)
 /*
- * modifies receiver to be  (sub)matrix of the src.
- * (sub)matrix has size of max value in indx
- * and on its position (indx->at(i),indx->at(j)) are values from src at (i, j).
- * if indx->at(i) or indx->at(j) are <= 0 then at position i,j is zero.
- *
- * Warning:
- * This method should produce also bigger matrix than src
- * Works only for square matrices.
+ * modifies receiver to be  submatrix of the src matrix
+ * size of receiver  submatrix is determined from
+ * input parameters
  */
 {
-    int size, n, ii, jj;
-
-    if ( ( n = indx.giveSize() ) == 0 ) {
-        this->resize(0, 0);
-        return;
+#ifdef DEBUG
+    if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
+        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
 
-#  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : cannot construct required submatrix");
+    if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
+        ( ( bottomCol - topCol ) > src.nColumns ) ) {
+        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
-# endif
+#endif
+    
+    
+    int topRm1, topCm1;
+    topRm1 = topRow - 1;
+    topCm1 = topCol - 1;
 
-    if ( n != src.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : giveSubMatrix size mismatch");
-    }
-
-    size = indx.maximum();
-
-    this->resize(size, size);
-
-    for ( int i = 1; i <= n; i++ ) {
-        for ( int j = 1; j <= n; j++ ) {
-            if ( ( ( ii = indx.at(i) ) != 0 ) && ( ( jj = indx.at(j) ) != 0 ) ) {
-                this->at(ii, jj) = src.at(i, j);
-            }
+    // allocate return value
+    this->resize(bottomRow - topRm1, bottomCol - topCm1);
+    for ( int i = topRow; i <= bottomRow; i++ ) {
+        for ( int j = topCol; j <= bottomCol; j++ ) {
+            this->at(i - topRm1, j - topCm1) = src.at(i, j);
         }
     }
 }
@@ -906,6 +863,10 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
 
 void
 FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size)
+///@todo: Illogical name - doesn't create a sub matrix but rather a super matrix is created. 
+///       Therefore it is in contradiction with the other implementation of beSubMatrixOf above
+///       wich actually creates a sub matrix. Maybe it should be renamed to beAssemblyOf, or simply 
+///       be replaced with calls to assemble. - JB
 /*
  * modifies receiver to be  (sub)matrix of the src matrix.
  * (sub)matrix has size size
@@ -932,12 +893,16 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
     if ( n != src.nRows ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : giveSubMatrix size mismatch");
     }
-
-    if ( indx.maximum() > size ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
+    if ( size ) {
+        if ( indx.maximum() > size ) {
+            OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
+        }
     }
 # endif
 
+    if ( !size ) {
+        size =  indx.maximum();
+    }
     this->resize(size, size);
 
     for ( int i = 1; i <= n; i++ ) {
@@ -1579,23 +1544,23 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 
 void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
 {
-	// Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
-	if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
+    if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
         OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
     }
 #  endif
-	this->resize(3,3);
-	if( aArray.giveSize() == 9 ){
-		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
-		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
-		this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8);	this->at(2,1) = aArray.at(9);
-	}
-	else if( aArray.giveSize() == 6 ){
-		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
-		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
-		this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5);	this->at(2,1) = aArray.at(6);
-	}
+    this->resize(3,3);
+    if( aArray.giveSize() == 9 ){
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8);	this->at(2,1) = aArray.at(9);
+    }
+    else if( aArray.giveSize() == 6 ){
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5);	this->at(2,1) = aArray.at(6);
+    }
 }
 
 #if 0
