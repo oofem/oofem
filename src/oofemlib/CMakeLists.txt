@@ -10,6 +10,7 @@ set (core_unsorted
     trianglemesherinterface.C
     geotoolbox.C geometry.C
     externalfieldgenerator.C
+    datastream.C
     rvematerial.C
     weakperiodicbc.C
     # Semi sorted:
