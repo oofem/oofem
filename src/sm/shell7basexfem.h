@@ -114,8 +114,8 @@ protected:
 
     // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep,
-        double xi0, EnrichmentItem *ei, int enrichmentDomainNumber);
+    virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
+        double xi0, EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
 
 
     // Mass matrices

@@ -395,7 +395,12 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     FloatMatrix temp;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
-    this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
+    
+    //this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
+
+    //new_computeBulkTangentMatrix(temp, solVec, solVecI, solVecJ, rMode, tStep);
+    this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
+
 
     // Add contribution due to pressure load
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -412,7 +417,124 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
             temp.add(K_pressure);
         }
     }
+    IntArray ordering = giveOrdering(All);
+    answer.assemble(temp, ordering, ordering);
 }
+
+void
+Shell7Base :: computeLambdaMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
+{
+
+    FloatArray m(3), dm1(3), dm2(3), temp1, temp2;
+    double dgam1, dgam2, gam;
+    this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dgam1, dgam2, gam);
+
+    // thickness coefficients
+    double a = zeta + 0.5 * gam * zeta * zeta;
+    double b = 0.5 * zeta * zeta;
+    double c = 1. + gam * zeta;
+
+    // lambda1 =  ( I,   0,  a*I,   0 ,  b*dgam1*I,  b*m,   0 ,  b*dm1 )
+    // lambda2 =  ( 0,   I,   0 ,  a*I,  b*dgam2*I,   0 ,  b*m,  b*dm2 )
+
+    FloatMatrix eye(3,3), aEye(3,3);
+    eye.beUnitMatrix();
+    aEye=eye;  aEye.times(a);
+    lambda[ 0 ].resize(3,18);   lambda[ 0 ].zero();  
+    lambda[ 1 ].resize(3,18);   lambda[ 1 ].zero();
+
+    lambda[ 0 ].setSubMatrix(eye,1,1);  lambda[ 0 ].setSubMatrix(aEye,1,7);
+    lambda[ 1 ].setSubMatrix(eye,1,4);  lambda[ 1 ].setSubMatrix(aEye,1,10);
+
+    FloatMatrix bdg1eye(3,3), bdg2eye(3,3);
+    bdg1eye = eye;  bdg1eye.times(b*dgam1);
+    bdg2eye = eye;  bdg2eye.times(b*dgam2);
+    lambda[ 0 ].setSubMatrix(bdg1eye,1,13);
+    lambda[ 1 ].setSubMatrix(bdg2eye,1,13);
+
+    FloatArray bm(3), bdm1(3), bdm2(3);
+    bm = m; bm.times(b);
+    bdm1 = dm1; bdm1.times(b);
+    bdm2 = dm2; bdm2.times(b);
+    lambda[ 0 ].setColumn(bm,16);   lambda[ 0 ].setColumn(bdm1,18);
+    lambda[ 1 ].setColumn(bm,17);   lambda[ 1 ].setColumn(bdm2,18);
+
+    // lambda3 =  ( 0,   0,   0 ,   0 ,     c*I   ,   0 ,   0 ,   xi*m )
+    lambda[ 2 ].resize(3,18);   lambda[ 2 ].zero();
+    lambda[ 2 ].at(1,13) = lambda[ 2 ].at(2,14) = lambda[ 2 ].at(3,15) = c;
+    FloatArray zm(3);
+    zm = m; zm.times(zeta);
+    lambda[ 2 ].setColumn(zm,18);
+}
+
+
+
+void
+Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep)
+{
+    FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
+    FloatMatrix L(18,18);
+    FloatMatrix B11, B22, B32, B43, B53, B;
+    FloatArray S1g(3), S2g(3), S3g(3);
+    FloatMatrix K(42,42);
+    K.zero();
+
+    int ndofs = Shell7Base :: giveNumberOfDofs();
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+
+    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
+    int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
+
+    for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
+        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
+        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = iRule->getIntegrationPoint(i);
+
+
+            this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
+            FloatArray genEpsI, genEpsJ, genEps;
+            this->computeGeneralizedStrainVector(genEpsI, solVecI, B11, B22, B32, B43, B53);
+            this->computeGeneralizedStrainVector(genEpsJ, solVecJ, B11, B22, B32, B43, B53);
+            this->computeGeneralizedStrainVector(genEps , solVec , B11, B22, B32, B43, B53);
+
+            // Material stiffness
+            Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
+
+            double zeta = giveGlobalZcoord(gp);
+            this->computeLambdaMatrices(lambdaI, genEpsI, zeta);
+            this->computeLambdaMatrices(lambdaJ, genEpsJ, zeta);
+
+            this->computeBmatrixAt(gp, B, 0, 0);
+            // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
+            // Naive implementation - should be optimized 
+            // note: L will only be symmetric if lambdaI = lambdaJ
+            FloatMatrix temp;
+            L.zero();
+            for ( int j = 0; j < 3; j++ ) {
+                for ( int k = 0; k < 3; k++ ) {
+                    this->computeTripleProduct(temp, lambdaI [ j ], A [ j ][ k ], lambdaJ [ k ]);
+                    L.add(temp);
+                }
+            }
+     
+            FloatMatrix Ktemp, K;
+            Ktemp.beProductOf(L, B);
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            K.beTProductOf(B,Ktemp);
+            answer.add(dV, K);
+        }
+    }
+    //answer.symmetrized();
+    
+    
+    //IntArray ordering = giveOrdering(All);
+    //answer.assemble(K, ordering, ordering);
+
+}
+
 
 
 void
@@ -718,7 +840,6 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep
     FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a;
     FloatArray g1, g2, g3, m(3), dm1(3), dm2(3), temp1, temp2;
 
-    //Material *mat = this->giveMaterial();
     FloatMatrix D, Dcart, Mmat, S;
 
     //A = L^iklj * (g_k x g_l) + S^ij*I
@@ -2346,7 +2467,8 @@ Shell7Base :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
  * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
  */
 {
-    int ndofs = this->giveNumberOfDofs();
+    //int ndofs = this->giveNumberOfDofs();
+    int ndofs = Shell7Base :: giveNumberOfDofs();
     int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
     answer.resize(18, ndofs);
     answer.zero();

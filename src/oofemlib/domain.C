@@ -430,7 +430,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     int i, num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nxfemman;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nxfemman=0;
     DofManager *node;
     Element *elem;
     Material *mat;
