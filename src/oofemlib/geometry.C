@@ -230,7 +230,7 @@ bool Line :: isPointInside(FloatArray *point)
     if ( vertices->at(1)->at(1) > vertices->at(2)->at(1) ) {
         maxX = vertices->at(1)->at(1);
         minX = vertices->at(2)->at(1);
-    } else   {
+    } else {
         minX = vertices->at(1)->at(1);
         maxX = vertices->at(2)->at(1);
     }
@@ -238,7 +238,7 @@ bool Line :: isPointInside(FloatArray *point)
     if ( vertices->at(1)->at(2) > vertices->at(2)->at(2) ) {
         maxY = vertices->at(1)->at(2);
         minY = vertices->at(2)->at(2);
-    } else   {
+    } else {
         minY = vertices->at(1)->at(2);
         maxY = vertices->at(2)->at(2);
     }
@@ -464,7 +464,7 @@ void Circle :: computeIntersectionPoints(Line *l, AList< FloatArray > *intersecP
         double fn;
         if ( i == 1 ) {
             fn = sqrt(D);
-        } else   {
+        } else {
             fn = ( -1 ) * sqrt(D);
         }
 

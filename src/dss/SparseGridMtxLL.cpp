@@ -97,7 +97,7 @@ double &SparseGridMtxLL :: ElementAt(int i, int j)
     if ( nbi < nbj ) {
         aux_bi_idx = Column_nbj->FindExistingBlockIndex(nbi);
         column_nbj_bi_data = Columns_data + Column_nbj->column_start_idx + aux_bi_idx * block_storage;
-    } else if ( nbi > nbj )       {
+    } else if ( nbi > nbj ) {
         aux_bj_idx = Column_nbi->FindExistingBlockIndex(nbj);
         column_nbi_bj_data = Columns_data + Column_nbi->column_start_idx + aux_bj_idx * block_storage;
     }
@@ -108,7 +108,7 @@ double &SparseGridMtxLL :: ElementAt(int i, int j)
         } else {
             return Columns_data [ nbi * block_storage + sj + si * block_size ];
         }
-    } else if ( aux_bi_idx >= 0 )       { // write into column bj
+    } else if ( aux_bi_idx >= 0 ) { // write into column bj
         return column_nbj_bi_data [ block_size * sj + si ];
     } else {                                    // write into column bi
         return column_nbi_bj_data [ block_size * si + sj ];
@@ -176,7 +176,7 @@ void SparseGridMtxLL :: LoadMatrixNumbers(SparseMatrixF &sm)
                 if ( nbi < nbj ) {
                     aux_bi_idx = Column_nbj->FindExistingBlockIndex(nbi);
                     column_nbj_bi_data = Columns_data + Column_nbj->column_start_idx + aux_bi_idx * block_storage;
-                } else if ( nbi > nbj )       {
+                } else if ( nbi > nbj ) {
                     aux_bj_idx = Column_nbi->FindExistingBlockIndex(nbj);
                     column_nbi_bj_data = Columns_data + Column_nbi->column_start_idx + aux_bj_idx * block_storage;
                 }
@@ -190,7 +190,7 @@ void SparseGridMtxLL :: LoadMatrixNumbers(SparseMatrixF &sm)
                 } else {
                     Columns_data [ nbi * block_storage + sj + si * block_size ] = val;
                 }
-            } else if ( aux_bi_idx >= 0 )       { // write into column bj
+            } else if ( aux_bi_idx >= 0 ) { // write into column bj
                 column_nbj_bi_data [ block_size * sj + si ] = val;
             } else {                                            // write into column bi
                 column_nbi_bj_data [ block_size * si + sj ] = val;
@@ -525,7 +525,7 @@ void SparseGridMtxLL :: SchurComplementFactorization(int fixed_blocks)
                     for ( long i = noJentries - 1; i >= 0; i-- ) {
                         p_blockJ_pattern [ min_bi_J = columnJentries [ i ] ] = ~( i * block_storage );
                     }
-                } else   {                                                      // Here we would read from the A22 matrix, therefore the scalar product is shorter (bi<blocks_to_factor)
+                } else {                                                      // Here we would read from the A22 matrix, therefore the scalar product is shorter (bi<blocks_to_factor)
                     for ( long i = noJentries - 1; i >= 0; i-- ) {
                         if ( columnJentries [ i ] < blocks_to_factor ) {
                             p_blockJ_pattern [ min_bi_J = columnJentries [ i ] ] = ~( i * block_storage );

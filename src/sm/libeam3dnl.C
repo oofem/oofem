@@ -207,7 +207,7 @@ LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     this->updateTempTriad(tStep);
 
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
+        TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )
                             ->giveStressVector();
     } else {
         this->computeStressVector(TotalStressVector, gp, tStep);
@@ -737,7 +737,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     answer.times(1 / this->l0);
 
     // ask for previous kappa
-    PrevEpsilon = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
+    PrevEpsilon = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStrainVector();
     if ( PrevEpsilon.giveSize() ) {
         answer.at(1) += PrevEpsilon.at(4);
         answer.at(2) += PrevEpsilon.at(5);

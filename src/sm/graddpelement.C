@@ -111,7 +111,7 @@ GradDpElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeSte
 {
     StructuralElement* elem = this->giveStructuralElement();
     FloatArray Epsilon;
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
 
     this->computeStrainVector(Epsilon, gp, stepN);
     cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
@@ -201,7 +201,7 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer,
         this->computeNkappaMatrixAt(gp, Nk);
         for(int j = 1; j<=nlSize;j++)
         fKappa.at(j) = Nk.at(1,j);
-        stress = ( (StructuralMaterialStatus *)mat->giveStatus(gp) )->giveTempStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
         int size = stress.giveSize();
         tempKappa = stress.at(size);
         dV  = elem->computeVolumeAround(gp);

@@ -149,13 +149,13 @@ Interface *
 QBrick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return ( EIPrimaryFieldInterface * ) this;
+        return static_cast< EIPrimaryFieldInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -177,10 +177,8 @@ QBrick1_ht :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 QBrick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    int i;
-
     pap.resize(numberOfDofMans);
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -188,10 +186,10 @@ QBrick1_ht :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 QBrick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }

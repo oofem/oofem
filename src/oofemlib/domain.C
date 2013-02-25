@@ -424,7 +424,7 @@ int
 Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
 {
-    const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     int i, num;
@@ -447,10 +447,9 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read type of Domain to be solved
     InputRecord *ir = dr->giveInputRecord(DataReader :: IR_domainRec, 1);
-    __keyword = "domain";
-    result = ir->giveField(name, IFT_Domain_type, __keyword);
+    result = ir->giveField(name, IFT_Domain_type, "domain");
     if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_Domain_type, __keyword, ir, result);
+        IR_IOERR(giveClassName(), __proc, IFT_Domain_type, "domain", ir, result);
     }
 
     ir->finish();
@@ -481,11 +480,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
-    __keyword = "nbarrier";
-    result = ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, __keyword);
+    ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, "nbarrier");
     // read optional number of RandomFieldGenerator
     nrfg = 0;
-    result = ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
+    ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
 
 
 
@@ -1365,7 +1363,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     int i, serNum;
-    bool domainUpdated = false;
+    bool domainUpdated;
     ErrorEstimator *ee;
     int ct;
     classType compId;

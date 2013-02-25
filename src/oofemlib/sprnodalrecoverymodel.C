@@ -195,7 +195,7 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
         }
 
 #endif
-        if ( ( interface =  ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) == NULL ) {
+        if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) == NULL ) {
             // If an element doesn't implement the interface, it is ignored.
             //regionsSkipped = 1;
             //regionMap.at( element->giveRegionNumber() ) = 1;
@@ -270,7 +270,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
             continue;
         }
 
-        if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
+        if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             interface->SPRNodalRecoveryMI_giveSPRAssemblyPoints(elemPap);
             npap = elemPap.giveSize();
             for ( ipap = 1; ipap <= npap; ipap++ ) {
@@ -304,7 +304,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
 
 #endif
                 if ( this->giveElementVirtualRegionNumber( element->giveNumber() ) == ireg ) {
-                    if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
+                    if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
                         nip += interface->SPRNodalRecoveryMI_giveNumberOfIP();
                     }
                 }
@@ -347,7 +347,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
                     continue;
                 }
 
-                if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
+                if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
                     interface->SPRNodalRecoveryMI_giveSPRAssemblyPoints(elemPap);
                     npap = elemPap.giveSize();
                     for ( ipap = 1; ipap <= npap; ipap++ ) {
@@ -379,7 +379,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
                         continue;
                     }
 
-                    if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
+                    if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
                         interface->SPRNodalRecoveryMI_giveSPRAssemblyPoints(elemPap);
                         npap = elemPap.giveSize();
                         for ( ipap = 1; ipap <= npap; ipap++ ) {
@@ -487,7 +487,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         }
 
 #endif
-        if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
+        if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             // add element reported dofMans for pap dofMan
             interface->SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(toDetermine, papNumber);
             for ( i = 1; i <= toDetermine.giveSize(); i++ ) {
@@ -575,7 +575,7 @@ void
 SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int papNumber, int regionValSize,
                                       SPRPatchType regType, InternalStateType type, TimeStep *tStep)
 {
-    int i, j, k, nelem, ielem, nip, neq;
+    int nelem, nip, neq;
     Element *element;
     FloatArray ipVal, coords, P;
     FloatMatrix A, rhs;
@@ -593,12 +593,12 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
 
     // loop over elements in patch
     nelem = patchElems.giveSize();
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement( patchElems.at(ielem) );
-        if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
+        if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             iRule = element->giveDefaultIntegrationRulePtr();
             nip = iRule->getNumberOfIntegrationPoints();
-            for ( i = 0; i < nip; i++ ) {
+            for ( int i = 0; i < nip; i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
                 if ( !element->giveIPValue(ipVal, gp, type, tStep) ) {
                     ipVal.resize(regionValSize);
@@ -608,12 +608,12 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
                 element->computeGlobalCoordinates( coords, * gp->giveLocalCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
-                for ( j = 1; j <= neq; j++ ) {
-                    for ( k = 1; k <= regionValSize; k++ ) {
+                for ( int j = 1; j <= neq; j++ ) {
+                    for ( int k = 1; k <= regionValSize; k++ ) {
                         rhs.at(j, k) += P.at(j) * ipVal.at(k);
                     }
 
-                    for ( k = 1; k <= neq; k++ ) {
+                    for ( int k = 1; k <= neq; k++ ) {
                         A.at(j, k) += P.at(j) * P.at(k);
                     }
                 }
@@ -631,16 +631,16 @@ SPRNodalRecoveryModel :: determineValuesFromPatch(FloatArray &dofManValues, IntA
                                                   FloatMatrix &a, int papNumber, int regionValSize,
                                                   SPRPatchType type)
 {
-    int i, j, eq, dofMan, ndofMan = dofManToDetermine.giveSize();
+    int eq, ndofMan = dofManToDetermine.giveSize();
     FloatArray P, *coords, vals(regionValSize);
     int lneq = this->giveNumberOfUnknownPolynomialCoefficients(type);
 
-    for ( dofMan = 1; dofMan <= ndofMan; dofMan++ ) {
+    for ( int dofMan = 1; dofMan <= ndofMan; dofMan++ ) {
         vals.zero();
         coords = domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
         this->computePolynomialTerms(P, * coords, type);
-        for ( i = 1; i <= regionValSize; i++ ) {
-            for ( j = 1; j <= lneq; j++ ) {
+        for ( int i = 1; i <= regionValSize; i++ ) {
+            for ( int j = 1; j <= lneq; j++ ) {
                 vals.at(i) += P.at(j) * a.at(j, i);
             }
         }
@@ -648,7 +648,7 @@ SPRNodalRecoveryModel :: determineValuesFromPatch(FloatArray &dofManValues, IntA
         // assemble values
 
         eq = ( regionNodalNumbers.at( dofManToDetermine.at(dofMan) ) - 1 ) * regionValSize;
-        for ( i = 1; i <= regionValSize; i++ ) {
+        for ( int i = 1; i <= regionValSize; i++ ) {
             dofManValues.at(eq + i) += vals.at(i);
         }
 

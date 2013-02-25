@@ -624,9 +624,6 @@ EngngModel :: forceEquationNumbering(int id)
         graph.askNewOptimalNumbering(currStep);
     }
 
-    // invalidate element local copies of location arrays
-    nelem = domain->giveNumberOfElements();
-
     return domainNeqs.at(id);
 }
 

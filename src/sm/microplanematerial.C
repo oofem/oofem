@@ -71,7 +71,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         slave = masterGp->gaussPointArray [ i ];
     }
 
-    return ( Microplane * ) slave;
+    return static_cast< Microplane * >( slave );
 }
 
 
@@ -504,7 +504,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
          *    m.at(2) = 1.0;
          *    m.at(3) = 0.0;
          *  }
-         * } else  {
+         * } else {
          *  aux = sqrt (n.at(1)*n.at(1) + n.at(3)*n.at(3));
          *  if(fabs(aux) > 1.0e-8){
          *    m.at(1) = n.at(3)/aux;

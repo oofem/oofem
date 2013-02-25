@@ -178,13 +178,14 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
 {
     FloatArray charVect;
     Material *mat = this->giveMaterial();
+    StructuralMaterialStatus *ms = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) );
 
     answer.resize(3, 3);
     answer.zero();
 
     if ( ( type == LocalForceTensor ) || ( type == GlobalForceTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
-        charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+        charVect = ms->giveStressVector();
 
         answer.at(1, 1) = charVect.at(1);
         answer.at(2, 2) = charVect.at(2);
@@ -192,12 +193,12 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         answer.at(2, 1) = charVect.at(3);
     } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
-        charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+        charVect = ms->giveStressVector();
 
         answer.at(3, 3) = charVect.at(4);
     } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
-        charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
+        charVect = ms->giveStrainVector();
 
         answer.at(1, 1) = charVect.at(1);
         answer.at(2, 2) = charVect.at(2);
@@ -205,7 +206,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
-        charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
+        charVect = ms->giveStrainVector();
 
         answer.at(3, 3) = charVect.at(4);
     } else {

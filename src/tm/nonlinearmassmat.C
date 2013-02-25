@@ -61,7 +61,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                           TimeStep *atTime)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    AnisotropicMassTransferMaterialStatus *status = ( ( AnisotropicMassTransferMaterialStatus * ) this->giveStatus(gp) );
+    AnisotropicMassTransferMaterialStatus *status = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(gp) );
     FloatArray eps = status->giveGradP();
     double gradPNorm;
     FloatMatrix t1, t2;
@@ -89,7 +89,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
-    
+
     answer.beEmptyMtrx();
     answer.add(t1);
     answer.add(1 + C * pow(gradPNorm, alpha), t2);
@@ -107,8 +107,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 void
 NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = ( ( AnisotropicMassTransferMaterialStatus * ) this->giveStatus(gp) );
+    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(gp) );
 
     thisMaterialStatus->setPressureGradient(eps);
 
@@ -124,8 +123,7 @@ NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *
 int
 NonlinearMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = ( ( AnisotropicMassTransferMaterialStatus * ) this->giveStatus(aGaussPoint) );
+    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(aGaussPoint) );
     FloatMatrix temp;
 
     switch ( type ) {

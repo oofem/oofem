@@ -169,7 +169,7 @@ CombinedZZSIRemeshingCriteria :: initializeFrom(InputRecord *ir)
 double
 CombinedZZSIRemeshingCriteria :: giveDofManDensity(int num)
 {
-    int i, isize;
+    int isize;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
     ZZRemeshingCriteriaInterface *interface;
@@ -178,9 +178,9 @@ CombinedZZSIRemeshingCriteria :: giveDofManDensity(int num)
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
-    for ( i = 1; i <= isize; i++ ) {
-        interface = ( ZZRemeshingCriteriaInterface * )
-                    domain->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType);
+    for ( int i = 1; i <= isize; i++ ) {
+        interface = static_cast< ZZRemeshingCriteriaInterface * >
+                    ( domain->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
             _error("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
         }
@@ -197,7 +197,8 @@ CombinedZZSIRemeshingCriteria :: giveDofManDensity(int num)
 
 
 void
-CombinedZZSIRemeshingCriteria :: setDomain(Domain *d) {
+CombinedZZSIRemeshingCriteria :: setDomain(Domain *d)
+{
     FEMComponent :: setDomain(d);
     zzrc.setDomain(d);
     dirc.setDomain(d);

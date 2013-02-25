@@ -115,7 +115,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d) { mu_inf = 1.e6; stressGrowthRate=BINGHAM_DEFAULT_STRESS_GROWTH_RATE;}
+    BinghamFluidMaterial2(int n, Domain *d);
     /// Destructor.
     virtual ~BinghamFluidMaterial2() { }
 

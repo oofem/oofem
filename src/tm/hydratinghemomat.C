@@ -151,7 +151,7 @@ HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint
 void
 HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
 {
-    TransportMaterialStatus *ms = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray aux;
     if ( ms ) {
         ms->letTempStateVectorBe(vec);
@@ -214,7 +214,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
         if ( !hydrationLHS ) {
             answer = 0;
         } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
-            FloatArray vec( ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector() );
+            FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempStateVector();
 
             if ( vec.giveSize() < 2 ) {
                 vec.resize(2);

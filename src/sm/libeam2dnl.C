@@ -60,7 +60,7 @@ Interface *
 LIBeam2dNL :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return ( LayeredCrossSectionInterface * ) this;
+        return static_cast< LayeredCrossSectionInterface * >( this );
     }
 
     return NULL;
@@ -268,7 +268,7 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
         dV = this->computeVolumeAround(gp);
-        stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+        stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         n = stress.giveSize();
         if ( n ) {
             for ( j = 1; j <= n; j++ ) {

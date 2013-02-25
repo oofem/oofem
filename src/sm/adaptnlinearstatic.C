@@ -313,7 +313,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
-                                    ( AdaptiveNonLinearStatic * ) sourceProblem, 1, this->giveCurrentStep() );
+                                    static_cast< AdaptiveNonLinearStatic * >( sourceProblem ), 1, this->giveCurrentStep() );
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
@@ -826,7 +826,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
     int mstepNum = atTime->giveMetaStepNumber();
-    int imstep;
     int hasfixed, mode;
     InputRecord *ir;
     MetaStep *iMStep;
@@ -843,7 +842,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.zero();
 
-    for ( imstep = 1; imstep < mstepNum; imstep++ ) {
+    for ( int imstep = 1; imstep < mstepNum; imstep++ ) {
         iMStep = this->giveMetaStep(imstep);
         ir = iMStep->giveAttributesRecord();
         //hasfixed = ir->hasField("fixload");
@@ -877,6 +876,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             if ( mode == ( int ) nls_directControl ) { // and only load control
                 for ( int istep = firststep; istep <= laststep; istep++ ) {
                     // bad practise here
+                    ///@todo Likely memory leak here with new TimeStep; Check.
                     TimeStep *old = new TimeStep(istep, this, imstep, istep - 1.0, deltaT, 0);
                     this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                                   rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
@@ -914,10 +914,9 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     rlm = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
     if ( mode == ( int ) nls_directControl ) { // and only load control
-        iMStep = this->giveMetaStep(imstep);
         for ( int istep = firststep; istep <= laststep; istep++ ) {
             // bad practise here
-            TimeStep *old = new TimeStep(istep, this, imstep, istep - 1.0, deltaT, 0);
+            TimeStep *old = new TimeStep(istep, this, mstepNum, istep - 1.0, deltaT, 0);
             this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                           rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
 

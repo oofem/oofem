@@ -174,8 +174,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
         } // end nlGeometry
 
         if ( useUpdatedGpRecord == 1 ) {
-            TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
-                                ->giveStressVector();
+            TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         } else {
             this->computeStressVector(TotalStressVector, gp, tStep);
         }
@@ -275,8 +274,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
             // TotalStressVector = gp->giveStressVector() ;
             if ( useUpdatedGpRecord == 1 ) {
-                TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
-                                    ->giveStressVector();
+                TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
                 this->computeStressVector(TotalStressVector, gp, tStep);
             }
@@ -460,7 +458,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             dV = this->computeVolumeAround(gp);
-            stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveTempStressVector();
+            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveTempStressVector();
             n = stress.giveSize();
             if ( n ) {
                 for ( j = 1; j <= n; j++ ) {
@@ -567,7 +565,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
             for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                 gp = iRule->getIntegrationPoint(i);
                 dV = this->computeVolumeAround(gp);
-                stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
                 n = stress.giveSize();
                 if ( n ) {
                     for ( j = 1; j <= n; j++ ) {

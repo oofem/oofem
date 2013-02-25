@@ -63,7 +63,7 @@ void
 InitModuleManager :: doInit()
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( InitModule * ) this->giveModule(i) )->doInit();
+        this->giveModule(i)->doInit();
     }
 }
 } // end namespace oofem

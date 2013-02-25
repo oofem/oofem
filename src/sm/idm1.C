@@ -239,7 +239,7 @@ void
 IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;
@@ -393,7 +393,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             }
         }
 
-        IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
+        IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
         Le = status->giveLe();
         ef = wf / Le;    //ef is the fracturing strain
         if ( ef < e0 ) { //check that no snapback occurs
@@ -548,8 +548,8 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     double E = this->giveLinearElasticMaterial()->give('E', gp);
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain, crackVect(3);
     FloatMatrix principalDir(3, 3);
-    IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     const double e0 = this->give(e0_ID, gp);
     const double ef = this->give(ef_ID, gp);
@@ -666,7 +666,7 @@ Interface *
 IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 {
     if ( type == MaterialModelMapperInterfaceType ) {
-        return ( MaterialModelMapperInterface * ) this;
+        return static_cast< MaterialModelMapperInterface * >( this );
     } else {
         return NULL;
     }
@@ -685,7 +685,7 @@ IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status;
 
-    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveNumber() );
+    status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
@@ -706,7 +706,7 @@ IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tSte
     int result;
     FloatArray intVal, strainIncr(3);
     IntArray toMap(3);
-    IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
+    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
 
 
     toMap.at(1) = ( int ) IST_MaxEquivalentStrainLevel;
@@ -744,7 +744,7 @@ IsotropicDamageMaterial1 :: MMI_update(GaussPoint *gp,  TimeStep *tStep, FloatAr
 {
     int result = 1;
     FloatArray intVal, strain;
-    IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
+    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
 
     // now update all internal vars accordingly
     strain = status->giveStrainVector();
@@ -799,7 +799,7 @@ Interface *
 IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return ( RandomMaterialStatusExtensionInterface * ) this;
+        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }

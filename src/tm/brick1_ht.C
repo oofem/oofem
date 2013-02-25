@@ -159,13 +159,13 @@ Interface *
 Brick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return ( EIPrimaryFieldInterface * ) this;
+        return static_cast< EIPrimaryFieldInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;

@@ -70,13 +70,13 @@ Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
@@ -88,14 +88,13 @@ Axisymm3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    int i;
     FloatArray n(3);
 
     answer.resize(2, 6);
     answer.zero();
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }

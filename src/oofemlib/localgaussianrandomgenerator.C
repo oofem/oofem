@@ -199,10 +199,10 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
     if ( fabs(q) <= split1 ) {
         r = const1 - q * q;
         value = q * dpolyValue(8, a, r) / dpolyValue(8, b, r);
-    } else   {
+    } else {
         if ( q < 0.0 ) {
             r = p;
-        } else   {
+        } else {
             r = 1.0 - p;
         }
 
@@ -215,7 +215,7 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
         if ( r <= split2 ) {
             r = r - const2;
             value = dpolyValue(8, c, r) / dpolyValue(8, d, r);
-        } else   {
+        } else {
             r = r - split2;
             value = dpolyValue(8, e, r) / dpolyValue(8, f, r);
         }

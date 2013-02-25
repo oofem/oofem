@@ -95,10 +95,7 @@ MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
  * creates new  material status  corresponding to this class
  */
 {
-    MPlasticMaterialStatus *status;
-
-    status = new MPlasticMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new MPlasticMaterialStatus(1, this->giveDomain(), gp);
 }
 
 
@@ -127,8 +124,8 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     IntArray activeConditionMap(this->nsurf);
     FloatArray gamma;
 
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
@@ -234,7 +231,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
         loadGradVecPtr  = & loadGradVec;
     }
 
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     status->givePlasticStrainVector(plasticStrainVectorR);
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
@@ -462,8 +459,8 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     int nIterations = 0;
     int size, sizeR, i, j, elastic, restart, actSurf, indx, iindx, jindx;
 
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
@@ -709,7 +706,7 @@ MPlasticMaterial :: computeGradientVector(FloatArray &answer, functType ftype, i
      */
     FloatArray stressGradient, stressGradientR;
     FloatArray stressSpaceHardVarGradient;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
     int i, isize, size;
 
@@ -749,7 +746,7 @@ MPlasticMaterial :: computeResidualVector(FloatArray &answer, GaussPoint *gp, co
 
     FloatArray oldPlasticStrainVectorR, oldStrainSpaceHardeningVariables;
     int i, j, isize, size;
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     isize = plasticStrainVectorR.giveSize();
     size =  gradientVectorR [ 0 ].giveSize();
@@ -785,7 +782,7 @@ MPlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *
 
     FloatMatrix de;
     FloatArray reducedAnswer;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->computeReducedElasticModuli(de, gp, atTime);
@@ -895,8 +892,8 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatArray gamma;
     int size, sizeR, i, j, iindx, actSurf = 0;
 
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
@@ -1053,8 +1050,8 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatArray gamma;
     int size, sizeR, i, j, iindx, actSurf = 0;
 
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     // ask for plastic consistency parameter
@@ -1431,7 +1428,7 @@ MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseFo
 int
 MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    MPlasticMaterialStatus *status = ( MPlasticMaterialStatus * ) this->giveStatus(aGaussPoint);
+    MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
@@ -1503,10 +1500,11 @@ MPlasticMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPo
 
 MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector()
+    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector(),
+    gamma(),
+    tempGamma()
 {
     state_flag = temp_state_flag = MPlasticMaterialStatus :: PM_Elastic;
-    gamma = tempGamma = 0.;
 }
 
 
@@ -1517,7 +1515,7 @@ MPlasticMaterialStatus :: ~MPlasticMaterialStatus()
 void
 MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, n;
+    int n;
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
@@ -1530,14 +1528,14 @@ MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
         n = plasticStrainVector.giveSize();
         fprintf(file, " plastic strains ");
-        for ( i = 1; i <= n; i++ ) {
+        for ( int i = 1; i <= n; i++ ) {
             fprintf( file, " % .4e", plasticStrainVector.at(i) );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
             n = strainSpaceHardeningVarsVector.giveSize();
             fprintf(file, ", strain space hardening vars ");
-            for ( i = 1; i <= n; i++ ) {
+            for ( int i = 1; i <= n; i++ ) {
                 fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
             }
         }
@@ -1555,7 +1553,7 @@ void MPlasticMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
@@ -1563,7 +1561,7 @@ void MPlasticMaterialStatus :: initTempStatus()
     tempPlasticStrainVector = plasticStrainVector;
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
-        strainSpaceHardeningVarsVector.resize( ( ( MPlasticMaterial * ) gp->giveMaterial() )->
+        strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial * >( gp->giveMaterial() )->
                                               giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }

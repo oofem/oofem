@@ -530,7 +530,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
                 VTKXMLExportModuleElementInterface *interface =
-                    ( VTKXMLExportModuleElementInterface * ) elem->giveInterface(VTKXMLExportModuleElementInterfaceType);
+                    static_cast< VTKXMLExportModuleElementInterface * >( elem->giveInterface(VTKXMLExportModuleElementInterfaceType) );
                 if ( interface ) {
                     // passing this to access general piece related methods like exportPointDataHeader, etc.
                     interface->_export(stream, this, primaryVarsToExport, internalVarsToExport, tStep);

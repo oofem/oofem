@@ -99,8 +99,8 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
     MMAShapeFunctProjectionInterface *interface;
     const FloatArray *nvec;
 
-    if ( ( interface = ( MMAShapeFunctProjectionInterface * )
-                       elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ) == NULL ) {
+    if ( ( interface = static_cast< MMAShapeFunctProjectionInterface * >
+                       ( elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ) ) == NULL ) {
         abort();
     }
 
@@ -138,8 +138,8 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
     MMAShapeFunctProjectionInterface *interface;
     const FloatArray *nvec;
 
-    if ( ( interface = ( MMAShapeFunctProjectionInterface * )
-                       elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ) == NULL ) {
+    if ( ( interface = static_cast< MMAShapeFunctProjectionInterface * >
+                       ( elem->giveInterface(MMAShapeFunctProjectionInterfaceType) ))  == NULL ) {
         abort();
     }
 

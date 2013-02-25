@@ -92,7 +92,7 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, MatResponseForm
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    CebFipSlip90MaterialStatus *status = ( CebFipSlip90MaterialStatus * ) this->giveStatus(gp);
+    CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     FloatArray reducedTotalStrainVector;
     double f, slip, tempKappa;
 
@@ -265,7 +265,7 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
                                                                GaussPoint *gp, TimeStep *atTime)
 {
     double kappa;
-    CebFipSlip90MaterialStatus *status = ( CebFipSlip90MaterialStatus * ) this->giveStatus(gp);
+    CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
     answer.resize(1, 1);
 
     if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) ) {

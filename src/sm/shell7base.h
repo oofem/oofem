@@ -227,7 +227,7 @@ protected:
 
     // Misc
     void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
-    int giveVoigtIndex(const int ind1, const int ind2);
+    int giveVoigtIndex(int ind1, int ind2);
     void giveTensorForm(const FloatMatrix &matrix, FloatArray &tensor);
     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
 };

@@ -58,7 +58,7 @@ TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
 {
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
 
     double tsed, tempPSED, tempTSED, tempESED;
@@ -98,7 +98,7 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     double tempDam, beta, tempKappa, kappa;
     FloatArray tempEffectiveStress, tempTensor2, prodTensor, plasFlowDirec;
     FloatMatrix elasticity, compliance, SSaTensor, secondTerm, thirdTerm, tangentMatrix;
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
     if ( mode == ElasticStiffness ) {
         this->constructAnisoComplTensor(compliance);
@@ -356,7 +356,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     FloatArray strainAfterSubstep, strainIncrement, strainSubIncrement;
     FloatMatrix elasticity, compliance;
 
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
     // elastic compliance
     this->constructAnisoComplTensor(compliance);
@@ -449,7 +449,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
 {
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     tempKappa = status->giveTempKappa();
 }
 
@@ -495,7 +495,7 @@ TrabBone3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
 {
     double tempDam;
     FloatArray effStress, densStress;
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
 
     // compute effective stress using the plasticity model
@@ -595,16 +595,14 @@ TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer, const int posSignF
 void
 TrabBone3D :: constructNormAdjustTensor(FloatMatrix &answer)
 {
-    int i;
-
     answer.resize(6, 6);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, i) = 1.;
     }
 
-    for ( i = 4; i <= 6; i++ ) {
+    for ( int i = 4; i <= 6; i++ ) {
         answer.at(i, i) = 0.5;
     }
 }
@@ -672,7 +670,7 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
 int
 TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(aGaussPoint);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = status->giveTempDam();
@@ -936,9 +934,7 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
 
 MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
 {
-    TrabBone3DStatus *status =
-        new  TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 
 }

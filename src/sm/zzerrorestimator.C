@@ -59,7 +59,7 @@ FloatArray sNorms;
 int
 ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 {
-    int ielem, nelems = this->domain->giveNumberOfElements();
+    int nelems = this->domain->giveNumberOfElements();
     ZZErrorEstimatorInterface *interface;
     double sNorm;
     InternalStateType type = IStype;
@@ -101,12 +101,12 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
     this->globalENorm = this->globalSNorm = 0.0;
     // loop over domain's elements
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
         if ( this->skipRegion( this->domain->giveElement(ielem)->giveRegionNumber() ) ) {
             continue;
         }
 
-        interface = ( ZZErrorEstimatorInterface * ) this->domain->giveElement(ielem)->giveInterface(ZZErrorEstimatorInterfaceType);
+        interface = static_cast< ZZErrorEstimatorInterface * >( this->domain->giveElement(ielem)->giveInterface(ZZErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
             _error("estimateError: Element has no ZZ error estimator interface defined");
         }
@@ -242,7 +242,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                                            InternalStateType type,
                                                                            TimeStep *tStep)
 {
-    int i, j, k, size, nDofMans;
+    int size, nDofMans;
     Element *elem = this->ZZErrorEstimatorI_giveElement();
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
     const FloatArray *recoveredStress;
@@ -255,10 +255,10 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     size = elem->giveIPValueSize(type, iRule->getIntegrationPoint(0));
     nodalRecoveredStreses.resize(nDofMans, size);
     // assemble nodal recovered stresses
-    for ( i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
+    for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
         elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress, elem->giveDofManager(i)->giveNumber(),
                                                             elem->giveRegionNumber() );
-        for ( j = 1; j <= size; j++ ) {
+        for ( int j = 1; j <= size; j++ ) {
             nodalRecoveredStreses.at(i, j) = recoveredStress->at(j);
         }
     }
@@ -269,13 +269,13 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
             diff.zero();
             this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
-            for ( j = 1; j <= size; j++ ) {
-                for ( k = 1; k <= nDofMans; k++ ) {
+            for ( int j = 1; j <= size; j++ ) {
+                for ( int k = 1; k <= nDofMans; k++ ) {
                     diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
@@ -291,16 +291,16 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         FloatArray help;
         FloatMatrix DInv;
 
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             dV  = elem->computeVolumeAround(gp);
             diff.zero();
             this->ZZErrorEstimatorI_computeEstimatedStressInterpolationMtrx(n, gp, type);
-            ( ( StructuralMaterial * ) elem->giveMaterial() )
+            static_cast< StructuralMaterial * >( elem->giveMaterial() )
             ->giveCharacteristicComplianceMatrix(DInv, ReducedForm, TangentStiffness,
                                                  gp, tStep);
-            for ( j = 1; j <= size; j++ ) {
-                for ( k = 1; k <= nDofMans; k++ ) {
+            for ( int j = 1; j <= size; j++ ) {
+                for ( int k = 1; k <= nDofMans; k++ ) {
                     diff.at(j) += n.at(k) * nodalRecoveredStreses.at(k, j);
                 }
             }
@@ -359,7 +359,7 @@ ZZRemeshingCriteria :: giveRemeshingStrategy(TimeStep *tStep)
 int
 ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 {
-    int i, j, nelem, nnode, jnode, elemPolyOrder, ielemNodes;
+    int nelem, nnode, jnode, elemPolyOrder, ielemNodes;
     double globValNorm = 0.0, globValErrorNorm = 0.0, elemErrLimit, eerror, iratio, currDensity, elemSize;
     Element *ielem;
     EE_ErrorType errorType = indicatorET;
@@ -376,7 +376,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     //std::vector<char> nodalDensities(nnode);
     this->nodalDensities.resize(nnode);
     std :: vector< char >dofManInitFlag(nnode);
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         dofManInitFlag [ i ] = 0;
     }
 
@@ -407,15 +407,15 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     elemErrLimit = sqrt( ( globValNorm * globValNorm + globValErrorNorm * globValErrorNorm ) / nelem ) *
                    this->requiredError * coeff;
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ielem = domain->giveElement(i);
 
         if ( this->ee->skipRegion( ielem->giveRegionNumber() ) ) {
             continue;
         }
 
-        interface = ( ZZRemeshingCriteriaInterface * )
-                    domain->giveElement(i)->giveInterface(ZZRemeshingCriteriaInterfaceType);
+        interface = static_cast< ZZRemeshingCriteriaInterface * >
+                    ( domain->giveElement(i)->giveInterface(ZZRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
             _error("estimateMeshDensities: element does not support ZZRemeshingCriteriaInterface");
         }
@@ -441,7 +441,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
         ielemNodes = ielem->giveNumberOfDofManagers();
-        for ( j = 1; j <= ielemNodes; j++ ) {
+        for ( int j = 1; j <= ielemNodes; j++ ) {
             jnode = ielem->giveDofManager(j)->giveNumber();
             if ( dofManInitFlag [ jnode - 1 ] ) {
                 this->nodalDensities.at(jnode) = min(this->nodalDensities.at(jnode), elemSize);
@@ -453,7 +453,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     }
 
     // init non-initialized nodes -> those in skip regions
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         if ( dofManInitFlag [ i ] == 0 ) {
             this->nodalDensities.at(i + 1) = this->giveDofManDensity(i + 1);
         }
@@ -480,7 +480,7 @@ ZZRemeshingCriteria :: initializeFrom(InputRecord *ir)
 double
 ZZRemeshingCriteria :: giveDofManDensity(int num)
 {
-    int i, isize;
+    int isize;
     bool init = false;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
@@ -507,13 +507,13 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     // Average density
 
     density = 0.0;
-    for ( i = 1; i <= isize; i++ ) {
-        interface = ( ZZRemeshingCriteriaInterface * )
-                    domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType);
+    for ( int i = 1; i <= isize; i++ ) {
+        interface = static_cast< ZZRemeshingCriteriaInterface * >
+                    ( domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType) );
         if ( interface ) {
-	  init = true;
-	  density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
-	}
+            init = true;
+            density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+        }
     }
     if (init) {
       density /= isize;

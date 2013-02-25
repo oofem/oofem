@@ -321,19 +321,19 @@ Interface *
 Quad1PlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;

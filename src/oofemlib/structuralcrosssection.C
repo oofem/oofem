@@ -55,7 +55,7 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
     Material *mat = gp->giveElement()->giveMaterial();
 
     if ( mat->hasMaterialModeCapability(mode) ) {
-        ( ( StructuralMaterial * ) gp->giveElement()->giveMaterial() )
+        static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() )
         ->giveRealStressVector(answer, form, gp, strain, tStep);
         return;
     } else {
@@ -98,7 +98,7 @@ StructuralCrossSection :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       GaussPoint *gp,
                                                       TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     this->giveMaterialStiffnessMatrixOf(answer, form, rMode, gp,
                                         mat, tStep);
 }
@@ -116,8 +116,7 @@ StructuralCrossSection :: giveMaterialStiffnessMatrixOf(FloatMatrix &answer,
 // only interface to material class, forcing returned matrix to be in reduced form.
 //
 {
-    // Material *mat = gp->giveElement()->giveMaterial();
-    ( ( StructuralMaterial * ) mat )->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
+    static_cast< StructuralMaterial * >( mat )->giveCharacteristicMatrix(answer, form, rMode, gp, tStep);
 }
 
 
@@ -350,13 +349,9 @@ StructuralCrossSection :: computeStressIndependentStrainVector(FloatArray &answe
 // takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
 //
 {
-    StructuralMaterial *mat = ( StructuralMaterial * ) gp->giveElement()->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     FloatArray e0, fullAnswer;
-
-    //
     // add parts caused by  material
-    //
-
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
 } // end namespace oofem

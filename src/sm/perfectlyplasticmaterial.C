@@ -89,13 +89,12 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     FloatArray plasticStrainIncrement3d, strainIncrement, reducedStrain, reducedStrainIncrement;
     FloatArray statusFullStressVector, statusFullPlasticVector;
     FloatArray plasticStrainVector;
-    PerfectlyPlasticMaterialStatus *status = ( PerfectlyPlasticMaterialStatus * ) this->giveStatus(gp);
+    PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     FloatMatrix dp;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
-                                           gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
+                                           ( gp->giveElement()->giveCrossSection() );
     double f0, f1, f2, help, dLambda, r, r1, m;
-    int i;
 
     // init temp variables (of YC,LC,Material) at the beginning of step
     this->initTempStatus(gp);
@@ -145,7 +144,8 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
                                                          & statusFullPlasticVector);
             crossSection->imposeStressConstrainsOnGradient(gp, yieldStressGrad);
 
-            for ( help = 0., i = 1; i <= 6; i++ ) {
+            help = 0.;
+            for ( int i = 1; i <= 6; i++ ) {
                 help += yieldStressGrad->at(i) * elasticStressIncrement.at(i);
             }
 
@@ -165,7 +165,6 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
             }
         } else { // f0 should be zero
             r  = 0.;
-            r1 = 1.;
         }
 
         stressVector3d =  elasticStressIncrement;
@@ -183,7 +182,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
         // element yielding - set the print status
         status->setTempYieldFlag(1);
         // loop over m-steps
-        for ( i = 1; i <= m; i++ ) {
+        for ( int i = 1; i <= m; i++ ) {
             //   yieldStressGrad = yieldCriteria->
             //    GiveStressGradient (gp, stressVector3d,
             //            PlasticStrainVector3d,
@@ -331,9 +330,9 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 {
     FloatArray statusFullStressVector, statusFullPlasticVector, plasticStrainVector;
     double lambda;
-    PerfectlyPlasticMaterialStatus *status = ( PerfectlyPlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
-                                           gp->giveElement()->giveCrossSection();
+    PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
+                                           ( gp->giveElement()->giveCrossSection() );
 
     // double f = domain->giveYieldCriteria(yieldCriteria)->
     //  computeValueAt(gp->giveStressVector(), gp->givePlasticStrainVector(),
@@ -619,7 +618,7 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
 // gp is used only and only for setting proper MaterialMode ()
 // returns proportionality factor lambda also if strainIncrement3d != NULL
 {
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
     FloatMatrix de, *yeldStressGradMat, *loadingStressGradMat;
     FloatMatrix fsde, gsfsde;
@@ -688,10 +687,9 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 // in full stress strain space
 {
     FloatArray *yeldStressGrad, *stressCorrection;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
-                                           gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
+                                           ( gp->giveElement()->giveCrossSection() );
     double f3, help;
-    int j;
 
     yeldStressGrad = this->GiveYCStressGradient(gp,
                                                 stressVector3d,
@@ -700,7 +698,8 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 
     f3 = this->computeYCValueAt(gp, stressVector3d, plasticVector3d);
 
-    for ( help = 0., j = 1; j <= 6; j++ ) {
+    help = 0.;
+    for ( int j = 1; j <= 6; j++ ) {
         help += yeldStressGrad->at(j) * yeldStressGrad->at(j);
     }
 
@@ -767,7 +766,7 @@ PerfectlyPlasticMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 // We call PerfectlyPlasticMaterialStatus->updateYourself()
 //
 {
-    PerfectlyPlasticMaterialStatus *status = ( PerfectlyPlasticMaterialStatus * ) this->giveStatus(gp);
+    PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(gp) );
     status->updateYourself(atTime);
     // update yield criteria
 }
@@ -776,7 +775,7 @@ PerfectlyPlasticMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 int
 PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    PerfectlyPlasticMaterialStatus *status = ( PerfectlyPlasticMaterialStatus * ) this->giveStatus(aGaussPoint);
+    PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
@@ -931,13 +930,13 @@ PerfectlyPlasticMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
-        plasticStrainIncrementVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                             giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {

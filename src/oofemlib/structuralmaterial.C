@@ -224,7 +224,7 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
      * caused by temperature, shrinkage and possibly by other phenomena.
      */
     FloatArray epsilonTemperature;
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     answer = reducedStrainVector;
     cs->computeStressIndependentStrainVector(epsilonTemperature, gp, stepN, mode);
@@ -2258,7 +2258,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 // and normalized.
 //
 {
-    int i, j, k, maxJ = 0, size;
+    int maxJ = 0, size;
     double cosine, maxCosine, swap;
 
 #ifdef DEBUG
@@ -2282,11 +2282,12 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
     //
     // sort pVal and pDir
     size = pDir->giveNumberOfRows();
-    for ( i = 1; i <= size - 1; i++ ) {
+    for ( int i = 1; i <= size - 1; i++ ) {
         // find closest pDir vector to toPDir i-th vector
         maxCosine = 0.0;
-        for ( j = i; j <= size; j++ ) {
-            for ( k = 1, cosine = 0.; k <= size; k++ ) {
+        for ( int j = i; j <= size; j++ ) {
+            cosine = 0.;
+            for ( int k = 1; k <= size; k++ ) {
                 cosine += toPDir->at(k, i) * pDir->at(k, j);
             }
 
@@ -2303,7 +2304,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
             swap = pVal->at(maxJ);
             pVal->at(maxJ) = pVal->at(i);
             pVal->at(i) = swap;
-            for ( k = 1; k <= size; k++ ) {
+            for ( int k = 1; k <= size; k++ ) {
                 swap = pDir->at(k, maxJ);
                 pDir->at(k, maxJ) = pDir->at(k, i);
                 pDir->at(k, i) = swap;
@@ -2316,7 +2317,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 int
 StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type)
 {
-    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
         status->letStressVectorBe(value);
         return 1;
@@ -2337,7 +2338,7 @@ StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoin
 int
 StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
         answer = status->giveStressVector();
         return 1;
@@ -2401,7 +2402,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             FloatArray gcoords, et2;
-            ( ( StructuralElement * ) aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
+            static_cast< StructuralElement * >( aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, atTime) ) ) {
                 OOFEM_ERROR3("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
             }
@@ -2414,7 +2415,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ) {
         FloatArray gc, val = status->giveStressVector();
         FloatMatrix base(3, 3);
-        ( ( StructuralElement * ) aGaussPoint->giveElement() )->computeGlobalCoordinates( gc, * aGaussPoint->giveCoordinates() );
+        static_cast< StructuralElement * >( aGaussPoint->giveElement() )->computeGlobalCoordinates( gc, * aGaussPoint->giveCoordinates() );
         double l = sqrt( gc.at(1) * gc.at(1) + gc.at(2) * gc.at(2) );
         if ( l > 1.e-4 ) {
             base.at(1, 1) = gc.at(1) / l;

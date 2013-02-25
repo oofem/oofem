@@ -1967,7 +1967,7 @@ void do_print_state(EView *v_p, caddr_t data_p)
     while ( ( grep = EVGetFromSelectionList() ) != NULL ) {
         if ( EGGetAppObj(grep) != NULL ) {
             // print info
-            obj = ( FEMComponent * ) EGGetAppObj(grep);
+            obj = reinterpret_cast< FEMComponent * >( EGGetAppObj(grep) );
             if ( gc [ 0 ].getActiveStep() != -1 ) {
                 obj->printOutputAt( fp, gc [ 0 ].getActiveProblem()->giveCurrentStep() );
             } else {

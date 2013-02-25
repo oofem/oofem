@@ -64,7 +64,7 @@ void
 ExportModuleManager :: doOutput(TimeStep *tStep)
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( ExportModule * ) this->giveModule(i) )->doOutput(tStep);
+        this->giveModule(i)->doOutput(tStep);
     }
 }
 
@@ -72,7 +72,7 @@ void
 ExportModuleManager :: initialize()
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( ExportModule * ) this->giveModule(i) )->initialize();
+        this->giveModule(i)->initialize();
     }
 }
 
@@ -81,7 +81,7 @@ void
 ExportModuleManager :: terminate()
 {
     for ( int i = 1; i <= numberOfModules; i++ ) {
-        ( ( ExportModule * ) this->giveModule(i) )->terminate();
+        this->giveModule(i)->terminate();
     }
 }
 } // end namespace oofem

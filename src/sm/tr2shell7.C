@@ -179,7 +179,8 @@ Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 // Integration
 
 double
-Tr2Shell7 :: computeVolumeAround(GaussPoint *gp) {
+Tr2Shell7 :: computeVolumeAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
@@ -189,7 +190,8 @@ Tr2Shell7 :: computeVolumeAround(GaussPoint *gp) {
 }
 
 double
-Tr2Shell7 :: computeAreaAround(GaussPoint *gp) {
+Tr2Shell7 :: computeAreaAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
     temp.beVectorProductOf(G1, G2);
@@ -201,7 +203,8 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp) {
 
 
 double
-Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer) {
+Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
+{
     FloatArray G1, G2, G3, temp;
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
@@ -214,7 +217,8 @@ Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer) {
 
 
 void
-Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer) {
+Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer)
+{
     int ndofs = 42;
     answer.resize(ndofs, ndofs);
     for ( int i = 1; i <= ndofs; i++ ) {
@@ -224,12 +228,12 @@ Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matr
                 double relDiff =  diff / matrix1.at(i, j);
                 if ( abs(relDiff) < 1.0e-4 ) {
                     answer.at(i, j) = 0.0;
-                } else if ( abs(diff) < 1.0e3 )     {
+                } else if ( abs(diff) < 1.0e3 ) {
                     answer.at(i, j) = 0.0;
-                } else  {
+                } else {
                     answer.at(i, j) = relDiff;
                 }
-            } else  {
+            } else{
                 answer.at(i, j) = -1.0;
             }
         }

@@ -74,8 +74,8 @@ RankineMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    E = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveYoungsModulus();
-    nu = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->givePoissonsRatio();
+    E = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveYoungsModulus();
+    nu = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->givePoissonsRatio();
 
     IR_GIVE_FIELD(ir, sig0, IFT_RankineMat_sig0, "sig0"); // uniaxial yield stress
 
@@ -143,7 +143,7 @@ RankineMat :: giveRealStressVector(FloatArray &answer,
         OOFEM_ERROR("RankineMat::giveRealStressVector : unknown material response mode");
     }
 
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
     // initialization
     this->initTempStatus(gp);
@@ -208,7 +208,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
   double kappa, tempKappa, H;
     FloatArray reducedStress;
     FloatArray strain, tempPlasticStrain;
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
     // get the initial plastic strain and initial kappa from the status
     status->givePlasticStrain(tempPlasticStrain);
@@ -362,7 +362,7 @@ double
 RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 {
     double tempKappa, dam;
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     dam = status->giveDamage();
     computeCumPlastStrain(tempKappa, gp, atTime);
     double tempDam = computeDamageParam(tempKappa);
@@ -375,7 +375,7 @@ RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 void RankineMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
 {
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     tempKappa = status->giveTempCumulativePlasticStrain();
 }
 
@@ -386,7 +386,7 @@ RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form
                                        GaussPoint *gp,
                                        TimeStep *atTime)
 {
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double gprime = computeDamageParamPrime(tempKappa);
     evaluatePlaneStressStiffMtrx(answer, form, mode, gp, atTime, gprime);
@@ -400,7 +400,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
                                            GaussPoint *gp,
                                            TimeStep *atTime, double gprime)
 {
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness || mode == SecantStiffness ) {
         // start from the elastic stiffness
         this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
@@ -529,7 +529,7 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
 int
 RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(aGaussPoint);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
         answer  = * status->givePlasDef();
         return 1;
@@ -731,7 +731,7 @@ void RankineMatStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrain.giveSize() == 0 ) {
-        plasticStrain.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrain.zero();
     }
 

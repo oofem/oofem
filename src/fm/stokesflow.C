@@ -116,7 +116,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         if (this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef) {
             this->giveDomain(1)->giveTopology()->replaceFEMesh();
             OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
-            meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
+            /*meshdeformation =*/ this->meshqualityee->giveValue(globalErrorEEV, tStep);
             this->giveExportModuleManager()->initialize();
         }
     }
@@ -190,16 +190,16 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     Domain* d = this->giveDomain(1);
     int i, nelem = d->giveNumberOfElements();
     for ( i = 1; i <= nelem; ++i ) {
-        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+        static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
     // update element stabilization
-    int i, nelem = d->giveNumberOfElements();
-    for ( i = 1; i <= nelem; ++i ) {
-        ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+    int nelem = d->giveNumberOfElements();
+    for ( int i = 1; i <= nelem; ++i ) {
+        static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 
     if (cmpn == InternalRhs) {

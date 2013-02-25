@@ -363,7 +363,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if (iSurf == 3) { // surface 3 - nodes   2 1 5 6   9 17 13 18
         nodes.at(1) =  2;  nodes.at(2) =  1;  nodes.at(3) =  5;  nodes.at(4) =  6;
         nodes.at(5) =  9;  nodes.at(6) = 17;  nodes.at(7) = 13;  nodes.at(8) = 18;
-    } else if ( isurf == 4 )     { // surface 4 - nodes   3 7 6 2  19 14 18 10
+    } else if ( isurf == 4 ) { // surface 4 - nodes   3 7 6 2  19 14 18 10
         nodes.at(1) =  3;
         nodes.at(2) =  7;
         nodes.at(3) =  6;
@@ -372,7 +372,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
         nodes.at(6) = 14;
         nodes.at(7) = 18;
         nodes.at(8) = 10;
-    } else if ( isurf == 5 )     { // surface 5 - nodes   3 4 8 7  11 20 15 19
+    } else if ( isurf == 5 ) { // surface 5 - nodes   3 4 8 7  11 20 15 19
         nodes.at(1) =  3;
         nodes.at(2) =  4;
         nodes.at(3) =  8;
@@ -384,7 +384,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if (iSurf == 6) { // surface 6 - nodes   4 8 5 1  20 16 17 12
         nodes.at(1) =  4;  nodes.at(2) =  8;  nodes.at(3) =  5;  nodes.at(4) =  1;
         nodes.at(5) = 20;  nodes.at(6) = 16;  nodes.at(7) = 17;  nodes.at(8) = 12;
-    } else   {
+    } else {
         OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 #endif

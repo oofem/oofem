@@ -546,14 +546,15 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
 {
     Dof *dof, *nodeDof;
     FloatMatrix *Lcs, *nodeLcs, trFromNodeLcsToLcs;
-    bool compatibleCS = false, orthogonalCS = false, newLcs = false, newNodeLcs = false;
+    bool compatibleCS, newLcs, newNodeLcs;
     double epsilon = 1.0e-9;
-    int i, j, compDofs = 0;
+    int compDofs = 0;
     DofIDItem dofId;
     double bcValue;
     int bcId;
 
-    compatibleCS = orthogonalCS = true;
+    newLcs = newNodeLcs = false;
+    compatibleCS = true;
 
     Lcs = master_node->giveLocalCoordinateTriplet();
     nodeLcs = slave_node->giveLocalCoordinateTriplet();
@@ -584,21 +585,9 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
             delete nodeLcs;
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( fabs(trFromNodeLcsToLcs.at(i, i) - 1.0) > epsilon ) {
                 compatibleCS = false;
-                /*
-                 *  for(i = 1; i <= 3; i++){
-                 *   for(j = 1; j <= 3; j++){
-                 *    entry = fabs(trFromNodeLcsToLcs.at(i, j));
-                 *    if(entry > epsilon && fabs(1.0 - entry) > epsilon){
-                 *     orthogonalCS = false;
-                 *     break;
-                 *    }
-                 *   }
-                 *   if(orthogonalCS == false)break;
-                 *  }
-                 */
                 break;
             }
         }
@@ -607,7 +596,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
     answer->resize(dofs);
 
     if ( compatibleCS == true ) {
-        for ( i = 1; i <= dofs; i++ ) {
+        for ( int i = 1; i <= dofs; i++ ) {
             nodeDof = slave_node->giveDof( dofArray.at(i) );
 
 #ifdef DEBUG
@@ -621,7 +610,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
             bcId = nodeDof->giveBcId();
             bcValue = nodeDof->giveBcValue(mode, tStep);
 
-            for ( j = 1; j <= master_node->giveNumberOfDofs(); j++ ) {
+            for ( int j = 1; j <= master_node->giveNumberOfDofs(); j++ ) {
                 dof = master_node->giveDof(j);
                 if ( dof->hasBc(tStep) == false ) {
                     continue;

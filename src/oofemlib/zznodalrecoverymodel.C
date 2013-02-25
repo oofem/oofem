@@ -60,14 +60,14 @@ ZZNodalRecoveryModel :: ~ZZNodalRecoveryModel()
 int
 ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 {
-    int ireg, nregions = this->giveNumberOfVirtualRegions();
-    int ielem, nelem = domain->giveNumberOfElements();
+    int nregions = this->giveNumberOfVirtualRegions();
+    int nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     int elemNodes;
     int regionValSize;
-    int elementNode, node;
+    int node;
     int regionDofMans;
-    int i, j, neq, eq;
+    int neq, eq;
     Element *element;
     ZZNodalRecoveryModelInterface *interface;
     IntArray skipRegionMap(nregions), regionRecSize(nregions);
@@ -101,7 +101,7 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 #endif
 
     // loop over regions
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+    for ( int ireg = 1; ireg <= nregions; ireg++ ) {
         // skip regions
         if ( skipRegionMap.at(ireg) ) {
             continue;
@@ -121,7 +121,7 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         sol.resize(neq);
         sol.zero();
         // assemble element contributions
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             element = domain->giveElement(ielem);
 
 #ifdef __PARALLEL_MODE
@@ -135,7 +135,7 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
             }
 
             // If an element doesn't implement the interface, it is ignored.
-            if ( ( interface = ( ZZNodalRecoveryModelInterface * ) element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) == NULL ) {
+            if ( ( interface = static_cast< ZZNodalRecoveryModelInterface * >( element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) ) == NULL ) {
                 //abort();
                 continue;
             }
@@ -149,10 +149,10 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 
             //loc.resize ((elemNodes+elemSides)*regionValSize);
             eq = 1;
-            for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+            for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
                 node = element->giveDofManager(elementNode)->giveNumber();
                 lhs.at( regionNodalNumbers.at(node) ) += nn.at(eq);
-                for ( i = 1; i <= regionValSize; i++ ) {
+                for ( int i = 1; i <= regionValSize; i++ ) {
                     rhs.at(regionNodalNumbers.at(node), i) += nsig.at(eq, i);
                 }
 
@@ -168,9 +168,9 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         bool missingDofManContribution = false;
         unresolvedDofMans.clear();
         // solve for recovered values of active region
-        for ( i = 1; i <= regionDofMans; i++ ) {
+        for ( int i = 1; i <= regionDofMans; i++ ) {
             eq = ( i - 1 ) * regionValSize;
-            for ( j = 1; j <= regionValSize; j++ ) {
+            for ( int j = 1; j <= regionValSize; j++ ) {
                 // rhs will be overriden by recovered values
                 if ( fabs( lhs.at(i) ) > ZZNRM_ZERO_VALUE ) {
                     sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
@@ -188,8 +188,8 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         if ( missingDofManContribution ) {
             std::ostringstream msg;
             std::set<int>::const_iterator sit;
-            i = 0;
-            for (sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); sit++) {
+            int i = 0;
+            for (sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit) {
                 msg << *sit << ' ';
                 if (++i > 20) break;
             }
@@ -208,8 +208,8 @@ void
 ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type)
 {
     int nregions = this->giveNumberOfVirtualRegions();
-    int ielem, nelem = domain->giveNumberOfElements();
-    int i, regionsSkipped = 0;
+    int nelem = domain->giveNumberOfElements();
+    int regionsSkipped = 0;
     int elementVR;
     Element *element;
     ZZNodalRecoveryModelInterface *interface;
@@ -220,7 +220,7 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
     regionValSize.zero();
 
     // loop over elements and check if implement interface
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
         if ( !element-> isActivated(domain->giveEngngModel()->giveCurrentStep()) ) {  //skip inactivated elements
             continue;
@@ -231,7 +231,7 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
         }
 
 #endif
-        if ( ( interface =  ( ZZNodalRecoveryModelInterface * ) element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) == NULL ) {
+        if ( ( interface = static_cast< ZZNodalRecoveryModelInterface * >( element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) ) == NULL ) {
             // If an element doesn't implement the interface, it is ignored.
 
             //regionsSkipped = 1;
@@ -259,7 +259,7 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
 
     if ( regionsSkipped ) {
         OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
-        for ( i = 1; i <= nregions; i++ ) {
+        for ( int i = 1; i <= nregions; i++ ) {
             if ( regionMap.at(i) ) {
                 OOFEM_LOG_RELEVANT("%d ", i);
             }
@@ -316,7 +316,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     // The size of N mtrx is (nstresses, nnodes*nstreses)
     // Definition : sigmaVector = N * nodalSigmaVector
     //
-    int i, size;
+    int size;
     double sum, dV, volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
@@ -329,7 +329,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     fullAnswer.zero();
     double pok = 0.0;
 
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp  = iRule->getIntegrationPoint(i);
         dV  = elem->computeVolumeAround(gp);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
@@ -341,7 +341,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 
     fullAnswer.symmetrized();
     answer.resize(size);
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         sum = 0.0;
         for ( int j = 1; j <= size; j++ ) {
             sum += fullAnswer.at(i, j);

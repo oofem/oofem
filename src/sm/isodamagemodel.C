@@ -84,7 +84,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -108,7 +108,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     //StructuralCrossSection *crossSection = (StructuralCrossSection*) gp -> giveElement()->giveCrossSection();
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     FloatArray strainVector, reducedTotalStrainVector;
@@ -181,7 +181,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
 void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -198,7 +198,7 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
 void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                          GaussPoint *gp, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -215,7 +215,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
 void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode,
                                                       GaussPoint *gp, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(gp);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double om;
     if ( mode == ElasticStiffness ) {
         om = 0.0;
@@ -235,7 +235,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 int
 IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    IsotropicDamageMaterialStatus *status = ( IsotropicDamageMaterialStatus * ) this->giveStatus(aGaussPoint);
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();

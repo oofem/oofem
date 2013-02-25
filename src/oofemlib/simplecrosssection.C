@@ -296,7 +296,7 @@ SimpleCrossSection :: give(CrossSectionProperty aProperty)
 {
     double value = 0.0;
 
-    if ( propertyDictionary->includes(aProperty) )   {
+    if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
         OOFEM_ERROR3("Simple cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
@@ -315,7 +315,7 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
 // takes into account form of load vector assumed by engngModel (Incremental or Total Load form).
 //
 {
-    StructuralMaterial *mat = ( StructuralMaterial * ) gp->giveElement()->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
     ///@todo  Deprecated or not? If so, remove it! / Mikael
 #if 0
     MaterialMode matmode = gp-> giveMaterialMode ();

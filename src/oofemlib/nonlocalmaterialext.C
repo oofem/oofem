@@ -103,12 +103,11 @@ NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *
 void
 NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 {
-    int j;
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterial()->giveStatus(gp)->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std::list< localIntegrationRecord > *iList;
 
     Element *ielem;
@@ -165,7 +164,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
         ielem = this->giveDomain()->giveElement(* pos);
         if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
                 jGp = iRule->getIntegrationPoint(j);
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                     weight = this->computeWeightFunction(gpCoords, jGpCoords);
@@ -229,12 +228,11 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 void
 NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems)
 {
-    int j;
     double weight, elemVolume, integrationVolume = 0.;
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterial()->giveStatus(gp)->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     std::list< localIntegrationRecord > *iList;
 
     Element *ielem;
@@ -261,7 +259,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         this->buildNonlocalPointTable(gp);
     } else {
         FloatArray gpCoords, jGpCoords;
-        int _e, _size = contributingElems->giveSize();
+        int _size = contributingElems->giveSize();
         if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
             OOFEM_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
         }
@@ -275,11 +273,11 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         }
 
         // initialize iList
-        for ( _e = 1; _e <= _size; _e++ ) {
+        for ( int _e = 1; _e <= _size; _e++ ) {
             ielem = this->giveDomain()->giveElement( contributingElems->at(_e) );
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
                     jGp = iRule->getIntegrationPoint(j);
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
@@ -313,7 +311,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         std::list< localIntegrationRecord > :: iterator pos;
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
         for ( pos = iList->begin(); pos != iList->end(); ++pos ) {
-            fprintf(stderr, "%d,%d(%e)", ( * pos ).nearGp->giveElement()->giveGlobalNumber(), ( * pos ).nearGp->giveNumber(), ( * pos ).weight);
+            fprintf(stderr, "%d,%d(%e)", pos->nearGp->giveElement()->giveGlobalNumber(), pos->nearGp->giveNumber(), pos->weight);
         }
 
         fprintf(stderr, "\n");
@@ -327,8 +325,8 @@ std::list< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * )  gp->giveMaterial()->giveStatus(gp)->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+        static_cast< NonlocalMaterialStatusExtensionInterface * >(  gp->giveMaterial()->giveStatus(gp)->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
@@ -345,8 +343,8 @@ void
 NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
-        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterial()->giveStatus(gp)->
-        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterial()->giveStatus(gp)->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
         OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");

@@ -67,19 +67,19 @@ Interface *
 LSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;
@@ -92,7 +92,6 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 // luated at aGaussPoint.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -100,13 +99,13 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     answer.resize(6, 24);
     answer.zero();
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
     }
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(4, 3 * i - 1) = dnx.at(i, 3);
         answer.at(4, 3 * i - 0) = dnx.at(i, 2);
 
@@ -125,7 +124,6 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // evaluated at aGaussPoint.
 // BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
 {
-    int i, j;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -133,8 +131,8 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(9, 24);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( j = 1; j <= 8; j++ ) { // 8 nodes
+    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( int j = 1; j <= 8; j++ ) { // 8 nodes
             answer.at(3 * i - 2, 3 * j - 2) =
                 answer.at(3 * i - 1, 3 * j - 1) =
                 answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
@@ -150,7 +148,6 @@ LSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 // evaluated at aGaussPoint
 
 {
-    int j, k, l;
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
@@ -162,33 +159,33 @@ LSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
     // put the products of derivatives of shape functions into the "nonlinear B matrix",
     // depending on parameter i, which is the number of the strain component
     if ( i <= 3 ) {
-        for ( k = 0; k < 8; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 24; j += 3 ) {
+        for ( int k = 0; k < 8; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 24; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
     } else if ( i == 4 ) {
-        for ( k = 0; k < 8; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 24; j += 3 ) {
+        for ( int k = 0; k < 8; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 24; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
     } else if ( i == 5 ) {
-        for ( k = 0; k < 8; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 24; j += 3 ) {
+        for ( int k = 0; k < 8; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 24; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
         }
     } else if ( i == 6 ) {
-        for ( k = 0; k < 8; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 24; j += 3 ) {
+        for ( int k = 0; k < 8; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 24; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
@@ -229,14 +226,13 @@ LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(8);
 
     answer.resize(3, 24);
     answer.zero();
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
         answer.at(2, 3 * i - 1) = n.at(i);
         answer.at(3, 3 * i - 0) = n.at(i);
@@ -294,13 +290,12 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
         double factor = pow( ( double ) this->numberOfGaussPoints, 1. / 3. );
         return this->giveLenghtInDir(normalToCrackPlane) / factor;
     } else {
-        int i;
         IntegrationRule *iRule;
         GaussPoint *gp;
         double volume = 0.0;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             volume += this->computeVolumeAround(gp);
         }
@@ -313,10 +308,8 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
 void
 LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    int i;
-
     pap.resize(numberOfDofMans);
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -344,7 +337,9 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
 
 int
 LSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); }
+{
+    return this->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints();
+}
 
 
 SPRPatchType
@@ -358,7 +353,6 @@ void
 LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                      InternalStateType type, TimeStep *tStep)
 {
-    int i, j;
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
     GaussPoint *gp;
     //StructuralMaterialStatus* status;
@@ -375,7 +369,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
         r.resize(4, size);
         A.zero();
         r.zero();
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             giveIPValue(val, gp, type, tStep);
 
@@ -403,7 +397,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
             A.at(4, 3) += w * v;
             A.at(4, 4) += w * w;
 
-            for ( j = 1; j <= size; j++ ) {
+            for ( int j = 1; j <= size; j++ ) {
                 y = val.at(j);
                 r.at(1, j) += y;
                 r.at(2, j) += y * u;
@@ -459,7 +453,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
             _error("LSpace ::giveInternalStateAtNode: unsupported node");
         }
 
-        for ( j = 1; j <= size; j++ ) {
+        for ( int j = 1; j <= size; j++ ) {
             answer.at(j) = b.at(1, j) + x1 *b.at(2, j) * x2 * b.at(3, j) * x3 * b.at(4, j);
         }
 
@@ -654,7 +648,6 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
 
 void LSpace :: drawRawGeometry(oofegGraphicContext &gc)
 {
-    int i;
     WCRec p [ 8 ];
     GraphicObj *go;
 
@@ -668,7 +661,7 @@ void LSpace :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    for ( i = 0; i < 8; i++ ) {
+    for ( int i = 0; i < 8; i++ ) {
         p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
         p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
         p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
@@ -1286,8 +1279,8 @@ LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     double determinant, weight, volume;
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    weight      = gp->giveWeight();
-    volume      = determinant * weight;
+    weight = gp->giveWeight();
+    volume = determinant * weight;
 
     return volume;
 }
@@ -1319,7 +1312,6 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
      * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      * return 1;
      */
-    int i, j;
     FloatArray gc(3);
     FloatArray h1(3), h2(3), nn(3), n(3);
     IntArray snodes(4);
@@ -1327,14 +1319,14 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
     answer.resize(3, 3);
 
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, isurf);
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
 
     gc.times(1. / 4.);
     // determine "average normal"
-    for ( i = 1; i <= 4; i++ ) {
-        j = ( i ) % 4 + 1;
+    for ( int i = 1; i <= 4; i++ ) {
+        int j = ( i ) % 4 + 1;
         h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
         h1.subtract(gc);
         h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
@@ -1354,7 +1346,7 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
     }
 
     nn.normalize();
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, 3) = nn.at(i);
     }
 
@@ -1372,7 +1364,7 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
     h1.at(3) = answer.at(3, 1) = 0.0;
     // local y axis perpendicular to local x,z axes
     h2.beVectorProductOf(nn, h1);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i, 2) = h2.at(i);
     }
 

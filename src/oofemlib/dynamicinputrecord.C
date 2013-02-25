@@ -41,26 +41,36 @@
 
 namespace oofem {
 
-DynamicInputRecord :: DynamicInputRecord() : InputRecord()
+DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
+    recordKeyword(),
+    recordNumber(0),
+    intRecord(),
+    doubleRecord(),
+    boolRecord(),
+    stringRecord(),
+    floatArrayRecord(),
+    intArrayRecord(),
+    matrixRecord(),
+    stringListRecord(),
+    dictionaryRecord(),
+    rangeRecord()
 {
-    this->recordKeyword = "";
-    this->recordNumber = 0;
 }
 
-DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src)
+DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) :
+    recordKeyword(src.recordKeyword),
+    recordNumber(src.recordNumber),
+    intRecord(src.intRecord),
+    doubleRecord(src.doubleRecord),
+    boolRecord(src.boolRecord),
+    stringRecord(src.stringRecord),
+    floatArrayRecord(src.floatArrayRecord),
+    intArrayRecord(src.intArrayRecord),
+    matrixRecord(src.matrixRecord),
+    stringListRecord(src.stringListRecord),
+    dictionaryRecord(src.dictionaryRecord),
+    rangeRecord(src.rangeRecord)
 {
-    this->recordKeyword = src.recordKeyword;
-    this->recordNumber = src.recordNumber;
-    this->intRecord = src.intRecord;
-    this->doubleRecord = src.doubleRecord;
-    this->boolRecord = src.boolRecord;
-    this->stringRecord = src.stringRecord;
-    this->floatArrayRecord = src.floatArrayRecord;
-    this->intArrayRecord = src.intArrayRecord;
-    this->matrixRecord = src.matrixRecord;
-    this->stringListRecord = src.stringListRecord;
-    this->dictionaryRecord = src.dictionaryRecord;
-    this->rangeRecord = src.rangeRecord;
 }
 
 DynamicInputRecord :: ~DynamicInputRecord()

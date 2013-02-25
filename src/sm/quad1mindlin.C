@@ -237,13 +237,13 @@ int
 Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
         return 1;
     } else {
-      return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
+        return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
     }
 }
 

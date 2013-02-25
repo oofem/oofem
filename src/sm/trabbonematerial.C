@@ -58,7 +58,7 @@ TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
 {
-    TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
+    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     alpha = status->giveTempAlpha();
 }
 
@@ -68,7 +68,7 @@ TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
                                           TimeStep *atTime)
 {
-    TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
+    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
     double epsnew;
     double epsp, depsp;
@@ -79,13 +79,13 @@ TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         answer.resize(1, 1);
         answer.at(1, 1) = E0;
-    } else if ( mode == SecantStiffness )     {
+    } else if ( mode == SecantStiffness ) {
         dam = status->giveTempDam();
         matconstc = status->giveMatConstC();
 
         answer.resize(1, 1);
         answer.at(1, 1) = ( 1.0 - dam ) * E0 + matconstc;
-    } else   {
+    } else {
         epsnew = status->giveTempStrainVector().at(1);
         epsnewArray = status->giveTempStrainVector();
         epsp = status->giveTempPlasStrainVector().at(1);
@@ -101,7 +101,7 @@ TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
         if ( depsp != 0.0 ) {
             answer.at(1, 1) = ( 1.0 - dam ) * ( E0 * ( Eil + Ek ) ) / ( E0 + Eil + Ek )
                               - E0 * E0 * ( epsnew - epsp ) / ( E0 + Eil + Ek ) * adam * exp(-adam * alpha) * depsp / fabs(depsp) + matconstc;
-        } else   {
+        } else {
             answer.at(1, 1) = ( 1.0 - dam ) * E0 + matconstc;
         }
     }
@@ -119,7 +119,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
     double sigp, sigY;
     double gNewton, dgNewton;
 
-    TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
+    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
     epsnew = totalStrain.at(1);
     epsold = status->giveStrainVector().at(1);
@@ -146,7 +146,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
         }
 
         epsp += depsp;
-    } else     {
+    } else {
         depsp = 0.0;
     }
 
@@ -164,14 +164,14 @@ TrabBoneMaterial :: computeDensification(GaussPoint *gp, const FloatArray &total
     double epsnew, sigc;
     double matconstc;
 
-    TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
+    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
     epsnew = totalStrain.at(1);
 
     if ( epsnew > EpsC ) {
         sigc = 0.0;
         matconstc = 0.0;
-    } else   {
+    } else {
         sigc = Cc * ( epsnew - EpsC ) + Cc2 * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC );
         matconstc = Cc + 7 * Cc2 * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC ) * ( epsnew - EpsC );
     }
@@ -188,7 +188,7 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
     if ( alpha > 0. ) {
         dam = 1.0 - exp(-adam * alpha);
         //    dam = adam*alpha;
-    } else   {
+    } else {
         dam = 0.0;
     }
 
@@ -222,7 +222,7 @@ TrabBoneMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm for
     double dam;
     double sig, sigc;
 
-    TrabBoneMaterialStatus *status = ( TrabBoneMaterialStatus * ) this->giveStatus(gp);
+    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
     this->initGpForNewStep(gp);
 

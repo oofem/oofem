@@ -120,7 +120,6 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(20);
 
     answer.resize(3, 60);
@@ -128,7 +127,7 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    for ( i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 20; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
         answer.at(2, 3 * i - 1) = n.at(i);
         answer.at(3, 3 * i - 0) = n.at(i);
@@ -149,7 +148,6 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 // luated at aGaussPoint.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -157,7 +155,7 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     answer.resize(6, 60);
     answer.zero();
 
-    for ( i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 20; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
@@ -233,8 +231,8 @@ QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     double determinant, weight, volume;
     determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
-    weight      = gp->giveWeight();
-    volume      = determinant * weight;
+    weight = gp->giveWeight();
+    volume = determinant * weight;
 
     return volume;
 }
@@ -326,11 +324,11 @@ Interface *
 QSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     OOFEM_LOG_INFO("Interface on Qspace element not supported");
@@ -357,10 +355,8 @@ QSpace :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 QSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    int i;
-
     pap.resize(20);
-    for ( i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 20; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -368,10 +364,10 @@ QSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 20; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -396,7 +392,6 @@ QSpace :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_3dBiQuadratic;
 }
-
 
 
 void

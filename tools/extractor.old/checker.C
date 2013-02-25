@@ -745,11 +745,11 @@ int main(int argc, char *argv[]) {
                 result = result && seekStressStrainGPRecord(outFileTokenizer, 0, 1,
                                                             checkRequestArry [ indx ].compNumber,
                                                             checkVal);
-            } else if ( checkRequestArry [ indx ].recNumber == 1 )    { // stress
+            } else if ( checkRequestArry [ indx ].recNumber == 1 ) { // stress
                 result = result && seekStressStrainGPRecord(outFileTokenizer, 1, 0,
                                                             checkRequestArry [ indx ].compNumber,
                                                             checkVal);
-            } else if ( checkRequestArry [ indx ].recNumber == 2 )    { // status
+            } else if ( checkRequestArry [ indx ].recNumber == 2 ) { // status
                 result = result && seekAndParseMaterialStatusRecord(outFileTokenizer, checkRequestArry [ indx ].keyword,
                                                                     checkRequestArry [ indx ].compNumber,
                                                                     checkVal);
@@ -1122,24 +1122,24 @@ compareRecords(int i, int j)
             // multiple check for Eigval data -> compare eigValNum
             if ( checkRequestArry [ i ].eigValNum < checkRequestArry [ j ].eigValNum ) {
                 return -1;
-            } else if ( checkRequestArry [ i ].eigValNum > checkRequestArry [ j ].eigValNum )       {
+            } else if ( checkRequestArry [ i ].eigValNum > checkRequestArry [ j ].eigValNum ) {
                 return 1;
-            } else                                                                                             {
+            } else {
                 return 0;
             }
         } else if ( ( checkRequestArry [ i ].type == NodeSideVal ) || ( checkRequestArry [ i ].type == EigNodeSideVal ) ) {
             // node side records
             if ( checkRequestArry [ i ].elNumber < checkRequestArry [ j ].elNumber ) {
                 return -1;
-            } else if ( checkRequestArry [ i ].elNumber > checkRequestArry [ j ].elNumber )       {
+            } else if ( checkRequestArry [ i ].elNumber > checkRequestArry [ j ].elNumber ) {
                 return 1;
-            } else                                                                                           {
+            } else {
                 // same nodeSide Record - check dofs
                 if ( checkRequestArry [ i ].dofNumber < checkRequestArry [ j ].dofNumber ) {
                     return -1;
-                } else if ( checkRequestArry [ i ].dofNumber > checkRequestArry [ j ].dofNumber )      {
+                } else if ( checkRequestArry [ i ].dofNumber > checkRequestArry [ j ].dofNumber ) {
                     return 1;
-                } else                                                                                            {
+                } else {
                     return 0; // sane dof record, checks with possible different unknowns
                 }
             }
@@ -1148,21 +1148,21 @@ compareRecords(int i, int j)
             // element records
             if ( checkRequestArry [ i ].elNumber < checkRequestArry [ j ].elNumber ) {
                 return -1;
-            } else if ( checkRequestArry [ i ].elNumber > checkRequestArry [ j ].elNumber )       {
+            } else if ( checkRequestArry [ i ].elNumber > checkRequestArry [ j ].elNumber ) {
                 return 1;
-            } else                                                                                           {
+            } else {
                 // same elements, check further
                 if ( checkRequestArry [ i ].gpNum < checkRequestArry [ j ].gpNum ) {
                     return -1;
-                } else if ( checkRequestArry [ i ].gpNum > checkRequestArry [ j ].gpNum )      {
+                } else if ( checkRequestArry [ i ].gpNum > checkRequestArry [ j ].gpNum ) {
                     return 1;
-                } else                                                                                    {
+                } else {
                     // same gp -> check for component to check
                     if ( checkRequestArry [ i ].recNumber < checkRequestArry [ j ].recNumber ) {
                         return -1;
-                    } else if ( checkRequestArry [ i ].recNumber > checkRequestArry [ j ].recNumber )     {
+                    } else if ( checkRequestArry [ i ].recNumber > checkRequestArry [ j ].recNumber ) {
                         return 1;
-                    } else                                                                                           {
+                    } else {
                         // same element record numbers,
                         // only different componenets of same record checked.
                         return 0;
@@ -1173,15 +1173,15 @@ compareRecords(int i, int j)
             // reaction node side records
             if ( checkRequestArry [ i ].elNumber < checkRequestArry [ j ].elNumber ) {
                 return -1;
-            } else if ( checkRequestArry [ i ].elNumber > checkRequestArry [ j ].elNumber )       {
+            } else if ( checkRequestArry [ i ].elNumber > checkRequestArry [ j ].elNumber ) {
                 return 1;
-            } else                                                                                           {
+            } else {
                 // same nodeSide Record - check dofs
                 if ( checkRequestArry [ i ].dofNumber < checkRequestArry [ j ].dofNumber ) {
                     return -1;
-                } else if ( checkRequestArry [ i ].dofNumber > checkRequestArry [ j ].dofNumber )      {
+                } else if ( checkRequestArry [ i ].dofNumber > checkRequestArry [ j ].dofNumber ) {
                     return 1;
-                } else                                                                                            {
+                } else {
                     return 0; // sane dof record, checks with possible different unknowns
                 }
             }

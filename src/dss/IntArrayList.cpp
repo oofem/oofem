@@ -184,7 +184,7 @@ void IntArrayList :: Alloc(long size)
 
         Items = new long [ Capacity ];
         Initialize();
-    } else   {
+    } else {
         Count = size;
         Initialize();
     }
@@ -260,7 +260,7 @@ void IntArrayList :: Insert(long pos, long item)
         if ( old_items ) {
             delete [] old_items;
         }
-    } else   {
+    } else {
         //Array::Copy(Items,pos,Items,pos+1,Count-pos);
         for ( int i = Count; i > pos; i-- ) {
             Items [ i ] = Items [ i - 1 ];
@@ -421,7 +421,7 @@ void IntArrayList :: RemoveMarkByBattern(long *ptr)
         if ( ptr [ e ] == 0 ) {
             * des++ = e;
             ptr [ e ] = 1;
-        } else   {
+        } else {
             Count--;
         }
     }

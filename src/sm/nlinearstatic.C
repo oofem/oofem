@@ -850,9 +850,9 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // add nonlocal contribution
-        int ielem, nelem = domain->giveNumberOfElements();
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            ( ( StructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, s, tStep);
+        int nelem = domain->giveNumberOfElements();
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            static_cast< StructuralElement * >( domain->giveElement(ielem) )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
         // print storage statistics

@@ -115,7 +115,7 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 void
 HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 {
-    HydratingConcreteMatStatus *ms = ( HydratingConcreteMatStatus * ) this->giveStatus(gp);
+    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     val.resize(1);
     if ( mode == VM_Total ) {
         val.at(1) = ms->GivePower(atTime);
@@ -128,7 +128,7 @@ HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint 
 void
 HydratingConcreteMat :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime)
 {
-    HydratingConcreteMatStatus *ms = ( HydratingConcreteMatStatus * ) this->giveStatus(gp);
+    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     ms->letTempStateVectorBe(vec);
 }
 
@@ -139,7 +139,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp) * giveConcreteDensity(gp) );
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
-        HydratingConcreteMatStatus *ms = ( HydratingConcreteMatStatus * ) this->giveStatus(gp);
+        HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of scaling Arrhenius equation with respect to temporary temperature
         double stateVec = ms->giveStateVector().at(1) + 273.15;
         double tempStateVec = ms->giveTempStateVector().at(1) + 273.15;
@@ -154,7 +154,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
 
 double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp)
 {
-    HydratingConcreteMatStatus *ms = ( HydratingConcreteMatStatus * ) this->giveStatus(gp);
+    HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     double conduct;
 
     if ( conductivityType == 0 ) { //given from input file
@@ -232,7 +232,7 @@ HydratingConcreteMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 {
     // printf ("IP %d::giveIPValue, IST %d", giveNumber(), type);
     if ( type == IST_HydrationDegree ) {
-        HydratingConcreteMatStatus *status = ( HydratingConcreteMatStatus * ) this->giveStatus(gp);
+        HydratingConcreteMatStatus *status = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
         answer.resize(1);
         answer.at(1) = status->giveDoHActual();
         //else answer.at(1) = 0;
@@ -306,7 +306,7 @@ HydratingConcreteMatStatus :: ~HydratingConcreteMatStatus()
 double HydratingConcreteMatStatus :: GivePower(TimeStep *atTime)
 {
     double castingTime = this->gp->giveMaterial()->giveCastingTime();
-    HydratingConcreteMat *mat = ( HydratingConcreteMat * ) this->gp->giveMaterial();
+    HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     double intrinsicTime = atTime->giveIntrinsicTime();
     double targTime = atTime->giveTargetTime();
 
@@ -367,13 +367,13 @@ double HydratingConcreteMatStatus :: GivePower(TimeStep *atTime)
 
 double HydratingConcreteMatStatus :: scaleTemperature(void)
 {
-    HydratingConcreteMat *mat = ( HydratingConcreteMat * ) this->gp->giveMaterial();
+    HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     return exp( mat->activationEnergy / 8.314 * ( 1. / ( 273.15 + mat->referenceTemperature ) - 1. / ( 273.15 + this->giveTempStateVector().at(1) ) ) );
 }
 
 double HydratingConcreteMatStatus :: affinity25(double DoH)
 {
-    HydratingConcreteMat *mat = ( HydratingConcreteMat * ) this->gp->giveMaterial();
+    HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     double result =  mat->B1 * ( mat->B2 / mat->DoHInf + DoH ) * ( mat->DoHInf - DoH ) * exp(-mat->eta * DoH / mat->DoHInf);
     if (result<0.){//numerical instabilities
         return 0.;
@@ -400,7 +400,7 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *atTime)
 void
 HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
 {
-    HydratingConcreteMat *mat = ( HydratingConcreteMat * ) this->gp->giveMaterial();
+    HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     TransportMaterialStatus :: printOutputAt(file, atTime);
     fprintf(file, "   status {");
     fprintf( file, "IntrinsicTime %e  DoH %f HeatPower %f [W/m3 of concrete] conductivity %f  capacity %f  density %f", atTime->giveIntrinsicTime(), this->giveDoHActual(), this->power, mat->giveIsotropicConductivity(this->gp), mat->giveConcreteCapacity(this->gp), mat->giveConcreteDensity(this->gp) );

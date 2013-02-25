@@ -56,7 +56,7 @@ QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
     // Constructor.
 {
-    numberOfDofMans  = 6;
+    numberOfDofMans = 6;
     numberOfGaussPoints = 4;
 }
 
@@ -66,15 +66,15 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
 {
     //if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     }
 
     return NULL;
@@ -86,7 +86,6 @@ QTrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(6);
 
     answer.resize(2, 12);
@@ -94,7 +93,7 @@ QTrPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
@@ -143,14 +142,12 @@ double
 QTrPlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    double determinant, weight, thickness, volume;
+    double determinant, weight, thickness;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
-    weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness);
-    volume      = determinant * weight * thickness;
-
-    return volume;
+    weight = aGaussPoint->giveWeight();
+    thickness = this->giveCrossSection()->give(CS_Thickness);
+    return determinant * weight * thickness;
 }
 
 void QTrPlaneStrain :: computeGaussPoints()
@@ -165,7 +162,7 @@ void QTrPlaneStrain :: computeGaussPoints()
 }
 
 void
-QTrPlaneStrain ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer.setValues(2, D_u, D_v);
 }
@@ -456,7 +453,9 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answ
 
 int
 QTrPlaneStrain :: SPRNodalRecoveryMI_giveNumberOfIP()
-{ return numberOfGaussPoints; }
+{
+    return numberOfGaussPoints;
+}
 
 
 SPRPatchType
@@ -466,9 +465,9 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-
 double
-QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
+QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
+{
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp;
     double volume = 0.0;
@@ -488,13 +487,13 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType
 {
     FloatArray lcoords, u, nn;
     FloatMatrix n(2, 12);
-    int i, result;
+    int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         n.at(1, 2 * i - 1) = nn.at(i);
         n.at(2, 2 * i - 0) = nn.at(i);
     }

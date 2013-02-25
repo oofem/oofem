@@ -58,7 +58,7 @@ FluidDynamicMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, do
 void
 FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = ((FluidDynamicMaterialStatus*)this->giveStatus(gp))->giveDeviatoricStressVector().giveSize();
+    int size = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
     answer.zero();
 }
@@ -67,7 +67,7 @@ FluidDynamicMaterial :: giveDeviatoricPressureStiffness(FloatArray &answer, MatR
 void
 FluidDynamicMaterial :: giveVolumetricDeviatoricStiffness(FloatArray &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    int size = ((FluidDynamicMaterialStatus*)this->giveStatus(gp))->giveDeviatoricStressVector().giveSize();
+    int size = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) )->giveDeviatoricStressVector().giveSize();
     answer.resize(size);
     answer.zero();
 }
@@ -88,11 +88,11 @@ void
 FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
-    int i, n;
+    int n;
 
     fprintf(File, "\n deviatoric stresses");
     n = deviatoricStressVector.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", deviatoricStressVector.at(i) );
     }
 
@@ -118,17 +118,17 @@ FluidDynamicMaterialStatus :: initTempStatus()
 
 
 int
-FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
-    FluidDynamicMaterialStatus *status = ( FluidDynamicMaterialStatus * ) this->giveStatus(aGaussPoint);
+    FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus* >( this->giveStatus(gp) );
     if ( type == IST_DeviatoricStress ) {
         answer = status->giveDeviatoricStressVector();
         return 1;
     } else if ( type == IST_Viscosity ) {
-        answer.resize(1); answer.at(1) = this->giveCharacteristicValue (MRM_Viscosity, aGaussPoint, atTime);
+        answer.resize(1); answer.at(1) = this->giveCharacteristicValue (MRM_Viscosity, gp, atTime);
         return 1;
     } else {
-        return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return Material :: giveIPValue(answer, gp, type, atTime);
     }
 }
 

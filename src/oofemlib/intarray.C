@@ -261,11 +261,10 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
 
     if ( newSize > allocatedSize ) {
         newValues = allocInt(newSize + allocChunk);
-        p3        = newValues;
 
-        p1        = values;
-        p2        = b.values;
-        p3        = newValues;
+        p1 = values;
+        p2 = b.values;
+        p3 = newValues;
 
         i = size;
         while ( i-- ) {
@@ -283,17 +282,17 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
 
         values = newValues;
         allocatedSize = newSize + allocChunk;
-        size   = newSize;
+        size = newSize;
     } else {
-        p1        = values + size;
-        p2        = b.values;
+        p1 = values + size;
+        p2 = b.values;
 
         i = b.size;
         while ( i-- ) {
             * p1++ = * p2++;
         }
 
-        size   = newSize;
+        size = newSize;
     }
 }
 

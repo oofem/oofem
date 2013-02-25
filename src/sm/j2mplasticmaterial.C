@@ -266,10 +266,10 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
 {
     /* computes stress space hardening gradient in reduced stress-strain space */
 
-    int i = 0, kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
+    int kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
     //double f,ax,ay,az,sx,sy,sz;
     FloatArray fullKinematicGradient, reducedKinematicGrad;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( !hasHardening() ) {
@@ -281,14 +281,14 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
 
     /* kinematic hardening variables first */
     if ( this->kinematicHardeningFlag ) {
-        this->computeStressGradientVector(fullKinematicGradient, ftype, i, gp, stressVector, stressSpaceHardeningVars);
+        this->computeStressGradientVector(fullKinematicGradient, ftype, isurf, gp, stressVector, stressSpaceHardeningVars);
         crossSection->giveReducedCharacteristicVector(reducedKinematicGrad, gp, fullKinematicGradient);
 
         kcount = reducedKinematicGrad.giveSize();
     }
 
     if ( this->kinematicHardeningFlag ) {
-        for ( i = 1; i <= kcount; i++ ) {
+        for ( int i = 1; i <= kcount; i++ ) {
             answer.at(i) = reducedKinematicGrad.at(i);
         }
     }
@@ -297,8 +297,6 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
         answer.at(size) = sqrt(1. / 3.);
     }
 }
-
-
 
 
 int

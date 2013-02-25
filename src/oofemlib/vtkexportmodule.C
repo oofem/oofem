@@ -634,7 +634,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 break;
 #if 0 // Hardly even worth the effort...
             case ISVT_TENSOR_G:
-                for (int indx = 1; indx < 9; ++indx)  {
+                for (int indx = 1; indx < 9; ++indx) {
                     fprintf(stream, "SCALARS %s_%d double 1\n", __InternalStateTypeToString(valID), indx);
 
                     for ( ielem = 1; ielem <= nelem; ielem++ ) {

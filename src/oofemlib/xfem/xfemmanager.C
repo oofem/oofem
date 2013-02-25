@@ -57,7 +57,6 @@
 #include "oofem_limits.h"
 #include "usrdefsub.h"
 #include "masterdof.h"
-#include "xfem/xfemmanager.h"
 #include "patchintegrationrule.h"
 #include "datareader.h"
 #include "datastream.h"
@@ -106,7 +105,6 @@ XfemManager :: clear()
     numberOfGeometryItems = 0;
     dofIdPos = 0;
 }
-
 
 
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
@@ -346,7 +344,7 @@ void XfemManager :: updateIntegrationRule()
 {
     for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
         Element *el = this->giveDomain()->giveElement(i);
-        XfemElementInterface *xei = ( XfemElementInterface * ) el->giveInterface(XfemElementInterfaceType);
+        XfemElementInterface *xei = static_cast< XfemElementInterface * >( el->giveInterface(XfemElementInterfaceType) );
         xei->XfemElementInterface_updateIntegrationRule();
     }
 }

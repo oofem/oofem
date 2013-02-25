@@ -58,7 +58,7 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, MatRespons
 // the previous level of stress and current strain increment
 //
 {
-    CohesiveInterfaceMaterialStatus *status = ( CohesiveInterfaceMaterialStatus * ) this->giveStatus(gp);
+    CohesiveInterfaceMaterialStatus *status = static_cast< CohesiveInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
     // initialize
     this->initGpForNewStep(gp);
@@ -210,7 +210,7 @@ CohesiveInterfaceMaterial :: giveFullCharacteristicVector(FloatArray &answer,
     if ( mode == _3dInterface ) {
         answer = strainVector;
         return;
-    } else                                                             {
+    } else {
         StructuralMaterial :: giveFullCharacteristicVector(answer, gp, strainVector);
     }
 }

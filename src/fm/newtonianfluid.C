@@ -105,7 +105,7 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
 // 'E') of the receiver.
 //
 {
-       if ( aProperty == Viscosity ) {
+    if ( aProperty == Viscosity ) {
         return viscosity;
     } else if ( aProperty == YieldStress ) {
         return 0.0;
@@ -166,7 +166,7 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
         _error("computeDeviatoricStressVector: unsuported material mode");
     }
 
-    ( ( FluidDynamicMaterialStatus * ) this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
+    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letTempDeviatoricStressVectorBe(answer);
 }
 
 void

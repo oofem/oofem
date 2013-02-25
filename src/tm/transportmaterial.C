@@ -40,7 +40,7 @@ namespace oofem {
 void
 TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint *gp, TimeStep *)
 {
-    TransportMaterialStatus *ms = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     if ( ms ) {
         ms->letTempStateVectorBe(stateVec);
     }
@@ -54,22 +54,21 @@ TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
 {
-    int i;
     FloatArray flowVec;
-    TransportElement *transpElem = ( TransportElement * ) gp->giveElement();
+    TransportElement *transpElem = static_cast< TransportElement * >( gp->giveElement() );
 
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  state");
 
-    for ( i = 1; i <= stateVector.giveSize(); i++ ) {
+    for ( int i = 1; i <= stateVector.giveSize(); i++ ) {
         fprintf( File, " % .4e", stateVector.at(i) );
     }
 
     transpElem->computeFlow(flowVec, gp, tNow);
 
     fprintf(File, "   flow");
-    for ( i = 1; i <= flowVec.giveSize(); i++ ) {
+    for ( int i = 1; i <= flowVec.giveSize(); i++ ) {
         fprintf( File, " % .4e", flowVec.at(i) );
     }
 
@@ -148,12 +147,12 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 // IST_Humidity must be overriden!
 {
     if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
-        FloatArray vec = ( ( TransportMaterialStatus * ) this->giveStatus(aGaussPoint) )->giveStateVector();
+        FloatArray vec = static_cast< TransportMaterialStatus * >( this->giveStatus(aGaussPoint) )->giveStateVector();
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
     } else if ( type == IST_TemperatureFlow ) {
-        TransportElement *transpElem = ( TransportElement * ) aGaussPoint->giveElement();
+        TransportElement *transpElem = static_cast< TransportElement * >( aGaussPoint->giveElement() );
         transpElem->computeFlow(answer, aGaussPoint, atTime);
         return 1;
     } else if ( type == IST_Density ) {

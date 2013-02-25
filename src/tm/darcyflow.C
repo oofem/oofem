@@ -11,7 +11,7 @@
 #include "timestep.h"
 #include "usrdefsub.h"
 #include "sparselinsystemnm.h"
-#include "math.h"
+#include "mathfem.h"
 #include "nrsolver.h"
 #include "nrsolver2.h"
 #include "tr1darcy.h"
@@ -192,7 +192,7 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
         iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, 1);
     } else if ( type == V_w ) {
         iDof->printSingleOutputAt(stream, atTime, 'w', EID_MomentumBalance, VM_Total, 1);
-    } else if ( type == P_f )    {
+    } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, 1);
     } else {
         _error("printDofOutputAt: unsupported dof type");

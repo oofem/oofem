@@ -68,7 +68,7 @@ BoundaryCondition *MasterDof :: giveBc()
     if ( bc ) {
         GeneralBoundaryCondition *bcptr = dofManager->giveDomain()->giveBc(bc);
         if ( bcptr->giveType() == DirichletBT ) {
-            return ( BoundaryCondition * ) bcptr;
+            return static_cast< BoundaryCondition * >( bcptr );
         }
     }
 
@@ -107,8 +107,7 @@ int MasterDof :: askNewEquationNumber(TimeStep *tStep)
 // subjected to a boundary condition, else it is n+1, where n is the
 // equation number of the most recently numbered degree of freedom.
 {
-    EngngModel *model;
-    model = ( EngngModel * ) ( dofManager->giveDomain()->giveEngngModel() );
+    EngngModel *model = dofManager->giveDomain()->giveEngngModel();
 
 #ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {

@@ -64,13 +64,13 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
     if ( !( globalCoordinates->at(1) > randomXStart && globalCoordinates->at(1) < randomXEnd &&
             globalCoordinates->at(2) > randomYStart && globalCoordinates->at(2) < randomYEnd ) ) {
         randomVariable = 1;
-    } else   {
+    } else {
         //Determine the corner points of the square over which we are going to interpolate
         while ( exitFlag == 0 ) {
             if ( field( 3 * i * numberReal(1) ) > globalCoordinates->at(1) ) {
                 if ( i == 0 ) { //Check soundness
                     OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
-                } else if ( i == numberReal(0) )        {
+                } else if ( i == numberReal(0) ) {
                     OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
                 }
 
@@ -90,7 +90,7 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
             if ( field(3 * i + 1) > globalCoordinates->at(2) ) {
                 if ( i == 0 ) {
                     OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
-                } else if ( i == numberReal(0) )        {
+                } else if ( i == numberReal(0) ) {
                     OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
                 }
 

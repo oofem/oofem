@@ -64,7 +64,7 @@ Interface *
 MazarsNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
     } else {
         return NULL;
     }
@@ -83,8 +83,7 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
      */
     FloatArray SDstrainVector, fullSDStrainVector;
     double equivStrain;
-    MazarsNLMaterialStatus *nlstatus = ( MazarsNLMaterialStatus * ) this->giveStatus(gp);
-    //StructuralCrossSection *crossSection = (StructuralCrossSection*) gp -> giveElement()->giveCrossSection();
+    MazarsNLMaterialStatus *nlstatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -106,7 +105,7 @@ void
 MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     double nonlocalContribution, nonlocalEquivalentStrain = 0.0;
-    MazarsNLMaterialStatus *nonlocStatus, *status = ( MazarsNLMaterialStatus * ) this->giveStatus(gp);
+    MazarsNLMaterialStatus *nonlocStatus, *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
@@ -116,9 +115,9 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = ( MazarsNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus( pos->nearGp ) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
-        nonlocalContribution *= ( * pos ).weight;
+        nonlocalContribution *= pos->weight;
 
         nonlocalEquivalentStrain += nonlocalContribution;
     }
@@ -173,16 +172,11 @@ MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gau
      * same value with reference length (which is used in local model, which
      * computeDmaga function is reused).
      */
-    MazarsNLMaterialStatus *status = ( MazarsNLMaterialStatus * ) this->giveStatus(gp);
+    MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
     status->setLe(1.0);
     status->setLec(1.0);
 }
-
-
-
-
-
 
 
 
@@ -276,7 +270,7 @@ Interface *
 MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialStatusExtensionInterface * ) this;
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }
@@ -287,7 +281,7 @@ MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 int
 MazarsNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    MazarsNLMaterialStatus *status = ( MazarsNLMaterialStatus * ) this->giveStatus(ip);
+    MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -299,7 +293,7 @@ int
 MazarsNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    MazarsNLMaterialStatus *status = ( MazarsNLMaterialStatus * ) this->giveStatus(ip);
+    MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
     result = buff.unpackDouble(localEquivalentStrainForAverage);

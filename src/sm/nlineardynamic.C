@@ -894,9 +894,9 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // Add nonlocal contribution.
-        int ielem, nelem = domain->giveNumberOfElements();
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            ( ( NLStructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, s, tStep);
+        int nelem = domain->giveNumberOfElements();
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            static_cast< NLStructuralElement * >( domain->giveElement(ielem) )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
         // Print storage statistics.
@@ -915,7 +915,6 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
-    int i;
 
     if ( type != 1 ) {
         return;
@@ -924,11 +923,11 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
     ctype = TangentStiffnessMatrix;
 
     int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
     }
 
-    for ( i = 1; i <= nelems; i++ ) {
+    for ( int i = 1; i <= nelems; i++ ) {
         domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, atTime);
     }
 }
@@ -982,7 +981,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 {
     int nelem = domain->giveNumberOfElements();
     //int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-    int i, j, k, jj, kk, n;
+    int jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
     Element *element;
@@ -990,7 +989,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 
     answer.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     answer.zero();
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
@@ -1017,10 +1016,10 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 
         n = loc.giveSize();
 
-        for ( j = 1; j <= n; j++ ) {
+        for ( int j = 1; j <= n; j++ ) {
             jj = loc.at(j);
             if ( jj ) {
-                for ( k = 1; k <= n; k++ ) {
+                for ( int k = 1; k <= n; k++ ) {
                     kk = loc.at(k);
                     if ( kk ) {
                         answer.at(jj) += charMtrx.at(j, k) * vec.at(kk);

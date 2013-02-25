@@ -3771,7 +3771,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         }
 
         // set node coordinates
-        ( ( Node * ) node )->setCoordinates( * mesh->giveNode(inode)->giveCoordinates() );
+        static_cast< Node * >( node )->setCoordinates( * mesh->giveNode(inode)->giveCoordinates() );
         node->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
         ( * dNew )->setDofManager(inode, node);
     } // end creating dof managers

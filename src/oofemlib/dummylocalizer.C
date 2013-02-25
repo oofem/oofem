@@ -82,13 +82,13 @@ Element *
 DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList)
 {
     // Dummy implementation here, to be replaced ASAP
-    int ielem, nelems = this->giveDomain()->giveNumberOfElements();
+    int nelems = this->giveDomain()->giveNumberOfElements();
     Element *ielemptr;
     SpatialLocalizerInterface *interface;
 
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
         ielemptr = this->giveDomain()->giveElement(ielem);
-        interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+        interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
         if ( interface ) {
             if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
                 continue;
@@ -111,14 +111,14 @@ DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, co
 Element *
 DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
-    int ielem, nelems = this->giveDomain()->giveNumberOfElements();
+    int nelems = this->giveDomain()->giveNumberOfElements();
     Element *ielemptr, *answer = NULL;
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
 
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
         ielemptr = this->giveDomain()->giveElement(ielem);
-        interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+        interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
         if ( interface ) {
             if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
                 continue;
@@ -142,7 +142,7 @@ DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const
 Element *
 DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region)
 {
-    int ielem, nelems;
+    int nelems;
     Element *ielemptr, *answer = NULL;
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
@@ -152,9 +152,9 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
 
     if ( region > 0 ) {
         IntArray &elems = this->region_elements[region-1];
-        for (ielem = 1; ielem <= elems.giveSize(); ielem++) {
+        for ( int ielem = 1; ielem <= elems.giveSize(); ielem++ ) {
             ielemptr = this->domain->giveElement(elems.at(ielem));
-            interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+            interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
                 currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
                 if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
@@ -170,9 +170,9 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
         }
     } else { // Check them all;
         nelems = this->giveDomain()->giveNumberOfElements();
-        for ( ielem = 1; ielem <= nelems; ielem++ ) {
+        for ( int ielem = 1; ielem <= nelems; ielem++ ) {
             ielemptr = this->giveDomain()->giveElement(ielem);
-            interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+            interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
                 if ( region > 0 && region == ielemptr->giveRegionNumber() ) {
                     continue;

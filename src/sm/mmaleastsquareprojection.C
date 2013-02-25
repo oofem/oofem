@@ -67,6 +67,10 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     // find the closest IP on old mesh
     sourceElement = sl->giveElementContainingPoint(coords);
 
+    if ( !sourceElement ) {
+        OOFEM_ERROR("MMALeastSquareProjection::__init: no suitable source element found");
+    }
+
     // determine the type of patch
     Element_Geometry_Type egt = sourceElement->giveGeometryType();
     if ( egt == EGT_line_1 ) {
@@ -75,10 +79,6 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         this->patchType = MMALSPPatchType_2dq;
     } else {
         OOFEM_ERROR("MMALeastSquareProjection::__init: unsupported material mode");
-    }
-
-    if ( !sourceElement ) {
-        OOFEM_ERROR("MMALeastSquareProjection::__init: no suitable source element found");
     }
 
     /* Determine the state of closest point.

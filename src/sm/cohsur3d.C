@@ -266,10 +266,9 @@ CohesiveSurface3d :: evaluateCenter()
 {
     Particle *nodeA, *nodeB;
     double RA, RB, L, aux;
-    int i;
 
-    nodeA  = ( Particle * ) this->giveNode(1);
-    nodeB  = ( Particle * ) this->giveNode(2);
+    nodeA = static_cast< Particle * >( this->giveNode(1) );
+    nodeB = static_cast< Particle * >( this->giveNode(2) );
     RA = nodeA->giveRadius();
     RB = nodeB->giveRadius();
     L  = giveLength();
@@ -278,7 +277,7 @@ CohesiveSurface3d :: evaluateCenter()
     switch ( numberOfDofMans ) {
     case 2:
         center.resize(3);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             center.at(i) = aux * ( nodeB->giveCoordinate(i) ) + ( 1. - aux ) * ( nodeA->giveCoordinate(i) );
         }
 

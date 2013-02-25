@@ -56,12 +56,12 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
 {
     FloatArray stressVector3d;
     FloatArray layerStrain, fullLayerStrain, fullStressVect, stressVect;
-    StructuralElement *element = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
     Material *layerMat;
     StructuralMaterialStatus *status;
     LayeredCrossSectionInterface *interface;
 
-    if ( ( interface = ( LayeredCrossSectionInterface * ) element->giveInterface(LayeredCrossSectionInterfaceType) ) == NULL ) {
+    if ( ( interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) ) ) == NULL ) {
         _error("giveRealStresses - element with no layer support encountered");
     }
 
@@ -93,7 +93,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
          * }
          */
 
-        ( ( StructuralMaterial * ) layerMat )
+        static_cast< StructuralMaterial * >( layerMat )
         ->giveRealStressVector(stressVector3d, FullForm, layerGp, layerStrain, tStep);
         // reducedStressIncrement = this -> GiveReducedStressVector (gp, stressIncrement3d);
     }
@@ -101,7 +101,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
     this->giveIntegrated3dShellStress(fullStressVect, gp);
     this->giveReducedCharacteristicVector(stressVect, gp, fullStressVect);
     answer = stressVect;
-    status = ( StructuralMaterialStatus * ) ( gp->giveMaterial()->giveStatus(gp) );
+    status = static_cast< StructuralMaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
 
     // now we must update master gp
     status->letTempStrainVectorBe(totalStrain);
@@ -828,7 +828,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
 void
 LayeredCrossSection :: setupLayerMidPlanes()
 {
-    double layerTopZ = 0.;
+    double layerTopZ;
     this->layerMidZ.resize(this->numberOfLayers);
 
     layerTopZ = -midSurfaceZcoordFromBottom;
@@ -915,8 +915,8 @@ LayeredCrossSection :: giveSlaveGaussPointNew(GaussPoint *masterGp, int i)
 
         // create new slave record in masterGp
         // (requires that this is friend of gp)
-        double currentZTopCoord = 0., bottom, top;
-        double layerTopZ = 0., layerMidZ = 0.;
+        double currentZTopCoord, bottom, top;
+        double layerMidZ = 0.;
         FloatArray *zCoord, *masterCoords = masterGp->giveCoordinates();
         // resolve slave material mode
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
@@ -943,8 +943,6 @@ LayeredCrossSection :: giveSlaveGaussPointNew(GaussPoint *masterGp, int i)
                 zCoord->at(2) = masterCoords->at(2); // gp y-coord of mid surface
             }
 
-
-            layerTopZ += this->layerThicks.at(j + 1);
             layerMidZ = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0; // z-coord of layer mid surface
 
             zCoord->at(3) = ( 2.0 * ( layerMidZ ) - top - bottom ) / ( top - bottom ); // natural coord for the layer midplane
@@ -1147,7 +1145,7 @@ LayeredCrossSection :: giveIntegrated3dShellStress(FloatArray &answer, GaussPoin
     for ( i = 1; i <= numberOfLayers; i++ ) {
         layerGp = giveSlaveGaussPoint(masterGp, i - 1);
         layerMat = domain->giveMaterial( layerMaterials.at(i) );
-        layerStatus = ( ( StructuralMaterialStatus * ) layerMat->giveStatus(layerGp) );
+        layerStatus = static_cast< StructuralMaterialStatus * >( layerMat->giveStatus(layerGp) );
 
         if ( layerStatus->giveTempStressVector().giveSize() ) { // there exist total sress in gp
             reducedLayerStress = layerStatus->giveTempStressVector();
@@ -1210,10 +1208,9 @@ LayeredCrossSection :: giveNumberOfLayers()
 double
 LayeredCrossSection :: giveArea()
 {
-    int i;
     if ( this->area <= 0.0 ) {
         this->area = 0.0;
-        for ( i = 1; i <= numberOfLayers; i++ ) {
+        for ( int i = 1; i <= numberOfLayers; i++ ) {
             this->area += this->layerThicks.at(i) * this->layerWidths.at(i);
         }
     }
@@ -1237,7 +1234,7 @@ void
 LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
                                                             GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
 {
-    StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatArray et;
 
     elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);

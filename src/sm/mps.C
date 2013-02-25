@@ -218,7 +218,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 void
 MPSMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 {
-    MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+    MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
     if ( this->CoupledAnalysis == MPS ) {
         status->setEquivalentTime( this->computeEquivalentTime(gp, atTime, 1) );
@@ -430,7 +430,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     if ( this->CoupledAnalysis == Basic ) {
         Cf = 0.5 * ( dt ) / eta;
     } else if ( this->CoupledAnalysis == MPS ) {
-        MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+        MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
         // TRAPEZOIDAL INTEGRATION RULE
         if ( atTime->isTheFirstStep() ) {
@@ -550,7 +550,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
         tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() );
         eta = tHalfStep / q4;
     } else if ( this->CoupledAnalysis == MPS ) {
-        MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+        MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
         // check whether this viscosity has been already computed
         if ( status->giveFlowTermViscosityTemp() != -1.  &&  !( atTime->isTheFirstStep() ) ) {
@@ -634,7 +634,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
     double eta, dt;
     double dEtaR, etaR, L;
 
-    MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+    MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == VM_Incremental ) {
         sigma = status->giveStressVector();       //stress vector at the beginning of time-step
@@ -688,7 +688,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
         }
 
         // expand the strain to full form if requested
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveFullCharacteristicVector(answer, gp, reducedAnswer);
     } else {
         /* error - total mode not implemented yet */
@@ -727,7 +727,7 @@ MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, MatResponse
         return;
     }
 
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }
 
@@ -741,10 +741,8 @@ MPSMaterial :: inverse_sorption_isotherm(double w)
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    double phi;
-
     // relative humidity
-    phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+    double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     /*if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
      * _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
@@ -760,13 +758,13 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *atTime, int option)
 {
     double H_tot=0.0, H_inc=0.0;
 
-    MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+    MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
     // compute humidity and its increment if the step is first or humidity has not been yet computed
     if ( ( status->giveHum() == -1. ) && ( status->giveHumIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
         Field *tf;
-        int err, wflag;
+        int err, wflag = 0;
         FloatArray gcoords;
         FloatArray et2, ei2; // total and incremental values of water mass
 
@@ -816,13 +814,13 @@ double
 MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *atTime, int option)
 {
     double T_tot=0.0, T_inc=0.0;
-    MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+    MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
 
     // compute humidity and its increment if the step is first or humidity has not been yet computed
     if ( ( status->giveT() == -1. ) && ( status->giveTIncrement() == -1. ) ) {
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
         Field *tf;
-        int err, tflag;
+        int err, tflag = 0;
         FloatArray gcoords;
         FloatArray et1, ei1; // total and incremental values of temperature
 
@@ -925,7 +923,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *atTime, int optio
             _error("computeEquivalentTime - mode is not supported")
         }
     } else {
-        MPSMaterialStatus *status = ( MPSMaterialStatus * ) this->giveStatus(gp);
+        MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
         tEquiv = status->giveEquivalentTime();
 
         if ( option == 0 ) { // gives time in the middle of the timestep

@@ -51,9 +51,9 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), recor
 {
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer()
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer(),
+    record(src.record)
 {
-    this->record = src.record;
     tokenizer.tokenizeLine(this->record.c_str());
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
@@ -62,9 +62,9 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
     }
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer()
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer(),
+    record(source)
 {
-    this->record = source;
     tokenizer.tokenizeLine(this->record.c_str());
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
