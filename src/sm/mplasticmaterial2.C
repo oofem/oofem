@@ -1543,7 +1543,10 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     } else {
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
         answerR = answer;
-        answer.beSubMatrixOfSizeOf(answerR, mask, 6);
+        //answer.beSubMatrixOfSizeOf(answerR, mask, 6);
+        answer.resize(6,6);
+        answer.zero();
+        answer.assemble(answerR, mask, mask);
     }
 }
 
@@ -1690,7 +1693,10 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     } else {
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
         helpMtrx = answer;
-        answer.beSubMatrixOfSizeOf(helpMtrx, mask, 6);
+        //answer.beSubMatrixOfSizeOf(helpMtrx, mask, 6);
+        answer.resize(6,6);
+        answer.zero();
+        answer.assemble(helpMtrx, mask, mask);
     }
 }
 

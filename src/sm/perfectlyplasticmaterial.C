@@ -442,7 +442,10 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
             answer = fullAnswer;
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.beSubMatrixOf(fullAnswer, mask);
+            //answer.beSubMatrixOf(fullAnswer, mask);
+            answer.resize(6,6);
+            answer.zero();
+            answer.assemble(fullAnswer, mask, mask);
         }
     }
 }
@@ -471,7 +474,10 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
             answer =  fullAnswer;
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.beSubMatrixOf(fullAnswer, mask);
+            //answer.beSubMatrixOf(fullAnswer, mask);
+            answer.resize(6,6);
+            answer.zero();
+            answer.assemble(fullAnswer, mask, mask);
         }
     }
 }
@@ -498,7 +504,10 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
             answer =  fullAnswer;
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.beSubMatrixOf(fullAnswer, mask);
+            //answer.beSubMatrixOf(fullAnswer, mask);
+            answer.resize(6,6);
+            answer.zero();
+            answer.assemble(fullAnswer, mask, mask);
         }
     }
 }
@@ -529,7 +538,10 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
             answer = fullAnswer;
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.beSubMatrixOf(fullAnswer, mask);
+            //answer.beSubMatrixOf(fullAnswer, mask);
+            answer.resize(6,6);
+            answer.zero();
+            answer.assemble(fullAnswer, mask, mask);
         }
     }
 }
@@ -559,7 +571,10 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
             answer = fullAnswer;
         } else { // reduced form asked
             this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-            answer.beSubMatrixOf(fullAnswer, mask);
+            //answer.beSubMatrixOf(fullAnswer, mask);
+            answer.resize(6,6);
+            answer.zero();
+            answer.assemble(fullAnswer, mask, mask);
         }
     }
 }

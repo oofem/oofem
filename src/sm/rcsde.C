@@ -229,7 +229,10 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                 answer = reducedAnswer;
             } else {
                 this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-                answer.beSubMatrixOf(reducedAnswer, mask);
+                //answer.beSubMatrixOf(reducedAnswer, mask);
+                answer.resize(mask.maximum(), mask.maximum());
+                answer.zero();
+                answer.assemble(reducedAnswer, mask, mask);
             }
         } else if ( rMode == ElasticStiffness ) {
             this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);

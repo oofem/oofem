@@ -447,7 +447,10 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
             return;
         } else {
             this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-            answer.beSubMatrixOfSizeOf(elasticModuli, mask, 6);
+            //answer.beSubMatrixOfSizeOf(elasticModuli, mask, 6);
+            answer.resize(6,6);
+            answer.zero();
+            answer.assemble(elasticModuli, mask, mask);
             return;
         }
     }
@@ -502,7 +505,10 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
         answer =  answerR;
     } else {
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-        answer.beSubMatrixOfSizeOf(answerR, mask, 6);
+        //answer.beSubMatrixOfSizeOf(answerR, mask, 6);
+        answer.resize(6,6);
+        answer.zero();
+        answer.assemble(answerR, mask, mask);
     }
 }
 

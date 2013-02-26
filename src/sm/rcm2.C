@@ -264,7 +264,10 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             this->giveCrackedStiffnessMatrix(dcr, TangentStiffness, gp, atTime);
             fullDecr = de;
             fullDecr.add(dcr);
-            decr.beSubMatrixOf(fullDecr, crackMapping);
+            //decr.beSubMatrixOf(fullDecr, crackMapping);
+            decr.resize(crackMapping.maximum(), crackMapping.maximum());
+            decr.zero();
+            decr.assemble(fullDecr, crackMapping, crackMapping);
 
             if ( dSigma.giveSize() == 0 ) {
                 fullDSigma.beProductOf(de, strainIncrement);
@@ -732,7 +735,10 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // now let d to grow to Full Format
     //
     this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-    df.beSubMatrixOfSizeOf(d, mask, 6);
+    //df.beSubMatrixOfSizeOf(d, mask, 6);
+    answer.resize(6,6);
+    answer.zero();
+    answer.assemble(d, mask, mask);
     //
     // final step - transform stiffnes to global c.s
     //
@@ -746,7 +752,10 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
         answer = df;
     } else { // reduced form asked
         this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-        answer.beSubMatrixOf(df, mask);
+        //answer.beSubMatrixOf(df, mask);
+        answer.resize(mask.maximum(), mask.maximum());
+        answer.zero();
+        answer.assemble(df, mask, mask);
     }
 }
 

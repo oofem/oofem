@@ -125,7 +125,10 @@ StructuralMaterial :: giveCharacteristicComplianceMatrix(FloatMatrix &answer,
 
     if ( form == FullForm ) {
         this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-        answer.beSubMatrixOf(redAnswer, mask);
+        //answer.beSubMatrixOf(redAnswer, mask);
+        answer.resize(mask.maximum(), mask.maximum());
+        answer.zero();
+        answer.assemble(redAnswer,mask,mask);
     } else if ( form == ReducedForm ) {
         answer = redAnswer;
     } else {
