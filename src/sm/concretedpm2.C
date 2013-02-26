@@ -2209,7 +2209,7 @@ ConcreteDPM2 :: computeInverseOfJacobian(FloatMatrix &answer, const FloatMatrix 
     for ( i = nRows; i > 1; i-- ) {
         piv = tmp.at(i, i);
         for ( j = i - 1; j > 0; j-- ) {
-            linkomb = tmp.at(j, i) / tmp.at(i, i);
+            linkomb = tmp.at(j, i) / piv;
             for ( k = i; k > 0; k-- ) {
                 tmp.at(j, k) -= tmp.at(i, k) * linkomb;
             }

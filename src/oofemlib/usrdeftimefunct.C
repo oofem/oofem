@@ -45,19 +45,11 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    LoadTimeFunction :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, ftExpression, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
+    IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, IFT_UserDefinedLoadTimeFunction_ft, "dfdt(t)");
+    IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, IFT_UserDefinedLoadTimeFunction_ft, "d2fdt2(t)");
 
-    result = ir->giveField(ftExpression, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
-    if ( result != IRRT_OK ) {
-        IR_IOERR(giveClassName(), __proc, IFT_UserDefinedLoadTimeFunction_ft, "f(t)", ir, result);
-    }
-
-    result = ir->giveOptionalField(dfdtExpression, IFT_UserDefinedLoadTimeFunction_ft, "dfdt(t)");
-    result = ir->giveOptionalField(d2fdt2Expression, IFT_UserDefinedLoadTimeFunction_ft, "d2fdt2(t)");
-
-    //this->readQuotedString (initString, "f(t)", ftExpression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH);
-
-    return IRRT_OK;
+    return LoadTimeFunction :: initializeFrom(ir);
 }
     
 double UserDefinedLoadTimeFunction :: __at(double time)

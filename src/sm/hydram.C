@@ -444,7 +444,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
  *  caller should ensure that this is called only when state vector is changed
  */
 {
-    double ksi, dksi, T = 0., h = 1., dt;
+    double ksi, dksi, T = 0., h = 1.;
     // get hydration model status associated with integration point
     HydrationModelStatus *status = static_cast< HydrationModelStatus * >( giveStatus(gp) );
 

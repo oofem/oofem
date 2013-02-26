@@ -364,8 +364,9 @@ main(int argc, char *argv[])
     dr.finish();
     problem->checkProblemConsistency();
 
+#ifdef OOFEG_DEVEL
     mask = ESI_GRAPHIC_EDITOR_MASK;
-#ifndef OOFEG_DEVEL
+#else
     mask = 0;
     mask |= ESI_TRACK_AREA_MASK;
     mask |= ESI_PROMPT_AREA_MASK;
@@ -2325,7 +2326,7 @@ toggleTransparentContours(Widget w, XtPointer ptr, XtPointer call_data)
     if ( IsContourBgTransparent() ) {
         SetContourBgTransparent(true);
     } else {
-        SetContourBgTransparent(true);
+        SetContourBgTransparent(true); ///@todo Duplicated branch here. Should this be false?
     }
 }
 

@@ -848,8 +848,7 @@ MDM :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Material
 int
 MDM :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( ( type == IST_DamageTensor ) || ( type == IST_DamageTensor ) ||
-        ( type == IST_DamageTensor ) || ( type == IST_DamageTensor ) ) {
+    if ( type == IST_DamageTensor ) {
         return ndc;
     } else if ( ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ) {
         return nsd;

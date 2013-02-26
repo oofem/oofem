@@ -254,9 +254,6 @@ LIBeam3d :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    // first call parent
-    result = StructuralElement :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, referenceNode, IFT_LIBeam3d_refnode, "refnode"); // Macro
     if ( referenceNode == 0 ) {
         _error("instanciateFrom: wrong reference node specified");
@@ -270,8 +267,7 @@ LIBeam3d :: initializeFrom(InputRecord *ir)
     //    dofsToCondense = NULL;
     //  }
 
-    this->computeGaussPoints();
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 

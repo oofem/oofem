@@ -103,6 +103,9 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     ir = dr->giveInputRecord(DataReader :: IR_jobRec, 1);
     __keyword = NULL;
     result = ir->giveField(desc, IFT_EngngModel_probdescription, __keyword);
+    if ( result != IRRT_OK ) {
+        IR_IOERR("", __proc, IFT_EngngModel_probdescription, "Problem description", ir, result);
+    }
 
     /* here we need copy of input record. The pointer returned by dr->giveInputRecord can (and will)
      * be updated as reading e-model components (nodes, etc). But we need this record being available

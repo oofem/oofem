@@ -140,6 +140,7 @@ LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, v
 void
 LEPlic :: updatePosition(TimeStep *atTime)
 {
+    ///@todo Can't have OOFEG stuff here, it will crash when running OOFEM normally.
 #ifdef __OOFEG
     //deleteLayerGraphics(OOFEG_DEBUG_LAYER);
     EVFastRedraw(myview);
