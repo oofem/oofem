@@ -430,7 +430,9 @@ IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
-    if ( this->damage > 0.0 ) {
+    if(this->kappa > 0 && this->damage <= 0)
+      fprintf(file, "kappa %f", this->kappa);
+    else  if ( this->damage > 0.0 ) {
         fprintf(file, "kappa %f, damage %f crackVector %f %f %f", this->kappa, this->damage, this->crackVector.at(1), this->crackVector.at(2), this->crackVector.at(3) );
 
 #ifdef keep_track_of_dissipated_energy

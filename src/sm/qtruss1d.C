@@ -50,7 +50,7 @@ namespace oofem {
 
 FEI1dQuad QTruss1d :: interpolation(1);
 
-QTruss1d :: QTruss1d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 // Constructor.
 {
     numberOfDofMans = 3;

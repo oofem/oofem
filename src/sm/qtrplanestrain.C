@@ -52,7 +52,7 @@ namespace oofem {
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), SpatialLocalizerInterface(),
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
     // Constructor.
 {

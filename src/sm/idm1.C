@@ -534,6 +534,40 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 }
 
 double
+IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
+{
+    const double e0 = this->give(e0_ID, gp);
+    double ef = 0.;
+    if ( softType == ST_Linear || softType == ST_Exponential || softType == ST_SmoothExtended ) {
+        ef = this->give(ef_ID, gp);         // ef is the fracturing strain
+    }
+
+    switch ( softType ) {
+    case ST_Linear:
+        if ( kappa <= e0 ) {
+            return 0.0;
+        } else if ( kappa < ef ) {
+	  return ( ef *e0 ) / ( ef - e0 )/(kappa*kappa);
+        } else {
+            return 1.0; //maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
+        }
+
+    case ST_Exponential:
+        if ( kappa > e0 ) {
+	  return  ( e0 / (kappa * kappa) ) * exp( -( kappa - e0 ) / ( ef - e0 )  + e0 / (kappa * (ef - e0)) ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+        } else {
+            return 0.0;
+        }
+   
+    default:
+        printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n", softType);
+    }
+
+    return 0.;         // to make the compiler happy  
+
+}
+
+double
 IsotropicDamageMaterial1 :: complianceFunction(double kappa, GaussPoint *gp)
 {
     double om = damageFunction(kappa, gp);

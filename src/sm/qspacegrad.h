@@ -73,6 +73,8 @@ protected:
     virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual StructuralElement* giveStructuralElement() { return this; }
+    virtual NLStructuralElement* giveNLStructuralElement() { return this; }
+    
 };
 
 }

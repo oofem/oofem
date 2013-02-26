@@ -175,10 +175,12 @@ set (core_fei
     fei2dquadbiquad.C
     fei3dlinelin.C
     fei3dtrlin.C
-	fei3dtrquad.C
+    fei3dtrquad.C
     fei3dtetquad.C
     fei3dhexalin.C
     fei3dhexaquad.C
+    fei3dwedgelin.C 
+    fei3dwedgequad.C
     )
 
 set (core_xfem

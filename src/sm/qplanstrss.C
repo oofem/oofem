@@ -45,7 +45,7 @@ namespace oofem {
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;

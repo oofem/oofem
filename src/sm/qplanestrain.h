@@ -35,7 +35,7 @@
 #ifndef qplanstrain_h
 #define qplanstrain_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
 #include "mathfem.h"
@@ -45,7 +45,7 @@ namespace oofem {
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface
+class QPlaneStrain : public NLStructuralElement, public ZZNodalRecoveryModelInterface
 {
 protected:
     int numberOfGaussPoints;

@@ -90,7 +90,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
 
     virtual integrationDomain giveIntegrationDomain() { return _Tetrahedra; }
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+    virtual MaterialMode giveMaterialMode();
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);
@@ -171,6 +171,7 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i);
+    virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
     /**

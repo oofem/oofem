@@ -10,6 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
+ *
  *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
@@ -32,70 +33,93 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+//   ************************************
+//   *** Abstract class for gradient formulation of coupled damage-plasticity model(GradDp). Yield function is formulated in the effective stress space and damage is driven by the nonlocal(over-nonlocal) cumulated plastic strain. The new nonlocal degrees of freedom (with the meaning of the nonlocal cumulated plastic strain) are introduced with lower order of approximation functions than the displacement field to avoid spurious stress oscillations ***
+//   ************************************
+
 #ifndef graddpelement_h
 #define graddpelement_h
 
 #include "structuralelement.h"
+#include "nlstructuralelement.h"
+
+
+
 
 namespace oofem {
 
-/**
- * Abstract class for gradient formulation of coupled damage-plasticity model(GradDp).
- * Yield function is formulated in the effective stress space and damage is driven by the nonlocal(over-nonlocal) cumulated plastic strain.
- * The new nonlocal degrees of freedom (with the meaning of the nonlocal cumulated plastic strain) are
- * introduced with lower order of approximation functions than the displacement field to avoid spurious stress oscillations.
- */
-class GradDpElement
+class GradDpElement 
 {
-protected:
-    int numberOfGaussPoints;
-    int nPrimNodes, nPrimVars,nSecNodes,nSecVars;
-    IntArray locU,locK;
-    int totalSize,nlSize,locSize;
+ protected:
+  int numberOfGaussPoints;
+  int nPrimNodes, nPrimVars,nSecNodes,nSecVars;
+  IntArray locU,locK;
+  int totalSize,nlSize,locSize;
+  int averType, nlGeo;
+ 
 
-public:
-    GradDpElement();
-    virtual ~GradDpElement() {}
+  
 
-    // definition & identification
-    virtual const char* giveClassName () const { return "GradDpElement"; }
-    virtual classType giveClassID () const { return GradDpElementClass; }
+ public:
+  GradDpElement () ;     // constructor
+  ~GradDpElement ()  {}             // destructor
 
-    virtual int getNprimNodes() { return 0; }
-    virtual int getNprimVars() { return 0; }
-    virtual int getNsecNodes() { return 0; }
-    virtual int getNsecVars() { return 0; }
 
-protected:
-    virtual StructuralElement* giveStructuralElement() = 0;
-    virtual void computeNkappaMatrixAt(GaussPoint*, FloatMatrix&) = 0;
-    virtual void computeBkappaMatrixAt(GaussPoint*, FloatMatrix&) = 0;
+  IRResultType initializeFrom (InputRecord* ir);
+  //virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
+  //
+  // definition & identification
+  //
+  const char* giveClassName () const { return "GradDpElement"; }
+  classType   giveClassID   () const { return GradDpElementClass; }
+  /***********************Predelat************************************/
+  virtual int getNprimNodes(){return 0;}
+  virtual int getNprimVars(){return 0;}
+  virtual int getNsecNodes(){return 0;}
+  virtual int getNsecVars(){return 0;}
 
-    void setDisplacementLocationArray(IntArray& answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
-    void setNonlocalLocationArray(IntArray& answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
+  /************************************************************/
+  //  virtual int  computeNumberOfDofs (EquationID ut){return (nPrimNodes*nPrimVars+nSecNodes*nSecVars);};
+  //virtual int    checkConsistency();
 
-    void computeStiffnessMatrix(FloatMatrix&, MatResponseMode, TimeStep *tStep);
-    void computeStiffnessMatrix_uu(FloatMatrix&, MatResponseMode, TimeStep *tStep);
-    void computeStiffnessMatrix_uk(FloatMatrix&, MatResponseMode, TimeStep *tStep);
-    void computeStiffnessMatrix_kk(FloatMatrix&, MatResponseMode, TimeStep *tStep);
-    void computeStiffnessMatrix_ku(FloatMatrix&, MatResponseMode, TimeStep *tStep);
+ protected:
+  virtual StructuralElement* giveStructuralElement() = 0;
+  virtual NLStructuralElement* giveNLStructuralElement() = 0;
 
-    void computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
-    void computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
+  virtual void computeNkappaMatrixAt(GaussPoint*,FloatMatrix&) = 0;
+  virtual void computeBkappaMatrixAt(GaussPoint*,FloatMatrix&) = 0;
+  //void initialize();
+  void setDisplacementLocationArray(IntArray& answer,int nPrimNodes,int nPrimVars,int nSecNodes,int nSecVars);
+  void setNonlocalLocationArray(IntArray& answer,int nPrimNodes,int nPrimVars,int nSecNodes,int nSecVars);
 
-    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeNonlocalCumPlasticStrain(double &answer, GaussPoint *gp, TimeStep *stepN);
+  void computeStiffnessMatrix(FloatMatrix&, MatResponseMode, TimeStep*);
+  void computeStiffnessMatrix_uu(FloatMatrix&,MatResponseMode,TimeStep*);
+  void computeStiffnessMatrix_uk(FloatMatrix&,MatResponseMode,TimeStep*);
+  void computeStiffnessMatrix_kk(FloatMatrix&,MatResponseMode,TimeStep*);
+  void computeStiffnessMatrix_ku(FloatMatrix&,MatResponseMode,TimeStep*);
 
-    void giveInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord);
-    void giveLocalInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord);
-    void giveNonlocalInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord);
+  void computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
+  void computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *stepN);
+  void computeNonlocalGradient(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 
-    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+
+  void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+  void computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+  void computeNonlocalCumPlasticStrain(double &answer, GaussPoint *gp, TimeStep *stepN);
+  
+  void giveInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord);
+  void giveLocalInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord);
+  void giveNonlocalInternalForcesVector(FloatArray &answer,TimeStep *tStep, int useUpdatedGpRecord);
+  
+  void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+  void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+  void computeLocForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+  void computeLocNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+  void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+  void computeDistanceToBoundary();
+///////////////////////////////////////////////////////////////////////////////
 };
-
+ 
 } // end namespace oofem
 
 #endif

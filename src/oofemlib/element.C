@@ -1152,6 +1152,8 @@ Element :: giveSpatialDimension(void) const
     case EGT_tetra_2:
     case EGT_hexa_1:
     case EGT_hexa_2:
+    case EGT_wedge_1:
+    case EGT_wedge_2:
         return 3;
 
     case EGT_Composite:
@@ -1186,6 +1188,10 @@ Element :: giveNumberOfBoundarySides(void) const
     case EGT_tetra_1:
     case EGT_tetra_2:
         return 4;
+
+    case EGT_wedge_1:
+    case EGT_wedge_2:
+        return 5;
 
     case EGT_hexa_1:
     case EGT_hexa_2:

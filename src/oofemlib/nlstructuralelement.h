@@ -93,6 +93,13 @@ public:
     virtual ~NLStructuralElement() { }
 
     /**
+     * Return nlgeometry mode
+     * 0 - small stran mode
+     * 1 - G-L strain mode
+     * 2 - deformation gradient mode
+    */
+    int giveGeometryMode(){return nlGeometry;}
+    /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using @f$ \int (B_1+B_2(r))^{\mathrm{T}} D(B_1+B_2(r))\;\mathrm{d}v @f$, where
      * @f$ B_2 @f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
@@ -203,6 +210,7 @@ protected:
         OOFEM_ERROR("NLStructuralElement::computeBFMatrixAt : method not implemented for this element");
         return;
     }
+    friend class GradDpElement;
 };
 } // end namespace oofem
 #endif // nlstructuralelement_h

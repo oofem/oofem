@@ -80,6 +80,7 @@ protected:
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual StructuralElement* giveStructuralElement(){return this;}
+    virtual NLStructuralElement* giveNLStructuralElement(){return this;}
 };
 } // end namespace oofem
 #endif // truss1d_h
