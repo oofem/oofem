@@ -45,7 +45,7 @@
 namespace oofem {
 FEI3dHexaQuad QSpace :: interpolation;
 
-QSpace :: QSpace(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
     // Constructor.
 {
     numberOfDofMans = 20;
@@ -82,6 +82,15 @@ QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     answer.setValues(3, D_u, D_v, D_w);
 }
 
+MaterialMode
+QSpace :: giveMaterialMode()
+{
+  if(this->nlGeometry > 1)
+    return _3dMat_F;
+  else
+    return _3dMat;
+}
+
 
 double
 QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
@@ -110,7 +119,7 @@ QSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, this->giveMaterialMode());
     }
 }
 
@@ -134,12 +143,6 @@ QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     }
 }
 
-
-void
-QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
-{
-    OOFEM_ERROR("QSpace :: NLBmatrix not implemented");
-}
 
 
 void
@@ -171,13 +174,78 @@ QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     }
 }
 
-
 void
-QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) 
+// Returns the [60x60] nonlinear part of strain-displacement matrix {B} of the receiver,
+// evaluated at aGaussPoint
+
 {
-    OOFEM_ERROR("QSpace :: BFmatrix not implemented");
+ 
+    FloatMatrix dnx;
+
+    // compute the derivatives of shape functions
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+    answer.resize(60, 60);
+    answer.zero();
+
+    // put the products of derivatives of shape functions into the "nonlinear B matrix",
+    // depending on parameter i, which is the number of the strain component
+    if ( i <= 3 ) {
+        for ( int k = 0; k < 20; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 60; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
+                }
+            }
+        }
+    } else if ( i == 4 )        {
+        for ( int k = 0; k < 20; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 60; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
+                }
+            }
+        }
+    } else if ( i == 5 )        {
+        for ( int k = 0; k < 20; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 60; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    } else if ( i == 6 )        {
+        for ( int k = 0; k < 20; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 60; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    }
+
+    return;
 }
 
+void
+QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) 
+{
+  FloatMatrix dnx;
+  
+  this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+
+  answer.resize(9, 60);
+  answer.zero();
+
+    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( int j = 1; j <= 20; j++ ) { // 8 nodes
+            answer.at(3 * i - 2, 3 * j - 2) =
+                answer.at(3 * i - 1, 3 * j - 1) =
+                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
+        }
+    }
+}
 
 // ******************************
 // ***  Surface load support  ***

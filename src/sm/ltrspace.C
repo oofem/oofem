@@ -196,6 +196,30 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
     }
 }
 
+
+void
+LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x12] defgrad-displacement matrix {BF} of the receiver,
+// evaluated at aGaussPoint.
+// BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
+{
+    int i, j;
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(9, 12);
+    answer.zero();
+
+    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( j = 1; j <= 4; j++ ) { // 8 nodes
+            answer.at(3 * i - 2, 3 * j - 2) =
+                answer.at(3 * i - 1, 3 * j - 1) =
+                answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
+        }
+    }
+}
+
 double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
@@ -223,6 +247,17 @@ LTRSpace :: initializeFrom(InputRecord *ir)
 }
 
 
+
+MaterialMode
+LTRSpace :: giveMaterialMode()
+{
+    if ( nlGeometry > 1 ) {
+        return _3dMat_F;
+    } else {
+        return _3dMat;
+    }
+}
+
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
@@ -230,7 +265,7 @@ void LTRSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, _3dMat);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, this->giveMaterialMode());
     }
 }
 

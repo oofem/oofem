@@ -51,7 +51,7 @@ namespace oofem {
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), SpatialLocalizerInterface(),
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;

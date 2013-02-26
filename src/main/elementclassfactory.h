@@ -62,6 +62,11 @@
  #include "q4axisymm.h"
  #include "l4axisymm.h"
  #include "ltrspace.h"
+ #include "qtrspace.h"
+ #include "qtrspacegrad.h"
+ #include "lwedge.h"
+ #include "qwedge.h"
+ #include "qwedgegrad.h"
  #include "beam2d.h"
  #include "beam3d.h"
  #include "libeam2dnl.h"
@@ -89,6 +94,7 @@
  #include "springelement.h"
  #include "particle.h"
  #include "lattice2d.h"
+ #include "htselement.h"
 
 // iga elements
  #include "igaelements.h"
@@ -152,6 +158,11 @@ REGISTER_CLASS(CCTPlate3d, "cctplate3d", CCTPlate3dClass)
 REGISTER_CLASS(CCTPlate, "cctplate", CCTPlateClass)
 //REGISTER_CLASS(LTRSpaceWithEmbeddedCrack, "ltrspaceec", )
 REGISTER_CLASS(LTRSpace, "ltrspace", LTRSpaceClass)
+REGISTER_CLASS(QTRSpace, "qtrspace", QTRSpaceClass)
+REGISTER_CLASS(QTRSpaceGrad, "qtrspacegrad", QTRSpaceGradClass)
+REGISTER_CLASS(LWedge, "lwedge", LWedgeClass)
+REGISTER_CLASS(QWedge, "qwedge", QWedgeClass)
+REGISTER_CLASS(QWedgeGrad, "qwedgegrad", QWedgeGradClass)
 REGISTER_CLASS(Truss2d, "truss2d", Truss2dClass)
 REGISTER_CLASS(RerShell, "rershell", RerShellClass)
 //REGISTER_CLASS(TrDirShell, "trdirshell", TrDirShellClass)
@@ -182,6 +193,7 @@ REGISTER_CLASS(NURBSPlaneStressElement, "nurbsplanestresselement", NURBSPlaneStr
 REGISTER_CLASS(TSplinePlaneStressElement, "tsplineplanestresselement", TSplinePlaneStressElementClass)
 REGISTER_CLASS(NURBSSpace3dElement, "nurbs3delement", NURBSSpace3dElementClass)
 REGISTER_CLASS(Lattice2d, "lattice2d", Lattice2dClass)
+REGISTER_CLASS(HTSelement, "htselement", HTSelementClass)
 #endif
 
 #ifdef __FM_MODULE

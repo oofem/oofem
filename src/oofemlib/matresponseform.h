@@ -52,6 +52,7 @@ enum MatResponseForm {
     PDGrad_ku,   ///< gradient model, left lower block.
     PDGrad_uk,   ///< gradient model, right upper block.
     PDGrad_kk,   ///< gradient model, right lower block.
+    PDGrad_LD,   ///< gradient model, stress-based averaging.
 };
 } // end namespace oofem
 #endif // matesponseform_h

@@ -1,0 +1,35 @@
+\begin{tikzpicture}[scale=4,>=stealth,x={(1cm,0cm)}, y={ (0.4cm,-0.3cm) }, z={(0.4cm,0.8cm)}]
+ \tikzstyle{elemnode} = [fill,circle,inner sep=2]
+ \tikzstyle{background} = [densely dashed]
+ \newcommand{\fs}{0.23}
+ 
+% Can't use rectangle in 3d
+ \draw[thick,background] (0,0,0) -- (1,0,0) node[midway,above,blue!50!black]{};
+ \draw[thick] (0,1,0) -- (0,0,0) node[midway,above,blue!50!black]{};
+ \draw[thick] (0,1,0)  -- (1,0,0) node[midway,above,blue!50!black]{};
+ \draw[thick] (-0.4,0,1) -- (0.6,0,1) node[midway,above,blue!50!black]{};
+ \draw[thick] (-0.4,1,1) -- (-0.4,0,1) node[midway,above,blue!50!black]{};
+  \draw[thick] (-0.4,1,1) -- (0.6,0,1) node[midway,above,blue!50!black]{};  
+  \draw[thick] (0,0,0) -- (-0.4,0,1) node[midway,left,blue!50!black]{};
+  \draw[thick] (0,1,0) -- (-0.4,1,1) node[midway,left,blue!50!black]{};
+  \draw[thick] (1,0,0) -- (0.6,0,1) node[midway,right,blue!50!black]{};
+% Nodes
+ \node[elemnode] (n1) at (0,0,0) {}; \node[below left] at (n1) {1};
+ \node[elemnode] (n2) at (0,1,0) {}; \node[below left] at (n2) {2};
+ \node[elemnode] (n3) at (1,0,0) {}; \node[below right] at (n3) {3};
+ \node[elemnode] (n4) at (-0.4,0,1) {}; \node[below left] at (n4) {4};
+ \node[elemnode] (n5) at (-0.4,1,1) {}; \node[below left] at (n5) {5};
+ \node[elemnode] (n6) at (0.6,0,1) {}; \node[below right] at (n6) {6};
+
+ \node[elemnode] (n7) at (0,0.5,0) {}; \node[below left] at (n7) {7};
+ \node[elemnode] (n8) at (0.5,0.5,0) {}; \node[below right] at (n8) {8};
+ \node[elemnode] (n9) at (0.5,0,0) {}; \node[below right] at (n9) {9};
+ \node[elemnode] (n10) at (-0.4,0.5,1) {}; \node[below left] at (n10) {10};
+ \node[elemnode] (n11) at (0.1,0.5,1) {}; \node[below right] at (n11) {11};
+ \node[elemnode] (n12) at (0.1,0,1) {}; \node[below right] at (n12) {12};
+ \node[elemnode] (n13) at (-0.2,0,0.5) {}; \node[below right] at (n13) {13};
+ \node[elemnode] (n14) at (-0.2,1,0.5) {}; \node[above right] at (n14) {14};
+ \node[elemnode] (n15) at (0.8,0,0.5) {}; \node[below right] at (n15) {15};
+
+
+\end{tikzpicture}

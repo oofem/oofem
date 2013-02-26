@@ -81,13 +81,14 @@ public:
     virtual int SetUpPointsOnSquare(int, MaterialMode);
     virtual int SetUpPointsOnCube(int, MaterialMode);
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode);
-
+    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
+    virtual int SetUpPointsOnWedge(int, MaterialMode, GaussPoint * * *);
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray **coords);
 
     void giveTriCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &weights);
     void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
 
-    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
+
 };
 } // end namespace oofem
 #endif // gaussintegrationrule_h

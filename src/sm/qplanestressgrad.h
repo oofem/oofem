@@ -34,7 +34,7 @@
 
 #ifndef qplanestressgrad_h
 #define qplanestressgrad_h
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
 #include "graddpelement.h"
 #include "qplanstrss.h"
@@ -70,6 +70,8 @@ protected:
     virtual void computeGaussPoints();
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
+    
 };
 } // end namespace oofem
 #endif // qplanestressgrad_h

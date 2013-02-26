@@ -238,6 +238,27 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
+  /**
+     * Returns the value of derivative of damage function
+     * wrt damage-driving variable kappa corresponding 
+     * to a given value of the  kappa, depending on 
+     * the type of selected damage law.
+     * @param kappa Equivalent strain measure.
+     * @param gp Integration point.
+     */
+    double damageFunctionPrime(double kappa, GaussPoint *gp);
+ /**
+     * Returns the value of compliance parameter
+     * corresponding to a given value
+     * of the damage-driving variable kappa,
+     * depending on the type of selected damage law,
+     * using a simple dependence (no adjustment for element size).
+     * The compliance parameter gamma is defined as
+     * gamma = omega/(1-omega)
+     * where omega is the damage.
+     * @param kappa Equivalent strain measure.
+     * @param gp Integration point.
+     */
     double complianceFunction(double kappa, GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType it);
