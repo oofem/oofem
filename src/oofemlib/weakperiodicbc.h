@@ -86,27 +86,15 @@ private:
     Node *gammaDman;
     IntArray DofIDList;
 
-    double factorial(double n) {
-    	if (n==0) {
-    		return 1.0;
-    	} else {
-    		return n*factorial(n-1);
-    	};
-    };
+    double factorial(int n);
 
-    double binomial(double n , double k) {
-    	double f=1.0;
-    	for (double i=1.0; i<=k; i=i+1.0) {
-    		f=f*(n-(k-i))/i;
-    	}
-    	return f;//factorial(n)/(factorial(k)*factorial(n-k));
-    };
+    double binomial(double n , int k);
 
 public:
     WeakPeriodicbc(int n, Domain *d);
-    ~WeakPeriodicbc() { };
+    virtual ~WeakPeriodicbc() { };
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     basisType giveBasisType() {return useBasisType; };
 
@@ -120,7 +108,7 @@ public:
 
     virtual DofManager *giveInternalDofManager(int i);
 
-    void addElementSide(int elem, int side);
+    virtual void addElementSide(int elem, int side);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */

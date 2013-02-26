@@ -1576,23 +1576,23 @@ double FloatMatrix :: computeReciprocalCondition(char p) const
 
 void FloatMatrix ::beMatrixForm(const FloatArray &aArray)
 {
-	// Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
+    // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
-	if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
+    if ( aArray.giveSize() !=6 && aArray.giveSize() !=9 ) {
         OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
     }
 #  endif
-	this->resize(3,3);
-	if( aArray.giveSize() == 9 ){
-		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
-		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
-		this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8);	this->at(2,1) = aArray.at(9);
-	}
-	else if( aArray.giveSize() == 6 ){
-		this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
-		this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5);	this->at(1,2) = aArray.at(6);
-		this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5);	this->at(2,1) = aArray.at(6);
-	}
+    this->resize(3,3);
+    if ( aArray.giveSize() == 9 ) {
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5); this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(7); this->at(3,1) = aArray.at(8); this->at(2,1) = aArray.at(9);
+    }
+    else if ( aArray.giveSize() == 6 ) {
+        this->at(1,1) = aArray.at(1); this->at(2,2) = aArray.at(2); this->at(3,3) = aArray.at(3);
+        this->at(2,3) = aArray.at(4); this->at(1,3) = aArray.at(5); this->at(1,2) = aArray.at(6);
+        this->at(3,2) = aArray.at(4); this->at(3,1) = aArray.at(5); this->at(2,1) = aArray.at(6);
+    }
 }
 
 #if 0

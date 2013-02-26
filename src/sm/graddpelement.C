@@ -51,9 +51,7 @@
 #include "nonlocalbarrier.h"
 #include "nlstructuralelement.h"
 
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
+#include <cstdio>
 
 namespace oofem {
 
@@ -447,8 +445,8 @@ void GradDpElement::computeDistanceToBoundary()
             lcoord(0) = gp->giveCoordinate(1);
             lcoord(1) = gp->giveCoordinate(2);
             elem ->computeGlobalCoordinates(coord,lcoord);
-            //	  double distance = d->giveBoundary(1)->computeDistanceTo(coord.at(1),coord.at(2));
-            //  gp->setDistanceToBoundary(distance);
+            //double distance = d->giveBoundary(1)->computeDistanceTo(coord.at(1),coord.at(2));
+            //gp->setDistanceToBoundary(distance);
         }
     }
   
@@ -725,7 +723,7 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
         mat-> giveCharacteristicMatrix(lStiff,PDGrad_kk,rMode, gp, tStep);
         NtN.beProductOf(Nt,N);
         NtN.times(dV);
-        answer.add(NtN);	
+        answer.add(NtN);
         if ( averType == 0 || averType == 1 ) {
             l = lStiff.at(1,1);
             BtB.beProductOf(Bt,Bk);

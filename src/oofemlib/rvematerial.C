@@ -44,7 +44,7 @@ namespace oofem {
 
 IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 {
-	printf("rvematerial initializing...\n");
+    printf("rvematerial initializing...\n");
 
     const char *__proc = "initializeFrom";
     IRResultType result;

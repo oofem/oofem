@@ -547,14 +547,14 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
         if ( kappa <= e0 ) {
             return 0.0;
         } else if ( kappa < ef ) {
-	  return ( ef *e0 ) / ( ef - e0 )/(kappa*kappa);
+            return ( ef *e0 ) / ( ef - e0 )/(kappa*kappa);
         } else {
             return 1.0; //maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
         }
 
     case ST_Exponential:
         if ( kappa > e0 ) {
-	  return  ( e0 / (kappa * kappa) ) * exp( -( kappa - e0 ) / ( ef - e0 )  + e0 / (kappa * (ef - e0)) ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+            return  ( e0 / (kappa * kappa) ) * exp( -( kappa - e0 ) / ( ef - e0 )  + e0 / (kappa * (ef - e0)) ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
         } else {
             return 0.0;
         }

@@ -489,13 +489,13 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer()  const { return values; }
+    double *givePointer() const { return values; }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
-	 * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
-	 * If size(aArray) = 6, a symmetric matrix will be created.
-	 * @param aArray Array to transform.
+     * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21 
+     * If size(aArray) = 6, a symmetric matrix will be created.
+     * @param aArray Array to transform.
      */
     void beMatrixForm(const FloatArray &aArray);
 

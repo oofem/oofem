@@ -1779,9 +1779,9 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         D = sqrt(D);
         answer.at(1) = 0.5 * ( ast - D );
         answer.at(2) = 0.5 * ( ast + D );
-	if ( size == 4 ) {
-	  answer.at(3) = s(3);
-	}
+        if ( size == 4 ) {
+            answer.at(3) = s(3);
+        }
 
         // sort result (first two principal values only)
         if ( answer.at(1) > answer.at(2) ) {

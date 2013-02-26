@@ -328,7 +328,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, Mat
             answer.at(1,1) = l1*n11 * n11 + l2 * n12 * n12;
             answer.at(1,2) = l1 * n11 * n21 + l2 * n12 * n22;
             answer.at(2,1) = l1 * n11 * n21 + l2 * n12 * n22;
-            answer.at(2,2) = l1 * n21 * n21 + l2 * n22 * n22;	  
+            answer.at(2,2) = l1 * n21 * n21 + l2 * n22 * n22;
         }
     }
 }

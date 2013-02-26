@@ -87,7 +87,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
         case EGT_tetra_2:
             tetras++;
             break;
-	case EGT_wedge_1:
+        case EGT_wedge_1:
         case EGT_wedge_2:
             wedges++;
             break;
@@ -132,9 +132,9 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
         case EGT_tetra_2:
             tetraIdArray.at(++tetras) = i;
             break;
-	case EGT_wedge_1:
+        case EGT_wedge_1:
         case EGT_wedge_2:
-	    wedgeIdArray.at(++wedges) = i;
+            wedgeIdArray.at(++wedges) = i;
             break;
         case EGT_hexa_1:
         case EGT_hexa_2:

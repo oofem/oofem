@@ -283,7 +283,8 @@ FEI3dTrQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const
 
 void
 FEI3dTrQuad :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
-{	// Returns matrix with derivatives wrt local coordinates
+{
+    // Returns matrix with derivatives wrt local coordinates
     answer.resize(6, 2);
     FloatArray dndxi(6), dndeta(6);
 
@@ -293,7 +294,6 @@ FEI3dTrQuad :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
         answer.at(i, 1) = dndxi.at(i); 
         answer.at(i, 2) = dndeta.at(i);
     }
-	
 }
 
 
@@ -302,7 +302,7 @@ void
 FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-	//Note: This gives the coordinate in the reference system
+    //Note: This gives the coordinate in the reference system
     IntArray nodes;
     FloatArray N;
     this->surfaceEvalN(N, lcoords, cellgeo);
@@ -324,7 +324,7 @@ FEI3dTrQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray 
 void
 FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-	// Note: These are not normalized. Returns the two tangent vectors to the surface.
+    // Note: These are not normalized. Returns the two tangent vectors to the surface.
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
@@ -347,7 +347,8 @@ FEI3dTrQuad :: surfaceEvalNormal(FloatArray &answer, const FloatArray &lcoords, 
 
 void
 FEI3dTrQuad :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{   // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
+{
+    // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
     // Note! The base vectors are not normalized except the third (normal)
     FloatArray G1, G2, G3; 
     this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
@@ -370,8 +371,7 @@ void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
     this->computeLocalEdgeMapping(surfNodes, isurf);
-
-	// OOFEM_ERROR("FEI3dTrQuad :: computeLocalSurfaceMapping - Not applicable to geometry");
+    // OOFEM_ERROR("FEI3dTrQuad :: computeLocalSurfaceMapping - Not applicable to geometry");
 }
 
 } // end namespace oofem

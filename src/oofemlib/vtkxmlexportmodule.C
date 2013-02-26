@@ -278,12 +278,11 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
             answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
         }
     } else if ( elemGT == EGT_wedge_2 ) {int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
-      nelemNodes = elem->giveNumberOfNodes();
-      answer.resize(nelemNodes);
-      for ( int i = 1; i <= nelemNodes; i++ ) 
-	{
-	  answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber() ;
-	}
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber() ;
+        }
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
     }
@@ -309,7 +308,7 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ||
-	( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
+        ( elemGT == EGT_wedge_1 ) || ( elemGT == EGT_wedge_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");

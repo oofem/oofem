@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/trplanstrss.C,v 1.7.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -32,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #include "trabbone3d.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
@@ -101,14 +101,14 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
     if ( mode == ElasticStiffness ) {
-      this->constructAnisoComplTensor(compliance);
-      //this->constructAnisoStiffnessTensor(elasticity);
-      elasticity.beInverseOf(compliance);
-      answer = elasticity;
+        this->constructAnisoComplTensor(compliance);
+        //this->constructAnisoStiffnessTensor(elasticity);
+        elasticity.beInverseOf(compliance);
+        answer = elasticity;
     } else if ( mode == SecantStiffness ) {
         if (printflag)
-	  printf("secant\n");
-	this->constructAnisoStiffnessTensor(elasticity);
+        printf("secant\n");
+        this->constructAnisoStiffnessTensor(elasticity);
       
         this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
@@ -116,16 +116,12 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         tempDam = status->giveTempDam();
         answer = elasticity;
         answer.times(1.0 - tempDam);
-    } 
-    else if ( mode == TangentStiffness ) 
-      {
+    } else if ( mode == TangentStiffness ) {
         kappa = status->giveKappa();
         tempKappa = status->giveTempKappa();
         tempDam = status->giveTempDam();
-	
-        if ( tempKappa > kappa ) 
-	  {
-	    // plastic loading
+        if ( tempKappa > kappa ) {
+            // plastic loading
             // Imports
             tempEffectiveStress = * status->giveTempEffectiveStress();
             plasFlowDirec = * status->givePlasFlowDirec();
@@ -146,39 +142,32 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             tangentMatrix.times(1.0 - tempDam);
             tangentMatrix.add(secondTerm);
             tangentMatrix.add(thirdTerm);
-	    answer = tangentMatrix;
-	    //answer.beTranspositionOf(tangentMatrix);
-	  
-
-	    
-	    
-        } 
-	else 
-	  { // elastic behavior with damage
+            answer = tangentMatrix;
+            //answer.beTranspositionOf(tangentMatrix);
+        } else { 
+            // elastic behavior with damage
             // Construction of the secant stiffness
-	    this->constructAnisoComplTensor(compliance);
+            this->constructAnisoComplTensor(compliance);
             elasticity.beInverseOf(compliance);
-	    
-	    //this->constructAnisoStiffnessTensor(elasticity);
+
+            //this->constructAnisoStiffnessTensor(elasticity);
             answer = elasticity;
             answer.times(1.0 - tempDam);
-	  }
-	double g = status ->giveDensG();
-	if (g <= 0)
-	  {
-	    
-	    double factor = gammaL0 * pow(rho,rL) + gammaP0 *pow(rho,rP)*(tDens-1) *pow(g,tDens-2);
-	    //	    printf("densification");
-	    tangentMatrix.resize(6,6);
-	    tangentMatrix.zero();
-	    tangentMatrix.at(1,1) = tangentMatrix.at(1,2)=tangentMatrix.at(1,3) = 1;
-	    tangentMatrix.at(2,1) = tangentMatrix.at(2,2)=tangentMatrix.at(2,3) = 1;
-	    tangentMatrix.at(3,1) = tangentMatrix.at(3,2)=tangentMatrix.at(3,3) = 1;
-	    tangentMatrix.times(factor);
-	    answer.add(tangentMatrix);		
-	    
-	    }
-      }
+        }
+        double g = status ->giveDensG();
+        if ( g <= 0. ) {
+            double factor = gammaL0 * pow(rho,rL) + gammaP0 *pow(rho,rP)*(tDens-1) *pow(g,tDens-2);
+            // printf("densification");
+            tangentMatrix.resize(6,6);
+            tangentMatrix.zero();
+            tangentMatrix.at(1,1) = tangentMatrix.at(1,2)=tangentMatrix.at(1,3) = 1;
+            tangentMatrix.at(2,1) = tangentMatrix.at(2,2)=tangentMatrix.at(2,3) = 1;
+            tangentMatrix.at(3,1) = tangentMatrix.at(3,2)=tangentMatrix.at(3,3) = 1;
+            tangentMatrix.times(factor);
+            answer.add(tangentMatrix);
+            
+        }
+    }
     
     status->setSmtrx(answer);
 }
@@ -187,37 +176,29 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 double
 TrabBone3D :: evaluateCurrentYieldStress(const double kappa)
 {
-  if(formulation == 0)
-    return hardFactor*( 1. + plasHardFactor * ( 1.0 - exp(-kappa * expPlasHard) ) );
-  /*  else
-    {
+    if(formulation == 0)
+        return hardFactor*( 1. + plasHardFactor * ( 1.0 - exp(-kappa * expPlasHard) ) );
+#if 0
+    else {
       
-      //Hadi post-yield function
-      double damage = this -> computeDamageParam(kappa);
-      if(kappa<kappaMax)
-	{
-	  return (yR + (1. - yR) * (1 -pow((kappaMax-kappa)/kappaMax,kappaSlope*kappaMax))) / (1. - damage);
-	}
-      else if(kappa<(kappaMin+kappaMax)/2.)
-	{
-	  return (yR + (1. - yR) * (1 - (1-gMin)/2 *pow(2*(kappa-kappaMax)/(kappaMin-kappaMax),N))) / (1. - damage);
-	}
-      else if(kappa<kappaMin)
-	{
-	  return (yR + (1. - yR) * (gMin + (1-gMin)/2. *pow(2*(kappaMin-kappa)/(kappaMin-kappaMax),N))) / (1. - damage);
-	}
-      else
-	{
-	  return (yR + (1. - yR) * gMin) / (1. - damage);
-	}
-	   
-
-
-	}*/
-  else
-    {
-      double a = (yR + (pR - yR) * (1.-exp(-expPlasHard*kappa)));
-      return a;
+        //Hadi post-yield function
+        double damage = this -> computeDamageParam(kappa);
+        if ( kappa < kappaMax ) {
+            return (yR + (1. - yR) * (1 -pow((kappaMax-kappa)/kappaMax,kappaSlope*kappaMax))) / (1. - damage);
+        }
+        else if ( kappa < (kappaMin+kappaMax)/2. ) {
+            return (yR + (1. - yR) * (1 - (1-gMin)/2 *pow(2*(kappa-kappaMax)/(kappaMin-kappaMax),N))) / (1. - damage);
+        }
+        else if ( kappa < kappaMin ) {
+            return (yR + (1. - yR) * (gMin + (1-gMin)/2. *pow(2*(kappaMin-kappa)/(kappaMin-kappaMax),N))) / (1. - damage);
+        } else {
+            return (yR + (1. - yR) * gMin) / (1. - damage);
+        }
+    }
+#endif
+    else {
+        double a = (yR + (pR - yR) * (1.-exp(-expPlasHard*kappa)));
+        return a;
     }    
 }
 
@@ -225,39 +206,34 @@ double
 TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
 {
 
-  if(formulation == 0)
-    return hardFactor*( plasHardFactor * expPlasHard * exp(-kappa * expPlasHard) );
-  /*else
-    {
-      double damage = this -> computeDamageParam(kappa);
-      double gPrime;
-      double damagePrime =  critDam * expDam * exp(-expDam*kappa);
-      double g = evaluateCurrentYieldStress(kappa);
-      
-      if(kappa<kappaMax)
-	{
-	  gPrime = kappaSlope* pow((kappaMax-kappa)/kappaMax,kappaSlope*kappaMax-1.);
-	}
-      else if(kappa<((kappaMin+kappaMax)/2.))
-	{
-	  gPrime   = ((gMin-1.)/(kappaMin-kappaMax) * N *pow(2.*(kappa-kappaMax)/(kappaMin-kappaMax),N-1.));
-	}
-      else if(kappa<kappaMin)
-	{
-	  gPrime =  ( (1.-gMin)/(kappaMin-kappaMax) * N *pow(2.*(kappaMin-kappa)/(kappaMin-kappaMax),N-1.));
-	}
-      else
-	{
-	  gPrime =  0.;
-	}
+    if(formulation == 0)
+        return hardFactor*( plasHardFactor * expPlasHard * exp(-kappa * expPlasHard) );
+#if 0
+    else {
+        double damage = this -> computeDamageParam(kappa);
+        double gPrime;
+        double damagePrime =  critDam * expDam * exp(-expDam*kappa);
+        double g = evaluateCurrentYieldStress(kappa);
+        
+        if ( kappa < kappaMax ) {
+            gPrime = kappaSlope* pow((kappaMax-kappa)/kappaMax,kappaSlope*kappaMax-1.);
+        }
+        else if ( kappa < ((kappaMin+kappaMax)/2.) ) {
+            gPrime   = ((gMin-1.)/(kappaMin-kappaMax) * N *pow(2.*(kappa-kappaMax)/(kappaMin-kappaMax),N-1.));
+        }
+        else if ( kappa < kappaMin ) {
+            gPrime =  ( (1.-gMin)/(kappaMin-kappaMax) * N *pow(2.*(kappaMin-kappa)/(kappaMin-kappaMax),N-1.));
+        } else {
+            gPrime = 0.;
+        }
 
-      return ((1.-yR)*gPrime/(1.-damage) + damagePrime * (yR + (1.-yR)*g)/(1.-damage)/(1.-damage));  
+        return ((1.-yR)*gPrime/(1.-damage) + damagePrime * (yR + (1.-yR)*g)/(1.-damage)/(1.-damage));  
 
-      }*/
-  else
-    {
-      double a = ((pR - yR) * expPlasHard * exp(-expPlasHard*kappa));
-      return a;
+    }
+#endif
+    else {
+        double a = ((pR - yR) * expPlasHard * exp(-expPlasHard*kappa));
+        return a;
     }
 }
 
@@ -265,26 +241,24 @@ TrabBone3D :: evaluateCurrentPlasticModulus(const double kappa)
 double
 TrabBone3D :: evaluateCurrentViscousStress(const double deltaKappa, TimeStep* atTime)
 {
-  
-  
-  //  double deltaT = 0.01;
-  double deltaT =  atTime->giveTimeIncrement();
-  double answer;
-  //return answer;
-  if(deltaT == 0)
-    answer = 0;
-  else
-    answer = -viscosity*deltaKappa/deltaT;
-  return answer;
+    //  double deltaT = 0.01;
+    double deltaT =  atTime->giveTimeIncrement();
+    double answer;
+    //return answer;
+    if(deltaT == 0)
+        answer = 0;
+    else
+        answer = -viscosity*deltaKappa/deltaT;
+    return answer;
 }
 
 double
 TrabBone3D :: evaluateCurrentViscousModulus(const double deltaKappa, TimeStep* atTime)
 {
-  double deltaT = atTime->giveTimeIncrement();
-  double  answer = -viscosity/deltaT;
-  
-  return answer;
+    double deltaT = atTime->giveTimeIncrement();
+    double  answer = -viscosity/deltaT;
+    
+    return answer;
 }
     
         
@@ -320,32 +294,26 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     // tempEffectiveStress ... effective stress at the end of the substep
     // tempPlasDef ... plastic strain at the end of the substep
     convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, atTime,gp,0);
-    if ( convergence ) 
-      {
-	status->setTempPlasDef(tempPlasDef);
-	status->setTempKappa(tempKappa);
-	status->setTempEffectiveStress(tempEffectiveStress);
-  
-      } 
-    else 
-      {
-	//	printf("LineSearch \n");
-	tempEffectiveStress = trialEffectiveStress;
-	tempKappa = status->giveKappa();
-	tempPlasDef = * status->givePlasDef();
-	convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, atTime,gp,1);
-	if(!convergence)
-	  {
-	    //printf("No convergence %d",gp->giveNumber());
-	    //_error("No convergence of the stress return algorithm in TrabBone3D :: performPlasticityReturn\n");
-	  }
+    if ( convergence ) {
+        status->setTempPlasDef(tempPlasDef);
+        status->setTempKappa(tempKappa);
+        status->setTempEffectiveStress(tempEffectiveStress);
+    } 
+    else {
+        //printf("LineSearch \n");
+        tempEffectiveStress = trialEffectiveStress;
+        tempKappa = status->giveKappa();
+        tempPlasDef = * status->givePlasDef();
+        convergence = projectOnYieldSurface(tempKappa, tempEffectiveStress, tempPlasDef, trialEffectiveStress, elasticity, compliance, status, atTime,gp,1);
+        if ( !convergence ) {
+            //printf("No convergence %d",gp->giveNumber());
+            //_error("No convergence of the stress return algorithm in TrabBone3D :: performPlasticityReturn\n");
+        }
  
-	
-	status->setTempPlasDef(tempPlasDef);
-	status->setTempKappa(tempKappa);	
-	status->setTempEffectiveStress(tempEffectiveStress);
-	
-      }
+        status->setTempPlasDef(tempPlasDef);
+        status->setTempKappa(tempKappa);
+        status->setTempEffectiveStress(tempEffectiveStress);
+    }
 }
        
 
@@ -360,226 +328,211 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
     FloatArray toSolveTensor, plasFlowDirec, yieldDerivative, tempTensor2, tensorFF_S,F,scaledF;
     FloatMatrix fabric, SSaTensor, tempTensor4, normAdjust, normedFFFF, derivPlasFlowDirec;
 
-  this->constructAnisoFabricTensor(fabric);
-  this->constructAnisoFtensor(F);
-  
-  tempTensor2.beProductOf(fabric, trialEffectiveStress);
-  FS = F.dotProduct(trialEffectiveStress);
-  SFS = sqrt(trialEffectiveStress.dotProduct(tempTensor2) );
-  plasCriterion = SFS + FS -this-> evaluateCurrentYieldStress(tempKappa);
+    this->constructAnisoFabricTensor(fabric);
+    this->constructAnisoFtensor(F);
+    
+    tempTensor2.beProductOf(fabric, trialEffectiveStress);
+    FS = F.dotProduct(trialEffectiveStress);
+    SFS = sqrt(trialEffectiveStress.dotProduct(tempTensor2) );
+    plasCriterion = SFS + FS -this-> evaluateCurrentYieldStress(tempKappa);
 
-    if ( plasCriterion < rel_yield_tol )
-      {         
-	// trial stress in elastic domain
+    if ( plasCriterion < rel_yield_tol ) {         
+        // trial stress in elastic domain
         convergence = true;
-      } 
-    else
-      { 
-	// return to the yield surface needed
+    }
+    else { 
+        // return to the yield surface needed
         // Initial valuesr
-	toSolveTensor.resize(6);
+        toSolveTensor.resize(6);
         toSolveTensor.zero();
         toSolveScalar = plasCriterion;
         errorF = plasCriterion;
         errorR = 0;
         SSaTensor = elasticity;
-	this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempEffectiveStress);
-	tensorFF_S.beProductOf(fabric,tempEffectiveStress);
+        this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempEffectiveStress);
+        tensorFF_S.beProductOf(fabric,tempEffectiveStress);
         deltaKappa = 0.;
-	/***********************************************************************************************/
-	    double radialReturnFlag = lineSearchFlag;
-	    if(radialReturnFlag == 2)
-	      {
-		//printf("Radial return");
-		double denom,dSYdA,dAlfa;
-		double k = tempKappa;
-		double f = plasCriterion;
-		double alfa = 1;
-		FloatArray helpArray,stress;
-		stress.resize(6);
-		stress.zero();
-		double SFSr = sqrt(trialEffectiveStress.dotProduct(tempTensor2) );
-		double FSr = F.dotProduct(trialEffectiveStress);
-		tempTensor2.beProductOf(compliance,trialEffectiveStress);
-		this->constructNormAdjustTensor(normAdjust);	  
-		helpArray.beProductOf(normAdjust,tempTensor2);
-		norm = sqrt(tempTensor2.dotProduct(helpArray));
-		while(fabs(f) > 1.e-12)
-		  {
-		    
-		    dSYdA = norm *this->evaluateCurrentPlasticModulus(k);
-		    dSYdA *= -norm; 
-		    denom = SFSr + FSr - dSYdA;
-		    dAlfa = -f/denom;
-		    alfa += dAlfa;
-		    stress = trialEffectiveStress;
-		    stress.times(alfa);
-		    k = k + (1-alfa)*norm;
-		    f =  evaluatePlasCriterion(fabric, F, stress, k, (1-alfa)*norm, atTime);
-		  }		
+        /***********************************************************************************************/
+        double radialReturnFlag = lineSearchFlag;
+        if ( radialReturnFlag == 2 ) {
+            //printf("Radial return");
+            double denom,dSYdA,dAlfa;
+            double k = tempKappa;
+            double f = plasCriterion;
+            double alfa = 1;
+            FloatArray helpArray,stress;
+            stress.resize(6);
+            stress.zero();
+            double SFSr = sqrt(trialEffectiveStress.dotProduct(tempTensor2) );
+            double FSr = F.dotProduct(trialEffectiveStress);
+            tempTensor2.beProductOf(compliance,trialEffectiveStress);
+            this->constructNormAdjustTensor(normAdjust);
+            helpArray.beProductOf(normAdjust,tempTensor2);
+            norm = sqrt(tempTensor2.dotProduct(helpArray));
+            while ( fabs(f) > 1.e-12 ) {
+                
+                dSYdA = norm *this->evaluateCurrentPlasticModulus(k);
+                dSYdA *= -norm; 
+                denom = SFSr + FSr - dSYdA;
+                dAlfa = -f/denom;
+                alfa += dAlfa;
+                stress = trialEffectiveStress;
+                stress.times(alfa);
+                k = k + (1-alfa)*norm;
+                f =  evaluatePlasCriterion(fabric, F, stress, k, (1-alfa)*norm, atTime);
+            }
 
-		tempEffectiveStress  = stress;
-		deltaKappa = k;
-		toSolveScalar = 0;
-		this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempEffectiveStress);
+            tempEffectiveStress  = stress;
+            deltaKappa = k;
+            toSolveScalar = 0;
+            this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempEffectiveStress);
 
 
-		if(tempEffectiveStress.giveSize() != trialEffectiveStress.giveSize())
-		  {
-		    printf("tempS  %d \n", tempEffectiveStress.giveSize());
-		    printf("trial S %d \n",trialEffectiveStress.giveSize());
-		  }
-		  
-		tempTensor2.beProductOf( compliance, ( tempEffectiveStress - trialEffectiveStress ) );
-		toSolveTensor = tempTensor2 + deltaKappa * plasFlowDirec;
-		// Construction of the derivative of the plastic flow
-		this->constructDerivativeOfPlasFlowDirec(derivPlasFlowDirec,fabric,F,tempEffectiveStress);
-		// Construction of the gradient Nabla_S of R and SSa tensor
-		tempTensor4 = derivPlasFlowDirec;
-		tempTensor4.times(deltaKappa);
-		tempTensor4.add(compliance);
-		SSaTensor.beInverseOf(tempTensor4);
-		
-		  
-	      }
+            if ( tempEffectiveStress.giveSize() != trialEffectiveStress.giveSize() ) {
+                printf("tempS  %d \n", tempEffectiveStress.giveSize());
+                printf("trial S %d \n",trialEffectiveStress.giveSize());
+            }
 
-	/***********************************************************************************************/
+            tempTensor2.beProductOf( compliance, ( tempEffectiveStress - trialEffectiveStress ) );
+            toSolveTensor = tempTensor2 + deltaKappa * plasFlowDirec;
+            // Construction of the derivative of the plastic flow
+            this->constructDerivativeOfPlasFlowDirec(derivPlasFlowDirec,fabric,F,tempEffectiveStress);
+            // Construction of the gradient Nabla_S of R and SSa tensor
+            tempTensor4 = derivPlasFlowDirec;
+            tempTensor4.times(deltaKappa);
+            tempTensor4.add(compliance);
+            SSaTensor.beInverseOf(tempTensor4);
+        }
+
+        /***********************************************************************************************/
         // iteration loop - solution of a set of nonlinear equations
         flagLoop = 1;
-        do
-	  {
+        do {
             plasModulus = evaluateCurrentPlasticModulus(tempKappa + deltaKappa);
-	    viscoModulus = evaluateCurrentViscousModulus(deltaKappa,atTime);
-	    //*************************************
+            viscoModulus = evaluateCurrentViscousModulus(deltaKappa,atTime);
+            //*************************************
             //Evaluation of the Recursive Equations
             //*************************************
             tempTensor2.beProductOf(SSaTensor, plasFlowDirec);
             beta = plasFlowDirec.dotProduct(tempTensor2);
             beta += (plasModulus - viscoModulus)/norm; //+ viscoModulus;
             // Construction of the equation of Delta Kappa
-	    tempTensor2.beProductOf(SSaTensor, toSolveTensor);
+            tempTensor2.beProductOf(SSaTensor, toSolveTensor);
             tempScalar = plasFlowDirec.dotProduct(tempTensor2);
             incKappa =  (toSolveScalar/norm - tempScalar ) / beta;
-	    tempTensor2 = plasFlowDirec;
-	    tempTensor2.times(incKappa);
-	    tempTensor2 += toSolveTensor;
-	    incTempEffectiveStress.beProductOf(SSaTensor, tempTensor2);
-	    
-	    if(lineSearchFlag ==1)
-	      {
-		max_num_iter = 4000;
-		double eta = 0.1;
-		double beta = 25.e-4;
-		int j = 0;
-		int jMax = 10;
-		double alfa = 1;
-		double M = (errorR*errorR + errorF * errorF)/2;
-		double dM = -2*M;
-		double newDeltaKappa;
-		FloatArray tempStress;
-		while(true)
-		  {
-		    j++;
-		    tempStress = incTempEffectiveStress;
-		    tempStress.times(-alfa);
-		    tempStress.add(tempEffectiveStress);
-		    newDeltaKappa = deltaKappa + alfa * incKappa;
-		    //*************************************
-		    // Evaluation of the f and R
-		    //*************************************
-		    // Construction of the derivative of the plastic flow
-		    this->constructDerivativeOfPlasFlowDirec(derivPlasFlowDirec,fabric,F,tempStress);
-		    // Construction of the gradient Nabla_S of R and SSa tensor
-		    tempTensor4 = derivPlasFlowDirec;
-		    tempTensor4.times(newDeltaKappa);
-		    tempTensor4.add(compliance);
-		    SSaTensor.beInverseOf(tempTensor4);
-		    // Evaluation of R
-		    this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempStress);
-		    tempTensor2.beProductOf( compliance, ( tempStress - trialEffectiveStress ) );
-		    toSolveTensor = tempTensor2 + newDeltaKappa * plasFlowDirec;
-		    // Evaluation of f
-		    tempTensor2.beProductOf(fabric, tempStress);
-		    SFS = sqrt( tempStress.dotProduct(tempTensor2));
-		    toSolveScalar = evaluatePlasCriterion(fabric, F, tempStress, tempKappa+newDeltaKappa, newDeltaKappa, atTime);
-		    //*************************************
-		    // Evaluation of the error
-		    //*************************************
-		    errLoop = toSolveTensor;
-		    errorR = sqrt( errLoop.dotProduct(errLoop ));
-		    errorF = fabs(toSolveScalar);
-		    double newM = (errorR*errorR + errorF * errorF)/2;
-		    //check Goldstein's condition
-		    if(newM < (1-2*beta*alfa)*M || j == jMax)
-		      //if(newM < M || j == jMax)
-		      {
-			deltaKappa = newDeltaKappa;
-			tempEffectiveStress = tempStress;
-			break;
-		      }
-		    
-		    double alfa1 = eta*alfa;
-		    double alfa2 = -alfa*alfa*dM/2/(newM-M-alfa*dM);
-		    alfa = alfa1;
-		    if(alfa1<alfa2)
-		      alfa = alfa2;
-		  }		
-	      }
-	    else
-	      {
-		max_num_iter = 100;
-	 	////////////////////////////////////////////////////////// 
-		deltaKappa += incKappa;
-		tempEffectiveStress -= incTempEffectiveStress;
-		//*************************************
-		// Evaluation of the f and R
-		//*************************************
-		// Construction of the derivative of the plastic flow
-		this->constructDerivativeOfPlasFlowDirec(derivPlasFlowDirec,fabric,F,tempEffectiveStress);
-		// Construction of the gradient Nabla_S of R and SSa tensor
-		tempTensor4 = derivPlasFlowDirec;
-		tempTensor4.times(deltaKappa);
-		tempTensor4.add(compliance);
-		SSaTensor.beInverseOf(tempTensor4);
-		// Evaluation of R
-		this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempEffectiveStress);
-		tempTensor2.beProductOf( compliance, ( tempEffectiveStress - trialEffectiveStress ) );
-		toSolveTensor = tempTensor2 + deltaKappa * plasFlowDirec;
-		// Evaluation of f
-		tempTensor2.beProductOf(fabric, tempEffectiveStress);
-		SFS = sqrt(tempEffectiveStress.dotProduct(tempTensor2) );
-		toSolveScalar = evaluatePlasCriterion(fabric, F, tempEffectiveStress, tempKappa+deltaKappa, deltaKappa, atTime);
-		//*************************************
-		// Evaluation of the error
-		//*************************************
-		errLoop = toSolveTensor;
-		errorR = sqrt(errLoop.dotProduct(errLoop) );
-		errorF = fabs(toSolveScalar);
-	      }
-		if ( printflag ) 
-		  {
-		    printf("   %d %g %g %g %g\n", flagLoop, tempEffectiveStress.at(1), tempEffectiveStress.at(3), incKappa, deltaKappa);
-		  }
-		flagLoop++;
-		convergence = ( fabs(errorF) < rel_yield_tol && errorR < strain_tol );
-	      
-	      
-	  } while ( flagLoop <= max_num_iter && !convergence );         // end of iterative loop
-	
-        if ( convergence )
-	  {
-	    plasModulus = evaluateCurrentPlasticModulus(tempKappa + deltaKappa);
-	    viscoModulus = evaluateCurrentViscousModulus(deltaKappa, atTime);
-	    tempTensor2.beProductOf(SSaTensor, plasFlowDirec);
+            tempTensor2 = plasFlowDirec;
+            tempTensor2.times(incKappa);
+            tempTensor2 += toSolveTensor;
+            incTempEffectiveStress.beProductOf(SSaTensor, tempTensor2);
+
+            if ( lineSearchFlag == 1 ) {
+                max_num_iter = 4000;
+                double eta = 0.1;
+                double beta = 25.e-4;
+                int j = 0;
+                int jMax = 10;
+                double alfa = 1;
+                double M = (errorR*errorR + errorF * errorF)/2;
+                double dM = -2*M;
+                double newDeltaKappa;
+                FloatArray tempStress;
+                while ( true ) {
+                    j++;
+                    tempStress = incTempEffectiveStress;
+                    tempStress.times(-alfa);
+                    tempStress.add(tempEffectiveStress);
+                    newDeltaKappa = deltaKappa + alfa * incKappa;
+                    //*************************************
+                    // Evaluation of the f and R
+                    //*************************************
+                    // Construction of the derivative of the plastic flow
+                    this->constructDerivativeOfPlasFlowDirec(derivPlasFlowDirec,fabric,F,tempStress);
+                    // Construction of the gradient Nabla_S of R and SSa tensor
+                    tempTensor4 = derivPlasFlowDirec;
+                    tempTensor4.times(newDeltaKappa);
+                    tempTensor4.add(compliance);
+                    SSaTensor.beInverseOf(tempTensor4);
+                    // Evaluation of R
+                    this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempStress);
+                    tempTensor2.beProductOf( compliance, ( tempStress - trialEffectiveStress ) );
+                    toSolveTensor = tempTensor2 + newDeltaKappa * plasFlowDirec;
+                    // Evaluation of f
+                    tempTensor2.beProductOf(fabric, tempStress);
+                    SFS = sqrt( tempStress.dotProduct(tempTensor2));
+                    toSolveScalar = evaluatePlasCriterion(fabric, F, tempStress, tempKappa+newDeltaKappa, newDeltaKappa, atTime);
+                    //*************************************
+                    // Evaluation of the error
+                    //*************************************
+                    errLoop = toSolveTensor;
+                    errorR = sqrt( errLoop.dotProduct(errLoop ));
+                    errorF = fabs(toSolveScalar);
+                    double newM = (errorR*errorR + errorF * errorF)/2;
+                    //check Goldstein's condition
+                    //if(newM < M || j == jMax)
+                    if(newM < (1-2*beta*alfa)*M || j == jMax) {
+                        deltaKappa = newDeltaKappa;
+                        tempEffectiveStress = tempStress;
+                        break;
+                    }
+                    
+                    double alfa1 = eta*alfa;
+                    double alfa2 = -alfa*alfa*dM/2/(newM-M-alfa*dM);
+                    alfa = alfa1;
+                    if(alfa1<alfa2)
+                        alfa = alfa2;
+                }
+            }
+            else {
+                max_num_iter = 100;
+                ////////////////////////////////////////////////////////// 
+                deltaKappa += incKappa;
+                tempEffectiveStress -= incTempEffectiveStress;
+                //*************************************
+                // Evaluation of the f and R
+                //*************************************
+                // Construction of the derivative of the plastic flow
+                this->constructDerivativeOfPlasFlowDirec(derivPlasFlowDirec,fabric,F,tempEffectiveStress);
+                // Construction of the gradient Nabla_S of R and SSa tensor
+                tempTensor4 = derivPlasFlowDirec;
+                tempTensor4.times(deltaKappa);
+                tempTensor4.add(compliance);
+                SSaTensor.beInverseOf(tempTensor4);
+                // Evaluation of R
+                this->constructPlasFlowDirec(plasFlowDirec,norm,fabric,F,tempEffectiveStress);
+                tempTensor2.beProductOf( compliance, ( tempEffectiveStress - trialEffectiveStress ) );
+                toSolveTensor = tempTensor2 + deltaKappa * plasFlowDirec;
+                // Evaluation of f
+                tempTensor2.beProductOf(fabric, tempEffectiveStress);
+                SFS = sqrt(tempEffectiveStress.dotProduct(tempTensor2) );
+                toSolveScalar = evaluatePlasCriterion(fabric, F, tempEffectiveStress, tempKappa+deltaKappa, deltaKappa, atTime);
+                //*************************************
+                // Evaluation of the error
+                //*************************************
+                errLoop = toSolveTensor;
+                errorR = sqrt(errLoop.dotProduct(errLoop) );
+                errorF = fabs(toSolveScalar);
+            }
+            if ( printflag ) {
+                printf("   %d %g %g %g %g\n", flagLoop, tempEffectiveStress.at(1), tempEffectiveStress.at(3), incKappa, deltaKappa);
+            }
+            flagLoop++;
+            convergence = ( fabs(errorF) < rel_yield_tol && errorR < strain_tol );
+
+        } while ( flagLoop <= max_num_iter && !convergence );
+
+        if ( convergence ) {
+            plasModulus = evaluateCurrentPlasticModulus(tempKappa + deltaKappa);
+            viscoModulus = evaluateCurrentViscousModulus(deltaKappa, atTime);
+            tempTensor2.beProductOf(SSaTensor, plasFlowDirec);
             beta = plasFlowDirec.dotProduct(tempTensor2);
             beta += (plasModulus-viscoModulus)/ norm;
             tempPlasDef += deltaKappa * plasFlowDirec;
             tempKappa += deltaKappa;
-	    status->setBeta(beta);
+            status->setBeta(beta);
             status->setPlasFlowDirec(plasFlowDirec);
             status->setSSaTensor(SSaTensor);
-	  }
-      }         // end of else statement
+        }
+    }
     
     return convergence;
 }
@@ -587,115 +540,115 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
 void 
 TrabBone3D :: constructPlasFlowDirec(FloatArray &answer,double  &norm, FloatMatrix &fabric, FloatArray &F, FloatArray &S)
 {
-  double SFS;
-  FloatArray FFS, tempTensor2;
-  FloatMatrix normAdjust;  
-  //////////////////////////////////////////////////
-  FFS.beProductOf(fabric,S);
-  //  FS = F.dotProduct(S);
-  SFS = sqrt(S.dotProduct(FFS) );		
-  // scaling matrix
-  this->constructNormAdjustTensor(normAdjust);	
-  //direction of Np
-  answer.zero();
-  answer.add(FFS);
-  answer.times(1./SFS);
-  answer.add(F);
-  tempTensor2.beProductOf(normAdjust, answer);
-  //norm Np
-  norm = sqrt(answer.dotProduct(tempTensor2));
-  //plastic flow	
-  answer.times(1.0 / norm);
-  //////////////////////////////////////////////////
+    double SFS;
+    FloatArray FFS, tempTensor2;
+    FloatMatrix normAdjust;  
+    //////////////////////////////////////////////////
+    FFS.beProductOf(fabric,S);
+    //  FS = F.dotProduct(S);
+    SFS = sqrt(S.dotProduct(FFS) );
+    // scaling matrix
+    this->constructNormAdjustTensor(normAdjust);
+    //direction of Np
+    answer.zero();
+    answer.add(FFS);
+    answer.times(1./SFS);
+    answer.add(F);
+    tempTensor2.beProductOf(normAdjust, answer);
+    //norm Np
+    norm = sqrt(answer.dotProduct(tempTensor2));
+    //plastic flow
+    answer.times(1.0 / norm);
+    //////////////////////////////////////////////////
 }
 void 
 TrabBone3D :: constructDerivativeOfPlasFlowDirec(FloatMatrix &answer, FloatMatrix &fabric, FloatArray &F, FloatArray &S)
 {
-  double SFS, norm, SGS,h;
-  FloatArray FFS, FFSF, tempTensor2,tempTensor21,helpArray,dNorm;
-  FloatMatrix normAdjust, tempTensor4,dNp, FSFS;  
-  //////////////////////////////////////////////////
-  FFS.beProductOf(fabric,S);
-  SFS = sqrt(S.dotProduct(FFS) );		
-  
-  SGS = pow(SFS,-3.);
-  FloatArray gradientOfG, gradientOfH;
-  FloatMatrix secondGradientOfG,helpMatrix;
-  gradientOfG.zero();
-  gradientOfG.add(FFS);
-  gradientOfG.times(1./SFS);
-  gradientOfG.add(F);
+    double SFS, norm, SGS,h;
+    FloatArray FFS, FFSF, tempTensor2,tempTensor21,helpArray,dNorm;
+    FloatMatrix normAdjust, tempTensor4,dNp, FSFS;  
+    //////////////////////////////////////////////////
+    FFS.beProductOf(fabric,S);
+    SFS = sqrt(S.dotProduct(FFS) );
+    
+    SGS = pow(SFS,-3.);
+    FloatArray gradientOfG, gradientOfH;
+    FloatMatrix secondGradientOfG,helpMatrix;
+    gradientOfG.zero();
+    gradientOfG.add(FFS);
+    gradientOfG.times(1./SFS);
+    gradientOfG.add(F);
 
-  helpMatrix.zero();
-  helpMatrix.add(fabric);
-  helpMatrix.times(1./SFS);
-  secondGradientOfG.beDyadicProductOf(FFS,FFS);
-  secondGradientOfG.times(-1.*SGS);
-  secondGradientOfG.add(helpMatrix);
-  
-  h = gradientOfG.dotProduct(gradientOfG);
-  h = sqrt(h);
+    helpMatrix.zero();
+    helpMatrix.add(fabric);
+    helpMatrix.times(1./SFS);
+    secondGradientOfG.beDyadicProductOf(FFS,FFS);
+    secondGradientOfG.times(-1.*SGS);
+    secondGradientOfG.add(helpMatrix);
+    
+    h = gradientOfG.dotProduct(gradientOfG);
+    h = sqrt(h);
   
  
-  gradientOfH.beTProductOf(secondGradientOfG,gradientOfG);
-  gradientOfH.times(1./h);
-  
-  secondGradientOfG.times(h);
-  FloatMatrix test;
-  test.beDyadicProductOf(gradientOfG,gradientOfH);
-  test.times(-1);
-  test.add(secondGradientOfG);
-  test.times(1./h/h);
-  //////////////////////////////////////////////////////////////////
-  FFS.beProductOf(fabric,S);
-  SFS = sqrt(S.dotProduct(FFS) );		
-  // scaling matrix
-  this->constructNormAdjustTensor(normAdjust);	
-  //norm
-  tempTensor2 = FFS;
-  tempTensor2.times(1./SFS);
-  tempTensor2.add(F);
-  tempTensor21.beProductOf(normAdjust, tempTensor2); 
-  //norm Np
-  norm = sqrt(tempTensor2.dotProduct(tempTensor21));
-  ///////////////////////////////////////////////////////////////////
-  FSFS.beDyadicProductOf(FFS,FFS);
-  dNp.zero();
-  dNp.add(FSFS);
-  dNp.times(-1./SFS/SFS);
-  dNp.add(fabric);
-  dNp.times(1./SFS/norm);
-  //////////////////////////////////////////////////////////////
-  FFSF.zero();
-  FFSF.add(FFS);
-  FFSF.times(1./SFS);
-  FFSF.add(F);
-  /////////////////////////////////////////////////////////////////
-  tempTensor4.zero();
-  tempTensor4.add(FSFS);
-  tempTensor4.times(-1./SFS/SFS);
-  tempTensor4.add(fabric);
-  tempTensor4.times(1./SFS/norm);
-  tempTensor2.beProductOf(normAdjust,FFSF);
-  dNorm.beProductOf(tempTensor4,tempTensor2);
-  ///////////////////////////////////////////////////////////////////
-  tempTensor4.beDyadicProductOf(FFSF,dNorm);
-  tempTensor4.times(-1./norm/norm);
-  ////////////////////////////////////////////////////////////////////
-  answer.zero();
-  answer.add(dNp);
-  answer.add(tempTensor4);
+    gradientOfH.beTProductOf(secondGradientOfG,gradientOfG);
+    gradientOfH.times(1./h);
+    
+    secondGradientOfG.times(h);
+    FloatMatrix test;
+    test.beDyadicProductOf(gradientOfG,gradientOfH);
+    test.times(-1);
+    test.add(secondGradientOfG);
+    test.times(1./h/h);
+    //////////////////////////////////////////////////////////////////
+    FFS.beProductOf(fabric,S);
+    SFS = sqrt(S.dotProduct(FFS) );
+    // scaling matrix
+    this->constructNormAdjustTensor(normAdjust);
+    //norm
+    tempTensor2 = FFS;
+    tempTensor2.times(1./SFS);
+    tempTensor2.add(F);
+    tempTensor21.beProductOf(normAdjust, tempTensor2); 
+    //norm Np
+    norm = sqrt(tempTensor2.dotProduct(tempTensor21));
+    ///////////////////////////////////////////////////////////////////
+    FSFS.beDyadicProductOf(FFS,FFS);
+    dNp.zero();
+    dNp.add(FSFS);
+    dNp.times(-1./SFS/SFS);
+    dNp.add(fabric);
+    dNp.times(1./SFS/norm);
+    //////////////////////////////////////////////////////////////
+    FFSF.zero();
+    FFSF.add(FFS);
+    FFSF.times(1./SFS);
+    FFSF.add(F);
+    /////////////////////////////////////////////////////////////////
+    tempTensor4.zero();
+    tempTensor4.add(FSFS);
+    tempTensor4.times(-1./SFS/SFS);
+    tempTensor4.add(fabric);
+    tempTensor4.times(1./SFS/norm);
+    tempTensor2.beProductOf(normAdjust,FFSF);
+    dNorm.beProductOf(tempTensor4,tempTensor2);
+    ///////////////////////////////////////////////////////////////////
+    tempTensor4.beDyadicProductOf(FFSF,dNorm);
+    tempTensor4.times(-1./norm/norm);
+    ////////////////////////////////////////////////////////////////////
+    answer.zero();
+    answer.add(dNp);
+    answer.add(tempTensor4);
 }
 
 double
 TrabBone3D :: evaluatePlasCriterion(FloatMatrix &fabric, FloatArray &F, FloatArray &stress,double kappa, double deltaKappa, TimeStep* atTime)
 {
-  FloatArray FFS;
-  double FS, SFS;
-  FFS.beProductOf(fabric, stress);
-  FS = F.dotProduct(stress);
-  SFS =  sqrt(stress.dotProduct(FFS));
-  return SFS + FS - evaluateCurrentYieldStress(kappa) + this->evaluateCurrentViscousStress(deltaKappa,atTime);
+    FloatArray FFS;
+    double FS, SFS;
+    FFS.beProductOf(fabric, stress);
+    FS = F.dotProduct(stress);
+    SFS =  sqrt(stress.dotProduct(FFS));
+    return SFS + FS - evaluateCurrentYieldStress(kappa) + this->evaluateCurrentViscousStress(deltaKappa,atTime);
 }
 
 double
@@ -715,9 +668,9 @@ TrabBone3D :: computeDamageParam(double tempKappa)
 double
 TrabBone3D :: computeDamageParamPrime(double tempKappa)
 {
-  double damagePrime;
-  damagePrime = critDam *expDam * exp(-expDam * tempKappa);
-  return damagePrime; 
+    double damagePrime;
+    damagePrime = critDam *expDam * exp(-expDam * tempKappa);
+    return damagePrime; 
 }
 //
 // END: FUNCTION FOR DAMAGE PARAMETER
@@ -737,7 +690,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
     double tempDam = computeDamageParam(tempKappa);
     if(tempDam < 0)
-      _error("negative damage");
+        _error("negative damage");
     return tempDam;
 }
 
@@ -752,23 +705,18 @@ void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, Time
 
 void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
-  TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
-  answer.resize(6);
-  answer.zero();
-  double traceLnU =  (totalStrain.at(1) + totalStrain.at(2) + totalStrain.at(3));
-  double g = traceLnU - densCrit;
-  status->setDensG(g);
-  if(g <= 0)
-    {
-      answer.at(1) = answer.at(2) = answer.at(3)= 1;
-      double factor = gammaL0 * pow(rho,rL) * g + gammaP0 * pow(rho,rP) * pow(g,tDens-1);      
-      answer.times(factor);
-      
-      }
-  
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
+    answer.resize(6);
+    answer.zero();
+    double traceLnU =  (totalStrain.at(1) + totalStrain.at(2) + totalStrain.at(3));
+    double g = traceLnU - densCrit;
+    status->setDensG(g);
+    if ( g <= 0 ) {
+        answer.at(1) = answer.at(2) = answer.at(3)= 1;
+        double factor = gammaL0 * pow(rho,rL) * g + gammaP0 * pow(rho,rP) * pow(g,tDens-1);      
+        answer.times(factor);
+    }
 }
-
-
 
 
 void
@@ -792,12 +740,10 @@ TrabBone3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
     computePlasStrainEnerDensity(gp, totalStrain, answer);
 
     // add densification stress, if the densificator is activated
-    if(densCrit != 0)
-      {
-		computeDensificationStress(densStress, gp, totalStrain, atTime);
-		answer.add(densStress);
-      }
-    
+    if ( densCrit != 0 ) {
+        computeDensificationStress(densStress, gp, totalStrain, atTime);
+        answer.add(densStress);
+    }
 
     // store final damage, strain and stress in status
     status->setTempDam(tempDam);
@@ -809,18 +755,13 @@ TrabBone3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Gau
 void
 TrabBone3D :: constructAnisoComplTensor(FloatMatrix &answer)
 {
+    FloatMatrix D(6,6);
+    FloatMatrix DT(6,6);
+    FloatMatrix T;
+    FloatMatrix Tt;
 
-  
-  FloatMatrix D(6,6);
-  FloatMatrix DT(6,6);
-  FloatMatrix T;
-  FloatMatrix Tt;
-
-  
-    this -> constructFabricTransformationMatrix(T);
+    this->constructFabricTransformationMatrix(T);
     Tt.beTranspositionOf(T);
-  
-    
 
     double m3 = 3. - m1 - m2;
     double eps0k = eps0 * pow(rho, expk);
@@ -852,45 +793,40 @@ TrabBone3D :: constructAnisoComplTensor(FloatMatrix &answer)
     ST.beProductOf(stiffness,t);
     TST.beProductOf(tT,ST);
     
-
-    
     DT.beProductOf(D,T);
     answer.beProductOf(Tt,DT);
-
-    return;
 }
 
 
 void
 TrabBone3D :: constructAnisoStiffnessTensor(FloatMatrix &answer)
 {
-  double m3 = 3. - m1 - m2;
-  double eps0k = eps0 * pow(rho, expk);
-  double mu0k = mu0 * pow(rho, expk);
-  double m1l = pow(m1, expl);
-  double m2l = pow(m2, expl);
-  double m3l = pow(m3, expl);
-  
-  
-  double eksi, n13, n23, n12, n31, n32, n21;
-  int i, j;
-  
-  double E1 = eps0k * m1l*m1l;
-  double E2 = eps0k * m2l*m2l;
-  double E3 = eps0k * m3l*m3l;
+    double m3 = 3. - m1 - m2;
+    double eps0k = eps0 * pow(rho, expk);
+    double mu0k = mu0 * pow(rho, expk);
+    double m1l = pow(m1, expl);
+    double m2l = pow(m2, expl);
+    double m3l = pow(m3, expl);
+    
+    
+    double eksi, n13, n23, n12, n31, n32, n21;
+    
+    double E1 = eps0k * m1l*m1l;
+    double E2 = eps0k * m2l*m2l;
+    double E3 = eps0k * m3l*m3l;
 
-  double G23 = mu0k* m2l * m3l;
-  double G13 = mu0k* m1l * m3l;
-  double G12 = mu0k* m1l * m2l;
+    double G23 = mu0k* m2l * m3l;
+    double G13 = mu0k* m1l * m3l;
+    double G12 = mu0k* m1l * m2l;
 
-  n23 = nu0 * m2l/m3l;
-  n12 = nu0 * m1l/m2l;
-  n31 = nu0 * m3l/m1l;
-  n32 = nu0 * m3l/m2l;
-  n21 = nu0 * m2l/m1l;
-  n13 = nu0 * m1l/m3l;
-  
-  eksi = 1. - ( n12 * n21 + n23 * n32 + n31 * n13 ) - ( n12 * n23 * n31 + n21 * n32 * n13 );
+    n23 = nu0 * m2l/m3l;
+    n12 = nu0 * m1l/m2l;
+    n31 = nu0 * m3l/m1l;
+    n32 = nu0 * m3l/m2l;
+    n21 = nu0 * m2l/m1l;
+    n13 = nu0 * m1l/m3l;
+    
+    eksi = 1. - ( n12 * n21 + n23 * n32 + n31 * n13 ) - ( n12 * n23 * n31 + n21 * n32 * n13 );
 
     //constitutiveMatrix = new FloatMatrix(6,6) ;
     FloatMatrix D(6, 6);
@@ -904,12 +840,11 @@ TrabBone3D :: constructAnisoStiffnessTensor(FloatMatrix &answer)
     D.at(3, 3) =  E3 * ( 1. - n21 * n12 ) / eksi;
 
     // define the lower triangle
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < i; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < i; j++ ) {
             D.at(i, j) = D.at(j, i);
         }
     }
-
 
     D.at(4, 4) =  G23;
     D.at(5, 5) =  G13;
@@ -921,12 +856,6 @@ TrabBone3D :: constructAnisoStiffnessTensor(FloatMatrix &answer)
     FloatMatrix DT;
     DT.beProductOf(D,t);
     answer.beProductOf(tT,DT);
-
-
-    return;
-
-
-
 }
 
 
@@ -934,124 +863,114 @@ TrabBone3D :: constructAnisoStiffnessTensor(FloatMatrix &answer)
 void
 TrabBone3D :: constructAnisoFabricTensor(FloatMatrix &answer)
 {
+    FloatMatrix T;
+    FloatMatrix Tt;
+    double S0 = (sig0Pos+sig0Neg)/(2.*sig0Pos*sig0Neg);
+    double rhoP = pow(rho, 2. * expp);
+    double m3 = 3. - m1 - m2;
+    double m1q = pow(m1, 2. * expq);
+    double m2q = pow(m2, 2. * expq);
+    double m3q = pow(m3, 2. * expq);
+    
+    
+    this->constructFabricTransformationMatrix(T);
+    Tt.beTranspositionOf(T);
+    
+    answer.resize(6, 6);
+    FloatMatrix F(6,6);
+    FloatMatrix FT(6,6);
+    
+    F.at(1, 1) = S0*S0 /(rhoP * m1q * m1q);
+    F.at(2, 2) = S0*S0 /(rhoP * m2q * m2q);
+    F.at(3, 3) = S0*S0 /(rhoP * m3q * m3q);
+    F.at(1, 2) = -chi0*S0*S0/( rhoP * m1q * m2q );
+    F.at(2, 1) = F.at(1, 2);
+    F.at(1, 3) = -chi0*S0*S0/( rhoP * m1q * m3q);
+    F.at(3, 1) = F.at(1, 3);
+    F.at(2, 3) = -chi0*S0*S0/( rhoP * m2q * m3q);
+    F.at(3, 2) = F.at(2, 3);
+    F.at(4, 4) = 1. / ( tau0*tau0 * rhoP * m2q * m3q );
+    F.at(5, 5) = 1. / ( tau0*tau0 * rhoP * m1q * m3q );
+    F.at(6, 6) = 1. / ( tau0*tau0 * rhoP * m1q * m2q );  
 
-  FloatMatrix T;
-  FloatMatrix Tt;
-  double S0 = (sig0Pos+sig0Neg)/(2.*sig0Pos*sig0Neg);
-  double rhoP = pow(rho, 2. * expp);
-  double m3 = 3. - m1 - m2;
-  double m1q = pow(m1, 2. * expq);
-  double m2q = pow(m2, 2. * expq);
-  double m3q = pow(m3, 2. * expq);
-  
-  
-  this -> constructFabricTransformationMatrix(T);
-  Tt.beTranspositionOf(T);
-  
-  answer.resize(6, 6);
-  FloatMatrix F(6,6);
-  FloatMatrix FT(6,6);
-  
-  F.at(1, 1) = S0*S0 /(rhoP * m1q * m1q);
-  F.at(2, 2) = S0*S0 /(rhoP * m2q * m2q);
-  F.at(3, 3) = S0*S0 /(rhoP * m3q * m3q);
-  F.at(1, 2) = -chi0*S0*S0/( rhoP * m1q * m2q );
-  F.at(2, 1) = F.at(1, 2);
-  F.at(1, 3) = -chi0*S0*S0/( rhoP * m1q * m3q);
-  F.at(3, 1) = F.at(1, 3);
-  F.at(2, 3) = -chi0*S0*S0/( rhoP * m2q * m3q);
-  F.at(3, 2) = F.at(2, 3);
-  F.at(4, 4) = 1. / ( tau0*tau0 * rhoP * m2q * m3q );
-  F.at(5, 5) = 1. / ( tau0*tau0 * rhoP * m1q * m3q );
-  F.at(6, 6) = 1. / ( tau0*tau0 * rhoP * m1q * m2q );  
 
-
-  FT.beProductOf(F,T);
-  answer.beProductOf(Tt,FT);
-
-    return;
+    FT.beProductOf(F,T);
+    answer.beProductOf(Tt,FT);
 }
 
 
 void
 TrabBone3D :: constructAnisoFtensor(FloatArray &answer)
 {
-
-  FloatMatrix T,tT;
-
+    FloatMatrix T,tT;
   
-  double rhoP = pow(rho,expp);
-  double m3 = 3. - m1 - m2;
-  double m1q = pow(m1, 2. * expq);
-  double m2q = pow(m2, 2. * expq);
-  double m3q = pow(m3, 2. * expq);
+    double rhoP = pow(rho,expp);
+    double m3 = 3. - m1 - m2;
+    double m1q = pow(m1, 2. * expq);
+    double m2q = pow(m2, 2. * expq);
+    double m3q = pow(m3, 2. * expq);
   
   
-  this -> constructFabricTransformationMatrix(T);
-  tT.beTranspositionOf(T);
-  answer.resize(6);
-  FloatArray F(6);
-  F.zero();
+    this->constructFabricTransformationMatrix(T);
+    tT.beTranspositionOf(T);
+    answer.resize(6);
+    FloatArray F(6);
+    F.zero();
   
-  F.at(1) = -(sig0Pos-sig0Neg)/(2. * sig0Pos * sig0Neg * rhoP * m1q );
-  F.at(2) = -(sig0Pos-sig0Neg)/(2. * sig0Pos * sig0Neg * rhoP * m2q );
-  F.at(3) = -(sig0Pos-sig0Neg)/(2. * sig0Pos * sig0Neg * rhoP * m3q );
-  
-  answer.beProductOf(tT,F);
-  
-  return;
+    F.at(1) = -(sig0Pos-sig0Neg)/(2. * sig0Pos * sig0Neg * rhoP * m1q );
+    F.at(2) = -(sig0Pos-sig0Neg)/(2. * sig0Pos * sig0Neg * rhoP * m2q );
+    F.at(3) = -(sig0Pos-sig0Neg)/(2. * sig0Pos * sig0Neg * rhoP * m3q );
+    
+    answer.beProductOf(tT,F);
 }
 
 
 void
 TrabBone3D :: constructStiffnessTransformationMatrix(FloatMatrix &answer)
 {
+    answer.resize(6,6);
 
-  answer.resize(6,6);
-
-
-  answer.at(1, 1) = x1 * x1;
-  answer.at(1, 2) = x2 * x2;
-  answer.at(1, 3) = x3 * x3;
-  answer.at(1, 4) = x2 * x3;
-  answer.at(1, 5) = x1 * x3;
-  answer.at(1, 6) = x1 * x2;
-  //second row of pull back transformation matrix
-  answer.at(2, 1) = y1 * y1;
-  answer.at(2, 2) = y2 * y2;
-  answer.at(2, 3) = y3 * y3;
-  answer.at(2, 4) = y2 * y3;
-  answer.at(2, 5) = y1 * y3;
-  answer.at(2, 6) = y1 * y2;
-  //third row of pull back transformation matrix
-  answer.at(3, 1) = z1 * z1;
-  answer.at(3, 2) = z2 * z2;
-  answer.at(3, 3) = z3 * z3;
-  answer.at(3, 4) = z2 * z3;
-  answer.at(3, 5) = z1 * z3;
-  answer.at(3, 6) = z1 * z2;
-  //fourth row of pull back transformation matrix
-  answer.at(4, 1) = 2. * y1 * z1;
-  answer.at(4, 2) = 2. * y2 * z2;
-  answer.at(4, 3) = 2. * y3 * z3;
-  answer.at(4, 4) = ( y2 * z3 + y3 * z2 );
-  answer.at(4, 5) = ( y1 * z3 + y3 * z1 );
-  answer.at(4, 6) = ( y1 * z2 + y2 * z1 );
-  //fifth row of pull back transformation matrix
-  answer.at(5, 1) = 2. * x1 * z1;
-  answer.at(5, 2) = 2. * x2 * z2;
-  answer.at(5, 3) = 2. * x3 * z3;
-  answer.at(5, 4) = ( x2 * z3 + x3 * z2 );
-  answer.at(5, 5) = ( x1 * z3 + x3 * z1 );
-  answer.at(5, 6) = ( x1 * z2 + x2 * z1 );
-  //sixth row of pull back transformation matrix
-  answer.at(6, 1) = 2. * x1 * y1;
-  answer.at(6, 2) = 2. * x2 * y2;
-  answer.at(6, 3) = 2. * x3 * y3;
-  answer.at(6, 4) = ( x2 * y3 + x3 * y2 );
-  answer.at(6, 5) = ( x1 * y3 + x3 * y1 );
-  answer.at(6, 6) = ( x1 * y2 + x2 * y1 );
-  
+    answer.at(1, 1) = x1 * x1;
+    answer.at(1, 2) = x2 * x2;
+    answer.at(1, 3) = x3 * x3;
+    answer.at(1, 4) = x2 * x3;
+    answer.at(1, 5) = x1 * x3;
+    answer.at(1, 6) = x1 * x2;
+    //second row of pull back transformation matrix
+    answer.at(2, 1) = y1 * y1;
+    answer.at(2, 2) = y2 * y2;
+    answer.at(2, 3) = y3 * y3;
+    answer.at(2, 4) = y2 * y3;
+    answer.at(2, 5) = y1 * y3;
+    answer.at(2, 6) = y1 * y2;
+    //third row of pull back transformation matrix
+    answer.at(3, 1) = z1 * z1;
+    answer.at(3, 2) = z2 * z2;
+    answer.at(3, 3) = z3 * z3;
+    answer.at(3, 4) = z2 * z3;
+    answer.at(3, 5) = z1 * z3;
+    answer.at(3, 6) = z1 * z2;
+    //fourth row of pull back transformation matrix
+    answer.at(4, 1) = 2. * y1 * z1;
+    answer.at(4, 2) = 2. * y2 * z2;
+    answer.at(4, 3) = 2. * y3 * z3;
+    answer.at(4, 4) = ( y2 * z3 + y3 * z2 );
+    answer.at(4, 5) = ( y1 * z3 + y3 * z1 );
+    answer.at(4, 6) = ( y1 * z2 + y2 * z1 );
+    //fifth row of pull back transformation matrix
+    answer.at(5, 1) = 2. * x1 * z1;
+    answer.at(5, 2) = 2. * x2 * z2;
+    answer.at(5, 3) = 2. * x3 * z3;
+    answer.at(5, 4) = ( x2 * z3 + x3 * z2 );
+    answer.at(5, 5) = ( x1 * z3 + x3 * z1 );
+    answer.at(5, 6) = ( x1 * z2 + x2 * z1 );
+    //sixth row of pull back transformation matrix
+    answer.at(6, 1) = 2. * x1 * y1;
+    answer.at(6, 2) = 2. * x2 * y2;
+    answer.at(6, 3) = 2. * x3 * y3;
+    answer.at(6, 4) = ( x2 * y3 + x3 * y2 );
+    answer.at(6, 5) = ( x1 * y3 + x3 * y1 );
+    answer.at(6, 6) = ( x1 * y2 + x2 * y1 );
 }
 
 
@@ -1068,8 +987,6 @@ TrabBone3D :: constructNormAdjustTensor(FloatMatrix &answer)
     for ( int i = 4; i <= 6; i++ ) {
         answer.at(i, i) = 0.5;
     }
-
-    return;
 }
 
 
@@ -1077,52 +994,49 @@ TrabBone3D :: constructNormAdjustTensor(FloatMatrix &answer)
 void
 TrabBone3D :: constructFabricTransformationMatrix(FloatMatrix &answer)
 {
+    answer.resize(6,6);
 
-  answer.resize(6,6);
-
-
-  answer.at(1, 1) = x1 * x1;
-  answer.at(1, 2) = x2 * x2;
-  answer.at(1, 3) = x3 * x3;
-  answer.at(1, 4) = 2*x2 * x3;//2
-  answer.at(1, 5) = 2*x1 * x3;//2
-  answer.at(1, 6) = 2*x1 * x2;//2
-  //second row of pull back transformation matrix
-  answer.at(2, 1) = y1 * y1;
-  answer.at(2, 2) = y2 * y2;
-  answer.at(2, 3) = y3 * y3;
-  answer.at(2, 4) = 2*y2 * y3;//2
-  answer.at(2, 5) = 2*y1 * y3;//2
-  answer.at(2, 6) = 2*y1 * y2;//2
-  //third row of pull back transformation matrix
-  answer.at(3, 1) = z1 * z1;
-  answer.at(3, 2) = z2 * z2;
-  answer.at(3, 3) = z3 * z3;
-  answer.at(3, 4) = 2*z2 * z3;//2
-  answer.at(3, 5) = 2*z1 * z3;//2
-  answer.at(3, 6) = 2*z1 * z2;//2
-  //fourth row of pull back transformation matrix
-  answer.at(4, 1) = y1 * z1;
-  answer.at(4, 2) = y2 * z2;
-  answer.at(4, 3) = y3 * z3;
-  answer.at(4, 4) = ( y2 * z3 + y3 * z2 );
-  answer.at(4, 5) = ( y1 * z3 + y3 * z1 );
-  answer.at(4, 6) = ( y1 * z2 + y2 * z1 );
-  //fifth row of pull back transformation matrix
-  answer.at(5, 1) = x1 * z1;
-  answer.at(5, 2) = x2 * z2;
-  answer.at(5, 3) = x3 * z3;
-  answer.at(5, 4) = ( x2 * z3 + x3 * z2 );
-  answer.at(5, 5) = ( x1 * z3 + x3 * z1 );
-  answer.at(5, 6) = ( x1 * z2 + x2 * z1 );
-  //sixth row of pull back transformation matrix
-  answer.at(6, 1) = x1 * y1;
-  answer.at(6, 2) = x2 * y2;
-  answer.at(6, 3) = x3 * y3;
-  answer.at(6, 4) = ( x2 * y3 + x3 * y2 );
-  answer.at(6, 5) = ( x1 * y3 + x3 * y1 );
-  answer.at(6, 6) = ( x1 * y2 + x2 * y1 );
-
+    answer.at(1, 1) = x1 * x1;
+    answer.at(1, 2) = x2 * x2;
+    answer.at(1, 3) = x3 * x3;
+    answer.at(1, 4) = 2*x2 * x3;//2
+    answer.at(1, 5) = 2*x1 * x3;//2
+    answer.at(1, 6) = 2*x1 * x2;//2
+    //second row of pull back transformation matrix
+    answer.at(2, 1) = y1 * y1;
+    answer.at(2, 2) = y2 * y2;
+    answer.at(2, 3) = y3 * y3;
+    answer.at(2, 4) = 2*y2 * y3;//2
+    answer.at(2, 5) = 2*y1 * y3;//2
+    answer.at(2, 6) = 2*y1 * y2;//2
+    //third row of pull back transformation matrix
+    answer.at(3, 1) = z1 * z1;
+    answer.at(3, 2) = z2 * z2;
+    answer.at(3, 3) = z3 * z3;
+    answer.at(3, 4) = 2*z2 * z3;//2
+    answer.at(3, 5) = 2*z1 * z3;//2
+    answer.at(3, 6) = 2*z1 * z2;//2
+    //fourth row of pull back transformation matrix
+    answer.at(4, 1) = y1 * z1;
+    answer.at(4, 2) = y2 * z2;
+    answer.at(4, 3) = y3 * z3;
+    answer.at(4, 4) = ( y2 * z3 + y3 * z2 );
+    answer.at(4, 5) = ( y1 * z3 + y3 * z1 );
+    answer.at(4, 6) = ( y1 * z2 + y2 * z1 );
+    //fifth row of pull back transformation matrix
+    answer.at(5, 1) = x1 * z1;
+    answer.at(5, 2) = x2 * z2;
+    answer.at(5, 3) = x3 * z3;
+    answer.at(5, 4) = ( x2 * z3 + x3 * z2 );
+    answer.at(5, 5) = ( x1 * z3 + x3 * z1 );
+    answer.at(5, 6) = ( x1 * z2 + x2 * z1 );
+    //sixth row of pull back transformation matrix
+    answer.at(6, 1) = x1 * y1;
+    answer.at(6, 2) = x2 * y2;
+    answer.at(6, 3) = x3 * y3;
+    answer.at(6, 4) = ( x2 * y3 + x3 * y2 );
+    answer.at(6, 5) = ( x1 * y3 + x3 * y1 );
+    answer.at(6, 6) = ( x1 * y2 + x2 * y1 );
 }
 
 IRResultType
@@ -1245,11 +1159,11 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, formulation, IFT_TrabBone3D_formulation, "formulation");
 
 
-  // optional densificator parameters
-   gammaL0 = 550;
-   // gammaL0 = 1100;
-   // gammaP0 = 1300;
-   gammaP0 = 39.;
+    // optional densificator parameters
+    gammaL0 = 550;
+    // gammaL0 = 1100;
+    // gammaP0 = 1300;
+    gammaP0 = 39.;
     tDens = 6.;
     // densCrit = -0.55;
     densCrit = -0.3;
@@ -1517,14 +1431,6 @@ TrabBone3DStatus :: giveSSaTensor()
     return & SSaTensor;
 }
 
-//
-// END: DEFINITION OF "GIVE PARAMETER"
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: OUTPUT
-// print state to output stream
 
 void
 TrabBone3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -1536,14 +1442,6 @@ TrabBone3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
-//
-// END: OUTPUT
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-// initialize temporary state variables according to equilibriated state vars
 
 void
 TrabBone3DStatus :: initTempStatus()
@@ -1552,14 +1450,6 @@ TrabBone3DStatus :: initTempStatus()
     densG = 200;
 }
 
-//
-// END: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-// Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
 void
 TrabBone3DStatus :: updateYourself(TimeStep *atTime)
@@ -1572,13 +1462,6 @@ TrabBone3DStatus :: updateYourself(TimeStep *atTime)
     nss = 1;
 }
 
-//// END: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERRUPT RESTART UTILITY - SAVE
-//
 
 contextIOResultType
 TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1589,7 +1472,7 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
- if ( ( iores = plasDef.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasDef.storeYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1602,14 +1485,6 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     return CIO_OK;
 }
 
-//
-// END: INTERRUPT RESTART UTILITY - SAVE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERRUPT RESTART UTILITY - RESTORE
-//
 
 contextIOResultType
 TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1620,7 +1495,7 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
- // read raw data
+    // read raw data
     if ( ( iores = plasDef.restoreYourself(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -1630,43 +1505,14 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
         THROW_CIOERR(CIO_IOERR);
     }
 
-
-
     return CIO_OK;
 }
 
-//
-// END: INTERRUPT RESTART UTILITY - RESTORE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CREATE STATUS
-//
 
 MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
 {
     return new TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 
-//
-// END: CREATE STATUS
-/////////////////////////////////////////////////////////////////
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
