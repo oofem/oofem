@@ -432,7 +432,7 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    Material *mat = ( StructuralMaterial * ) this->giveMaterial();
+    Material *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;

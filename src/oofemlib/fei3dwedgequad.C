@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -66,13 +66,11 @@ FEI3dWedgeQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEI
     answer.at(13) = (1. -x - y) * (1. - z * z);
     answer.at(14) = x * (1. - z * z);
     answer.at(15) = y * (1. - z * z);
-    return;
 }
 
 void
 FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    int i;
     FloatMatrix jacobianMatrix(3, 3), inv(3, 3);
     FloatArray dx(15), dy(15), dz(15);
     double u, v, w;
@@ -90,7 +88,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
 
     answer.resize(15, 3);
 
-    for ( i = 1; i <= 15; i++ ) {
+    for ( int i = 1; i <= 15; i++ ) {
         answer.at(i, 1) = dx.at(i) * inv.at(1, 1) + dy.at(i) * inv.at(1, 2) + dz.at(i) * inv.at(1, 3);
         answer.at(i, 2) = dx.at(i) * inv.at(2, 1) + dy.at(i) * inv.at(2, 2) + dz.at(i) * inv.at(2, 3);
         answer.at(i, 3) = dx.at(i) * inv.at(3, 1) + dy.at(i) * inv.at(3, 2) + dz.at(i) * inv.at(3, 3);
@@ -140,7 +138,6 @@ FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatA
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 // Computes it if it does not exist yet.
 {
-    int i;
     double x, y, z, u, v, w;
     FloatArray dx(15), dy(15), dz(15);
 
@@ -155,7 +152,7 @@ FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatA
     this->giveDerivativeEta(dy, u, v,  w);
     this->giveDerivativeDzeta(dz, u, v, w);
 
-    for ( i = 1; i <= 15; i++ ) {
+    for ( int i = 1; i <= 15; i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(1);
         y = cellgeo.giveVertexCoordinates(i)->at(2);
         z = cellgeo.giveVertexCoordinates(i)->at(3);
@@ -176,69 +173,61 @@ FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatA
 void
 FEI3dWedgeQuad :: giveDerivativeKsi(FloatArray &dx, double x, double y, double z)
 {
-
-  dx.at(1) = 1/2 - ((z - 1)*(x + y - 1))/2 - z*z/2 - ((x + y)*(z - 1))/2; 
-  dx.at(2) = z*z/2 - (x*(z - 1))/2 - ((x - 1)*(z - 1))/2 - 1/2;
-  dx.at(3) = 0;
-  dx.at(4) = ((x + y)*(z + 1))/2 + ((z + 1)*(x + y - 1))/2 - z*z/2 + 1/2;
-  dx.at(5) = ((x - 1)*(z + 1))/2 + (x*(z + 1))/2 + z*z/2 - 1/2;
-  dx.at(6) = 0;
-  dx.at(7) = (z - 1)*(x + y - 1) + x*(z - 1);
-  dx.at(8) = -y*(z - 1);
-  dx.at(9) = y*(z - 1);
-  dx.at(10) = - (z + 1)*(x + y - 1) - x*(z + 1);
-  dx.at(11) = y*(z + 1);
-  dx.at(12) = -y*(z + 1); 
-  dx.at(13) = z*z - 1;
-  dx.at(14) = 1 - z*z;
-  dx.at(15) = 0;
+    dx.at(1) = 1/2 - ((z - 1)*(x + y - 1))/2 - z*z/2 - ((x + y)*(z - 1))/2; 
+    dx.at(2) = z*z/2 - (x*(z - 1))/2 - ((x - 1)*(z - 1))/2 - 1/2;
+    dx.at(3) = 0;
+    dx.at(4) = ((x + y)*(z + 1))/2 + ((z + 1)*(x + y - 1))/2 - z*z/2 + 1/2;
+    dx.at(5) = ((x - 1)*(z + 1))/2 + (x*(z + 1))/2 + z*z/2 - 1/2;
+    dx.at(6) = 0;
+    dx.at(7) = (z - 1)*(x + y - 1) + x*(z - 1);
+    dx.at(8) = -y*(z - 1);
+    dx.at(9) = y*(z - 1);
+    dx.at(10) = - (z + 1)*(x + y - 1) - x*(z + 1);
+    dx.at(11) = y*(z + 1);
+    dx.at(12) = -y*(z + 1); 
+    dx.at(13) = z*z - 1;
+    dx.at(14) = 1 - z*z;
+    dx.at(15) = 0;
 }
 
 void
 FEI3dWedgeQuad :: giveDerivativeEta(FloatArray &dy, double x, double y, double z)
 {
-
-
-  
-  dy.at(1) = 1/2 - ((z - 1)*(x + y - 1))/2 - z*z/2 - ((x + y)*(z - 1))/2;
-  dy.at(2) = 0;
-  dy.at(3) = z*z/2 - (y*(z - 1))/2 - ((y - 1)*(z - 1))/2 - 1/2;
-  dy.at(4) = ((x + y)*(z + 1))/2 + ((z + 1)*(x + y - 1))/2 - z*z/2 + 1/2;
-  dy.at(5) = 0;
-  dy.at(6) = ((y - 1)*(z + 1))/2 + (y*(z + 1))/2 + z*z/2 - 1/2;
-  dy.at(7) = x*(z - 1);
-  dy.at(8) = -x*(z - 1);
-  dy.at(9) = (z - 1)*(x + y - 1) + y*(z - 1);
-  dy.at(10) = -x*(z + 1);
-  dy.at(11) = x*(z + 1);
-  dy.at(12) = - (z + 1)*(x + y - 1) - y*(z + 1);
-  dy.at(13) = z*z - 1;
-  dy.at(14) = 0;
-  dy.at(15) = 1 - z*z;
-
- 
+    dy.at(1) = 1/2 - ((z - 1)*(x + y - 1))/2 - z*z/2 - ((x + y)*(z - 1))/2;
+    dy.at(2) = 0;
+    dy.at(3) = z*z/2 - (y*(z - 1))/2 - ((y - 1)*(z - 1))/2 - 1/2;
+    dy.at(4) = ((x + y)*(z + 1))/2 + ((z + 1)*(x + y - 1))/2 - z*z/2 + 1/2;
+    dy.at(5) = 0;
+    dy.at(6) = ((y - 1)*(z + 1))/2 + (y*(z + 1))/2 + z*z/2 - 1/2;
+    dy.at(7) = x*(z - 1);
+    dy.at(8) = -x*(z - 1);
+    dy.at(9) = (z - 1)*(x + y - 1) + y*(z - 1);
+    dy.at(10) = -x*(z + 1);
+    dy.at(11) = x*(z + 1);
+    dy.at(12) = - (z + 1)*(x + y - 1) - y*(z + 1);
+    dy.at(13) = z*z - 1;
+    dy.at(14) = 0;
+    dy.at(15) = 1 - z*z;
 }
 
 void
 FEI3dWedgeQuad :: giveDerivativeDzeta(FloatArray &dz,  double x, double y, double z)
 {
-
-  dz.at(1) = - ((x + y)*(x + y - 1))/2 - z*(x + y - 1);
-  dz.at(2) = x*z - (x*(x - 1))/2;
-  dz.at(3) = y*z - (y*(y - 1))/2;
-  dz.at(4) = ((x + y)*(x + y - 1))/2 - z*(x + y - 1);
-  dz.at(5) = x*z + (x*(x - 1))/2;
-  dz.at(6) = y*z + (y*(y - 1))/2;
-  dz.at(7) = x*(x + y - 1);
-  dz.at(8) = -x*y;
-  dz.at(9) = y*(x + y - 1);
-  dz.at(10) = -x*(x + y - 1);
-  dz.at(11) = x*y;
-  dz.at(12) = -y*(x + y - 1);
-  dz.at(13) = 2*z*(x + y - 1);
-  dz.at(14) = (-2)*x*z; 
-  dz.at(15) = (-2)*y*z;
-
+    dz.at(1) = - ((x + y)*(x + y - 1))/2 - z*(x + y - 1);
+    dz.at(2) = x*z - (x*(x - 1))/2;
+    dz.at(3) = y*z - (y*(y - 1))/2;
+    dz.at(4) = ((x + y)*(x + y - 1))/2 - z*(x + y - 1);
+    dz.at(5) = x*z + (x*(x - 1))/2;
+    dz.at(6) = y*z + (y*(y - 1))/2;
+    dz.at(7) = x*(x + y - 1);
+    dz.at(8) = -x*y;
+    dz.at(9) = y*(x + y - 1);
+    dz.at(10) = -x*(x + y - 1);
+    dz.at(11) = x*y;
+    dz.at(12) = -y*(x + y - 1);
+    dz.at(13) = 2*z*(x + y - 1);
+    dz.at(14) = (-2)*x*z; 
+    dz.at(15) = (-2)*y*z;
 }
 
 
@@ -278,8 +267,8 @@ FEI3dWedgeQuad :: computeGlobalSurfaceMapping(IntArray &surfNodes, IntArray &ele
 
 double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  OOFEM_ERROR("FEI3dWedgeQuad :: edgeGiveTransformationJacobian not implemented");
-  return 0.0;
+    OOFEM_ERROR("FEI3dWedgeQuad :: edgeGiveTransformationJacobian not implemented");
+    return 0.0;
 }
 
 } // end namespace oofem

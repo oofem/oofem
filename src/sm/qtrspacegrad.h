@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/QSpace.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -33,15 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************
-//   *** CLASS QUADRATIC 3D Element   ***
-//   ************************************
-
-//
-//  Recasted by L. Svoboda
-//
 #ifndef qtrspacegrad_h
 #define qtrspacegrad_h
+
 #include "qtrspace.h"
 #include "fei3dtrlin.h"
 #include "graddpelement.h"
@@ -51,42 +44,43 @@
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
-
 namespace oofem {
 
-class QTRSpaceGrad : public QTRSpace,public GradDpElement {
- protected:
-  int numberOfGaussPoints;
-  static FEI3dTrLin interpolation;
+/**
+ * Quadratic 3D element
+ * @author L. Svoboda
+ */
+class QTRSpaceGrad : public QTRSpace,public GradDpElement
+{
+protected:
+    int numberOfGaussPoints;
+    static FEI3dTrLin interpolation;
 
- public:
-  QTRSpaceGrad (int,Domain*) ;     // constructor
-  ~QTRSpaceGrad ()  {}             // destructor
+public:
+    QTRSpaceGrad(int,Domain*);
+    virtual ~QTRSpaceGrad() {}
 
-IRResultType initializeFrom (InputRecord* ir);
-  virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
-  //
-  // definition & identification
-  //
-  const char* giveClassName () const { return "QTRSpaceGrad"; }
-  classType   giveClassID   () const { return QTRSpaceClass; }
-  virtual int  computeNumberOfDofs (EquationID ut) {return 34;}
+    virtual IRResultType initializeFrom(InputRecord* ir);
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray& answer) const;
+
+    // definition & identification
+    virtual const char* giveClassName() const { return "QTRSpaceGrad"; }
+    virtual classType giveClassID() const { return QTRSpaceClass; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 34; }
   
- protected:
- ///////////////////////////////////////////////////////////////////////////////
-   void computeGaussPoints ();
-   void computeNkappaMatrixAt(GaussPoint*,FloatMatrix&);
-   void computeBkappaMatrixAt(GaussPoint*,FloatMatrix&);
-   StructuralElement* giveStructuralElement(){return this;}
-   NLStructuralElement* giveNLStructuralElement(){return this;}
+protected:
+    ///////////////////////////////////////////////////////////////////////////////
+    void computeGaussPoints();
+    void computeNkappaMatrixAt(GaussPoint*, FloatMatrix&);
+    void computeBkappaMatrixAt(GaussPoint*, FloatMatrix&);
+    StructuralElement* giveStructuralElement() { return this; }
+    NLStructuralElement* giveNLStructuralElement() { return this; }
 
-
-
-   virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
-   virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-   virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
-   //   virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, stepN, mode); }
-   virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { ; }
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    virtual void computeForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, stepN, mode); }
+    //virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, stepN, mode); }
+    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode) { ; }
 
 };
  

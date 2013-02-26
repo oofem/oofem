@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/idmgrad1.C,v 1.8.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -33,16 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// file: idm1grad.C
-
-
 #include "idmgrad1.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-
 #include "sparsemtrx.h"
 #include "isolinearelasticmaterial.h"
 #include "dynalist.h"
@@ -50,25 +45,12 @@
 #include "nonlocalmaterialext.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
-
-
 #include "stressvector.h"
 #include "strainvector.h"
-
-#ifndef __MAKEDEPEND
- #include <math.h>
-#endif
 
 #ifdef __PARALLEL_MODE
  #include "combuff.h"
 #endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "conTable.h"
-#endif
-
 
 namespace oofem {
 
@@ -77,11 +59,8 @@ IDGMaterial :: IDGMaterial(int n, Domain *d):IsotropicDamageMaterial1(n,d)
     // constructor
     //
 {
-
   internalLength = 0;
   averType = 0;
-
-
 }
 
 
@@ -94,26 +73,24 @@ IDGMaterial :: ~IDGMaterial()
 IRResultType
 IDGMaterial :: initializeFrom(InputRecord *ir)
 {
-  //  const char *__proc = "initializeFrom";     // Required by IR_GIVE_FIELD macro
-  // IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    //const char *__proc = "initializeFrom";     // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                // Required by IR_GIVE_FIELD macro
   
     IsotropicDamageMaterial1 :: initializeFrom(ir);
 
     //internal Length parameter    
-//  IR_GIVE_OPTIONAL_FIELD(ir, internalLength, IFT_IDGMaterial_internalLength, "internallength");     // Macro
+    //IR_GIVE_OPTIONAL_FIELD(ir, internalLength, IFT_IDGMaterial_internalLength, "internallength");     // Macro
     averType = 1;
     // averaging type approach 0-standard else stress based averaging
-// IR_GIVE_OPTIONAL_FIELD(ir, averType, IFT_IDGMaterial_averType, "avertype");
+    //IR_GIVE_OPTIONAL_FIELD(ir, averType, IFT_IDGMaterial_averType, "avertype");
    
     // parameter for avetType = 1
-    if(averType == 1)
-      {
-	beta = 0.5;
-//	IR_GIVE_FIELD(ir, beta, IFT_IDGMaterial_beta, "beta");
-	t = 1;
-//	IR_GIVE_FIELD(ir, t, IFT_IDGMaterial_t, "t");
-      }
+    if(averType == 1) {
+        beta = 0.5;
+        //IR_GIVE_FIELD(ir, beta, IFT_IDGMaterial_beta, "beta");
+        t = 1;
+        //IR_GIVE_FIELD(ir, t, IFT_IDGMaterial_t, "t");
+    }
 
     this->mapper.initializeFrom(ir);
 
@@ -144,33 +121,22 @@ IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _PlaneStressGrad:
-      if ( form == PDGrad_uu ) {
-	givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
-	break;
-      } else if ( form == PDGrad_ku ) {
-	givePlaneStressKappaMatrix(answer, form, rMode, gp, atTime);
-	break;
-      } else if ( form == PDGrad_uk ) {
-	givePlaneStressGprime(answer, form, rMode, gp, atTime);
-	break;
-      }
-      else if ( form == PDGrad_kk ) {
-	giveInternalLength(answer, form, rMode, gp, atTime);
-	break;
-      }
-      else if ( form == PDGrad_LD ) {
-	giveInternalLengthDerivative(answer, form, rMode, gp, atTime);
-	break;
-      }
-    
-      
+        if ( form == PDGrad_uu ) {
+            givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_ku ) {
+            givePlaneStressKappaMatrix(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_uk ) {
+            givePlaneStressGprime(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_kk ) {
+            giveInternalLength(answer, form, rMode, gp, atTime);
+        } else if ( form == PDGrad_LD ) {
+            giveInternalLengthDerivative(answer, form, rMode, gp, atTime);
+        }
+        break;
 
     default:
         _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-        return;
     }
-
-    return;
 }
 
 
@@ -184,75 +150,56 @@ IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 void
 IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
-
- LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
- answer.resize(1,3);
- if ( strain.isEmpty() ) {
-   answer.zero();
-   return;
- }
- 
- if ( this->equivStrainType == EST_Mazars ) 
-   {
-     double posNorm = 0.0;
-     FloatArray principalStrains, fullstrain;
-     
-     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
-     if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad  ) 
-       {
-	 double nu = lmat->give(NYxz, gp);
-	 FloatMatrix N,m,Eta(2,2);
-	 Eta.zero();
-	 FloatArray n(2);
-	 StrainVector fullStrain(strain,_PlaneStress);
-	 fullStrain.computePrincipalValDir(principalStrains, N);
-	 principalStrains.resize(3);
-	 principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
-
-	  for ( int i = 1; i <= 3; i++ ) 
-	    {
-	      if ( principalStrains.at(i) > 0.0 ) 
-		{
-		  
-		  if(i<3)
-		    {
-		      if ( principalStrains.at(i) > 0.0 )
-			{
-			  double e = principalStrains.at(i);
-			  for(int j = 1; j<3;j++)
-			    n.at(j) = N.at(i,j);
-			  m.beDyadicProductOf(n,n);
-			  m.times(e);
-			  Eta.add(m);	      
-			}
-		    }
-		  if ( principalStrains.at(i) > 0.0 )
-		    posNorm += principalStrains.at(i) * principalStrains.at(i);			     
-		} 
-	    }
-	  double kappa = sqrt(posNorm);
-	  Eta.times(1./kappa);
-	  answer.at(1,1) = Eta.at(1,1);
-	  answer.at(1,2) = Eta.at(2,2);
-	  answer.at(1,3) = Eta.at(1,2);
-	
-	  
-	}
+    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    answer.resize(1,3);
+    if ( strain.isEmpty() ) {
+        answer.zero();
+        return;
     }
-  else 
-    {
-      _error("computeEta: unknown EquivStrainType");
+ 
+    if ( this->equivStrainType == EST_Mazars ) {
+        double posNorm = 0.0;
+        FloatArray principalStrains, fullstrain;
+        
+        // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
+        if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad  ) {
+            double nu = lmat->give(NYxz, gp);
+            FloatMatrix N,m,Eta(2,2);
+            Eta.zero();
+            FloatArray n(2);
+            StrainVector fullStrain(strain,_PlaneStress);
+            fullStrain.computePrincipalValDir(principalStrains, N);
+            principalStrains.resize(3);
+            principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
+
+            for ( int i = 1; i <= 3; i++ ) {
+                if ( principalStrains.at(i) > 0.0 ) {
+                    if ( i < 3 ) {
+                        if ( principalStrains.at(i) > 0.0 ) {
+                            double e = principalStrains.at(i);
+                            for(int j = 1; j<3;j++)
+                                n.at(j) = N.at(i,j);
+                            m.beDyadicProductOf(n,n);
+                            m.times(e);
+                            Eta.add(m);
+                        }
+                    }
+                    if ( principalStrains.at(i) > 0.0 ) 
+                        posNorm += principalStrains.at(i) * principalStrains.at(i);
+                }
+            }
+            double kappa = sqrt(posNorm);
+            Eta.times(1./kappa);
+            answer.at(1,1) = Eta.at(1,1);
+            answer.at(1,2) = Eta.at(2,2);
+            answer.at(1,3) = Eta.at(1,2);
+
+        }
+    } else {
+        _error("computeEta: unknown EquivStrainType");
     }
   
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -260,61 +207,57 @@ IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPo
 void
 IDGMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-  IDGMaterialStatus *status = ( IDGMaterialStatus * ) this->giveStatus(gp);
-  double tempDamage;
+    IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+    double tempDamage;
     if ( mode == ElasticStiffness ) {
         tempDamage = 0.0;
     } else {
         tempDamage = status->giveTempDamage();
-	if(tempDamage >0)
+    if ( tempDamage > 0.0 )
         tempDamage = min(tempDamage, maxOmega);
     }
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     answer.times(1.0 - tempDamage);
     
-    /*  double damage = status->giveDamage();
-    if(tempDamage>damage)
-      {
-	double kappa = status->giveKappa();
-	FloatArray strain;
-	FloatArray stress;
-	FloatArray eta;
-	FloatMatrix correctionTerm;
-	stress = status->giveTempStressVector();
-	strain = status->giveTempStrainVector();
-	double nlKappa = strain.at(4);
-	strain.resize(3);
-	stress.times(1./(1-tempDamage));
-	stress.resize(3);
-	this->computeEta(eta,strain,gp,atTime);
-	double dDamage = damageFunctionPrime(nlKappa,gp);
-	correctionTerm.beDyadicProductOf(stress,eta);
-	correctionTerm.times(-dDamage);
-	answer.add(correctionTerm);
+#if 0
+     double damage = status->giveDamage();
+    if(tempDamage>damage) {
+        double kappa = status->giveKappa();
+        FloatArray strain;
+        FloatArray stress;
+        FloatArray eta;
+        FloatMatrix correctionTerm;
+        stress = status->giveTempStressVector();
+        strain = status->giveTempStrainVector();
+        double nlKappa = strain.at(4);
+        strain.resize(3);
+        stress.times(1./(1-tempDamage));
+        stress.resize(3);
+        this->computeEta(eta,strain,gp,atTime);
+        double dDamage = damageFunctionPrime(nlKappa,gp);
+        correctionTerm.beDyadicProductOf(stress,eta);
+        correctionTerm.times(-dDamage);
+        answer.add(correctionTerm);
       }
-    */ 
-
-    return;
+#endif
 }
 
 
 void
 IDGMaterial :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-  // only for Mazars equivalent deformation ...answer = <eps>/eps_eq 
-  // only plane-stress case
-  IDGMaterialStatus *status = ( IDGMaterialStatus * ) this->giveStatus(gp);
-  double kappa = status->giveKappa();
-  FloatArray  totalStrain =  status->giveTempStrainVector();  
-  double nlKappa = totalStrain.at(4);
-  totalStrain.resize(3);
-  answer.resize(1,3);
-  if(kappa > nlKappa)
-    {
-      this->computeEta(answer,totalStrain,gp,atTime);
-    }
-  else 
-    answer.zero();
+    // only for Mazars equivalent deformation ...answer = <eps>/eps_eq 
+    // only plane-stress case
+    IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+    double kappa = status->giveKappa();
+    FloatArray  totalStrain =  status->giveTempStrainVector();  
+    double nlKappa = totalStrain.at(4);
+    totalStrain.resize(3);
+    answer.resize(1,3);
+    if ( kappa > nlKappa ) {
+        this->computeEta(answer,totalStrain,gp,atTime);
+    } else 
+        answer.zero();
   
 }
   
@@ -322,81 +265,71 @@ void
 IDGMaterial :: givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
 
-  IDGMaterialStatus *status = ( IDGMaterialStatus * ) this->giveStatus(gp);
-  double damage = status -> giveDamage();
-  double tempDamage = status -> giveTempDamage();
-  answer.resize(3,1);
-  if(tempDamage > damage)
-    {
-      double nlEquivStrain =  status->giveTempStrainVector().at(4);
-      double gPrime =  this -> damageFunctionPrime(nlEquivStrain, gp);
-      FloatArray stress =  status->giveTempStressVector();
-      answer.at(1, 1) = stress.at(1)/(1-tempDamage);
-      answer.at(2, 1) = stress.at(2)/(1-tempDamage);
-      answer.at(3, 1) = stress.at(3)/(1-tempDamage);
-      answer.times(gPrime);
+    IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+    double damage = status->giveDamage();
+    double tempDamage = status->giveTempDamage();
+    answer.resize(3,1);
+    if ( tempDamage > damage ) {
+        double nlEquivStrain =  status->giveTempStrainVector().at(4);
+        double gPrime =  this -> damageFunctionPrime(nlEquivStrain, gp);
+        FloatArray stress =  status->giveTempStressVector();
+        answer.at(1, 1) = stress.at(1)/(1-tempDamage);
+        answer.at(2, 1) = stress.at(2)/(1-tempDamage);
+        answer.at(3, 1) = stress.at(3)/(1-tempDamage);
+        answer.times(gPrime);
     }
-
-  
 }
 
 
 void
 IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime)
 {
-  if(averType == 0)
-    {
-      answer.resize(1, 1);
-      answer.at(1, 1) = internalLength*internalLength;
-    }
-  else if(averType == 1)
-    {
-      double distance   = 0;
-      //      double distance = gp ->getDistanceToBoundary();
-      answer.resize(1, 1);
-      if(distance<t*internalLength)
-	answer.at(1,1) = (internalLength*beta + (1-beta)*distance/t)*(internalLength*beta + (1-beta)*distance/t);
-      else
-	answer.at(1, 1) = internalLength*internalLength;
-    }
-  else if(averType == 2)
-    {
-      MaterialMode mMode = gp->giveMaterialMode();
-      if(mMode == _PlaneStressGrad)
-	{
-	  answer.resize(2,2);
-	  IDGMaterialStatus *status = (IDGMaterialStatus * ) this->giveStatus(gp);
-	  StressVector finalStress(_PlaneStressGrad);
-	  FloatArray stress = status->giveTempStressVector();
-	  (FloatArray)finalStress = status->giveTempStressVector();
-	  FloatArray sigPrinc;
-	  FloatMatrix nPrinc;
-	  // get principal trial stresses (ordered) and principal stress directions
-	  finalStress.computePrincipalValDir(sigPrinc, nPrinc);
-	  if(nPrinc.giveNumberOfRows() == 0)
-	    {
-	      nPrinc.resize(2,2);
-	      nPrinc.at(1,1) = 1;
-	      nPrinc.at(2,2) = 1;
-	    }
-	  // principal internal lengths
-	  double l1 = internalLength;
-	  double l2 = internalLength;
-	  double denominator = beta*sigPrinc.at(1)*sigPrinc.at(1)+(1-beta)*sigPrinc.at(2)*sigPrinc.at(2);
-	  if(denominator != 0)
-	    l2 *= sigPrinc.at(1)*sigPrinc.at(1)/denominator;
-	  // compose the internal Length matrix in global coordinates
-	  //   the first subscript refers to coordinate
-	  //   the second subscript refers to eigenvalue
-	  double n11 = nPrinc.at(1, 1);
-	  double n12 = nPrinc.at(1, 2);
-	  double n21 = nPrinc.at(2, 1);
-	  double n22 = nPrinc.at(2, 2);
-	  answer.at(1,1) = l1*n11 * n11 + l2 * n12 * n12;
-	  answer.at(1,2) = l1 * n11 * n21 + l2 * n12 * n22;
-	  answer.at(2,1) = l1 * n11 * n21 + l2 * n12 * n22;
-	  answer.at(2,2) = l1 * n21 * n21 + l2 * n22 * n22;	  
-	}
+    if ( averType == 0 ) {
+        answer.resize(1, 1);
+        answer.at(1, 1) = internalLength*internalLength;
+    } else if ( averType == 1 ) {
+        double distance = 0;
+        //double distance = gp ->getDistanceToBoundary();
+        answer.resize(1, 1);
+        if ( distance < t*internalLength )
+            answer.at(1,1) = (internalLength*beta + (1-beta)*distance/t)*(internalLength*beta + (1-beta)*distance/t);
+        else
+            answer.at(1, 1) = internalLength*internalLength;
+    } else if ( averType == 2 ) {
+        MaterialMode mMode = gp->giveMaterialMode();
+        if ( mMode == _PlaneStressGrad ) {
+            answer.resize(2,2);
+            IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+            StressVector finalStress(_PlaneStressGrad);
+            FloatArray stress = status->giveTempStressVector();
+            (FloatArray)finalStress = status->giveTempStressVector();
+            FloatArray sigPrinc;
+            FloatMatrix nPrinc;
+            // get principal trial stresses (ordered) and principal stress directions
+            finalStress.computePrincipalValDir(sigPrinc, nPrinc);
+            if ( nPrinc.giveNumberOfRows() == 0 ) {
+                nPrinc.resize(2,2);
+                nPrinc.at(1,1) = 1;
+                nPrinc.at(2,2) = 1;
+            }
+            // principal internal lengths
+            double l1 = internalLength;
+            double l2 = internalLength;
+            double denominator = beta*sigPrinc.at(1)*sigPrinc.at(1)+(1-beta)*sigPrinc.at(2)*sigPrinc.at(2);
+            if(denominator != 0)
+                l2 *= sigPrinc.at(1)*sigPrinc.at(1)/denominator;
+            // compose the internal Length matrix in global coordinates
+            //   the first subscript refers to coordinate
+            //   the second subscript refers to eigenvalue
+            double n11 = nPrinc.at(1, 1);
+            double n12 = nPrinc.at(1, 2);
+            double n21 = nPrinc.at(2, 1);
+            double n22 = nPrinc.at(2, 2);
+            answer.at(1,1) = l1*n11 * n11 + l2 * n12 * n12;
+            answer.at(1,2) = l1 * n11 * n21 + l2 * n12 * n22;
+            answer.at(2,1) = l1 * n11 * n21 + l2 * n12 * n22;
+            answer.at(2,2) = l1 * n21 * n21 + l2 * n22 * n22;	  
+        }
     }
 }
 
@@ -405,49 +338,42 @@ void
 IDGMaterial :: giveInternalLengthDerivative(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
   
-  if(averType == 1)
-    {
-      MaterialMode mMode = gp->giveMaterialMode();
-      if(mMode == _PlaneStressGrad)
-	{
-	  answer.resize(4,4);
-	  IDGMaterialStatus *status = (IDGMaterialStatus * ) this->giveStatus(gp);
-	  StressVector finalStress(_PlaneStressGrad);
-	  (FloatArray)finalStress = status->giveTempStressVector();
-	  FloatArray sigPrinc;
-	  FloatMatrix nPrinc;
-	  // get principal trial stresses (ordered) and principal stress directions
-	  finalStress.computePrincipalValDir(sigPrinc, nPrinc);
-	  if(nPrinc.giveNumberOfRows() == 0)
-	    {
-	      nPrinc.resize(2,2);
-	      nPrinc.zero();
-	    }
-	  
-	  // principal internal lengths
-	  double denominator = (beta*sigPrinc.at(1)*sigPrinc.at(1)+(1-beta)*sigPrinc.at(2)*sigPrinc.at(2));
-	  double derivativeSig1 = 0;
-	  double derivativeSig2 = 0;
-	  if(denominator != 0)
-	    {
-	      derivativeSig1 = 2*internalLength*(sigPrinc.at(1)*denominator - beta*sigPrinc.at(1)*sigPrinc.at(1)*sigPrinc.at(1))/denominator/denominator;
-	      derivativeSig2 = 2*internalLength* (beta-1)*sigPrinc.at(1)*sigPrinc.at(1)*sigPrinc.at(2)/denominator/denominator;
-	    }
-	  // compose the internal Length matrix in global coordinates
-	  //   the first subscript refers to coordinate
-	  //   the second subscript refers to eigenvalue
-	  answer.at(1,1) = nPrinc.at(1, 1);
-	  answer.at(1,2) = nPrinc.at(1, 2);
-	  answer.at(2,1) = nPrinc.at(2, 1);
-	  answer.at(2,2) = nPrinc.at(2, 2);	  
-	  answer.at(3,3) = derivativeSig1;
-	  answer.at(4,4) = derivativeSig2;
-	}
+    if ( averType == 1 ) {
+        MaterialMode mMode = gp->giveMaterialMode();
+        if ( mMode == _PlaneStressGrad ) {
+            answer.resize(4,4);
+            IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+            StressVector finalStress(_PlaneStressGrad);
+            (FloatArray)finalStress = status->giveTempStressVector();
+            FloatArray sigPrinc;
+            FloatMatrix nPrinc;
+            // get principal trial stresses (ordered) and principal stress directions
+            finalStress.computePrincipalValDir(sigPrinc, nPrinc);
+            if(nPrinc.giveNumberOfRows() == 0) {
+                nPrinc.resize(2,2);
+                nPrinc.zero();
+            }
+        
+            // principal internal lengths
+            double denominator = (beta*sigPrinc.at(1)*sigPrinc.at(1)+(1-beta)*sigPrinc.at(2)*sigPrinc.at(2));
+            double derivativeSig1 = 0;
+            double derivativeSig2 = 0;
+            if(denominator != 0) {
+                derivativeSig1 = 2*internalLength*(sigPrinc.at(1)*denominator - beta*sigPrinc.at(1)*sigPrinc.at(1)*sigPrinc.at(1))/denominator/denominator;
+                derivativeSig2 = 2*internalLength* (beta-1)*sigPrinc.at(1)*sigPrinc.at(1)*sigPrinc.at(2)/denominator/denominator;
+            }
+            // compose the internal Length matrix in global coordinates
+            //   the first subscript refers to coordinate
+            //   the second subscript refers to eigenvalue
+            answer.at(1,1) = nPrinc.at(1, 1);
+            answer.at(1,2) = nPrinc.at(1, 2);
+            answer.at(2,1) = nPrinc.at(2, 1);
+            answer.at(2,2) = nPrinc.at(2, 2);
+            answer.at(3,3) = derivativeSig1;
+            answer.at(4,4) = derivativeSig2;
+        }
     }
-
-  return;
 }
-
 
 
 
@@ -456,7 +382,7 @@ void
 IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     if ( strain.isEmpty() ) {
         kappa = 0.;
@@ -468,7 +394,7 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         FloatArray principalStrains, fullstrain;
 
         crossSection->giveFullCharacteristicVector(fullstrain, gp, strain);
-	fullstrain.resize(6);
+        fullstrain.resize(6);
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStressGrad ) {
             double nu = lmat->give(NYxz, gp);
@@ -490,7 +416,6 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         kappa = sqrt(posNorm);
     } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
         // EST_Rankine equiv strain measure
-        int i;
         FloatMatrix de;
         FloatArray stress, fullStress, principalStress;
         double sum = 0.;
@@ -499,7 +424,7 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
         stress.beProductOf(de, strain);
         crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
                 if ( this->equivStrainType == EST_Rankine_Smooth ) {
                     sum += principalStress.at(i) * principalStress.at(i);
@@ -571,13 +496,13 @@ IDGMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, 
 void
 IDGMaterial :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
-    int i, indx = 1;
+    int indx = 1;
     double le=0.;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain, crackVect(3);
     FloatMatrix principalDir(3, 3);
-    IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     const double e0 = this->give(e0_ID, gp);
     const double ef = this->give(ef_ID, gp);
@@ -604,25 +529,25 @@ IDGMaterial :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *g
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
         // find index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
+        for ( int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
         // find index with minimal value but non-zero for plane-stress condition - this is the crack direction
         indx = 1;
-        for ( i = 2; i <= 3; i++ ) {
+        for ( int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) < principalStrains.at(indx) && fabs( principalStrains.at(i) ) > 1.e-10 ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             crackVect.at(i) = principalDir.at(i, indx);
         }
 
@@ -677,19 +602,19 @@ IDGMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Ga
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    IDGMaterialStatus *status = ( IDGMaterialStatus * ) this->giveStatus(gp);
+    IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     FloatArray strainVector, reducedTotalStrainVector,totalStrainVector, strain;
 
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
     double nlEquivStrain;
-//////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
     int size = totalStrain.giveSize();
     strain = totalStrain;
     strain.resize(size-1);
     nlEquivStrain = totalStrain.at(size);
-////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
 
     this->initGpForNewStep(gp);
 
@@ -743,8 +668,6 @@ IDGMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, Ga
     status->letTempStressVectorBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
- 
-    return;
 }
 
 

@@ -609,7 +609,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();

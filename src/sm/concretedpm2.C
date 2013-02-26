@@ -187,7 +187,7 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     StrainVector plasticStrainVector( gp->giveMaterialMode() );
     giveFullPlasticStrainVector(plasticStrainVector);
 
-    //    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    //    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     StrainVector inelasticStrainVector( gp->giveMaterialMode() );
     static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->giveFullCharacteristicVector(inelasticStrainVector, gp, strainVector);

@@ -878,7 +878,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
      *      // if the time step is the first one, ask for an initial microprestress
      *      S = this->giveInitMicroPrestress();
      * } else {
-     *      B3SolidMaterialStatus *status = ( B3SolidMaterialStatus * ) this->giveStatus(gp);
+     *      B3SolidMaterialStatus *status = static_cast< B3SolidMaterialStatus * >( this->giveStatus(gp) );
      *      S = status->giveMPS();
      * }
      *

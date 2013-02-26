@@ -297,7 +297,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
     FloatArray strainAfterSubstep, strainIncrement, strainSubIncrement;
     FloatMatrix elasticity, compliance;
 
-    TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+    TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
     // elastic compliance
     this->constructAnisoComplTensor(compliance);
@@ -752,7 +752,7 @@ void TrabBone3D :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, Time
 
 void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
-  TrabBone3DStatus *status = ( TrabBone3DStatus * ) this->giveStatus(gp);
+  TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
   answer.resize(6);
   answer.zero();
   double traceLnU =  (totalStrain.at(1) + totalStrain.at(2) + totalStrain.at(3));

@@ -905,7 +905,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();

@@ -640,7 +640,7 @@ TrabBoneNL3D :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPo
 {
     abort();
  #if 0
-    IDNLMaterialStatus *nlStatus = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -656,7 +656,7 @@ TrabBoneNL3D :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *ste
     abort();
  #if 0
     int result;
-    IDNLMaterialStatus *nlStatus = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *nlStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
     result = buff.unpackDouble(localEquivalentStrainForAverage);

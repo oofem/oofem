@@ -882,7 +882,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
     int igp, i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule;
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();

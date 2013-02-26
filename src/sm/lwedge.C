@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -33,7 +33,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "lwedge.h"
 #include "node.h"
 #include "material.h"
@@ -48,9 +47,7 @@
 #include "mathfem.h"
 #include "structuralcrosssection.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
+#include <cstdio>
 
 namespace oofem {
 FEI3dWedgeLin LWedge :: interpolation;
@@ -95,8 +92,6 @@ LWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     answer.at(1) = D_u;
     answer.at(2) = D_v;
     answer.at(3) = D_w;
-
-    return;
 }
 
 
@@ -109,15 +104,6 @@ LWedge :: computeVolumeAround(GaussPoint *aGaussPoint)
 
     return ( determinant * weight );
 }
-
-
-int
-LWedge :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
 
 
 void
@@ -136,7 +122,6 @@ LWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(6);
 
     answer.resize(3, 18);
@@ -144,13 +129,11 @@ LWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
         answer.at(2, 3 * i - 1) = n.at(i);
         answer.at(3, 3 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -204,8 +187,6 @@ LWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
             }
         }
     }
-
-    return;
 }
 MaterialMode
 LWedge :: giveMaterialMode()
@@ -244,13 +225,12 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
         answer.at(6, 3 * i - 2) = dnx.at(i, 2);
         answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 
 void
-LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) {
+LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+{
   int i, j;
   FloatMatrix dnx;
   
@@ -273,11 +253,11 @@ Interface *
 LWedge :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     OOFEM_LOG_INFO("Interface on Lwedge element not supported");
@@ -311,8 +291,6 @@ LWedge :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
     for ( i = 1; i <= 6; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
-
-    return;
 }
 
 int
@@ -324,10 +302,8 @@ LWedge :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 LWedge :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    int i;
-
     pap.resize(6);
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -335,10 +311,10 @@ LWedge :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 LWedge :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }

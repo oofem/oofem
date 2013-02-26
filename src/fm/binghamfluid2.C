@@ -701,11 +701,10 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
 /*void
 BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
 {
-    
-  BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(gp) );
-const FloatArray &epsd = status->giveTempDeviatoricStrainVector();
-const FloatArray &sigd = status->giveTempDeviatoricStrainVector() 
-    for ( i = 1; i <= nincr; i++ ) {
+    BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
+    const FloatArray &epsd = status->giveTempDeviatoricStrainVector();
+    const FloatArray &sigd = status->giveTempDeviatoricStrainVector() 
+    for ( int i = 1; i <= nincr; i++ ) {
         eps.add(eps_i);
         computeDeviatoricStressVector(tau, gp, eps, atTime);
         giveDeviatoricStiffnessMatrix(d, TangentStiffness, gp, atTime);

@@ -74,7 +74,7 @@ HellmichMaterial :: createMaterialGp()
         _error("Could not create the material-level gp.");
     }
 
-    ( ( HellmichMaterialStatus * ) giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
+    static_cast< HellmichMaterialStatus * >( giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
  #ifdef VERBOSE_HELLMAT
     // output to check if it worked
     printf("\n Hellmat::createMaterialGp:");
@@ -655,7 +655,7 @@ double HellmichMaterial :: computeViscousSlipIncrement(GaussPoint *gp, TimeStep 
     double expterm, ba, ca;
     double base, gamman, dt, dT, T, dh, h;
     dt = giveTimeIncrement(atTime);
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     // might also get directly from status - should be called only for materialGp from initAuxStatus in isothermal case
     T = giveTemperature(gp);
     dT = giveTemperatureChange(gp, VM_Incremental);
@@ -686,7 +686,7 @@ double HellmichMaterial :: computeViscosity(GaussPoint *gp, TimeStep *atTime)
 {
     double base, gamma, T;
     T = giveTemperature(gp);
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     base = status->giveGamma0();
     gamma = status->giveTempViscousSlip();
     // c'=1e-6 - unit constant for Pa
@@ -928,7 +928,7 @@ void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStres
     ActiveSurface as;
     int i;
 
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
 
     inv = invariantI1(trialStress);
     snorm = deviatorNorm(trialStress);
@@ -1016,7 +1016,7 @@ void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
     }
 
     Ev = agingE(ksi) / giveKvCoeff(gp, atTime);
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
 
     as = status->giveActiveSurface();
     if ( ( as == asNone ) || ( rMode == ElasticStiffness ) ) { // elastic
@@ -1077,7 +1077,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     }
 
     giveKvCoeffs(gp, atTime, kv, gv, VM_Total); // obtain visc coefficients for volumetric(kv) and deviatoric(gv) stress
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     as = status->giveActiveSurface();
 
     Gv = agingG(ksi) / gv; // deviatoric visc coeff included in base value of G
@@ -1374,7 +1374,7 @@ void HellmichMaterial :: plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep
 
  #endif
 
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     status->giveTrialStressVector(trialStress);
     stress = status->giveTempStressVector();
     ksi = giveHydrationDegree(gp, atTime, VM_Total);
@@ -1419,7 +1419,7 @@ void HellmichMaterial :: plotStressStrain(FILE *outputStream, GaussPoint *gp, Ti
     }
 
     ksi = giveHydrationDegree(gp, atTime, VM_Total);
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( status->giveTempStressVector().giveSize() ) {
         stress = status->giveTempStressVector() (idx);
     } else {
@@ -1475,7 +1475,7 @@ void HellmichMaterial :: plotStressPath(FILE *outputStream, GaussPoint *gp, Time
     FloatArray stress(6);
     double ksi;
 
-    status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
 
     if ( id == -1 ) { // print header
         ksi = giveHydrationDegree(gp, atTime, VM_Total);
@@ -1557,7 +1557,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
     }
 
     // === Check if aux status is uninitialized ===  works for both gp and material-level status
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( status->giveUpdateFlag() ) {
         return;
     } else {
@@ -1736,7 +1736,7 @@ double HellmichMaterial :: giveTemperature(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    return ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveTempTemperature();
+    return ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveTempTemperature();
 }
 
 double HellmichMaterial :: giveTemperatureChange(GaussPoint *gp, ValueModeType mode)
@@ -1745,7 +1745,7 @@ double HellmichMaterial :: giveTemperatureChange(GaussPoint *gp, ValueModeType m
         gp = giveMaterialGp();
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( mode == VM_Total ) {
         return ( status->giveTempTemperature() - status->giveInitialTemperature() );
     } else if ( mode == VM_Incremental ) {
@@ -1761,7 +1761,7 @@ double HellmichMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
         gp = giveMaterialGp();
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( mode == VM_Total ) {
         return status->giveTempHumidity();
     } else if ( mode == VM_Incremental ) {
@@ -1783,7 +1783,7 @@ double HellmichMaterial :: giveViscousSlip(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    return ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveViscousSlip();
+    return ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveViscousSlip();
 }
 
 double HellmichMaterial :: giveGamma0(GaussPoint *gp)
@@ -1795,7 +1795,7 @@ double HellmichMaterial :: giveGamma0(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    return ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveGamma0();
+    return ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveGamma0();
 }
 
 // === Creep ===
@@ -1807,7 +1807,7 @@ double HellmichMaterial :: givePrestress(GaussPoint *gp)
             gp = giveMaterialGp();
         }
 
-        HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+        HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         double g0;
         g0 = status->giveGamma0();
         if ( g0 <= 0 ) {
@@ -1828,7 +1828,7 @@ double HellmichMaterial :: giveViscosity(GaussPoint *gp)
         gp = giveMaterialGp();
     }
 
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     if ( status->giveGamma0() <= 0. ) {
         return ( 0. );                     // gamma0 not set yet
     } else {
@@ -1880,7 +1880,7 @@ void HellmichMaterial :: giveKvCoeffs(GaussPoint *gp, TimeStep *atTime, double &
             ev = 1. / ( 1. + twTime(ksi) / dt ) * agingE(ksi) * jv;
 
             // compute flow creep coefficient fv
-            if ( ( ( HellmichMaterialStatus * ) giveStatus(gp) )->giveGamma0() > 0 ) {
+            if ( ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->giveGamma0() > 0 ) {
                 fv = dt * agingE(ksi) * giveViscosity(gp);
             } else {
                 fv = 0.;
@@ -2125,7 +2125,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
     dt = giveTimeIncrement(atTime);
     if ( ( options & moCreep ) && ( dt > 0 ) ) {
         // reduced stress vector
-        HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+        HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         stress = status->giveStressVector();
         // compute creep coefficients
         giveKvCoeffs(gp, atTime, ev, fv, VM_Incremental);
@@ -2185,7 +2185,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
 {
     FloatArray auxStrain, strainIncrement, elasticStrain;
     FloatArray auxStress, trialStressVector, fullStressVector(6), redStressVector;
-    HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+    HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
     ValueModeType mode = VM_Incremental;
     MaterialMode mmode = gp->giveMaterialMode();
@@ -2611,7 +2611,7 @@ HellmichMaterial :: initGpForNewStep(GaussPoint *gp)
     // call parent method - calls initTempStatus(gp)
     StructuralMaterial :: initGpForNewStep(gp);
     // Force initialization of auxiliary status
-    ( ( HellmichMaterialStatus * ) giveStatus(gp) )->setUpdateFlag(0);
+    ( static_cast< HellmichMaterialStatus * >( giveStatus(gp) ) )->setUpdateFlag(0);
     initAuxStatus(gp, atTime);
 }
 
@@ -2665,7 +2665,7 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
  #ifdef VERBOSE_TANGENT
     if ( options & moPlotStressStrainIter ) {
-        HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
+        HellmichMaterialStatus *status = static_cast< HellmichMaterialStatus * >( giveStatus(gp) );
         if ( mMode == _1dMat ) {
             printf( "Time: %.2f, sig: %.10e, Eep: %.10e\n", giveTime(atTime),
                    ( status->giveTempStressVector().giveSize() ) ? ( status->giveTempStressVector() )(0) : 0, answer(0, 0) );

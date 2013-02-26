@@ -31,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-// file : LsMasterMat.C
-
 
 #include "lsmastermatgrad.h"
 #include "isolinearelasticmaterial.h"
@@ -144,7 +142,7 @@ LsMasterMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRe
 {
 
   
-  LsMasterMatGradStatus *status = ( LsMasterMatGradStatus * ) this->giveStatus(gp);
+  LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
   this->initTempStatus(gp);
   Material *mat;
   StructuralMaterial *sMat;
@@ -180,7 +178,7 @@ LsMasterMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRe
 void
 LsMasterMatGrad :: give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-     LsMasterMatGradStatus *status = ( LsMasterMatGradStatus * ) this->giveStatus(gp);
+     LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
   this->initTempStatus(gp);
   Material *mat;
   StructuralMaterial *sMat;
@@ -222,7 +220,7 @@ LsMasterMatGrad :: giveRealStressVector(FloatArray &answer,
                                  TimeStep *atTime)
 {
 
-  LsMasterMatGradStatus *status = ( LsMasterMatGradStatus * ) this->giveStatus(gp);
+  LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
   this->initTempStatus(gp);
   Material *mat;
   StructuralMaterial *sMat;
@@ -571,7 +569,7 @@ LsMasterMatGrad :: giveRealStressVector(FloatArray &answer,
  void 
  LsMasterMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,MatResponseForm form, MatResponseMode mode,GaussPoint * gp,TimeStep * atTime)
 {
-  LsMasterMatGradStatus *status = ( LsMasterMatGradStatus * ) this->giveStatus(gp);
+  LsMasterMatGradStatus *status = static_cast< LsMasterMatGradStatus * >( this->giveStatus(gp) );
   Material *mat;
   StructuralMaterial *sMat;
   FloatMatrix stiffness;

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/qspacegrad.C,v 1.3.4.1 20011/05/10 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file QSPACE.CC
-
-//
-
 #include "qwedgegrad.h"
 #include "node.h"
 #include "material.h"
@@ -51,16 +46,14 @@
 #include "mathfem.h"
 #include "structuralcrosssection.h"
 
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
+#include <cstdio>
 
 namespace oofem {
 
-  FEI3dWedgeLin QWedgeGrad :: interpolation;
+FEI3dWedgeLin QWedgeGrad :: interpolation;
 
-  QWedgeGrad :: QWedgeGrad (int n, Domain* aDomain) :  QWedge(n, aDomain),GradDpElement()
-  // Constructor.
+QWedgeGrad :: QWedgeGrad (int n, Domain* aDomain) :  QWedge(n, aDomain),GradDpElement()
+// Constructor.
 {
   nPrimNodes = 15; 
   nPrimVars = 3;
@@ -76,60 +69,54 @@ namespace oofem {
 IRResultType
 QWedgeGrad :: initializeFrom (InputRecord* ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-  this->NLStructuralElement :: initializeFrom (ir);
-  IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_QWedgeGrad_nip, "nip"); // Macro
+    this->NLStructuralElement :: initializeFrom (ir);
+    IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_QWedgeGrad_nip, "nip"); // Macro
 
-  if ((numberOfGaussPoints != 2) && (numberOfGaussPoints != 9))
-    numberOfGaussPoints = 9;
+    if ((numberOfGaussPoints != 2) && (numberOfGaussPoints != 9))
+        numberOfGaussPoints = 9;
 
-  // set - up Gaussian integration points
-  this -> computeGaussPoints();
+    // set - up Gaussian integration points
+    this->computeGaussPoints();
 
-  return IRRT_OK;
+    return IRRT_OK;
 }
 
 
 void
 QWedgeGrad :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const
-  // returns DofId mask array for inode element node.
-  // DofId mask array determines the dof ordering requsted from node.
-  // DofId mask array contains the DofID constants (defined in cltypes.h)
-  // describing physical meaning of particular DOFs.
+// returns DofId mask array for inode element node.
+// DofId mask array determines the dof ordering requsted from node.
+// DofId mask array contains the DofID constants (defined in cltypes.h)
+// describing physical meaning of particular DOFs.
 {
-  if(inode<=nSecNodes)
-    {
-      answer.resize (4);
-      answer.at(1) = D_u;
-      answer.at(2) = D_v;
-      answer.at(3) = D_w; 
-      answer.at(4) = G_0;
+    if( inode <= nSecNodes ) {
+        answer.resize (4);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
+        answer.at(3) = D_w; 
+        answer.at(4) = G_0;
+    } else {
+        answer.resize (3);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
+        answer.at(3) = D_w; 
     }
-  else
-  {
-      answer.resize (3);
-      answer.at(1) = D_u;
-      answer.at(2) = D_v;
-      answer.at(3) = D_w; 
-  }
- 
-  return ;
 }
 
 void
 QWedgeGrad :: computeGaussPoints ()
   // Sets up the array containing the four Gauss points of the receiver.
 {
-  numberOfIntegrationRules = 1;
-  integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
-  MaterialMode mode = _3dMatGrad; // material model is based on strain (standard approach)
-	
-  if ( nlGeometry > 1 )
-    mode = _3dMatGrad_F; // material model is based on deformation gradient, not on strain
-  integrationRulesArray[0]->setUpIntegrationPoints (_Wedge, numberOfGaussPoints, mode);
+    numberOfIntegrationRules = 1;
+    integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
+    integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 7);
+    MaterialMode mode = _3dMatGrad; // material model is based on strain (standard approach)
+    if ( nlGeometry > 1 )
+        mode = _3dMatGrad_F; // material model is based on deformation gradient, not on strain
+    integrationRulesArray[0]->setUpIntegrationPoints (_Wedge, numberOfGaussPoints, mode);
 }
 
 
@@ -138,35 +125,31 @@ QWedgeGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answer
   // Returns the displacement interpolation matrix {N} of the receiver, eva-
   // luated at aGaussPoint.
 {
-  FloatArray n(9);
-  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
-  answer.resize(1,9);
-  answer.zero();
+    FloatArray n(9);
+    this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
+    answer.resize(1,9);
+    answer.zero();
 
-  for ( int i = 1; i <= 9; i++ ) {
+    for ( int i = 1; i <= 9; i++ ) {
         answer.at(1, i) = n.at(i);
-  }
-  
+    }
 }
 
 void
 QWedgeGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix& answer)
- {
-  FloatMatrix dnx;
-  IntArray a(9);
+{
+    FloatMatrix dnx;
+    IntArray a(9);
 
-  answer.resize(3,9);
-  answer.zero();
+    answer.resize(3,9);
+    answer.zero();
 
-  this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
-   for ( int i = 1; i <= 9; i++ ) 
-     {
-       answer.at(1, i) = dnx.at(i,1);
-       answer.at(2, i) = dnx.at(i,2);
-       answer.at(3, i) = dnx.at(i,3);
-     }
-  
- }
-
+    this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this));
+    for ( int i = 1; i <= 9; i++ ) {
+        answer.at(1, i) = dnx.at(i,1);
+        answer.at(2, i) = dnx.at(i,2);
+        answer.at(3, i) = dnx.at(i,3);
+    }
+}
 
 }

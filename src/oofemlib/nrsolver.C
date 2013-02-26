@@ -865,7 +865,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         FloatArray reactions;
         int i, di = 1;   // hard wired domain index =  1
         // ask emodel to evaluate reactions
-        ( ( StructuralEngngModel * ) engngModel )->computeReactions(reactions, tNow, di);
+        static_cast< StructuralEngngModel * >( engngModel )->computeReactions(reactions, tNow, di);
         // compute corresponding norm
         double RN;
 

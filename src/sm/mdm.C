@@ -1421,7 +1421,7 @@ MDM :: giveInterface(InterfaceType type)
 int
 MDM :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(ip);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -1433,7 +1433,7 @@ int
 MDM :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    MDMStatus *status = ( MDMStatus * ) this->giveStatus(ip);
+    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
     FloatMatrix _LocalDamageTensorForAverage;
 
     result = _LocalDamageTensorForAverage.unpackFromCommBuffer(buff);

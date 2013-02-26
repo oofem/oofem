@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/qspace.C,v 1.3.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -48,9 +47,7 @@
 #include "mathfem.h"
 #include "structuralcrosssection.h"
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
+#include <cstdio>
 
 namespace oofem {
 FEI3dWedgeQuad QWedge :: interpolation;
@@ -112,14 +109,6 @@ QWedge :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 
-int
-QWedge :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
-{
-    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
-    return 1;
-}
-
-
 void
 QWedge :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
@@ -136,7 +125,6 @@ QWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(15);
 
     answer.resize(3, 45);
@@ -144,13 +132,11 @@ QWedge :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    for ( i = 1; i <= 15; i++ ) {
+    for ( int i = 1; i <= 15; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
         answer.at(2, 3 * i - 1) = n.at(i);
         answer.at(3, 3 * i - 0) = n.at(i);
     }
-
-    return;
 }
 
 
@@ -205,15 +191,15 @@ QWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
         }
     }
 
-    return;
 }
+
 MaterialMode
 QWedge :: giveMaterialMode()
 {
-  if(this->nlGeometry > 1)
-    return _3dMat_F;
-  else
-    return _3dMat;
+    if(this->nlGeometry > 1)
+        return _3dMat_F;
+    else
+        return _3dMat;
 }
 
 void
@@ -222,7 +208,6 @@ QWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 // luated at aGaussPoint.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -230,7 +215,7 @@ QWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     answer.resize(6, 45);
     answer.zero();
 
-    for ( i = 1; i <= 15; i++ ) {
+    for ( int i = 1; i <= 15; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
@@ -244,23 +229,21 @@ QWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
         answer.at(6, 3 * i - 2) = dnx.at(i, 2);
         answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
-
-    return;
 }
 
 
 void
-QWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) {
-  int i, j;
-  FloatMatrix dnx;
-  
-  this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+QWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+{
+    FloatMatrix dnx;
+    
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-  answer.resize(9, 45);
-  answer.zero();
+    answer.resize(9, 45);
+    answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( j = 1; j <= 15; j++ ) { // 15 nodes
+    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( int j = 1; j <= 15; j++ ) { // 15 nodes
             answer.at(3 * i - 2, 3 * j - 2) =
                 answer.at(3 * i - 1, 3 * j - 1) =
                     answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
@@ -272,11 +255,11 @@ Interface *
 QWedge :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     OOFEM_LOG_INFO("Interface on QWedge element not supported");
@@ -297,7 +280,6 @@ QWedge :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 QWedge :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
-    int i;
     FloatArray n;
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
@@ -307,11 +289,9 @@ QWedge :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
         return;
     }
 
-    for ( i = 1; i <= 15; i++ ) {
+    for ( int i = 1; i <= 15; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
-
-    return;
 }
 
 int
@@ -323,10 +303,8 @@ QWedge :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 QWedge :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
-    int i;
-
     pap.resize(20);
-    for ( i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 20; i++ ) {
         pap.at(i) = this->giveNode(i)->giveNumber();
     }
 }
@@ -334,10 +312,10 @@ QWedge :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 QWedge :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 20; i++ ) {
+    for ( int i = 1; i <= 20; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }

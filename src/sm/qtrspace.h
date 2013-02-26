@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/qspace.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -45,128 +44,68 @@
 #include "sprnodalrecoverymodel.h"
 
 namespace oofem {
+
+/**
+ * This class implements an Quadratic 3d  10 - node
+ * elasticity finite element.
+ * 
+ * Each node has 3 degrees of freedom.
+ * One single additional attribute is needed for Gauss integration purpose :
+ * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
+ * TASKS :
+ * - calculating its Gauss points ;
+ * - calculating its B,D,N matrices and dV.
+ */
 class QTRSpace : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 
 {
-    /*
-     * This class implements an Quadratic 3d  10 - node
-     * elasticity finite element. Each node has 3 degrees of freedom.
-     * DESCRIPTION :
-     * One single additional attribute is needed for Gauss integration purpose :
-     * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
-     * TASKS :
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
     int numberOfGaussPoints;
     static FEI3dTrQuad interpolation;
 
 public:
-    QTRSpace(int, Domain *);   // constructor
-    ~QTRSpace()  {}            // destructor
+    QTRSpace(int, Domain *);
+    virtual ~QTRSpace() {}
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
-    double       computeVolumeAround(GaussPoint *);
+    virtual double computeVolumeAround(GaussPoint *);
 
-    /**
-     * Computes the global coordinates from given element's local coordinates.
-     * Required by nonlocal material models.
-     * @returns nonzero if successful
-     */
-    virtual int  computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-
-
-    /// Interface requesting service
-    Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
-    /**
-     * @name The element interface required by ZZNodalRecoveryModel
-     */
-    //@{
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual int giveApproxOrder() { return 2; }
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 5; }
 
-    /// Returns the corresponding element to interface
-    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
 
-    /// Evaluates N matrix (interpolation estimated stress matrix).
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
-    //@}
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
+    virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    /**
-     * @name The element interface required by SPRNodalRecoveryModelInterface
-     */
-    //@{
-    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    int SPRNodalRecoveryMI_giveNumberOfIP();
-    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
-    SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    //@}
-
-    /**
-     * @name The element interface required by NodalAveragingRecoveryModel
-     */
-    //@{
-    /**
-     * Computes the element value in given node.
-     * @param answer contains the result
-     * @param node element node number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
-    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-
-    /**
-     * Computes the element value in given side.
-     * @param answer contains the result
-     * @param side element side number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-
-    /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    //@}
 
-    //
     // definition & identification
-    //
-    const char *giveClassName() const { return "QTRSpace"; }
-    classType   giveClassID() const { return QTRSpaceClass; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
-    virtual int  computeNumberOfDofs(EquationID ut) { return 30; }
-    integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
-    MaterialMode          giveMaterialMode();
+    virtual const char *giveClassName() const { return "QTRSpace"; }
+    virtual classType giveClassID() const { return QTRSpaceClass; }
+    virtual Element_Geometry_Type giveGeometryType() const { return EGT_tetra_2; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 30; }
+    virtual integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
+    virtual MaterialMode giveMaterialMode();
 
 protected:
-    void computeGaussPoints();
-    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
-    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
-
-
-
-
-
-    int giveApproxOrder() { return 2; }
-    int giveNumberOfIPForMassMtrxIntegration() { return 5; }
-
+    virtual void computeGaussPoints();
+    virtual void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
 
 };
 } // end namespace oofem

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -35,7 +35,6 @@
 #ifndef htselement_h
 #define htselement_h
 #include "structuralelement.h"
-#include "fei1dlin.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -49,6 +48,7 @@ protected:
     double cgX,cgY;
     int numberOfStressDofs;
     int numberOfDofs;
+
 public:
     HTSelement(int n, Domain *d);
     virtual ~HTSelement() { }
@@ -78,15 +78,15 @@ protected:
 
     void computePuVectorAt(FloatArray &answer, FloatMatrix N, FloatArray u, GaussPoint *gp,int sideNumber);
     void computePsVectorAt(FloatArray &answer, FloatArray t, GaussPoint *gp);
-    void  computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    virtual  void  computeEdgeLoadVectorAt(FloatArray &answer, Load *load,int iEdge, TimeStep *tStep, ValueModeType mode);
+    void computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load,int iEdge, TimeStep *tStep, ValueModeType mode);
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
 
 
-    void  computeFMatrixAt(FloatMatrix &answer,FloatMatrix N, GaussPoint *gp, int sideNumber);
-    void  computeAMatrixAt(FloatMatrix &answer, FloatMatrix N,GaussPoint *gp, int sideNumber);
-    void  computeUvMatrixAt(FloatMatrix &answer, GaussPoint* gp, int sideNubmer);
-    void  computeSvMatrixAt(FloatMatrix &answer, GaussPoint* gp, int sideNumber);
+    void computeFMatrixAt(FloatMatrix &answer,FloatMatrix N, GaussPoint *gp, int sideNumber);
+    void computeAMatrixAt(FloatMatrix &answer, FloatMatrix N,GaussPoint *gp, int sideNumber);
+    void computeUvMatrixAt(FloatMatrix &answer, GaussPoint* gp, int sideNubmer);
+    void computeSvMatrixAt(FloatMatrix &answer, GaussPoint* gp, int sideNumber);
     void computeUgammaMatrixAt(FloatMatrix &answer, GaussPoint* gp);
     void computeOutwardNormalMatrix(FloatMatrix &answer, int sideNumber);  
 

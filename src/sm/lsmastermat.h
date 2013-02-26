@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *******************************
-//   *** CLASS Large-Strain Master Material
-//   *******************************
-
 #ifndef lsmastermat_h
 #define lsmastermat_h
 
@@ -50,94 +46,58 @@ namespace oofem {
 class GaussPoint;
 class Domain;
 
+/**
+ * Large strain master material.
+ * Stress and stiffness are computed from small strain(slaveMat) material model 
+ * using a strain tensor from the Seth-Hill strain tensors family (depends on parameter m,
+ * m = 0 logarithmic strain,m = 1 Green-Lagrange strain ...)
+ * then stress and stiffness are transformed 2.PK stress and appropriate stiffness 
+ */
 class LsMasterMat : public StructuralMaterial
 {
-    /*
-     * This class implements a large strain master material.
-     * stress and stiffness are computed from small strain(slaveMat) material model 
-     * using a strain tensor from the Seth-Hill strain tensors familly(depends on parameter m,
-     * m = 0 logarithmic strain,m = 1 Green-Lagrange strain ...)
-     * then stress and stiffness are transformed 2.PK stress and appropriate stiffness 
-     */
-
 protected:
-    /// reference to the basic elastic material
+    /// Reference to the basic elastic material.
     LinearElasticMaterial *linearElasticMaterial;
 
-    /// 'slave' material model number
+    /// 'slave' material model number.
     int slaveMat;
-    /// specifies the strain tensor
+    /// Specifies the strain tensor.
     double m;
 
  
 public:
     LsMasterMat(int n, Domain *d);
-    ~LsMasterMat();
+    virtual ~LsMasterMat();
     
-    /// specifies whether a given material mode is supported by this model
-    int hasMaterialModeCapability(MaterialMode mode);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /// reads the model parameters from the input file
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasNonLinearBehaviour() { return 1; }
+    virtual const char *giveClassName() const { return "LsMasterMat"; }
+    virtual classType giveClassID() const { return LsMasterMatClass; }
 
-    // identification and auxiliary functions
-    int hasNonLinearBehaviour()   { return 1; }
-    const char *giveClassName() const { return "LsMasterMat"; }
-    classType giveClassID()     const { return LsMasterMatClass; }
-
-    /// returns a reference to the basic elastic material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    //    virtual int         giveSizeOfFullHardeningVarsVector();
-    //    virtual int         giveSizeOfReducedHardeningVarsVector(GaussPoint *);
-    /// confirms that the stiffness matrix is symmetric
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    /// creates a new material status  corresponding to this class
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-      /// evaluates the material stiffness matrix
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                        MatResponseForm, MatResponseMode,
                                        GaussPoint * gp,
                                        TimeStep * atTime);
 
-    /// evaluates the stress
-    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
+    virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
     /// transformation matrix
     void constructTransformationMatrix(FloatMatrix F, GaussPoint *gp);
 
     
-
 protected:
-
-
-     
-
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-
-    /**
-     * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
-     * @param type determines the internal variable requested (physical meaning)
-     * @returns nonzero if ok or error is generated for unknown mat mode.
-     */
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
-    /**
-     * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type determines the type of internal variable
-     * @returns type of internal variable
-     */
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
-
-    /**
-     * Returns the corresponding integration point  value size in Reduced form.
-     * @param type determines the type of internal variable
-     * @returns var size, zero if var not supported
-     */
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 
@@ -147,12 +107,12 @@ protected:
 class LsMasterMatStatus : public StructuralMaterialStatus
 {
 protected:
-  FloatMatrix Pmatrix,TLmatrix, transformationMatrix;
-  int slaveMat;
+    FloatMatrix Pmatrix,TLmatrix, transformationMatrix;
+    int slaveMat;
 
 public:
-  LsMasterMatStatus(int n, Domain *d, GaussPoint *g, int s);
-    ~LsMasterMatStatus();
+    LsMasterMatStatus(int n, Domain *d, GaussPoint *g, int s);
+    virtual ~LsMasterMatStatus();
 
 
     void givePmatrix(FloatMatrix &answer)
@@ -165,27 +125,20 @@ public:
     void setPmatrix(FloatMatrix values) { Pmatrix = values; }
     void setTLmatrix(FloatMatrix values) { TLmatrix = values; }
     void setTransformationMatrix(FloatMatrix values){transformationMatrix = values;}
-    /// prints the output variables into the *.out file
-    void printOutputAt(FILE *file, TimeStep *tStep);
 
-    /// initializes the temporary status
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
     virtual void initTempStatus();
 
-    /// updates the state after a new equilibrium state has been reached
     virtual void updateYourself(TimeStep *);
 
-    /// saves the current context(state) into a stream
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    /// restores the state from a stream
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    /// identifies this class by its name
-    const char *giveClassName() const { return "LsMasterMatStatus"; }
+    virtual const char *giveClassName() const { return "LsMasterMatStatus"; }
 
-    /// identifies this class by its ID number
-    classType             giveClassID() const
-    { return LsMasterMatStatusClass; }
+    virtual classType giveClassID() const { return LsMasterMatStatusClass; }
 };
 } // end namespace oofem
 #endif // misesmat_h

@@ -696,7 +696,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     TransportElement *element;
     CemhydMat *cem;
     for ( int j = 1; j <= nelem; j++ ) {
-        element = ( TransportElement * ) domain->giveElement(j);
+        element = static_cast< TransportElement * >( domain->giveElement(j) );
         cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
         if ( cem ) {

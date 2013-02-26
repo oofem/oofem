@@ -227,7 +227,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
      * nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
      * x = coords.at(1);
      * w = ((*pos).weight/wsum)/(nearElem->computeVolumeAround((*pos).nearGp));
-     * nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus((*pos).nearGp);
+     * nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus((*pos).nearGp) );
      * damage = nonlocStatus->giveDamage();
      * printf("%g %g %g\n",x,w,damage);
      * }
@@ -565,10 +565,10 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
              *   if ((r != 0) && (c!=0)) dest.at(r,c) -= (double) (lcontrib.at(i)*rcontrib.at(j)*coeff);
              *  }
              */
-            int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
+            int dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
-            for ( i = 1; i <= dim1; i++ ) {
-                for ( j = 1; j <= dim2; j++ ) {
+            for ( int i = 1; i <= dim1; i++ ) {
+                for ( int j = 1; j <= dim2; j++ ) {
                     contrib.at(i, j) = -1.0 * lcontrib.at(i) * rcontrib.at(j) * coeff;
                 }
             }
@@ -619,7 +619,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
 
     gp->giveElement()->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-    int n, m, i, j;
+    int n, m;
     std::list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     std::list< localIntegrationRecord > :: iterator pos;
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -632,12 +632,12 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
 
         n = loc.giveSize();
         m = rloc.giveSize();
-        for ( i = 1; i <= n; i++ ) {
+        for ( int i = 1; i <= n; i++ ) {
             if ( loc.at(i) == 0 ) {
                 continue;
             }
 
-            for ( j = 1; j <= m; j++ ) {
+            for ( int j = 1; j <= m; j++ ) {
                 if ( rloc.at(j) == 0 ) {
                     continue;
                 }
@@ -681,7 +681,7 @@ int
 IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
                                                        FloatArray &lcontrib, TimeStep *atTime)
 {
-    int nrows, nsize, i, j;
+    int nrows, nsize;
     double sum, f, equivStrain;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
@@ -739,9 +739,9 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         nrows = b.giveNumberOfColumns();
         nsize = stress.giveSize();
         lcontrib.resize(nrows);
-        for ( i = 1; i <= nrows; i++ ) {
+        for ( int i = 1; i <= nrows; i++ ) {
             sum = 0.0;
-            for ( j = 1; j <= nsize; j++ ) {
+            for ( int j = 1; j <= nsize; j++ ) {
                 sum += b.at(j, i) * stress.at(j);
             }
 
@@ -760,7 +760,7 @@ void
 IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                         FloatArray &rcontrib, TimeStep *atTime)
 {
-    int ncols, nsize, i, j;
+    int ncols, nsize;
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
@@ -819,7 +819,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         }
 
         sum = 0.0;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
                 sum += principalStress.at(i) * principalStress.at(i);
             }
@@ -840,7 +840,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         //  if (gp->giveMaterialMode() != _1dMat) this->giveStressVectorTranformationMtrx (t, princDir,1);
 
         // extract positive part
-        for ( i = 1; i <= principalStress.giveSize(); i++ ) {
+        for ( int i = 1; i <= principalStress.giveSize(); i++ ) {
             principalStress.at(i) = max(principalStress.at(i), 0.0);
         }
 
@@ -874,7 +874,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
          */
         FloatArray fullPrincStress(6);
         fullPrincStress.zero();
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             fullPrincStress.at(i) = principalStress.at(i);
         }
 
@@ -901,9 +901,9 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     ncols = b.giveNumberOfColumns();
     nsize = nu.giveSize();
     rcontrib.resize(ncols);
-    for ( i = 1; i <= ncols; i++ ) {
+    for ( int i = 1; i <= ncols; i++ ) {
         sum = 0.0;
-        for ( j = 1; j <= nsize; j++ ) {
+        for ( int j = 1; j <= nsize; j++ ) {
             sum += nu.at(j) * b.at(j, i);
         }
 
@@ -1039,7 +1039,7 @@ IDNLMaterialStatus :: giveInterface(InterfaceType type)
 int
 IDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -1051,7 +1051,7 @@ int
 IDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(ip);
+    IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
     result = buff.unpackDouble(localEquivalentStrainForAverage);

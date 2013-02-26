@@ -1416,8 +1416,8 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
     NonlocalMaterialStiffnessInterface *interface;
     int i;
     if ( ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ) ) {
-        interface = ( NonlocalMaterialStiffnessInterface * )
-                    this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType);
+        interface = static_cast< NonlocalMaterialStiffnessInterface * >
+                    ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
         if ( interface == NULL ) {
             return;
         }

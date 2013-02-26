@@ -85,7 +85,7 @@ NonlocalMaterialWTP :: giveNonlocalDepArryElementPlugin(GaussPoint *gp, std :: s
     int remoteElemNum;
 
     NonlocalMaterialStatusExtensionInterface *interface =
-        ( NonlocalMaterialStatusExtensionInterface * ) ( gp->giveElement()->giveMaterial()->
+        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveElement()->giveMaterial()->
                                                         giveStatus(gp)->giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     if ( interface ) {
         std::list< localIntegrationRecord > *lir = interface->giveIntegrationDomainList();
@@ -533,7 +533,7 @@ void
 NonlocalMaterialWTP :: fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray &map)
 {
     Element *elem = gp->giveElement();
-    NonlocalMaterialExtensionInterface *iface = ( NonlocalMaterialExtensionInterface * ) elem->giveMaterial()->giveInterface(NonlocalMaterialExtensionInterfaceType);
+    NonlocalMaterialExtensionInterface *iface = static_cast< NonlocalMaterialExtensionInterface * >( elem->giveMaterial()->giveInterface(NonlocalMaterialExtensionInterfaceType) );
     if ( iface ) {
         iface->rebuildNonlocalPointTable(gp, & map);
     }

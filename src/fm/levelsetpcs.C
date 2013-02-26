@@ -312,11 +312,11 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
 #else
 
     Element *ielem = domain->giveElement(ie);
-    int i, inodes = ielem->giveNumberOfNodes();
-    LevelSetPCSElementInterface *interface = ( LevelSetPCSElementInterface * ) ielem->giveInterface(LevelSetPCSElementInterfaceType);
+    int inodes = ielem->giveNumberOfNodes();
+    LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
     FloatArray fi(inodes);
 
-    for ( i = 1; i <= inodes; i++ ) {
+    for ( int i = 1; i <= inodes; i++ ) {
         fi.at(i) = levelSetValues.at( ielem->giveDofManagerNumber(i) );
     }
 

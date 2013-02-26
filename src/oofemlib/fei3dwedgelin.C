@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2011   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -56,14 +56,11 @@ FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     answer.at(4)  = 0.5 * (1. - x - y ) * (1 + z);
     answer.at(5)  = 0.5 *  x * ( 1. + z );
     answer.at(6)  = 0.5 *  y * (1. + z );
- 
-    return;
 }
 
 void
 FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    int i;
     FloatMatrix jacobianMatrix(3, 3), inv(3, 3);
     FloatArray dx(6), dy(6), dz(6);
     double u, v, w;
@@ -81,7 +78,7 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 
     answer.resize(6, 3);
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(i, 1) = dx.at(i) * inv.at(1, 1) + dy.at(i) * inv.at(1, 2) + dz.at(i) * inv.at(1, 3);
         answer.at(i, 2) = dx.at(i) * inv.at(2, 1) + dy.at(i) * inv.at(2, 2) + dz.at(i) * inv.at(2, 3);
         answer.at(i, 3) = dx.at(i) * inv.at(3, 1) + dy.at(i) * inv.at(3, 2) + dz.at(i) * inv.at(3, 3);
@@ -92,7 +89,6 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 void
 FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    int i;
     double x, y, z;
     FloatArray n(6);
 
@@ -111,7 +107,7 @@ FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 
     answer.resize(3);
     answer.zero();
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(1);
         answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(2);
         answer.at(3) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(3);
@@ -143,7 +139,6 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 // Computes it if it does not exist yet.
 {
-    int i;
     double x, y, z, u, v, w;
     FloatArray dx(6), dy(6), dz(6);
 
@@ -158,7 +153,7 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
     this->giveDerivativeEta(dy, u, w);
     this->giveDerivativeDzeta(dz, u, v);
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(1);
         y = cellgeo.giveVertexCoordinates(i)->at(2);
         z = cellgeo.giveVertexCoordinates(i)->at(3);
@@ -246,8 +241,8 @@ FEI3dWedgeLin :: computeGlobalSurfaceMapping(IntArray &surfNodes, IntArray &elem
 
 double FEI3dWedgeLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  OOFEM_ERROR("FEI3dWedgeLin :: edgeGiveTransformationJacobian not implemented");
-  return 0.0;
+    OOFEM_ERROR("FEI3dWedgeLin :: edgeGiveTransformationJacobian not implemented");
+    return 0.0;
 }
 
 } // end namespace oofem

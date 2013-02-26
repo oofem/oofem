@@ -576,7 +576,7 @@ RCSDNLMaterialStatus :: giveInterface(InterfaceType type)
 int
 RCSDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
-    RCSDNLMaterialStatus *status = ( RCSDNLMaterialStatus * ) this->giveStatus(ip);
+    RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(stepN);
@@ -588,7 +588,7 @@ int
 RCSDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
 {
     int result;
-    RCSDNLMaterialStatus *status = ( RCSDNLMaterialStatus * ) this->giveStatus(ip);
+    RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
     FloatArray localStrainVectorForAverage;
 
     result = localStrainVectorForAverage.unpackFromCommBuffer(buff);
@@ -602,7 +602,7 @@ RCSDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     //
     // Note: status localStrainVectorForAverage memeber must be properly sized!
     //
-    RCSDNLMaterialStatus *status = ( RCSDNLMaterialStatus * ) this->giveStatus(ip);
+    RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
 
     return status->giveLocalStrainVectorForAverage().givePackSize(buff);
 }
