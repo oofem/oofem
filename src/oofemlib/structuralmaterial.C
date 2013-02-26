@@ -227,7 +227,7 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
      * caused by temperature, shrinkage and possibly by other phenomena.
      */
     FloatArray epsilonTemperature;
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     answer = reducedStrainVector;
     cs->computeStressIndependentStrainVector(epsilonTemperature, gp, stepN, mode);
@@ -1720,40 +1720,39 @@ StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 void
 StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArray &s, stressStrainPrincMode mode)
 //
-// This function computes Principal values of strains or stresses.
-// strains/stresses are stored in vector form in array s.
+// This function computes the principal values of strains or stresses.
+// Strains/stresses are stored in vector form in array s.
 // Engineering notation is used.
 //
-// Problem size (3D/2D) is recognized automatically according to
+// Problem size (3D/2D) is recognized automatically according to the
 // vector size.
 // If size = 6 -> 3D problem, then array s contains:
-//                            {Sxx,Syy,Szz,Syz,Szx,Sxy} if mode = stress_mode
-//                            {Exx,Eyy,Ezz,GMyz,GMzx,GMxy} if mode = strain mode
-// if size = 2 -> 2D problem, then array s contains:
-//                            {Sxx,Syy,Sxy} if mode = stress_mode
-//                            {Exx,Eyy,GMxy} if mode = strain mode
+//                            {Sxx,Syy,Szz,Syz,Szx,Sxy} if mode = principal_stress
+//                            {Exx,Eyy,Ezz,GMyz,GMzx,GMxy} if mode = principal_strain
+// if size = 3 -> 2D problem, then array s contains:
+//                            {Sxx,Syy,Sxy} if mode = principal_stress
+//                            {Exx,Eyy,GMxy} if mode = principal_strain
 //
-// mode      - principal strains
-//           - principal stress
-//           - principal deviatoric stress
-//           - ..
+// if size = 4 -> 2D problem (with normal out-of-plane component), then array s contains:
+//                            {Sxx,Syy,Szz,Sxy} if mode = principal_stress
+//                            {Exx,Eyy,Ezz,GMxy} if mode = principal_strain
 //
 // Return Values:
 //
-//    array sp -> principal strains or stresses
+//    array answer -> principal strains or stresses
 //
 {
     int size = s.giveSize();
-    double swap;
-    int nonzeroFlag = 0;
-    if ( !( ( size == 3 ) || ( size == 6 ) ) ) {
+    if ( !( ( size == 3 ) || ( size == 4 ) || ( size == 6 ) ) ) {
         OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Vector size mismatch");
     }
 
-    if ( s.giveSize() == 3 ) {
+    double swap;
+    int nonzeroFlag = 0;
+    if ( ( size == 3 ) || ( size == 4 ) ) {
         // 2D problem
         double ast, dst, D = 0.0;
-        answer.resize(2);
+        answer.resize(size-1);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1769,22 +1768,25 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         ast = s.at(1) + s.at(2);
         dst = s.at(1) - s.at(2);
         if ( mode == principal_strain ) {
-            D = dst * dst + s.at(3) * s.at(3);
+            D = dst * dst + s.at(size) * s.at(size);
         } else if ( mode == principal_stress ) {
-            D = dst * dst + 4.0 * s.at(3) * s.at(3);
+            D = dst * dst + 4.0 * s.at(size) * s.at(size);
         } else {
             OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: not supported");
         }
 
         if ( D < 0. ) {
-            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Imaginar roots ");
+            OOFEM_ERROR("StructuralMaterial :: ComputePrincipalValues: Imaginary roots ");
         }
 
         D = sqrt(D);
         answer.at(1) = 0.5 * ( ast - D );
         answer.at(2) = 0.5 * ( ast + D );
+	if ( size == 4 ) {
+	  answer.at(3) = s(3);
+	}
 
-        // sort result
+        // sort result (first two principal values only)
         if ( answer.at(1) > answer.at(2) ) {
             return;
         } else {
@@ -1840,8 +1842,8 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         }
 
         /*
-         * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
-         * This aloows to overcome various rounding errors when solving general cubic equation.
+         * Call cubic3r to ensure that all three real eigenvalues will be found, because we have symmetric tensor.
+         * This allows to overcome various rounding errors when solving general cubic equation.
          */
         cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & i );
 
@@ -1877,7 +1879,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
                                              const FloatArray &s,
                                              stressStrainPrincMode mode)
 //
-// This function cumputes Principal values & directions corresponding to principal values
+// This function computes the principal values & directions corresponding to principal values
 // of strains or streses.
 // strains/streses are stored in vector form in array s.
 // Engineering notation is used.
@@ -1885,16 +1887,15 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 // Problem size (3D/2D) is recognized automatically according to
 // vector size.
 // If size = 6 -> 3D problem, then array s contains:
-//                            {Sxx,Syy,Szz,Syz,Szx,Sxy} if mode = stress_mode
-//                            {Exx,Eyy,Ezz,GMyz,GMzx,GMxy} if mode = strain mode
-// if size = 2 -> 2D problem, then array s contains:
-//                            {Sxx,Syy,Sxy} if mode = stress_mode
-//                            {Exx,Eyy,GMxy} if mode = strain mode
+//                            {Sxx,Syy,Szz,Syz,Szx,Sxy} if mode = principal_stress
+//                            {Exx,Eyy,Ezz,GMyz,GMzx,GMxy} if mode = principal_strain
+// if size = 3 -> 2D problem, then array s contains:
+//                            {Sxx,Syy,Sxy} if mode = principal_stress
+//                            {Exx,Eyy,GMxy} if mode = principal_strain
 //
 // mode      - principal strains
 //           - principal stress
-//           - principal deviatoric stress
-//           - ..
+//
 // Input Values:
 // mode
 // s
@@ -1902,7 +1903,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 // Return Values:
 //
 // matrix dir -> principal directions of strains or stresses
-// array sp -> principal strains or stresses
+// array answer -> principal strains or stresses
 //
 {
     FloatMatrix ss;
@@ -1912,11 +1913,11 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
     int nonzeroFlag = 0;
 
     // printf ("size is %d\n",size);
-    if ( !( ( size == 3 ) || ( size == 6 ) ) ) {
+    if ( !( ( size == 3 ) || ( size == 4 ) || ( size == 6 ) ) ) {
         OOFEM_ERROR("StructuralMaterial :: computePrincipalValDir: Vector size mismatch");
     }
 
-    if ( s.giveSize() == 3 ) {
+    if ( ( size == 3 ) || ( size == 4 ) ) {
         // 2D problem
         ss.resize(2, 2);
         answer.resize(2);
@@ -1937,9 +1938,9 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
         ss.at(2, 2) = s.at(2);
 
         if ( mode == principal_strain ) {
-            ss.at(1, 2) = ss.at(2, 1) = 0.5 * s.at(3);
+            ss.at(1, 2) = ss.at(2, 1) = 0.5 * s.at(size);
         } else if ( mode == principal_stress ) {
-            ss.at(1, 2) = ss.at(2, 1) = s.at(3);
+            ss.at(1, 2) = ss.at(2, 1) = s.at(size);
         } else {
             OOFEM_ERROR("StructuralMaterial :: computePrincipalValDir: not supported");
         }
@@ -2260,7 +2261,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 // and normalized.
 //
 {
-    int i, j, k, maxJ = 0, size;
+    int maxJ = 0, size;
     double cosine, maxCosine, swap;
 
 #ifdef DEBUG
@@ -2284,11 +2285,12 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
     //
     // sort pVal and pDir
     size = pDir->giveNumberOfRows();
-    for ( i = 1; i <= size - 1; i++ ) {
+    for ( int i = 1; i <= size - 1; i++ ) {
         // find closest pDir vector to toPDir i-th vector
         maxCosine = 0.0;
-        for ( j = i; j <= size; j++ ) {
-            for ( k = 1, cosine = 0.; k <= size; k++ ) {
+        for ( int j = i; j <= size; j++ ) {
+            cosine = 0.;
+            for ( int k = 1; k <= size; k++ ) {
                 cosine += toPDir->at(k, i) * pDir->at(k, j);
             }
 
@@ -2305,7 +2307,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
             swap = pVal->at(maxJ);
             pVal->at(maxJ) = pVal->at(i);
             pVal->at(i) = swap;
-            for ( k = 1; k <= size; k++ ) {
+            for ( int k = 1; k <= size; k++ ) {
                 swap = pDir->at(k, maxJ);
                 pDir->at(k, maxJ) = pDir->at(k, i);
                 pDir->at(k, i) = swap;
@@ -2318,7 +2320,7 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 int
 StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoint, InternalStateType type)
 {
-    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
         status->letStressVectorBe(value);
         return 1;
@@ -2339,7 +2341,7 @@ StructuralMaterial :: setIPValue(const FloatArray &value, GaussPoint *aGaussPoin
 int
 StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_StressTensor ) {
         answer = status->giveStressVector();
         return 1;
@@ -2403,7 +2405,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             FloatArray gcoords, et2;
-            ( ( StructuralElement * ) aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
+            static_cast< StructuralElement * >( aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
             if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, atTime) ) ) {
                 OOFEM_ERROR3("StructuralMaterial :: giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
             }
@@ -2416,7 +2418,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
     } else if ( ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ) {
         FloatArray gc, val = status->giveStressVector();
         FloatMatrix base(3, 3);
-        ( ( StructuralElement * ) aGaussPoint->giveElement() )->computeGlobalCoordinates( gc, * aGaussPoint->giveCoordinates() );
+        static_cast< StructuralElement * >( aGaussPoint->giveElement() )->computeGlobalCoordinates( gc, * aGaussPoint->giveCoordinates() );
         double l = sqrt( gc.at(1) * gc.at(1) + gc.at(2) * gc.at(2) );
         if ( l > 1.e-4 ) {
             base.at(1, 1) = gc.at(1) / l;
@@ -2502,7 +2504,7 @@ StructuralMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGauss
         ( type == IST_CylindricalStressTensor ) || ( type == IST_CylindricalStrainTensor ) ||
         ( type == IST_ShellForceMomentumTensor ) ) {
         return this->giveSizeOfReducedStressStrainVector( aGaussPoint->giveMaterialMode() );
-    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
+    } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalPlasticStrainTensor ) ||
                ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
         return 3;
     } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {

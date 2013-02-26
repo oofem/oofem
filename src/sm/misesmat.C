@@ -81,8 +81,8 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveShearModulus();
-    K = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, sig0, IFT_MisesMat_sig0, "sig0"); // uniaxial yield stress
 
@@ -138,7 +138,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
                                                     const FloatArray &totalDefGrad,
                                                     TimeStep *atTime)
 {
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -350,7 +350,7 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
                                                    const FloatArray &totalStrain,
                                                    TimeStep *atTime)
 {
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     MaterialMode mode = gp->giveMaterialMode();
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -372,7 +372,7 @@ void MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &total
     FloatArray reducedStress;
     FloatArray strain, plStrain;
     //  MaterialMode mode = gp->giveMaterialMode();
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     StressVector fullStress(mode);
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -480,7 +480,7 @@ double
 MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 {
     double tempKappa, dam;
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     dam = status->giveDamage();
     computeCumPlastStrain(tempKappa, gp, atTime);
     double tempDam = computeDamageParam(tempKappa);
@@ -494,7 +494,7 @@ MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 
 void MisesMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *atTime)
 {
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     tempKappa = status->giveTempCumulativePlasticStrain();
 }
 
@@ -526,7 +526,7 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
         return;
     }
 
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
@@ -583,7 +583,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 {
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
     FloatArray stressVector;
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
     double tempKappa = status->giveTempCumulativePlasticStrain();
@@ -618,7 +618,7 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
         return;
     }
 
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double kappa = status->giveCumulativePlasticStrain();
     double dKappa = tempKappa - kappa;
@@ -672,7 +672,7 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 void
 MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     // start from the elastic stiffness
 
     FloatMatrix I(6, 6);
@@ -867,7 +867,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
 int
 MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(aGaussPoint);
+    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
         answer  = * status->givePlasDef();
         return 1;
@@ -1060,7 +1060,7 @@ void MisesMatStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrain.giveSize() == 0 ) {
-        plasticStrain.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
+        plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrain.zero();
     }
 

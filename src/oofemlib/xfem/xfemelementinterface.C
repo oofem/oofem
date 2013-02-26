@@ -79,7 +79,7 @@ void XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
             int mat = 0;
             if ( xf->giveEnrichmentItem( interactedEI.at(1) )->giveGeometry()->isOutside( triangles.at(i) ) ) {
                 mat = 1;
-            } else   {
+            } else {
                 mat = 2;
             }
 

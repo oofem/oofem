@@ -79,11 +79,11 @@ protected:
     */
     FloatArray strainSpaceHardeningVarsVector;
     FloatArray tempStrainSpaceHardeningVarsVector;
-    
+
     /// Yield function status indicator.
     int state_flag;
     int temp_state_flag;
-    
+
     /// Isotropic damage variables
     double damage, tempDamage;
 

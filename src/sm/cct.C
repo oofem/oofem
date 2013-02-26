@@ -361,17 +361,17 @@ Interface *
 CCTPlate :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return ( LayeredCrossSectionInterface * ) this;
+        return static_cast< LayeredCrossSectionInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return ( ZZErrorEstimatorInterface * ) this;
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return ( ZZRemeshingCriteriaInterface * ) this;
+        return static_cast< ZZRemeshingCriteriaInterface * >( this );
     }
 
 
@@ -399,11 +399,8 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection *cs;
-    double elthick;
-
-    cs = ( StructuralCrossSection * ) this->giveCrossSection();
-    elthick = cs->give(CS_Thickness);
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    double elthick = cs->give(CS_Thickness);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -429,10 +426,10 @@ int
 CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
 {
     if ( type == IST_ShellForceMomentumTensor ) {
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
         return 1;
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
         return 1;
     } else {
       return NLStructuralElement::giveIPValue(answer, gp, type, atTime);
@@ -490,10 +487,10 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     GaussPoint *gp;
     if ( type == IST_ShellForceMomentumTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStressVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStressVector();
     } else if ( type == IST_ShellStrainCurvatureTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        answer = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        answer = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
     } else {
         answer.resize(0);
     }

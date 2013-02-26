@@ -130,7 +130,7 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    int setIPValue(const FloatArray value, InternalStateType type);
+    int setIPValue(const FloatArray &value, InternalStateType type);
 
     virtual void restoreConsistency();
     virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }

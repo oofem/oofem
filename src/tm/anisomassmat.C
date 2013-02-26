@@ -108,8 +108,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 void
 AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = ( ( AnisotropicMassTransferMaterialStatus * ) this->giveStatus(gp) );
+    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(gp) );
 
     thisMaterialStatus->setPressureGradient(eps);
 
@@ -122,8 +121,7 @@ AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint
 int
 AnisotropicMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    AnisotropicMassTransferMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = ( ( AnisotropicMassTransferMaterialStatus * ) this->giveStatus(aGaussPoint) );
+    AnisotropicMassTransferMaterialStatus *thisMaterialStatus = static_cast< AnisotropicMassTransferMaterialStatus * >( this->giveStatus(aGaussPoint) );
     FloatMatrix temp;
 
     switch ( type ) {

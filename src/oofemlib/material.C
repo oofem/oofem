@@ -250,8 +250,7 @@ Material :: giveStatus(GaussPoint *gp) const
  * returns material status in gp corresponding to specific material class
  */
 {
-    MaterialStatus *status;
-    status = (MaterialStatus*) gp->giveMaterialStatus( this->giveNumber() );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);

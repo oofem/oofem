@@ -59,15 +59,13 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom";
     IRResultType result;
 
-    result = ActiveBoundaryCondition :: initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->gamma, IFT_SurfaceTensionBoundaryCondition_gamma, "gamma");
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_SurfaceTensionBoundaryCondition_useTangent, "usetangent");
     this->useTangent = val;
 
-    return IRRT_OK;
+    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,

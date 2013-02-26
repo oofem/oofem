@@ -44,7 +44,7 @@ namespace oofem {
 FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
 QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -55,7 +55,7 @@ Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     }
 
     return NULL;

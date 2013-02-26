@@ -62,10 +62,10 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );       //c++
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
 
     case LayeredCrossSectionInterfaceType:
-        return ( LayeredCrossSectionInterface * ) this;
+        return static_cast< LayeredCrossSectionInterface * >( this );
 
     default:
         return StructuralElement :: giveInterface(it);
@@ -1012,11 +1012,11 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     double zeta = 1.e30;
     if ( iSurf == 1 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * ( -0.5 );     // bottom surface -> iSurf = 1
-    } else if ( iSurf == 2 )   {
+    } else if ( iSurf == 2 ) {
         zeta = 0.0;                                                 // midplane surface -> iSurf = 2
-    } else if ( iSurf == 3 )   {
+    } else if ( iSurf == 3 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * 0.5;       // top surface -> iSurf = 3
-    } else  {
+    } else {
         _error("computePressureForce: incompatible load surface must be 1, 2 or 3");
     }
 
@@ -1169,7 +1169,8 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 #if 1
 
 void
-Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps) {
+Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps)
+{
     // Compute deformation gradient as open product(g_i, G_i)
     FloatArray gcov1, gcov2, gcov3, Gcon1, Gcon2, Gcon3;
     this->evalCovarBaseVectorsAt(gp, gcov1, gcov2, gcov3, genEps);
@@ -1187,7 +1188,8 @@ Shell7Base :: computeFAt(GaussPoint *gp, FloatMatrix &answer, FloatArray &genEps
 }
 
 void
-Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps) {
+Shell7Base :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &genEps)
+{
     // Computes the Green-Lagrange strain tensor: E=0.5(C-I)
     FloatMatrix F, E;
     this->computeFAt(gp, F, genEps);     // Deformation gradient
@@ -1211,7 +1213,7 @@ Shell7Base :: computeStressVector(FloatArray &answer, FloatArray &genEps, GaussP
 {
     FloatArray E;
     this->computeStrainVector(E, gp, stepN, genEps);     // Green-Lagrange strain vector
-    ( ( StructuralMaterial * ) mat )->giveRealStressVector(answer, ReducedForm, gp, E, stepN);
+    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, ReducedForm, gp, E, stepN);
 }
 
 void
@@ -1321,7 +1323,8 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 
 
 void
-Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta) {
+Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta)
+{
     FloatArray g1, g2, g3, S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
     FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a;
     double fac1, fac2, fac3, gam, dg1, dg2;
@@ -1386,7 +1389,8 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray
 #if 1
 
 void
-Shell7Base :: computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer) {
+Shell7Base :: computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer)
+{
     //thickness jacobian = ratio between volume and area: j0 = a3 + a2*zeta^2 + a1 * zeta
     // Returns array with a1-a3, used in expression for analytical integration of mass matrix.
     FloatArray lcoords = * gp->giveCoordinates();
@@ -1424,14 +1428,16 @@ Shell7Base :: computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer) {
 }
 
 void
-Shell7Base :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) {
+Shell7Base :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
     // TODO: add algorithm for this
     OOFEM_ERROR("Shell7Base :: computeLumpedMassMatrix - No lumping algorithm implemented");
 }
 
 
 void
-Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) {
+Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
     // Analytically integrated over the thickness. Constant density assumed.
     // => integration rule #2 = midplane only
     IntegrationRule *iRule = integrationRulesArray [ 1 ];
@@ -1524,7 +1530,8 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) {
 
 
 void
-Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, double &gam) {
+Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, double &gam)
+{
     double a1, a2, a3;
     FloatArray coeff;
     this->computeThicknessMappingCoeff(gp, coeff);
@@ -1549,7 +1556,8 @@ Shell7Base :: giveMassFactorsAt(GaussPoint *gp, FloatArray &factors, double &gam
 }
 
 void
-Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
+Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
+{
     // Num refers in this case to  numerical integration in both in-plane and through the thickness.
     // For analytically integrated throught he thickness, see computeMassMatrix
 
@@ -1698,7 +1706,8 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
 
 
 void
-Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep) {
+Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
+{
     // Analytically integrated over the thickness. Constant density assumed.
 
     IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule 2 for mid-plane integration only
@@ -1767,7 +1776,8 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep) {
 
 
 void
-Shell7Base :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c) {
+Shell7Base :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c)
+{
     // Computes the product a^T*b*c
     FloatMatrix temp;
     temp.beTProductOf(a, b);
@@ -1832,7 +1842,8 @@ Shell7Base :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 }
 
 void
-Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep) {
+Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const int iSurf, BoundaryLoad *surfLoad, TimeStep *tStep)
+{
     // Computes pressure loading. Acts normal to the current (deformed) surface.
 
     // Should be special integration rule for top and bottom surface!!
@@ -1862,7 +1873,8 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
 
 
 void
-Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep) {
+Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const int iSurf, FloatArray genEps, BoundaryLoad *surfLoad, TimeStep *tStep)
+{
     // Computes pressure loading. Acts normal to the current (deformed) surface.
 
     FloatArray g1, g2, g3, m, load, traction;
@@ -1872,11 +1884,11 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
     double zeta = 1.e30;
     if ( iSurf == 1 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * ( -0.5 );     // bottom surface -> iSurf = 1
-    } else if ( iSurf == 2 )   {
+    } else if ( iSurf == 2 ) {
         zeta = 0.0;                                                 // midplane surface -> iSurf = 2
-    } else if ( iSurf == 3 )   {
+    } else if ( iSurf == 3 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * 0.5;       // top surface -> iSurf = 3
-    } else  {
+    } else {
         _error("computePressureForceAt: incompatible load surface must be 1, 2 or 3");
     }
 
@@ -1888,9 +1900,9 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &answer, const i
         surfLoad->computeValueAt(load, tStep, * ( gp->giveCoordinates() ), VM_Total);        // pressure components
         traction.beVectorProductOf(g1, g2);        // normal vector (unnormalized)
         traction.times( -load.at(1) );
-    } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) )   {
+    } else if ( dynamic_cast< ConstantSurfaceLoad * >( surfLoad ) ) {
         surfLoad->computeValueAt(traction, tStep, * ( gp->giveCoordinates() ), VM_Total);        // traction vector
-    } else  {
+    } else {
         _error("computePressureForceAt: incompatible load type");
     }
 
@@ -1978,7 +1990,8 @@ Shell7Base :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 #if 1
 
 double
-Shell7Base :: computeAreaAround(GaussPoint *gp) {
+Shell7Base :: computeAreaAround(GaussPoint *gp)
+{
     FloatArray G1, G2, G3, temp;
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
@@ -1988,7 +2001,8 @@ Shell7Base :: computeAreaAround(GaussPoint *gp) {
 }
 
 double
-Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge) {
+Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge)
+{
     FloatArray G1, G3, temp;
     double detJ;
     this->edgeEvalInitialCovarBaseVectorsAt(gp, iedge, G1, G3);
@@ -1998,7 +2012,8 @@ Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge) {
 
 
 double
-Shell7Base :: computeVolumeAroundLayer(GaussPoint *gp, int layer) {
+Shell7Base :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
+{
     FloatArray G1, G2, G3, temp;
     double detJ;
     this->evalInitialCovarBaseVectorsAt(gp, G1, G2, G3);
@@ -2075,7 +2090,8 @@ Shell7Base :: giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArr
 }
 
 void
-Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q) {
+Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q)
+{
     /* Returns the Bond transformation matrix (M) between coordinate system 1 and 2, defined by the three base
      * vectors in each coordinate system g1i and g2i respectively.
      * Q is a transformation matrix defined as the direction cosines between the transformed system and the initial
@@ -2653,14 +2669,6 @@ Shell7Base :: computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &
 }
 
 
-
-
-
-
-
-
-
-
 #endif
 
 
@@ -2669,22 +2677,22 @@ Shell7Base :: computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &
 // Misc functions
 
 int
-Shell7Base :: giveVoigtIndex(const int ind1, const int ind2)
+Shell7Base :: giveVoigtIndex(int ind1, int ind2)
 {
     // Returns the Voigt index corresponding to two given tensor indices.
     if ( ind1 == 1 && ind2 == 1 ) {
         return 1;
-    } else if ( ind1 == 2 && ind2 == 2 )        {
+    } else if ( ind1 == 2 && ind2 == 2 ) {
         return 2;
-    } else if ( ind1 == 3 && ind2 == 3 )        {
+    } else if ( ind1 == 3 && ind2 == 3 ) {
         return 3;
-    } else if ( ( ind1 == 2 && ind2 == 3 ) || ( ind1 == 3 && ind2 == 2 ) )               {
+    } else if ( ( ind1 == 2 && ind2 == 3 ) || ( ind1 == 3 && ind2 == 2 ) ) {
         return 4;
-    } else if ( ( ind1 == 1 && ind2 == 3 ) || ( ind1 == 3 && ind2 == 1 ) )               {
+    } else if ( ( ind1 == 1 && ind2 == 3 ) || ( ind1 == 3 && ind2 == 1 ) ) {
         return 5;
-    } else if ( ( ind1 == 1 && ind2 == 2 ) || ( ind1 == 2 && ind2 == 1 ) )               {
+    } else if ( ( ind1 == 1 && ind2 == 2 ) || ( ind1 == 2 && ind2 == 1 ) ) {
         return 6;
-    } else  {
+    } else {
         OOFEM_ERROR("Error in giveVoigtIndex - bad indices");
         return -1;
     }

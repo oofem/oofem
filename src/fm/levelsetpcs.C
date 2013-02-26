@@ -178,8 +178,7 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
                     // get element level set gradient
                     ielem = domain->giveElement( elems->at(l) );
                     inodes = ielem->giveNumberOfNodes();
-                    interface = ( LevelSetPCSElementInterface * )
-                                ielem->giveInterface(LevelSetPCSElementInterfaceType);
+                    interface = static_cast< LevelSetPCSElementInterface * >( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
 
                     if ( interface ) {
                         interface->LS_PCS_computedN(dN);
@@ -255,7 +254,7 @@ LevelSetPCS :: giveMaterialMixtureAt(FloatArray &answer, FloatArray &position)
     answer.resize(2);
 
     Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(position);
-    LevelSetPCSElementInterface *interface = ( LevelSetPCSElementInterface * ) elem->giveInterface(LevelSetPCSElementInterfaceType);
+    LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >( elem->giveInterface(LevelSetPCSElementInterfaceType) );
     if ( interface ) {
         if ( elem->computeLocalCoordinates(N, position) ) {
             int inodes = elem->giveNumberOfNodes();
@@ -297,7 +296,7 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
             ielem = domain->giveElement(_ie);
             inodes = ielem->giveNumberOfNodes();
             fi.resize(inodes);
-            interface = ( LevelSetPCSElementInterface * ) ielem->giveInterface(LevelSetPCSElementInterfaceType);
+            interface = static_cast< LevelSetPCSElementInterface * >( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
             for ( i = 1; i <= inodes; i++ ) {
                 fi.at(i) = levelSetValues.at( ielem->giveDofManagerNumber(i) );
             }
@@ -313,11 +312,11 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
 #else
 
     Element *ielem = domain->giveElement(ie);
-    int i, inodes = ielem->giveNumberOfNodes();
-    LevelSetPCSElementInterface *interface = ( LevelSetPCSElementInterface * ) ielem->giveInterface(LevelSetPCSElementInterfaceType);
+    int inodes = ielem->giveNumberOfNodes();
+    LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
     FloatArray fi(inodes);
 
-    for ( i = 1; i <= inodes; i++ ) {
+    for ( int i = 1; i <= inodes; i++ ) {
         fi.at(i) = levelSetValues.at( ielem->giveDofManagerNumber(i) );
     }
 
@@ -445,7 +444,7 @@ void
 LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *atTime, PCSEqType t)
 {
     int i, j, l, _ig, inodes;
-    int ie, ndofman = domain->giveNumberOfDofManagers(), nelem   = domain->giveNumberOfElements();
+    int ie, ndofman = domain->giveNumberOfDofManagers(), nelem = domain->giveNumberOfElements();
     double alpha, dfi, help, sumkn, F, f, volume, gfi_norm;
     FloatMatrix dN;
     FloatArray gfi(nsd), fi(4), n(nsd), k(4), dfii(4);
@@ -461,8 +460,8 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
     for ( ie = 1; ie <= nelem; ie++ ) {
         ielem = domain->giveElement(ie);
         inodes = ielem->giveNumberOfNodes();
-        interface = ( LevelSetPCSElementInterface * )
-                    ielem->giveInterface(LevelSetPCSElementInterfaceType);
+        interface = static_cast< LevelSetPCSElementInterface * >
+                    ( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
 
         if ( interface ) {
             F = this->evalElemFContribution(t, ie, atTime);
@@ -541,8 +540,8 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
 double
 LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime)
 {
-    LevelSetPCSElementInterface *interface = ( LevelSetPCSElementInterface * )
-                                             domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType);
+    LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >
+                                             ( domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType) );
     if ( t == PCS_levelSetUpdate ) {
         return interface->LS_PCS_computeF(this, atTime);
     } else if ( t == PCS_levelSetRedistance ) {
@@ -556,8 +555,8 @@ LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime)
 double
 LevelSetPCS :: evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime)
 {
-    LevelSetPCSElementInterface *interface = ( LevelSetPCSElementInterface * )
-                                             domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType);
+    LevelSetPCSElementInterface *interface = static_cast< LevelSetPCSElementInterface * >
+                                             ( domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType) );
     if ( t == PCS_levelSetUpdate ) {
         return 0.0;
     } else if ( t == PCS_levelSetRedistance ) {

@@ -93,10 +93,7 @@ PlasticMaterial :: CreateStatus(GaussPoint *gp) const
  * creates new  material status  corresponding to this class
  */
 {
-    PlasticMaterialStatus *status;
-
-    status = new PlasticMaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new PlasticMaterialStatus(1, this->giveDomain(), gp);
 }
 
 
@@ -119,13 +116,13 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     FloatArray strainVectorR, plasticStrainVectorR, *gradientVectorR;
     FloatArray helpVec, helpVec2;
     double yieldValue, Gamma, dGamma, helpVal1, helpVal2;
-    int i, strSize, totSize, nIterations = 0;
+    int strSize, totSize, nIterations = 0;
     FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
     FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix helpMtrx, helpMtrx2;
 
-    PlasticMaterialStatus *status = ( PlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
@@ -202,11 +199,11 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         helpVec2.beProductOf(helpMtrx, helpVec);
 
         // Update state variables and consistency parameter
-        for ( i = 1; i <= strSize; i++ ) {
+        for ( int i = 1; i <= strSize; i++ ) {
             plasticStrainVectorR.at(i) += helpVec2.at(i);
         }
 
-        for ( i = strSize + 1; i <= totSize; i++ ) {
+        for ( int i = strSize + 1; i <= totSize; i++ ) {
             strainSpaceHardeningVariables.at(i - strSize) += helpVec2.at(i);
         }
 
@@ -277,9 +274,9 @@ PlasticMaterial :: ComputeGradientVector(GaussPoint *gp,
      */
     FloatArray *stressGradient, stressGradientR;
     FloatArray *stressSpaceHardVarGradient, *answer;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
-    int i, isize, size;
+    int isize, size;
 
     stressGradient = this->ComputeStressGradient(gp, fullStressVector,
                                                  fullStressSpaceHardeningVars);
@@ -296,11 +293,11 @@ PlasticMaterial :: ComputeGradientVector(GaussPoint *gp,
     }
 
     answer = new FloatArray(size);
-    for ( i = 1; i <= isize; i++ ) {
+    for ( int i = 1; i <= isize; i++ ) {
         answer->at(i) = stressGradientR.at(i);
     }
 
-    for ( i = isize + 1; i <= size; i++ ) {
+    for ( int i = isize + 1; i <= size; i++ ) {
         answer->at(i) = stressSpaceHardVarGradient->at(i - isize);
     }
 
@@ -321,8 +318,8 @@ PlasticMaterial :: ComputeResidualVector(GaussPoint *gp, double Gamma,
 
     FloatArray oldPlasticStrainVectorR, oldStrainSpaceHardeningVariables;
     FloatArray *answer;
-    int i, isize, size;
-    PlasticMaterialStatus *status = ( PlasticMaterialStatus * ) this->giveStatus(gp);
+    int isize, size;
+    PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
 
     isize = plasticStrainVectorR->giveSize();
     size = gradientVectorR->giveSize();
@@ -331,11 +328,11 @@ PlasticMaterial :: ComputeResidualVector(GaussPoint *gp, double Gamma,
     status->givePlasticStrainVector(oldPlasticStrainVectorR);
     status->giveStrainSpaceHardeningVars(oldStrainSpaceHardeningVariables);
 
-    for ( i = 1; i <= isize; i++ ) {
+    for ( int i = 1; i <= isize; i++ ) {
         answer->at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR->at(i) + Gamma *gradientVectorR->at(i);
     }
 
-    for ( i = isize + 1; i <= size; i++ ) {
+    for ( int i = isize + 1; i <= size; i++ ) {
         answer->at(i) = oldStrainSpaceHardeningVariables.at(i - isize) - strainSpaceHardeningVariables->at(i - isize) + Gamma *gradientVectorR->at(i);
     }
 
@@ -370,7 +367,7 @@ PlasticMaterial :: computeConsistentModuli(FloatMatrix &answer,
      */
     FloatMatrix gradientMatrix;
     FloatMatrix helpInverse;
-    int i, j, isize, size;
+    int isize, size;
 
     isize = elasticModuliInverse.giveNumberOfRows();
     if ( this->hasHardening() ) {
@@ -386,22 +383,22 @@ PlasticMaterial :: computeConsistentModuli(FloatMatrix &answer,
     // assemble consistent moduli
     helpInverse.resize(size, size);
 
-    for ( i = 1; i <= isize; i++ ) {
-        for ( j = 1; j <= isize; j++ ) {
+    for ( int i = 1; i <= isize; i++ ) {
+        for ( int j = 1; j <= isize; j++ ) {
             helpInverse.at(i, j) = elasticModuliInverse.at(i, j) + Gamma *gradientMatrix.at(i, j);
         }
 
-        for ( j = isize + 1; j <= size; j++ ) {
+        for ( int j = isize + 1; j <= size; j++ ) {
             helpInverse.at(i, j) = Gamma * gradientMatrix.at(i, j);
         }
     }
 
-    for ( i = isize + 1; i <= size; i++ ) {
-        for ( j = 1; j <= isize; j++ ) {
+    for ( int i = isize + 1; i <= size; i++ ) {
+        for ( int j = 1; j <= isize; j++ ) {
             helpInverse.at(i, j) = Gamma * gradientMatrix.at(i, j);
         }
 
-        for ( j = isize + 1; j <= size; j++ ) {
+        for ( int j = isize + 1; j <= size; j++ ) {
             helpInverse.at(i, j) = hardeningModuliInverse.at(i - isize, j - isize) + Gamma *gradientMatrix.at(i, j);
         }
     }
@@ -431,9 +428,9 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatArray strainSpaceHardeningVariables, helpVector;
     IntArray mask;
     double s, Gamma;
-    int sizeR, i, j;
-    PlasticMaterialStatus *status = ( PlasticMaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    int sizeR;
+    PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     // ask for plastic consistency parameter
@@ -492,8 +489,8 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     consistentSubModuli.beSubMatrixOf( consistentModuli, 1, sizeR, 1, gradientVector->giveSize() );
     helpVector.beProductOf(consistentSubModuli, * gradientVector);
 
-    for ( i = 1; i <= sizeR; i++ ) {
-        for ( j = 1; j <= sizeR; j++ ) {
+    for ( int i = 1; i <= sizeR; i++ ) {
+        for ( int j = 1; j <= sizeR; j++ ) {
             answerR.at(i, j) += ( 1. / s ) * helpVector.at(i) * helpVector.at(j);
         }
     }
@@ -520,7 +517,7 @@ PlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
     //
     // assembles diagonal moduli from elasticModuliInverse and hardeningModuliInverse
     //
-    int size1, size2, i, j;
+    int size1, size2;
 
     size1 = elasticModuliInverse.giveNumberOfRows();
     if ( hardeningModuliInverse.giveNumberOfRows() ) {
@@ -532,14 +529,14 @@ PlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
     answer.resize(size2, size2);
     answer.zero();
 
-    for ( i = 1; i <= size1; i++ ) {
-        for ( j = 1; j <= size1; j++ ) {
+    for ( int i = 1; i <= size1; i++ ) {
+        for ( int j = 1; j <= size1; j++ ) {
             answer.at(i, j) = elasticModuliInverse.at(i, j);
         }
     }
 
-    for ( i = size1 + 1; i <= size2; i++ ) {
-        for ( j = size1 + 1; j <= size2; j++ ) {
+    for ( int i = size1 + 1; i <= size2; i++ ) {
+        for ( int j = size1 + 1; j <= size2; j++ ) {
             answer.at(i, j) = hardeningModuliInverse.at(i - size1, j - size1);
         }
     }
@@ -751,7 +748,7 @@ PlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseFor
 int
 PlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    PlasticMaterialStatus *status = ( PlasticMaterialStatus * ) this->giveStatus(aGaussPoint);
+    PlasticMaterialStatus *status = static_cast< PlasticMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
@@ -875,7 +872,7 @@ void PlasticMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
@@ -883,7 +880,7 @@ void PlasticMaterialStatus :: initTempStatus()
     tempPlasticStrainVector = plasticStrainVector;
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
-        strainSpaceHardeningVarsVector.resize( ( ( PlasticMaterial * ) gp->giveMaterial() )->
+        strainSpaceHardeningVarsVector.resize( static_cast< PlasticMaterial * >( gp->giveMaterial() )->
                                               giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }

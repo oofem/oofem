@@ -1,5 +1,8 @@
 set (sm_element
-    lspace.C lspacebb.C qspace.C ltrspace.C
+    lspace.C lspacebb.C qspace.C qspacegrad.C
+    ltrspace.C qtrspace.C qtrspacegrad.C
+    lwedge.C qwedge.C qwedgegrad.C
+    htselement.C
     truss1d.C truss2d.C truss3d.C
     trplanstrss.C trplanestrain.C trplanrot.C
     libeam2d.C libeam2dnl.C
@@ -64,7 +67,7 @@ set (sm_material
     b3solidmat.C
     rcsd.C rcsde.C rcsdnl.C
     m4.C
-    idm1.C idmnl1.C
+    idm1.C idmnl1.C idmgrad1.C
     mazarsmodel.C mazarsmodelnl.C
     druckerPragerPlasticitySM.C
     druckerpragercutmat.C
@@ -90,6 +93,7 @@ set (sm_material
     latticematstatus.C
     latticedamage2d.C
     dustmat.C
+    lsmastermat.C lsmastermatgrad.C
     )
 
 set (sm_error

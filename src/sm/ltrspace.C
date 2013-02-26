@@ -70,27 +70,27 @@ Interface *
 LTRSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return ( ZZErrorEstimatorInterface * ) this;
+        return static_cast< ZZErrorEstimatorInterface * >( this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return ( ZZRemeshingCriteriaInterface * ) this;
+        return static_cast< ZZRemeshingCriteriaInterface * >( this );
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return ( MMAShapeFunctProjectionInterface * ) this;
+        return static_cast< MMAShapeFunctProjectionInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;
@@ -196,6 +196,30 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
     }
 }
 
+
+void
+LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x12] defgrad-displacement matrix {BF} of the receiver,
+// evaluated at aGaussPoint.
+// BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
+{
+    int i, j;
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(9, 12);
+    answer.zero();
+
+    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( j = 1; j <= 4; j++ ) { // 8 nodes
+            answer.at(3 * i - 2, 3 * j - 2) =
+                answer.at(3 * i - 1, 3 * j - 1) =
+                answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
+        }
+    }
+}
+
 double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
@@ -223,6 +247,17 @@ LTRSpace :: initializeFrom(InputRecord *ir)
 }
 
 
+
+MaterialMode
+LTRSpace :: giveMaterialMode()
+{
+    if ( nlGeometry > 1 ) {
+        return _3dMat_F;
+    } else {
+        return _3dMat;
+    }
+}
+
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
@@ -230,7 +265,7 @@ void LTRSpace :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, _3dMat);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, this->giveMaterialMode());
     }
 }
 
@@ -574,7 +609,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();

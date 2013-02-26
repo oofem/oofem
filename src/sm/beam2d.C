@@ -76,7 +76,7 @@ Interface *
 Beam2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return ( LayeredCrossSectionInterface * ) this;
+        return static_cast< LayeredCrossSectionInterface * >( this );
     }
 
     return NULL;

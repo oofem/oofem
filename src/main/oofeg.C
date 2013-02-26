@@ -63,7 +63,7 @@
 
 #include <sstream>
 //
-// for c++ compiler to be succesfull on some c files
+// for c++ compiler to be successful on some c files
 //
 
 //#define OOFEG_DEVEL
@@ -364,8 +364,9 @@ main(int argc, char *argv[])
     dr.finish();
     problem->checkProblemConsistency();
 
+#ifdef OOFEG_DEVEL
     mask = ESI_GRAPHIC_EDITOR_MASK;
-#ifndef OOFEG_DEVEL
+#else
     mask = 0;
     mask |= ESI_TRACK_AREA_MASK;
     mask |= ESI_PROMPT_AREA_MASK;
@@ -944,22 +945,21 @@ void OOFEGSimpleCmd(char *buf)
     char *remain;
     int stepinfo [ 2 ];
     int istep, pstep, iversion = 0;
-    contextIOResultType result;
 
-    readSimpleString(buf, cmd, & remain); // read comand
+    readSimpleString(buf, cmd, & remain); // read command
     if ( !strncasecmp(cmd, "active_step", 11) ) {
         pstep = gc [ 0 ].getActiveStep();
         istep = atoi(remain);
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            result = problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             stepinfo [ 0 ] = pstep;
             stepinfo [ 1 ] = iversion;
             try {
-                result = problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+                problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
             } catch(ContextIOERR & m2) {
                 m2.print();
                 exit(1);
@@ -1039,7 +1039,7 @@ void defPlot(Widget wid, XtPointer cl, XtPointer cd)
 void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd)
 {
     int init = 1, id, i, j, nnodes;
-    double mincoords [ 3 ], maxcoords [ 3 ];
+    double mincoords [ 3 ] = {0.,0.,0.}, maxcoords [ 3 ] = {0.,0.,0.};
     double coord, maxdef = 0.0;
     Domain *domain;
     DofManager *dman;
@@ -1122,12 +1122,8 @@ int  updateDefPlotFlag()
 }
 
 
-
-
-
 void nextStep(Widget wid, XtPointer cl, XtPointer cd)
 {
-    contextIOResultType result;
     int istep, prevStep, stepStep, prevStepVersion, istepVersion;
     int stepInfo [ 2 ];
 
@@ -1147,7 +1143,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 1 ] = istepVersion;
             printf("OOFEG: restoring context file %d.%d\n", stepInfo [ 0 ], stepInfo [ 1 ]);
             try {
-                result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 istepVersion = 0;
@@ -1170,7 +1166,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
 
             //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
             try {
-                result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
@@ -1192,7 +1188,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
-            result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+            problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
@@ -1204,7 +1200,6 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
 
 void previousStep(Widget wid, XtPointer cl, XtPointer cd)
 {
-    contextIOResultType result;
     int istep, prevStep, stepStep = problem->giveContextOutputStep();
     int stepInfo [ 2 ];
     if ( stepStep == 0 ) {
@@ -1218,7 +1213,7 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 0 ] = istep;
             stepInfo [ 1 ] = 0;
             try {
-                result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
@@ -1241,7 +1236,7 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
-            result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+            problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
@@ -1973,7 +1968,7 @@ void do_print_state(EView *v_p, caddr_t data_p)
     while ( ( grep = EVGetFromSelectionList() ) != NULL ) {
         if ( EGGetAppObj(grep) != NULL ) {
             // print info
-            obj = ( FEMComponent * ) EGGetAppObj(grep);
+            obj = reinterpret_cast< FEMComponent * >( EGGetAppObj(grep) );
             if ( gc [ 0 ].getActiveStep() != -1 ) {
                 obj->printOutputAt( fp, gc [ 0 ].getActiveProblem()->giveCurrentStep() );
             } else {
@@ -2169,8 +2164,6 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
     int estep, sstep;
     int stepinfo [ 2 ];
     int istep, iversion = 0;
-    contextIOResultType result;
-
 
     ac = 0;
     XtSetArg(al [ ac ], XtNstring, & s);
@@ -2201,7 +2194,7 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
         stepinfo [ 0 ] = istep;
         stepinfo [ 1 ] = iversion;
         try {
-            result = problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
+            problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
         } catch(ContextIOERR & m) {
             m.print();
             return;
@@ -2333,7 +2326,7 @@ toggleTransparentContours(Widget w, XtPointer ptr, XtPointer call_data)
     if ( IsContourBgTransparent() ) {
         SetContourBgTransparent(true);
     } else {
-        SetContourBgTransparent(true);
+        SetContourBgTransparent(true); ///@todo Duplicated branch here. Should this be false?
     }
 }
 

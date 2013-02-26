@@ -156,13 +156,10 @@ FloatMatrix :: ~FloatMatrix()
 FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
-    double *P1, *P2;
     this->resize(src.nRows, src.nColumns);
 
-    P1 = values;
-    P2 = src.values;
     for ( int i = 0; i < nRows * nColumns; i++ ) {
-        P1 [ i ] = P2 [ i ];
+        values [ i ] = src.values [ i ];
     }
 
     return * this;
@@ -203,7 +200,7 @@ double FloatMatrix :: operator() (int i, int j) const
 void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int ii, jj, size = src.giveNumberOfRows();
-    size = src.giveNumberOfRows();
+
 #if DEBUG
     if ( size != loc.giveSize() ) {
         OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
@@ -803,7 +800,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         for ( int i = nRows; i > 1; i-- ) {
             piv = tmp.at(i, i);
             for ( int j = i - 1; j > 0; j-- ) {
-                linkomb = tmp.at(j, i) / tmp.at(i, i);
+                linkomb = tmp.at(j, i) / piv;
                 for ( int k = i; k > 0; k-- ) {
                     tmp.at(j, k) -= tmp.at(i, k) * linkomb;
                 }

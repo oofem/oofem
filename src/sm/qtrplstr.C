@@ -51,7 +51,7 @@ namespace oofem {
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), SpatialLocalizerInterface(),
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;
@@ -71,13 +71,13 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
      *    return ( ZZNodalRecoveryModelInterface * ) this;
      */
     if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     }
 
     return NULL;

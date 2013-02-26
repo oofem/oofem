@@ -39,7 +39,7 @@ namespace oofem {
 FieldManager :: ~FieldManager() 
 {
     std :: map< FieldType, fieldRecord* > :: iterator i;
-    for( i = this->externalFields.begin(); i != this->externalFields.end(); i++ ) {
+    for( i = this->externalFields.begin(); i != this->externalFields.end(); ++i ) {
       delete (*i).second;
     }
 }

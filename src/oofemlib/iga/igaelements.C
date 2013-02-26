@@ -58,7 +58,7 @@ BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) :
 
 IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir)
 {
-    BSplineInterpolation *interpol = ( BSplineInterpolation * ) this->giveInterpolation();
+    BSplineInterpolation *interpol = static_cast< BSplineInterpolation * >( this->giveInterpolation() );
     IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
 
@@ -77,7 +77,7 @@ NURBSPlaneStressElement :: NURBSPlaneStressElement(int n, Domain *aDomain) : IGA
 
 IRResultType NURBSPlaneStressElement :: initializeFrom(InputRecord *ir)
 {
-    NURBSInterpolation *interpol = ( NURBSInterpolation * ) this->giveInterpolation();
+    NURBSInterpolation *interpol = static_cast< NURBSInterpolation * >( this->giveInterpolation() );
     IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
 
@@ -100,7 +100,7 @@ NURBSSpace3dElement :: NURBSSpace3dElement(int n, Domain *aDomain) : IGAElement(
 
 IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir)
 {
-    NURBSInterpolation *interpol = ( NURBSInterpolation * ) this->giveInterpolation();
+    NURBSInterpolation *interpol = static_cast< NURBSInterpolation * >( this->giveInterpolation() );
     IGAElement :: initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
 

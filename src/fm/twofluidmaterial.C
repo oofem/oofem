@@ -145,7 +145,7 @@ TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint
 {
     double vof = this->giveTempVOF(gp);
     FloatArray v0, v1;
-    FluidDynamicMaterialStatus *status = ( FluidDynamicMaterialStatus * ) this->giveStatus(gp);
+    FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) );
 
     this->giveMaterial(0)->computeDeviatoricStressVector(v0, gp, eps, tStep);
     this->giveMaterial(1)->computeDeviatoricStressVector(v1, gp, eps, tStep);

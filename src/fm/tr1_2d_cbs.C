@@ -177,13 +177,12 @@ TR1_2D_CBS :: computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *atTime)
 void
 TR1_2D_CBS :: computeDiagonalMassMtrx(FloatArray &answer, TimeStep *atTime)
 {
-    int i;
     answer.resize(6);
 
     //double rho = this->giveMaterial()->give('d');
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
     double mm = rho * this->area / 3.0;
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(i) = mm;
     }
 }
@@ -200,7 +199,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
     double dt = stepN->giveTimeIncrement();
     //double rho = this->giveMaterial()->give('d');
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), stepN);
-    int nLoads, i;
+    int nLoads;
     bcGeomType ltype;
     Load *load;
     FloatArray gVector;
@@ -253,8 +252,8 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *stepN)
 
 
     // body load (gravity effects)
-    nLoads    = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
+    nLoads = this->giveBodyLoadArray()->giveSize();
+    for ( int i = 1; i <= nLoads; i++ ) {
         load  = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
@@ -278,21 +277,22 @@ void
 TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray stress;
-    int i, j, nLoads;
+    int nLoads;
+    FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
-    double coeff, rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    double coeff, rho = mat->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     bcGeomType ltype;
     Load *load;
     FloatArray gVector;
     double ar3 = area / 3.0;
 
-    stress = ( ( FluidDynamicMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
+    stress = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
     // \int dNu/dxj \Tau_ij
     answer.resize(6);
-    for ( i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         answer.at( ( i ) * 2 + 1 ) = -area * ( stress.at(1) * b [ i ] + stress.at(3) * c [ i ] );
         answer.at( ( i + 1 ) * 2 ) = -area * ( stress.at(3) * b [ i ] + stress.at(2) * c [ i ] );
     }
@@ -300,9 +300,9 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     // add boundary termms
     coeff = ar3 * rho;
     // body load (gravity effects)
-    nLoads    = this->giveBodyLoadArray()->giveSize();
-    for ( i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
+    nLoads = this->giveBodyLoadArray()->giveSize();
+    for ( int i = 1; i <= nLoads; i++ ) {
+        load = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -322,9 +322,8 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     int n1, n2, code;
     double tx, ty, l, nx, ny;
     nLoads = boundarySides.giveSize();
-    for ( j = 1; j <= nLoads; j++ ) {
+    for ( int j = 1; j <= nLoads; j++ ) {
         code = boundaryCodes.at(j);
-        i = boundarySides.at(j);
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
             //printf ("TR1_2D_CBS :: computeDiffusionTermsI tractions detected\n");
 
@@ -333,7 +332,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
             int nLoads, n;
             BoundaryLoad *load;
             // integrate tractions
-            n1 = i;
+            n1 = boundarySides.at(j);
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
 
             tx = giveNode(n2)->giveCoordinate(1) - giveNode(n1)->giveCoordinate(1);
@@ -343,10 +342,10 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
             ny = -tx / l;
 
             // loop over boundary load array
-            nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( i = 1; i <= nLoads; i++ ) {
-                n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-                load  = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
+            nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+            for ( int i = 1; i <= nLoads; i++ ) {
+                n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+                load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
                 if ( load ) {
                     load->computeValueAt(t, tStep, coords, VM_Total);
 
@@ -388,7 +387,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
 {
     // computes velocity terms on RHS for density equation
 
-    int i, j, uadr, vadr;
+    int uadr, vadr;
     double velu = 0.0, velv = 0.0; // dudx=0.0, dvdy=0.0;
     double theta1 = domain->giveEngngModel()->giveUnknownComponent(Theta_1, VM_Unknown, tStep, domain, NULL);
     //double rho = this->giveMaterial()->give('d');
@@ -402,14 +401,14 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     ustar.times(theta1);
     u.add(ustar);
 
-    for ( i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         uadr = i * 2 + 1;
         vadr = ( i + 1 ) * 2;
         velu += u.at(uadr);
         velv += u.at(vadr);
     }
 
-    for ( i = 0; i < 3; i++ ) {
+    for ( int i = 0; i < 3; i++ ) {
         answer.at(i + 1) = area * ( ( b [ i ] * velu + c [ i ] * velv ) ) / 3.0;
     }
 
@@ -421,15 +420,14 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
 
     // loop over sides
     int code;
-    for ( j = 1; j <= boundarySides.giveSize(); j++ ) {
+    for ( int j = 1; j <= boundarySides.giveSize(); j++ ) {
         code = boundaryCodes.at(j);
         if ( ( code & FMElement_PrescribedPressureBC ) ) {
             continue;
         } else if ( ( code & FMElement_PrescribedUnBC ) ) {
             this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Total, tStep, u);
 
-            i = boundarySides.at(j);
-            n1 = i;
+            n1 = boundarySides.at(j);
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
 
             //if (giveNode(n1)->isBoundary() && giveNode(n2)->isBoundary()) {
@@ -465,10 +463,9 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
      * this pressure is enforced as dirichlet bc in density/pressure equation
      */
     FloatArray stress;
-    int i, j;
     double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL);
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    stress = ( ( FluidDynamicMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
+    stress = static_cast< FluidDynamicMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveDeviatoricStressVector();
     stress.times(1. / Re);
 
     answer.resize(3);
@@ -478,7 +475,7 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
     int n1, n2, code, sid;
     double tx, ty, l, nx, ny, pcoeff;
     //IntArray nodecounter (3);
-    for ( j = 1; j <= boundarySides.giveSize(); j++ ) {
+    for ( int j = 1; j <= boundarySides.giveSize(); j++ ) {
         code = boundaryCodes.at(j);
         sid = boundarySides.at(j);
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
@@ -506,10 +503,10 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
             // then zero traction is assumed !!!
 
             // loop over boundary load array
-            nLoads    = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( i = 1; i <= nLoads; i++ ) {
-                n     = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
-                id    = boundaryLoadArray.at(i * 2);
+            nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+            for ( int i = 1; i <= nLoads; i++ ) {
+                n  = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+                id = boundaryLoadArray.at(i * 2);
                 if ( id != sid ) {
                     continue;
                 }
@@ -539,19 +536,16 @@ TR1_2D_CBS :: computeNumberOfNodalPrescribedTractionPressureContributions(FloatA
      * p = tau(i,j)*n(i)*n(j) - traction(i)*n(i)
      * this pressure is enforced as dirichlet bc in density/pressure equation
      */
-    int i, j;
-
     answer.resize(3);
     answer.zero();
 
     // loop over sides
     int n1, n2, code;
     IntArray nodecounter(3);
-    for ( j = 1; j <= boundarySides.giveSize(); j++ ) {
+    for ( int j = 1; j <= boundarySides.giveSize(); j++ ) {
         code = boundaryCodes.at(j);
-        i = boundarySides.at(j);
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
-            n1 = i;
+            n1 = boundarySides.at(j);
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
             answer.at(n1)++;
             answer.at(n2)++;
@@ -654,19 +648,19 @@ Interface *
 TR1_2D_CBS :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return ( EIPrimaryFieldInterface * ) this;
+        return static_cast< EIPrimaryFieldInterface * >( this );
     }
     //<RESTRICTED_SECTION>
     else if ( interface == LEPlicElementInterfaceType ) {
-        return ( LEPlicElementInterface * ) this;
+        return static_cast< LEPlicElementInterface * >( this );
     }
 
     //</RESTRICTED_SECTION>
@@ -675,7 +669,8 @@ TR1_2D_CBS :: giveInterface(InterfaceType interface)
 
 
 int
-TR1_2D_CBS :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
+TR1_2D_CBS :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
     FloatArray lcoords;
     return this->computeLocalCoordinates(lcoords, coords);
 }
@@ -720,7 +715,7 @@ TR1_2D_CBS :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeSt
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
     eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
-    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 
 int
@@ -805,7 +800,6 @@ void
 TR1_2D_CBS :: formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
                                      const FloatArray &normal, const double p, bool updFlag)
 {
-    int i;
     double x, y;
     Vertex v;
 
@@ -814,7 +808,7 @@ TR1_2D_CBS :: formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
     if ( this->vof <= TRSUPG_ZERO_VOF ) {
         return;
     } else if ( this->vof >= ( 1 - TRSUPG_ZERO_VOF ) ) {
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( updFlag ) {
                 x = matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() );
                 y = matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() );
@@ -838,7 +832,7 @@ void
 TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
                                       const FloatArray &normal, const double p, bool updFlag)
 {
-    int i, next;
+    int next;
     bool nodeIn [ 3 ];
     double nx = normal.at(1), ny = normal.at(2), x, y;
     double tx, ty;
@@ -846,7 +840,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
 
     matvolpoly.clear();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( updFlag ) {
             x = matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() );
             y = matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() );
@@ -863,7 +857,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
     }
 
     if ( nodeIn [ 0 ] && nodeIn [ 1 ] && nodeIn [ 2 ] ) { // all nodes inside
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( updFlag ) {
                 x = matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() );
                 y = matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() );
@@ -880,7 +874,7 @@ TR1_2D_CBS :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
     } else if ( !( nodeIn [ 0 ] || nodeIn [ 1 ] || nodeIn [ 2 ] ) ) { // all nodes outside
         return;
     } else {
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             next = i < 3 ? i + 1 : 1;
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
@@ -1032,7 +1026,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
                                                     FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                     TimeStep *atTime)
 {
-    int i, j, indx, es;
+    int indx, es;
     double sum;
     FloatArray elemvector, f, lc;
     //FloatMatrix n;
@@ -1048,9 +1042,10 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
         // this->computeNmatrixAt(n, &lc);
         // compute answer
         answer.resize( dofId.giveSize() );
-        for ( i = 1; i <= dofId.giveSize(); i++ ) {
+        for ( int i = 1; i <= dofId.giveSize(); i++ ) {
             if ( ( indx = elemdofs.findFirstIndexOf( dofId.at(i) ) ) ) {
-                for ( j = 1, sum = 0.0; j <= 3; j++ ) {
+                sum = 0.0;
+                for ( int j = 1; j <= 3; j++ ) {
                     sum += lc.at(j) * elemvector.at(es * ( j - 1 ) + indx);
                 }
 
@@ -1249,8 +1244,6 @@ contextIOResultType TR1_2D_CBS :: restoreContext(DataStream *stream, ContextMode
 
     return CIO_OK;
 }
-
-
 
 
 #ifdef __OOFEG

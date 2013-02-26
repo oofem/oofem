@@ -95,7 +95,7 @@ double &SparseGridMtxLU :: ElementAt(int i, int j)
     if ( nbi < nbj ) {
         aux_bi_idx = Column_nbj->FindExistingBlockIndex(nbi);
         column_nbj_bi_data = Columns_data + Column_nbj->column_start_idx + aux_bi_idx * block_storage;
-    } else if ( nbi > nbj )       {
+    } else if ( nbi > nbj ) {
         aux_bj_idx = Column_nbi->FindExistingBlockIndex(nbj);
         row_nbi_bj_data = Rows_data + Column_nbi->column_start_idx + aux_bj_idx * block_storage;
     }
@@ -173,7 +173,7 @@ void SparseGridMtxLU :: LoadMatrixNumbers(SparseMatrixF &sm)
                 if ( nbi < nbj ) {
                     aux_bi_idx = Column_nbj->FindExistingBlockIndex(nbi);
                     column_nbj_bi_data = Columns_data + Column_nbj->column_start_idx + aux_bi_idx * block_storage;
-                } else if ( nbi > nbj )       {
+                } else if ( nbi > nbj ) {
                     aux_bj_idx = Column_nbi->FindExistingBlockIndex(nbj);
                     row_nbi_bj_data = Rows_data + Column_nbi->column_start_idx + aux_bj_idx * block_storage;
                 }
@@ -432,7 +432,7 @@ void SparseGridMtxLU :: SchurComplementFactorization(int fixed_blocks)
                     for ( long i = noJentries - 1; i >= 0; i-- ) {
                         p_blockJ_pattern [ min_bi_J = columnJentries [ i ] ] = ~( i * block_storage );
                     }
-                } else   {                                                      // Here we would read from the A22 matrix, therefore the scalar product is shorter (bi<blocks_to_factor)
+                } else {                                                      // Here we would read from the A22 matrix, therefore the scalar product is shorter (bi<blocks_to_factor)
                     for ( long i = noJentries - 1; i >= 0; i-- ) {
                         if ( columnJentries [ i ] < blocks_to_factor ) {
                             p_blockJ_pattern [ min_bi_J = columnJentries [ i ] ] = ~( i * block_storage );

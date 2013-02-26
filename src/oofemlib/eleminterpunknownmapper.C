@@ -170,7 +170,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
     }
 #endif
 
-    interface = ( EIPrimaryUnknownMapperInterface * ) ( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
+    interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
         interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
 #if 1

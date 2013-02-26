@@ -66,7 +66,7 @@ TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *atTime)
 {
-    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(gp);
+    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
     FloatMatrix elasticity, compliance;
 
@@ -86,7 +86,7 @@ TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &total
     double tempAlpha;
     FloatArray tempPlasDef;
 
-    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(gp);
+    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
     tempPlasDef.resize(6);
     tempAlpha = 0.;
@@ -133,7 +133,7 @@ TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     this->constructIsoComplTensor(compliance, eps0, nu0);
     elasticity.beInverseOf(compliance);
 
-    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(gp);
+    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
     this->initGpForNewStep(gp);
 
@@ -187,7 +187,7 @@ TrabBoneEmbed :: initializeFrom(InputRecord *ir)
 int
 TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(aGaussPoint);
+    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.;

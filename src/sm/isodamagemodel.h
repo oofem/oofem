@@ -73,7 +73,7 @@ protected:
     double crack_angle;
     /// Crack orientation normalized to damage magnitude. This is useful for plotting cracks as a vector field (paraview etc.).
     FloatArray crackVector;
-    
+
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
     double stressWork;
@@ -118,7 +118,6 @@ public:
     void giveCrackVector(FloatArray &answer);
     /// Sets crack vector to given value. This is useful for plotting cracks as a vector field (paraview etc.).
     void setCrackVector(FloatArray cv) { crackVector = cv; }
-    
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.

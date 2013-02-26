@@ -91,7 +91,7 @@ RankineMatGrad :: giveCharacteristicMatrix(FloatMatrix &answer,
 void
 RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    RankineMatStatus *status = ( RankineMatStatus * ) this->giveStatus(gp);
+    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double tempDamage = status->giveTempDamage();
     double damage = status->giveDamage();
     double gprime;
@@ -121,7 +121,7 @@ RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm 
 void
 RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    RankineMatGradStatus *status = ( RankineMatGradStatus * ) this->giveStatus(gp);
+    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     answer.resize(1, 3);
     answer.zero();
     if ( mode != TangentStiffness ) {
@@ -184,7 +184,7 @@ RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseForm for
         return;
     }
 
-    RankineMatGradStatus *status = ( RankineMatGradStatus * ) this->giveStatus(gp);
+    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     double damage = status->giveDamage();
     double tempDamage = status->giveTempDamage();
     if ( tempDamage - damage <= negligible_damage ) {
@@ -214,7 +214,7 @@ void
 RankineMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                        const FloatArray &totalStrain, TimeStep *atTime)
 {
-    RankineMatGradStatus *status = ( RankineMatGradStatus * ) this->giveStatus(gp);
+    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     this->initTempStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
@@ -259,7 +259,7 @@ void
 RankineMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
 {
     double nlCumPlastStrain;
-    RankineMatGradStatus *status = ( RankineMatGradStatus * ) this->giveStatus(gp);
+    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
     FloatArray strain;
     strain = status->giveTempStrainVector();
@@ -271,7 +271,7 @@ RankineMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep 
 double
 RankineMatGrad :: giveNonlocalCumPlasticStrain(GaussPoint *gp)
 {
-    RankineMatGradStatus *status = ( RankineMatGradStatus * ) this->giveStatus(gp);
+    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     FloatArray strain = status->giveTempStrainVector();
     int size = strain.giveSize();
     double answer = strain.at(size);
@@ -380,9 +380,9 @@ RankineMatGradStatus :: initTempStatus()
 
     if ( plasticStrain.giveSize() == 0 ) {
         if ( gp->giveMaterialMode() == _PlaneStressGrad ) {
-            plasticStrain.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_PlaneStress) );
+            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_PlaneStress) );
         } else if ( gp->giveMaterialMode() == _3dMatGrad ) {
-            plasticStrain.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_3dMat) );
+            plasticStrain.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector(_3dMat) );
         }
 
         plasticStrain.zero();

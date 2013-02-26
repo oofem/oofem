@@ -123,15 +123,14 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     FloatArray strainIncrement, elasticStrainVectorR;
     FloatArray strainVectorR, plasticStrainVectorR;
     FloatArray helpVec, helpVec2;
-    int i;
     FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
     FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix helpMtrx, helpMtrx2;
     IntArray activeConditionMap(this->nsurf);
     FloatArray gamma;
 
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
@@ -154,16 +153,16 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
         this->cuttingPlaneReturn(fullStressVector, activeConditionMap, gamma, form, gp, strainVectorR,
                                  plasticStrainVectorR, strainSpaceHardeningVariables, atTime);
     }
-        
+
     status->letTempStrainVectorBe(totalStrain);
     crossSection->giveReducedCharacteristicVector(helpVec, gp, fullStressVector);
-    
+
     //perform isotropic damage on effective stress
     double omega = computeDamage(gp, strainSpaceHardeningVariables, atTime);
     status->letTempDamageBe(omega);
     helpVec.times(1.-omega);
     //end of damage part
-    
+
     status->letTempStressVectorBe(helpVec);
 
     status->letTempPlasticStrainVectorBe(plasticStrainVectorR);
@@ -176,7 +175,7 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     // update state flag
     int newState, state = status->giveStateFlag();
     bool yieldFlag = false;
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         if ( gamma.at(i) > 0. ) {
             yieldFlag = true;
         }
@@ -223,7 +222,6 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
     FloatArray fullStressVector;
     FloatArray strainIncrement, elasticStrainVectorR;
     FloatArray fullStressSpaceHardeningVars, residualVectorR, gradientVectorR;
-    ;
     FloatArray helpVector, helpVector2;
     FloatArray dgamma, dgammared, tempGamma, dkappa;
     FloatMatrix elasticModuli, hardeningModuli, consistentModuli;
@@ -237,7 +235,7 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
     FloatArray rhs;
     double yieldValue;
     int nIterations = 0;
-    int i, j, strSize;
+    int strSize;
     int elastic, restart, actSurf, indx;
     bool yieldConsistency, init = true;
     bool hasHardening = this->hasHardening();
@@ -253,7 +251,7 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
         loadGradSigVecPtr  = & loadGradSigVec;
     }
 
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
 huhu: //label for goto
 
@@ -270,7 +268,6 @@ huhu: //label for goto
     // compute elastic moduli and its inverse
     this->computeReducedElasticModuli(elasticModuli, gp, atTime);
     elasticModuliInverse.beInverseOf(elasticModuli);
-    // delete elasticModuli;
 
     //
     // Elastic Predictor
@@ -292,7 +289,7 @@ huhu: //label for goto
         initialConditionMap.zero();
     }
 
-    for ( i = 1; i <= this->nsurf; i++ ) {
+    for ( int i = 1; i <= this->nsurf; i++ ) {
         yieldValue = this->computeYieldValueAt(gp, i, fullStressVector, strainSpaceHardeningVariables);
         if ( yieldValue > YIELD_TOL ) {
             elastic = 0;
@@ -327,7 +324,7 @@ huhu: //label for goto
         do {
             do { // restart loop
                  // compute gradients
-                for ( i = 1; i <= nsurf; i++ ) {
+                for ( int i = 1; i <= nsurf; i++ ) {
                     this->computeReducedStressGradientVector(yieldGradSigVec [ i - 1 ], yieldFunction, i, gp, fullStressVector,
                                                              strainSpaceHardeningVariables);
                     if ( hasHardening ) {
@@ -337,7 +334,7 @@ huhu: //label for goto
                 }
 
                 if ( this->plType == nonassociatedPT ) {
-                    for ( i = 1; i <= nsurf; i++ ) {
+                    for ( int i = 1; i <= nsurf; i++ ) {
                         this->computeReducedStressGradientVector(loadGradSigVec [ i - 1 ], loadFunction, i, gp, fullStressVector,
                                                                  strainSpaceHardeningVariables);
                         if ( hasHardening ) {
@@ -354,7 +351,7 @@ huhu: //label for goto
 #ifdef DEBUG
                 if ( debug ) {
                     printf("Convergence[actSet: ");
-                    for ( i = 1; i <= nsurf; i++ ) {
+                    for ( int i = 1; i <= nsurf; i++ ) {
                         printf( "%d ", activeConditionMap.at(i) );
                     }
 
@@ -365,7 +362,7 @@ huhu: //label for goto
 
                 // check convergence
                 yieldConsistency = true;
-                for ( i = 1; i <= nsurf; i++ ) {
+                for ( int i = 1; i <= nsurf; i++ ) {
                     if ( activeConditionMap.at(i) ) {
                         yieldValue = this->computeYieldValueAt(gp, i, fullStressVector, strainSpaceHardeningVariables);
                         if ( fabs(yieldValue) >= YIELD_TOL ) {
@@ -402,7 +399,7 @@ huhu: //label for goto
                     }
 
 #endif
-                    for ( i = 1; i <= this->nsurf; i++ ) {
+                    for ( int i = 1; i <= this->nsurf; i++ ) {
                         yieldValue = this->computeYieldValueAt(gp, i, fullStressVector, strainSpaceHardeningVariables);
 
 #ifdef DEBUG
@@ -421,12 +418,12 @@ huhu: //label for goto
 #ifdef DEBUG
                     if ( debug ) {
                         printf("\nStress: ");
-                        for ( i = 1; i <= fullStressVector.giveSize(); i++ ) {
+                        for ( int i = 1; i <= fullStressVector.giveSize(); i++ ) {
                             printf( " %e", fullStressVector.at(i) );
                         }
 
                         printf("\nKappa : ");
-                        for ( i = 1; i <= strainSpaceHardeningVariables.giveSize(); i++ ) {
+                        for ( int i = 1; i <= strainSpaceHardeningVariables.giveSize(); i++ ) {
                             printf( " %e", strainSpaceHardeningVariables.at(i) );
                         }
 
@@ -440,7 +437,7 @@ huhu: //label for goto
                         actSurf = 0;
                         newmap.zero();
                         // buid new actsurf mask
-                        for ( i = 1; i <= this->nsurf; i++ ) {
+                        for ( int i = 1; i <= this->nsurf; i++ ) {
                             yieldValue = this->computeYieldValueAt(gp, i, fullStressVector, strainSpaceHardeningVariables);
                             if ( ( ( activeConditionMap.at(i) ) && ( gamma.at(i) >= 0.0 ) ) || ( yieldValue > YIELD_TOL ) ) {
                                 elastic = 0;
@@ -477,7 +474,8 @@ huhu: //label for goto
 #endif
                         }
 
-                        for ( actSurf = 0, i = 1; i <= nsurf; i++ ) {
+                        actSurf = 0;
+                        for ( int i = 1; i <= nsurf; i++ ) {
                             if ( activeConditionMap.at(i) ) {
                                 actSurf++;
                             }
@@ -549,16 +547,16 @@ huhu: //label for goto
                                                                  fullStressVector, strainSpaceHardeningVariables, gamma);
                 }
 
-                for ( i = 1; i <= nsurf; i++ ) {
+                for ( int i = 1; i <= nsurf; i++ ) {
                     if ( ( indx = activeConditionMap.at(i) ) ) {
                         if ( hasHardening ) {
                             helpVector.beTProductOf(ks, yieldGradKVec [ i - 1 ]);
                             helpVector.add(yieldGradSigVec [ i - 1 ]);
-                            for ( j = 1; j <= strSize; j++ ) {
+                            for ( int j = 1; j <= strSize; j++ ) {
                                 lmat.at(indx, j) = helpVector.at(j);
                             }
                         } else {
-                            for ( j = 1; j <= strSize; j++ ) {
+                            for ( int j = 1; j <= strSize; j++ ) {
                                 lmat.at(indx, j) = yieldGradSigVec [ i - 1 ].at(j);
                             }
                         }
@@ -571,13 +569,13 @@ huhu: //label for goto
                             rmat.add(helpMtrx);
                         }
 
-                        for ( j = 1; j <= strSize; j++ ) {
+                        for ( int j = 1; j <= strSize; j++ ) {
                             rmat.at(j, indx) += ( * loadGradSigVecPtr ) [ i - 1 ].at(j);
                         }
 
                         if ( hasHardening ) {
                             helpVector2.beTProductOf(kl, yieldGradKVec [ i - 1 ]);
-                            for ( j = 1; j <= actSurf; j++ ) {
+                            for ( int j = 1; j <= actSurf; j++ ) {
                                 gmat.at(indx, j) = ( -1.0 ) * helpVector2.at(j);
                             }
                         }
@@ -601,7 +599,7 @@ huhu: //label for goto
                 gmat.solveForRhs(rhs, dgammared);
 
                 // assign gammas
-                for ( i = 1; i <= this->nsurf; i++ ) {
+                for ( int i = 1; i <= this->nsurf; i++ ) {
                     if ( ( indx = activeConditionMap.at(i) ) ) {
                         dgamma.at(i) = dgammared.at(indx);
                     } else {
@@ -619,7 +617,7 @@ huhu: //label for goto
                     //
 
                     restart = 0;
-                    for ( i = 1; i <= this->nsurf; i++ ) {
+                    for ( int i = 1; i <= this->nsurf; i++ ) {
                         if ( tempGamma.at(i) < 0.0 ) {
                             restart = 1;
                         }
@@ -629,7 +627,7 @@ huhu: //label for goto
                         // build up new activeConditionMap and restart the iterartion from begining
                         actSurf = 0;
                         activeConditionMap.zero();
-                        for ( i = 1; i <= this->nsurf; i++ ) {
+                        for ( int i = 1; i <= this->nsurf; i++ ) {
                             if ( tempGamma.at(i) > 0.0 ) {
                                 actSurf += 1;
                                 activeConditionMap.at(i) = actSurf;
@@ -658,7 +656,7 @@ huhu: //label for goto
 
             helpVector2.resize(strSize);
             // Update state variables and consistency parameter
-            for ( i = 1; i <= nsurf; i++ ) {
+            for ( int i = 1; i <= nsurf; i++ ) {
                 if ( activeConditionMap.at(i) ) {
                     ( * loadGradSigVecPtr ) [ i - 1 ].times( dgamma.at(i) );
                     residualVectorR.add( ( * loadGradSigVecPtr ) [ i - 1 ] );
@@ -681,7 +679,7 @@ huhu: //label for goto
             helpVector2.beProductOf(elasticModuliInverse, helpVector);
 
             gamma.add(dgamma);
-            for ( i = 1; i <= strSize; i++ ) {
+            for ( int i = 1; i <= strSize; i++ ) {
                 plasticStrainVectorR.at(i) += helpVector2.at(i);
             }
 
@@ -708,7 +706,7 @@ huhu: //label for goto
                 // issue warning
                 fprintf( stderr, "\nclosestPointReturn (mat no. %d): reached max number of iterations\n", this->giveNumber() );
                 fprintf(stderr, "activeSet: ");
-                for ( i = 1; i <= nsurf; i++ ) {
+                for ( int i = 1; i <= nsurf; i++ ) {
                     fprintf( stderr, "%d ", activeConditionMap.at(i) );
                 }
 
@@ -730,7 +728,7 @@ huhu: //label for goto
                 actSurf = 0;
                 newmap.zero();
                 // check for active conditions
-                for ( i = 1; i <= this->nsurf; i++ ) {
+                for ( int i = 1; i <= this->nsurf; i++ ) {
                     if ( activeConditionMap.at(i) ) {
                         if ( gamma.at(i) < 0.0 ) {
                             smartCandidate = true;
@@ -773,7 +771,8 @@ huhu: //label for goto
 #endif
                     }
 
-                    for ( actSurf = 0, i = 1; i <= nsurf; i++ ) {
+                    actSurf = 0;
+                    for ( int i = 1; i <= nsurf; i++ ) {
                         if ( activeConditionMap.at(i) ) {
                             actSurf++;
                         }
@@ -783,7 +782,7 @@ huhu: //label for goto
                 } else {
                     IntArray newMap(nsurf);
                     // select any possible
-                    for ( i = 1; i <= this->nsurf; i++ ) {
+                    for ( int i = 1; i <= this->nsurf; i++ ) {
                         if ( initialConditionMap.at(i) ) {
                             actSurf = 1;
                             newMap.at(i) = 1;
@@ -850,7 +849,6 @@ huhu: //label for goto
                     // debug line
                     nIterations = 0;
                     goto huhu;
-                    break;
                 }
             }
         } while ( 1 );
@@ -886,7 +884,7 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
     bool yieldConsistency, init = true;
     bool hasHardening = this->hasHardening();
 
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
     if ( this->plType == associatedPT ) {
         loadGradSigVecPtr = & yieldGradSigVec;
@@ -1234,7 +1232,6 @@ huhu: //label for goto
                     // debug line
                     nIterations = 0;
                     goto huhu;
-                    break;
                 }
             }
         } while ( 1 );
@@ -1252,7 +1249,7 @@ MPlasticMaterial2 :: computeReducedStressGradientVector(FloatArray &answer, func
                                                         const FloatArray &strainSpaceHardeningVariables)
 {
     FloatArray stressGradient;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->computeStressGradientVector(stressGradient, ftype, isurf, gp, stressVector,
@@ -1270,30 +1267,26 @@ MPlasticMaterial2 :: computeResidualVector(FloatArray &answer, GaussPoint *gp, c
     /* Computes Residual vector for closes point projection algorithm */
 
     FloatArray oldPlasticStrainVectorR;
-    int i, j, size;
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
+    int size;
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
     size = plasticStrainVectorR.giveSize();
 
     answer.resize(size);
     status->givePlasticStrainVector(oldPlasticStrainVectorR);
 
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         answer.at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR.at(i);
     }
 
-    for ( i = 1; i <= this->nsurf; i++ ) {
+    for ( int i = 1; i <= this->nsurf; i++ ) {
         if ( activeConditionMap.at(i) ) {
-            for ( j = 1; j <= size; j++ ) {
+            for ( int j = 1; j <= size; j++ ) {
                 answer.at(j) += gamma.at(i) * gradientVectorR [ i - 1 ].at(j);
             }
         }
     }
 }
-
-
-
-
 
 
 void
@@ -1305,7 +1298,7 @@ MPlasticMaterial2 :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
 
     FloatMatrix de;
     FloatArray reducedAnswer;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->computeReducedElasticModuli(de, gp, atTime);
@@ -1403,11 +1396,11 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     IntArray activeConditionMap, mask;
     FloatArray gamma;
-    int strSize, i, j, indx, actSurf = 0;
+    int strSize, indx, actSurf = 0;
     bool hasHardening = this->hasHardening();
 
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
@@ -1432,7 +1425,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     // plastic case
     //
     // determine number of active surfaces
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         if ( activeConditionMap.at(i) ) {
             actSurf++;
         }
@@ -1454,7 +1447,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
                                    activeConditionMap, fullStressVector, strainSpaceHardeningVariables);
 
     //computee gmatInv
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         this->computeReducedStressGradientVector(yieldGradSigVec [ i - 1 ], yieldFunction, i, gp, fullStressVector,
                                                  strainSpaceHardeningVariables);
         if ( hasHardening ) {
@@ -1464,7 +1457,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     }
 
     if ( this->plType == nonassociatedPT ) {
-        for ( i = 1; i <= nsurf; i++ ) {
+        for ( int i = 1; i <= nsurf; i++ ) {
             this->computeReducedStressGradientVector(loadGradSigVec [ i - 1 ], loadFunction, i, gp, fullStressVector,
                                                      strainSpaceHardeningVariables);
             if ( hasHardening ) {
@@ -1489,16 +1482,16 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
                                                      fullStressVector, strainSpaceHardeningVariables, gamma);
     }
 
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         if ( ( indx = activeConditionMap.at(i) ) ) {
             if ( hasHardening ) {
                 helpVector.beTProductOf(ks, yieldGradKVec [ i - 1 ]);
                 helpVector.add(yieldGradSigVec [ i - 1 ]);
-                for ( j = 1; j <= strSize; j++ ) {
+                for ( int j = 1; j <= strSize; j++ ) {
                     vmat.at(indx, j) = helpVector.at(j);
                 }
             } else {
-                for ( j = 1; j <= strSize; j++ ) {
+                for ( int j = 1; j <= strSize; j++ ) {
                     vmat.at(indx, j) = yieldGradSigVec [ i - 1 ].at(j);
                 }
             }
@@ -1511,14 +1504,14 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
                 umat.add(helpMtrx);
             }
 
-            for ( j = 1; j <= strSize; j++ ) {
+            for ( int j = 1; j <= strSize; j++ ) {
                 umat.at(j, indx) += ( ( * loadGradSigVecPtr ) [ i - 1 ] ).at(j);
             }
 
 
             if ( hasHardening ) {
                 helpVector2.beTProductOf(kl, yieldGradKVec [ i - 1 ]);
-                for ( j = 1; j <= actSurf; j++ ) {
+                for ( int j = 1; j <= actSurf; j++ ) {
                     gmat.at(indx, j) = ( -1.0 ) * helpVector2.at(j);
                 }
             }
@@ -1572,11 +1565,11 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
 
     IntArray activeConditionMap, mask;
     FloatArray gamma;
-    int strSize, i, j, indx, actSurf = 0;
+    int strSize, indx, actSurf = 0;
     bool hasHardening = this->hasHardening();
 
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( this->plType == associatedPT ) {
@@ -1601,7 +1594,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     // plastic case
     //
     // determine number of active surfaces
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         if ( activeConditionMap.at(i) ) {
             actSurf++;
         }
@@ -1616,8 +1609,8 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
     strSize = elasticModuli.giveNumberOfRows();
 
-    //computee gmatInv
-    for ( i = 1; i <= nsurf; i++ ) {
+    //compute gmatInv
+    for ( int i = 1; i <= nsurf; i++ ) {
         this->computeReducedStressGradientVector(yieldGradSigVec [ i - 1 ], yieldFunction, i, gp, fullStressVector,
                                                  strainSpaceHardeningVariables);
         if ( hasHardening ) {
@@ -1627,7 +1620,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     }
 
     if ( this->plType == nonassociatedPT ) {
-        for ( i = 1; i <= nsurf; i++ ) {
+        for ( int i = 1; i <= nsurf; i++ ) {
             this->computeReducedStressGradientVector(loadGradSigVec [ i - 1 ], loadFunction, i, gp, fullStressVector,
                                                      strainSpaceHardeningVariables);
             if ( hasHardening ) {
@@ -1648,28 +1641,28 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
                                                      fullStressVector, strainSpaceHardeningVariables, gamma);
     }
 
-    for ( i = 1; i <= nsurf; i++ ) {
+    for ( int i = 1; i <= nsurf; i++ ) {
         if ( ( indx = activeConditionMap.at(i) ) ) {
             if ( hasHardening ) {
                 helpVector.beTProductOf(ks, yieldGradKVec [ i - 1 ]);
                 helpVector.add(yieldGradSigVec [ i - 1 ]);
-                for ( j = 1; j <= strSize; j++ ) {
+                for ( int j = 1; j <= strSize; j++ ) {
                     vmat.at(indx, j) = helpVector.at(j);
                 }
             } else {
-                for ( j = 1; j <= strSize; j++ ) {
+                for ( int j = 1; j <= strSize; j++ ) {
                     vmat.at(indx, j) = yieldGradSigVec [ i - 1 ].at(j);
                 }
             }
 
-            for ( j = 1; j <= strSize; j++ ) {
+            for ( int j = 1; j <= strSize; j++ ) {
                 umat.at(j, indx) += ( * loadGradSigVecPtr ) [ i - 1 ].at(j);
             }
 
 
             if ( hasHardening ) {
                 helpVector2.beTProductOf(kl, yieldGradKVec [ i - 1 ]);
-                for ( j = 1; j <= actSurf; j++ ) {
+                for ( int j = 1; j <= actSurf; j++ ) {
                     gmat.at(indx, j) = ( -1.0 ) * helpVector2.at(j);
                 }
             }
@@ -1964,7 +1957,7 @@ MPlasticMaterial2 :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseF
 int
 MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    MPlasticMaterial2Status *status = ( MPlasticMaterial2Status * ) this->giveStatus(aGaussPoint);
+    MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_PlasticStrainTensor ) {
         status->givePlasticStrainVector(answer);
         return 1;
@@ -2081,9 +2074,8 @@ int
 MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask, int degree, int size)
 {
     long val = 0;
-    std :: set< long > :: iterator it;
-    int i, candDegree = 0, candSize = candidateMask.giveSize();
-    for ( i = 1; i <= candSize; i++ ) {
+    int candDegree = 0, candSize = candidateMask.giveSize();
+    for ( int i = 1; i <= candSize; i++ ) {
         if ( candidateMask.at(i) ) {
             candDegree++;
         }
@@ -2105,10 +2097,9 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
     } else {
         // try to generate suitable candidate from candidateMask if possible
         // first construct array of candidates
-        int j = 1;
         IntArray candidateArray(candDegree);
         IntArray ind(degree);
-        for ( i = 1; i <= candSize; i++ ) {
+        for ( int i = 1, j = 1; i <= candSize; i++ ) {
             if ( candidateMask.at(i) ) {
                 candidateArray.at(j++) = i;
             }
@@ -2116,7 +2107,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 
         // first try first degree candidates
         int activeIndx = degree;
-        for ( i = 1; i <= degree; i++ ) {
+        for ( int i = 1; i <= degree; i++ ) {
             ind.at(i) = i;
         }
 
@@ -2124,7 +2115,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
         do {
             result.zero();
             int ii, count = 1;
-            for ( i = 1; i <= degree; i++ ) {
+            for ( int i = 1; i <= degree; i++ ) {
                 ii = candidateArray.at( ind.at(i) );
                 if ( !result.at(ii) ) {
                     result.at(ii) = count++;
@@ -2133,7 +2124,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 
             // order result array
             count = 1;
-            for ( i = 1; i <= size; i++ ) {
+            for ( int i = 1; i <= size; i++ ) {
                 if ( result.at(i) ) {
                     result.at(i) = count++;
                 }
@@ -2169,7 +2160,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
     IntArray ind(degree);
     // first try first degree candidates
     int activeIndx = degree;
-    for ( i = 1; i <= degree; i++ ) {
+    for ( int i = 1; i <= degree; i++ ) {
         ind.at(i) = 1;
     }
 
@@ -2177,7 +2168,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
     do {
         result.zero();
         int ii, count = 1;
-        for ( i = 1; i <= degree; i++ ) {
+        for ( int i = 1; i <= degree; i++ ) {
             ii = ind.at(i);
             if ( !result.at(ii) ) {
                 result.at(ii) = count++;
@@ -2186,7 +2177,7 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 
         // order result array
         count = 1;
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             if ( result.at(i) ) {
                 result.at(i) = count++;
             }
@@ -2222,29 +2213,20 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 }
 
 
-
-
-
-
-#ifdef __OOFEG
-#endif
-
-
-
-
-
-
 //
 // SmearedCrackingMaterialStatus Class
 //
 
 MPlasticMaterial2Status :: MPlasticMaterial2Status(int n, Domain *d, GaussPoint *g) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector()
+    strainSpaceHardeningVarsVector(), tempStrainSpaceHardeningVarsVector(),
+    state_flag(MPlasticMaterial2Status :: PM_Elastic),
+    temp_state_flag(MPlasticMaterial2Status :: PM_Elastic),
+    damage(0.),
+    tempDamage(0.),
+    gamma(),
+    tempGamma()
 {
-    state_flag = temp_state_flag = MPlasticMaterial2Status :: PM_Elastic;
-    gamma = tempGamma = 0.;
-    damage = tempDamage = 0.;
 }
 
 MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
@@ -2253,8 +2235,7 @@ MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
 void
 MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i, n;
-
+    int n;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( ( state_flag == MPlasticMaterial2Status :: PM_Yielding ) || ( state_flag == MPlasticMaterial2Status :: PM_Unloading ) ) {
@@ -2266,23 +2247,23 @@ MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
 
         n = plasticStrainVector.giveSize();
         fprintf(file, " Plastic strains");
-        for ( i = 1; i <= n; i++ ) {
+        for ( int i = 1; i <= n; i++ ) {
             fprintf( file, " % .4e", plasticStrainVector.at(i) );
         }
 
         if ( strainSpaceHardeningVarsVector.giveSize() ) {
             n = strainSpaceHardeningVarsVector.giveSize();
             fprintf(file, " Strain space hardening vars");
-            for ( i = 1; i <= n; i++ ) {
+            for ( int i = 1; i <= n; i++ ) {
                 fprintf( file, " % .4e", strainSpaceHardeningVarsVector.at(i) );
             }
         }
-        
+
         fprintf( file, " ActiveConditionMap" );
-        for ( i = 1; i <= activeConditionMap.giveSize() ; i++ ) {
+        for ( int i = 1; i <= activeConditionMap.giveSize() ; i++ ) {
             fprintf( file, " %d", activeConditionMap.at(i) );
         }
-        
+
     }
 
     fprintf(file, "}\n");
@@ -2297,7 +2278,7 @@ void MPlasticMaterial2Status :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
@@ -2305,7 +2286,7 @@ void MPlasticMaterial2Status :: initTempStatus()
     tempPlasticStrainVector = plasticStrainVector;
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
-        strainSpaceHardeningVarsVector.resize( ( ( MPlasticMaterial2 * ) gp->giveMaterial() )->
+        strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial2 * >( gp->giveMaterial() )->
                                               giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }
@@ -2317,7 +2298,6 @@ void MPlasticMaterial2Status :: initTempStatus()
     tempGamma = gamma;
     tempActiveConditionMap = activeConditionMap;
 }
-
 
 
 void

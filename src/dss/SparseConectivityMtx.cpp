@@ -113,7 +113,7 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, Orderi
     if ( node_order ) {
         nprm = node_order->perm->Items;
         n = node_order->order->Count / block_size;
-    } else   {
+    } else {
         n = ( long ) sm.neq / block_size + ( ( ( sm.neq % block_size ) == 0 ) ? 0 : 1 );
     }
 
@@ -602,7 +602,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         //Write("Permuting..");
         order->cm = new SparseConectivityMtxII(* this, order);
         //Writeln(MC_());
-    } else if ( ord == Ordering :: ApproxMinimumDegree )       {
+    } else if ( ord == Ordering :: ApproxMinimumDegree ) {
         //CS();Write("Symbolic factorization...");
         Writeln(" ordering            : ApproxMinimumDegree");
         Write("Symbolic QG factorization   : ");
@@ -612,14 +612,14 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         //Write("Permuting..");
         order->cm = new SparseConectivityMtxII(* this, order);
         //Writeln(MC_());
-    } else if ( ord == Ordering :: ApproxMinimumDegreeAA )       {
+    } else if ( ord == Ordering :: ApproxMinimumDegreeAA ) {
         //CS();Write("Symbolic factorization...");
         Writeln(" ordering            : ApproxMinimumDegree (aggressive absorbtion)");
         Write("Symbolic QG factorization   : ");
         order = GenerateAMD(fixed);
         GenerateFillInPresorted(order);
         order->cm = new SparseConectivityMtxII(* this, order);
-    } else if ( ord == Ordering :: ApproxMinimumDegreeIncomplete )       {
+    } else if ( ord == Ordering :: ApproxMinimumDegreeIncomplete ) {
         //CS();Write("Symbolic factorization...");
         //backup this matrix
         Writeln(" ordering            : ApproxMinimumDegreeIncomplete");
@@ -632,7 +632,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         order->cm = new SparseConectivityMtxII(* mtxA, order);
         delete mtxA;
         //Writeln(MC_());
-    } else if ( ord == Ordering :: None )       {
+    } else if ( ord == Ordering :: None ) {
         //CS();Write("Symbolic factorization...");
         Writeln(" ordering            : None");
         Write("Symbolic QG factorization   : ");
@@ -644,7 +644,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         //Write("Permuting..");
         order->cm = new SparseConectivityMtxII(* this, order);
         //Writeln(MC_());
-    } else if ( ord == Ordering :: ReverseCuthillMcKee )       {
+    } else if ( ord == Ordering :: ReverseCuthillMcKee ) {
         Writeln(" ordering            : Reverse Cuthill-McKee");
         Write("Symbolic QG factorization   : ");
         clock_t start = MT.ClockStart();
@@ -653,7 +653,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         Write("...");
         GenerateFillInPresorted(order);
         order->cm = new SparseConectivityMtxII(* this, order);
-    } else if ( ord == Ordering :: CuthillMcKee )       {
+    } else if ( ord == Ordering :: CuthillMcKee ) {
         Writeln(" ordering            : Cuthill-McKee");
         Write("Symbolic QG factorization   : ");
         clock_t start = MT.ClockStart();
@@ -662,7 +662,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         Write("...");
         GenerateFillInPresorted(order);
         order->cm = new SparseConectivityMtxII(* this, order);
-    } else if ( ord == Ordering :: NestedGraphBisection )       {
+    } else if ( ord == Ordering :: NestedGraphBisection ) {
         Writeln(" ordering            : RecursiveBiSection");
         Write("Symbolic QG factorization   : ");
         clock_t start = MT.ClockStart();
@@ -671,7 +671,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         Write("...");
         GenerateFillInPresorted(order);
         order->cm = new SparseConectivityMtxII(* this, order);
-    } else if ( ord == Ordering :: MetisND )       {
+    } else if ( ord == Ordering :: MetisND ) {
         Writeln(" ordering            : Metis (G.Karypis, V.Kumar)");
         Write("Graph ordering optimization : ");
         clock_t start = MT.ClockStart();
@@ -680,7 +680,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         Write("...");
         GenerateFillInPresorted(order);
         order->cm = new SparseConectivityMtxII(* this, order);
-    } else if ( ord == Ordering :: ColAMD )       {
+    } else if ( ord == Ordering :: ColAMD ) {
         Writeln(" ordering            : ColAMD (S.I.Larimore, T.A.Davis)");
         Write("Graph ordering optimization : ");
         clock_t start = MT.ClockStart();
@@ -689,7 +689,7 @@ Ordering *SparseConectivityMtxII :: GetPermutationAndPattern(Ordering :: Type or
         Write("...");
         GenerateFillInPresorted(order);
         order->cm = new SparseConectivityMtxII(* this, order);
-    } else   {
+    } else {
         Writeln("!!!! Incorrect ordering selected !!!!");
     }
 
@@ -1231,7 +1231,7 @@ IntArrayList *MD_Qqraph :: GenerateMD(bool approximate_degree, IntArrayList *fix
             for ( long i = 0; i < n; i++ ) {
                 Eliminate(fixed->Items [ i ]);
             }
-        } else   {
+        } else {
             while ( no_elements < n ) {
                 long MinimDeg = min(MinDegB, MinDegA);
                 MinDegB = n;
@@ -1248,7 +1248,7 @@ IntArrayList *MD_Qqraph :: GenerateMD(bool approximate_degree, IntArrayList *fix
                             vi = vi_Min;
                             continue;
                         }
-                    } else   {
+                    } else {
                         if ( IsFree(vi) && ( degrees [ vi ] < MinDegC ) ) {
                             MinDegC = degrees [ vi ];
                         }

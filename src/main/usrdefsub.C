@@ -255,41 +255,41 @@ SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type)
 // ================ DOF CLASS FACTORY==================
 Dof *CreateUsrDefDofOfType(dofType type, int number, DofManager *dman)
 {
-  return classFactory.createDof(type, number, dman);
+    return classFactory.createDof(type, number, dman);
 }
 
 // ================ SparseLinearSystemNM CLASS FACTORY==================
 SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m)
 {
-  return classFactory.createSparseLinSolver(st,i,d,m);
+    return classFactory.createSparseLinSolver(st,i,d,m);
 }
 
 // ================ ErrorEstimator CLASS FACTORY==================
 ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
 {
-  return classFactory.createErrorEstimator(type,number,d);
+    return classFactory.createErrorEstimator(type,number,d);
 }
 
 // ================ Nonlocal Barrier CLASS FACTORY==================
 NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int number, Domain *domain)
 {
-  return classFactory.createNonlocalBarrier(aClass,number,domain);
+    return classFactory.createNonlocalBarrier(aClass,number,domain);
 }
 
 NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(classType type, int number, Domain *domain)
 {
-  return classFactory.createNonlocalBarrier(type,number,domain);
+    return classFactory.createNonlocalBarrier(type,number,domain);
 }
 
 // ================ Random Field Generator CLASS FACTORY==================
 RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int number, Domain *domain)
 {
-  return classFactory.createRandomFieldGenerator(aClass,number,domain);
+    return classFactory.createRandomFieldGenerator(aClass,number,domain);
 }
 
 RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(classType type, int number, Domain *domain)
 {
-  return classFactory.createRandomFieldGenerator(type,number,domain);
+    return classFactory.createRandomFieldGenerator(type,number,domain);
 }
 
 
@@ -303,7 +303,7 @@ std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > to
 TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *domain)
 {
 #if 0
-    if ( topologyNameList.size() == 0 ) { topologyNameList["particletopology"] = topologyCreator< ParticleTopologyDescription >; }
+    if ( topologyNameList.empty() ) { topologyNameList["particletopology"] = topologyCreator< ParticleTopologyDescription >; }
 #endif
 
     return ( topologyNameList.count(aClass) == 1 ) ? topologyNameList [ aClass ](domain) : NULL;
@@ -311,21 +311,16 @@ TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *doma
 
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m)
 {
-    SparseGeneralEigenValueSystemNM *nm = NULL;
     if ( st == GES_SubspaceIt ) {
-        nm = ( SparseGeneralEigenValueSystemNM * ) new SubspaceIteration(i, d, m);
-        return nm;
+        return new SubspaceIteration(i, d, m);
     } else if ( st == GES_InverseIt ) {
-        nm = ( SparseGeneralEigenValueSystemNM * ) new InverseIteration(i, d, m);
-        return nm;
+        return new InverseIteration(i, d, m);
     } else if ( st == GES_SLEPc ) {
-        nm = ( SparseGeneralEigenValueSystemNM * ) new SLEPcSolver(i, d, m);
-        return nm;
+        return new SLEPcSolver(i, d, m);
     } else {
         OOFEM_ERROR("CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
+        return NULL;
     }
-
-    return nm;
 }
 
 
@@ -334,7 +329,7 @@ std :: map < std :: string, SparseNonLinearSystemNM * ( * )(int, Domain *, Engng
 
 SparseNonLinearSystemNM *CreateUsrDefNonLinearSolver(const char *aClass, int number, Domain *d, EngngModel *emodel, EquationID eid)
 {
-    if ( nonlinList.size() == 0 ) {
+    if ( nonlinList.empty() ) {
         //nonlinList["snes"]       = nonlinCreator< PETScSNES >;
         nonlinList [ "nrsolver" ]   = nonlinCreator< NRSolver >;
         nonlinList [ "nrsolver2" ]  = nonlinCreator< NRSolver2 >;
@@ -349,7 +344,7 @@ std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > 
 
 ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    if ( exportList.size() == 0 ) {
+    if ( exportList.empty() ) {
         exportList [ "vtkxml" ]    = exportCreator< VTKXMLExportModule >;
         exportList [ "vtk" ]       = exportCreator< VTKExportModule >;
         exportList [ "matlab" ]    = exportCreator< MatlabExportModule >;
@@ -370,7 +365,7 @@ std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > in
 
 InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
-    if ( initList.size() == 0 ) {
+    if ( initList.empty() ) {
 #ifdef __SM_MODULE
         initList [ "gpinitmodule" ] = initCreator< GPInitModule >;
 #endif //__SM_MODULE
@@ -446,7 +441,7 @@ std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *)
 
 EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemManager *xm, Domain *domain)
 {
-    if ( enrichItemList.size() == 0 ) {
+    if ( enrichItemList.empty() ) {
         enrichItemList [ "cracktip" ]      = enrichItemCreator< CrackTip >;
         enrichItemList [ "crackinterior" ] = enrichItemCreator< CrackInterior >;
         enrichItemList [ "inclusion" ]     = enrichItemCreator< Inclusion >;
@@ -459,8 +454,8 @@ EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int number, XfemM
 
 EnrichmentItem *CreateUsrDefEnrichmentItem(classType type, int number, XfemManager *xm, Domain *domain)
 {
-  OOFEM_ERROR("CreateUsrDefEnrichmentItem: Unknown type\n");
-  return NULL;
+    OOFEM_ERROR("CreateUsrDefEnrichmentItem: Unknown type\n");
+    return NULL;
 }
 
 
@@ -469,7 +464,7 @@ std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *), CaseComp 
 
 EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int number, Domain *domain)
 {
-    if ( enrichFuncList.size() == 0 ) {
+    if ( enrichFuncList.empty() ) {
         enrichFuncList [ "discontinuousfunction" ] = enrichFuncCreator< DiscontinuousFunction >;
         enrichFuncList [ "branchfunction" ] = enrichFuncCreator< BranchFunction >;
         enrichFuncList [ "rampfunction" ] = enrichFuncCreator< RampFunction >;
@@ -489,7 +484,7 @@ std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
 
 BasicGeometry *CreateUsrDefGeometry(const char *aClass)
 {
-    if ( geometryList.size() == 0 ) {
+    if ( geometryList.empty() ) {
         geometryList [ "line" ] = geometryCreator< Line >;
         geometryList [ "circle" ] = geometryCreator< Circle >;
         geometryList [ "pointswarm" ] = geometryCreator< PointSwarm >; // just temporary
@@ -513,8 +508,8 @@ EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
 
 BasicGeometry *CreateUsrDefGeometry(classType type)
 {
-  OOFEM_ERROR("CreateUsrDefGeometry: Unknown type\n");
-  return NULL;
+    OOFEM_ERROR("CreateUsrDefGeometry: Unknown type\n");
+    return NULL;
 }
 
 Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e)

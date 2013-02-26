@@ -61,7 +61,6 @@ PlaneStress2dXfem :: giveInterface(InterfaceType interface)
 
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-    int i;
     // evaluation of N,dNdx
     FloatMatrix dNdx;
     FloatArray N;
@@ -72,12 +71,12 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     simple->zero();
 
     // assemble standard FEM part of strain-displacement matrix
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         simple->at(1, 2 * i - 1) = dNdx.at(i, 1);
         simple->at(2, 2 * i - 0) = dNdx.at(i, 2);
     }
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         simple->at(3, 2 * i - 1) = dNdx.at(i, 2);
         simple->at(3, 2 * i - 0) = dNdx.at(i, 1);
     }
@@ -90,7 +89,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     additionals.put(1, simple);
     counter += simple->giveNumberOfColumns();
     // loop over enrichment items
-    for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
+    for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *er = xf->giveEnrichmentItem(i);
         int erndofs = 0 ; //er->giveNumberOfDofs();
         
@@ -240,8 +239,8 @@ void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRe
 {
     XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     if ( xf->isElementEnriched(this) ) {
-        PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
-        StructuralMaterial *sm = ( StructuralMaterial * ) this->giveDomain()->giveMaterial( pir->giveMaterial() );
+        PatchIntegrationRule *pir = static_cast< PatchIntegrationRule * >( gp->giveIntegrationRule() );
+        StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
         sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
     } else {
         PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
@@ -254,19 +253,18 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs in the element local c.s.
 {
-    int i, j, k, nDofs, size;
+    int k, m, nDofs, size;
     IntArray elementNodeMask;
     FloatArray vec;
     answer.resize( size = this->computeNumberOfGlobalDofs(type) );
-    k = 0;
-    int m = 0;
     FloatArray p1(size - 8);
 
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    m = k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, type, elementNodeMask);
         this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
         nDofs = vec.giveSize();
-        for ( j = 1; j <= nDofs; j++ ) {
+        for ( int j = 1; j <= nDofs; j++ ) {
             if ( j <= 2 ) {
                 answer.at(++k) = vec.at(j);
             } else {
@@ -290,11 +288,11 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     this->computeStrainVector(Epsilon, gp, stepN);
     XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     if ( xf->isElementEnriched(this) ) {
-        PatchIntegrationRule *pir = ( PatchIntegrationRule * ) gp->giveIntegrationRule();
-        StructuralMaterial *sm = ( StructuralMaterial * ) this->giveDomain()->giveMaterial( pir->giveMaterial() );
+        PatchIntegrationRule *pir = static_cast< PatchIntegrationRule * >( gp->giveIntegrationRule() );
+        StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
         sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
     } else {
-        StructuralCrossSection *cs = ( StructuralCrossSection * ) this->giveCrossSection();
+        StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
         cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
     }
 }
@@ -347,7 +345,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
         PlaneStress2d :: drawScalar(context);
     } else {
         if ( context.giveIntVarMode() == ISM_local ) {
-            int i, j, indx, ans, result = 1;
+            int indx, ans, result = 1;
             double val;
             FloatArray s(3), v;
             IntArray map;
@@ -360,14 +358,14 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
 
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
-            for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
                 iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
 
  #if 0
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+                for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
                     GaussPoint *gp = iRule->getIntegrationPoint(0);
                     result += giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);

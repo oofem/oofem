@@ -145,7 +145,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 //  25.9.2001
 {
     double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray s;
 
 
@@ -184,7 +184,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 //  25.9.2001
 {
     double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray s;
 
 
@@ -226,7 +226,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 //  25.9.2001
 {
     double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     FloatArray s;
 
 
@@ -272,7 +272,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
     } else if ( mode == Capacity_wh ) {
         return 0.0;
     } else if ( mode == Capacity_hw ) {
-        TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         FloatArray s;
         double w, t;
 
@@ -285,7 +285,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         t = s.at(1);
         return get_b(w, t) * get_latent(w, t);
     } else if ( mode == Capacity_hh ) {
-        TransportMaterialStatus *status = ( TransportMaterialStatus * ) this->giveStatus(gp);
+        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         FloatArray s;
         double w, t;
 
@@ -308,12 +308,13 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 double
 HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 {
-    FloatArray tempState = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
+    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    const FloatArray &tempState = ms->giveTempStateVector();
     if ( tempState.giveSize() < 2 ) {
         _error("giveHumidity: undefined moisture status!");
     }
 
-    FloatArray state = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveStateVector();
+    FloatArray state = ms->giveStateVector();
 
     if ( mode == VM_Total ) {
         return inverse_sorption_isotherm( tempState.at(2) );

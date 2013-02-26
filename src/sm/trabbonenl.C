@@ -83,7 +83,7 @@ TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 {
     FloatArray SDstrainVector, fullSDStrainVector;
     double cumPlastStrain;
-    TrabBoneNLStatus *nlstatus = ( TrabBoneNLStatus * ) this->giveStatus(gp);
+    TrabBoneNLStatus *nlstatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -114,7 +114,7 @@ TrabBoneNL :: giveRealStressVector(FloatArray &answer,
                                    const FloatArray &strainVector,
                                    TimeStep *atTime)
 {
-    TrabBoneNLStatus *nlStatus = ( TrabBoneNLStatus * ) this->giveStatus(gp);
+    TrabBoneNLStatus *nlStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     double tempDamage = computeDamage(gp, atTime);
     double plasStrain = nlStatus->giveTempPlasStrainVector().at(1);
@@ -143,7 +143,7 @@ void
 TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
 {
     double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
-    TrabBoneNLStatus *nonlocStatus, *status = ( TrabBoneNLStatus * ) this->giveStatus(gp);
+    TrabBoneNLStatus *nonlocStatus, *status = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
@@ -152,9 +152,9 @@ TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atT
     std::list< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = ( TrabBoneNLStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus( pos->nearGp ) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
-        nonlocalContribution *= ( * pos ).weight;
+        nonlocalContribution *= pos->weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 
@@ -177,12 +177,8 @@ Interface *
 TrabBoneNL :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
-    } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
-        return ( NonlocalMaterialStiffnessInterface * ) this;
-    }
-    //
-    else {
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+    } else {
         return NULL;
     }
 }

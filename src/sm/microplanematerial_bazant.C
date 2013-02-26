@@ -62,7 +62,7 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer, MatRespons
     answer.resize(6);
     answer.zero();
 
-    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(gp);
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
 
 

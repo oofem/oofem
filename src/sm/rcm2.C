@@ -133,8 +133,8 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     FloatArray princStress, reducedStressVector, crackStrain, reducedAnswer;
     FloatArray reducedTotalStrainVector, principalStrain, strainVector;
     FloatMatrix tempCrackDirs;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
@@ -185,7 +185,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
 // updates principal strain and stress of the receiver's status.
 //
 {
-    int i, iter, ind;
+    int ind;
     double maxErr;
     FloatArray crackStrainVector, reducedTotalStrainVector;
     FloatArray strainIncrement, crackStrainIterativeIncrement;
@@ -195,7 +195,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
     FloatArray fullDSigma;
     IntArray activatedCracks, crackMapping;
     FloatMatrix dcr, de, decr, fullDecr, crackDirs;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     /*
      * if (status -> giveStressVector() == NULL) status->letStressVectorBe(new FloatArray(this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode())));
@@ -255,7 +255,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
     // is equal to stress computed from cracking strain increment
     // we do this computation in reduced stress strain space
     dSigma.resize(0);
-    for ( iter = 1; iter <= 20; iter++ ) {
+    for ( int iter = 1; iter <= 20; iter++ ) {
         //
         // first check if already cracked
         //
@@ -278,7 +278,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             }
 
             decr.solveForRhs(dSigma, crackStrainIterativeIncrement);
-            for ( i = 1; i <= 3; i++ ) {
+            for ( int i = 1; i <= 3; i++ ) {
                 if ( ( ind = crackMapping.at(i) ) ) {
                     crackStrainVector.at(i) += crackStrainIterativeIncrement.at(ind);
                 }
@@ -292,7 +292,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             sigmaEl.beProductOf(de, elastStrain);
 
             // Stress in cracks
-            for ( i = 1; i <= 3; i++ ) {
+            for ( int i = 1; i <= 3; i++ ) {
                 if ( crackMapping.at(i) ) {
                     sigmaCr.at(i) = giveNormalCrackingStress(gp, crackStrainVector.at(i), i);
                 }
@@ -347,7 +347,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
 
         // check only for active cracks
         maxErr = 0.;
-        for ( i = 1; i <= dSigma.giveSize(); i++ ) {
+        for ( int i = 1; i <= dSigma.giveSize(); i++ ) {
             if ( fabs( dSigma.at(i) ) > maxErr ) {
                 maxErr = fabs( dSigma.at(i) );
             }
@@ -372,7 +372,7 @@ RCM2Material :: initTempStatus(GaussPoint *gp)
 // of integrating incremental constitutive relations) to correct values
 //
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     status->initTempStatus();
 }
@@ -393,8 +393,8 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
 //
 {
     double initStress, Le = 0.0;
-    int i, j, upd, activationFlag = 0;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    int upd, activationFlag = 0;
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     FloatArray localStress;
     FloatMatrix tempCrackDirs;
     IntArray crackMap;
@@ -406,7 +406,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
     //
     // local stress is updated according to reached local crack strain
     //
-    for ( i = 1; i <= 3; i++ ) { // loop over each possible crack plane
+    for ( int i = 1; i <= 3; i++ ) { // loop over each possible crack plane
         // test previous status of each possible crack plane
         upd = 0;
         if ( ( crackMap.at(i) == 0 ) &&
@@ -424,7 +424,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
 
                 FloatArray crackPlaneNormal(3);
                 status->giveTempCrackDirs(tempCrackDirs);
-                for ( j = 1; j <= 3; j++ ) {
+                for ( int j = 1; j <= 3; j++ ) {
                     crackPlaneNormal.at(j) = tempCrackDirs.at(j, i);
                 }
 
@@ -455,7 +455,8 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
 
 
 double
-RCM2Material :: giveCharacteristicElementLenght(GaussPoint *gp, const FloatArray &crackPlaneNormal) {
+RCM2Material :: giveCharacteristicElementLenght(GaussPoint *gp, const FloatArray &crackPlaneNormal)
+{
     // returns characteristic element length for given crack plane normal
     return gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
 }
@@ -468,7 +469,7 @@ RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
 // updates Le and computes and sets minEffStrainForFullyOpenCrack
 //
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     if ( Le <= 0 ) {
         _error2( "Element %d returned zero char length", gp->giveElement()->giveNumber() );
@@ -496,9 +497,8 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
 //
 //
 {
-    int i;
     double minCrackStrainsForFullyOpenCrack;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     IntArray crackMap;
 
     status->giveCrackMap(crackMap);
@@ -515,7 +515,7 @@ RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
     //
     // local stress is updated according to reached local crack strain
     //
-    for ( i = 1; i <= 3; i++ ) { // loop over each possible crack plane
+    for ( int i = 1; i <= 3; i++ ) { // loop over each possible crack plane
         if ( ( crackMap.at(i) != 0 ) &&
             ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
             if ( status->giveTempMaxCrackStrain(i) < crackStrain.at(i) ) {
@@ -562,10 +562,10 @@ RCM2Material :: checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVecto
 // if yes updates crackStrainVector and gp-status accordingly
 //
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
-    int i, isClosing = 0;
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
+    int isClosing = 0;
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( crackMap.at(i) ) {
             if ( crackStrainVector.at(i) < 0. ) {
                 // crack closing occur
@@ -600,12 +600,12 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
     StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
     FloatMatrix de, fullAnswer(3, 3);
     IntArray mask;
-    int i, j, sd;
+    int sd;
 
     lMat->giveCharacteristicMatrix(de, FullForm, rMode, gp, atTime);
     // copy first 3x3 submatrix to answer
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             fullAnswer.at(i, j) = de.at(i, j);
         }
     }
@@ -618,7 +618,7 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         //
         // first find spatial dimension of problem
         sd = 0;
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
                 sd++;
             }
@@ -629,8 +629,8 @@ RCM2Material :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
         // copy fullAnswer to reduced one
         this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 if ( mask.at(i) && mask.at(j) ) {
                     answer.at( mask.at(i), mask.at(j) ) = fullAnswer.at(i, j);
                 }
@@ -651,10 +651,10 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 // for gp stress strain mode
 //
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
     int numberOfActiveCracks = status->giveNumberOfTempActiveCracks();
-    int i, j, indi, indj, ii, jj;
+    int indi, indj, ii, jj;
     double G, princStressDis, princStrainDis;
     FloatMatrix de, invDe, compliance, dcr, d, df, t, tt, tempCrackDirs;
     FloatArray principalStressVector, principalStrainVector;
@@ -678,9 +678,9 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // we will set
     // first we set compliances for normal streses in
     // local coordinate system defined by crackplane
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( ( indi = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
-            for ( j = 1; j <= 3; j++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 if ( ( indj = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), j) ) ) {
                     compliance.at(indi, indj) += invDe.at(i, j);
                 }
@@ -701,7 +701,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
 
     // now remain to set shears
     G = this->give(pscm_G, gp);
-    for ( i = 4; i <= 6; i++ ) {
+    for ( int i = 4; i <= 6; i++ ) {
         if ( ( indi = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
             if ( i == 4 ) {
                 ii = 2;
@@ -784,8 +784,7 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
 // we don't teke care about possible cracking (or non-linear softening) during strain increment
 // this correction is made in this -> updateCrackStatus  (gp);
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
-    int i;
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     int numberOfActiveCracks = status->giveNumberOfTempActiveCracks();
     IntArray crackMap;
 
@@ -799,7 +798,7 @@ RCM2Material :: giveCrackedStiffnessMatrix(FloatMatrix &answer,
     answer.zero();
 
     // loop over each active crack plane
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( crackMap.at(i) ) {
             // obtain incremental law for one crack
             answer.at(i, i) = this->giveCrackingModulus(rMode, gp,
@@ -817,14 +816,14 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
 // updates mapping matrix of active cracks
 //
 {
-    int i, indx = 1;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    int indx = 1;
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     IntArray crackMap;
     status->giveCrackMap(crackMap);
 
     //if (crackMap == NULL) _error ("updateActiveCrackMap: NULL pointer encountered");
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( status->isCrackActive(i) ) {
             crackMap.at(i) = indx++;
         } else if ( activatedCracks ) {
@@ -896,7 +895,7 @@ RCM2Material :: give(int aProperty, GaussPoint *gp)
 int
 RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(aGaussPoint);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_CrackedFlag ) {
         answer.resize(1);
         answer.at(1) =  status->giveAlreadyCrack();
@@ -1050,7 +1049,6 @@ RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
 }
 
 
-
 void
 RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
                                          MatResponseForm form,
@@ -1069,7 +1067,6 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 }
 
 
-
 void
 RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
                                           MatResponseForm form,
@@ -1086,7 +1083,6 @@ RCM2Material :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 {
     this->giveMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
 }
-
 
 
 void
@@ -1112,15 +1108,14 @@ RCM2Material :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 
 
 
-
-
 RCM2MaterialStatus :: RCM2MaterialStatus(int n, Domain *d, GaussPoint *g) :
     StructuralMaterialStatus(n, d, g), crackStatuses(3), tempCrackStatuses(3),
     maxCrackStrains(3), tempMaxCrackStrains(3), crackStrainVector(3),
     oldCrackStrainVector(3), crackDirs(3, 3), tempCrackDirs(3, 3), charLengths(3),
     //minEffStrainsForFullyOpenCrack(3),
     principalStrain(3), oldPrincipalStrain(3),
-    principalStress(3), oldPrincipalStress(3), crackMap(3) {
+    principalStress(3), oldPrincipalStress(3), crackMap(3)
+{
     for ( int i = 1; i <= 3; i++ ) {
         crackDirs.at(i, i) = tempCrackDirs.at(i, i) = 1.0;
     }
@@ -1195,9 +1190,9 @@ RCM2MaterialStatus :: giveNumberOfActiveCracks() const
 // return number of active cracks, computed upon CrackStatus
 //
 {
-    int i, answer = 0;
+    int answer = 0;
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( oldCrackStrainVector.at(i) > 0. ) {
             answer++;
         }
@@ -1213,9 +1208,9 @@ RCM2MaterialStatus :: giveNumberOfTempActiveCracks() const
 // return number of active cracks, computed upon tempCrackStatus
 //
 {
-    int i, answer = 0;
+    int answer = 0;
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         if ( isCrackActive(i) ) {
             answer++;
         }
@@ -1233,8 +1228,6 @@ RCM2MaterialStatus :: initTempStatus()
 // builds new crackMap
 //
 {
-    int i;
-
     StructuralMaterialStatus :: initTempStatus();
 
     tempCrackStatuses = crackStatuses;
@@ -1245,7 +1238,7 @@ RCM2MaterialStatus :: initTempStatus()
     principalStrain = oldPrincipalStrain;
     principalStress = oldPrincipalStress;
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         crackMap.at(i) = 0;
     }
 }

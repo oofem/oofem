@@ -38,12 +38,12 @@
 namespace oofem {
 InputRecord :: InputRecord()
 {
-  this->lineNumber = 0;
+    this->lineNumber = 0;
 }
 
 InputRecord :: InputRecord(const InputRecord &src)
 { 
-  this->lineNumber = src.lineNumber;
+    this->lineNumber = src.lineNumber;
 }
 
 InputRecord &

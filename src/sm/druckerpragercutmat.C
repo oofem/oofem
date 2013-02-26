@@ -51,9 +51,9 @@ DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : MPlasticMaterial2
     this->nsurf = 4;
     this->rmType = mpm_CuttingPlane;
 //     this->rmType = mpm_ClosestPoint;
-    
+
     this->plType = nonassociatedPT;// Rankine associated, DP nonassociated
-    
+
     sigT = 0.;
     H = 0.;
     omegaCrit = 0.;
@@ -88,8 +88,8 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveShearModulus();
-    K = ( ( IsotropicLinearElasticMaterial * ) linearElasticMaterial )->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, tau0, IFT_DruckerPragerCutMat_tau0, "tau0"); // initial yield stress under pure shear (DP model)
     IR_GIVE_FIELD(ir, sigT, IFT_DruckerPragerCutMat_sigT, "sigt"); // uniaxial tensile strength for cut-off, (Rankine plasticity model)
@@ -245,8 +245,6 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
         } else {
             OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString(gp->giveMaterialMode()) );
         }
-        
-        
     }
 }
 
@@ -257,27 +255,28 @@ DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
                                          TimeStep *atTime)
 {  /* Returns elastic moduli in reduced stress-strain space*/
     //MaterialMode mode = gp->giveMaterialMode();
-    
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, ReducedForm,
                                                                     ElasticStiffness,
                                                                     gp, atTime);
 }
 
 //answer is dkappa (cumulative plastic strain), flow rule
-void DruckerPragerCutMat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp, const FloatArray &stress, const FloatArray &dlambda, const FloatArray &dplasticStrain, const IntArray &activeConditionMap){
+void DruckerPragerCutMat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp, const FloatArray &stress, const FloatArray &dlambda, const FloatArray &dplasticStrain, const IntArray &activeConditionMap)
+{
     answer.resize(4);
     answer.zero();
-    
+
     if( dlambda.at(4) > 0. ){
         answer.at(4) = dlambda.at(4) * sqrt( 1./3. + 2*alphaPsi*alphaPsi );
     }
 }
 
 // Computes the derivative of yield/loading function with respect to kappa_1, kappa_2 etc.
-void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables){
+void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
+{
     answer.resize( 1 );//1 hardening variable for DP model - kappa
     answer.zero();
-    
+
     if (isurf == 4){
         answer.at(1) = this->H;
     }
@@ -285,25 +284,28 @@ void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType
 
 //necesarry only for mpm_ClosestPoint
 //Computes second mixed derivative of loading function with respect to stress and hardening vars. 
-void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables){
+void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
+{
     int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
     gradientMatrix.resize(size, 1);//six stresses in 3D and one kappa
     gradientMatrix.zero();
 }
 
 // computes dKappa_i/dsig_j gradient matrix
-void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda){
+void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda)
+{
     int size = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
     answer.resize(1, size);
     answer.zero();
 }
 
 // computes dKappa_i/dLambda_j for one surface
-void DruckerPragerCutMat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda){
+void DruckerPragerCutMat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda)
+{
     int indx;
     answer.resize(1, actSurf);//actSurf = number of active surfaces
     answer.zero();
-    
+
      if ( ( indx = activeConditionMap.at(4) ) ) {
         if ( dlambda.at(4) > 0. ) {
             answer.at(1, indx) = sqrt( 1./3. + 2*alphaPsi*alphaPsi );

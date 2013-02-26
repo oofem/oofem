@@ -293,12 +293,12 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
  * Creates the hydration model status if necessary.
  */
 {
-    HydrationModelStatusInterface *hmi = ( HydrationModelStatusInterface * ) this->giveStatus(gp)->giveInterface(HydrationModelStatusInterfaceType);
+    HydrationModelStatusInterface *hmi = static_cast< HydrationModelStatusInterface * >( this->giveStatus(gp)->giveInterface(HydrationModelStatusInterfaceType) );
     HydrationModelStatus *status = NULL;
     if ( hmi ) {
         status = hmi->giveHydrationModelStatus();
         if ( status == NULL ) {
-            status = ( HydrationModelStatus * ) this->CreateStatus(gp);
+            status = static_cast< HydrationModelStatus * >( this->CreateStatus(gp) );
             hmi->setHydrationModelStatus(status);
         }
     } else {
@@ -427,7 +427,7 @@ double
 HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 // returns the hydration degree in integration point gp
 {
-    HydrationModelStatus *status = ( HydrationModelStatus * ) giveStatus(gp);
+    HydrationModelStatus *status = static_cast< HydrationModelStatus * >( giveStatus(gp) );
     double ksi = status->giveTempHydrationDegree();
     if ( mode == VM_Incremental ) {
         ksi -= status->giveHydrationDegree();
@@ -444,9 +444,9 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
  *  caller should ensure that this is called only when state vector is changed
  */
 {
-    double ksi, dksi, T = 0., h = 1., dt;
+    double ksi, dksi, T = 0., h = 1.;
     // get hydration model status associated with integration point
-    HydrationModelStatus *status = ( HydrationModelStatus * ) giveStatus(gp);
+    HydrationModelStatus *status = static_cast< HydrationModelStatus * >( giveStatus(gp) );
 
     if ( vec.giveSize() ) {
         T = vec(0);
@@ -465,8 +465,8 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
         status->setHydrationDegree(ksi);
     }
 
-    //!!! timeScale
-    if ( ( dt = atTime->giveTimeIncrement() ) > 0. ) {
+    // !!! timeScale
+    if ( atTime->giveTimeIncrement() > 0. ) {
         dksi = computeHydrationDegreeIncrement(ksi, T, h, atTime->giveTimeIncrement() * timeScale);
     } else {
         dksi = 0.;
@@ -609,7 +609,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         if ( !( hydrationModel = new HydrationModel() ) ) {
-            ( ( Material * ) this )->_error("Could not create HydrationModel instance.");
+            OOFEM_ERROR("Could not create HydrationModel instance.");
         }
 
         hydrationModel->initializeFrom(ir);

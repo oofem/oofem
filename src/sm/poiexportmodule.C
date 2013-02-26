@@ -297,7 +297,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         if ( source ) {
             // ask interface
             EIPrimaryUnknownMapperInterface *interface =
-                ( EIPrimaryUnknownMapperInterface * ) ( source->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
+                static_cast< EIPrimaryUnknownMapperInterface * >( source->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
             if ( interface ) {
                 interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, tStep, coords, pv);
             } else {

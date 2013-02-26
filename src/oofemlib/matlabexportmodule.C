@@ -162,7 +162,7 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
 	for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
 		if (domain->giveElement(i)->giveNumberOfDofManagers()==numberOfDofMans) {
 			for ( int j = 1; j <= domain->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
-				fprintf( FID, "%u,", domain->giveElement(i)->giveDofManagerNumber(j) );
+				fprintf( FID, "%d,", domain->giveElement(i)->giveDofManagerNumber(j) );
 			}
 		}
 		fprintf(FID, ";");
@@ -203,7 +203,7 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 
     fprintf(FID, "\tdata.DofIDs=[");
     for ( size_t i = 0; i < DofIDList.size(); i++ ) {
-        fprintf( FID, "%u, ", DofIDList.at(i) );
+        fprintf( FID, "%d, ", DofIDList.at(i) );
     }
 
     fprintf(FID, "];\n");
@@ -261,7 +261,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 	fprintf(FID, "\tspecials.velocitymean=[%e, %e];\n", Vu, Vv);
 
 	// Output weak periodic boundary conditions
-	int wpbccount = 1;
+	unsigned int wpbccount = 1;
 
 	for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
 		WeakPeriodicbc *wpbc = dynamic_cast< WeakPeriodicbc * >( domain->giveBc(i) );

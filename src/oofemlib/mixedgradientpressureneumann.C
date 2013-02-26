@@ -639,7 +639,7 @@ void MixedGradientPressureNeumann :: computeTangents(
         // or slave nodes etc. The goal is to compute the velocity from the sensitivity field, but we need to avoid going through the actual
         // engineering model. If this ever becomes an issue it needs to perform the same steps as Element::giveUnknownVector does.
         for (int i = 1; i <= fe.giveSize(); ++i) {
-            if (loc.at(i) > 0)  {
+            if (loc.at(i) > 0) {
                 e_p += fe.at(i) * s_p.at(loc.at(i));
                 for (int j = 1; j <= ndev; ++j) {
                     e_d.at(j) += fe.at(i) * s_d.at(loc.at(i), j);

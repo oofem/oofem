@@ -54,10 +54,10 @@ namespace oofem {
 Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
     // Constructor.
 {
-    numberOfDofMans     = 2;
+    numberOfDofMans = 2;
 
-    length              = 0.;
-    pitch               = 10.;  // a dummy value
+    length = 0.;
+    pitch = 10.;  // a dummy value
 }
 
 Lattice2d :: ~Lattice2d()
@@ -74,7 +74,7 @@ Lattice2d :: giveCrackFlag()
     gp = iRule->getIntegrationPoint(0);
     Material *mat = this->giveMaterial();
 
-    status = ( LatticeMaterialStatus * ) mat->giveStatus(gp);
+    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
     int crackFlag = 0;
     crackFlag = status->giveCrackFlag();
 
@@ -92,7 +92,7 @@ Lattice2d :: giveCrackWidth()
     gp = iRule->getIntegrationPoint(0);
     Material *mat = this->giveMaterial();
 
-    status = ( LatticeMaterialStatus * ) mat->giveStatus(gp);
+    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
     double crackWidth = 0;
     crackWidth = status->giveCrackWidth();
 
@@ -109,7 +109,7 @@ Lattice2d :: giveDissipation()
     gp = iRule->getIntegrationPoint(0);
     Material *mat = this->giveMaterial();
 
-    status = ( LatticeMaterialStatus * ) mat->giveStatus(gp);
+    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
     double dissipation = 0;
     dissipation = status->giveDissipation();
 
@@ -127,7 +127,7 @@ Lattice2d :: giveDeltaDissipation()
     gp = iRule->getIntegrationPoint(0);
     Material *mat = this->giveMaterial();
 
-    status = ( LatticeMaterialStatus * ) mat->giveStatus(gp);
+    status = static_cast< LatticeMaterialStatus * >( mat->giveStatus(gp) );
     double deltaDissipation = 0;
     deltaDissipation = status->giveDeltaDissipation();
 
@@ -249,7 +249,8 @@ Lattice2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 
 void
-Lattice2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const {
+Lattice2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+{
     answer.setValues(3, D_u, D_v, R_w);
 }
 
@@ -431,7 +432,7 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    Material *mat = ( StructuralMaterial * ) this->giveMaterial();
+    Material *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
@@ -552,7 +553,7 @@ Lattice2d :: giveCrossSectionCoordinates(FloatArray &coords)
     if ( normalDirection.at(2) == 0. ) {
         shearDirection.at(1) = 0.;
         shearDirection.at(2) = 1.;
-    } else   {
+    } else {
         shearDirection.at(1) = 1.0;
         shearDirection.at(2) =
             -normalDirection.at(1) / normalDirection.at(2);

@@ -270,7 +270,7 @@ SUPG :: giveNextStep()
 
     // check for critical time step
     for ( i = 1; i <= nelem; i++ ) {
-        dt = min( dt, ( ( SUPGElement * ) domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
+        dt = min( dt, static_cast< SUPGElement * >( domain->giveElement(i) )->computeCriticalTimeStep(previousStep) );
     }
 
     if ( materialInterface ) {
@@ -883,7 +883,7 @@ SUPG :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int i, nelem;
+    int nelem;
     Element *ePtr;
     SUPGElement *sePtr;
     GeneralBoundaryCondition *bcPtr;
@@ -893,7 +893,7 @@ SUPG :: checkConsistency()
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
@@ -908,7 +908,7 @@ SUPG :: checkConsistency()
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
         int nbc = domain->giveNumberOfBoundaryConditions();
-        for ( i = 1; i <= nbc; i++ ) {
+        for ( int i = 1; i <= nbc; i++ ) {
             bcPtr = domain->giveBc(i);
             if ( bcPtr->giveBCValType() == VelocityBVT ) {
                 bcPtr->scale(1. / uscale);
@@ -922,7 +922,7 @@ SUPG :: checkConsistency()
         }
 
         int nic = domain->giveNumberOfInitialConditions();
-        for ( i = 1; i <= nic; i++ ) {
+        for ( int i = 1; i <= nic; i++ ) {
             icPtr = domain->giveIc(i);
             if ( icPtr->giveICValType() == VelocityBVT ) {
                 icPtr->scale(VM_Total, 1. / uscale);
@@ -1025,7 +1025,7 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     }
 
     for ( j = 1; j <= nelem; j++ ) {
-        element = ( SUPGElement * ) domain->giveElement(j);
+        element = static_cast< SUPGElement * >( domain->giveElement(j) );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
@@ -1060,7 +1060,8 @@ SUPG :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 }
 
 int
-SUPG :: giveNumberOfEquations(EquationID id) {
+SUPG :: giveNumberOfEquations(EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1081,7 +1082,8 @@ SUPG :: giveNumberOfEquations(EquationID id) {
 }
 
 int
-SUPG :: giveNumberOfPrescribedEquations(EquationID id) {
+SUPG :: giveNumberOfPrescribedEquations(EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1102,7 +1104,8 @@ SUPG :: giveNumberOfPrescribedEquations(EquationID id) {
 }
 
 int
-SUPG :: giveNumberOfDomainEquations(int d, EquationID id) {
+SUPG :: giveNumberOfDomainEquations(int d, EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1123,7 +1126,8 @@ SUPG :: giveNumberOfDomainEquations(int d, EquationID id) {
 }
 
 int
-SUPG :: giveNumberOfPrescribedDomainEquations(int d, EquationID id) {
+SUPG :: giveNumberOfPrescribedDomainEquations(int d, EquationID id)
+{
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
@@ -1171,12 +1175,11 @@ void
 SUPG :: evaluateElementStabilizationCoeffs(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    int i, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     SUPGElement *ePtr;
 
-    //printf ("#");
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = ( SUPGElement * ) domain->giveElement(i);
+    for ( int i = 1; i <= nelem; i++ ) {
+        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateStabilizationCoeffs(atTime);
     }
 }
@@ -1185,14 +1188,14 @@ void
 SUPG :: updateElementsForNewInterfacePosition(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    int i, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     SUPGElement *ePtr;
 
     OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
 
 
-    for ( i = 1; i <= nelem; i++ ) {
-        ePtr = ( SUPGElement * ) domain->giveElement(i);
+    for ( int i = 1; i <= nelem; i++ ) {
+        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateElementForNewInterfacePosition(atTime);
     }
 }

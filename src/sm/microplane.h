@@ -88,10 +88,10 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     double giveWeight()
-    { return ( ( MicroplaneMaterial * ) this->giveMaterial() )->giveMicroplaneIntegrationWeight(this); }
+    { return static_cast< MicroplaneMaterial * >( this->giveMaterial() )->giveMicroplaneIntegrationWeight(this); }
     /// Returns normal of microplane.
     void giveMicroplaneNormal(FloatArray &answer)
-    { ( ( MicroplaneMaterial * ) this->giveMaterial() )->giveMicroplaneNormal(answer, this); }
+    { static_cast< MicroplaneMaterial * >( this->giveMaterial() )->giveMicroplaneNormal(answer, this); }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

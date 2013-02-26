@@ -725,7 +725,7 @@ HuertaRemeshingCriteria :: giveRemeshingStrategy(TimeStep *tStep)
 int
 HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 {
-    int i, j, k, nelem, nnode, jnode, elemPolyOrder, ielemNodes, skipped;
+    int nelem, nnode, elemPolyOrder, skipped;
     double globValNorm = 0.0, globValErrorNorm = 0.0, globValWErrorNorm = 0.0;
     double globValNorm2, globValErrorNorm2, globValWErrorNorm2;
     double eerror, iratio, currDensity, elemSize, elemErrLimit, percentError;
@@ -790,7 +790,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     this->nodalDensities.resize(nnode);
 
     std :: vector< int >connectedElems(nnode);
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         connectedElems [ i ] = 0;
     }
 
@@ -801,7 +801,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     } else {
         if ( run > 100 ) {
             OOFEM_LOG_INFO("hehe\n");
-            for ( i = 1; i <= nelem; i++ ) {
+            for ( int i = 1; i <= nelem; i++ ) {
                 ielem = domain->giveElement(i);
 
                 // skipping these elements will result in reusing their current size;
@@ -813,7 +813,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                  * if(this -> ee -> skipRegion(ielem -> giveRegionNumber()) != 0)continue;
                  * }
                  */
-                interface = ( HuertaRemeshingCriteriaInterface * ) ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType);
+                interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
                 if ( !interface ) {
                     _error("estimateMeshDensities: element does not support HuertaRemeshingCriteriaInterface");
                 }
@@ -829,7 +829,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                 maxVal = 0.0;
                 iRule = ielem->giveDefaultIntegrationRulePtr();
                 nip = iRule->getNumberOfIntegrationPoints();
-                for ( k = 0; k < nip; k++ ) {
+                for ( int k = 0; k < nip; k++ ) {
                     result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
                     if ( result ) {
                         sval = val.computeNorm();
@@ -851,7 +851,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         // check whether to remesh because of low level of error
         if ( this->ee->giveErrorEstimatorType() == EET_HEE ) {
             /* HUHU toto je divne !!! pak se neuplatni refine viz dale */
-            if ( ( ( HuertaErrorEstimator * ) ( this->ee ) )->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
+            if ( static_cast< HuertaErrorEstimator * >( this->ee )->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
                 stateCounter = tStep->giveSolutionStateCounter();
                 return 1;
             }
@@ -859,7 +859,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
             if ( wError == false ) {
                 if ( percentError <= this->requiredError ) {
                     if ( percentError >= this->requiredError * 0.5 * this->refineCoeff || run <= 5 ) {
-                        for ( i = 1; i <= nnode; i++ ) {
+                        for ( int i = 1; i <= nnode; i++ ) {
                             nodalDensities.at(i) = this->giveDofManDensity(i);
                         }
 
@@ -869,12 +869,10 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                     }
                 }
             } else {
-                double pwe = percentError;
-
-                pwe = sqrt( globValWErrorNorm2 / ( globValErrorNorm2 + globValNorm2 ) );
+                double pwe = sqrt( globValWErrorNorm2 / ( globValErrorNorm2 + globValNorm2 ) );
                 if ( pwe <= this->requiredError * 1.1 ) {
                     if ( pwe >= this->requiredError * 0.5 * this->refineCoeff || run <= 5 ) {
-                        for ( i = 1; i <= nnode; i++ ) {
+                        for ( int i = 1; i <= nnode; i++ ) {
                             nodalDensities.at(i) = this->giveDofManDensity(i);
                         }
 
@@ -892,7 +890,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     /* HUHU ma zamezit aby se opakovane restartovalo ze stejneho kroku, na coz davky nejsou pripravene */
     if ( run == 1 && tStep->giveNumber() != 1 ) {
         this->remeshingStrategy = NoRemeshing_RS;
-        for ( i = 1; i <= nnode; i++ ) {
+        for ( int i = 1; i <= nnode; i++ ) {
             nodalDensities.at(i) = this->giveDofManDensity(i);
         }
 
@@ -900,7 +898,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         return 1;
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         ielem = domain->giveElement(i);
 
         // skipping these elements will result in reusing their current size;
@@ -912,7 +910,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
          * if(this -> ee -> skipRegion(ielem -> giveRegionNumber()) != 0)continue;
          * }
          */
-        interface = ( HuertaRemeshingCriteriaInterface * ) ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType);
+        interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
             _error("estimateMeshDensities: element does not support HuertaRemeshingCriteriaInterface");
         }
@@ -947,7 +945,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         maxVal = 0.0;
         iRule = ielem->giveDefaultIntegrationRulePtr();
         nip = iRule->getNumberOfIntegrationPoints();
-        for ( k = 0; k < nip; k++ ) {
+        for ( int k = 0; k < nip; k++ ) {
             result = ielem->giveIPValue(val, iRule->getIntegrationPoint(k), IST_PrincipalDamageTensor, tStep);
             if ( result ) {
                 sval = val.computeNorm();
@@ -960,9 +958,8 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         }
 
         //#endif
-        ielemNodes = ielem->giveNumberOfDofManagers();
-        for ( j = 1; j <= ielemNodes; j++ ) {
-            jnode = ielem->giveDofManager(j)->giveNumber();
+        for ( int j = 1; j <= ielem->giveNumberOfDofManagers(); j++ ) {
+            int jnode = ielem->giveDofManager(j)->giveNumber();
             if ( connectedElems [ jnode - 1 ] != 0 ) {
                 //this -> nodalDensities.at(jnode) = min(this -> nodalDensities.at(jnode), elemSize);
                 this->nodalDensities.at(jnode) += elemSize;
@@ -975,7 +972,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     }
 
     // init non-initialized nodes -> those in skip regions
-    for ( i = 0; i < nnode; i++ ) {
+    for ( int i = 0; i < nnode; i++ ) {
         if ( connectedElems [ i ] == 0 ) {
             this->nodalDensities.at(i + 1) = this->giveDofManDensity(i + 1);
         } else {
@@ -985,7 +982,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     if ( refine == true ) {
         if ( this->ee->giveErrorEstimatorType() == EET_HEE ) {
-            if ( ( ( HuertaErrorEstimator * ) ( this->ee ) )->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
+            if ( static_cast< HuertaErrorEstimator * >( this->ee )->giveAnalysisMode() == HuertaErrorEstimator :: HEE_linear ) {
                 this->remeshingStrategy = RemeshingFromPreviousState_RS;
             }
         }
@@ -1032,7 +1029,7 @@ HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
 double
 HuertaRemeshingCriteria :: giveDofManDensity(int num)
 {
-    int i, isize;
+    int isize;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
     HuertaRemeshingCriteriaInterface *interface;
@@ -1058,9 +1055,9 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
     // Average density
 
     density = 0.0;
-    for ( i = 1; i <= isize; i++ ) {
-        interface = ( HuertaRemeshingCriteriaInterface * )
-                    domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType);
+    for ( int i = 1; i <= isize; i++ ) {
+        interface = static_cast< HuertaRemeshingCriteriaInterface * >
+                    ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
             _error("giveDofManDensity: element does not support HuertaRemeshingCriteriaInterface");
         }
@@ -2934,7 +2931,6 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     FloatMatrix mat;
     EIPrimaryUnknownMapper mapper;
     Dof *nodeDof;
-    std :: string irec;
     double coeff, elementNorm, patchNorm, mixedNorm, eNorm = 0.0, uNorm = 0.0;
     IntArray controlNode, controlDof;
 
@@ -2978,7 +2974,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 #endif
 
     refinedElement = this->refinedElementList.at(elemId);
-    interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+    interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
     if ( interface == NULL ) {
         _error("solveRefinedElementProblem: Element has no Huerta error estimator interface defined");
     }
@@ -3104,7 +3100,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     } else {
         AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >( refinedProblem );
         if ( prob ) {
-            ( ( AdaptiveNonLinearStatic * ) refinedProblem )->initializeAdaptiveFrom(problem);
+            static_cast< AdaptiveNonLinearStatic * >( refinedProblem )->initializeAdaptiveFrom(problem);
         } else {
             OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
         }
@@ -3174,7 +3170,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         eNorm = uNorm = 0.0;
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
-            interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+            interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             iRule = element->giveDefaultIntegrationRulePtr();
 
             elementNorm = patchNorm = mixedNorm = 0.0;
@@ -3295,17 +3291,17 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     //   elementError.at(pos) * (1.0 - coeff) + patchError.at(pos);
     // }
 
-    element = domain->giveElement(elemId);
 
     double eeeNorm = 0.0;
 
 #ifdef HUHU
     IntegrationRule *iRule;
     int nip, result;
-    double sval, maxVal, eeeNorm = 0.0;
+    double sval, maxVal;
     int k;
 
     maxVal = 0.0;
+    element = domain->giveElement(elemId);
     iRule = element->giveDefaultIntegrationRulePtr();
     nip = iRule->getNumberOfIntegrationPoints();
     for ( k = 0; k < nip; k++ ) {
@@ -3467,7 +3463,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
         refinedElement = this->refinedElementList.at(elemId);
-        interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+        interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
             _error("solveRefinedPatchProblem: Element has no Huerta error estimator interface defined");
         }
@@ -3505,7 +3501,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
             refinedElement = this->refinedElementList.at(elemId);
-            interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+            interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
             for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
                 if ( element->giveNode(inode)->giveNumber() != nodeId ) {
@@ -3550,7 +3546,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
         refinedElement = this->refinedElementList.at(elemId);
-        interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+        interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
         for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
             if ( element->giveNode(inode)->giveNumber() != nodeId ) {
@@ -3580,7 +3576,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
         refinedElement = this->refinedElementList.at(elemId);
-        interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+        interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
         for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
             if ( element->giveNode(inode)->giveNumber() != nodeId ) {
@@ -3614,7 +3610,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 #endif
 
             refinedElement = this->refinedElementList.at(elemId);
-            interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+            interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
             for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
                 if ( element->giveNode(inode)->giveNumber() != nodeId ) {
@@ -3674,7 +3670,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     } else {
         AdaptiveNonLinearStatic *prob = dynamic_cast< AdaptiveNonLinearStatic * >( refinedProblem );
         if ( prob ) {
-            ( ( AdaptiveNonLinearStatic * ) refinedProblem )->initializeAdaptiveFrom(problem);
+            static_cast< AdaptiveNonLinearStatic * >( refinedProblem )->initializeAdaptiveFrom(problem);
         } else {
             OOFEM_ERROR("HuertaErrorEstimator :: solveRefinedElementProblem - Refined problem must be of the type AdaptiveNonLinearStatic");
         }
@@ -3775,7 +3771,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
         refinedElement = this->refinedElementList.at(elemId);
-        interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+        interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
             _error("solveRefinedWholeProblem: Element has no Huerta error estimator interface defined");
         }
@@ -3796,8 +3792,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         for ( elemId = 1; elemId <= elems; elemId++ ) {
             element = domain->giveElement(elemId);
             refinedElement = this->refinedElementList.at(elemId);
-            interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
-
+            interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                         localNodeIdArray, globalNodeIdArray,
                                                                         HuertaErrorEstimatorInterface :: BCMode, tStep,
@@ -3824,7 +3819,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
         refinedElement = this->refinedElementList.at(elemId);
-        interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+        interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                     localNodeIdArray, globalNodeIdArray,
                                                                     HuertaErrorEstimatorInterface :: NodeMode, tStep,
@@ -3836,7 +3831,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
         refinedElement = this->refinedElementList.at(elemId);
-        interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+        interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                     localNodeIdArray, globalNodeIdArray,
                                                                     HuertaErrorEstimatorInterface :: ElemMode, tStep,
@@ -3852,7 +3847,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         for ( elemId = 1; elemId <= elems; elemId++ ) {
             element = domain->giveElement(elemId);
             refinedElement = this->refinedElementList.at(elemId);
-            interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+            interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                         localNodeIdArray, globalNodeIdArray,
                                                                         HuertaErrorEstimatorInterface :: BCMode, tStep,
@@ -3963,7 +3958,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         exactENorm = coarseUNorm = fineUNorm = mixedNorm = 0.0;
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
-            interface = ( HuertaErrorEstimatorInterface * ) element->giveInterface(HuertaErrorEstimatorInterfaceType);
+            interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             iRule = element->giveDefaultIntegrationRulePtr();
 
             for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {

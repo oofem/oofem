@@ -300,7 +300,6 @@ TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
     FloatArray n, u, un;
     FloatMatrix D, d2n;
 
@@ -310,13 +309,13 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
 
     this->velocityInterpolation.evald2Ndx2(d2n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 2 * i - 1) = D.at(1, 1) * d2n.at(i, 1) + D.at(1, 3) * d2n.at(i, 3) + D.at(3, 1) * d2n.at(i, 3) + D.at(3, 3) * d2n.at(i, 2);
-        answer.at(1, 2 * i)   = D.at(1, 2) * d2n.at(i, 3) + D.at(1, 3) * d2n.at(i, 1) + D.at(3, 2) * d2n.at(i, 2) + D.at(3, 3) * d2n.at(i, 3);
+        answer.at(1, 2 * i)     = D.at(1, 2) * d2n.at(i, 3) + D.at(1, 3) * d2n.at(i, 1) + D.at(3, 2) * d2n.at(i, 2) + D.at(3, 3) * d2n.at(i, 3);
         answer.at(2, 2 * i - 1) = D.at(2, 1) * d2n.at(i, 3) + D.at(2, 3) * d2n.at(i, 2) + D.at(3, 1) * d2n.at(i, 1) + D.at(3, 3) * d2n.at(i, 3);
-        answer.at(2, 2 * i)   = D.at(2, 2) * d2n.at(i, 2) + D.at(2, 3) * d2n.at(i, 3) + D.at(3, 2) * d2n.at(i, 3) + D.at(3, 3) * d2n.at(i, 1);
+        answer.at(2, 2 * i)     = D.at(2, 2) * d2n.at(i, 2) + D.at(2, 3) * d2n.at(i, 3) + D.at(3, 2) * d2n.at(i, 3) + D.at(3, 3) * d2n.at(i, 1);
     }
 }
 
@@ -328,12 +327,11 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     FloatMatrix dn, N, N_d, M_d, LSIC;
     FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(6), u2(6);
     GaussPoint *gp;
-    int j;
     IntegrationRule *iRule;
 
     iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
-    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+    for ( int j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
         gp = iRule->getIntegrationPoint(j);
         mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
         if ( mu_min > mu ) {
@@ -1424,7 +1422,6 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, FloatArray line)
     A.at(3, 3) = 1.0;
 
     FloatArray b(3);
-    int i, j, k;
 
     detA = A.giveDeterminant();
 
@@ -1432,9 +1429,9 @@ TR21_2D_SUPG :: computeQuadraticFunct(FloatArray &answer, FloatArray line)
     b.at(2) = y2;
     b.at(3) = y3;
 
-    for ( k = 1; k <= 3; k++ ) {
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
+    for ( int k = 1; k <= 3; k++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
+            for ( int j = 1; j <= 3; j++ ) {
                 A1.at(i, j) = A.at(i, j);
             }
 
@@ -1572,8 +1569,8 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this)) );
 
 
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
 
     return volume;
 }
@@ -1599,11 +1596,11 @@ Interface *
 TR21_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
-        return ( LevelSetPCSElementInterface * ) this;
+        return static_cast< LevelSetPCSElementInterface * >( this );
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     return NULL;

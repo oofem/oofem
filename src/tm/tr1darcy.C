@@ -89,7 +89,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime)
     FloatArray *lcoords;
     GaussPoint *gp;
 
-    TransportMaterial *mat = ( TransportMaterial * ) this->domain->giveMaterial(this->material);
+    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
@@ -128,7 +128,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *atTim
     FloatMatrix BT;
     GaussPoint *gp;
 
-    TransportMaterial *mat = ( TransportMaterial * ) this->domain->giveMaterial(this->material);
+    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, atTime, a);
@@ -162,20 +162,20 @@ void Tr1Darcy :: computeLoadVector(FloatArray &answer, TimeStep *atTime)
     answer.zero();
 
     // Compute characteristic vector for Neumann boundary conditions.
-    int i, load_number, load_id;
-    GeneralBoundaryCondition *load;
+    int load_number, load_id;
+    Load *load;
     bcGeomType ltype;
 
     int nLoads = boundaryLoadArray.giveSize() / 2;
 
-    for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition ....
+    for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition ....
         load_number = boundaryLoadArray.at(2 * i - 1);
         load_id = boundaryLoadArray.at(2 * i);
-        load = ( GeneralBoundaryCondition * ) domain->giveLoad(load_number);
+        load = domain->giveLoad(load_number);
         ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
-            this->computeEdgeBCSubVectorAt(vec, ( Load * ) load, load_id, atTime);
+            this->computeEdgeBCSubVectorAt(vec, load, load_id, atTime);
         }
 
         answer.add(vec);
@@ -196,7 +196,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
     if ( load->giveType() == TransmissionBC ) {                 // Neumann boundary conditions (traction)
         BoundaryLoad *boundaryLoad;
-        boundaryLoad = ( BoundaryLoad * ) load;
+        boundaryLoad = static_cast< BoundaryLoad * >( load );
 
         int numberOfEdgeIPs;
         numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
@@ -273,7 +273,7 @@ Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
-    TransportMaterial *mat = ( TransportMaterial * ) this->domain->giveMaterial(this->material);
+    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     gp = iRule->getIntegrationPoint(0);
@@ -291,7 +291,7 @@ Interface *
 Tr1Darcy :: giveInterface(InterfaceType interface)
 {
     if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     return NULL;

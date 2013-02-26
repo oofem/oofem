@@ -259,11 +259,11 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *
 {
     /* computes stress space hardening gradient in reduced stress-strain space */
 
-    int i, kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
+    int kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
     //double f,ax,ay,az,sx,sy,sz;
     FloatArray *answer;
     FloatArray *fullKinematicGradient, reducedKinematicGrad;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     if ( !hasHardening() ) {
@@ -282,7 +282,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *
     }
 
     if ( this->kinematicHardeningFlag ) {
-        for ( i = 1; i <= kcount; i++ ) {
+        for ( int i = 1; i <= kcount; i++ ) {
             answer->at(i) = reducedKinematicGrad.at(i);
         }
     }
@@ -413,7 +413,7 @@ J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
 { /* Computes the full trial elastic stress vector */
     FloatArray reducedAnswer;
     FloatMatrix reducedModuli;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >
                                            ( gp->giveElement()->giveCrossSection() );
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(reducedModuli, ReducedForm, ElasticStiffness,

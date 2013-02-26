@@ -69,6 +69,7 @@ QTrPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &
         answer.setValues(2, D_u, D_v);
     }
 }
+
 IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
@@ -150,4 +151,3 @@ QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 }
 
 }
-

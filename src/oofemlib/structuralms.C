@@ -42,7 +42,7 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     MaterialStatus(n, d, g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector()
 {
-    int rsize = ( ( StructuralMaterial * ) gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    int rsize = static_cast< StructuralMaterial * >( gp->giveMaterial() )->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
 
     strainVector.resize(rsize);
     strainVector.zero();
@@ -62,24 +62,23 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;
-    int i, n;
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( gp->giveCrossSection() );
+    int n;
 
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  strains ");
-    ( ( StructuralCrossSection * )
-     gp->giveCrossSection() )->giveFullCharacteristicVector(helpVec, gp, strainVector);
+    cs->giveFullCharacteristicVector(helpVec, gp, strainVector);
     n = helpVec.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", helpVec.at(i) );
     }
 
     fprintf(File, "\n              stresses");
-    ( ( StructuralCrossSection * )
-     gp->giveCrossSection() )->giveFullCharacteristicVector(helpVec, gp, stressVector);
+    cs->giveFullCharacteristicVector(helpVec, gp, stressVector);
 
     n = helpVec.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( int i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", helpVec.at(i) );
     }
     fprintf(File, "\n");
@@ -107,12 +106,12 @@ void StructuralMaterialStatus :: initTempStatus()
 
     // see if vectors describing reached equilibrium are defined
     if ( this->giveStrainVector().giveSize() == 0 ) {
-        strainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        strainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                             giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
     }
 
     if ( this->giveStressVector().giveSize() == 0 ) {
-        stressVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        stressVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                             giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
     }
 

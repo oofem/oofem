@@ -82,7 +82,7 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
 int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
                                                                          IntegrationRule *ie, EquationID ut)
 {
-    int i, j, nsd;
+    int nsd;
     IntArray mask, nodeDofIDMask, nodalArray;
     int dofmandof;
 
@@ -94,13 +94,13 @@ int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArra
 
     // first evaluate nonzero basis function mask
     if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
-        IGAIntegrationElement *ee = ( IGAIntegrationElement * ) ie;
+        IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
         elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
         // loop over nonzero shape functions and assemble localization array
         answer.resize(0);
-        for ( i = 1; i <= mask.giveSize(); i++ ) {
+        for ( int i = 1; i <= mask.giveSize(); i++ ) {
             nodalArray.resize( nodeDofIDMask.giveSize() );
-            for ( j = 1; j <= nsd; j++ ) {
+            for ( int j = 1; j <= nsd; j++ ) {
                 nodalArray.at(j) = dofmandof * ( mask.at(i) - 1 ) + j;
             }
 
@@ -152,7 +152,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     Element *elem = this->giveElement();
     int numberOfDofMans = elem->giveNumberOfDofManagers();
     IntArray nodeDofIDMask, dimFlag(3);
-    int i, j, indx = 0, k, ldofs, dim;
+    int indx = 0, ldofs, dim;
     double summ;
 
     if ( !this->isActivated(tStep) ) {
@@ -165,12 +165,12 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     this->computeConsistentMassMatrix(answer, tStep, mass);
     ldofs = answer.giveNumberOfRows();
 
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         elem->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
-        for ( j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
+        for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
             // zero all off-diagonal terms
-            for ( k = 1; k <= ldofs; k++ ) {
+            for ( int k = 1; k <= ldofs; k++ ) {
                 if ( k != indx ) {
                     answer.at(indx, k) = 0.;
                     answer.at(k, indx) = 0.;
@@ -195,7 +195,8 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
-    for ( summ = 0., k = 1; k <= ldofs; k++ ) {
+    summ = 0.;
+    for ( int k = 1; k <= ldofs; k++ ) {
         summ += answer.at(k, k);
     }
 
@@ -264,7 +265,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
 void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord)
 {
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     GaussPoint *gp;
     Material *mat = elem->giveMaterial();
     IntegrationRule *iRule;
@@ -291,7 +292,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             gp = iRule->getIntegrationPoint(i);
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
-                stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+                stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
             } else {
                 this->computeStrainVector(strain, gp, tStep, u); ///@todo This part computes the B matrix again; Inefficient.
                 cs->giveRealStresses(stress, ReducedForm, gp, strain, tStep);
@@ -302,7 +303,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             }
 
             // compute nodal representation of internal forces using f = B^T*Sigma dV
-            dV  = this->computeVolumeAround(gp);
+            dV = this->computeVolumeAround(gp);
             bs.beTProductOf(b, stress);
             m->add(dV, bs);
         }
@@ -324,7 +325,6 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
 // the receiver, at time step tStep. The nature of these strains depends
 // on the element's type.
 {
-    int i;
     FloatMatrix b;
     FloatArray ur;
     Element *elem = this->giveElement();
@@ -341,7 +341,7 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     IntArray lc;
     this->giveIntegrationElementLocalCodeNumbers(lc, elem, gp->giveIntegrationRule(), EID_MomentumBalance);
     ur.resize( b.giveNumberOfColumns() );
-    for ( i = 1; i <= lc.giveSize(); i++ ) {
+    for ( int i = 1; i <= lc.giveSize(); i++ ) {
         ur.at(i) = u.at( lc.at(i) );
     }
 
@@ -353,7 +353,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 {
     FloatArray u;
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
 
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -407,7 +407,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     IntegrationRule *iRule;
     GaussPoint *gp;
     Element *elem = this->giveElement();
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+    StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( elem->giveCrossSection() );
     int ndofs = elem->computeNumberOfDofs(EID_MomentumBalance);
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, elem->giveMaterial()->giveNumber() );
     IntArray irlocnum;

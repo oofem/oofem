@@ -322,7 +322,8 @@ void oofem_print_epilog()
     printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
 }
 
-void oofem_finalize_modules() {
+void oofem_finalize_modules()
+{
 #ifdef __PETSC_MODULE
     PetscFinalize();
 #endif
@@ -336,8 +337,8 @@ void oofem_finalize_modules() {
 #endif
 }
 
-#include "loadbalancer.h"
-#include "iga.h"
+//#include "loadbalancer.h"
+//#include "xfem/iga.h"
 
 void oofem_debug(EngngModel *emodel)
 {

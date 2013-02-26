@@ -134,12 +134,6 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 int
 RotatingBoundary :: giveInputRecordString(std :: string &str, bool keyword)
 {
-    char buff [ 1024 ];
-
-    GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
-
-    str += buff;
-
-    return 1;
+    return GeneralBoundaryCondition :: giveInputRecordString(str, keyword);
 }
 } // end namespace oofem

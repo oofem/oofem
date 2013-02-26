@@ -549,7 +549,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
     if ( this->nlGeometry ) {
         // add increment to previous total value
-        PrevEpsilon = ( ( StructuralMaterialStatus * ) this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
+        PrevEpsilon = static_cast< StructuralMaterialStatus * >( this->giveMaterial()->giveStatus(gp) )->giveStrainVector();
         if ( PrevEpsilon.giveSize() ) {
             answer.add(PrevEpsilon);
         }
@@ -669,7 +669,7 @@ Interface *
 LIBeam3d2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return ( FiberedCrossSectionInterface * ) this;
+        return static_cast< FiberedCrossSectionInterface * >( this );
     }
 
     return NULL;

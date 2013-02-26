@@ -69,11 +69,11 @@ Interface *
 L4Axisymm :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
@@ -85,14 +85,13 @@ L4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at aGaussPoint.
 {
-    int i;
     FloatArray n(4);
 
     answer.resize(2, 8);
     answer.zero();
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
         answer.at(2, 2 * i - 0) = n.at(i);
     }
@@ -107,7 +106,6 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 // (epsilon_x,epsilon_y,...,Gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
-    int i;
     double r, x;
     int size, ind = 1;
     FloatMatrix dnx;
@@ -129,7 +127,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     answer.zero();
 
     if ( ( li <= 1 ) && ( ui >= 1 ) ) {
-        for ( i = 1; i <= 4; i++ ) {
+        for ( int i = 1; i <= 4; i++ ) {
             answer.at(ind, 2 * i - 1) = dnx.at(i, 1);
         }
 
@@ -137,7 +135,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     }
 
     if ( ( li <= 2 ) && ( ui >= 2 ) ) {
-        for ( i = 1; i <= 4; i++ ) {
+        for ( int i = 1; i <= 4; i++ ) {
             answer.at(ind, 2 * i - 0) = dnx.at(i, 2);
         }
 
@@ -149,7 +147,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
         this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
+        for ( int i = 1; i <= numberOfDofMans; i++ ) {
             x  = this->giveNode(i)->giveCoordinate(1);
             r += x * n.at(i);
         }
@@ -171,7 +169,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     }
 
     if ( ( li <= 6 ) && ( ui >= 6 ) ) {
-        for ( i = 1; i <= 4; i++ ) {
+        for ( int i = 1; i <= 4; i++ ) {
             answer.at(ind, 2 * i - 1) = dnx.at(i, 2);
             answer.at(ind, 2 * i - 0) = dnx.at(i, 1);
         }
@@ -198,14 +196,13 @@ double
 L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-    int i;
     double determinant, weight, volume, r, x;
     FloatArray n(4);
 
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         x  = this->giveNode(i)->giveCoordinate(1);
         r += x * n.at(i);
     }
@@ -252,7 +249,6 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
 {
-    int i;
     FloatMatrix b, A;
     FloatArray u, Epsilon, help;
     fMode mode = domain->giveEngngModel()->giveFormulation();
@@ -287,7 +283,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *s
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            for ( i = 1; i <= 6; i++ ) {
+            for ( int i = 1; i <= 6; i++ ) {
                 // nonlin part of strain vector
                 this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {

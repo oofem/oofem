@@ -1487,8 +1487,8 @@ Graph :: insert(node *ins, node *first, node *last)
 void
 Graph :: remove(node *rem)
 {
-    rem->neighbor->entry = 0;
     if ( rem ) {
+        rem->neighbor->entry = 0;
         rem->prev->next = rem->next;
         rem->next->prev = rem->prev;
         delete rem;

@@ -62,11 +62,11 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     lastLocalStrainIndx = 3;
     // convert patch coordinates into element based, update weights accordingly
     for ( int j = 0; j <  numberOfIntegrationPoints; j++ ) {
-        GaussPoint *gp = ( this->gaussPointArray ) [ j ];
+        GaussPoint *gp = this->gaussPointArray[ j ];
         patch->convertGPIntoParental(gp); // convert coordinates into parental
-        Element *elg = ( Element * ) patch->giveParent();
+        Element *elg = patch->giveParent();
         double parentArea = elg->computeArea();
-        Triangle *tr = ( Triangle * ) patch;
+        Triangle *tr = ( Triangle * ) patch; ///@todo This must be a serious bug. This will do a reinterpret_cast from Patch to Triangle, which makes no sense.
         gp->setWeight(8.0 * gp->giveWeight() * tr->getArea() / parentArea); // update integration weight
     }
 

@@ -92,7 +92,7 @@ public:
     OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth);
     /// Destructor.
     ~OctantRec();
-    
+
     /// @return Reference to parent; NULL if root.
     OctantRec *giveParent() { return this->parent; }
     /**

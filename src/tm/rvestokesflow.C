@@ -35,7 +35,6 @@
 #include "rvestokesflow.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
-#include "stdio.h"
 #include "rveengngmodel.h"
 #include "engngm.h"
 #include "nummet.h"
@@ -43,6 +42,7 @@
 #include "gausspnt.h"
 #include "mathfem.h"
 
+#include <cstdio>
 #include <cstring>
 #include <sstream>
 
@@ -180,7 +180,7 @@ int
 RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     RVEStokesFlowMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(aGaussPoint) );
+    thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(aGaussPoint) );
     FloatMatrix temp;
     answer.resize(3);
     answer.zero();
@@ -219,7 +219,7 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
 
     OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve);
 
-    RVEStokesFlowMaterialStatus *status = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(gp) );
+    RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
     FloatArray temp = status->giveTempGradP();
 
     if ( temp.giveSize() >= 3 && temp.at(1) == eps.at(1) && temp.at(2) == eps.at(2) ) {
@@ -284,7 +284,7 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm 
 
     OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix ********************** rve @ %p \n", this->rve);
 
-    RVEStokesFlowMaterialStatus *status = ( ( RVEStokesFlowMaterialStatus * ) this->giveStatus(gp) );
+    RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
 
     answer = status->giveTempTangentMatrix();
     status->letTempTangentMatrixBe(answer);

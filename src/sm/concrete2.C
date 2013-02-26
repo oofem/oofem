@@ -252,8 +252,8 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     int ifsh, i, ifplas, ifupd;
     FloatArray plasticStrainVector, plasticStrainIncrementVector;
 
-    Concrete2MaterialStatus *status = ( Concrete2MaterialStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
     FloatArray currentStress, currentStrain, currentEffStrain(6), pVal, * ep, * pStress,
     * strainIncr, plasticStrain, help, reducedStrain, helpR;
     FloatMatrix pDir;
@@ -1095,7 +1095,7 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
 //    - components of plastic strain associated with epp in gp->plasticStrainVector.
 //
 {
-    Concrete2MaterialStatus *status = ( Concrete2MaterialStatus * ) this->giveStatus(gp);
+    Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
     double eop, eopr, dep, d, eep, eepr;
     //
     // strain softening
@@ -1252,7 +1252,7 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 //     PLASTIC STRAIN INCREMENT
 //
 {
-    Concrete2MaterialStatus *status = ( Concrete2MaterialStatus * ) this->giveStatus(gp);
+    Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
 
     double dep, srf, dez, ovs, s, dt;
     if ( strainIncrement == NULL ) {
@@ -1444,13 +1444,13 @@ Concrete2MaterialStatus :: initTempStatus()
     tempSEZ  = SEZ;
 
     if ( plasticStrainVector.giveSize() == 0 ) {
-        plasticStrainVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                    giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainVector.zero();
     }
 
     if ( plasticStrainIncrementVector.giveSize() == 0 ) {
-        plasticStrainIncrementVector.resize( ( ( StructuralMaterial * ) gp->giveMaterial() )->
+        plasticStrainIncrementVector.resize( static_cast< StructuralMaterial * >( gp->giveMaterial() )->
                                             giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) );
         plasticStrainIncrementVector.zero();
     } else {

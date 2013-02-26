@@ -133,7 +133,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
             candidate = * ( queue.begin() );
             queue.erase( queue.begin() );
 
-            candNode  = ( Node * ) d->giveDofManager(candidate);
+            candNode  = static_cast< Node * >( d->giveDofManager(candidate) );
             // find candidate neighbours
             candidateConnectivity = d->giveConnectivityTable()->giveDofManConnectivityArray(candidate);
             for ( int j = 1; j <= candidateConnectivity->giveSize(); j++ ) {
@@ -146,7 +146,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                     }
 
                     // neighbour found, check if smoothing necessary
-                    neighbourCoords = ( ( Node * ) jelem->giveNode(k) )->giveCoordinates();
+                    neighbourCoords = static_cast< Node * >( jelem->giveNode(k) )->giveCoordinates();
                     dist = candNode->giveCoordinates()->distance(neighbourCoords);
                     // overshoot criteria
                     if ( ( ( nodalDensities.at(neighbour) / nodalDensities.at(candidate) ) > 1.3 ) &&
@@ -186,7 +186,6 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                 }
             }
         } // end loop over queue
-
     }
 }
 } // end namespace oofem

@@ -297,7 +297,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
 {
     int elementCsFlag;
     FloatMatrix elementCs;
-    StructuralElement *element = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
 
     if ( gp->giveMaterialMode() == _1dMat ) { //do not rotate 1D materials on trusses and beams
         answer.resize(3, 3);

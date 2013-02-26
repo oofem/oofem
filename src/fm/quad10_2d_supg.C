@@ -137,7 +137,7 @@ Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer
         answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.resize(0);
-    } else  {
+    } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
@@ -150,7 +150,7 @@ Quad10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &
         answer.resize(0);
     } else if ( ( ut == EID_ConservationEquation ) || ( ut == EID_MomentumBalance_ConservationEquation ) ) {
         answer.setValues(1, P_f);
-    } else  {
+    } else {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
@@ -307,7 +307,6 @@ Quad10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 }
 
 
-
 void
 Quad10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
@@ -366,7 +365,7 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     if ( ( norm_N == 0 ) || ( norm_N_d == 0 ) || ( norm_M_d == 0 ) ) {
         t_supg = 0;
-    } else   {
+    } else {
         Re = ( norm_un / nu ) * ( norm_N / norm_N_d );
 
         t_s1 = norm_N / norm_N_d;
@@ -381,7 +380,7 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     if ( norm_LSIC == 0 ) {
         t_lsic = 0;
-    } else   {
+    } else {
         t_lsic = norm_N / norm_LSIC;
 
         // t_lsic = 0;
@@ -389,7 +388,7 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     if ( ( norm_G_c == 0 ) || ( norm_N_c == 0 ) || ( norm_M_c == 0 ) ) {
         t_pspg = 0;
-    } else  {
+    } else {
         Re = ( norm_un / nu ) * ( norm_N / norm_N_d );
 
         t_p1 = norm_G_c / norm_N_c;
@@ -404,8 +403,6 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //t_pspg = 0;
 }
-
-
 
 
 void
@@ -455,7 +452,6 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTim
         answer.plusProductUnsym(b, b, rho * dV);
     }
 }
-
 
 
 void
@@ -565,7 +561,6 @@ Quad10_2D_SUPG :: giveNumberOfSpatialDimensions()
 }
 
 
-
 double
 Quad10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
@@ -607,13 +602,11 @@ Quad10_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 { }
 
 
-
 double
 Quad10_2D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 {
     return 1.e6;
 }
-
 
 
 int
@@ -718,16 +711,6 @@ Quad10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 }
 
 
-//void
-//Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
-// Performs end-of-step operations.
-//{
-//    SUPGElement :: printOutputAt(file, stepN);
-//}
-
-
-
-
 contextIOResultType
 Quad10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -797,11 +780,11 @@ Interface *
 Quad10_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
-        return ( LevelSetPCSElementInterface * ) this;
-    } else if ( interface == ZZNodalRecoveryModelInterfaceType )  {
-        return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< LevelSetPCSElementInterface * >( this );
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     }
 
     return NULL;
@@ -812,39 +795,36 @@ void
 Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 // Performs end-of-step operations.
 {
-    int i;
-
 #ifdef __PARALLEL_MODE
     fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
 #else
-    fprintf(file, "element %d :\n", number);
+    fprintf( file, "element %d :\n", number );
 #endif
     pressureNode.printOutputAt(file, stepN);
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->printOutputAt(file, stepN);
     }
 }
-
 
 
 void
 Quad10_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
     map.resize(8);
-    int i;
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         map.at(i) = i;
     }
 }
+
+
 void
 Quad10_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
     map.resize(1);
     map.at(1) = 9;
 }
-
 
 
 #ifdef __OOFEG
@@ -854,8 +834,6 @@ Quad10_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType 
 {
     return SUPGElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
 }
-
-
 
 void
 Quad10_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
@@ -888,7 +866,8 @@ Quad10_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void Quad10_2D_SUPG :: drawScalar(oofegGraphicContext &context)
+void
+Quad10_2D_SUPG :: drawScalar(oofegGraphicContext &context)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
@@ -979,8 +958,6 @@ void Quad10_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         EMAddGraphicsToModel(ESIModel(), tr);
     }
 }
-
-
 
 #endif
 } // end namespace oofem

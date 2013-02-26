@@ -67,27 +67,27 @@ Interface *
 TrPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return ( ZZNodalRecoveryModelInterface * ) this;
+        return static_cast< ZZNodalRecoveryModelInterface * >( this );
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return ( NodalAveragingRecoveryModelInterface * ) this;
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return ( SPRNodalRecoveryModelInterface * ) this;
+        return static_cast< SPRNodalRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return ( SpatialLocalizerInterface * ) this;
+        return static_cast< SpatialLocalizerInterface * >( this );
     } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return ( DirectErrorIndicatorRCInterface * ) this;
+        return static_cast< DirectErrorIndicatorRCInterface * >( this );
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return ( EIPrimaryUnknownMapperInterface * ) this;
+        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return ( ZZErrorEstimatorInterface * ) this;
+        return static_cast< ZZErrorEstimatorInterface * >(this );
     } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return ( ZZRemeshingCriteriaInterface * ) this;
+        return static_cast< ZZRemeshingCriteriaInterface * >( this );
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return ( MMAShapeFunctProjectionInterface * ) this;
+        return static_cast< MMAShapeFunctProjectionInterface * >( this );
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return ( HuertaErrorEstimatorInterface * ) this;
+        return static_cast< HuertaErrorEstimatorInterface * >( this );
     } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return ( HuertaRemeshingCriteriaInterface * ) this;
+        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
     }
 
     return NULL;
@@ -803,7 +803,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
     GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();

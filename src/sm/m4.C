@@ -129,7 +129,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
                                              const FloatArray &strain,
                                              TimeStep *tStep)
 {
-    M4MaterialStatus *status =  ( M4MaterialStatus * ) this->giveMicroplaneStatus(mplane);
+    M4MaterialStatus *status = static_cast< M4MaterialStatus * >( this->giveMicroplaneStatus(mplane) );
     FloatArray previousStress, previousStrain;
     FloatArray stressIncrement, strainIncrement;
     double EpsN, DEpsN, DEpsL, DEpsM;
@@ -299,7 +299,7 @@ M4Material :: updateVolumetricStressTo(Microplane *mPlane, double sigv)
 {
     //FloatArray stressIncrement;
     FloatArray stress;
-    M4MaterialStatus *status =  ( M4MaterialStatus * ) this->giveStatus(mPlane);
+    M4MaterialStatus *status =  static_cast< M4MaterialStatus * >( this->giveStatus(mPlane) );
     //stressIncrement = status->giveStressIncrementVector();
     //stressIncrement.at(1) = sigv - status->giveStressVector().at(1);
     //status->letStressIncrementVectorBe (stressIncrement);

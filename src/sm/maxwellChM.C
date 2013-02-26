@@ -146,7 +146,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
     double deltaYmu;
     FloatArray *sigmaMu, help, reducedAnswer;
     FloatMatrix B;
-    MaxwellChainMaterialStatus *status = ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
+    MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == VM_Incremental ) {
         this->giveUnitComplianceMatrix(B, ReducedForm, gp, atTime);
@@ -172,7 +172,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
         }
 
         // expand the strain to full form if requested
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveFullCharacteristicVector(answer, gp, reducedAnswer);
     } else {
         /* error - total mode not implemented yet */
@@ -198,7 +198,7 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
     FloatMatrix Binv;
     MaxwellChainMaterialStatus *status =
-        ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
+        static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
     this->giveUnitStiffnessMatrix(Binv, ReducedForm, gp, tNow);
     help = status->giveTempStrainVector();

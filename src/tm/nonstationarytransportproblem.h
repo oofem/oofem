@@ -134,7 +134,9 @@ public:
      */
     double giveDiscreteTime(int n);
 
+#if __CEMHYD_MODULE
     void averageOverElements(TimeStep *tStep);
+#endif
 
 protected:
     virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,

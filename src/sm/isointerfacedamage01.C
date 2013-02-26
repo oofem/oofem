@@ -94,7 +94,7 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, MatRespon
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    IsoInterfaceDamageMaterialStatus *status = ( IsoInterfaceDamageMaterialStatus * ) this->giveStatus(gp);
+    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
     FloatArray strainVector, reducedTotalStrainVector;
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
@@ -221,16 +221,14 @@ IsoInterfaceDamageMaterial :: giveStressStrainMask(IntArray &answer, MatResponse
 // relations, and corresponding component is included in reduced vector.
 //
 {
-    int i;
-
     if ( mmode == _2dInterface ) {
         answer.resize(2);
-        for ( i = 1; i <= 2; i++ ) {
+        for ( int i = 1; i <= 2; i++ ) {
             answer.at(i) = i;
         }
     } else if ( mmode == _3dInterface ) {
         answer.resize(3);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) = i;
         }
     } else {
@@ -289,7 +287,7 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
                                                                      GaussPoint *gp, TimeStep *atTime)
 {
     double om, un;
-    IsoInterfaceDamageMaterialStatus *status = ( IsoInterfaceDamageMaterialStatus * ) this->giveStatus(gp);
+    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
 
 
     if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
@@ -348,7 +346,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
                                                                      GaussPoint *gp, TimeStep *atTime)
 {
     double om, un;
-    IsoInterfaceDamageMaterialStatus *status = ( IsoInterfaceDamageMaterialStatus * ) this->giveStatus(gp);
+    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
 
 
     if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
@@ -405,7 +403,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
 int
 IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    IsoInterfaceDamageMaterialStatus *status = ( IsoInterfaceDamageMaterialStatus * ) this->giveStatus(aGaussPoint);
+    IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(aGaussPoint) );
     if ( ( type == IST_DamageTensor ) || ( type == IST_PrincipalDamageTensor ) ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();

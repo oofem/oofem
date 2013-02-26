@@ -131,7 +131,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                 iRule = elem->giveDefaultIntegrationRulePtr();
                 for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    structElem = ( StructuralElement * ) gp->giveElement();
+                    structElem = static_cast< StructuralElement * >( gp->giveElement() );
                     structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                     //gp->giveCoordinate(1);
                     dV  = elem->computeVolumeAround(gp);

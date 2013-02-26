@@ -816,7 +816,7 @@ Node :: drawYourself(oofegGraphicContext &gc)
             pp [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
             pp [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
             pp [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
-            pp [ 1 ].x = pp [ 1 ].x = pp [ 1 ].x = 0.0;
+            pp [ 1 ].x = pp [ 1 ].y = pp [ 1 ].z = 0.0;
 
             FloatArray load;
             FloatMatrix t;

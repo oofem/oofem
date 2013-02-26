@@ -36,7 +36,7 @@
 #define qtruss1d_h
 
 #include "fei1dquad.h"
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -44,7 +44,7 @@ namespace oofem {
  * This class implements a three-node truss bar element for one-dimensional
  * analysis.
  */
-class QTruss1d : public StructuralElement
+class QTruss1d : public NLStructuralElement
 {
 protected:
     static FEI1dQuad interpolation;

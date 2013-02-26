@@ -249,8 +249,8 @@ LinearElasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponseFor
 {
     FloatArray stressIncrement, stressVector, strainVector;
     FloatMatrix d;
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(gp);
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp

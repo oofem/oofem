@@ -342,7 +342,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
         return;
     }
 
-    ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+    static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
 }
 
@@ -357,8 +357,8 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
     double time = relMatAge + atTime->giveTargetTime() / timeFactor;
-    int i, err, tflag = 0, wflag = 0;
-    MaxwellChainMaterialStatus *status = ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
+    int err, tflag = 0, wflag = 0;
+    MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
@@ -419,7 +419,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     giveFullCharacteristicVector(fullStressVector, gp, stressVector);
     // commpute volumetric stress
     sv = 0.0;
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         sv += stressVector.at(i);
     }
 
@@ -443,7 +443,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
             return;
         }
 
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveReducedCharacteristicVector(answer, gp, fullAnswer);
         return;
     } else { // total values required
@@ -464,7 +464,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
             return;
         }
 
-        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        static_cast< StructuralCrossSection * >( gp->giveCrossSection() )->
         giveReducedCharacteristicVector(answer, gp, fullAnswer);
         return;
     }

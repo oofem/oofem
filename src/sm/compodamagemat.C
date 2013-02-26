@@ -139,9 +139,9 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 //called in each iteration, support for 3D and 1D material mode
 void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
-    int i_max = 0, s;
+    int i_max, s;
     double delta, sigma, charLen, tmp=0., Gf_tmp;
-    CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
+    CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
     Element *element = gp->giveElement();
     FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6), reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6), charLenModes(6);
     FloatArray *inputFGf;
@@ -196,12 +196,16 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
         i_max = 1;
         break;
     }
-    default: OOFEM_ERROR2( "Material mode %s not supported", __MaterialModeToString(mMode) );
+    default:
+    {
+        OOFEM_ERROR2( "Material mode %s not supported", __MaterialModeToString(mMode) );
+        i_max = 0;
+    }
     }
 
     //proceed 6 components for 3D or 1 component for 1D, damage evolution is based on the evolution of strains
     //xx, yy, zz, yz, zx, xy
-    for (int i = 1; i <= i_max; i++ ) {
+    for ( int i = 1; i <= i_max; i++ ) {
         if ( tempStressVectorL.at(i) >= 0. ) { //unequilibrated stress, tension
             inputFGf = & inputTension; //contains pairs (stress - fracture energy)
             s = 0;
@@ -350,7 +354,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
 //used for output in *.hom a *.out
 int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    CompoDamageMatStatus *status = ( CompoDamageMatStatus * ) this->giveStatus(aGaussPoint);
+    CompoDamageMatStatus *status = static_cast< CompoDamageMatStatus * >( this->giveStatus(aGaussPoint) );
     if ( type == IST_DamageTensor ) {
         answer.resize(6);
         answer = status->omega;
@@ -407,7 +411,7 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
     answer.resize(6, 6);
     answer.zero();
 
-    CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
+    CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
 
     ex = this->give(Ex, NULL);
     ey = this->give(Ey, NULL);
@@ -451,7 +455,7 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
 int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix t(3, 3);
-    StructuralElement *element = ( StructuralElement * ) gp->giveElement();
+    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
     MaterialMode mMode = gp->giveMaterialMode();
 
     switch ( mMode ) {
@@ -480,15 +484,14 @@ int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint
 // Material orientation in global c.s. is passed. Called in the first run
 void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs)
 {
-    int i, j;
     FloatArray crackPlaneNormal(3);
 
     //elementCs.printYourself();
 
     //normal to x,y,z is the same as in elementCs
 
-    for ( i = 1; i <= 3; i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             crackPlaneNormal.at(j) = elementCs.at(j, i);
         }
 
@@ -499,8 +502,9 @@ void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *
 
 //determine characteristic length for six stresses/strains in their modes
 void
-CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp) {
-    CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
+CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp)
+{
+    CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
 
     charLenModes.resize(6);
     charLenModes.at(1) = st->elemCharLength.at(1);
@@ -512,8 +516,9 @@ CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *g
 }
 
 //check that elemnt is small enough to prevent snap-back
-void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {
-    CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
+void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
+{
+    CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
     FloatArray charLenModes(6);
     FloatArray *inputFGf;
     double l_ch, ft, Gf, elem_h, modulus = -1.0;
@@ -557,7 +562,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {
                 if ( elem_h > 2 * l_ch ) {
                     if ( this->allowSnapBack.contains(i + 6 * j) ) {
                         OOFEM_LOG_INFO("Allowed snapback of 3D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
-                    } else   {
+                    } else {
                         OOFEM_ERROR5("Decrease size of 3D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
                     }
                 }
@@ -571,10 +576,10 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode) {
             l_ch = modulus * Gf / ft / ft;
             elem_h = st->elemCharLength.at(1);
             if ( elem_h > 2 * l_ch ) {
-                int i = 1; // i=1 for case _1dMat?
-                if ( this->allowSnapBack.contains(i + 6 * j) ) {
-                    OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
-                } else   {
+                ///@todo Check value here for 1d mat (old broken code used undeclared variable)
+                if ( this->allowSnapBack.contains(1 + 6 * j) ) {
+                    OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
+                } else {
                     OOFEM_ERROR5("Decrease size of 1D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
                 }
             }

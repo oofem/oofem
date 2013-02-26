@@ -55,7 +55,7 @@ Concrete3 :: CreateStatus(GaussPoint *gp) const
  */
 {
     // double Ee, Gf, Et, Etp, Ft, Le, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) RCM2Material :: CreateStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( RCM2Material :: CreateStatus(gp) );
     return status;
 }
 
@@ -132,7 +132,7 @@ Concrete3 :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
 //
 {
     if ( softeningMode == linearSoftening ) {
-        RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+        RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
         double Le, Gf, Ft;
 
         Le = status->giveCharLength(i);
@@ -250,7 +250,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
 {
     //double Ee, Gf;
     double Cf, Gf, Ft, Le, ef, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     //
     // now we have to set proper reduced strength and softening modulus Et
@@ -367,7 +367,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
 //
 {
     double Cf, Ft, Gf, Le, answer, ef, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(gp);
+    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
 
     Cf = this->giveCrackingModulus(TangentStiffness, gp, crackStrain, i); // < 0

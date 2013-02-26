@@ -127,12 +127,10 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
         return;
     }
 
-    //LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    //LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    double paramA = 0.;
-    double paramB = 0.;
-    double paramC = 0.;
+    double paramA, paramB, paramC;
 
     paramA = 0.5 * ( e0 + ec * e0 );
     paramB = ( coh * e0 ) / sqrt( 1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
@@ -145,7 +143,7 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
 void
 LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const FloatArray &strain, GaussPoint *gp)
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     omega = 0.0;
 
@@ -232,29 +230,29 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 void
 LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
-    int i, indx = 1;
+    int indx = 1;
     double le;
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
     FloatMatrix principalDir(3, 3);
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
     //get the random variable from the status
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+    StructuralCrossSection *crossSection = static_cast< StructuralCrossSection * >( gp->giveElement()->giveCrossSection() );
 
     crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
         // finfd index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
+        for ( int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
@@ -275,9 +273,7 @@ LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 MaterialStatus *
 LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 {
-    MaterialStatus *status;
-
-    status = ( MaterialStatus * ) gp->giveMaterialStatus( this->giveNumber() );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus( this->giveNumber() ) );
     if ( status == NULL ) {
         // create a new one
         status = this->CreateStatus(gp);
@@ -305,7 +301,7 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     status->setE0(e0);
@@ -552,7 +548,7 @@ LatticeDamage2d :: giveSecantStiffnessMatrix(FloatMatrix &answer,
                                              GaussPoint *gp,
                                              TimeStep *atTime)
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
 
     double omega = status->giveTempDamage();
 
@@ -661,7 +657,7 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
                                InternalStateType type,
                                TimeStep *atTime)
 {
-    LatticeDamage2dStatus *status = ( LatticeDamage2dStatus * ) this->giveStatus(gp);
+    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
     if ( type == IST_CrackStatuses ) {
         answer.resize(1);
         answer.at(1) = status->giveCrackFlag();
@@ -791,7 +787,7 @@ Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return ( RandomMaterialStatusExtensionInterface * ) this;
+        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
     } else {
         return NULL;
     }

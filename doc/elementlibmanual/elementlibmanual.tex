@@ -101,6 +101,8 @@ information about the types of loadings supported by particular elements.
 
 
 \section{Elements for Structural Analysis\\(SM Module)}
+
+
 \subsection{Truss Elements}
 
 \subsubsection{Truss 1D element}
@@ -127,7 +129,10 @@ constitutive support, Adaptivity support
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported in current implementation.
 
-\descitem{Status} Reliable
+
+\descitem{Status} Reliable\\
+
+
 
 \subsubsection{Truss 2D element}
 \label{Truss2d}
@@ -365,8 +370,8 @@ following. Each i-th element side begins in i-th element node and
 ends on next element node (i+1-th node or 1-st node, in the case of 
 side number 4). The local positive edge x-axis coincides with side
 direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{Planestress2dfig})).
-
+anti-clockwise (see fig. (\ref{Planestress2dfig})).\\
+\descitem{Nlgeo} 0, 1.\\
 \descitem{Status} Reliable.
 
 \subsubsection{QPlaneStress2d}
@@ -402,8 +407,8 @@ integration point used can be overloaded using \param{NIP} parameter.
 
 \descitem{CS properties} Thickness. 
 
-\descitem{Loads} Body and boundary loads are supported.
-
+\descitem{Loads} Body and boundary loads are supported.\\
+\descitem{Nlgeo} 0, 1.\\
 \descitem{Status} Stable.
 
 \subsubsection{TrPlaneStress2d}
@@ -442,8 +447,8 @@ following. Each i-th element side begins in i-th element node and
 ends on next element node (i+1-th node or 1-st node, in the case of 
 side number 3). The local positive edge x-axis coincides with side
 direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{TrPlanestressfig})).
-
+anti-clockwise (see fig. (\ref{TrPlanestressfig})).\\
+\descitem{Nlgeo} 0, 1.\\
 \descitem{Status} Reliable.
 
 \subsubsection{QTrPlStr}
@@ -476,8 +481,8 @@ default) or in 7 points (using \param{NIP} parameter).
 
 \descitem{CS properties} Thickness. 
 
-\descitem{Loads} Boundary loads are supported.
-
+\descitem{Loads} Boundary loads are supported.\\
+\descitem{Nlgeo} 0, 1.\\
 \descitem{Status} 
 
 \subsubsection{TrPlaneStrRot}
@@ -501,8 +506,8 @@ specified using \param{NIPRot} parameter).
 
 \descitem{CS properties} Thickness. 
 
-\descitem{Features} 
-
+\descitem{Features} \\
+\descitem{Nlgeo} 0.\\
 \descitem{Status} 
 
 \subsection{Plane Strain Elements}
@@ -787,6 +792,7 @@ Full integration of all strain components. \\
 allows to change the integration formula.\\
 \descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
 \descitem{Loads} \\
+\descitem{Nlgeo} 0, 1, 2.\\
 \descitem{Status} 
 
 \subsubsection{LSpaceBB element}
@@ -819,6 +825,7 @@ Full integration of all strain components.
 allows to change the integration formula.\\
 \descitem{Features} None.\\
 \descitem{Loads} \\
+\descitem{Nlgeo} 0, 1, 2.\\
 \descitem{Status} 
 
 \subsubsection{LTRSpace element}
@@ -850,6 +857,82 @@ geometry using linear volume coordinates.\\
 Full integration of all strain components using four point Gauss integration formula.\\
 \descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
 \descitem{Loads} Surface and Edge loadings supported.\\
+\descitem{Nlgeo} 0, 1, 2.\\
+\descitem{Status} 
+
+\subsubsection{QTRSpace element}
+Implementation of tetrahedra ten-node finite element. 
+Each node has 3 degrees of freedom.
+Following node numbering convention is adopted (see also Fig.~\ref{qtetrahedron_fig}):
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \raisebox{-0.5\height}{\input{tetrahedra_quad_a.tikz}}
+  \raisebox{-0.5\height}{\input{tetrahedra_quad_b.tikz}}
+ \end{makeimage}
+ \caption{QTRSpace element. Definition and node numbering convention.}
+  \label{qtetrahedron_fig}
+\end{figure}
+
+\elemkeyword{QTRSpace}\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Unknowns}
+Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
+\descitem{Approximation} Quadratic approximation of displacements and
+geometry\\
+\descitem{Integration}
+Full integration of all strain components.
+\param{NIP} parameter (possible completions are 1, 4 (default), 5, 11, 15, 24, and 45 allows to change the integration formula.\\
+\descitem{Nlgeo} 0, 1, 2.\\
+\descitem{Status} 
+
+\subsubsection{LWedge element}
+Implementation of wedge six-node finite element. 
+Each node has 3 degrees of freedom.
+Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}):
+
+\begin{figure}[htb]
+ \centering
+  \raisebox{-0.5\height}{\input{wedge_lin.tikz}}
+  \caption{LWedge element. Definition and node numbering convention.}
+  \label{linwedge_fig}
+\end{figure}
+
+\elemkeyword{LWedge}\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Unknowns}
+Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
+\descitem{Approximation} Linear approximation of displacements and
+geometry.\\
+\descitem{Integration}
+Full integration of all strain components.
+\param{NIP} parameter (possible completions are 2 (default) and 9 allows to change the integration formula.\\
+\descitem{Nlgeo} 0, 1, 2.\\
+\descitem{Status} 
+
+\subsubsection{QWedge element}
+Implementation of wedge fifteen-node finite element. 
+Each node has 3 degrees of freedom.
+Following node numbering convention is adopted (see also Fig.~\ref{qwedge_fig}):
+
+\begin{figure}[htb]
+ \centering
+  \raisebox{-0.5\height}{\input{wedge_quad.tikz}}
+  \caption{QWedge element. Definition and node numbering convention.}
+  \label{qwedge_fig}
+\end{figure}
+
+\elemkeyword{QWedge}\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Unknowns}
+Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
+\descitem{Approximation} Quadratic approximation of displacements and
+geometry.\\
+\descitem{Integration}
+Full integration of all strain components.
+\param{NIP} parameter (possible completions are 2 (default) and 9 allows to change the integration formula.\\
+\descitem{Nlgeo} 0, 1, 2.\\
 \descitem{Status} 
 
 \subsection{Interface elements}
@@ -932,6 +1015,7 @@ Full integration of all components using one point integration formula.
 \descitem{Loads} \\
 \descitem{Status} 
 
+
 \subsection{Iso Geometric Analysis based (IGA) elements}
 The following record describes the common part of IGA element record:
  
@@ -1013,6 +1097,23 @@ Note: the spring element nodes doesn't need to be coincident, but the spring ori
   \end{tabular}
   \caption{Supported spring element modes } \label{spring_mode_table}
 \end{table}
+
+\subsection{Geometric nonlinear analysis}
+To take geometric nonlinearity into account on an element, keyword \param{nlgeo} has to be specified. The \param{nlgeo} parameter defines which type of the strain tensor is computed (see Table~\ref{strain_tensor_table}).
+\begin{table}
+  \centering
+  \begin{tabular}{lll}
+    \hline
+    nlgeo & strain tensor\\
+    \hline
+    0 (default) & Small-strain tensor\\
+    1 & Green-Lagrange strain tensor\\
+    2 & Deformation gradient\\
+    \hline
+  \end{tabular}
+  \caption{Nonlinear geometry modes} \label{strain_tensor_table}
+\end{table}
+
 
 \section{Elements for Transport problems\\(TM Module)}
 \subsection{2D Elements}
