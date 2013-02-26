@@ -41,7 +41,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
-#include "util.h"
 
 #ifdef __OOFEG
  #include "engngm.h"

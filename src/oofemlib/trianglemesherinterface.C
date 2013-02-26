@@ -459,7 +459,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     }
 
     // A somewhat annoying missing feature of triangle, it won't make the segments quadratic.
-    std::set< std::size_t > *node_triangle;
+    std::set< std::size_t > *node_triangle = NULL;
     if (this->quadratic) {
         node_triangle = new std::set< std::size_t >[output.numberofpoints];
         for (std::size_t i = 0; i < triangles.size(); ++i) {
