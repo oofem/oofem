@@ -57,6 +57,18 @@ IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+int 
+Shell7Base :: checkConsistency()
+{
+    NLStructuralElement :: checkConsistency();
+
+    this->layeredCS = static_cast< LayeredCrossSection * >( this->giveCrossSection() );
+
+    return 1;
+}
+
+
+
 
 Interface *Shell7Base :: giveInterface(InterfaceType it)
 {
@@ -1253,8 +1265,10 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
 
-    //FloatArray temp;
-    this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
+    FloatArray temp;
+    this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
+    IntArray ordering = giveOrdering(All);        
+    answer.assemble(temp, ordering);
 
     ///@todo How to treat the convective force? Only active during dynamic simulations
 }
@@ -1266,8 +1280,8 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 {
     FloatMatrix B;
     FloatArray BtF, f, genEps;
-    //answer.resize( this->giveNumberOfDofs() );
-    //answer.zero();
+    answer.resize( Shell7Base :: giveNumberOfDofs() );
+    answer.zero();
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
     int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion of types
@@ -1312,13 +1326,18 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             f3.add(dV, f3temp);
         }
     }
+    answer.addSubVector(f1,1);
+    answer.addSubVector(f2,19);
+    answer.addSubVector(f3,37);
 
+    /*
     IntArray ordering_phibar = giveOrdering(Midplane);
     IntArray ordering_m = giveOrdering(Director);
     IntArray ordering_gam = giveOrdering(InhomStrain);
     answer.assemble(f1, ordering_phibar);
     answer.assemble(f2, ordering_m);
     answer.assemble(f3, ordering_gam);
+    */
 }
 
 

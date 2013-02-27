@@ -109,13 +109,13 @@ protected:
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord,  
         double xi0, EnrichmentItem *ei, int enrichmentDomainNumber);
 
-    void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, EnrichmentItem *ei, int enrichmentDomainNumber, SolutionField field);
+    void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray, int enrichmentDomainNumber, SolutionField field);
 
 
     // Tangent matrices
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep,
-        double xi0, EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
+         EnrichmentItem *ei, int enrichmentDomainNumberI, int enrichmentDomainNumberJ);
 
 
     // Mass matrices
@@ -125,6 +125,7 @@ public:
     // constructor
     Shell7BaseXFEM(int n, Domain *d);   // : Shell7Base(n, d),  XfemElementInterface(this);
     virtual ~Shell7BaseXFEM() {};		// destructor -> declaring as virtual will make each subclass call their respective destr.
+    virtual int checkConsistency();
 
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
     virtual classType giveClassID()      const { return Shell7BaseXFEMClass; }
@@ -132,6 +133,7 @@ public:
     
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    void discGiveDofManDofIDMask(int inode,  int enrichmentdomainNumber, IntArray &answer) const;
     virtual int giveNumberOfDofs();
 };
 

@@ -60,10 +60,11 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs(EquationID ut) { return this->giveNumberOfDofs(); }
-
+    //virtual int checkConsistency(){return 1;};
+    virtual int checkConsistency();
 
     // Definition & identification
-    virtual const char *giveClassName() const {     return "Shell7Base"; }
+    virtual const char *giveClassName() const { return "Shell7Base"; }
     virtual classType giveClassID() const { return Shell7BaseClass; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
@@ -82,6 +83,7 @@ protected:
     virtual Interface *giveInterface(InterfaceType it);
     int numberOfGaussPoints;
     IntegrationRule **layerIntegrationRulesArray;
+    LayeredCrossSection *layeredCS;
 
     enum SolutionField {
         Midplane,       ///< phi_bar 7 x_bar (3 dofs)
