@@ -188,6 +188,7 @@ Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &ei
     FloatArray temp;
     temp_computeVectorOf(eiDofIdArray, VM_Total, tStep, temp);
     answer.resize( Shell7Base :: giveNumberOfDofs() );
+    
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
 
@@ -235,7 +236,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
     this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
     IntArray activeDofs, ordering; 
     this->computeOrderingArray(ordering, activeDofs, 0, All);
-
+    answer.assemble(temp, ordering);
 
     // Disccontinuous part
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
@@ -266,23 +267,21 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
 {
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
-    //IntArray eiDofIdArray;
-    //this->xMan->giveEnrichmentItem(1)->giveEIDofIdArray(eiDofIdArray, enrichmentDomainNumber);
-    //ei->giveEIDofIdArray(eiDofIdArray, enrichmentDomainNumber);
 
     IntArray ordering_cont = this->giveOrdering(field);
     IntArray fieldDofId    = this->giveFieldDofId(field);
 
-    IntArray ordering_temp, activeDofsArrayTemp;
+    IntArray ordering_temp, activeDofsArrayTemp, temp;
     ordering_temp.resize(ordering_cont.giveSize());
     activeDofsArrayTemp.resize(ordering_cont.giveSize());
-
+    temp.resize(ordering_cont.giveSize());
     int activeDofPos = 0, activeDofIndex = 0, orderingDofIndex = 0;
+    int itemp=0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         DofManager *dMan = this->giveDofManager(i);
         IntArray dofManDofIdMask, dofManDofIdMaskAll; 
         this->discGiveDofManDofIDMask(i, enrichmentDomainNumber, dofManDofIdMask);
-
+                
         for (int j = 1; j <= dofManDofIdMask.giveSize(); j++ ) {
             int pos = dMan->findDofWithDofId( (DofIDItem) dofManDofIdMask.at(j) );
             activeDofPos++;
@@ -294,7 +293,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         activeDofIndex   += fieldDofId.giveSize();
 
     }
-    
+     
     // Reduce arrays to actual size ///@todo will not work if there are several ei
     int numActiveDofs = activeDofPos;
     IntArray ordering; orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
@@ -303,7 +302,9 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         orderingArray.at(i) = ordering_temp.at(i); 
         activeDofsArray.at(i) = activeDofsArrayTemp.at(i);
     }
-
+    //orderingArray.printYourself();
+    //activeDofsArray.printYourself();
+    //temp.printYourself();
 }
 
 
@@ -325,6 +326,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     IntArray ordering, activeDofs;
     this->computeOrderingArray(ordering, activeDofs, 0, All);
     answer.assemble(temp, ordering, ordering);
+    
 
     // Disccontinuous part
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
@@ -420,8 +422,8 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     FloatMatrix L(18,18);
     FloatMatrix B11, B22, B32, B43, B53, B;
     FloatArray S1g(3), S2g(3), S3g(3);
-    FloatMatrix K(42,42);
-    K.zero();
+    FloatMatrix K(42,42), tempAnswer(42,42);
+    K.zero(); tempAnswer.zero();
 
     //int ndofs = this->giveNumberOfDofs();
     int ndofs = Shell7Base :: giveNumberOfDofs();
@@ -483,15 +485,16 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
                 Ktemp.beProductOf(L, B);
                 double dV = this->computeVolumeAroundLayer(gp, layer);
                 K.beTProductOf(B,Ktemp);
-                answer.add(dV, K);
+                //answer.add(dV, K);
+                tempAnswer.add(dV, K);
             }
         }
     }
 
 
 
-    IntArray ordering_phibar, ordering_m, ordering_gam;
-    IntArray activeDofs_phibar, activeDofs_m, activeDofs_gam;
+    IntArray ordering = this->giveOrdering(All);
+    answer.assemble(tempAnswer, ordering, ordering);
 
     //computeOrderingArray(ordering_phibar, activeDofs_phibar, ei, enrichmentDomainNumber, Midplane);
     //computeOrderingArray(ordering_m, activeDofs_m, ei, enrichmentDomainNumber, Director);
@@ -526,10 +529,11 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 //
 {
     FloatMatrix B;
-    FloatArray BtF, genEps;
+    FloatArray BtF, genEps, temp(42);
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
-
+    temp.resize( Shell7Base :: giveNumberOfDofs() );
+    temp.zero();
     
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
     int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion of types
@@ -581,27 +585,6 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         }
     }
 
-
-    // Should assemble to xfem dofs
-    //IntArray ordering_phibar, ordering_m, ordering_gam, ordering_all;
-    //IntArray activeDofs_phibar, activeDofs_m, activeDofs_gam, activeDofs_all;
-
-
-
-    //computeOrderingArray(ordering_phibar, activeDofs_phibar, ei, enrichmentDomainNumber, Midplane);
-    //computeOrderingArray(ordering_m, activeDofs_m, ei, enrichmentDomainNumber, Director);
-    //computeOrderingArray(ordering_gam, activeDofs_gam, ei, enrichmentDomainNumber, InhomStrain);
-    //computeOrderingArray(ordering_all, activeDofs_all, ei, enrichmentDomainNumber, All);
-/*
-    ordering_phibar.printYourself();
-    ordering_m.printYourself();
-    ordering_gam.printYourself();
-
-    activeDofs_phibar.printYourself();
-    activeDofs_m.printYourself();
-    activeDofs_gam.printYourself();
-    */
-
     /*
     FloatArray f1Ass, f2Ass, f3Ass;
 
@@ -614,9 +597,16 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     */
 
     //FloatArray f(42);
-    answer.addSubVector(f1,1);
-    answer.addSubVector(f2,19);
-    answer.addSubVector(f3,37);
+    //answer.addSubVector(f1,1);
+    //answer.addSubVector(f2,19);
+    //answer.addSubVector(f3,37);
+
+    temp.addSubVector(f1,1);
+    temp.addSubVector(f2,19);
+    temp.addSubVector(f3,37);
+
+    IntArray ordering = this->giveOrdering(All);
+    answer.assemble(temp, ordering);
     //FloatArray fAss;
     //fAss.beSubArrayOf(f,activeDofs_all);
     //answer.assemble(fAss, ordering_all);

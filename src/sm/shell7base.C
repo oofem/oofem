@@ -1326,18 +1326,18 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             f3.add(dV, f3temp);
         }
     }
-    answer.addSubVector(f1,1);
-    answer.addSubVector(f2,19);
-    answer.addSubVector(f3,37);
+    //answer.addSubVector(f1,1);
+    //answer.addSubVector(f2,19);
+    //answer.addSubVector(f3,37);
 
-    /*
+    
     IntArray ordering_phibar = giveOrdering(Midplane);
     IntArray ordering_m = giveOrdering(Director);
     IntArray ordering_gam = giveOrdering(InhomStrain);
     answer.assemble(f1, ordering_phibar);
     answer.assemble(f2, ordering_m);
     answer.assemble(f3, ordering_gam);
-    */
+    
 }
 
 
