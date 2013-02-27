@@ -340,9 +340,7 @@ FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 void
 FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
 {
-    int i;
     double x, y;
     FloatArray dxi, deta;
 
@@ -352,7 +350,7 @@ FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArra
     this->giveDerivativeXi(dxi, lcoords);
     this->giveDerivativeEta(deta, lcoords);
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(xind);
         y = cellgeo.giveVertexCoordinates(i)->at(yind);
 

@@ -408,7 +408,6 @@ FEI3dHexaQuad :: computeGlobalSurfaceMapping(IntArray &surfNodes, IntArray &elem
 void
 FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     FloatMatrix dNduvw, coords;
     this->giveLocalDerivative(dNduvw, lcoords);

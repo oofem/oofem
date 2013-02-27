@@ -230,9 +230,7 @@ Q4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 void
 Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
 {
-    int i;
     double ksi, eta, x, y;
     FloatArray *nx, *ny;
 
@@ -245,7 +243,7 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoin
     nx = this->GiveDerivativeKsi(ksi, eta);
     ny = this->GiveDerivativeEta(ksi, eta);
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         x = this->giveNode(i)->giveCoordinate(1);
         y = this->giveNode(i)->giveCoordinate(2);
 

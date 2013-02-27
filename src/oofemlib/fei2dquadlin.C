@@ -344,7 +344,6 @@ FEI2dQuadLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
 void
 FEI2dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     double ksi, eta, x, y;
     FloatArray nx(4), ny(4);

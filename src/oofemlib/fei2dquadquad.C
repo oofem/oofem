@@ -302,7 +302,6 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 void
 FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     double x, y;
     FloatMatrix dn;

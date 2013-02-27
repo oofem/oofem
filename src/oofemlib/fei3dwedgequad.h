@@ -41,6 +41,9 @@
 namespace oofem {
 /**
  * Class representing implementation of quadratic wedge interpolation class.
+ * 
+ * @author Milan Jirasek
+ * @author Mikael Öhman
  */
 class FEI3dWedgeQuad : public FEInterpolation3d
 {
@@ -71,13 +74,10 @@ public:
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                      const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
-    void computeGlobalSurfaceMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveDerivativeKsi(FloatArray &, double, double, double);
-    void giveDerivativeEta(FloatArray &, double, double, double);
-    void giveDerivativeDzeta(FloatArray &, double, double, double);
+    void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 public:
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };

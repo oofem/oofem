@@ -452,7 +452,6 @@ FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 void
 FEI3dHexaLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     FloatMatrix dNduvw, coords;
     this->giveLocalDerivative(dNduvw, lcoords);

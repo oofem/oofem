@@ -193,7 +193,6 @@ FEI3dLineLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 void
 FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     ///@todo Not sure about this matrix
     jacobianMatrix.resize(1,1);
