@@ -859,56 +859,30 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
 
 
 void
-FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size)
-///@todo: Illogical name - doesn't create a sub matrix but rather a super matrix is created. 
-///       Therefore it is in contradiction with the other implementation of beSubMatrixOf above
-///       wich actually creates a sub matrix. Maybe it should be renamed to beAssemblyOf, or simply 
-///       be replaced with calls to assemble. - JB
+FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol)
 /*
- * modifies receiver to be  (sub)matrix of the src matrix.
- * (sub)matrix has size size
- * and on its position (indx->at(i),indx->at(j)) are values from src at (i, j).
- * if indx->at(i) or indx->at(j) are <= 0 then at position i,j is zero.
- *
- * Warning:
- * This method should produce also bigger matrix than src
- * Works only for square matrices.
+ * Modifies receiver to be a sub-matrix of the src matrix.
+ * sub-matrix has size(indxRow) x size(indxCol) with values given as
+ * this(i,j) = src( indxRow(i), indxCol(j) )
  */
 {
-    int n, ii, jj;
-
-    if ( ( n = indx.giveSize() ) == 0 ) {
-        this->resize(0, 0);
-        return;
-    }
-
 #  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : cannot construct submatrix");
-    }
-
-    if ( n != src.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : giveSubMatrix size mismatch");
-    }
-    if ( size ) {
-        if ( indx.maximum() > size ) {
-            OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : index in mask exceed size");
-        }
+    if ( indxRow.maximum() > src.giveNumberOfRows()  ||  indxCol.maximum() > src.giveNumberOfColumns()  ||
+         indxRow.minimum() < 1  ||  indxCol.minimum() < 1 ) {
+        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : index exceeds source dimensions");
     }
 # endif
 
-    if ( !size ) {
-        size =  indx.maximum();
-    }
-    this->resize(size, size);
-
-    for ( int i = 1; i <= n; i++ ) {
-        for ( int j = 1; j <= n; j++ ) {
-            if ( ( ( ii = indx.at(i) ) != 0 ) && ( ( jj = indx.at(j) ) != 0 ) ) {
-                this->at(ii, jj) = src.at(i, j);
-            }
+    int szRow = indxRow.giveSize();
+    int szCol = indxCol.giveSize();
+    this->resize(szRow, szCol);
+    
+    for ( int i = 1; i <= szRow; i++ ) {
+        for ( int j = 1; j <= szCol; j++ ) {
+            this->at(i,j) = src.at( indxRow.at(i), indxCol.at(j) );
         }
     }
+
 }
 
 void FloatMatrix :: add(const FloatMatrix &aMatrix)

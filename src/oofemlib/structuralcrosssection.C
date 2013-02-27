@@ -153,7 +153,6 @@ StructuralCrossSection :: giveCharMaterialComplianceMatrixOf(FloatMatrix &answer
     if ( form == FullForm ) {
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode(),
                                    static_cast< StructuralMaterial * >( gp->giveMaterial() ) );
-        //answer.beSubMatrixOfSizeOf(redAnswer, mask, 6);
         answer.resize(6,6);
         answer.zero();
         answer.assemble(redAnswer,mask,mask);

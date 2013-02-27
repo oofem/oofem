@@ -296,29 +296,14 @@ public:
      * @param topCol Index of top column of sub-matrix.
      * @param bottomCol index of bottom column of sub-matrix.
      */
-    void beSubMatrixOf(const FloatMatrix &src, int topRow,
-                       int bottomRow, int topCol, int bottomCol);
+    void beSubMatrixOf(const FloatMatrix &src, int topRow, int bottomRow, int topCol, int bottomCol);
     /**
-     * Assigns to the receiver the sub matrix of another matrix.
-     * Works only for square matrices. Should produce bigger matrix than source matrix.
-     * @param src Source matrix.
-     * @param indx Receiver (i.e. sub-matrix) will resize to square matrix of size given by
-     * maximum value found in indx parameter. On its position (indx->at(i), indx->at(j)) the
-     * value of src->at(i,j) will be stored. If one of indx->at(i), indx->at(j) indexes is
-     * less or equal to zero, then on this position zero will be stored.
+     * Modifies receiver to be a sub-matrix of another matrix.
+     * @param src Matrix from which sub-matrix is taken
+     * @param indxRow Array of the row indices to be extracted
+     * @param indxCol Array of the column indices to be extracted
      */
-    void beSubMatrixOf(const FloatMatrix &src, const IntArray &indx) { this->beSubMatrixOfSizeOf(src, indx, 0); };
-    /**
-     * Assigns to the receiver the sub matrix of another matrix.
-     * Works only for square matrices. Should produce bigger matrix than source matrix.
-     * @param src Source matrix.
-     * @param indx Describes sub-matrix extraction. On receiver  position
-     * (indx->at(i), indx->at(j)) the
-     * value of src->at(i,j) will be stored. If one of indx->at(i), indx->at(j) indexes is
-     * less or equal to zero, then on this position zero will be stored.
-     * @param size Receiver becomes square (size, size) matrix.
-     */
-    void beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx, int size=0);
+    void beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, const IntArray &indxCol);
     /**
      * Adds given vector to receiver starting at given position.
      * @param src Source matrix.

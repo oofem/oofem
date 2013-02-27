@@ -563,7 +563,6 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
     } else {
         IntArray mask;
         this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
-        //answer.beSubMatrixOfSizeOf(de, mask, 6);
         answer.resize(6,6);
         answer.zero();
         answer.assemble(de,mask,mask);
