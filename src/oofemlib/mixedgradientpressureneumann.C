@@ -315,7 +315,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
         // Evaluate the normal;
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         // Evaluate the velocity/displacement coefficients
-        interpUnknown->boundaryEvalN(n, lcoords, cellgeo);
+        interpUnknown->boundaryEvalN(n, boundary, lcoords, cellgeo);
         nMatrix.beNMatrixOf(n, nsd);
 
         contrib.beTProductOf(nMatrix, normal);
@@ -353,7 +353,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
         // Evaluate the normal;
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         // Evaluate the velocity/displacement coefficients
-        interpUnknown->boundaryEvalN(n, lcoords, cellgeo);
+        interpUnknown->boundaryEvalN(n, boundary, lcoords, cellgeo);
         nMatrix.beNMatrixOf(n, nsd);
 
         // Formulating like this to avoid third order tensors, which is hard to express in linear algebra.

@@ -206,7 +206,7 @@ FEI3dWedgeLin :: giveDerivativeDzeta(FloatArray &dz, double u, double v)
 
 
 
-void FEI3dWedgeLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI3dWedgeLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 { OOFEM_ERROR("FEI3dWedgeLin :: edgeEvalN not implemented"); }
 void FEI3dWedgeLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 { OOFEM_ERROR("FEI3dWedgeLin :: edgeEvaldNdx not implemented"); }
@@ -218,7 +218,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {OOFEM_ERROR("FEI3dWedgeLin :: computeLocalEdgeMapping not implemented"); }
 
 void
-FEI3dWedgeLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dWedgeLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {OOFEM_ERROR("FEI3dWedgeLin :: computeLocalEdgeMapping not implemented");}
 
 void

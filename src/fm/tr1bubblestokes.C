@@ -292,7 +292,7 @@ void Tr1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load,
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 

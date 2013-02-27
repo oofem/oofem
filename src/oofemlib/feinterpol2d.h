@@ -59,8 +59,8 @@ public:
     { OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass."); return 0; }
 
 
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary)  { this->computeLocalEdgeMapping(answer, boundary); }
-    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { this->edgeEvalN(answer, lcoords, cellgeo); }
+    virtual void boundaryGiveNodes(IntArray &answer, int boundary) { this->computeLocalEdgeMapping(answer, boundary); }
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { this->edgeEvalN(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeEvalNormal(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) { return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo); }
     
@@ -78,10 +78,11 @@ public:
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param iedge Edge number.
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the normal on the given edge.
      * @param answer Contains the evaluated normal.

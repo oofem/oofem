@@ -86,7 +86,7 @@ FEI2dQuadConst :: giveTransformationJacobian(const FloatArray &lcoords, const FE
 
 
 void
-FEI2dQuadConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI2dQuadConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI2dQuadConst :: edgeEvalN: not implemented");
 }

@@ -846,7 +846,7 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGa
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -947,10 +947,10 @@ LTRSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 }
 
 void
-LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
+LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(3);
-    interpolation.surfaceEvalN( n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 9);
     answer.zero();

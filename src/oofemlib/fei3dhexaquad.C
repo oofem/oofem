@@ -176,7 +176,7 @@ FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
     return jacobianMatrix.giveDeterminant();
 }
 
-void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeEvalN not implemented"); }
 void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeEvaldNdx not implemented"); }
@@ -193,7 +193,7 @@ FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 { OOFEM_ERROR("FEI3dHexaQuad :: computeLocalEdgeMapping not implemented"); }
 
 void
-FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi, eta;
     answer.resize(8);
@@ -261,10 +261,10 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     this->computeLocalSurfaceMapping(nodes, isurf);
 
-    this->surfaceEvalN(n, lcoords, cellgeo);
+    this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
     answer.resize(0);
-    for ( int i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; ++i ) {
         answer.add( n.at(i), *cellgeo.giveVertexCoordinates( nodes.at(i) ));
     }
 }
@@ -427,9 +427,9 @@ FEI3dHexaQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
     u = lcoords.at(1);
     v = lcoords.at(2);
     w = lcoords.at(3);
-    
+
     dN.resize(20, 3);
-    
+
     dN.at( 1, 1) = 0.125 * ( 1.0 - v ) * ( 1.0 + w ) * ( 2.0 * u + v - w + 1.0 );
     dN.at( 2, 1) = 0.125 * ( 1.0 + v ) * ( 1.0 + w ) * ( 2.0 * u - v - w + 1.0 );
     dN.at( 3, 1) = 0.125 * ( 1.0 + v ) * ( 1.0 + w ) * ( 2.0 * u + v + w - 1.0 );

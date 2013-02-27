@@ -247,7 +247,7 @@ FEI2dQuadLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 }
 
 void
-FEI2dQuadLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
+FEI2dQuadLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords,  const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -292,7 +292,7 @@ FEI2dQuadLin :: edgeLocal2global(FloatArray &answer, int iedge,
     IntArray edgeNodes;
     FloatArray n;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(n, lcoords, cellgeo);
+    this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +

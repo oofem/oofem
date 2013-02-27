@@ -209,7 +209,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                fei2d->edgeEvalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                fei2d->edgeEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double J = fei2d->edgeGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 fei2d->edgeLocal2global(gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double r = gcoords(0); // First coordinate is the radial coord.
@@ -330,7 +330,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                fei2d->edgeEvalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                fei2d->edgeEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double J = fei2d->edgeGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 fei2d->edgeLocal2global(gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double r = gcoords(0); // First coordinate is the radial coord.

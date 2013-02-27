@@ -287,7 +287,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 // Find the value of parameter s which is the vert/horiz distance to 0
                 interpolation->edgeLocal2global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                 // Compute base function values
-                interpolation->boundaryEvalN( N, * lcoords, FEIElementGeometryWrapper(thisElement) );
+                interpolation->boundaryEvalN( N, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                 // Compute Jacobian
                 double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                 double s = gcoords.at(direction);
@@ -435,7 +435,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                     // Find the value of parameter s which is the vert/horiz distance to 0
                     interpolation->edgeLocal2global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                     // Compute base function values
-                    interpolation->boundaryEvalN( N, * lcoords, FEIElementGeometryWrapper(thisElement) );
+                    interpolation->boundaryEvalN( N, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                     // Compute Jacobian
                     double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                     double s = gcoords.at(direction);

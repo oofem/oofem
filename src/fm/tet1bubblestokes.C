@@ -306,7 +306,7 @@ void Tet1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
@@ -355,7 +355,7 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this)));
             double dA = gp->giveWeight() * detJ;
 

@@ -41,7 +41,7 @@ namespace oofem {
 void
 FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    this->surfaceEvalN(answer, lcoords, cellgeo);
+    this->surfaceEvalN(answer, 1, lcoords, cellgeo);
 }
 
 void
@@ -171,7 +171,7 @@ FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArra
 
 
 void
-FEI3dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords.at(1);
     answer.resize(3);
@@ -209,7 +209,7 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     IntArray edgeNodes;
     FloatArray N;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(N, lcoords, cellgeo);
+    this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.resize(0);
     for (int i = 0; i < N.giveSize(); ++i) {
@@ -265,7 +265,7 @@ FEI3dTrQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cel
 }
 
 void
-FEI3dTrQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -290,7 +290,7 @@ FEI3dTrQuad :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
 
     this->giveDerivativeXi(dndxi, lcoords);
     this->giveDerivativeEta(dndeta, lcoords);
-    for (int i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; ++i ) {
         answer.at(i, 1) = dndxi.at(i); 
         answer.at(i, 2) = dndeta.at(i);
     }
@@ -305,10 +305,10 @@ FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     //Note: This gives the coordinate in the reference system
     IntArray nodes;
     FloatArray N;
-    this->surfaceEvalN(N, lcoords, cellgeo);
+    this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
     answer.resize(0);
-    for (int i = 0; i < N.giveSize(); ++i) {
+    for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), *cellgeo.giveVertexCoordinates(i) );
     }
 }
@@ -328,7 +328,7 @@ FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Fl
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
-    for (int i = 0; i < 6; ++i) {
+    for ( int i = 0; i < 6; ++i ) {
         G1.add(dNdxi(i,1), *cellgeo.giveVertexCoordinates(i));
         G2.add(dNdxi(i,2), *cellgeo.giveVertexCoordinates(i));
     }

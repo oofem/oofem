@@ -254,7 +254,7 @@ Shell7Base :: edgeEvalInitialDirectorAt(GaussPoint *gp, FloatArray &answer, cons
     FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
 
     fei->computeLocalEdgeMapping(edgeNodes, iEdge);
-    fei->edgeEvalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    fei->edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(3);
     answer.zero();
@@ -2210,7 +2210,7 @@ Shell7Base :: edgeComputeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray N;
 
     FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
-    fei->edgeEvalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    fei->edgeEvalN( N, 1, lcoords, FEIElementGeometryWrapper(this) );
 
 
     /*    9   9    3
@@ -2243,7 +2243,7 @@ Shell7Base :: edgeComputeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, 
     FloatArray N, dNdxi;
 
     FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
-    fei->edgeEvalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    fei->edgeEvalN( N, 1, lcoords, FEIElementGeometryWrapper(this) );
     int iedge = 0;
     fei->edgeEvaldNdxi( dNdxi, iedge, lcoords, FEIElementGeometryWrapper(this) );
 

@@ -261,10 +261,10 @@ QSpace :: GetSurfaceIntegrationRule(int approxOrder)
 }
 
 void
-QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
+QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(8);
-    interpolation.surfaceEvalN(n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    interpolation.surfaceEvalN(n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(3, 24);
     answer.zero();

@@ -189,7 +189,7 @@ protected:
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *);
     virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
     virtual double computeSurfaceVolumeAround(GaussPoint *, int);

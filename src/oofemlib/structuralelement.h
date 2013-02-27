@@ -431,7 +431,7 @@ protected:
      * @param answer Interpolation matrix of surface.
      * @param gp Integration point.
      */
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp) { answer.resize(0, 0); }
     /**
      * Assembles edge dof mapping mask, which provides mapping between edge local DOFs and "global" element
      * DOFs. Mask can be imagined as local edge code numbers used to localize local edge DOFs to
