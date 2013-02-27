@@ -64,7 +64,6 @@ public:
 
     virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
-protected:
     virtual int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp);
     virtual int SetUpPointsOnTriangle(int, MaterialMode mode, GaussPoint ***gp);
     virtual int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp);
