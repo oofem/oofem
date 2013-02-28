@@ -831,11 +831,12 @@ public:
      * @param type Characteristic components of type type are requested.
      * @param s Determines the equation numbering scheme.
      * @param domain Domain to assemble from.
+     * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
     double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                           CharType type, ValueModeType mode,
-                          const UnknownNumberingScheme &s, Domain *domain);
+                          const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer Assembled vector.
@@ -849,7 +850,7 @@ public:
      */
     double assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                          CharType type, ValueModeType mode,
-                                         const UnknownNumberingScheme &s, Domain *domain);
+                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
@@ -864,7 +865,7 @@ public:
      */
     double assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                       CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain);
+                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles characteristic vector of required type from active boundary conditions.
@@ -880,7 +881,7 @@ public:
      */
     double assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                       CharType type, ValueModeType mode,
-                                      const UnknownNumberingScheme &s, Domain *domain);
+                                      const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles the extrapolated internal forces vector,

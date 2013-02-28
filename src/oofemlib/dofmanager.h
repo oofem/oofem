@@ -183,8 +183,17 @@ public:
      * @param s Determines the equation numbering scheme.
      * @see Element::giveDofManDofIDMask.
      */
-    virtual void giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
-                                           const UnknownNumberingScheme &s) const;
+    void giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
+                           const UnknownNumberingScheme &s) const;
+    /**
+     * Returns master dof ID array of receiver.
+     * @param dofIDArry Array containing dof mask. This mask containing DofIDItem values
+     * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
+     * required values. If dof with requested physical meaning does not exist in receiver,
+     * an error is generated and execution exits.
+     * @param masterDofIDs Master dof ID array.
+     */
+    void giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &masterDofIDs) const;
     /**
      * Returns full location array of receiver containing equation numbers of all dofs
      * of receiver. Their order is specific to every DofManager. Mainly used at EngngModel level
@@ -192,7 +201,13 @@ public:
      * @param locationArray Complete location array of receiver.
      * @param s Determines the equation numbering scheme.
      */
-    virtual void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
+    void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
+    /**
+     * Returns the full dof ID array of receiver. 
+     * Mainly used at EngngModel level to assemble internal norms fronm DofManager contribution (typically load vector).
+     * @param dofIDaArray Complete dof ID array of receiver.
+     */
+    void giveCompleteMasterDofIDArray(IntArray &dofIDArray) const;
     /**
      * Returns DOFs numbers of receiver with required physical meaning.
      * @param dofIDArray Array containing DofIDItem-type values (this is enumeration
@@ -493,7 +508,6 @@ protected:
 
     /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
-    IntArray *giveCompleteGlobalDofIDArray() const;
 };
 } // end namespace oofem
 #endif // dofmanager_h

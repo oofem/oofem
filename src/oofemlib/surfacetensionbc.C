@@ -74,7 +74,7 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
     if (!this->useTangent || type != TangentStiffnessMatrix)
         return;
 
-    IntArray dofids;
+    IntArray dofids, masterdofids;
     rows.resize(this->elements.size() + this->sides.size());
     cols.resize(this->elements.size() + this->sides.size());
 
@@ -142,8 +142,7 @@ double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, Tim
     }
 
     FloatArray fe;
-    IntArray loc;
-    IntArray dofids;
+    IntArray loc, dofids, masterdofids; ///@todo masterDofIDs and eNorms.
     double norm = 0.0;
 
     for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {

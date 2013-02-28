@@ -385,6 +385,7 @@ double MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, Time
     if (eid != EID_MomentumBalance)
         return 0.0;
 
+    ///@todo Support eNorms
     int vol_loc = this->giveVolDof()->giveEquationNumber(s);
     if (vol_loc) {
         double rve_size = this->domainSize();

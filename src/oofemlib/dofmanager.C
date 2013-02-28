@@ -221,11 +221,6 @@ bool DofManager :: hasDofID(DofIDItem id)
 
 
 void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray, const UnknownNumberingScheme &s) const
-// Returns the location array of the receiver. Creates this array if it
-// does not exist yet. The location array contains the equation number of
-// every requested degree of freedom of the receiver.
-// In dofIDArray are stored DofID's of requsted DOFs in receiver.
-// The DofID's are determining the physical meaning of particular DOFs
 {
     if ( !hasSlaveDofs ) {
         int size, indx;
@@ -240,11 +235,13 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
 
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
         }
+
     } else {
         IntArray dofArray, mstrEqNmbrs;
+        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
 
         this->giveDofArray(dofIDArry, dofArray);
-        locationArray.resize( giveNumberOfPrimaryMasterDofs(dofArray) );
+        locationArray.resize( masterDofs );
 
         for ( int k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             this->giveDof(dofArray.at(i))->giveEquationNumbers(mstrEqNmbrs, s);
@@ -255,9 +252,27 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
 }
 
 
+void DofManager :: giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &masterDofIDs) const
+{
+    if ( !hasSlaveDofs ) {
+        masterDofIDs = dofIDArry;
+    } else {
+        IntArray dofArray, temp;
+        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
+
+        this->giveDofArray(dofIDArry, dofArray);
+        masterDofIDs.resize( masterDofs );
+
+        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+            this->giveDof(i)->giveDofIDs(temp);
+            masterDofIDs.copySubVector(temp, k);
+            k += temp.giveSize();
+        }
+    }
+}
+
+
 void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const
-// Returns the complete location array of the receiver.
-// including all available dofs
 {
     if ( !hasSlaveDofs ) {
         // prevents some size problem when connecting different elements with
@@ -267,9 +282,40 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(i) );
         }
     } else {
-        IntArray *dofids = giveCompleteGlobalDofIDArray();
-        giveLocationArray(*dofids, locationArray, s);
-        delete dofids;
+        IntArray temp;
+        int nMasterDofs = 0;
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
+        }
+        locationArray.resize(nMasterDofs);
+        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+            this->giveDof(i)->giveEquationNumbers(temp, s);
+            locationArray.copySubVector(temp, k);
+            k += temp.giveSize();
+        }
+    }
+}
+
+
+void DofManager :: giveCompleteMasterDofIDArray(IntArray &dofIDArray) const
+{
+    if ( !hasSlaveDofs ) {
+        dofIDArray.resize(numberOfDofs);
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            dofIDArray.at(i) = this->giveDof(i)->giveDofID();
+        }
+    } else {
+        IntArray temp;
+        int nMasterDofs = 0;
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
+        }
+        dofIDArray.resize(nMasterDofs);
+        for ( int k = 1, i = 1; i <= numberOfDofs; i++ ) {
+            this->giveDof(i)->giveDofIDs(temp);
+            dofIDArray.copySubVector(temp, k);
+            k += temp.giveSize();
+        }
     }
 }
 
@@ -965,18 +1011,6 @@ bool DofManager :: computeM2LTransformation(FloatMatrix &answer, const IntArray 
 bool DofManager :: requiresTransformation()
 {
     return this->hasAnySlaveDofs();
-}
-
-
-IntArray *DofManager :: giveCompleteGlobalDofIDArray() const
-{
-    IntArray *answer = new IntArray(numberOfDofs);
-
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        answer->at(i) = ( int ) this->giveDof(i)->giveDofID();
-    }
-
-    return answer;
 }
 
 

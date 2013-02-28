@@ -85,7 +85,7 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const I
 }
 
 int
-SlaveDof :: giveNumberOfPrimaryMasterDofs(void)
+SlaveDof :: giveNumberOfPrimaryMasterDofs()
 {
     if ( countOfPrimaryMasterDofs > 0 ) {
         return countOfPrimaryMasterDofs;
@@ -159,6 +159,22 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
         masterEqNumbers.copySubVector(mstrEqNmbrs, k);
         k += mstrEqNmbrs.giveSize();
     }
+}
+
+
+void
+SlaveDof :: giveDofIDs(IntArray &masterDofIDs)
+{
+    IntArray temp;
+
+    masterDofIDs.resize( this->giveNumberOfPrimaryMasterDofs() );
+
+    for (int k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
+        this->giveMasterDof(i)->giveDofIDs(temp);
+        masterDofIDs.copySubVector(temp, k);
+        k += temp.giveSize();
+    }
+
 }
 
 
