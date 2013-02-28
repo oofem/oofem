@@ -49,16 +49,18 @@ public:
     FEI3dTrQuad() : FEInterpolation3d(2) { }
 
     // Bulk
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);    
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     // new methods
-    void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
+    void giveDerivativeKsi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
+    void giveDerivativeDzeta(FloatArray &n, const FloatArray &lcoords);
+    void giveSurfaceDerivativeKsi(FloatArray &n, const FloatArray &lcoords);
+    void giveSurfaceDerivativeEta(FloatArray &n, const FloatArray &lcoords);
     //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo); 
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);

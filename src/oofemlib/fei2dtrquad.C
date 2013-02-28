@@ -66,7 +66,7 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     inv.beInverseOf(jacobianMatrix);
 
-    this->giveDerivativeXi(dndxi, lcoords);
+    this->giveDerivativeKsi(dndxi, lcoords);
     this->giveDerivativeEta(dndeta, lcoords);
 
     for ( i = 1; i <= 6; i++ ) {
@@ -347,7 +347,7 @@ FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArra
     jacobianMatrix.resize(2, 2);
     jacobianMatrix.zero();
 
-    this->giveDerivativeXi(dxi, lcoords);
+    this->giveDerivativeKsi(dxi, lcoords);
     this->giveDerivativeEta(deta, lcoords);
 
     for ( int i = 1; i <= 6; i++ ) {
@@ -363,7 +363,7 @@ FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArra
 
 
 void
-FEI2dTrQuad :: giveDerivativeXi(FloatArray &n, const FloatArray &lc)
+FEI2dTrQuad :: giveDerivativeKsi(FloatArray &n, const FloatArray &lc)
 {
     double l1, l2, l3;
 

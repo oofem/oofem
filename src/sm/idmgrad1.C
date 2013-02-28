@@ -104,7 +104,7 @@ IDGMaterial :: initializeFrom(InputRecord *ir)
 int
 IDGMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
-    if ( mode == _PlaneStressGrad ) {
+    if ( mode == _1dMatGrad || mode == _PlaneStressGrad ) {
         return 1;
     }
 
@@ -120,17 +120,36 @@ IDGMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
+    case _1dMatGrad:
+      if ( form == PDGrad_uu ) {
+	give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
+	break;
+      } else if ( form == PDGrad_ku ) {
+	give1dKappaMatrix(answer, form, rMode, gp, atTime);
+	break;
+      } else if ( form == PDGrad_uk ) {
+	give1dGprime(answer, form, rMode, gp, atTime);
+	break;
+      } else if ( form == PDGrad_kk ) {
+	giveInternalLength(answer, form, rMode, gp, atTime);
+	break;
+      }
     case _PlaneStressGrad:
         if ( form == PDGrad_uu ) {
             givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
+	    break;
         } else if ( form == PDGrad_ku ) {
             givePlaneStressKappaMatrix(answer, form, rMode, gp, atTime);
+	    break;
         } else if ( form == PDGrad_uk ) {
             givePlaneStressGprime(answer, form, rMode, gp, atTime);
+	    break;
         } else if ( form == PDGrad_kk ) {
             giveInternalLength(answer, form, rMode, gp, atTime);
+	    break;
         } else if ( form == PDGrad_LD ) {
             giveInternalLengthDerivative(answer, form, rMode, gp, atTime);
+	    break;
         }
         break;
 
@@ -201,6 +220,59 @@ IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPo
   
 }
 
+
+void
+IDGMaterial ::  give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm form, MatResponseMode mode, GaussPoint * gp,  TimeStep * tStep)
+{
+    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    double om;
+    om = status->giveTempDamage();
+    om = min(om, maxOmega);
+    answer.resize(1,1);
+    answer.at(1,1) = lmat->give('E', gp);    
+    answer.times(1.0 - om);
+
+}
+
+void
+IDGMaterial :: give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+  IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+  LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+  answer.resize(1,1);
+  if(status->giveTempStrainVector().at(1) > 0)
+    answer.at(1,1) = 1;
+  else if(status->giveTempStrainVector().at(1) < 0)
+    answer.at(1,1) = 2 * lmat -> give('n',gp) * lmat -> give('n',gp);
+  else
+    answer.at(1,1) = 0;
+
+  
+}
+
+void
+IDGMaterial :: give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+   IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
+   LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+
+   double damage = status ->giveDamage();
+   double tempDamage = status ->giveTempDamage();
+   double E = lmat->give('E', gp);
+
+   answer.resize(1, 1);
+   if ( ( tempDamage - damage ) > 0 ) {
+     double nlKappa =  status->giveTempStrainVector().at(2);
+     answer.at(1, 1) = E * status->giveTempStrainVector().at(1);
+     double gPrime = damageFunctionPrime(nlKappa,gp);
+     answer.times(gPrime);
+    } else {
+        answer.zero();
+    }
+
+
+}
 
 
 

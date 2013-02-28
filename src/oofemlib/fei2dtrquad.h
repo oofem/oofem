@@ -78,7 +78,7 @@ public:
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void   giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
+    void   giveDerivativeKsi(FloatArray &n, const FloatArray &lcoords);
     void   giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
     void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
