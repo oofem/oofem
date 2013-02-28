@@ -39,7 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing a 2d triangular linear interpolation based on area coordinates.
+ * Second order triangular interpolation in 2D (6 nodes).
  */
 class FEI2dTrQuad : public FEInterpolation2d
 {
@@ -83,9 +83,3 @@ protected:
 };
 } // end namespace oofem
 #endif // fei2dtrquad_h
-
-
-
-
-
-

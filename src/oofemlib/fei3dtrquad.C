@@ -112,18 +112,8 @@ FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 int
 FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
-    ///@todo Implement this
     OOFEM_ERROR("FEI3dTrQuad :: global2local - Not supported");
     return -1;
-}
-
-
-double
-FEI3dTrQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
-{
-    ///@todo Implement this
-    OOFEM_ERROR("FEI3dTrQuad :: giveCharacteristicLength - Not supported");
-    return -1.0;
 }
 
 
@@ -139,23 +129,7 @@ FEI3dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
 void
 FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    ///@todo Implement this
     OOFEM_ERROR("FEI3dTrQuad :: giveJacobianMatrixAt - Not supported");
-
-    /*
-    FloatMatrix dNdxi;
-    FloatMatrix coords;
-    this->evaldNdxi(dNdxi, lcoords);
-    jacobianMatrix.resize(3,3);
-    coords.resize(10,3);
-    for (int i = 1; i <= 10; ++i) {
-        const FloatArray *c = cellgeo.giveVertexCoordinates(i);
-        coords.at(i,1) = c->at(1);
-        coords.at(i,1) = c->at(2);
-        coords.at(i,1) = c->at(3);
-    }
-    jacobianMatrix.beProductOf(dNdxi, coords);
-    */
 }
 
 
@@ -175,9 +149,6 @@ void
 FEI3dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    ///@todo Implement this
     OOFEM_ERROR("FEI3dTrQuad :: edgeEvaldNdx - Not supported");
 }
 
@@ -317,6 +288,8 @@ FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Fl
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
+    G1.resize(0);
+    G2.resize(0);
     for ( int i = 0; i < 6; ++i ) {
         G1.add(dNdxi(i,1), *cellgeo.giveVertexCoordinates(i));
         G2.add(dNdxi(i,2), *cellgeo.giveVertexCoordinates(i));
