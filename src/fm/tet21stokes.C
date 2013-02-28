@@ -45,12 +45,12 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
 
 namespace oofem {
 // Set up interpolation coordinates
-FEI3dTrLin Tet21Stokes :: interpolation_lin;
+FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
 IntArray Tet21Stokes :: momentum_ordering(30);

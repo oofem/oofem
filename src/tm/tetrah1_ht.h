@@ -37,24 +37,26 @@
 
 #include "transportelement.h"
 #include "spatiallocalizer.h"
-#include "fei3dtrlin.h"
 #include "zznodalrecoverymodel.h"
 
 namespace oofem {
+
+class FEI3dTetLin;
+
 /**
  * Tetrahedral (3d) element with linear approximation for heat and mass transfer.
 */
 class Tetrah1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
-    static FEI3dTrLin interpolation;
+    static FEI3dTetLin interpolation;
     int numberOfGaussPoints;
 
 public:
     Tetrah1_ht(int n, Domain *d);
     virtual ~Tetrah1_ht();
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation();
     
     virtual double computeVolumeAround(GaussPoint *gp);
 

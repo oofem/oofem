@@ -32,14 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "mathfem.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
 
 namespace oofem {
 void
-FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(4);
 
@@ -50,7 +50,7 @@ FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICell
 }
 
 void
-FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, vol;
     answer.resize(4, 3);
@@ -75,7 +75,7 @@ FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
            ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) ) / 6.;
 
     if ( vol <= 0.0 ) {
-        OOFEM_ERROR("FEI3dTrLin :: evaldNdx: negative volume");
+        OOFEM_ERROR("FEI3dTetLin :: evaldNdx: negative volume");
     }
 
     answer.at(1, 1) = -( ( y3 - y2 ) * ( z4 - z2 ) - ( y4 - y2 ) * ( z3 - z2 ) );
@@ -97,7 +97,7 @@ FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEI
 }
 
 void
-FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n(4);
     this->evalN(n, lcoords, cellgeo);
@@ -111,7 +111,7 @@ FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
 #define POINT_TOL 1.e-3
 
 int
-FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, xp, yp, zp, volume;
     answer.resize(4);
@@ -172,7 +172,7 @@ FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
 
 double
-FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double detJ, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 
@@ -196,7 +196,7 @@ FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICel
              ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
     if ( detJ <= 0.0 ) {
-        OOFEM_ERROR("FEI3dTrLin :: giveTransformationJacobian: negative volume encountered");
+        OOFEM_ERROR("FEI3dTetLin :: giveTransformationJacobian: negative volume encountered");
     }
 
     return detJ;
@@ -204,7 +204,7 @@ FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICel
 
 
 void
-FEI3dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -214,7 +214,7 @@ FEI3dTrLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords
 }
 
 void
-FEI3dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
+FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double coeff, l, x1, x2, y1, y2, z1, z2;
@@ -241,7 +241,7 @@ FEI3dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 }
 
 void
-FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
+FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
@@ -260,7 +260,7 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
 
 double
-FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
@@ -269,7 +269,7 @@ FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoord
 
 
 void
-FEI3dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
     int aNode = 0, bNode = 0;
     edgeNodes.resize(2);
@@ -293,7 +293,7 @@ FEI3dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 4;
     } else {
-        OOFEM_ERROR2("FEI3dTrLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR2("FEI3dTetLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = ( aNode );
@@ -301,13 +301,13 @@ FEI3dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 double
-FEI3dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
     return cellgeo.giveVertexCoordinates(edgeNodes.at(2))->distance(cellgeo.giveVertexCoordinates(edgeNodes.at(1)));
 }
 
 void
-FEI3dTrLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     answer.resize(3);
 
@@ -317,7 +317,7 @@ FEI3dTrLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoo
 }
 
 void
-FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int iedge,
+FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
@@ -342,7 +342,7 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int iedge,
 }
 
 void
-FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
     double a, b, c;
@@ -372,7 +372,7 @@ FEI3dTrLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &
 }
 
 double
-FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray a, b;
     IntArray snodes(3);
@@ -386,7 +386,7 @@ FEI3dTrLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray 
 }
 
 double
-FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+FEI3dTetLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                 const FEICellGeometry &cellgeo)
 {
     FloatArray c;
@@ -394,7 +394,7 @@ FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lco
 }
 
 void
-FEI3dTrLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+FEI3dTetLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
     int aNode = 0, bNode = 0, cNode = 0;
     surfNodes.resize(3);
@@ -416,7 +416,7 @@ FEI3dTrLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         bNode = 4;
         cNode = 3;
     } else {
-        OOFEM_ERROR2("FEI3dTrLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR2("FEI3dTetLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
     surfNodes.at(1) = ( aNode );

@@ -38,7 +38,7 @@
 #include "supgelement2.h"
 
 #include "levelsetpcs.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 
 namespace oofem {
 
@@ -49,7 +49,7 @@ namespace oofem {
 class Tet1_3D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface
 {
 protected:
-    static FEI3dTrLin interpolation;
+    static FEI3dTetLin interpolation;
 
 public:
     Tet1_3D_SUPG(int n, Domain *d);

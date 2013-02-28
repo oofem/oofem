@@ -43,12 +43,12 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "masterdof.h"
 
 namespace oofem {
 
-FEI3dTrLin Tet1BubbleStokes :: interp;
+FEI3dTetLin Tet1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)
 IntArray Tet1BubbleStokes :: ordering(19);
 IntArray Tet1BubbleStokes :: edge_ordering [ 6 ] = { IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6) };
