@@ -264,7 +264,7 @@ LSpace :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 8;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_LSpace_nip, "nip"); // Macro
 
-    if ( !( ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
+    if ( !( ( numberOfGaussPoints == 1 ) || ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;
     }
 
