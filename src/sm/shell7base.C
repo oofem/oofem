@@ -409,10 +409,9 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     this->giveUpdatedSolutionVector(solVec, tStep);
     
     //this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
-
-    //new_computeBulkTangentMatrix(temp, solVec, solVecI, solVecJ, rMode, tStep);
-    this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
-
+    //this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
+    solVec.printYourself();
+    this->new_computeBulkTangentMatrix(answer, solVec, solVec, solVec, rMode, tStep);
 
     // Add contribution due to pressure load
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -426,11 +425,10 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
         if ( dynamic_cast< ConstantPressureLoad * >( load ) ) {
             FloatMatrix K_pressure;
             this->computePressureTangentMatrix(K_pressure, load, iSurf, tStep);
-            temp.add(K_pressure);
+            //answer.add(K_pressure); // Should assemble with ordering
         }
     }
-    IntArray ordering = giveOrdering(All);
-    answer.assemble(temp, ordering, ordering);
+
 }
 
 void
@@ -488,19 +486,19 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
     FloatMatrix L(18,18);
     FloatMatrix B11, B22, B32, B43, B53, B;
     FloatArray S1g(3), S2g(3), S3g(3);
-    FloatMatrix K(42,42);
+    FloatMatrix K(42,42), tempAnswer(42,42);
     K.zero();
+    tempAnswer.zero();
 
     int ndofs = Shell7Base :: giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection() );
-    int numberOfLayers = layeredCS->giveNumberOfLayers();     // conversion from double to int - fix!
+    int numberOfLayers = this->layeredCS->giveNumberOfLayers();     
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
-        Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
+        Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(i);
@@ -536,14 +534,18 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
             Ktemp.beProductOf(L, B);
             double dV = this->computeVolumeAroundLayer(gp, layer);
             K.beTProductOf(B,Ktemp);
-            answer.add(dV, K);
+            tempAnswer.add(dV, K);
         }
     }
-    //answer.symmetrized();
+
     
-    
-    //IntArray ordering = giveOrdering(All);
-    //answer.assemble(K, ordering, ordering);
+    FloatMatrix test;
+    test.beSubMatrixOf(tempAnswer,29,42,29,42);
+    test.printYourself();
+
+    IntArray ordering = giveOrdering(All);
+    answer.assemble(tempAnswer, ordering, ordering);
+
 
 }
 
@@ -1266,9 +1268,8 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
     answer.zero();
 
     FloatArray temp;
-    this->computeSectionalForces(temp, tStep, solVec, useUpdatedGpRecord);
-    IntArray ordering = giveOrdering(All);        
-    answer.assemble(temp, ordering);
+    this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
+    answer.printYourself();
 
     ///@todo How to treat the convective force? Only active during dynamic simulations
 }
@@ -1326,11 +1327,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             f3.add(dV, f3temp);
         }
     }
-    //answer.addSubVector(f1,1);
-    //answer.addSubVector(f2,19);
-    //answer.addSubVector(f3,37);
 
-    
     IntArray ordering_phibar = giveOrdering(Midplane);
     IntArray ordering_m = giveOrdering(Director);
     IntArray ordering_gam = giveOrdering(InhomStrain);
