@@ -60,6 +60,7 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
      * @param cellgeo Underlying cell geometry.
@@ -78,9 +79,7 @@ public:
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void   giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
-    void   giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
 };
 } // end namespace oofem
 #endif // fei2dtrquad_h

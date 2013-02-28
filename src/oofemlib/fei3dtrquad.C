@@ -47,21 +47,7 @@ FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
 void
 FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(6, 2);
-    int i;
-    FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
-    FloatArray dndxi(6), dndeta(6);
-
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    inv.beInverseOf(jacobianMatrix);
-
-    this->giveDerivativeXi(dndxi, lcoords);
-    this->giveDerivativeEta(dndeta, lcoords);
-
-    for ( i = 1; i <= 6; i++ ) {
-        answer.at(i, 1) = dndxi.at(i) * inv.at(1, 1) + dndeta.at(i) * inv.at(1, 2);
-        answer.at(i, 2) = dndxi.at(i) * inv.at(2, 1) + dndeta.at(i) * inv.at(2, 2);
-    }
+    OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
 }
 
 
@@ -70,7 +56,6 @@ FEI3dTrQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const F
 {
     this->surfaceEvaldNdxi(answer, lcoords);
 }
-
 
 
 void
@@ -112,13 +97,17 @@ FEI3dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
 }
 
 
-
 void
 FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+    FloatArray n;
+    this->evalN(n, lcoords, cellgeo);
+    answer.resize(0);
+    for ( int i = 1; i <= 6; ++i ) {
+        answer.add(n.at(i), * cellgeo.giveVertexCoordinates(i));
+    }
 }
 
-#define POINT_TOL 1e-6
 
 int
 FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
@@ -205,7 +194,7 @@ FEI3dTrQuad :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lc
 void
 FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{// Note: This gives the coordinate in the reference system
+{
     IntArray edgeNodes;
     FloatArray N;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
@@ -232,7 +221,7 @@ FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
 void
 FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
-       int aNode = 0, bNode = 0, cNode = 0;
+    int aNode = 0, bNode = 0, cNode = 0;
     edgeNodes.resize(3);
 
     if ( iedge == 1 ) { // edge between nodes 1 2
@@ -370,8 +359,7 @@ FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lc
 void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    this->computeLocalEdgeMapping(surfNodes, isurf);
-    // OOFEM_ERROR("FEI3dTrQuad :: computeLocalSurfaceMapping - Not applicable to geometry");
+    surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
 }
 
 } // end namespace oofem
