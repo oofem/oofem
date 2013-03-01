@@ -159,10 +159,10 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
 
     outputStrem = fopen(fileName, "w");
     if ( tri_tetra == true ) {
-        fprintf(outputStrem, "3 1\n");
+        fprintf(outputStrem, "3 1 -1\n");
         fprintf(outputStrem, "%d %d %d %d\n", nnodes, edges, trias, tetras);
     } else {
-        fprintf(outputStrem, "7 1\n");
+        fprintf(outputStrem, "7 1 -1\n");
         fprintf(outputStrem, "%d %d %d %d %d %d %d %d\n", nnodes, edges, trias, quads, tetras, pyrams, wedges, hexas);
     }
 
