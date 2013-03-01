@@ -199,7 +199,7 @@ protected:
 
     void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
-
+    void giveUpdatedSolutionVectorC(FloatArray &answer, TimeStep *tStep);
 
 
     // Nodal averaging interface:

@@ -405,12 +405,15 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     answer.zero();
 
     FloatMatrix temp;
-    FloatArray solVec;
-    this->giveUpdatedSolutionVector(solVec, tStep);
-    
+    FloatArray solVec, totalSolVec;
+    //this->giveUpdatedSolutionVector(solVec, tStep);
+
+    this->giveUpdatedSolutionVector(totalSolVec, tStep);  //  a
+    this->giveUpdatedSolutionVector(solVec, tStep); // da
+
     //this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
     //this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
-    this->new_computeBulkTangentMatrix(answer, solVec, solVec, solVec, rMode, tStep);
+    this->new_computeBulkTangentMatrix(answer, totalSolVec, solVec, solVec, rMode, tStep);
 
     // Add contribution due to pressure load
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
@@ -1260,9 +1263,9 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 //
 // Computes internal forces as a summation of: sectional forces + convective mass force
 {
-    FloatArray solVec;
-    this->giveUpdatedSolutionVector(solVec, tStep);
-
+    FloatArray totalSolVec, solVec;
+    //this->giveUpdatedSolutionVector(solVec, tStep);
+    this->giveUpdatedSolutionVector(solVec, tStep); // da
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
 
@@ -1296,12 +1299,19 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
             FloatMatrix B11, B22, B32, B43, B53;
             this->computeBmatricesAt(gp, B11, B22, B32, B43, B53);
-            this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+            //this->computeGeneralizedStrainVector(genEps, solVec, B11, B22, B32, B43, B53);
+
+
+            FloatArray genEpsD, totalSolVec;
+            this->computeGeneralizedStrainVector(genEpsD, solVec, B11, B22, B32, B43, B53);
+
+            this->giveUpdatedSolutionVector(totalSolVec, tStep); // a
+            this->computeGeneralizedStrainVector(genEps, totalSolVec, B11, B22, B32, B43, B53);
 
             double zeta = giveGlobalZcoord(gp);
             FloatArray N, M, T, Ms;
             double Ts = 0.;
-            this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, genEps, zeta);
+            this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, genEpsD, zeta);
 
             // Computation of sectional forces: f = B^t*[N M T Ms Ts]^t
             FloatArray f1temp(18), f2temp(18), f3temp(6), temp;
@@ -1325,7 +1335,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             f3.add(dV, f3temp);
         }
     }
-
+    //f1.printYourself();
     IntArray ordering_phibar = giveOrdering(Midplane);
     IntArray ordering_m = giveOrdering(Director);
     IntArray ordering_gam = giveOrdering(InhomStrain);
@@ -1337,7 +1347,8 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 
 
 void
-Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta)
+Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, 
+GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta)
 {
 
 #if 1
@@ -2321,6 +2332,19 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
 
+void
+Shell7Base :: giveUpdatedSolutionVectorC(FloatArray &answer, TimeStep *tStep)
+{
+    answer.resize( Shell7Base :: giveNumberOfDofs() );
+    answer.zero();
+    FloatArray temp;
+    int dummy = 0;
+    IntArray dofIdArray;
+    Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
+    this->temp_computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    
+    answer.assemble( temp, this->giveOrdering(AllInv) );
+}
 
 void
 Shell7Base :: giveInitialSolutionVector(FloatArray &answer) {

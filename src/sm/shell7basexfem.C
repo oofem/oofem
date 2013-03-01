@@ -143,8 +143,9 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
     // Continuous part
     FloatArray g1c, g2c, g3c;
     Shell7Base :: evalCovarBaseVectorsAt(gp, g1, g2, g3, genEpsC);
-
+    
     // Discontinuous part - ///@todo naive imlementation should be changed
+#if 1
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
@@ -158,11 +159,18 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatAr
                 FloatArray g1d_temp, g2d_temp, g3d_temp, dGenEps;
                 computeDiscGeneralizedStrainVector(dGenEps, gp, dei, j, tStep);
                 Shell7Base :: evalCovarBaseVectorsAt(gp, g1d_temp, g2d_temp, g3d_temp, dGenEps);
+                if ( H > 0.1 ) {
+                    //dGenEps.printYourself();
+                    //g1.printYourself();g2.printYourself(); g3.printYourself();
+                    //g1d_temp.printYourself();  g2d_temp.printYourself();   g3d_temp.printYourself();
+                    g1.add(H,g1d_temp); g2.add(H,g2d_temp); g3.add(H,g3d_temp);
+                    //g1.printYourself();g2.printYourself(); g3.printYourself();
+                }
 
-                g1.add(H,g1d_temp); g2.add(H,g2d_temp); g3.add(H,g3d_temp);
             }
         }
     }
+#endif
 }
 
 
@@ -186,12 +194,14 @@ Shell7BaseXFEM :: discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &ei
     // Returns the solution vector of discontinuous dofs dx_d & dm_d
     FloatArray temp;
     temp_computeVectorOf(eiDofIdArray, VM_Total, tStep, temp);
-    //temp.printYourself();
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
     //this->discGiveInitialSolutionVector(answer, eiDofIdArray);
     //this->giveInitialSolutionVector(answer);
     //answer.printYourself();
+
+    //this->giveUpdatedSolutionVector(answer, tStep);
+
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
 
@@ -302,7 +312,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
     IntArray testi;
     testi.setValues(7,15,16,17,18,19,20,21);
     test.beSubArrayOf(temp,testi);
-    test.printYourself();
+    //test.printYourself();
 
     // Disccontinuous part
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
@@ -321,7 +331,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 FloatArray tempRed;
                 tempRed.beSubArrayOf(temp, activeDofs);
                 answer.assemble(tempRed, ordering);
-                tempRed.printYourself();
+                //tempRed.printYourself();
             }
         }
     }
@@ -400,6 +410,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
+    //f1.printYourself();
     answer.assemble(f1, ordering_phibar);
     answer.assemble(f2, ordering_m);
     answer.assemble(f3, ordering_gam);
@@ -432,12 +443,14 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     FloatMatrix test;
     test.beSubMatrixOf(answer,15,21,15,21);
     test.printYourself();
+
     FloatArray testvec, testvec2;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, testvec);
     //testvec.printYourself();
     IntArray testi;
     testi.setValues(14,15,16,17,18,19,20,21,  22,23,24,25,26,27,28);
-    
+    testvec2.beSubArrayOf(testvec,testi);
+    testvec2.printYourself();
 
     // Disccontinuous part
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
@@ -464,7 +477,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         IntArray orderingJ, orderingK, activeDofsJ, activeDofsK;
                         computeOrderingArray(orderingJ, activeDofsJ, j, All);
                         computeOrderingArray(orderingK, activeDofsK, k, All);
-
                         FloatMatrix tempRed;
                         tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsK);
                         answer.assemble(tempRed, orderingJ, orderingK);
@@ -475,8 +487,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
             }
         }
-        #endif
-        #if 1
+
 
         // First column
 
@@ -500,8 +511,8 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                 FloatMatrix test;
                 test.beSubMatrixOf(tempRed,1,7,15,21);
                 test.printYourself();
-                //test.times(2.);
-                //test.printYourself();
+                
+                
             }
             
         }
@@ -525,7 +536,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                 answer.assemble(tempRed, ordering, orderingK);
             }
         }
-        #endif
+    #endif
 
     }
 
@@ -613,29 +624,6 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &answer, FloatArray &
     IntArray ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
 
-    //computeOrderingArray(ordering_phibar, activeDofs_phibar, ei, enrichmentDomainNumber, Midplane);
-    //computeOrderingArray(ordering_m, activeDofs_m, ei, enrichmentDomainNumber, Director);
-    //computeOrderingArray(ordering_gam, activeDofs_gam, ei, enrichmentDomainNumber, InhomStrain);
-
-
-    /*
-    FloatMatrix K11Ass, K12Ass, K13Ass, K22Ass, K23Ass, K33Ass, mat1, mat2(3,3);
-
-    answer.assemble(K11, ordering_phibar, ordering_phibar);
-    answer.assemble(K12, ordering_phibar, ordering_m);
-    answer.assemble(K13, ordering_phibar, ordering_gam);
-    answer.assemble(K22, ordering_m,      ordering_m);
-    answer.assemble(K23, ordering_m,      ordering_gam);
-    answer.assemble(K33, ordering_gam,    ordering_gam);
-
-    FloatMatrix K21, K31, K32;
-    K21.beTranspositionOf(K12);
-    K31.beTranspositionOf(K13);
-    K32.beTranspositionOf(K23);
-    answer.assemble(K21, ordering_m,      ordering_phibar);
-    answer.assemble(K31, ordering_gam,    ordering_phibar);
-    answer.assemble(K32, ordering_gam,    ordering_m);
-    */
 }
 
 
