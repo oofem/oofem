@@ -41,6 +41,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
+#include "strainvector.h"
+#include "stressvector.h"
 
 namespace oofem {
 #ifdef IDM_USE_MMAClosestIPTransfer
@@ -273,16 +275,15 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         kappa = sqrt(posNorm);
     } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
         // EST_Rankine equiv strain measure
-        int i;
-        FloatMatrix de;
-        FloatArray stress, fullStress, principalStress;
         double sum = 0.;
+        FloatArray stress, fullStress, principalStress;  
+	FloatMatrix de;   
 
         lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
         crossSection->giveFullCharacteristicVector(fullStress, gp, stress);
         this->computePrincipalValues(principalStress, fullStress, principal_stress);
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             if ( principalStress.at(i) > 0.0 ) {
                 if ( this->equivStrainType == EST_Rankine_Smooth ) {
                     sum += principalStress.at(i) * principalStress.at(i);
@@ -348,6 +349,171 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
     }
+}
+
+void
+IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+{
+    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+  
+    if ( strain.isEmpty() ) {
+        answer.zero();
+        return;
+    }
+ 
+    if ( this->equivStrainType == EST_Mazars ) {
+        int dim;
+        double posNorm = 0.0;
+	double nu = lmat->give(NYxz, gp);
+        FloatArray principalStrains, fullstrain;
+	FloatMatrix N,m;
+
+        // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
+        if ( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad  ) {
+	    dim = 2;
+	    StrainVector  fullStrain(strain,_PlaneStress);
+	    fullStrain.computePrincipalValDir(principalStrains, N);
+	    principalStrains.resize(3);
+	    principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
+	}
+	else if( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad){
+	    dim = 3;
+	    StrainVector fullStrain(strain,_3dMat);
+	    fullStrain.computePrincipalValDir(principalStrains, N);
+	  }
+
+	FloatArray n(dim);	
+	FloatMatrix Eta(dim,dim);
+       	Eta.zero();
+	
+	for ( int i = 1; i <= 3; i++ ) {
+	  if ( i < dim ) {
+	    if ( principalStrains.at(i) > 0.0 ) {
+	      for(int j = 1; j<3;j++)
+		n.at(j) = N.at(j,i);
+	      m.beDyadicProductOf(n,n);
+	      m.times(principalStrains.at(i));
+	      Eta.add(m);
+	    }
+	  }
+	  if ( principalStrains.at(i) > 0.0 ) 
+	    posNorm += principalStrains.at(i) * principalStrains.at(i);	      
+	}
+	double kappa = sqrt(posNorm);
+	Eta.times(1./kappa);
+
+	int numberOfEl = (dim * (dim-1)/2+dim);
+	answer.resize(numberOfEl);
+
+	if(gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad){
+	  answer.at(1) = Eta.at(1,1);
+	  answer.at(2) = Eta.at(2,2);
+	  answer.at(3) = Eta.at(1,2);
+	} else if( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad){
+	  answer.at(1) = Eta.at(1,1);
+	  answer.at(2) = Eta.at(2,2);
+	  answer.at(3) = Eta.at(3,3);
+	  answer.at(4) = Eta.at(2,3);
+	  answer.at(5) = Eta.at(1,3);
+	  answer.at(6) = Eta.at(1,2);
+	}   
+	
+    } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
+
+        int index, dim;
+	double sum = 0.;
+        FloatArray stress, principalStress, eta;
+	FloatMatrix de, N, m, Eta;  
+
+	lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+	stress.beProductOf(de, strain);
+	if( gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad ){
+	  StressVector fullStress(stress,_PlaneStress);	  
+	  fullStress.computePrincipalValDir(principalStress, N);
+	  principalStress.resize(3);
+	  dim = 2;
+ 	}
+	else if( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad){
+	  StressVector fullStress(stress,_3dMat);
+	  fullStress.computePrincipalValDir(principalStress, N);
+	  dim = 3;
+	}
+	
+	FloatArray n(dim);        
+	n.zero();
+	Eta.resize(dim,dim);
+	Eta.zero();
+	for ( int i = 1; i <= 3; i++ ) {
+	  if ( principalStress.at(i) > 0.0 ) {
+	    if ( this->equivStrainType == EST_Rankine_Smooth ) {
+	      sum += principalStress.at(i) * principalStress.at(i);
+	      if ( i < dim ) {
+		for(int j = 1; j<=dim;j++)
+		  n.at(j) = N.at(j,i);
+	      }
+	      m.beDyadicProductOf(n,n);
+	      m.times(principalStress.at(i));
+	      Eta.add(m);
+	    }else if ( sum < principalStress.at(i) ) {
+	      sum = principalStress.at(i);
+	      index = i;
+	    }
+	  } else if ( sum < principalStress.at(i) ) {
+	    sum = principalStress.at(i);
+	    index = i;
+	  }
+	}		
+    
+	int numberOfEl = (dim * (dim-1)/2+dim);
+	eta.resize(numberOfEl);
+	eta.zero();
+	
+        if ( this->equivStrainType == EST_Rankine_Smooth ) {
+	  sum = sqrt(sum);
+	  double kappa =  sum / lmat->give('E', gp);
+	  Eta.times(1./kappa);
+	}else if( this->equivStrainType == EST_Rankine_Standard ){
+	  for(int i =1; i <= dim; i++)
+	    n.at(i) = N.at(i,index);
+	  Eta.beDyadicProductOf(n,n);
+	  Eta.times(1./lmat->give('E', gp));
+	}
+
+
+	if(gp->giveMaterialMode() == _PlaneStress || gp->giveMaterialMode() == _PlaneStressGrad){
+	  eta.at(1) = Eta.at(1,1);
+	  eta.at(2) = Eta.at(2,2);
+	  eta.at(3) = Eta.at(1,2);
+	} else if( gp->giveMaterialMode() == _3dMat || gp->giveMaterialMode() == _3dMatGrad){
+	  eta.at(1) = Eta.at(1,1);
+	  eta.at(2) = Eta.at(2,2);
+	  eta.at(3) = Eta.at(3,3);
+	  eta.at(4) = Eta.at(2,3);
+	  eta.at(5) = Eta.at(1,3);
+	  eta.at(6) = Eta.at(1,2);
+	}
+	answer.beProductOf(de, eta);	
+
+	    
+    } else if ( this->equivStrainType == EST_ElasticEnergy ) {
+       
+        FloatMatrix de;
+        FloatArray stress;
+        double sum;
+
+        lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
+	// standard elastic energy
+	stress.beProductOf(de, strain);
+	sum = strain.dotProduct(stress);
+      	
+        double kappa = sqrt( sum / lmat->give('E', gp) );
+	answer = stress;
+	answer.times(1./ lmat->give('E', gp) / kappa );
+	
+    } else {
+      _error("computeEta: unknown EquivStrainType");
+    }
+    
 }
 
 void

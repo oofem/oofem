@@ -86,6 +86,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _1dMat:
+    case _1dMatGrad:
         this->give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _2dPlateLayer:

@@ -75,6 +75,13 @@ QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
     answer.setValues(1, D_u);
 }
 
+int
+QTruss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this));
+    return 1;
+}
+
 
 double
 QTruss1d :: computeVolumeAround(GaussPoint *gp)

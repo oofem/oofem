@@ -182,16 +182,43 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
                                                          GaussPoint *gp, TimeStep *atTime)
 {
     IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
-    double om;
+    double tempDamage;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
+        tempDamage = 0.0;
     } else {
-        om = status->giveTempDamage();
-        om = min(om, maxOmega);
+        tempDamage = status->giveTempDamage();
+        tempDamage = min(tempDamage, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-    answer.times(1.0 - om);
+    answer.times(1.0 - tempDamage);
+    if(mode == TangentStiffness)
+      {
+	double damage = status -> giveDamage();
+	if(tempDamage > damage)
+	  {
+	    double tempKappa;
+	    FloatArray stress, strain, eta;
+	    FloatMatrix correctionTerm;
+	    stress = status -> giveTempStressVector();
+	    strain = status -> giveTempStrainVector();
+	    tempKappa = status -> giveTempKappa();
+	    // effective stress
+	    stress.times(1./(1-tempDamage));
+	    //compute derivative of eqstrain wrt strain
+	    this->computeEta(eta,strain,gp,atTime);
+	    //compute derivative of damage function
+	    double damagePrime = damageFunctionPrime(tempKappa,gp);
+	    // dyadic product of eff stress and eta
+	    correctionTerm.beDyadicProductOf(stress,eta);
+	    // times minus derivative of damage function
+	    correctionTerm.times(-damagePrime);
+	    // add to secant stiffness
+	    answer.add(correctionTerm);
+	  }
+
+      }
+
 }
 
 

@@ -192,20 +192,18 @@ IDGMaterial :: computeEta(FloatMatrix &answer, const FloatArray &strain, GaussPo
             principalStrains.at(3) = -nu * ( principalStrains.at(1) + principalStrains.at(2) ) / ( 1. - nu );
 
             for ( int i = 1; i <= 3; i++ ) {
-                if ( principalStrains.at(i) > 0.0 ) {
-                    if ( i < 3 ) {
-                        if ( principalStrains.at(i) > 0.0 ) {
-                            double e = principalStrains.at(i);
-                            for(int j = 1; j<3;j++)
-                                n.at(j) = N.at(i,j);
-                            m.beDyadicProductOf(n,n);
-                            m.times(e);
-                            Eta.add(m);
-                        }
-                    }
-                    if ( principalStrains.at(i) > 0.0 ) 
-                        posNorm += principalStrains.at(i) * principalStrains.at(i);
-                }
+	      if ( i < 3 ) {
+		if ( principalStrains.at(i) > 0.0 ) {
+		  double e = principalStrains.at(i);
+		  for(int j = 1; j<3;j++)
+		    n.at(j) = N.at(i,j);
+		  m.beDyadicProductOf(n,n);
+		  m.times(e);
+		  Eta.add(m);
+		}
+	      }
+	      if ( principalStrains.at(i) > 0.0 ) 
+		posNorm += principalStrains.at(i) * principalStrains.at(i);	      
             }
             double kappa = sqrt(posNorm);
             Eta.times(1./kappa);
@@ -321,12 +319,15 @@ IDGMaterial :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm f
     // only for Mazars equivalent deformation ...answer = <eps>/eps_eq 
     // only plane-stress case
     IDGMaterialStatus *status = static_cast< IDGMaterialStatus * >( this->giveStatus(gp) );
-    double kappa = status->giveKappa();
+    //    double kappa = status->giveKappa();
+    //    double nlKappa = totalStrain.at(4);
     FloatArray  totalStrain =  status->giveTempStrainVector();  
-    double nlKappa = totalStrain.at(4);
+    double kappa = status->giveKappa();
+    double tempKappa = status->giveTempKappa();
     totalStrain.resize(3);
     answer.resize(1,3);
-    if ( kappa > nlKappa ) {
+
+    if ( tempKappa > kappa) {
         this->computeEta(answer,totalStrain,gp,atTime);
     } else 
         answer.zero();
