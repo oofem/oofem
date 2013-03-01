@@ -354,11 +354,11 @@ Two dofs (u-displacement, v-displacement) are required in each node.
 geometry.
 
 \descitem{Integration}
-Integration of membrane strain terms using gauss integration formula
-in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
+Integration of membrane strain terms using Gauss integration formula
+in 1, 4 (default), 9 or 16 integration points. The default number of
+integration points used can be overloaded using \param{NIP} parameter.
 Reduced integration for shear terms is employed. Shear terms are
-always integrated using 1 point integration rule.
+always integrated using the 1-point integration rule.
 
 \descitem{Features} Nonlocal constitutive support, Geometric nonlinearity support.
 
@@ -399,9 +399,9 @@ Two dofs (u-displacement, v-displacement) are required in each node.
 geometry.
 
 \descitem{Integration}
-Full integration using gauss integration formula
-in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
+Full integration using Gauss integration formula
+in 4 (the default), 9 or 16 integration points. The default number of
+integration points used can be overloaded using \param{NIP} parameter.
 
 \descitem{Features} Adaptivity support.
 
@@ -539,8 +539,8 @@ geometry.
 
 \descitem{Integration}
 Integration of membrane strain terms using gauss integration formula
-in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
+in 4 (the default), 9 or 16 integration points. The default number of
+integration points used can be overloaded using \param{NIP} parameter.
 Reduced integration for shear terms is employed. Shear terms are
 always integrated using 1 point integration rule.
 
@@ -740,7 +740,7 @@ Two dofs (u-displacement, v-displacement) are required in each node.\\
 geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} parameter (possible completions are 1, 4 (default), 9 and 16
+\param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
 point integration rule). The remaining strain components ($\varepsilon_\phi$ and
 $\gamma_{rz}$) can be integrated using 1 (default), 4, 9 and 16 integration
 point formulae (\param{NIPfish} parameter).\\
@@ -760,7 +760,7 @@ Two dofs (u-displacement, v-displacement) are required in each node.\\
 geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} parameter (possible completions are 1, 4 (default), 9 and 16
+\param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
 point integration rule). The remaining strain components ($\varepsilon_\phi$ and
 $\gamma_{rz}$) are integrated using one point integration formula.\\
 \descitem{Features} None.\\
@@ -788,7 +788,7 @@ Three dofs (u-displacement, v-displacement, w-displacement) are required in each
 \descitem{Approximation} Linear approximation of displacements and geometry. \\
 \descitem{Integration}
 Full integration of all strain components. \\
-\param{NIP} parameter (possible completions are 8 (default) and 27)
+\param{NIP} parameter (possible completions are 1, 8 (default) or 27)
 allows to change the integration formula.\\
 \descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
 \descitem{Loads} \\
@@ -1125,7 +1125,7 @@ To take geometric nonlinearity into account on an element, keyword \param{nlgeo}
 \subsubsection{Quad1ht element}
 \label{Quad1ht}
 Represents isoparametric four-node quadrilateral finite element for
-heat transfer problems. Each node has 1 degrees of freedom.
+heat transfer problems. Each node has 1 degree of freedom.
 Problem should be defined in x,y plane. The cross section thickness
 property is requested form cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
@@ -1232,7 +1232,7 @@ surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.
 \subsubsection{Brick1ht - hexahedral 3D element}
 \label{Brick1ht}
 Represents isoparametric eight-node brick/hexahedron finite element for
-heat transfer problems. Each node has 1 degrees of freedom.
+heat transfer problems. Each node has 1 degree of freedom.
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -1269,7 +1269,7 @@ Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 
 \subsubsection{QBrick1ht - quadratic hexahedral 3D element}\label{QBrick1ht_element}
 Implementation of quadratic 3d 20-node 
-finite element. Each node has 1 degrees of freedom. See section ~\ref{QSpace_element} 
+finite element. Each node has 1 degree of freedom. See section ~\ref{QSpace_element} 
 for node numbering order and order of faces.
 
 \elemkeyword{QBrick1ht}\\

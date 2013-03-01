@@ -194,7 +194,7 @@ public:
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp,
-                              const FloatArray &reducedStrain, TimeStep *tStep);
+                                      const FloatArray &reducedStrain, TimeStep *tStep);
 
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -212,6 +212,13 @@ public:
      * @param tStep Time step.
      */
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
+    /**Computes derivative of the equivalent strain wrt strain
+     * @param[out] answer Contains the resulting derivative.
+     * @param strain Strain vector.
+     * @param gp Integration point.
+     * @param tStep Time step.
+     */
+    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime) { _error("IsotropicDamageMaterial: computeEta is not implemented"); }
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.
@@ -235,17 +242,28 @@ protected:
      */
     virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
 
+    /**
+     * Returns the value of derivative of damage function
+     * wrt damage-driving variable kappa corresponding
+     * to a given value of the  kappa, depending on
+     * the type of selected damage law.
+     * @param kappa Equivalent strain measure.
+     * @param gp Integration point.
+     */
+    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) { _error("IsotropicDamageMaterial: damageFunctionPrime is not implemented");
+                                                                       return 0; }
+
     virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
     virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep);
+                                          GaussPoint *gp,
+                                          TimeStep *tStep);
 
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep);
+                                       GaussPoint *gp,
+                                       TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // isodamagemodel_h

@@ -39,8 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing implementation of quadratic  interpolation class.
- * @author 
+ * Second order triangular interpolation in 3D space (6 nodes).
  * @todo This class is entirely unchecked.
  */
 class FEI3dTrQuad : public FEInterpolation3d
@@ -56,24 +55,12 @@ public:
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     // new methods
-    void giveDerivativeKsi(FloatArray &n, const FloatArray &lcoords);
+    void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    void giveDerivativeDzeta(FloatArray &n, const FloatArray &lcoords);
-    void giveSurfaceDerivativeKsi(FloatArray &n, const FloatArray &lcoords);
-    void giveSurfaceDerivativeEta(FloatArray &n, const FloatArray &lcoords);
     //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo); 
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
     
-
-
-    /**
-     * Returns a characteristic length of the geometry, typically a diagonal or edge length.
-     * @param cellgeo Underlying cell geometry.
-     * @return Square root of area.
-     */
-    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
-
     // Edge
     virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
             void edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);

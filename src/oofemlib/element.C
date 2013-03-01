@@ -368,7 +368,7 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
-    IntArray dofIDMask;
+    IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
     locationArray.resize(0);
     if (dofIdArray) dofIdArray->resize(0);
@@ -376,13 +376,19 @@ Element :: giveLocationArray(IntArray &locationArray, EquationID eid, const Unkn
         this->giveDofManDofIDMask(i, eid, dofIDMask);
         this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
-        if (dofIdArray) dofIdArray->followedBy(dofIDMask);
+        if (dofIdArray) {
+            this->giveDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
     }
     for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, eid, dofIDMask);
         this->giveInternalDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
-        if (dofIdArray) dofIdArray->followedBy(dofIDMask);
+        if (dofIdArray) {
+            this->giveDofManager(i)->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
     }
 }
 
@@ -393,7 +399,7 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
 // simply appending the location array of every node on the boundary of the receiver. Consistent numbering with the interpolator.
 {
     IntArray bNodes;
-    IntArray dofIDMask;
+    IntArray dofIDMask, masterDofIDs;
     IntArray nodalArray;
 
     this->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
@@ -403,7 +409,10 @@ Element :: giveBoundaryLocationArray(IntArray &locationArray, int boundary, Equa
         this->giveDofManDofIDMask(bNodes.at(i), eid, dofIDMask);
         this->giveDofManager(bNodes.at(i))->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
-        if (dofIdArray) dofIdArray->followedBy(dofIDMask);
+        if (dofIdArray) {
+            this->giveDofManager(bNodes.at(i))->giveMasterDofIDArray(dofIDMask, masterDofIDs);
+            dofIdArray->followedBy(masterDofIDs);
+        }
     }
 }
 

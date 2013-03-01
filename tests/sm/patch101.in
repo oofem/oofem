@@ -12,11 +12,11 @@ node 5 coords 3  0.8   8.0   0.0  bc 2 1 0
 node 6 coords 3  3.0   7.0   0.0  bc 2 1 0
 node 7 coords 3  0.0   9.0   0.0  bc 2 1 0  load 1 2
 node 8 coords 3  4.0   9.0   0.0  bc 2 1 0  load 1 2
-PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1 NIP 1
-PlaneStress2d 2 nodes 4 1 7 5 4  crossSect 1 mat 1 NIP 1
-PlaneStress2d 3 nodes 4 4 5 6 3  crossSect 1 mat 1 NIP 1
-PlaneStress2d 4 nodes 4 3 6 8 2  crossSect 1 mat 1 NIP 1
-PlaneStress2d 5 nodes 4 5 7 8 6  crossSect 1 mat 1 NIP 1
+PlaneStress2d 1 nodes 4 1 4 3 2  crossSect 1 mat 1 NIP 4
+PlaneStress2d 2 nodes 4 1 7 5 4  crossSect 1 mat 1 NIP 4
+PlaneStress2d 3 nodes 4 4 5 6 3  crossSect 1 mat 1 NIP 4
+PlaneStress2d 4 nodes 4 3 6 8 2  crossSect 1 mat 1 NIP 4
+PlaneStress2d 5 nodes 4 5 7 8 6  crossSect 1 mat 1 NIP 4
 SimpleCS 1 thick 0.15
 IsoLE 1 d 0. E 15.0 n 0.25  tAlpha 0.000012
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 

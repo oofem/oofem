@@ -389,7 +389,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                 thisElement->giveBoundaryLocationArray(tempSideLocation, side [ thisSide ].at(ielement), EID_MomentumBalance, s);
 
                 // Find dofs for this element which should be periodic
-                IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+                IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray, masterDofIDs; ///@todo masterDofIDs and eNorms
                 periodicDofIDMask.resize(1);
                 periodicDofIDMask.at(1) = dofid;
 

@@ -52,7 +52,7 @@ FEI2dQuadLin :: giveArea(const FEICellGeometry &cellgeo) const
     double x24 = node2->at(xind) - node4->at(xind);
     double y24 = node2->at(yind) - node4->at(yind);
 
-    return fabs(0.5*(x13*y24 - x24*y13));
+    return fabs( 0.5 * ( x13 * y24 - x24 * y13 ) );
 }
 
 void
@@ -73,21 +73,21 @@ FEI2dQuadLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
 void
 FEI2dQuadLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
-    FloatArray nx(4), ny(4);
+    FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
+    this->giveDerivatives(dn, lcoords);
+    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
+        double x = cellgeo.giveVertexCoordinates(i)->at(xind);
+        double y = cellgeo.giveVertexCoordinates(i)->at(yind);
+
+        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
+    }
     inv.beInverseOf(jacobianMatrix);
 
-    this->giveDerivativeKsi( nx, lcoords.at(2) );
-    this->giveDerivativeEta( ny, lcoords.at(1) );
-
-    answer.resize(4, 2);
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(i, 1) = nx.at(i) * inv.at(1, 1) + ny.at(i) * inv.at(1, 2);
-        answer.at(i, 2) = nx.at(i) * inv.at(2, 1) + ny.at(i) * inv.at(2, 2);
-    }
+    answer.beProductTOf(dn, inv);
 }
 
 void
@@ -240,7 +240,7 @@ FEI2dQuadLin :: global2local(FloatArray &answer, const FloatArray &coords, const
 double
 FEI2dQuadLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix(2, 2);
+    FloatMatrix jacobianMatrix;
 
     this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
     return jacobianMatrix.giveDeterminant();
@@ -345,49 +345,44 @@ void
 FEI2dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 {
-    double ksi, eta, x, y;
-    FloatArray nx(4), ny(4);
+    double x, y;
+    FloatMatrix dn;
 
     jacobianMatrix.resize(2, 2);
     jacobianMatrix.zero();
 
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
+    this->giveDerivatives(dn, lcoords);
 
-    this->giveDerivativeKsi(nx, eta);
-    this->giveDerivativeEta(ny, ksi);
-
-    for ( int i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
         x = cellgeo.giveVertexCoordinates(i)->at(xind);
         y = cellgeo.giveVertexCoordinates(i)->at(yind);
 
-        jacobianMatrix.at(1, 1) += nx.at(i) * x;
-        jacobianMatrix.at(1, 2) += nx.at(i) * y;
-        jacobianMatrix.at(2, 1) += ny.at(i) * x;
-        jacobianMatrix.at(2, 2) += ny.at(i) * y;
+        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
     }
 }
 
-
 void
-FEI2dQuadLin :: giveDerivativeKsi(FloatArray &n, double eta)
+FEI2dQuadLin :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
 {
-    n.resize(4);
+    double ksi, eta;
+    ksi = lc.at(1);
+    eta = lc.at(2);
+    dn.resize(4, 2);
+    
+    // dn/dxi
+    dn.at(1, 1) =  0.25 * ( 1. + eta );
+    dn.at(2, 1) = -0.25 * ( 1. + eta );
+    dn.at(3, 1) = -0.25 * ( 1. - eta );
+    dn.at(4, 1) =  0.25 * ( 1. - eta );
 
-    n.at(1) =  0.25 * ( 1. + eta );
-    n.at(2) = -0.25 * ( 1. + eta );
-    n.at(3) = -0.25 * ( 1. - eta );
-    n.at(4) =  0.25 * ( 1. - eta );
+    // dn/deta
+    dn.at(1, 2) =  0.25 * ( 1. + ksi );
+    dn.at(2, 2) =  0.25 * ( 1. - ksi );
+    dn.at(3, 2) = -0.25 * ( 1. - ksi );
+    dn.at(4, 2) = -0.25 * ( 1. + ksi );
 }
 
-void
-FEI2dQuadLin :: giveDerivativeEta(FloatArray &n, double ksi)
-{
-    n.resize(4);
-
-    n.at(1) =  0.25 * ( 1. + ksi );
-    n.at(2) =  0.25 * ( 1. - ksi );
-    n.at(3) = -0.25 * ( 1. - ksi );
-    n.at(4) = -0.25 * ( 1. + ksi );
-}
 } // end namespace oofem

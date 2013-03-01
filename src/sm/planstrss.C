@@ -411,7 +411,7 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 4;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_PlaneStress2d_nip, "nip"); // Macro
 
-    if ( numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
+    if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
         OOFEM_WARNING1("Number of Gauss points enforced to 4");
     }

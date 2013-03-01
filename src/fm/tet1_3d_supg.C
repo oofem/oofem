@@ -50,7 +50,7 @@
 #endif
 
 namespace oofem {
-FEI3dTrLin Tet1_3D_SUPG :: interpolation;
+FEI3dTetLin Tet1_3D_SUPG :: interpolation;
 
 Tet1_3D_SUPG :: Tet1_3D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain)

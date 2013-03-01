@@ -1075,12 +1075,12 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 
 double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                     CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme &s, Domain *domain)
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     double localNorm = 0.0;
-    localNorm += this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain);
-    localNorm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain);
-    localNorm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain);
+    localNorm += this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
+    localNorm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
+    localNorm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 #ifdef __PARALLEL_MODE
  #ifdef __PETSC_MODULE
     return this->givePetscContext(domain->giveNumber(), eid)->accumulate(localNorm);
@@ -1102,7 +1102,7 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
 
 double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                                    CharType type, ValueModeType mode,
-                                                   const UnknownNumberingScheme &s, Domain *domain)
+                                                   const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
 // assembles matrix answer by  calling
 // node(i) -> computeLoadVectorAt (tStep);
@@ -1114,7 +1114,7 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
         return 0.0;
     }
 
-    IntArray loc;
+    IntArray loc, dofids;
     FloatArray charVec;
     FloatMatrix R;
     IntArray dofIDarry(0);
@@ -1125,7 +1125,7 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     // Note! For normal master dofs, loc is unique to each node, but there can be slave dofs, so we must keep it shared, unfortunately.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer) private(node, R, charVec, loc) reduction(+:norm)
+ #pragma omp parallel for shared(answer, eNorms) private(node, R, charVec, loc, dofids) reduction(+:norm)
 #endif
     for ( int i = 1; i <= nnode; i++ ) {
         node = domain->giveDofManager(i);
@@ -1143,6 +1143,13 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
             }
 
             answer.assemble(charVec, loc);
+            
+            if ( eNorms ) {
+                node->giveCompleteMasterDofIDArray(dofids);
+                for ( int i = 1; i <= dofids.giveSize(); ++i ) {
+                    eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
+                }
+            }
             norm += charVec.computeSquaredNorm();
         }
     }
@@ -1154,7 +1161,7 @@ double EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep 
 
 double EngngModel :: assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                                 CharType type, ValueModeType mode,
-                                                const UnknownNumberingScheme &s, Domain *domain)
+                                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     double norm = 0.0;
     int nbc = domain->giveNumberOfBoundaryConditions();
@@ -1174,13 +1181,13 @@ double EngngModel :: assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tS
 
 double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                                 CharType type, ValueModeType mode,
-                                                const UnknownNumberingScheme &s, Domain *domain)
+                                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
 // for each element in domain
 // and assembling every contribution to answer
 //
 {
-    IntArray loc;
+    IntArray loc, dofids;
     FloatMatrix R;
     FloatArray charVec;
     Element *element;
@@ -1190,7 +1197,7 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer) private(element, R, charVec, loc) reduction(+:norm)
+ #pragma omp parallel for shared(answer, eNorms) private(element, R, charVec, loc, dofids) reduction(+:norm)
 #endif
     for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
@@ -1215,6 +1222,12 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
             }
 
             answer.assemble(charVec, loc);
+            
+            if ( eNorms ) {
+                for ( int i = 1; i <= dofids.giveSize(); ++i ) {
+                    eNorms->at(dofids.at(i)) += charVec.at(i) * charVec.at(i);
+                }
+            }
             norm += charVec.computeSquaredNorm();
         }
     }

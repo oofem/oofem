@@ -36,7 +36,6 @@
 #define qtrspace_h
 
 #include "nlstructuralelement.h"
-#include "fei3dtrquad.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
@@ -44,6 +43,8 @@
 #include "sprnodalrecoverymodel.h"
 
 namespace oofem {
+
+class FEI3dTetQuad;
 
 /**
  * This class implements an Quadratic 3d  10 - node
@@ -61,7 +62,7 @@ class QTRSpace : public NLStructuralElement, public SPRNodalRecoveryModelInterfa
 {
 protected:
     int numberOfGaussPoints;
-    static FEI3dTrQuad interpolation;
+    static FEI3dTetQuad interpolation;
 
 public:
     QTRSpace(int, Domain *);

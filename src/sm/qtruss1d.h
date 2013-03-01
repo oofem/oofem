@@ -73,6 +73,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
     virtual integrationDomain giveIntegrationDomain() { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

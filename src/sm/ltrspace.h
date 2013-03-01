@@ -36,7 +36,6 @@
 #define ltrspace_h
 
 #include "nlstructuralelement.h"
-#include "fei3dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -48,6 +47,8 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
+
+class FEI3dTetLin;
 
 /**
  * This class implements a linear tetrahedral four-node finite element for stress analysis.
@@ -61,14 +62,14 @@ class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterfac
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
-    static FEI3dTrLin interpolation;
+    static FEI3dTetLin interpolation;
     int numberOfGaussPoints;
 
 public:
     LTRSpace(int n, Domain *d);
     virtual ~LTRSpace() { }
 
-    virtual FEInterpolation *giveInterpolation() { return &interpolation; }
+    virtual FEInterpolation *giveInterpolation();
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }

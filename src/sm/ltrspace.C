@@ -41,6 +41,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "fei3dtetlin.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -52,7 +53,7 @@
 #endif
 
 namespace oofem {
-FEI3dTrLin LTRSpace :: interpolation;
+FEI3dTetLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
@@ -96,19 +97,26 @@ LTRSpace :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
+
+FEInterpolation *
+LTRSpace:: giveInterpolation()
+{
+    return &interpolation;
+}
+
+
 void
 LTRSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the [6x12] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatMatrix dn(4, 3);
     interpolation.evaldNdx( dn, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2) = dn.at(i, 1);
         answer.at(2, 3 * i - 1) = dn.at(i, 2);
         answer.at(3, 3 * i - 0) = dn.at(i, 3);
@@ -132,7 +140,6 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
-    int i;
     FloatArray n(4);
 
     this->interpolation.evalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -140,7 +147,7 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(3, 12);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 3 * i - 2)  = n.at(i);
         answer.at(2, 3 * i - 1)  = n.at(i);
         answer.at(3, 3 * i - 0)  = n.at(i);
@@ -153,7 +160,6 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
 // Returns the [12x12] nonlinear part of the strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
 {
-    int j, k, l;
     FloatMatrix dnx;
 
     interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -162,33 +168,33 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
     answer.zero();
 
     if ( i <= 3 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
                 }
             }
         }
     } else if ( i == 4 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
                 }
             }
         }
     } else if ( i == 5 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
         }
     } else if ( i == 6 ) {
-        for ( k = 0; k < 4; k++ ) {
-            for ( l = 0; l < 3; l++ ) {
-                for ( j = 1; j <= 12; j += 3 ) {
+        for ( int k = 0; k < 4; k++ ) {
+            for ( int l = 0; l < 3; l++ ) {
+                for ( int j = 1; j <= 12; j += 3 ) {
                     answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
                 }
             }
@@ -203,7 +209,6 @@ LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // evaluated at aGaussPoint.
 // BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
 {
-    int i, j;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx( dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -211,8 +216,8 @@ LTRSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(9, 12);
     answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( j = 1; j <= 4; j++ ) { // 8 nodes
+    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( int j = 1; j <= 4; j++ ) { // 8 nodes
             answer.at(3 * i - 2, 3 * j - 2) =
                 answer.at(3 * i - 1, 3 * j - 1) =
                 answer.at(3 * i, 3 * j) = dnx.at(j, i);     // derivative of Nj wrt Xi
@@ -226,8 +231,8 @@ double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * aGaussPoint->giveCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
-    weight      = aGaussPoint->giveWeight();
-    volume      = determinant * weight;
+    weight = aGaussPoint->giveWeight();
+    volume = determinant * weight;
     return volume;
 }
 
@@ -368,10 +373,10 @@ LTRSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }

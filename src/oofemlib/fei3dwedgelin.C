@@ -41,25 +41,27 @@ namespace oofem {
 void
 FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double x, y, z;
+    double u, v, w;
     answer.resize(6);
 
-    x = lcoords.at(1);
-    y = lcoords.at(2);
-    z = lcoords.at(3);
+    u = lcoords.at(1);
+    v = lcoords.at(2);
+    w = lcoords.at(3);
 
-    answer.at(1) = 0.5 * ( 1. - x - y ) * ( 1. - z );
-    answer.at(2) = 0.5 * x * (1 - z);
-    answer.at(3) = 0.5 * y * (1 - z);
-    answer.at(4) = 0.5 * (1. - x - y ) * (1 + z);
-    answer.at(5) = 0.5 *  x * ( 1. + z );
-    answer.at(6) = 0.5 *  y * (1. + z );
+    answer.at(1) = 0.5 * ( 1. - w ) * ( 1. - u - v );
+    answer.at(2) = 0.5 * ( 1. - w ) * u;
+    answer.at(3) = 0.5 * ( 1. - w ) * v;
+    answer.at(4) = 0.5 * ( 1. + w ) * ( 1. - u - v );
+    answer.at(5) = 0.5 * ( 1. + w ) * u;
+    answer.at(6) = 0.5 * ( 1. + w ) * v;
 }
+
 
 void
 FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix, inv, dNduvw, coords;
+    FloatMatrix jacobianMatrix(2, 2), inv, dNduvw, coords;
+
     this->giveLocalDerivative(dNduvw, lcoords);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {

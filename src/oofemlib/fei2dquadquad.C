@@ -103,12 +103,20 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 void
 FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix, inv, dn;
-
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    inv.beInverseOf(jacobianMatrix);
+    FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
     this->giveDerivatives(dn, lcoords);
+    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
+        double x = cellgeo.giveVertexCoordinates(i)->at(xind);
+        double y = cellgeo.giveVertexCoordinates(i)->at(yind);
+
+        jacobianMatrix.at(1, 1) += dn.at(i,1) * x;
+        jacobianMatrix.at(1, 2) += dn.at(i,1) * y;
+        jacobianMatrix.at(2, 1) += dn.at(i,2) * x;
+        jacobianMatrix.at(2, 2) += dn.at(i,2) * y;
+    }
+    inv.beInverseOf(jacobianMatrix);
+
     answer.beProductTOf(dn, inv);
 }
 
