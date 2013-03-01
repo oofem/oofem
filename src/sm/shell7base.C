@@ -410,7 +410,6 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     
     //this->computeBulkTangentMatrix(answer, solVec, rMode, tStep);
     //this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
-    solVec.printYourself();
     this->new_computeBulkTangentMatrix(answer, solVec, solVec, solVec, rMode, tStep);
 
     // Add contribution due to pressure load
@@ -513,7 +512,7 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
             // Material stiffness
             Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, S1g, S2g, S3g, A, genEps);
 
-            double zeta = giveGlobalZcoord(gp);
+            double zeta = this->giveGlobalZcoord(gp);
             this->computeLambdaMatrices(lambdaI, genEpsI, zeta);
             this->computeLambdaMatrices(lambdaJ, genEpsJ, zeta);
 
@@ -540,8 +539,8 @@ Shell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solV
 
     
     FloatMatrix test;
-    test.beSubMatrixOf(tempAnswer,29,42,29,42);
-    test.printYourself();
+    test.beSubMatrixOf(tempAnswer,29,36,29,36);
+    //test.printYourself();
 
     IntArray ordering = giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
@@ -1269,7 +1268,6 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 
     FloatArray temp;
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
-    answer.printYourself();
 
     ///@todo How to treat the convective force? Only active during dynamic simulations
 }
@@ -1303,7 +1301,7 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
             double zeta = giveGlobalZcoord(gp);
             FloatArray N, M, T, Ms;
             double Ts = 0.;
-            this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, zeta);
+            this->computeSectionalForcesAt(N, M, T, Ms, Ts, gp, mat, tStep, genEps, genEps, zeta);
 
             // Computation of sectional forces: f = B^t*[N M T Ms Ts]^t
             FloatArray f1temp(18), f2temp(18), f3temp(6), temp;
@@ -1339,8 +1337,59 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
 
 
 void
-Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta)
+Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta)
 {
+
+#if 1
+    FloatArray S1g(3), S2g(3), S3g(3);
+    FloatArray cartStressVector, contravarStressVector;
+    FloatMatrix lambda[3];
+
+    this->computeLambdaMatrices(lambda, genEpsD, zeta);
+
+
+    this->computeStressVector(cartStressVector, genEps, gp, mat, tStep);
+    this->transInitialCartesianToInitialContravar(gp, cartStressVector, contravarStressVector);
+    this->computeStressResultantsAt(gp, contravarStressVector, S1g, S2g, S3g, genEps);
+
+    
+    FloatArray sectionalForces(18), temp;
+    sectionalForces.zero();
+    temp.beTProductOf(lambda [0], S1g);
+    sectionalForces.add(temp);
+    temp.beTProductOf(lambda [1], S2g);
+    sectionalForces.add(temp);
+    temp.beTProductOf(lambda [2], S3g);
+    sectionalForces.add(temp);
+
+
+    /* The following expressions are sectional forces (in the classic sense) if integrated over the thickness. However,
+     * now they are integrated over the volume to produce f_int.*/
+
+    
+    N.resize(6);  // Membrane forces - N1, N2
+    M.resize(6);  // Moments - M1, M2
+    for ( int i = 1; i <=6; i++ ) {
+        N.at(i) = sectionalForces.at(i);
+        M.at(i) = sectionalForces.at(6+i);
+    }
+    
+    // Shear force - T
+    T.resize(3);
+    T.at(1) = sectionalForces.at(13);
+    T.at(2) = sectionalForces.at(14);
+    T.at(3) = sectionalForces.at(15);
+
+    // Higher order force - Ms
+    Ms.resize(2);
+    Ms.at(1) = sectionalForces.at(16);
+    Ms.at(2) = sectionalForces.at(17);
+    
+    // Ts
+    Ts = sectionalForces.at(18);
+
+#else
+
     FloatArray g1, g2, g3, S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
     FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a;
     double fac1, fac2, fac3, gam, dg1, dg2;
@@ -1369,7 +1418,7 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray
     N.at(4) = S2g.at(1);
     N.at(5) = S2g.at(2);
     N.at(6) = S2g.at(3);
-
+    N.printYourself();
     // Moments - M1, M2
     M.resize(6);
     M.at(1) = fac1 * S1g.at(1);
@@ -1378,7 +1427,7 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray
     M.at(4) = fac1 * S2g.at(1);
     M.at(5) = fac1 * S2g.at(2);
     M.at(6) = fac1 * S2g.at(3);
-
+    M.printYourself();
     // Shear force - T
     T.resize(3);
     T.at(1) = fac2 * S3g.at(1) + fac3 * ( S1g.at(1) * dg1 + S2g.at(1) * dg2 );
@@ -1393,6 +1442,7 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray
 
     // Ts
     Ts = fac3 * ( dm1.dotProduct(S1g) + dm2.dotProduct(S2g) ) + zeta * m.dotProduct(S3g);
+#endif
 }
 
 #endif
