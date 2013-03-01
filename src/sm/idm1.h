@@ -205,7 +205,7 @@ public:
 
     bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->gf != 0. ); }
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-   
+
     virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
     /**
@@ -240,16 +240,16 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-  /**
+    /**
      * Returns the value of derivative of damage function
-     * wrt damage-driving variable kappa corresponding 
-     * to a given value of the  kappa, depending on 
+     * wrt damage-driving variable kappa corresponding
+     * to a given value of the  kappa, depending on
      * the type of selected damage law.
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
     double damageFunctionPrime(double kappa, GaussPoint *gp);
- /**
+    /**
      * Returns the value of compliance parameter
      * corresponding to a given value
      * of the damage-driving variable kappa,
