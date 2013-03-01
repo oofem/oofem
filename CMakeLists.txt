@@ -642,6 +642,16 @@ endforeach (case)
 #add_test (test-${case} "${EXECUTABLE_OUTPUT_PATH}/oofem" "-f" ${case} "-l" "2")
 #add_test (test-${case}-check "python" "${oofem_SOURCE_DIR}/tools/extractor.py" "-f" ${case} "-c")
 
+# Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
+add_custom_target (tests
+    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
+    WORKING_DIRECTORY ${oofem_BINARY_DIR}
+    )
+add_custom_target (benchmarks
+    COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
+    WORKING_DIRECTORY ${oofem_BINARY_DIR}
+    )
+
 #######################################################################
 ######################## Packing ######################################
 #######################################################################
