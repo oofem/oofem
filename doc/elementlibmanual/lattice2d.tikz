@@ -13,8 +13,8 @@
     coordinate[midway] (bmid)
     coordinate[at end] (bend);
 
- \draw[dotted,<-] (bmid)++(-60:0.05) node[below left] {$y_\mathrm{l}$} -- +(-60:0.1) coordinate (bmid2);
- \draw[dotted,->] (bmid2) -- +(30:0.1) node[below right] {$x_\mathrm{l}$};
+ \draw[dotted,<-] (bmid)++(-60:0.05) node[below left] {$y_{\mathrm{l}}$} -- +(-60:0.1) coordinate (bmid2);
+ \draw[dotted,->] (bmid2) -- +(30:0.1) node[below right] {$x_{\mathrm{l}}$};
  \node[elemnode] at (bmid2) {};
  \node[below] at (bmid2) {$C$};
 
