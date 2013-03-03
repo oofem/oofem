@@ -164,7 +164,6 @@ protected:
     // Internal forces
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     void computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord = 0);
-    void computeSectionalForcesOld(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord = 0);
     void computeSectionalForcesAt(FloatArray &N, FloatArray  &M, FloatArray &T, FloatArray  &Ms, double &Ts, GaussPoint *gp, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta);
 
     // External forces
@@ -188,7 +187,8 @@ protected:
 
 
     // Solution vectors
-    void temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    void giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
+    void temp_computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
                                         const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
@@ -199,7 +199,6 @@ protected:
 
     void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
-    void giveUpdatedSolutionVectorC(FloatArray &answer, TimeStep *tStep);
 
 
     // Nodal averaging interface:

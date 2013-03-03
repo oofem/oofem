@@ -40,21 +40,10 @@
 #include <algorithm>
 
 namespace oofem {
-    /*
-    IRResultType EnrichmentDomain :: initializeFrom(InputRecord *ir)
-{
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
-    
-    //IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    
-    return IRRT_OK;
-}
-*/
 
 
 
+// Node list
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
 {

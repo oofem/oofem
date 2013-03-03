@@ -113,19 +113,14 @@ public:
     /// Updates receiver geometry to the state reached at given time step.
     /// Geometry update; calls individual enrichment item updateGeometry method.
     virtual void updateGeometry(TimeStep *tStep) {};
+
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
     
 
-    enum NodeEnrichmentType {
-        STANDARD = 0,    // No enrichment
-        SPLIT = 1,       // divide into strong and weak?
-        TIP = 2,         // Crack tip enrichment (branch functions)
-        DELAMINATION = 3 //       
-    };
 
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
     void setStartOfDofIdPool(int number) { this->startOfDofIdPool = number; };
-    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber);
+    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber); // list of id's the specific ei supports
 
 
 
@@ -136,8 +131,10 @@ protected:
     int geometry;
     IntArray enrichmentDomainNumbers;
     IntArray *enrichesDofsWithIdArray;
+
     /// EnrichmentFunction associated with the EnrichmentItem. - should be a list of functions
     int enrichmentFunction;
+
     /// Additional dofIds from Enrichment. -JB depends on problem type and spatial dimension
     IntArray dofsId;
     int startOfDofIdPool; // points to the first available dofId number 
@@ -153,6 +150,9 @@ protected:
     /// Enrichment function list.
     AList< EnrichmentFunction > *enrichmentFunctionList;
     int numberOfEnrichmentFunctions;
+
+
+
     int numberOfEnrichmentTypes; // number of unique enrichment domain objects 
     
     

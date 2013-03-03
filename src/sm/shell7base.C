@@ -2269,29 +2269,46 @@ void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
 #if 1
 
 void
-Shell7Base :: temp_computeVectorOf(IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Shell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep)
 {
-    // Routine to extract vector given an array of dofid items
-    // If a certain dofId does not exist a zero is used as value
-    answer.resize( dofIdArray.giveSize() * numberOfDofMans );
+    // Returns the solution vector of discontinuous dofs dx_d & dm_d
+    FloatArray temp;
+    temp_computeVectorOf(dofIdArray, VM_Total, tStep, temp);
+    answer.resize( Shell7Base :: giveNumberOfDofs() );
+    answer.zero();
+    answer.assemble( temp, this->giveOrdering(AllInv) );
+}
+
+void
+Shell7Base :: temp_computeVectorOf(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+{
+    // Routine to extract the solution vector for an element given an dofid array.
+    // Size will be numberOfDofs and if a certain dofId does not exist a zero is used as value. 
+    // This method may e.g. be used to obtain the enriched part of the solution vector
+    ///@todo: generalize so it can be used by all XFEM elements
+    answer.resize( Shell7Base ::giveNumberOfDofs());
     answer.zero();
     int k = 0;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         DofManager *dMan = this->giveDofManager(i);        
         for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
-            Dof *d = dMan->giveDof(j);
-            k++;
+            
+            //k++;
             if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo EID_MomentumBalance is just a dummy argument in this case and feels redundant
+                Dof *d = dMan->giveDofWithID( dofIdArray.at(j) );
+                /// @todo: will fail if any other dof then gamma is excluded from enrichment 
+                /// since I only add "j". Instead I should skip certain dof numbers when incrementing
+                answer.at(k+j) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo: EID_MomentumBalance is just a dummy argument in this case and feels redundant
             }
         }
+        k += 7;
     }
 }
 
-//(int boundary, EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 void
 Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 {
+    ///@todo: NOT CHECKED!!!
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
 
@@ -2308,7 +2325,7 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
             Dof *d = dMan->giveDof(j);
             k++;
             if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
-                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo EID_MomentumBalance is just a dummy argument in this case and feels redundant
+                answer.at(k) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); 
             }
         }
     }
@@ -2320,23 +2337,8 @@ void
 Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
 {
     // Computes updated solution as: x = X + dx, m = M + dM, gam = 0 + dgam
-    this->giveInitialSolutionVector(answer);
-    FloatArray temp;
-    //this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, temp);
-
-    int dummy = 0;
-    IntArray dofIdArray;
-    Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
-    this->temp_computeVectorOf(dofIdArray, VM_Total, tStep, temp);
-    
-    answer.assemble( temp, this->giveOrdering(AllInv) );
-}
-
-void
-Shell7Base :: giveUpdatedSolutionVectorC(FloatArray &answer, TimeStep *tStep)
-{
-    answer.resize( Shell7Base :: giveNumberOfDofs() );
-    answer.zero();
+    // This is because the element formulation is in terms of placement and not displacement.
+    this->giveInitialSolutionVector(answer); // X & M
     FloatArray temp;
     int dummy = 0;
     IntArray dofIdArray;
@@ -2345,6 +2347,7 @@ Shell7Base :: giveUpdatedSolutionVectorC(FloatArray &answer, TimeStep *tStep)
     
     answer.assemble( temp, this->giveOrdering(AllInv) );
 }
+
 
 void
 Shell7Base :: giveInitialSolutionVector(FloatArray &answer) {

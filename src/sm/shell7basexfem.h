@@ -99,7 +99,6 @@ protected:
     //     FloatArray &dmdxi2, FloatArray &m);
     //void discComputeGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &dSolVec, const FloatMatrix &B11,
     //     const FloatMatrix &B22, const FloatMatrix &B32);
-    void discGiveUpdatedSolutionVector(FloatArray &answer, IntArray &eiDofIdArray, TimeStep *tStep);    
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray);
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, GaussPoint *gp, EnrichmentItem *ei, int enrichmentDomainNumber, TimeStep *tStep);
 

@@ -35,7 +35,6 @@
 #include "xfemmanager.h"
 #include "flotmtrx.h"
 #include "enrichmentitem.h"
-#include "geometry.h"
 #include "element.h"
 #include "enrichmentfunction.h"
 #include "cltypes.h"
@@ -47,7 +46,6 @@ namespace oofem {
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMComponent(n, aDomain)
 {
     xmanager = xm;
-    geometry = 0;
     enrichmentFunction = 0;
 
     //new JB
@@ -68,8 +66,6 @@ EnrichmentItem :: ~EnrichmentItem()
 // remove - should ask for specific geom. can be multiple?
 BasicGeometry *EnrichmentItem :: giveGeometry()
 {
-    //return xmanager->giveGeometry(this->geometry);
-    //return this->giveGeometry( this->geometry );
     return this->enrichementDomainList->at(1);
 }
 
@@ -173,7 +169,6 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     this->geometry = 0;
     this->enrichmentFunction = 0;
     
-    //IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
     IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, IFT_EnrichmentItem_enrichmentdomains, "enrichmentdomains"); // Macro
     this->numberOfEnrichmentDomains = this->enrichmentDomainNumbers.giveSize();
     //int test = this->enrichmentDomainNumbers.maximum();
@@ -208,7 +203,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     std :: string name;
     EnrichmentItem *ei;
     EnrichmentFunction *ef;
-    BasicGeometry *ge;
     EnrichmentDomain *ed;
     InputRecord *mir;
 
@@ -265,21 +259,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     return 1;
 }
 
-/*
-IntArray 
-*EnrichmentItem :: getDofIdArray() 
-{ 
-    // returns the array of dofs a particular EI s
-    IntArray dofIdArray;
-    for ( int i = 1; i <= this->giveNumberOfEnrichmentfunctions(); i++ ) { 
-        EnrichmentFunction *ef = this->giveEnrichmentFunction(i);
-        // This is per regular dof
-        ef->giveNumberOfDofs(); // = number of functions associated with a particular enrichment function, e.g. 4 for branch function.
 
-    }
-    return &dofIdArray; 
-} 
-*/
 void
 EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 {
@@ -344,7 +324,8 @@ EnrichmentItem :: giveNumberOfEnrDofs()
  */
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 { 
-    this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
+    //this->enrichesDofsWithIdArray->setValues(7, D_u, D_v, D_w, W_u, W_v, W_w, Gamma);
+    this->enrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
 }
 
 
