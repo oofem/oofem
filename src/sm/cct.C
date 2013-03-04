@@ -575,7 +575,7 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     FloatArray n;
     double b,c, n12;
 
-    this->interp_lin.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     n12 = 0.5 * n.at(1)*n.at(2);

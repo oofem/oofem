@@ -657,7 +657,6 @@ int MicroMaterial :: giveDofEquationNumber(Dof *dof) const
     default:
         answer = 0;
         OOFEM_ERROR("Node numbering undefined");
-	
     }
 
     //    answer = 3 * ( dof->giveDofManNumber() - 1 ) + dof->giveNumber();

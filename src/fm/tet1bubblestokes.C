@@ -43,12 +43,12 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "masterdof.h"
 
 namespace oofem {
 
-FEI3dTrLin Tet1BubbleStokes :: interp;
+FEI3dTetLin Tet1BubbleStokes :: interp;
 // Set up ordering vectors (for assembling)
 IntArray Tet1BubbleStokes :: ordering(19);
 IntArray Tet1BubbleStokes :: edge_ordering [ 6 ] = { IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6), IntArray(6) };
@@ -306,7 +306,7 @@ void Tet1BubbleStokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.edgeEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.edgeEvalN(N, iEdge, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.edgeGiveTransformationJacobian(iEdge, * lcoords, FEIElementGeometryWrapper(this)));
             double dS = gp->giveWeight() * detJ;
 
@@ -355,7 +355,7 @@ void Tet1BubbleStokes :: computeSurfBCSubVectorAt(FloatArray &answer, Load *load
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interp.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interp.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
             double detJ = fabs(this->interp.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this)));
             double dA = gp->giveWeight() * detJ;
 

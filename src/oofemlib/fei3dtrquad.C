@@ -41,27 +41,13 @@ namespace oofem {
 void
 FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    this->surfaceEvalN(answer, lcoords, cellgeo);
+    this->surfaceEvalN(answer, 1, lcoords, cellgeo);
 }
 
 void
 FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer.resize(6, 2);
-    int i;
-    FloatMatrix jacobianMatrix(2, 2), inv(2, 2);
-    FloatArray dndxi(6), dndeta(6);
-
-    this->giveJacobianMatrixAt(jacobianMatrix, lcoords, cellgeo);
-    inv.beInverseOf(jacobianMatrix);
-
-    this->giveDerivativeXi(dndxi, lcoords);
-    this->giveDerivativeEta(dndeta, lcoords);
-
-    for ( i = 1; i <= 6; i++ ) {
-        answer.at(i, 1) = dndxi.at(i) * inv.at(1, 1) + dndeta.at(i) * inv.at(1, 2);
-        answer.at(i, 2) = dndxi.at(i) * inv.at(2, 1) + dndeta.at(i) * inv.at(2, 2);
-    }
+    OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
 }
 
 
@@ -70,7 +56,6 @@ FEI3dTrQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const F
 {
     this->surfaceEvaldNdxi(answer, lcoords);
 }
-
 
 
 void
@@ -112,29 +97,23 @@ FEI3dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
 }
 
 
-
 void
 FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+    FloatArray n;
+    this->evalN(n, lcoords, cellgeo);
+    answer.resize(0);
+    for ( int i = 1; i <= 6; ++i ) {
+        answer.add(n.at(i), * cellgeo.giveVertexCoordinates(i));
+    }
 }
 
-#define POINT_TOL 1e-6
 
 int
 FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
-    ///@todo Implement this
     OOFEM_ERROR("FEI3dTrQuad :: global2local - Not supported");
     return -1;
-}
-
-
-double
-FEI3dTrQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
-{
-    ///@todo Implement this
-    OOFEM_ERROR("FEI3dTrQuad :: giveCharacteristicLength - Not supported");
-    return -1.0;
 }
 
 
@@ -150,28 +129,12 @@ FEI3dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
 void
 FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    ///@todo Implement this
     OOFEM_ERROR("FEI3dTrQuad :: giveJacobianMatrixAt - Not supported");
-
-    /*
-    FloatMatrix dNdxi;
-    FloatMatrix coords;
-    this->evaldNdxi(dNdxi, lcoords);
-    jacobianMatrix.resize(3,3);
-    coords.resize(10,3);
-    for (int i = 1; i <= 10; ++i) {
-        const FloatArray *c = cellgeo.giveVertexCoordinates(i);
-        coords.at(i,1) = c->at(1);
-        coords.at(i,1) = c->at(2);
-        coords.at(i,1) = c->at(3);
-    }
-    jacobianMatrix.beProductOf(dNdxi, coords);
-    */
 }
 
 
 void
-FEI3dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords.at(1);
     answer.resize(3);
@@ -186,9 +149,6 @@ void
 FEI3dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    ///@todo Implement this
     OOFEM_ERROR("FEI3dTrQuad :: edgeEvaldNdx - Not supported");
 }
 
@@ -205,11 +165,11 @@ FEI3dTrQuad :: edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lc
 void
 FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{// Note: This gives the coordinate in the reference system
+{
     IntArray edgeNodes;
     FloatArray N;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(N, lcoords, cellgeo);
+    this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.resize(0);
     for (int i = 0; i < N.giveSize(); ++i) {
@@ -232,7 +192,7 @@ FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
 void
 FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
-       int aNode = 0, bNode = 0, cNode = 0;
+    int aNode = 0, bNode = 0, cNode = 0;
     edgeNodes.resize(3);
 
     if ( iedge == 1 ) { // edge between nodes 1 2
@@ -265,7 +225,7 @@ FEI3dTrQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cel
 }
 
 void
-FEI3dTrQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTrQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -283,17 +243,17 @@ FEI3dTrQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const
 
 void
 FEI3dTrQuad :: surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
-{	// Returns matrix with derivatives wrt local coordinates
+{
+    // Returns matrix with derivatives wrt local coordinates
     answer.resize(6, 2);
     FloatArray dndxi(6), dndeta(6);
 
     this->giveDerivativeXi(dndxi, lcoords);
     this->giveDerivativeEta(dndeta, lcoords);
-    for (int i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; ++i ) {
         answer.at(i, 1) = dndxi.at(i); 
         answer.at(i, 2) = dndeta.at(i);
     }
-	
 }
 
 
@@ -302,13 +262,13 @@ void
 FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-	//Note: This gives the coordinate in the reference system
+    //Note: This gives the coordinate in the reference system
     IntArray nodes;
     FloatArray N;
-    this->surfaceEvalN(N, lcoords, cellgeo);
+    this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
     answer.resize(0);
-    for (int i = 0; i < N.giveSize(); ++i) {
+    for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), *cellgeo.giveVertexCoordinates(i) );
     }
 }
@@ -324,11 +284,13 @@ FEI3dTrQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray 
 void
 FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-	// Note: These are not normalized. Returns the two tangent vectors to the surface.
+    // Note: These are not normalized. Returns the two tangent vectors to the surface.
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
-    for (int i = 0; i < 6; ++i) {
+    G1.resize(0);
+    G2.resize(0);
+    for ( int i = 0; i < 6; ++i ) {
         G1.add(dNdxi(i,1), *cellgeo.giveVertexCoordinates(i));
         G2.add(dNdxi(i,2), *cellgeo.giveVertexCoordinates(i));
     }
@@ -347,7 +309,8 @@ FEI3dTrQuad :: surfaceEvalNormal(FloatArray &answer, const FloatArray &lcoords, 
 
 void
 FEI3dTrQuad :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{   // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
+{
+    // Jacobian matrix consists of the three curvilinear base vectors. The third is taken as the normal to the surface.
     // Note! The base vectors are not normalized except the third (normal)
     FloatArray G1, G2, G3; 
     this->surfaceEvalBaseVectorsAt(G1, G2, lcoords, cellgeo);
@@ -369,9 +332,7 @@ FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lc
 void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    this->computeLocalEdgeMapping(surfNodes, isurf);
-
-	// OOFEM_ERROR("FEI3dTrQuad :: computeLocalSurfaceMapping - Not applicable to geometry");
+    surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
 }
 
 } // end namespace oofem

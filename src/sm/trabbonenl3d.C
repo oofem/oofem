@@ -52,40 +52,16 @@
 
 
 namespace oofem {
-/////////////////////////////////////////////////////////////////
-////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-//
 
 TrabBoneNL3D :: TrabBoneNL3D(int n, Domain *d) : TrabBone3D(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 {
     R = 0.;
 }
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
 
 TrabBoneNL3D :: ~TrabBoneNL3D()
 {}
 
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE FOR UPDATE BEFORE NON LOCAL AVERAGE
-// update local values of accumulated pastic strain
 
 void
 TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
@@ -107,14 +83,6 @@ TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     nlStatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
-//
-// END: SUBROUTINE FOR UPDATE BEFORE NON LOCAL AVERAGE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: EVALUATION OF LOCAL STIFFNESS MATRIX
-//
 
 void
 TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -191,14 +159,6 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     nlStatus->setSmtrx(answer);
 }
 
-//
-// END: EVALUATION OF LOCAL STIFFNESS MATRIX
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: EVALUATION OF NONLOCAL CONTRIBUTION TO STIFFNESS MATRIX
-//
 
 void
 TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, GaussPoint *gp, TimeStep *atTime)
@@ -339,14 +299,6 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     }
 }
 
-//
-// END: EVALUATION OF NONLOCAL CONTRIBUTION TO STIFFNESS MATRIX
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
-//
 
 void
 TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
@@ -355,7 +307,6 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
 
-    int i;
     double tempDam;
     FloatArray effStress, totalStress, densStress;
 
@@ -365,7 +316,7 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 
     totalStress = ( 1 - tempDam ) * effStress;
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < pow(10.0, -8.0) ) {
             totalStress.at(i) = 0.;
         }
@@ -373,27 +324,17 @@ TrabBoneNL3D :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
 
     computePlasStrainEnerDensity(gp, totalStrain, totalStress);
 
-    if ( densCrit != 0. ) 
-      {
+    if ( densCrit != 0. ) {
         computeDensificationStress(densStress, gp, totalStrain, atTime);
-	answer.add(densStress);
-      }
+        answer.add(densStress);
+    }
 
     answer = totalStress;
     nlStatus->setTempDam(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);
-    return;
 }
 
-//
-// END: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SUBROUTINE OF NONLOCAL ALPHA EVALUATION
-//
 
 void
 TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
@@ -420,14 +361,6 @@ TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *a
     kappa = mParam * nonlocalCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
 }
 
-//
-// END: SUBROUTINE OF NONLOCAL ALPHA EVALUATION
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERFACE ????
-//
 
 Interface *
 TrabBoneNL3D :: giveInterface(InterfaceType type)
@@ -441,14 +374,6 @@ TrabBoneNL3D :: giveInterface(InterfaceType type)
     }
 }
 
-//
-// END: INTERFACE ????
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PARAMETERS OF INPUT FILE
-//
 
 IRResultType
 TrabBoneNL3D :: initializeFrom(InputRecord *ir)
@@ -470,14 +395,6 @@ TrabBoneNL3D :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-//
-// END: PARAMETERS OF INPUT FILE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN
-//
 
 int
 TrabBoneNL3D :: giveInputRecordString(std :: string &str, bool keyword)
@@ -492,14 +409,6 @@ TrabBoneNL3D :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
-//
-// END
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: WEIGHT FUNCTION FOR NONLOCAL CONTRIBUTION
-//
 
 double
 TrabBoneNL3D :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
@@ -514,19 +423,10 @@ TrabBoneNL3D :: computeWeightFunction(const FloatArray &src, const FloatArray &c
     return 0.0;
 }
 
-//
-// END: WEIGHT FUNCTION FOR NONLOCAL CONTRIBUTION
-/////////////////////////////////////////////////////////////////
-
 
 /////////////////////////////////////////////////////////////////
 /////////TRABECULAR BONE NONLOCAL MATERIAL STATUS////////////////
 /////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-// init state variables
 
 TrabBoneNL3DStatus :: TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g) :
     TrabBone3DStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
@@ -534,26 +434,10 @@ TrabBoneNL3DStatus :: TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g) :
     localCumPlastStrainForAverage = 0.0;
 }
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
 
 TrabBoneNL3DStatus :: ~TrabBoneNL3DStatus()
 {}
 
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PRINTOUT
-//
 
 void
 TrabBoneNL3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -575,14 +459,6 @@ TrabBoneNL3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
-//
-// END: PRINTOUT
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-// initialize temporary state variables according to equilibriated state vars
 
 void
 TrabBoneNL3DStatus :: initTempStatus()
@@ -590,14 +466,6 @@ TrabBoneNL3DStatus :: initTempStatus()
     TrabBone3DStatus :: initTempStatus();
 }
 
-//
-// END: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
-// Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
 void
 TrabBoneNL3DStatus :: updateYourself(TimeStep *atTime)
@@ -605,14 +473,6 @@ TrabBoneNL3DStatus :: updateYourself(TimeStep *atTime)
     TrabBone3DStatus :: updateYourself(atTime);
 }
 
-//
-// END: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: INTERFACE
-//
 
 Interface *
 TrabBoneNL3DStatus :: giveInterface(InterfaceType type)
@@ -624,14 +484,6 @@ TrabBoneNL3DStatus :: giveInterface(InterfaceType type)
     }
 }
 
-//
-// END: INTERFACE
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PARALLEL MODE OPTION
-//
 
 #ifdef __PARALLEL_MODE
 int

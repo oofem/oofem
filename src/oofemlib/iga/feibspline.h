@@ -77,7 +77,7 @@ public:
     
     virtual void boundaryGiveNodes(IntArray &answer, int boundary)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveNodes - Not implemented"); }
-    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalN - Not implemented"); }
     virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented"); return 0.; }

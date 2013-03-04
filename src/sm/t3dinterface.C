@@ -87,7 +87,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
         case EGT_tetra_2:
             tetras++;
             break;
-	case EGT_wedge_1:
+        case EGT_wedge_1:
         case EGT_wedge_2:
             wedges++;
             break;
@@ -132,9 +132,9 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
         case EGT_tetra_2:
             tetraIdArray.at(++tetras) = i;
             break;
-	case EGT_wedge_1:
+        case EGT_wedge_1:
         case EGT_wedge_2:
-	    wedgeIdArray.at(++wedges) = i;
+            wedgeIdArray.at(++wedges) = i;
             break;
         case EGT_hexa_1:
         case EGT_hexa_2:
@@ -159,10 +159,10 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN)
 
     outputStrem = fopen(fileName, "w");
     if ( tri_tetra == true ) {
-        fprintf(outputStrem, "3 1\n");
+        fprintf(outputStrem, "3 1 -1\n");
         fprintf(outputStrem, "%d %d %d %d\n", nnodes, edges, trias, tetras);
     } else {
-        fprintf(outputStrem, "7 1\n");
+        fprintf(outputStrem, "7 1 -1\n");
         fprintf(outputStrem, "%d %d %d %d %d %d %d %d\n", nnodes, edges, trias, quads, tetras, pyrams, wedges, hexas);
     }
 

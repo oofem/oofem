@@ -214,7 +214,7 @@ protected:
     /**
      * Computes the basis functions at the edge for one unknown.
      */
-    virtual void computeEgdeNAt(FloatArray &answer, const FloatArray &lcoord);
+    virtual void computeEgdeNAt(FloatArray &answer, int iEdge, const FloatArray &lcoord);
     /**
      * Gives the node indexes for given edge.
      */
@@ -226,7 +226,7 @@ protected:
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iEdge);
 
     virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder) { return NULL; }
-    virtual void computeSurfaceNAt(FloatArray &answer, const FloatArray &lcoord);
+    virtual void computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void giveSurfaceDofMapping(IntArray &mask, int iSurf);
     virtual void computeSurfIpGlobalCoords(FloatArray &answer, const FloatArray &lcoord, int iSurf);

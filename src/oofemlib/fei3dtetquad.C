@@ -233,7 +233,7 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 
 
 void
-FEI3dTetQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords.at(1);
     answer.resize(3);
@@ -259,7 +259,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     IntArray edgeNodes;
     FloatArray N;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(N, lcoords, cellgeo);
+    this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.resize(0);
     for (int i = 0; i < N.giveSize(); ++i) {
@@ -322,7 +322,7 @@ FEI3dTetQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
 }
 
 void
-FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -345,10 +345,10 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     IntArray nodes;
     FloatArray N;
     this->computeLocalSurfaceMapping(nodes, isurf);
-    this->surfaceEvalN(N, lcoords, cellgeo);
+    this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
     answer.resize(0);
-    for (int i = 0; i < N.giveSize(); ++i) {
+    for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), *cellgeo.giveVertexCoordinates(nodes(i)) );
     }
 }

@@ -30,14 +30,6 @@
   \draw[thick] (n2) -- (n5) node[midway,above left,blue] {8};
   \draw[thick] (n3) -- (n6) node[midway,right,blue] {9};
 
-  % Nodes
-  \node[elemnode] at (n1) {}; \node[below left] at (n1) {1};
-  \node[elemnode] at (n2) {}; \node[below] at (n2) {2};
-  \node[elemnode] at (n3) {}; \node[below right] at (n3) {3};
-  \node[elemnode] at (n4) {}; \node[left] at (n4) {4};
-  \node[elemnode] at (n5) {}; \node[above] at (n5) {5};
-  \node[elemnode] at (n6) {}; \node[right] at (n6) {6};
-
   % Faces
   \draw[red,background] (\fs,\fs,1) -- (\fs,1-2*\fs,1) -- (1-2*\fs,\fs,1) -- cycle;
   \node[red] at (1/3,1/3,1) {2};

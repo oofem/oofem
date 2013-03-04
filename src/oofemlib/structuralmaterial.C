@@ -86,6 +86,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _1dMat:
+    case _1dMatGrad:
         this->give1dStressStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _2dPlateLayer:
@@ -101,7 +102,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         this->give1dFiberStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     default:
-        OOFEM_ERROR2("StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
         return;
     }
 }
@@ -170,7 +171,7 @@ StructuralMaterial ::  reduceStiffMtrx3d(FloatMatrix &answer, MatResponseForm fo
         this->reduceTo1dFiberStiffMtrx(answer, form, gp, stiffMtrx3d);
         break;
     default:
-        OOFEM_ERROR2("StructuralMaterial :: reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2( "StructuralMaterial :: reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
         return;
     }
 }
@@ -210,7 +211,7 @@ StructuralMaterial :: reduceComplMtrx3d(FloatMatrix &answer, MatResponseForm for
         this->reduceTo1dFiberComplMtrx(answer, form, gp, complMtrx3d);
         break;
     default:
-        OOFEM_ERROR2("StructuralMaterial :: reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2( "StructuralMaterial :: reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode) );
         return;
     }
 }
@@ -295,7 +296,7 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
         return 7;
 
     default:
-        OOFEM_ERROR2("StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR2( "StructuralMaterial :: giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
 
     return 0;
@@ -464,7 +465,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
             break;
 
         default:
-            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2( "StructuralMaterial :: giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
 
         return 0;
@@ -621,7 +622,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
 
 
         default:
-            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2( "StructuralMaterial :: giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
 
         return 0;
@@ -765,7 +766,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(2) = 7;
             break;
         default:
-            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2( "StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
     } else if ( form == FullForm ) {
         switch ( mmode ) {
@@ -890,7 +891,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             break;
 
         default:
-            OOFEM_ERROR2("StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
+            OOFEM_ERROR2( "StructuralMaterial :: giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
     } else {
         OOFEM_ERROR("StructuralMaterial :: giveStressStrainMask : unknown form mode");
@@ -1751,7 +1752,7 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
     if ( ( size == 3 ) || ( size == 4 ) ) {
         // 2D problem
         double ast, dst, D = 0.0;
-        answer.resize(size-1);
+        answer.resize(size - 1);
 
         for ( int i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
@@ -1781,9 +1782,9 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         D = sqrt(D);
         answer.at(1) = 0.5 * ( ast - D );
         answer.at(2) = 0.5 * ( ast + D );
-	if ( size == 4 ) {
-	  answer.at(3) = s(3);
-	}
+        if ( size == 4 ) {
+            answer.at(3) = s(3);
+        }
 
         // sort result (first two principal values only)
         if ( answer.at(1) > answer.at(2) ) {
@@ -2022,7 +2023,7 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress) {
     double J2;
     double v1, v2, v3;
 
-    if ( currentStress == NULL || currentStress->giveSize() != 6) {
+    if ( currentStress == NULL || currentStress->giveSize() != 6 ) {
         return 0.0;
     }
 
@@ -2031,9 +2032,9 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress) {
     v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
     J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+         currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
 
-    return sqrt(3*J2);
+    return sqrt(3 * J2);
 }
 
 
@@ -2346,7 +2347,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         return 1;
     } else if ( type == IST_vonMisesStress ) {
         answer.resize(1);
-        answer.at(1) = this->computeVonMisesStress(&status->giveStressVector());
+        answer.at(1) = this->computeVonMisesStress( & status->giveStressVector() );
         return 1;
     } else if ( type == IST_StrainTensor ) {
         answer = status->giveStrainVector();
@@ -2358,8 +2359,8 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         answer = status->giveTempStrainVector();
         return 1;
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStressTempTensor ) ) {
-//         int indx;
-//         FloatArray st(6);
+        //         int indx;
+        //         FloatArray st(6);
         FloatArray s;
 
         if ( type == IST_PrincipalStressTensor ) {
@@ -2368,13 +2369,13 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
             s = status->giveTempStressVector();
         }
 
-//         for ( int i = 1; i <= s.giveSize(); i++ ) {
-//             indx = this->giveStressStrainComponentIndOf(ReducedForm, aGaussPoint->giveMaterialMode(), i);
-//             if ( indx ) {
-//                 st.at(indx) = s.at(i);
-//             }
-//         }
-//         this->computePrincipalValues(answer, st, principal_stress);
+        //         for ( int i = 1; i <= s.giveSize(); i++ ) {
+        //             indx = this->giveStressStrainComponentIndOf(ReducedForm, aGaussPoint->giveMaterialMode(), i);
+        //             if ( indx ) {
+        //                 st.at(indx) = s.at(i);
+        //             }
+        //         }
+        //         this->computePrincipalValues(answer, st, principal_stress);
         this->computePrincipalValues(answer, s, principal_stress);
         return 1;
     } else if ( ( type == IST_PrincipalStrainTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
@@ -2459,7 +2460,7 @@ StructuralMaterial :: giveIPValueType(InternalStateType type)
     else if ( ( type == IST_StrainTensor ) || ( type == IST_StrainTensorTemp ) || ( type == IST_CylindricalStrainTensor ) ) {
         return ISVT_TENSOR_S3E;
     } else if ( ( type == IST_PrincipalStressTensor ) || ( type == IST_PrincipalStrainTensor ) ||
-        ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
+               ( type == IST_PrincipalStressTempTensor ) || ( type == IST_PrincipalStrainTempTensor ) ) {
         return ISVT_VECTOR;
     } else if ( ( type == IST_Temperature ) || ( type == IST_vonMisesStress ) ) {
         return ISVT_SCALAR;
@@ -2547,7 +2548,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfReducedStressStrainVector(matmode) ) {
-        OOFEM_ERROR5("StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+        OOFEM_ERROR5( "StructuralMaterial :: Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
     }
 
     /* add external source, if provided */
@@ -2655,7 +2656,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
             break;
 
         default:
-            OOFEM_ERROR2("StructuralMaterial :: Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode) );
+            OOFEM_ERROR2( "StructuralMaterial :: Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode) );
         }
 
         answerEigenstrain = fullAnswer;
@@ -2667,7 +2668,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         answer = answerTemper;
         if ( answerEigenstrain.giveSize() ) {
             if ( answerTemper.giveSize() != answerEigenstrain.giveSize() ) {
-                OOFEM_ERROR4("StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
+                OOFEM_ERROR4( "StructuralMaterial :: Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
             }
 
             answer.add(answerEigenstrain);
@@ -2792,5 +2793,4 @@ StructuralMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

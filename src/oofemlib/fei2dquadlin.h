@@ -61,10 +61,11 @@ public:
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNds(FloatArray &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -73,9 +74,7 @@ public:
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void   giveDerivativeKsi(FloatArray &n, double eta);
-    void   giveDerivativeEta(FloatArray &n, double ksi);
-    void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void giveDerivatives(FloatMatrix &dn, const FloatArray &lc);
 };
 } // end namespace oofem
 #endif // fei2dquadlin_h

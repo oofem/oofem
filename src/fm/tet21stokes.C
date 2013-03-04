@@ -45,12 +45,12 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
-#include "fei3dtrlin.h"
+#include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
 
 namespace oofem {
 // Set up interpolation coordinates
-FEI3dTrLin Tet21Stokes :: interpolation_lin;
+FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
 IntArray Tet21Stokes :: momentum_ordering(30);
@@ -284,7 +284,7 @@ void Tet21Stokes :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load, 
             gp = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
 
-            this->interpolation_quad.surfaceEvalN(N, * lcoords, FEIElementGeometryWrapper(this));
+            this->interpolation_quad.surfaceEvalN(N, iSurf, * lcoords, FEIElementGeometryWrapper(this));
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian(iSurf, * lcoords, FEIElementGeometryWrapper(this));
 
             if ( boundaryLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) { // load in xi-eta system

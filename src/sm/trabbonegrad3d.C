@@ -144,7 +144,7 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
             tangentMatrix.add(thirdTerm);
         }
         answer = tangentMatrix;
-        //answer.beTranspositionOf(tangentMatrix);	  
+        //answer.beTranspositionOf(tangentMatrix);  
         } else {
         // elastic behavior with damage
             // Construction of the secant stiffness

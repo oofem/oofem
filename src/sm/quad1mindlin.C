@@ -282,7 +282,7 @@ Quad1Mindlin :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint 
     IntArray edgeNodes;
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     answer.beNMatrixOf(n, 3);

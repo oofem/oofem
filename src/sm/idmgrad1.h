@@ -40,7 +40,7 @@
 namespace oofem {
 
 /**
- * Nonlocal Isotropic Damage model for concrete in tension,
+ * Gradient-enhancedl Isotropic Damage model for concrete in tension,
  */
 class IDGMaterial : public IsotropicDamageMaterial1
 {
@@ -71,16 +71,13 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     void giveCharacteristicMatrix(FloatMatrix &answer,  MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
-
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * tStep);
+    void give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-
     void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-
-
     void givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-
     void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-
     void giveInternalLengthDerivative(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 
     virtual void initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp);
@@ -90,7 +87,7 @@ public:
 
 
 /**
- * Material status for nonlocal isotropic damage model for concrete in tension.
+ * Material status for gradient-enhanced isotropic damage model for concrete in tension.
  */
 class IDGMaterialStatus : public IsotropicDamageMaterial1Status
 {

@@ -474,7 +474,7 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer()  const { return values; }
+    double *givePointer() const { return values; }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.

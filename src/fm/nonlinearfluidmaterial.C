@@ -41,7 +41,7 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace oofem {
 int

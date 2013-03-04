@@ -1008,12 +1008,10 @@ void FloatArray :: beFullVectorForm(const FloatMatrix &aMatrix)
     }
 
 #  endif
-    
     this->resize(9);
-    this->at(1) = aMatrix.at(1,1);	this->at(2) = aMatrix.at(2,2);	this->at(3) = aMatrix.at(3,3);
-    this->at(4) = aMatrix.at(2,3);	this->at(5) = aMatrix.at(1,3);	this->at(6) = aMatrix.at(1,2);
-    this->at(7) = aMatrix.at(3,2);	this->at(8) = aMatrix.at(3,1);	this->at(9) = aMatrix.at(2,1);
-    
+    this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
+    this->at(4) = aMatrix.at(2,3); this->at(5) = aMatrix.at(1,3); this->at(6) = aMatrix.at(1,2);
+    this->at(7) = aMatrix.at(3,2); this->at(8) = aMatrix.at(3,1); this->at(9) = aMatrix.at(2,1);
 }
 
 void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
@@ -1027,13 +1025,11 @@ void FloatArray :: beReducedVectorForm(const FloatMatrix &aMatrix)
 #  endif
     
     this->resize(6);
-    this->at(1) = aMatrix.at(1,1);	this->at(2) = aMatrix.at(2,2);	this->at(3) = aMatrix.at(3,3);
+    this->at(1) = aMatrix.at(1,1); this->at(2) = aMatrix.at(2,2); this->at(3) = aMatrix.at(3,3);
     this->at(4) = 0.5*( aMatrix.at(2,3) + aMatrix.at(3,2) );
     this->at(5) = 0.5*( aMatrix.at(1,3) + aMatrix.at(3,1) );
     this->at(6) = 0.5*( aMatrix.at(1,2) + aMatrix.at(2,1) );
-    
 }
-
 
 
 } // end namespace oofem

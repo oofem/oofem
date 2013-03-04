@@ -266,13 +266,13 @@ TransportElement :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-TransportElement :: computeEgdeNAt(FloatArray &answer, const FloatArray &lcoords)
+TransportElement :: computeEgdeNAt(FloatArray &answer, int iedge, const FloatArray &lcoords)
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation2d * >(interp)->edgeEvalN( answer, lcoords, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation2d * >(interp)->edgeEvalN( answer, iedge, lcoords, FEIElementGeometryWrapper(this) );
     } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->edgeEvalN( answer, lcoords, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation3d * >(interp)->edgeEvalN( answer, iedge, lcoords, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -301,11 +301,11 @@ TransportElement :: computeEdgeIpGlobalCoords(FloatArray &answer, const FloatArr
 }
 
 void
-TransportElement :: computeSurfaceNAt(FloatArray &answer, const FloatArray &lcoord)
+TransportElement :: computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord)
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->surfaceEvalN( answer, lcoord, FEIElementGeometryWrapper(this) );
+        dynamic_cast< FEInterpolation3d * >(interp)->surfaceEvalN( answer, iSurf, lcoord, FEIElementGeometryWrapper(this) );
     }
 }
 
@@ -636,8 +636,8 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         for ( int i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule.getIntegrationPoint(i);
             FloatArray *lcoords = gp->giveCoordinates();
-            this->computeEgdeNAt(n, * lcoords);
-            dV  = this->computeEdgeVolumeAround(gp, iEdge);
+            this->computeEgdeNAt(n, iEdge, * lcoords);
+            dV = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
                 edgeLoad->computeValueAt(val, tStep, * lcoords, mode);
@@ -693,7 +693,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
-            this->computeSurfaceNAt( n, * gp->giveCoordinates() );
+            this->computeSurfaceNAt( n, iSurf, * gp->giveCoordinates() );
             dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
@@ -754,9 +754,9 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 FloatMatrix subAnswer;
 
                 for ( int igp = 0; igp < iRule.getNumberOfIntegrationPoints(); igp++ ) {
-                    gp  = iRule.getIntegrationPoint(igp);
-                    this->computeEgdeNAt( n, * gp->giveCoordinates() );
-                    dV  = this->computeEdgeVolumeAround(gp, id);
+                    gp = iRule.getIntegrationPoint(igp);
+                    this->computeEgdeNAt( n, id, * gp->giveCoordinates() );
+                    dV = this->computeEdgeVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, n, dV * edgeLoad->giveProperty('a') );
                 }
 
@@ -781,7 +781,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
 
                 for ( int igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
                     gp  = iRule->getIntegrationPoint(igp);
-                    this->computeSurfaceNAt( n, * gp->giveCoordinates() );
+                    this->computeSurfaceNAt( n, id, * gp->giveCoordinates() );
                     dV  = this->computeSurfaceVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, n, dV * surfLoad->giveProperty('a') );
                 }

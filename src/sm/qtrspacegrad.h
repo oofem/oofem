@@ -36,7 +36,6 @@
 #define qtrspacegrad_h
 
 #include "qtrspace.h"
-#include "fei3dtrlin.h"
 #include "graddpelement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -46,6 +45,8 @@
 
 namespace oofem {
 
+class FEI3dTetLin;
+
 /**
  * Quadratic 3D element
  * @author L. Svoboda
@@ -54,7 +55,7 @@ class QTRSpaceGrad : public QTRSpace,public GradDpElement
 {
 protected:
     int numberOfGaussPoints;
-    static FEI3dTrLin interpolation;
+    static FEI3dTetLin interpolation;
 
 public:
     QTRSpaceGrad(int,Domain*);

@@ -315,7 +315,7 @@ void MixedGradientPressureNeumann :: integrateVolTangent(FloatArray &answer, Ele
         // Evaluate the normal;
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         // Evaluate the velocity/displacement coefficients
-        interpUnknown->boundaryEvalN(n, lcoords, cellgeo);
+        interpUnknown->boundaryEvalN(n, boundary, lcoords, cellgeo);
         nMatrix.beNMatrixOf(n, nsd);
 
         contrib.beTProductOf(nMatrix, normal);
@@ -353,7 +353,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
         // Evaluate the normal;
         double detJ = interp->boundaryEvalNormal(normal, boundary, lcoords, cellgeo);
         // Evaluate the velocity/displacement coefficients
-        interpUnknown->boundaryEvalN(n, lcoords, cellgeo);
+        interpUnknown->boundaryEvalN(n, boundary, lcoords, cellgeo);
         nMatrix.beNMatrixOf(n, nsd);
 
         // Formulating like this to avoid third order tensors, which is hard to express in linear algebra.
@@ -426,6 +426,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
 
     double norm;
     IntArray loc, sigma_loc;  // For the velocities and stress respectively
+    IntArray masterDofIDs; ///@todo Support eNorms.
     this->sigmaDev->giveCompleteLocationArray(sigma_loc, s);
 
     if (type == ExternalForcesVector) {
@@ -434,7 +435,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         FloatArray devLoad;
         devLoad.beScaled(-rve_size, this->devGradient);
         answer.assemble(devLoad, sigma_loc);
-        norm = devLoad.computeSquaredNorm(); ///@todo Different units here, have to consider something better..
+        norm = devLoad.computeSquaredNorm();
 
         // The second contribution is on the momentumbalance equation; - int delta_v . n dA * p
         FloatArray fe;

@@ -1,6 +1,11 @@
 \begin{tikzpicture}[scale=6,>=stealth]
  \tikzstyle{elemnode} = [draw,circle,inner sep=1,fill=white]
- \newcommand{\lcoordsys}[1]{\draw[->] (-0.05,0) -- (1,0) node[above] {$x_{#1}$}; \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y_{#1}$};}
+ \newcommand{\lcoordsys}[2]{
+   \begin{scope}[transform canvas={shift={#2},scale=0.5,rotate=#1}]
+    \draw[->] (0,0.05) ++(-0.02,0) -- ++(0.2,0) node[above] {$x$};
+    \draw[->] (0,0.05) ++(0,-0.02) -- ++(0,0.1) node[right] {$y$};
+   \end{scope}
+ }
  \draw[->] (-0.05,0) -- (0.8,0) node[above] {$x_g$};
  \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y_g$};
  
@@ -10,7 +15,7 @@
   -- (0.4,0.5) node[elemnode] {} node[above] {3} node[blue,midway,above right] {2} coordinate[midway] (e2)
   -- (0.2,0.1) node[blue,midway,above left] {3} coordinate[midway] (e3);
 
- \node[yshift=8] at (e1) {\rotatebox{12}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
- \node[xshift=-9,yshift=-2] at (e2) {\rotatebox{135}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
- \node[xshift=8,yshift=-1] at (e3) {\rotatebox{243}{\scalebox{0.5}{\tikz{\lcoordsys{}}}}};
+ \lcoordsys{ 12}{(e1)};
+ \lcoordsys{135}{(e2)};
+ \lcoordsys{243}{(e3)};
 \end{tikzpicture}

@@ -113,7 +113,7 @@ protected:
      */
     //@{
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
     virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);

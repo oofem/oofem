@@ -45,12 +45,13 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
+#include "fei3dtetlin.h"
 
 #include <cstdio>
 
 namespace oofem {
 
-FEI3dTrLin QTRSpaceGrad :: interpolation;
+FEI3dTetLin QTRSpaceGrad :: interpolation;
 
 QTRSpaceGrad :: QTRSpaceGrad (int n, Domain* aDomain) :  QTRSpace(n, aDomain),GradDpElement()
 // Constructor.

@@ -468,6 +468,10 @@ public:
      * Resets the free dof IDs.
      */
     void resetFreeDofID();
+    /**
+     * Gives the current maximum dof ID used.
+     */
+    int giveMaxDofID() { return this->freeDofID - 1; }
 
     /**
      * Returns receiver's associated connectivity table.

@@ -281,7 +281,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
-            this->computeSurfaceNMatrixAt(n, gp);
+            this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == BoundaryLoad :: BL_EntityFormulation ) {
@@ -791,17 +791,6 @@ StructuralElement :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 // on the element's type.
 // this version assumes TOTAL LAGRANGE APPROACH
 {
-    /*
-     * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
-     * FloatArray totalEpsilon;
-     * // FloatArray *help;
-     *
-     *
-     * this->computeStrainVector(totalEpsilon, gp,stepN) ;
-     * cs->giveRealStresses (answer, ReducedForm, gp,totalEpsilon,stepN);
-     *
-     * return ;
-     */
     FloatArray Epsilon;
     StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );
 

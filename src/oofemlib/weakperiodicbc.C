@@ -32,10 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <math.h>
-#include <cmath>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <algorithm>
 
 #include "activebc.h"
@@ -48,6 +46,7 @@
 #include "sparsemtrx.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
+#include "mathfem.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
 
@@ -82,14 +81,14 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     IntArray temp;
     IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_ActiveBoundaryCondition_elementSides, "elementsidespositive");
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
-        //		printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
+        //printf("Add positive edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
         side [ 0 ].push_back( temp.at(2 * i + 1) );
         element [ 0 ].push_back( temp.at(2 * i + 2) );
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, temp, IFT_ActiveBoundaryCondition_elementSides, "elementsidesnegative");
     for ( int i = 0; i < temp.giveSize() / 2; i++ ) {
-        //		printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
+        //printf("Add negative edge, element %u, side %u\n", temp.at(2*i+2), temp.at(2*i+1));
         side [ 1 ].push_back( temp.at(2 * i + 1) );
         element [ 1 ].push_back( temp.at(2 * i + 2) );
     }
@@ -171,7 +170,7 @@ void WeakPeriodicbc :: updateSminmax()
 
 void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
 {
-    //	printf ("Add element %u, side %u\n", newElement, newSide);
+    //printf ("Add element %u, side %u\n", newElement, newSide);
 
     FloatArray normalNew, normal0;
     int addToList = 0;
@@ -179,7 +178,7 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
     if ( element [ 0 ].size() > 0 ) {
         // If there are elements in the list, compare normals in order to determine which list to store them in
         giveEdgeNormal(normalNew, newElement, newSide);
-        //		normalNew.printYourself();
+        //normalNew.printYourself();
         giveEdgeNormal( normal0, element [ 0 ].at(0), side [ 0 ].at(0) );
         double d = sqrt( pow(normalNew.at(1) - normal0.at(1), 2) + pow(normalNew.at(2) - normal0.at(2), 2) );
         if ( abs(d) < 0.001 ) {
@@ -190,7 +189,7 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
     } else {
         // Otherwise, check the normal in order to decide upon which direction the parameter runs (x or y)
         giveEdgeNormal(normalNew, newElement, newSide);
-        //		normalNew.printYourself();
+        //normalNew.printYourself();
         if ( abs(abs( normalNew.at(1) ) - 1) < 0.0001 ) {               // Normal point in x direction, thus set direction to y
             direction = 2;
         } else {
@@ -198,14 +197,14 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
         }
     }
 
-    //	printf(" to list %u\n", addToList);
+    //printf(" to list %u\n", addToList);
     element [ addToList ].push_back(newElement);
     side [ addToList ].push_back(newSide);
 }
 
 void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
-//	printf("*** assemble\n");
+    //printf("*** assemble\n");
     GaussIntegrationRule *iRule;
 
     GaussPoint *gp;
@@ -235,8 +234,8 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
             thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
-            if (ngp==-1) {
-            	ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+orderOfPolygon);
+            if ( ngp == -1 ) {
+                ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+orderOfPolygon);
             }
             iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
@@ -288,17 +287,17 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 // Find the value of parameter s which is the vert/horiz distance to 0
                 interpolation->edgeLocal2global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                 // Compute base function values
-                interpolation->boundaryEvalN( N, * lcoords, FEIElementGeometryWrapper(thisElement) );
+                interpolation->boundaryEvalN( N, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                 // Compute Jacobian
                 double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                 double s = gcoords.at(direction);
 
                 for ( int j = 0; j <= orderOfPolygon; j++ ) {
-                	double fVal = computeBaseFunctionValue(j, s);
-//                	printf("fVal=%f @ %f\n", fVal, s);
-                	for ( int k = 0; k < dofCountOnBoundary; k++ ) {
-                		B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
-                	}
+                    double fVal = computeBaseFunctionValue(j, s);
+                    //printf("fVal=%f @ %f\n", fVal, s);
+                    for ( int k = 0; k < dofCountOnBoundary; k++ ) {
+                        B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
+                    }
                 }
             }
 
@@ -324,12 +323,12 @@ double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
         } else {
             fVal = sin( ( ( double ) baseID + 1 ) / 2 * ( coordinate * 2 * 3.141593 / sideLength ) );
         }
-    } else if ( useBasisType == legendre) {
-    	double n=(double) baseID;
-    	coordinate=2.0*coordinate-1;
-    	for (double k=0; k<=n; k=k+1.0) {
-    		fVal=fVal+binomial(n,k)*binomial(-n-1.0, k)*pow((1.0-coordinate)/2.0, k);
-    	}
+    } else if ( useBasisType == legendre ) {
+        double n = (double) baseID;
+        coordinate = 2.0*coordinate-1.0;
+        for ( int k = 0.; k <= baseID; k++ ) {
+            fVal = fVal + binomial(n,k) * binomial(-n-1.0, k) * pow((1.0-coordinate)/2.0, (double)k);
+        }
     }
 
     return fVal;
@@ -339,7 +338,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                                         CharType type, ValueModeType mode,
                                         const UnknownNumberingScheme &s, Domain *domain)
 {
-//	printf("*** assembleVector\n");
+    //printf("*** assembleVector\n");
     double norm = 0.0;
 
     // Fetch unknowns of this boundary condition
@@ -379,8 +378,8 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                 FloatArray a;
 
                 iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
-                if (ngp==-1) {
-                	ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+(int) orderOfPolygon);
+                if ( ngp == -1 ) {
+                    ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+(int) orderOfPolygon);
                 }
                 iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
@@ -390,7 +389,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                 thisElement->giveBoundaryLocationArray(tempSideLocation, side [ thisSide ].at(ielement), EID_MomentumBalance, s);
 
                 // Find dofs for this element which should be periodic
-                IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+                IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray, masterDofIDs; ///@todo masterDofIDs and eNorms
                 periodicDofIDMask.resize(1);
                 periodicDofIDMask.at(1) = dofid;
 
@@ -436,16 +435,16 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                     // Find the value of parameter s which is the vert/horiz distance to 0
                     interpolation->edgeLocal2global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                     // Compute base function values
-                    interpolation->boundaryEvalN( N, * lcoords, FEIElementGeometryWrapper(thisElement) );
+                    interpolation->boundaryEvalN( N, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                     // Compute Jacobian
                     double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                     double s = gcoords.at(direction);
 
                     for ( int j = 0; j <= orderOfPolygon; j++ ) {
-                		double fVal = computeBaseFunctionValue(j, s);
-//                    	printf("fVal=%f @ %f\n", fVal, s);
-                    	for ( int k = 0; k < dofCountOnBoundary; k++ ) {
-                    		B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
+                        double fVal = computeBaseFunctionValue(j, s);
+                        //printf("fVal=%f @ %f\n", fVal, s);
+                        for ( int k = 0; k < dofCountOnBoundary; k++ ) {
+                            B.at(k + 1, j + 1) = B.at(k + 1, j + 1) + N.at(k + 1) * fVal * detJ * normalSign * gp->giveWeight();
                         }
                     }
                 }
@@ -483,5 +482,25 @@ DofManager *WeakPeriodicbc :: giveInternalDofManager(int i)
         return NULL;
     }
 }
+
+double WeakPeriodicbc::factorial(int n)
+{
+    int x = 1.0;
+    for ( int i = 1; i <= n; i++ ) {
+        x = x * i;
+    }
+    return x;
+}
+
+double WeakPeriodicbc::binomial(double n, int k)
+{
+    double f = 1.0;
+    for ( int i = 1; i <= k; i++ ) {
+        f = f * ( n - ( k - i ) ) / i;
+    }
+    return f;
+}
+
+    
 }
 

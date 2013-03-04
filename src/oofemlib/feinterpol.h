@@ -204,11 +204,12 @@ public:
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
      * @param answer Basis functions Array to be filled with the boundary nodes.
+     * @param boundary Boundary number.
      * @param lcoords The local coordinates (on the boundary local coordinate system).
      * @param cellgeo Underlying cell geometry.
      * @todo Support boundary number.
      */
-    virtual void boundaryEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the normal on the requested boundary.
      * @param answer The evaluated normal.

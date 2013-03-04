@@ -41,6 +41,9 @@
 namespace oofem {
 /**
  * Class representing implementation of quadratic wedge interpolation class.
+ * 
+ * @author Milan Jirasek
+ * @author Mikael Öhman
  */
 class FEI3dWedgeQuad : public FEInterpolation3d
 {
@@ -56,7 +59,7 @@ public:
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     // Edge
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
@@ -66,18 +69,15 @@ public:
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
 
     // Surface
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceLocal2global(FloatArray &answer, int iedge,const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
                                                      const FEICellGeometry &cellgeo);
     virtual void computeLocalSurfaceMapping(IntArray &nodes, int iSurf);
-    void computeGlobalSurfaceMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveDerivativeKsi(FloatArray &, double, double, double);
-    void giveDerivativeEta(FloatArray &, double, double, double);
-    void giveDerivativeDzeta(FloatArray &, double, double, double);
+    void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 public:
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };

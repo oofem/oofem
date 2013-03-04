@@ -41,7 +41,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
-#include "util.h"
 
 #ifdef __OOFEG
  #include "engngm.h"
@@ -265,7 +264,7 @@ LSpace :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 8;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_LSpace_nip, "nip"); // Macro
 
-    if ( !( ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
+    if ( !( ( numberOfGaussPoints == 1 ) || ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;
     }
 
@@ -988,7 +987,7 @@ LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *aGaus
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -1132,10 +1131,10 @@ LSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPo
 
 
 void
-LSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
+LSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(4);
-    interpolation.surfaceEvalN( n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
     answer.zero();

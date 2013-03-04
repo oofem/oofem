@@ -1,6 +1,5 @@
-\tikzstyle{elemnode} = [draw,thin,circle,inner sep=1,fill=white]
-
 \begin{tikzpicture}[scale=7,>=stealth]
+ \tikzstyle{elemnode} = [draw,thin,circle,inner sep=1,fill=white]
  \coordinate (a) at (0.1,-0.2);
  \coordinate (b) at (0.6,-0.1);
  \newcommand{\beamlength}{0.4};

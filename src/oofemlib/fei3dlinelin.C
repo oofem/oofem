@@ -115,7 +115,7 @@ FEI3dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 
 
 void
-FEI3dLineLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dLineLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     this->evalN(answer, lcoords, cellgeo);
 }
@@ -156,7 +156,7 @@ FEI3dLineLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 void
-FEI3dLineLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dLineLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     OOFEM_ERROR("FEI3dLineLin :: computeEdgeMapping: no surfaces available");
 }
@@ -193,7 +193,6 @@ FEI3dLineLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 void
 FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     ///@todo Not sure about this matrix
     jacobianMatrix.resize(1,1);

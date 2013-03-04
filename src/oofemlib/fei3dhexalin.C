@@ -228,7 +228,7 @@ FEI3dHexaLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 }
 
 void
-FEI3dHexaLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaLin :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -258,7 +258,7 @@ FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
     IntArray edgeNodes;
     FloatArray n;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(n, lcoords, cellgeo);
+    this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(3);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(1) +
@@ -334,7 +334,7 @@ FEI3dHexaLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
 }
 
 void
-FEI3dHexaLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dHexaLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double ksi, eta;
     answer.resize(4);
@@ -356,7 +356,7 @@ FEI3dHexaLin :: surfaceLocal2global(FloatArray &answer, int iedge,
     FloatArray n;
 
     this->computeLocalSurfaceMapping(nodes, iedge);
-    this->surfaceEvalN(n, lcoords, cellgeo);
+    this->surfaceEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(3);
     answer.at(1) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(1) + n.at(2) *cellgeo.giveVertexCoordinates( nodes.at(2) )->at(1) +
@@ -373,7 +373,7 @@ FEI3dHexaLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
     FloatArray a, b, dNdksi(4), dNdeta(4);
     double ksi, eta;
     IntArray snodes;
-    
+
     this->computeLocalSurfaceMapping(snodes, isurf);
 
     ksi = lcoords.at(1);
@@ -394,7 +394,7 @@ FEI3dHexaLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
         a.add(dNdksi.at(i), *cellgeo.giveVertexCoordinates(snodes.at(i)));
         b.add(dNdeta.at(i), *cellgeo.giveVertexCoordinates(snodes.at(i)));
     }
-    
+
     answer.beVectorProductOf(a, b);
     return answer.normalize()*0.0625;
 }
@@ -452,7 +452,6 @@ FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 void
 FEI3dHexaLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
-// Computes it if it does not exist yet.
 {
     FloatMatrix dNduvw, coords;
     this->giveLocalDerivative(dNduvw, lcoords);

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/lwedge.C,v 1.3.4.1 2012/01/018 23:15:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -191,10 +190,10 @@ LWedge :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i
 MaterialMode
 LWedge :: giveMaterialMode()
 {
-  if(this->nlGeometry > 1)
-    return _3dMat_F;
-  else
-    return _3dMat;
+    if(this->nlGeometry > 1)
+        return _3dMat_F;
+    else
+        return _3dMat;
 }
 
 void
@@ -203,7 +202,6 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 // luated at aGaussPoint.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-    int i;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
@@ -211,7 +209,7 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     answer.resize(6, 18);
     answer.zero();
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);
         answer.at(3, 3 * i - 0) = dnx.at(i, 3);
@@ -231,19 +229,18 @@ LWedge :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 void
 LWedge :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
-  int i, j;
-  FloatMatrix dnx;
-  
-  this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
+    FloatMatrix dnx;
+    
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
-  answer.resize(9, 18);
-  answer.zero();
+    answer.resize(9, 18);
+    answer.zero();
 
-    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-        for ( j = 1; j <= 6; j++ ) { // 6 nodes
+    for ( int i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+        for ( int j = 1; j <= 6; j++ ) { // 6 nodes
             answer.at(3 * i - 2, 3 * j - 2) =
                 answer.at(3 * i - 1, 3 * j - 1) =
-                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
+                answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
         }
     }
 }
@@ -278,7 +275,6 @@ LWedge :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 void
 LWedge :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
-    int i;
     FloatArray n;
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this));
 
@@ -288,7 +284,7 @@ LWedge :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
         return;
     }
 
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         answer.at(1, i)  = n.at(i);
     }
 }
@@ -342,12 +338,12 @@ LWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, Gaus
     }
 }
 
+
 SPRPatchType
 LWedge :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_3dBiQuadratic;
 }
-
 
 
 void

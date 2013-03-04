@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei3dtrlin_h
-#define fei3dtrlin_h
+#ifndef fei3dtetlin_h
+#define fei3dtetlin_h
 
 #include "feinterpol3d.h"
 
@@ -41,10 +41,10 @@ namespace oofem {
 /**
  * Class representing implementation of linear tetrahedra interpolation class.
  */
-class FEI3dTrLin : public FEInterpolation3d
+class FEI3dTetLin : public FEInterpolation3d
 {
 public:
-    FEI3dTrLin() : FEInterpolation3d(1) { }
+    FEI3dTetLin() : FEInterpolation3d(1) { }
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -54,7 +54,7 @@ public:
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     // Edge
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
@@ -64,7 +64,7 @@ public:
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
 
     // Surface
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void surfaceEvaldNdx(FloatMatrix &answer, int isurf,
                    const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double surfaceEvalNormal(FloatArray &answer, int isurf,
@@ -79,10 +79,5 @@ protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
-#endif // fei3dtrlin_h
-
-
-
-
-
+#endif // fei3dtetlin_h
 

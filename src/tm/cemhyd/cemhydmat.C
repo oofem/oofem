@@ -49,11 +49,11 @@
  */
 
 #include <cstdio>
-#include <cmath>
 #include <cstdlib>
 
 #include "cemhydmat.h"
 #include "homogenize.h"
+#include "mathfem.h"
 
 #ifdef __TM_MODULE //OOFEM transport module
  #include "domain.h"

@@ -56,7 +56,8 @@ Dof :: Dof(int i, DofManager *aNode, DofIDItem id)
     dofID          = id;
 }
 
-int Dof :: giveEquationNumber(const UnknownNumberingScheme &s) {
+int Dof :: giveEquationNumber(const UnknownNumberingScheme &s)
+{
     return s.giveDofEquationNumber(this);
 }
 
@@ -66,6 +67,10 @@ void Dof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
     masterEqNumbers.at(1) = s.giveDofEquationNumber(this);
 }
 
+void Dof :: giveDofIDs(IntArray &masterDofIDs)
+{
+    masterDofIDs.setValues(1, this->giveDofID());
+}
 
 int
 Dof :: giveDofManNumber() const { return this->dofManager->giveNumber(); } // termitovo

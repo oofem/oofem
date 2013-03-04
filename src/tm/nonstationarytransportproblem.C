@@ -649,8 +649,6 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #endif
     int nDofs, jj;
     int nman  = domain->giveNumberOfDofManagers();
-    DofManager *node;
-    Dof *iDof;
 
     UnknownsField->advanceSolution(stepWhenIcApply);
     solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
@@ -658,13 +656,13 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     solutionVector->zero();
 
     for ( int j = 1; j <= nman; j++ ) {
-        node = domain->giveDofManager(j);
+        DofManager *node = domain->giveDofManager(j);
         nDofs = node->giveNumberOfDofs();
 
         for ( int k = 1; k <= nDofs; k++ ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
-            iDof  =  node->giveDof(k);
+            Dof *iDof = node->giveDof(k);
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }
@@ -693,11 +691,9 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
-    TransportElement *element;
-    CemhydMat *cem;
     for ( int j = 1; j <= nelem; j++ ) {
-        element = static_cast< TransportElement * >( domain->giveElement(j) );
-        cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
+        TransportElement *element = static_cast< TransportElement * >( domain->giveElement(j) );
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
         if ( cem ) {
             element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
@@ -711,7 +707,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     //perform averaging on each material instance of CemhydMatClass
     int nmat = domain->giveNumberOfMaterialModels();
     for ( int j = 1; j <= nmat; j++ ) {
-        cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( domain->giveMaterial(j) );
         if ( cem ) {
             cem->averageTemperature();
         }

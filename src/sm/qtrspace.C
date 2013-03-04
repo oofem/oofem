@@ -46,12 +46,13 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
+#include "fei3dtetquad.h"
 
 #include <cstdio>
 
 namespace oofem {
  
-FEI3dTrQuad QTRSpace :: interpolation;
+FEI3dTetQuad QTRSpace :: interpolation;
 
 QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
     // Constructor.
@@ -129,8 +130,6 @@ QTRSpace :: giveMaterialMode()
         return _3dMat;
     }
 }
-
-
 
 
 void
@@ -352,7 +351,6 @@ QTRSpace :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_3dBiQuadratic;
 }
-
 
 
 void

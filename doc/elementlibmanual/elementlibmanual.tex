@@ -1,12 +1,29 @@
 \documentclass[a4paper]{article}
+\usepackage{amsmath}
+\usepackage{ifluatex}
+\ifluatex
+ \usepackage{fontspec}
+  %\setmainfont[Ligatures=TeX]{xits}
+  %\setmathfont[math-style=ISO]{xits-math}
+ \setmainfont[Ligatures=TeX]{Latin Modern Roman}
+ \fontspec[SmallCapsFeatures={Letters=SmallCaps}]{Latin Modern Roman}
+ \usepackage{unicode-math}
+ \setmathfont[math-style=ISO]{lmmath-regular.otf}
+ %\setmathfont[math-style=ISO]{xits-math.otf}
+\else
+ \usepackage[utf8]{inputenc}
+\fi
+\usepackage{microtype}
 \usepackage{html}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{hyperref}
+\usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
 \usepackage{biblatex}
-\usepackage{ifpdf}
 \usepackage{ifthen}
+
 \input{include.tex}
+
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
@@ -15,32 +32,28 @@
 \setcounter{totalnumber}{5} %maximum floating objects on one page
 
 \newcommand{\descitem}[1]{{\noindent \textbf{#1}}:}
-\newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\bf \texttt{#1}}}
-\newcommand{\elemparam}[2]{{{\texttt{#1}\tiny (#2)}~~\#}}
-\newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
-%%\newcommand{\param}[1]{{\texttt{#1}}}
+\newcommand{\elemkeyword}[1]{\descitem{Keyword}~\param{#1}} % Convenience macro
 
-\newcommand{\param}[1]{{\em #1}}
-\newcommand{\fieldVal}[2]{\mbox{({\it\bf{#1}\#)\tiny (#2)}}}
-\newcommand{\keywordnotype}[1]{\mbox{{\it{\bf{#1}}}}}
-\newcommand{\keyword}[2]{\mbox{{\keywordnotype{#1}\tiny (#2)}}}
-\newcommand{\entKeyword}[1]{\mbox{{*{\bf{#1}}}}}
-\newcommand{\entKeywordWithVal}[2]{\mbox{*\keyword{#1}{#2}}}
-\newcommand{\entKeywordInst}[1]{\mbox{{\bf{{#1}}}}}
-\newcommand{\field}[2]{\mbox{\keyword{#1}{#2}~\#}}
-\newcommand{\optField}[2]{\mbox{[\field{#1}{#2}]}}
-%% macros for items related to parallel
-%%\newcommand{\Pmode}[1]{\begin{minipage}[t]{11cm}\textsf{#1}\end{minipage}}
+\newcommand{\param}[1]{\texttt{#1}} % Use when referring to fields in text.
+\newcommand{\optional}[1]{[#1]} % Denotes optional parameter
+\newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Fields #1 = identifier, #2 = type
+\newcommand{\optField}[2]{\optional{\field{#1}{#2}}}
+\newcommand{\fieldnotype}[1]{\param{#1}}
+\newcommand{\optFieldnotype}[1]{[\param{#1}]}
+\newcommand{\componentNum}{(\param{num}\#){\tiny(in)}} % For the component number.
+\newcommand{\entKeyword}[1]{*\textbf{#1}} % For general keywords, e.g. ``engnmodel''
+\newcommand{\entKeywordInst}[1]{\textbf{#1}} % For specific keywords, e.g. ``nlinearstatic''
+
+% macros for items related to parallel
 \newcommand{\Pmode}[1]{{\sffamily #1}}
 \newcommand{\Pparam}[1]{\param{#1}}
-\newcommand{\PfieldVal}[2]{\mbox{$\langle$({\it\bf{#1}\#)\tiny (#2)}$\rangle$}}
-\newcommand{\Pkeywordnotype}[1]{\mbox{$\langle${\it{\bf{#1}}}}$\rangle$}
-\newcommand{\Pkeyword}[2]{\mbox{$\langle${\keywordnotype{#1}\tiny (#2)}$\rangle$}}
-\newcommand{\PentKeyword}[1]{\mbox{{$\langle$*{\bf{#1}}$\rangle$}}}
-\newcommand{\PentKeywordWithVal}[2]{\mbox{*\Pkeyword{#1}{#2}}}
-\newcommand{\PentKeywordInst}[1]{\mbox{$\langle${\bf{{#1}}}$\rangle$}}
-\newcommand{\Pfield}[2]{\mbox{$\langle$\keyword{#1}{#2}~\#$\rangle$}}
-\newcommand{\PoptField}[2]{\mbox{$\langle$[\field{#1}{#2}]$\rangle$}}
+\renewcommand{\parallel}[1]{$\langle${#1}$\rangle$}
+\newcommand{\PentKeyword    }[1]{\parallel{\entKeyword{#1}}}
+\newcommand{\PentKeywordInst}[1]{\parallel{\entKeywordInst{#1}}}
+\newcommand{\Pfield         }[2]{\parallel{\field{#1}{#2}}}
+\newcommand{\Pfieldnotype   }[1]{\parallel{\fieldnotype{#1}}}
+\newcommand{\PoptField      }[2]{\parallel{\optField{#1}{#2}}}
+\newcommand{\PoptFieldnotype}[1]{\parallel{\optFieldnotype{#1}}}
 
 \begin{htmlonly}
 \newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
@@ -59,6 +72,7 @@
 %begin{latexonly}
 \title{
 \begin{center}\oofemlnk{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}\end{center}
+%\input{oofem-logo-contour.pgf}
 Element Library Manual}
 \author{\bp \\ \\
 Czech Technical University\\
@@ -70,7 +84,7 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 %end{latexonly}
 \begin{htmlonly}
 \begin{center}
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}}
 {\Large Element Library Manual}\\
 {\bp \\ \\
 Czech Technical University\\
@@ -100,7 +114,7 @@ information about the types of loadings supported by particular elements.
 
 
 
-\section{Elements for Structural Analysis\\(SM Module)}
+\section{Elements for Structural Analysis (SM Module)}
 
 
 \subsection{Truss Elements}
@@ -148,7 +162,7 @@ element geometry can be specified in (x,z), (x,y), or (y,z) plane.
 \end{figure}
 
 \elemkeyword{truss2d}\\
-\descitem{Parameters} \optelemparam{cs}{in}\\
+\descitem{Parameters} \optField{cs}{in}\\
 
 \descitem{Unknowns}
 Two dofs representing displacements in definition plane are required
@@ -215,7 +229,7 @@ printed.
 \end{figure}
 
 \elemkeyword{beam2d}\\
-\descitem{Parameters} \optelemparam{dofstocondense}{ia}\\
+\descitem{Parameters} \optField{dofstocondense}{ia}\\
 The \param{dofstocondense} parameter allows to specify local element dofs that
 will be condensed. The numbering of local element dofs is shown in
 fig.~\ref{beam2dfig}. The size of this array should be equal to
@@ -273,8 +287,8 @@ z-axis direction vector by local x-axis direction vector.
 \end{figure}
 
 \elemkeyword{beam3d}\\
-\descitem{Parameters} \elemparam{refnode}{in}
-\optelemparam{dofstocondense}{ia}\\
+\descitem{Parameters} \field{refnode}{in}
+\optField{dofstocondense}{ia}\\
 The \param{refnode} parameter
 determines the reference node. It determines the local coordinate
 system of beam element. The \param{dofstocondense} parameter allows to
@@ -321,7 +335,7 @@ The element is defined in x,y plane.
 \end{figure}
 
 \elemkeyword{lattice2d}\\
-\descitem{Parameters} \elemparam{thick}{rn} \elemparam{width}{rn} \elemparam{gpCoords}{ra} \\
+\descitem{Parameters} \field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra} \\
 The \param{thick} parameter is the out of plane ($z$-direction) thickness. 
 The \param{width} parameter is the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre. 
 The \param{gpCooords} parameter is an array of the coordinates of the integration point $C$ in the global coordinate system.
@@ -346,7 +360,7 @@ z-axis).
 \end{figure}
 
 \elemkeyword{planestress2d}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.
 
@@ -354,11 +368,11 @@ Two dofs (u-displacement, v-displacement) are required in each node.
 geometry.
 
 \descitem{Integration}
-Integration of membrane strain terms using gauss integration formula
-in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
+Integration of membrane strain terms using Gauss integration formula
+in 1, 4 (default), 9 or 16 integration points. The default number of
+integration points used can be overloaded using \param{NIP} parameter.
 Reduced integration for shear terms is employed. Shear terms are
-always integrated using 1 point integration rule.
+always integrated using the 1-point integration rule.
 
 \descitem{Features} Nonlocal constitutive support, Geometric nonlinearity support.
 
@@ -391,7 +405,7 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
 \end{figure}
 
 \elemkeyword{qplanestress2d}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.
 
@@ -399,9 +413,9 @@ Two dofs (u-displacement, v-displacement) are required in each node.
 geometry.
 
 \descitem{Integration}
-Full integration using gauss integration formula
-in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
+Full integration using Gauss integration formula
+in 4 (the default), 9 or 16 integration points. The default number of
+integration points used can be overloaded using \param{NIP} parameter.
 
 \descitem{Features} Adaptivity support.
 
@@ -466,7 +480,7 @@ anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}).
 \end{figure}
 
 \elemkeyword{qtrplstr}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.
 
@@ -491,7 +505,7 @@ finite element with independent rotation field.
 Each node has 3 degrees of freedom.
 
 \elemkeyword{trplanestrrot}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPRot}{in}\\
+\descitem{Parameters} \optField{NIP}{in} \optField{NIPRot}{in}\\
 \descitem{Unknowns}
 Three dofs (u-displacement, v-displacement, z-rotation) are required in each node.
 
@@ -530,7 +544,7 @@ z-axis).
 \end{figure}
 
 \elemkeyword{quad1planestrain}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.
 
@@ -539,8 +553,8 @@ geometry.
 
 \descitem{Integration}
 Integration of membrane strain terms using gauss integration formula
-in 4 (the default), 9, or 16 integration points. The default number of
-integration point used can be overloaded using \param{NIP} parameter.
+in 4 (the default), 9 or 16 integration points. The default number of
+integration points used can be overloaded using \param{NIP} parameter.
 Reduced integration for shear terms is employed. Shear terms are
 always integrated using 1 point integration rule.
 
@@ -644,12 +658,9 @@ Six dofs (u,v,w-displacements and u,v,w rotations) are required in each node.
 %\descitem{Approximation} 
 
 \descitem{Integration}
-Integration of all terms using one point formula.
-
-\descitem{Features} Layered cross section support.
-
-\descitem{Loads} Body loads are supported. Boundary loads are
-not supported.
+Integration of all terms using one point formula. \\
+\descitem{Features} Layered cross section support. \\
+\descitem{Loads} Body loads are supported. Boundary loads are not supported.\\
 \descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
 
 \descitem{Status} Reliable.
@@ -667,7 +678,7 @@ Integration of all terms using one point formula.\\
 \descitem{Features} Layered cross section support.\\
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported now.\\
-\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
+\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element. \\
 \descitem{Status} Reliable.
 
 
@@ -689,7 +700,7 @@ Integration of all terms using one point formula.\\
 \descitem{Features} Layered cross section support.\\
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported.\\
-\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
+\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element. \\
 \descitem{Status} Reliable.
 
 \subsubsection{Quad1Mindlin Element} \label{quad1mindlin}
@@ -698,7 +709,7 @@ This type of element exhibit strong shear locking (thin plates exhibit almost no
 Implements the lumped mass matrix.
 
 \elemkeyword{quad1mindlin}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \\
+\descitem{Parameters} \optField{NIP}{in} \\
 \descitem{Unknowns} Three dofs (w-displacement, u and v - rotation) are required in each node. \\
 \descitem{Integration} Default uses 4 integration points. No reduced integration is used, as it causes numerical problems. \\
 \descitem{Features} Layered cross section support. \\
@@ -712,7 +723,7 @@ Implements the lumped mass matrix.
 Implementation of triangular three-node finite element 
 for axisymmetric continuum. Each node has 2 degrees of freedom.\\
 \elemkeyword{axisymm3d}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPfish}{in}\\
+\descitem{Parameters} \optField{NIP}{in} \optField{NIPfish}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacement and
@@ -733,14 +744,14 @@ finite element for axisimmetric 3d continuum.
 Each node has 2 degrees of freedom.
 
 \elemkeyword{q4axisymm}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPfish}{in}\\
+\descitem{Parameters} \optField{NIP}{in} \optField{NIPfish}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.\\
 \descitem{Approximation} Quadratic approximation of displacements and
 geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} parameter (possible completions are 1, 4 (default), 9 and 16
+\param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
 point integration rule). The remaining strain components ($\varepsilon_\phi$ and
 $\gamma_{rz}$) can be integrated using 1 (default), 4, 9 and 16 integration
 point formulae (\param{NIPfish} parameter).\\
@@ -753,14 +764,14 @@ Implementation of isoparametric four-node quadrilateral axisymmetric
 finite element. Each node has 2 degrees of freedom.
 
 \elemkeyword{l4axisymm}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacements and
 geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} parameter (possible completions are 1, 4 (default), 9 and 16
+\param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
 point integration rule). The remaining strain components ($\varepsilon_\phi$ and
 $\gamma_{rz}$) are integrated using one point integration formula.\\
 \descitem{Features} None.\\
@@ -782,13 +793,13 @@ finite element. Each node has 3 degrees of freedom.
 \end{figure}
 
 \elemkeyword{lspace}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacements and geometry. \\
 \descitem{Integration}
 Full integration of all strain components. \\
-\param{NIP} parameter (possible completions are 8 (default) and 27)
+\param{NIP} parameter (possible completions are 1, 8 (default) or 27)
 allows to change the integration formula.\\
 \descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
 \descitem{Loads} \\
@@ -814,7 +825,7 @@ finite element. Each node has 3 degrees of freedom.
 \end{figure}
 
 \elemkeyword{qspace}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
 \descitem{Approximation} Quadratic approximation of displacements and
@@ -876,7 +887,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{qtetrahedron_
 \end{figure}
 
 \elemkeyword{QTRSpace}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
 \descitem{Approximation} Quadratic approximation of displacements and
@@ -894,13 +905,15 @@ Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}
 
 \begin{figure}[htb]
  \centering
-  \raisebox{-0.5\height}{\input{wedge_lin.tikz}}
-  \caption{LWedge element. Definition and node numbering convention.}
+ \begin{makeimage}
+  \input{wedge_lin.tikz}
+ \end{makeimage}
+  \caption{LWedge element. Node numbering convention in black, edge numbering in blue and face numbering in red.}
   \label{linwedge_fig}
 \end{figure}
 
 \elemkeyword{LWedge}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacements and
@@ -918,13 +931,16 @@ Following node numbering convention is adopted (see also Fig.~\ref{qwedge_fig}):
 
 \begin{figure}[htb]
  \centering
-  \raisebox{-0.5\height}{\input{wedge_quad.tikz}}
-  \caption{QWedge element. Definition and node numbering convention.}
+ \begin{makeimage}
+  \raisebox{-1.\height}{\input{wedge_quad_a.tikz}}
+  \raisebox{-1.\height}{\input{wedge_quad_b.tikz}}
+ \end{makeimage}
+  \caption{QWedge element. Node numbering convention in black, edge numbering in blue and face numbering in red.}
   \label{qwedge_fig}
 \end{figure}
 
 \elemkeyword{QWedge}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
 \descitem{Approximation} Quadratic approximation of displacements and
@@ -947,7 +963,7 @@ these nodes depending on their relative displacement. This element can
 be applied in 1D, 2D, and 3D settings (default).
 
 \elemkeyword{Interface1d}\\
-\descitem{Parameters} \optelemparam{refnode}{in} \optelemparam{normal}{ra}\\
+\descitem{Parameters} \optField{refnode}{in} \optField{normal}{ra}\\
 The optional parameter \param{refnode} determines the reference node, which is used to
 specify a reference direction (the direction vector is obtained by
 subtracting the coordinates of the first node from the reference node). The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.
@@ -955,12 +971,12 @@ The magnitude of slip is then obtained as relative displacement vector
 of two element nodes projected to reference direction. As a
 consequence, this will lead to linearized geometrical equations, where
 slip is always related to the original (undeformed) configuration.
-Element requires material model with \_1dInterface support.
+Element requires material model with \_1dInterface support.\\
 \descitem{Unknowns}
 One, two, or three DOFs (u-displacement, v-displacement,
 w-displacement) are required in each node, according to element mode.\\
-\descitem{Approximation} None.
-\descitem{Integration} None.
+\descitem{Approximation} None. \\
+\descitem{Integration} None. \\
 \descitem{Features} None.\\
 \descitem{Loads} \\
 \descitem{Status} 
@@ -983,9 +999,9 @@ approximation of displacement field. Can be used to glue together two elements w
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
 \descitem{Approximation} quadratic approximation of displacements and
-geometry.
+geometry. \\
 \descitem{Integration}
-Full integration of all strain components using four point integration formula.
+Full integration of all strain components using four point integration formula. \\
 \descitem{Features} None.\\
 \descitem{Loads} \\
 \descitem{Status} 
@@ -1010,7 +1026,7 @@ Two dofs (u-displacement, v-displacement, w-displacement) are required in each n
 \descitem{Approximation} Linear approximation of displacements and
 geometry.\\
 \descitem{Integration}
-Full integration of all components using one point integration formula.
+Full integration of all components using one point integration formula. \\
 \descitem{Features} None.\\
 \descitem{Loads} \\
 \descitem{Status} 
@@ -1021,7 +1037,7 @@ The following record describes the common part of IGA element record:
  
 \noindent
 \begin{record}
-  \recentry{\entKeyword{IGAElement}}{\fieldVal{num}{in}}
+  \recentry{\entKeyword{IGAElement}}{\componentNum}
   \recentry{}{\field{mat}{in} \field{crossSect}{in} \field{nodes}{ia}}
   %% interpolation specific
   \recentry{}{\field{knotvectoru}{ra} \field{knotvectorv}{ra} \field{knotvectorw}{ra}}
@@ -1037,7 +1053,7 @@ The degree of approximation for each parametric direction is determined from \pa
 In case of elements with BSpline or Nurbs interpolation, the nodes forming the rectangular array of control points of the element are ordered in a such way, that u-index is changing most quickly, and w-index (or v-index in case of 2d problems) most slowly. In case of elements with T-spline interpolation, the nodes forming the T-mesh of the element are ordered arbitrarily.
 
 
-The supported \entKeyword{IGAElement} values are following:\\\\
+The supported \entKeyword{IGAElement} values are following:\\
 \elemkeyword{bsplineplanestresselement}\\
 \descitem{Parameters} None.\\
 \elemkeyword{nurbsplanestresselement}\\
@@ -1045,7 +1061,7 @@ The supported \entKeyword{IGAElement} values are following:\\\\
 \elemkeyword{nurbs3delement}\\
 \descitem{Parameters} None.\\
 \elemkeyword{tsplineplanestresselement}\\
-\descitem{Parameters} \elemparam{localindexknotvectoru}{in} \elemparam{localindexknotvectorv}{in} \elemparam{localindexknotvectorw}{in}\\
+\descitem{Parameters} \field{localindexknotvectoru}{in} \field{localindexknotvectorv}{in} \field{localindexknotvectorw}{in}\\
 The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ and \param{localindexknotvectorw} defined by the indices to global knot vectors (given by \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters) specify the local knot vectors for each control point of T-mesh (node) in the same order as the nodes have been specified for the element. The local knot vector in a particular direction has $p+2$ entries, where the $p$ is the polynomial degree in that direction.
 
 
@@ -1056,7 +1072,7 @@ This element, defined by a single node, allows to introduce additional concentra
 A different mass and rotary inertia may be assigned to each coordinate direction. At present, individual mass/inertia components can be specified for  every degree of freedom of element node. Only displacement and rotational degrees od freedom are considered. 
 
 \elemkeyword{LumpedMass}\\
-\descitem{Parameters} \elemparam{components}{ra}\\
+\descitem{Parameters} \field{components}{ra}\\
 The \param{components} allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes. Only displacement and rotational degrees of freedom are considered. The individual DOFs are ordered according to following rule: first, displacement degrees of freedom in the direction of x,y, and z axes (if any), followed by rotational DOFs around x,y, and z axes (if any).\\
 \descitem{Unknowns}
 Only displacement and roational DOFs are considered ($D_u$, $D_v$, $D_w$, $R_u$, $R_v$, and $R_w$).\\
@@ -1072,7 +1088,7 @@ This element represent longitudial or torsional spring element. It is defined by
 The spring element has no mass associated, the mass can be added using LumpedMass element. The spring is linear and works the same way in tension or in compression. 
 
 \elemkeyword{Spring}\\
-\descitem{Parameters} \elemparam{mode}{in} \elemparam{k}{rn} \elemparam{orientation}{ra}\\
+\descitem{Parameters} \field{mode}{in} \field{k}{rn} \field{orientation}{ra}\\
 The \param{mode} parameter defines the type of spring element (see Table~\ref{spring_mode_table}). The spring constant is defined by \param{k} parameter, corresponding units are [Force/Length] for longitudinal spring and [Force*Length/Radian] for torsional spring. The \param{orientation} defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.\\
 Note: the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.
 
@@ -1115,12 +1131,12 @@ To take geometric nonlinearity into account on an element, keyword \param{nlgeo}
 \end{table}
 
 
-\section{Elements for Transport problems\\(TM Module)}
+\section{Elements for Transport problems (TM Module)}
 \subsection{2D Elements}
 \subsubsection{Quad1ht element}
 \label{Quad1ht}
 Represents isoparametric four-node quadrilateral finite element for
-heat transfer problems. Each node has 1 degrees of freedom.
+heat transfer problems. Each node has 1 degree of freedom.
 Problem should be defined in x,y plane. The cross section thickness
 property is requested form cross section model.
 The nodes should be numbered anti-clockwise (positive rotation around
@@ -1138,7 +1154,7 @@ z-axis).
 \end{figure}
 
 \elemkeyword{Quad1ht}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Single dof (T\_f - temperature) is required in each node.
 
@@ -1212,7 +1228,7 @@ Represents isoparametric four-node tetrahedral element. Each node has 1 degree o
 The same numbering convection is adopted as in mechanics, see Fig.~\ref{lintetrahedron_fig}.
 
 \elemkeyword{Tetrah1ht}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns} Single dof (T\_f - temperature) is required in each node.\\
 \descitem{Approximation} Linear approximation of temperature using linear volume coordinates.\\
 \descitem{Integration}
@@ -1227,7 +1243,7 @@ surface numbering is shown in Fig.~\ref{lintetrahedron_fig}.
 \subsubsection{Brick1ht - hexahedral 3D element}
 \label{Brick1ht}
 Represents isoparametric eight-node brick/hexahedron finite element for
-heat transfer problems. Each node has 1 degrees of freedom.
+heat transfer problems. Each node has 1 degree of freedom.
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -1239,7 +1255,7 @@ heat transfer problems. Each node has 1 degrees of freedom.
 \end{figure}
 
 \elemkeyword{Brick1ht - hexahedral 3D element}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
+\descitem{Parameters} \optField{NIP}{in}\\
 \descitem{Unknowns}
 Single dof (T\_f - temperature) is required in each node.
 
@@ -1264,12 +1280,12 @@ Other features are similar to Brick1 element, see section \ref{Brick1ht}.
 
 \subsubsection{QBrick1ht - quadratic hexahedral 3D element}\label{QBrick1ht_element}
 Implementation of quadratic 3d 20-node 
-finite element. Each node has 1 degrees of freedom. See section ~\ref{QSpace_element} 
+finite element. Each node has 1 degree of freedom. See section ~\ref{QSpace_element} 
 for node numbering order and order of faces.
 
 \elemkeyword{QBrick1ht}\\
-\descitem{Parameters} \optelemparam{NIP}{in}\\
-\descitem{Unknowns}
+\descitem{Parameters} \optField{NIP}{in}\\
+\descitem{Unknowns} \\
 \descitem{Approximation} Quadratic approximation of temperature and
 geometry.\\
 \param{NIP} number of integration points, possible values are 8, 27 (default) and 64.\\
@@ -1284,7 +1300,7 @@ each node. Linear approximation of temperature and mass concentration.
 Other features are similar to QBrick1ht element, see section \ref{QBrick1ht_element}.
 
 
-\section{Elements for Fluid Dynamics problems\\(FM Module)}
+\section{Elements for Fluid Dynamics problems (FM Module)}
 \subsection{Stokes' Flow Elements}
 Stokes' flow elements neglect acceleration, and thus requires no additional stabilization.
 
@@ -1293,16 +1309,16 @@ Standard 6 node triangular element for stokes flow, with quadratic geometry, vel
 Both compressible and incompressible material behavior is supported (and also the seamless transition between the two).
 
 \elemkeyword{Tr121Stokes}\\
-\descitem{Parameters} none.
-\descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes.
+\descitem{Parameters} none. \\
+\descitem{Unknowns} Unknown pressure in nodes 1--3 with unknown velocity (V\_u and V\_v) in all 6 nodes. \\
 \descitem{Status} Reliable.
 
 \subsubsection{Tet21Stokes element}
 Standard 10 node tetrahedral element for stokes flow, with quadratic geometry, velocity and linear pressure.
 
 \elemkeyword{Tr121Stokes}\\
-\descitem{Parameters} none.
-\descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes.
+\descitem{Parameters} none. \\
+\descitem{Unknowns} Unknown pressure (P\_f) in nodes 1--4, and unknown velocity (V\_u, V\_v, V\_w) in all nodes. \\
 \descitem{Status} Untested.
 
 \subsubsection{Tr1BubbleStokes element}
@@ -1310,8 +1326,8 @@ So called ``Mini'' element in 2D. A 3 node triangular element for stokes flow, w
 Should not be used with materials that have memory (which is uncommon for flow problems).
 
 \elemkeyword{Tr1BubbleStokes}\\
-\descitem{Parameters} none.
-\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
+\descitem{Parameters} none. \\
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager. \\
 \descitem{Status} Untested.
 
 \subsubsection{Tet1BubbleStokes element}
@@ -1319,8 +1335,8 @@ So called ``Mini'' element in 3D. A 4 node tetrahedral element for stokes flow, 
 Should not be used with materials that have memory (which is uncommon for flow problems).
 
 \elemkeyword{Tet1BubbleStokes}\\
-\descitem{Parameters} none.
-\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager.
+\descitem{Parameters} none. \\
+\descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager. \\
 \descitem{Status} Untested.
 
 \subsection{2D CBS Elements}
@@ -1343,7 +1359,7 @@ The node numbering is anti-clockwise
 \end{figure}
 
 \elemkeyword{Tr1CBS}\\
-\descitem{Parameters} \optelemparam{bsides}{ia} \optelemparam{bcodes}{ia}\\
+\descitem{Parameters} \optField{bsides}{ia} \optField{bcodes}{ia}\\
 \descitem{Unknowns}
 Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
 
@@ -1393,8 +1409,8 @@ The node numbering is anti-clockwise
 \end{figure}
 
 \elemkeyword{Tr1SUPG}\\
-\descitem{Parameters} \optelemparam{vof}{rn}
-\optelemparam{pvof}{rn}\\
+\descitem{Parameters} \optField{vof}{rn}
+\optField{pvof}{rn}\\
 \descitem{Unknowns}
 Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
 
@@ -1476,8 +1492,8 @@ axis of ratational symmetry. The node numbering is anti-clockwise
 \end{figure}
 
 \elemkeyword{Tr1SUPGAxi}\\
-\descitem{Parameters} \optelemparam{vof}{rn}
-\optelemparam{pvof}{rn}\\
+\descitem{Parameters} \optField{vof}{rn}
+\optField{pvof}{rn}\\
 \descitem{Unknowns}
 Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
 
