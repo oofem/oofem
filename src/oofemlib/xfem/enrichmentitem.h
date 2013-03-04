@@ -68,40 +68,30 @@ public:
     virtual const char *giveClassName() const { return "EnrichmentItem"; }
     IntArray *giveEnrichesDofsWithIdArray() { return this->enrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs();
-    /// Accessor. should there be support for several geom. objects describing one EI, probably yes. Ex. inclusion given as union of several geom.s?
+
+    // Enrichment domains
     BasicGeometry *giveGeometry(int i);
     BasicGeometry *giveGeometry();
+    int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
+    
 
-    // Spatial search queries
+    // Spatial search queries - some of theses queries are not valid for some enrichment domain descriptions
     
     /// Computes intersection points with Element. - based on the geometry of the enrichment
     void computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element);
     
-    /// Computes number intersection points with Element.
+    /// Computes number of intersection points with Element.
     int computeNumberOfIntersectionPoints(Element *element);
     
-    /// Checks whether a Geometry is inside or outside. - what if the geometry is not closed? like a set of segments
+    /// Checks whether a Geometry is inside or outside.
     bool isOutside(BasicGeometry *bg);
     
 
-
-    /// Accessor.
-    //EnrichmentFunction *giveEnrichmentFunction(){}; // but there may be several functions?
+    // Enrichment functions
     EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentfunctions() { return this->numberOfEnrichmentFunctions; }
 
 
-    /// Gives number of dofs.
-    //int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
-    //int giveNumberOfDofs() { return 1; } // should loop over all EF and ask them - what should be meant. active dofs? total or enriched?
-
-    /// Sets DofId Array of an Enrichment Item.
-    void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
-    /// Accessor.
-    //IntArray *getDofIdArray() { return & dofsId; }  // old
-    //IntArray *getDofIdArray();
-
-    void computeDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber);
 
 
 
@@ -110,17 +100,13 @@ public:
     bool isElementEnriched(const Element *element); 
     bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
 
-    /// Updates receiver geometry to the state reached at given time step.
-    /// Geometry update; calls individual enrichment item updateGeometry method.
+    // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
 
-    int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
     
-
-
     int giveStartOfDofIdPool() { return this->startOfDofIdPool; };
-    void setStartOfDofIdPool(int number) { this->startOfDofIdPool = number; };
-    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber); // list of id's the specific ei supports
+    void computeDofManDofIdArray(IntArray &DofIdArray, DofManager *dMan, int enrichmentDomainNumber); // list of id's a particular dof manager supports
+    void giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber); // list of id's for the enrichment dofs
 
 
 
@@ -128,7 +114,7 @@ protected:
     /// Link to associated Xfem manager.
     XfemManager *xmanager;
     /// Geometry associated with EnrichmentItem.
-    int geometry;
+    //int geometry;
     IntArray enrichmentDomainNumbers;
     IntArray *enrichesDofsWithIdArray;
 
@@ -233,35 +219,6 @@ public:
 
 
 
-
-
-class MultipleDelamination : public EnrichmentItem  
-{
-public:
-    MultipleDelamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain){}
-    virtual const char *giveClassName() const { return "MultipleDelamination"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
-    AList< EnrichmentItem > *delaminationList;
-    //AList< BasicGeometry > *enrichementDomainList;
-
-    int numberOfDelaminations;
-    int giveNumberOfDelaminations() { return numberOfDelaminations; };
-    
-    FloatArray delaminationZCoords; // must they be ordered?
-    double giveDelaminationZCoord(int n) { return delaminationZCoords.at(n); }; 
-
-    int giveDelaminationGroupAt(double z);
-    FloatArray delaminationGroupMidZ(int dGroup);
-    double giveDelaminationGroupMidZ(int dGroup, Element *e);
-    
-    FloatArray delaimnationGroupThickness;
-    double giveDelaminationGroupThickness(int dGroup, Element *e);
-
-    void giveDelaminationGroupZLimits(int &dGroup, double &zTop, double &zBottom, Element *e);
-
-
-};
 
 
 

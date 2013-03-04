@@ -160,7 +160,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
 {
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveXfemManager(1);
-    xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
+    xf->giveActiveEIsFor( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
 
     /* JB
     // for all enrichment items which element interacts

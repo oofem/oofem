@@ -187,30 +187,6 @@ Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, GaussPo
 
 
 
-
-void
-Shell7BaseXFEM :: discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray) {
-    answer.resize( Shell7Base :: giveNumberOfDofs() );
-    answer.zero();
-    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
-    // Reference position and directors
-    for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
-        if ( 1 ) {
-            FloatArray *Xi = this->giveNode(i)->giveCoordinates();
-            FloatArray Mi = this->giveInitialNodeDirector(i);
-            //answer.at(1 + j) = Xi->at(1);
-            //answer.at(2 + j) = Xi->at(2);
-            //answer.at(3 + j) = Xi->at(3);
-            double scale = 1.0e-2;
-            answer.at(ndofs_xm + 1 + j) = Mi.at(1)*scale;
-            answer.at(ndofs_xm + 2 + j) = Mi.at(2)*scale;
-            answer.at(ndofs_xm + 3 + j) = Mi.at(3)*scale;
-
-            // Assumes gam=0 at t=0
-        }
-    }
-}
-
 int
 Shell7BaseXFEM :: giveNumberOfDofs()
 {
@@ -771,6 +747,7 @@ Shell7BaseXFEM :: giveFieldDofId(SolutionField fieldType) const {
         return dofId;
     } else {
         _error("giveOrdering: unknown fieldType");
+        return 0;
     }
 }
 
@@ -838,7 +815,7 @@ Shell7BaseXFEM :: giveDelaminationGroupAt(double xi)
     std::list< std::pair<int, double> >::const_iterator iter;
     iter = this->delaminationXiCoordList.begin();
 
-    int nDelam = this->delaminationXiCoordList.size();
+    size_t nDelam = this->delaminationXiCoordList.size();
     for ( int j = 1; j <= nDelam; j++ ) {
         double xiDelam = (*iter).second;
         if ( xi < xiDelam ) { //belong to the delamination group just below delamination #j. How to deal with poins that lie onthe boundary?
@@ -846,7 +823,7 @@ Shell7BaseXFEM :: giveDelaminationGroupAt(double xi)
         }
         iter++;
     }
-    return nDelam;
+    return (int) nDelam;
             
 }
 
@@ -854,7 +831,7 @@ Shell7BaseXFEM :: giveDelaminationGroupAt(double xi)
 void 
 Shell7BaseXFEM :: giveDelaminationGroupXiLimits(int &dGroup, double &xiTop, double &xiBottom)
 {
-    int nDelam = this->delaminationXiCoordList.size();
+    size_t nDelam = this->delaminationXiCoordList.size();
     if ( nDelam == 0 ) {
         xiBottom = xiTop = 0.0;
     } else {
@@ -907,33 +884,6 @@ Shell7BaseXFEM :: giveDelaminationGroupMidXi(int dGroup)
 
 
 
-void 
-Shell7BaseXFEM :: setupDelaminationXiCoordsAtGP() 
-{
-    std::pair<int, double> pid;
-    std::list<std::pair<int, double> > *delaminationXiCoordList;
-
-    xMan = this->giveDomain()->giveXfemManager(1);
-    int numEI = xMan->giveNumberOfEnrichmentItems();
-    for ( int i = 1; i <= numEI; i++ ) {
-        Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
-        if ( dei ) {
-            if ( dei->isElementEnriched(this) ) {
-
-
-                int nDelam = dei->giveNumberOfEnrichmentDomains(); // numEnrDomains max possible number
-                int pos = 1;
-                for ( int j = 1; j <= nDelam; j++ ) {
-                    //if( this->isElementEnriched(element) ) {
-                    //pid.first  = pos;
-                    //pid.second = this->delaminationZCoords.at(i); 
-                    //xiCoordList->push_back(pid); 
-                    //pos++;
-                }
-            }
-        } 
-    }
-}
 
 
 

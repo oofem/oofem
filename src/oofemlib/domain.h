@@ -463,7 +463,7 @@ public:
      * Useful for XFEM and other boundary conditions that introduce other unique Lagrange multipliers.
      * @return The next free dof ID.
      */
-    int giveNextFreeDofID();
+    int giveNextFreeDofID(int increment = 1);
     /**
      * Resets the free dof IDs.
      */

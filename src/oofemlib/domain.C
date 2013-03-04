@@ -1271,9 +1271,11 @@ double Domain :: giveVolume()
 }
 
 int
-Domain :: giveNextFreeDofID()
+Domain :: giveNextFreeDofID(int increment)
 {
-    return this->freeDofID++;
+    int freeID = this->freeDofID; 
+    this->freeDofID += increment;
+    return freeID;
 }
 
 void

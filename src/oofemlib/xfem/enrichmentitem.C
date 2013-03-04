@@ -52,9 +52,11 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichementDomainList = new AList< BasicGeometry >(0); // Should be an enrichmentdomain type or something similar
     this->enrDomainList = new AList< EnrichmentDomain >(0); 
-    numberOfEnrichmentFunctions = 0;    
-    numberOfEnrichmentDomains = 0;  
+    this->numberOfEnrichmentFunctions = -1;    
+    this->numberOfEnrichmentDomains = -1;  
+    this->startOfDofIdPool = -1;
     this->enrichesDofsWithIdArray = new IntArray;
+    
 }
 
 EnrichmentItem :: ~EnrichmentItem()
@@ -166,15 +168,10 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    this->geometry = 0;
-    this->enrichmentFunction = 0;
-    
-    IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, IFT_EnrichmentItem_enrichmentdomains, "enrichmentdomains"); // Macro
+    IR_GIVE_FIELD(ir, this->enrichmentDomainNumbers, IFT_RecordIDField, "enrichmentdomains"); // Macro
     this->numberOfEnrichmentDomains = this->enrichmentDomainNumbers.giveSize();
-    //int test = this->enrichmentDomainNumbers.maximum();
 
-
-    IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, enrichmentFunction, IFT_RecordIDField, "enrichmentfunction"); // Macro
     
     return IRRT_OK;
 }
@@ -186,7 +183,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int material = 0;
-    IR_GIVE_FIELD(ir, material, IFT_EnrichmentItem_materialNr, "material"); // Macro
+    IR_GIVE_FIELD(ir, material, IFT_RecordIDField, "material"); // Macro
     this->mat = this->giveDomain()->giveMaterial(material);
     //this->numberOfEnrichmentFunctions = 1;
     //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
@@ -199,63 +196,49 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 {
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
-    int i;
     std :: string name;
-    EnrichmentItem *ei;
-    EnrichmentFunction *ef;
-    EnrichmentDomain *ed;
-    InputRecord *mir;
 
-
+    // Instanciate enrichment functions
     this->enrichmentFunctionList->growTo(numberOfEnrichmentFunctions);
-    for ( i = 1; i <= this->numberOfEnrichmentFunctions; i++ ) {
-        mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, i);
+    for ( int i = 1; i <= this->numberOfEnrichmentFunctions; i++ ) {
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, i);
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
         
-        ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xmanager->giveDomain() );
+        EnrichmentFunction *ef = CreateUsrDefEnrichmentFunction( name.c_str(), i, this->xmanager->giveDomain() );
         if ( ef == NULL ) {
             OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment function (%s)", name.c_str() );
         }
-
         enrichmentFunctionList->put(i, ef);
         ef->initializeFrom(mir);
-        
     }
 
-    
+    // Instanciate enrichment domains
     enrichementDomainList->growTo(numberOfEnrichmentDomains);
     enrDomainList->growTo(numberOfEnrichmentDomains);
 
-    for ( i = 1; i <= numberOfEnrichmentDomains; i++ ) {
-        mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
+    for ( int i = 1; i <= numberOfEnrichmentDomains; i++ ) {
+        InputRecord *mir = dr->giveInputRecord(DataReader :: IR_geoRec, i);
         result = mir->giveRecordKeywordField(name);
         if ( result != IRRT_OK ) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
-#if 0
-        ge = CreateUsrDefGeometry( name.c_str() );
-        enrichementDomainList->put(i, ge);
-        ge->initializeFrom(mir);
-        
-        if ( ge == NULL ) {
-            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown geometry (%s)", name.c_str() );
+
+        EnrichmentDomain *ed = CreateUsrDefEnrichmentDomain( name.c_str() ); 
+        if ( ed == NULL ) {
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
         }
-#endif
-
-        // new
-
-        ed = CreateUsrDefEnrichmentDomain( name.c_str() ); 
         this->enrDomainList->put(i, ed);
         ed->initializeFrom(mir);
     }
 
-#ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated enrichment items ", nnode)
-#endif
+    // Set start of the enrichment dof pool for the given EI
+    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * this->giveNumberOfEnrichmentDomains(); 
+    this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
+
     return 1;
 }
 
@@ -263,25 +246,23 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 void
 EnrichmentItem :: giveEIDofIdArray(IntArray &answer, int enrichmentDomainNumber)
 {
-    // Computes an array containing the dofId's that should be created as new dofs.
+    // Returns an array containing the dof Id's of the new enrichment dofs pertinent to the ei. 
+    // Note: the dof managers may not support these dofsall potential dof id's
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
+
     answer.resize(eiEnrSize);
     int xDofAllocSize = eiEnrSize * this->giveNumberOfEnrDofs(); // number of new dof id's the ei will allocate
     for ( int i = 1; i <= eiEnrSize; i++ ) {
         answer.at(i) = this->giveStartOfDofIdPool() + (enrichmentDomainNumber-1)*xDofAllocSize + i; 
-    }
-   
+    }   
 }
 
-
 void
-EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)
+EnrichmentItem :: computeDofManDofIdArray(IntArray &answer, DofManager *dMan, int enrichmentDomainNumber)
 {
-    // Computes an array containing the dofId's that should be created as new dofs.
+    // Gives an array containing the dofId's that should be created as new dofs (what dofs to enrich).
     IntArray *enrichesDofsWithIdArray = this->giveEnrichesDofsWithIdArray();
-    
     int eiEnrSize = enrichesDofsWithIdArray->giveSize();
     
     // Go through the list of dofs that the EI supports and compare with the available dofs in the dofMan. 
@@ -291,7 +272,7 @@ EnrichmentItem :: computeDofIdArray(IntArray &answer, DofManager *dMan, int enri
     for ( int i = 1; i <= eiEnrSize; i++ ) {
         if ( dMan->hasDofID( (DofIDItem) enrichesDofsWithIdArray->at(i) ) ) {
             count++;
-            dofMask.at(count) = i;
+            dofMask.at(count) = dMan->giveDofWithID( enrichesDofsWithIdArray->at(i) )->giveNumber();
         }
     }
 
@@ -334,17 +315,13 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     this->numberOfEnrichmentFunctions = 1; // must be set before EnrichmentItem :: initializeFrom(ir) is called
     EnrichmentItem :: initializeFrom(ir);
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-    int material = 0;
-    
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, IFT_EnrichmentItem_Delamination_delaminationXiCoords, "delaminationxicoords"); // Macro
+    IR_GIVE_FIELD(ir, this->enrichmentDomainXiCoords, IFT_RecordIDField, "delaminationxicoords"); // Macro
     if ( this->numberOfEnrichmentDomains != this->enrichmentDomainXiCoords.giveSize() ) {
         OOFEM_ERROR3( "EnrichmentItem :: initializeFrom: size of enrichmentDomainXiCoords (%i) differs from numberOfEnrichmentDomains (%i)", 
-           this->enrichmentDomainXiCoords.giveSize(), this->numberOfEnrichmentDomains );
+                       this->enrichmentDomainXiCoords.giveSize(), this->numberOfEnrichmentDomains );
     }
-
-    
 
     //write an instanciate method
     

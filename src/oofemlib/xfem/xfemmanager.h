@@ -88,7 +88,7 @@ public:
      * Gets interacted enrichment items for a particular element, the enrichment items
      * are referenced by a number from the domain - Don't like the name 'interacted' // JB
      */
-    void getInteractedEI(IntArray &answer, const Element *elem);
+    void giveActiveEIsFor(IntArray &answer, const Element *elem);
     
     /// Checks whether an element is interacted.
     bool isElementEnriched(const Element *elem);
@@ -114,17 +114,14 @@ public:
 
     /// Instantiates the Xfem components.
     int instanciateYourself(DataReader *dr);
-    const char *giveClassName() const { return "XfemManager"; }
+   // const char *giveClassName() const { return "XfemManager"; }
+     const char *giveClassName() const { return ""; }
     const char *giveInputRecordName() const { return "XfemManager"; }
     
     /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
 
-    /// Gives Domain.
-    Domain *giveDomain();
-
-    /// Accessor.
-    //IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
+    Domain *giveDomain() { return emodel->giveDomain(domainIndex); }
 
 
     /// Clear the receiver
@@ -151,9 +148,6 @@ public:
      */
     //contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-protected:
-    /// Changes dofIdPos to next index.
-    DofIDItem allocateNewDofID();
 };
 } // end namespace oofem
 #endif // xfemmanager_h

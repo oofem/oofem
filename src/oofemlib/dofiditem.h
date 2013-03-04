@@ -65,8 +65,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(D_u_edge_lin, 36) /* Linear part of boundary u-displacement used by Treftz element*/\
     ENUM_ITEM_WITH_VALUE(D_v_edge_const, 37) /* Constant part of boundary v-displacement used by Treftz element*/\
     ENUM_ITEM_WITH_VALUE(D_v_edge_lin, 38) /* Linear part of boundary v-displacement used by Treftz element*/\
-    ENUM_ITEM_WITH_VALUE(X_1, 1000) /* Start of xfemManager xfemdof pool */ \
-    ENUM_ITEM_WITH_VALUE(X_N, 2000) /* End of xfemManager xfemdof pool */ \
+    
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
  * available DOFs.

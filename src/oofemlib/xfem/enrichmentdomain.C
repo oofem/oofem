@@ -51,7 +51,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IntArray idList;
-    IR_GIVE_FIELD(ir, idList, IFT_Identification, "list"); // Macro
+    IR_GIVE_FIELD(ir, idList, IFT_RecordIDField, "list"); // Macro
     for ( int i = 1; i<=idList.giveSize(); i++) {
         this->dofManList.push_back( idList.at(i) );
     }
@@ -75,23 +75,4 @@ bool DofManList :: isDofManagerEnriched(const DofManager *dMan)
 
 
 
-
-/// WholeDomain
-
-
-/*
-IRResultType WholeDomain :: initializeFrom(InputRecord *ir)
-{
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
-    //IntArray idList;
-    //IR_GIVE_FIELD(ir, idList, IFT_Identification, "all"); // Macro
-    //for ( int i = 1; i<=idList.giveSize(); i++) {
-    //    this->dofManList.push_back( idList.at(i) );
-    //}
-    return IRRT_OK;
-    
-}
-*/
 } // end namespace oofem
