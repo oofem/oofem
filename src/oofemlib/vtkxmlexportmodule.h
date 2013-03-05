@@ -42,7 +42,7 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "internalstatevaluetype.h"
-#include "elementgeometrytype.h"
+//#include "elementgeometrytype.h"
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>
@@ -100,7 +100,10 @@ public:
     virtual void initialize();
     virtual void terminate();
     virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
-
+    /**
+     * Prints point data header.
+     */
+    void exportPointDataHeader(FILE *stream, TimeStep *tStep);
 protected:
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     void makeFullForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType type, const IntArray &redIndx);
@@ -135,10 +138,7 @@ protected:
     //void giveElementCell(IntArray &answer, Element_Geometry_Type elemGT, int cell);
      
 #ifndef __VTK_MODULE
-    /**
-     * Prints point data header.
-     */
-    void exportPointDataHeader(FILE *stream, TimeStep *tStep);
+
 #endif
     /**
      * Export internal variables by smoothing.

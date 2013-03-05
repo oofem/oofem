@@ -200,7 +200,7 @@ protected:
 
     void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
-
+    void giveUnknownsAt(FloatArray &lcoords, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
@@ -208,8 +208,8 @@ protected:
     virtual int  NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
     // VTK interface
-    void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, FloatArray &globalCoords);
-
+    void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords);
+    void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
 
     // N and B matrices
 

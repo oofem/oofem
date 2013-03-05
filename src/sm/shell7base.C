@@ -2770,12 +2770,11 @@ Shell7Base :: computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &
 
 
 void
-Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, FloatArray &globalCoords)
+Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords)
 {
     double x, y, z, Mx, My, Mz, zeta;
-    //zeta = giveGlobalZcoord(gp);
-    zeta = localCoords.at(3)*this->layeredCS->give(CS_Thickness);
-    
+    //zeta = localCoords.at(3)*this->layeredCS->give(CS_Thickness);
+    zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
     FloatArray N, M;
 
     // In plane base vectors
@@ -2802,6 +2801,48 @@ Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, FloatArr
     }
 
 }
+
+
+void
+Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
+{
+    FloatArray x, m; double gam=0;
+    this->giveUnknownsAt(localCoords, x, m, gam, tStep); 
+
+    double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
+    double fac = ( zeta + 0.5 * gam * zeta * zeta );
+    globalCoords = x;    
+    globalCoords.add(fac,m);
+
+}
+
+void
+Shell7Base :: giveUnknownsAt(FloatArray &lcoords, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at aGaussPoint.
+{
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep);
+
+    FloatArray N;
+    this->giveInterpolation()->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+
+    x.resize(3);
+    x.zero();
+    m.resize(3);
+    m.zero();
+    int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
+    for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
+        x.at(1) += N.at(i) * solVec.at(1+j);
+        x.at(2) += N.at(i) * solVec.at(2+j);
+        x.at(3) += N.at(i) * solVec.at(3+j);
+        m.at(1) += N.at(i) * solVec.at(ndofs_xm+1+j);
+        m.at(2) += N.at(i) * solVec.at(ndofs_xm+2+j);
+        m.at(3) += N.at(i) * solVec.at(ndofs_xm+3+j);
+        gam     += N.at(i) * solVec.at(2*ndofs_xm+i);
+    }
+}
+
 
 
 
