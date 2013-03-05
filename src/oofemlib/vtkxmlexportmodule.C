@@ -253,6 +253,7 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
 
 void
 VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
+//VTKXMLExportModule :: giveElementCell(IntArray &answer, Element_Geometry_Type elemGT, int cell)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int nelemNodes;
@@ -432,6 +433,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
                 nelemNodes = elem->giveNumberOfNodes();
                 this->giveElementCell(cellNodes, elem, 0);
+                //Element_Geometry_Type elemGT = elem->giveGeometryType();
+                //this->giveElementCell(cellNodes, elemGT, 0);
 #ifdef __VTK_MODULE
                 elemNodeArray->Reset();
                 elemNodeArray->SetNumberOfIds(nelemNodes);

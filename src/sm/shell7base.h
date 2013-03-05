@@ -42,6 +42,7 @@
 
 #include "nlstructuralelement.h"
 #include <vector>
+#include "vtkxmlexportmodule.h"
 namespace oofem {
 class BoundaryLoad;
 
@@ -52,7 +53,7 @@ class BoundaryLoad;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface
+class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, public VTKXMLExportModuleElementInterface
 {
 public:
     Shell7Base(int n, Domain *d); // constructor
@@ -206,8 +207,8 @@ protected:
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int  NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 
-
-
+    // VTK interface
+    void vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, FloatArray &globalCoords);
 
 
     // N and B matrices

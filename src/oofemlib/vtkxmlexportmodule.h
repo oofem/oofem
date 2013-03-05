@@ -42,6 +42,7 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "internalstatevaluetype.h"
+#include "elementgeometrytype.h"
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>
@@ -131,6 +132,8 @@ protected:
      * Returns the element cell geometry.
      */
     void giveElementCell(IntArray &answer, Element *elem, int cell);
+    //void giveElementCell(IntArray &answer, Element_Geometry_Type elemGT, int cell);
+     
 #ifndef __VTK_MODULE
     /**
      * Prints point data header.
@@ -238,7 +241,7 @@ class VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() {}
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
-    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) = 0;
+    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) {};
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

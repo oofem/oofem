@@ -43,7 +43,7 @@
 #include "gausspnt.h"
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
-
+#include "vtkxmlexportmodule.h"
 
 namespace oofem {
 FEI3dTrQuad Tr2Shell7 :: interpolation;
@@ -240,4 +240,215 @@ Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matr
         }
     }
 }
+
+
+
+// VTK export interface
+void 
+Tr2Shell7 :: _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) 
+{
+    // export as quadratic wedge
+    int regionDofMans = 15;
+    int totalcells = 1;
+    fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells);
+
+    // export nodes in region as vtk vertices
+    fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+
+    // compute fictious node coords
+    FloatArray nodeCoords[15];
+    this->vtkGiveFictiousNodeCoords(nodeCoords);
+
+    for ( int inode = 1; inode <= regionDofMans; inode++ ) {
+        FloatArray coords = nodeCoords [inode-1]; 
+        for ( int i = 1; i <= coords.giveSize(); i++ ) {
+            fprintf( stream, "%e ", coords.at(i) );
+        }
+        coords.printYourself();
+    }
+    fprintf(stream, "</DataArray>\n</Points>\n");
+
+
+
+
+    // output all cells of the piece
+    int nelemNodes=regionDofMans;
+    //------
+    int WedgeQuadNodeMapping [] = { 4, 6, 5, 1, 3, 2, 12, 11, 10, 9, 8, 7, 13, 15,14 };
+   
+    //IntArray answer.resize(nelemNodes);
+    //for ( int i = 1; i <= nelemNodes; i++ ) {
+        //answer.at(i) = elem->giveNode(WedgeQuadNodeMapping [ i - 1 ])->giveNumber() ;
+    //}
+
+    
+    IntArray cellNodes;
+    int nelem = 1;
+    fprintf(stream, "<Cells>\n");
+    // output the connectivity data
+    fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        //elem = d->giveElement(ielem);
+        
+        //nelemNodes = elem->giveNumberOfNodes();
+        
+        //m->giveElementCell(cellNodes, elem, 0);
+
+        for ( int i = 1; i <= nelemNodes; i++ ) {
+
+            //fprintf(stream, "%d ", mapG2L.at( cellNodes.at(i) ) - 1);
+            //fprintf(stream, "%d ", WedgeQuadNodeMapping[i-1]);
+            fprintf(stream, "%d ", i);
+
+        }
+        fprintf(stream, " ");
+    }
+
+
+    // Offset
+    int vtkCellType;
+    fprintf(stream, "</DataArray>\n");
+    // output the offsets (index of individual element data in connectivity array)
+    fprintf(stream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
+    int offset = 0;
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+        //offset += elem->giveNumberOfNodes();
+        offset += nelemNodes;
+        fprintf(stream, "%d ", offset);
+    }
+    fprintf(stream, "</DataArray>\n");
+
+
+    // output cell (element) types
+    fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
+    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+
+        //vtkCellType = this->giveCellType(elem);
+        vtkCellType = 26;
+        fprintf(stream, "%d ", vtkCellType);
+    }
+
+    fprintf(stream, "</DataArray>\n");
+    fprintf(stream, "</Cells>\n");
+
+    // export point data and other stuff
+
+    // end of piece record
+    fprintf(stream, "</Piece>\n");
+}
+
+void 
+Tr2Shell7 :: vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15])
+{
+    // compute fictious node coords
+    FloatArray nodeLocalXiCoords, nodeLocalEtaCoords;
+    this->giveLocalNodeCoords( nodeLocalXiCoords, nodeLocalEtaCoords);
+    /*for ( int i = 1; i <= 6; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXiCoords.at(i);
+        localCoords.at(2) = nodeLocalEtaCoords.at(i);
+
+        localCoords.at(3) = -1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, coords);
+        nodeCoords[i-1].resize(3); 
+        nodeCoords[i-1].at(1) = coords.at(1);
+        nodeCoords[i-1].at(2) = coords.at(2);
+        nodeCoords[i-1].at(3) = coords.at(3);
+
+        localCoords.at(3) = 1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, coords);
+        nodeCoords[i+6-1].resize(3); 
+        nodeCoords[i+6-1].at(1) = coords.at(1);
+        nodeCoords[i+6-1].at(2) = coords.at(2);
+        nodeCoords[i+6-1].at(3) = coords.at(3);
+    }*/
+    
+    
+    for ( int i = 1; i <= 3; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXiCoords.at(i);
+        localCoords.at(2) = nodeLocalEtaCoords.at(i);
+
+        localCoords.at(3) = -1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, coords);
+        nodeCoords[i-1].resize(3); 
+        nodeCoords[i-1].at(1) = coords.at(1);
+        nodeCoords[i-1].at(2) = coords.at(2);
+        nodeCoords[i-1].at(3) = coords.at(3);
+
+        localCoords.at(3) = 1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, coords);
+        nodeCoords[i+3-1].resize(3); 
+        nodeCoords[i+3-1].at(1) = coords.at(1);
+        nodeCoords[i+3-1].at(2) = coords.at(2);
+        nodeCoords[i+3-1].at(3) = coords.at(3);
+    }
+
+    for ( int i = 1; i <= 3; i++ ){
+        FloatArray coords, localCoords(3);
+        localCoords.at(1) = nodeLocalXiCoords.at(i+3);
+        localCoords.at(2) = nodeLocalEtaCoords.at(i+3);
+
+        localCoords.at(3) = -1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, coords);
+        nodeCoords[i+6-1].resize(3); 
+        nodeCoords[i+6-1].at(1) = coords.at(1);
+        nodeCoords[i+6-1].at(2) = coords.at(2);
+        nodeCoords[i+6-1].at(3) = coords.at(3);
+
+        localCoords.at(3) = 1.0;
+        this->vtkEvalInitialGlobalCoordinateAt(localCoords, coords);
+        nodeCoords[i+6+3-1].resize(3); 
+        nodeCoords[i+6+3-1].at(1) = coords.at(1);
+        nodeCoords[i+6+3-1].at(2) = coords.at(2);
+        nodeCoords[i+6+3-1].at(3) = coords.at(3);
+    }
+    
+
+    //Middle nodes - linear variation in the thickness direction -> mean value of top and bottom
+    /*
+    for ( int i = 1; i <= 3; i++ ){
+        nodeCoords[12+i-1].resize(3);
+        nodeCoords[12+i-1].at(1) = 0.5 * ( nodeCoords[i-1].at(1) + nodeCoords[i+6-1].at(1) );
+        nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+6-1].at(2) );
+        nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+6-1].at(3) );
+    }*/
+    
+        for ( int i = 1; i <= 3; i++ ){
+        nodeCoords[12+i-1].resize(3);
+        nodeCoords[12+i-1].at(1) = 0.5 * ( nodeCoords[i-1].at(1) + nodeCoords[i+3-1].at(1) );
+        nodeCoords[12+i-1].at(2) = 0.5 * ( nodeCoords[i-1].at(2) + nodeCoords[i+3-1].at(2) );
+        nodeCoords[12+i-1].at(3) = 0.5 * ( nodeCoords[i-1].at(3) + nodeCoords[i+3-1].at(3) );
+        }
+    
+        
+        
+        nodeCoords[1-1].setValues(3,  1.,0.,0.);
+        nodeCoords[2-1].setValues(3,  1.,0.,0.);
+        nodeCoords[3-1].setValues(3,  0.,1.,0.);
+        nodeCoords[4-1].setValues(3,  0.,0.,1.);
+        nodeCoords[5-1].setValues(3,  1.,0.,1.);
+        nodeCoords[6-1].setValues(3,  0.,1.,1.);
+
+        nodeCoords[7-1].setValues(3,  .5,0.,0.);
+        nodeCoords[8-1].setValues(3,  0.5,0.5,.0);
+        nodeCoords[9-1].setValues(3,  0.,0.5,.0);
+
+        nodeCoords[10-1].setValues(3,  0.5,0.,1.);
+        nodeCoords[11-1].setValues(3,  0.5,0.5,1.);
+        nodeCoords[12-1].setValues(3,  0.,0.5,1.);
+
+        nodeCoords[13-1].setValues(3,  0.,0.,0.5);
+        nodeCoords[14-1].setValues(3,  1.,0.,.5);
+        nodeCoords[15-1].setValues(3,  0.,1.,.5);
+        
+
+}
+
+
+
+
+
+
 } // end namespace oofem

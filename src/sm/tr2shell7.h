@@ -42,7 +42,7 @@
 
 #include "nlstructuralelement.h"
 #include "shell7base.h"
-
+#include "vtkxmlexportmodule.h"
 namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;
@@ -55,7 +55,7 @@ class BoundaryLoad;
  * @date 2012-11-01
  */
 
-class Tr2Shell7 : public Shell7Base
+class Tr2Shell7 : public Shell7Base, public VTKXMLExportModuleElementInterface
 {
 protected:
     int numberOfGaussPoints;
@@ -99,6 +99,10 @@ protected:
 
     virtual FEInterpolation *giveInterpolation();
 
+    // VTK
+    void vtkGiveFictiousNodeCoords(FloatArray nodeCoords[15]);
+    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep);
+
 
 public:
     Tr2Shell7(int n, Domain *d);        // constructor
@@ -109,7 +113,8 @@ public:
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
     virtual const char *giveClassName()                const { return "Tr2Shell7"; }
     virtual classType giveClassID()                    const { return Tr2Shell7Class; }
-    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
+    //virtual Element_Geometry_Type giveGeometryType()   const { return EGT_triangle_2; }
+    virtual Element_Geometry_Type giveGeometryType()   const { return EGT_Composite; }
     virtual integrationDomain  giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
 };
 } // end namespace oofem

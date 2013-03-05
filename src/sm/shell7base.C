@@ -45,9 +45,9 @@
 #include "boundaryload.h"
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"
-
+#include "vtkxmlexportmodule.h"
 namespace oofem {
-Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface()
+Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), VTKXMLExportModuleElementInterface()
 {}
 
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
@@ -78,6 +78,9 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 
     case LayeredCrossSectionInterfaceType:
         return static_cast< LayeredCrossSectionInterface * >( this );
+
+    case VTKXMLExportModuleElementInterfaceType:
+        return static_cast< VTKXMLExportModuleElementInterface * >( this );
 
     default:
         return StructuralElement :: giveInterface(it);
@@ -2764,6 +2767,41 @@ Shell7Base :: computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &
 
 #endif
 
+
+
+void
+Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, FloatArray &globalCoords)
+{
+    double x, y, z, Mx, My, Mz, zeta;
+    //zeta = giveGlobalZcoord(gp);
+    zeta = localCoords.at(3)*this->layeredCS->give(CS_Thickness);
+    
+    FloatArray N, M;
+
+    // In plane base vectors
+    FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
+    fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
+
+    globalCoords.resize(3);
+    globalCoords.zero();
+
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        FloatArray *nodeI = this->giveNode(i)->giveCoordinates();
+        x = nodeI->at(1);
+        y = nodeI->at(2);
+        z = nodeI->at(3);
+
+        M = this->giveInitialNodeDirector(i);
+        Mx = M.at(1);
+        My = M.at(2);
+        Mz = M.at(3);
+
+        globalCoords.at(1) += N.at(i) * ( x + zeta * Mx );
+        globalCoords.at(2) += N.at(i) * ( y + zeta * My );
+        globalCoords.at(3) += N.at(i) * ( z + zeta * Mz );
+    }
+
+}
 
 
 
