@@ -76,16 +76,10 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
     if (!this->useTangent || eid != EID_MomentumBalance || type != TangentStiffnessMatrix)
         return;
 
-    rows.resize(this->elements.size() + this->sides.size());
-    cols.resize(this->elements.size() + this->sides.size());
+    rows.resize(this->sides.size());
+    cols.resize(this->sides.size());
 
     int i = 0;
-    for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {
-        Element *e = this->giveDomain()->giveElement(*it);
-        e->giveLocationArray(rows[i], eid, r_s);
-        e->giveLocationArray(cols[i], eid, c_s);
-        i++;
-    }
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
         int side = it->second;
@@ -109,13 +103,6 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     FloatMatrix Ke;
     IntArray r_loc, c_loc;
 
-    for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {
-        Element *e = this->giveDomain()->giveElement(*it);
-        e->giveLocationArray(r_loc, eid, r_s); // Assumes the element has a sane/normal location vector.
-        e->giveLocationArray(c_loc, eid, c_s);
-        this->computeTangentFromElement(Ke, e, -1, tStep);
-        answer->assemble(r_loc, c_loc, Ke);
-    }
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
         int side = it->second;
@@ -144,19 +131,6 @@ double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, Tim
     IntArray loc, dofids, masterdofids;
     double norm = 0.0;
 
-    ///@todo Duplicated code here, should work exclusively on element boundaries (degenerate elements should just stick to boundary = 1)
-    for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {
-        Element *e = this->giveDomain()->giveElement(*it);
-        e->giveLocationArray(loc, eid, s, &masterdofids); // Assumes the element has a sane/normal location vector.
-        this->computeLoadVectorFromElement(fe, e, -1, tStep);
-        answer.assemble(fe, loc);
-        norm += fe.computeSquaredNorm();
-        if ( eNorms ) {
-            for ( int i = 1; i <= loc.giveSize(); ++i ) {
-                if ( loc.at(i) > 0 ) eNorms->at(masterdofids.at(1)) += fe.at(i) * fe.at(i);
-            }
-        }
-    }
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
         int side = it->second;
@@ -216,9 +190,9 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                fei2d->edgeEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                double J = fei2d->edgeGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                fei2d->edgeLocal2global(gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                fei->boundaryEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                fei->boundaryLocal2Global(gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double r = gcoords(0); // First coordinate is the radial coord.
 
                 es.beProductOf(xy, dNds);
@@ -244,7 +218,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                double J = fei2d->edgeGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
 
                 es.beProductOf(xy, dNds);
 
@@ -281,8 +255,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             fei3d->surfaceEvaldNdx(dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-            fei3d->surfaceEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-            //double J = fei3d->surfaceGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e), 0.0);
+            /*double J = */fei->boundaryEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
             //double dV = gamma * J * gp->giveWeight();
 
             for (int i = 0; i < nodes; i++) {
@@ -338,9 +311,9 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                fei2d->edgeEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                double J = fei2d->edgeGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                fei2d->edgeLocal2global(gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                fei->boundaryEvalN(N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                fei->boundaryLocal2Global(gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 double r = gcoords(0); // First coordinate is the radial coord.
 
                 es.beProductOf(xy, dNds);
@@ -358,7 +331,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
                 GaussPoint *gp = iRule->getIntegrationPoint(k);
                 fei2d->edgeEvaldNds(dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-                double J = fei2d->edgeGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+                double J = fei->boundaryGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
                 es.beProductOf(xy, dNds);
 
                 for (int i = 0; i < nodes; i++) {
@@ -388,8 +361,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
             GaussPoint *gp = iRule->getIntegrationPoint(k);
             fei3d->surfaceEvaldNdx(dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-            fei3d->surfaceEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
-            double J = fei3d->surfaceGiveTransformationJacobian(side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
+            double J = fei->boundaryEvalNormal(n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e));
 
             for (int i = 0; i < nodes; i++) {
                 tmp(3*i+0) = dNdx(i,0) - (dNdx(i,0)*n(0)* + dNdx(i,1)*n(1) + dNdx(i,2)*n(2))*n(0);
