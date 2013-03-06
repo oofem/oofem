@@ -440,7 +440,7 @@ void
 Shell7Base :: computeLambdaMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
 {
 
-    FloatArray m(3), dm1(3), dm2(3), temp1;
+    FloatArray m(3), dm1(3), dm2(3), temp1, temp2;
     double dgam1, dgam2, gam;
     this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dgam1, dgam2, gam);
 
@@ -570,7 +570,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
     L44(2, 2), L45(2, 1),
     L55(1, 1);
     FloatMatrix B11, B22, B32, B43, B53;
-    FloatArray S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1;
+    FloatArray S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
     FloatMatrix K11(18, 18), K12(18, 18), K13(18, 6), K22(18, 18), K23(18, 6), K33(6, 6);
     K11.zero(), K12.zero(), K13.zero(), K22.zero(), K23.zero(), K33.zero();
 
@@ -856,10 +856,10 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep
                                          FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) {
     // Fix material for layered cross section
 
-    FloatArray cartStressVector, contravarStressVector;
-    FloatArray g1, g2, g3;
+    FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a;
+    FloatArray g1, g2, g3, m(3), dm1(3), dm2(3), temp1, temp2;
 
-    FloatMatrix D, Dcart, S;
+    FloatMatrix D, Dcart, Mmat, S;
 
     //A = L^iklj * (g_k x g_l) + S^ij*I
     mat->giveCharacteristicMatrix(Dcart, FullForm, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
@@ -1026,8 +1026,8 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
 
     double dA, a, b;
-    FloatMatrix N, B, NtL, NtLB, L(7, 18);
-    FloatArray lcoords;
+    FloatMatrix N, B, Nt, NtL, NtLB, L(7, 18);
+    FloatArray lcoords, BF;
     double zeta = 1.e30;
     if ( iSurf == 1 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * ( -0.5 );     // bottom surface -> iSurf = 1
@@ -1266,13 +1266,13 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 //
 // Computes internal forces as a summation of: sectional forces + convective mass force
 {
-    FloatArray solVec;
+    FloatArray totalSolVec, solVec;
     //this->giveUpdatedSolutionVector(solVec, tStep);
     this->giveUpdatedSolutionVector(solVec, tStep); // da
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
 
-
+    FloatArray temp;
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
 
     ///@todo How to treat the convective force? Only active during dynamic simulations
@@ -1283,8 +1283,8 @@ void
 Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord)
 //
 {
-
-    FloatArray genEps;
+    FloatMatrix B;
+    FloatArray BtF, f, genEps;
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
 
@@ -1523,7 +1523,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     IntegrationRule *iRule = integrationRulesArray [ 1 ];
 
     //------------------------------
-    FloatMatrix N, Ntm, NtmN, temp;
+    FloatMatrix N, Nt, Ntm, NtmN, temp;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
 
@@ -1592,7 +1592,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     F.beSubMatrixOf(temp, 37, 42, 37, 42);
     //    B.printYourself();
 
-    FloatArray sums(6);
+    FloatArray eig, sums(6);
     sums.zero();
     for ( int i = 1; i <= 18; i++ ) {
         sums.at(1) += A.at(i, i);
@@ -1642,8 +1642,8 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     // For analytically integrated throught he thickness, see computeMassMatrix
 
 
-    FloatMatrix mass, temp;
-    FloatArray solVec;
+    FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
+    FloatArray solVec, unknowns;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int ndofs = this->giveNumberOfDofs();
     temp.resize(ndofs, ndofs);

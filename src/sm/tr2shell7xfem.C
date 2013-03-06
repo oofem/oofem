@@ -79,7 +79,6 @@ Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const {
         return this->ordering_gr_edge;
     } else {
         _error("giveOrdering: unknown fieldType");
-        return NULL;
     }
 }
 

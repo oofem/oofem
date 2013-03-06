@@ -145,7 +145,7 @@ void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC)
 {
     // Continuous part
-
+    FloatArray g1c, g2c, g3c;
     Shell7Base :: evalCovarBaseVectorsAt(gp, g1, g2, g3, genEpsC);
     
     // Discontinuous part - ///@todo bad implementation regarding enr. functions - should be changed
@@ -221,7 +221,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
     IntArray ordering_cont = this->giveOrdering(field);
     IntArray fieldDofId    = this->giveFieldDofId(field);
 
-    IntArray ordering_temp, activeDofsArrayTemp;
+    IntArray ordering_temp, activeDofsArrayTemp, temp;
     ordering_temp.resize(ordering_cont.giveSize());
     activeDofsArrayTemp.resize(ordering_cont.giveSize());
 
@@ -254,7 +254,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
      
     // Reduce arrays to actual size ///@todo will not work if there are several ei
     int numActiveDofs = activeDofPos;
-    orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
+    IntArray ordering; orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
     
     for ( int i = 1; i <= numActiveDofs; i++ ) {
         orderingArray.at(i) = ordering_temp.at(i); 
@@ -602,8 +602,8 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
     // For analytically integrated throught he thickness, see computeMassMatrix
 
 
-    FloatMatrix mass, temp;
-    FloatArray solVec;
+    FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
+    FloatArray solVec, unknowns;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int ndofs = this->giveNumberOfDofs();
     temp.resize(ndofs, ndofs);
