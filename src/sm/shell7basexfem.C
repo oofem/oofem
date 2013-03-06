@@ -145,7 +145,7 @@ void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC)
 {
     // Continuous part
-    FloatArray g1c, g2c, g3c;
+
     Shell7Base :: evalCovarBaseVectorsAt(gp, g1, g2, g3, genEpsC);
     
     // Discontinuous part - ///@todo bad implementation regarding enr. functions - should be changed
@@ -221,7 +221,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
     IntArray ordering_cont = this->giveOrdering(field);
     IntArray fieldDofId    = this->giveFieldDofId(field);
 
-    IntArray ordering_temp, activeDofsArrayTemp, temp;
+    IntArray ordering_temp, activeDofsArrayTemp;
     ordering_temp.resize(ordering_cont.giveSize());
     activeDofsArrayTemp.resize(ordering_cont.giveSize());
 
@@ -254,7 +254,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
      
     // Reduce arrays to actual size ///@todo will not work if there are several ei
     int numActiveDofs = activeDofPos;
-    IntArray ordering; orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
+    orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
     
     for ( int i = 1; i <= numActiveDofs; i++ ) {
         orderingArray.at(i) = ordering_temp.at(i); 
@@ -602,8 +602,8 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
     // For analytically integrated throught he thickness, see computeMassMatrix
 
 
-    FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
-    FloatArray solVec, unknowns;
+    FloatMatrix mass, temp;
+    FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int ndofs = this->giveNumberOfDofs();
     temp.resize(ndofs, ndofs);
@@ -873,11 +873,52 @@ Shell7BaseXFEM :: giveDelaminationGroupMidXi(int dGroup)
 
 
 
+void
+Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
+{
 
 
+    double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
 
+    // Continuous part
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep);
+    FloatArray xc, mc; double gamc=0;
+    this->giveUnknownsAt(localCoords, solVec, xc, mc, gamc, tStep); 
+    double fac = ( zeta + 0.5 * gamc * zeta * zeta );
+    
+    globalCoords = xc;    
+    globalCoords.add(fac,mc);
 
+    // Discontinuous part
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); // should check success
+        EnrichmentFunction *ef = dei->giveEnrichmentFunction(1);
 
+        for ( int j = 1; j <= dei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( dei->isElementEnrichedByEnrichmentDomain(this, j) ) {
+                double zeta0 = dei->enrichmentDomainXiCoords.at(j)*this->layeredCS->computeIntegralThick()*0.5;
+                double H = dei->heaviside(zeta, zeta0);
+
+                if ( H > 0.1 ) {
+                    FloatArray solVecD;
+                    IntArray eiDofIdArray;
+                    dei->giveEIDofIdArray(eiDofIdArray, j);
+                    this->giveSolutionVector(solVecD, eiDofIdArray, tStep); 
+                    FloatArray xd, md; double gamd=0;
+                    this->giveUnknownsAt(localCoords, solVecD, xd, md, gamd, tStep);
+                    double fac = ( zeta + 0.5 * gamd * zeta * zeta );
+                    FloatArray xtemp(3);
+                    xtemp = xd;
+                    xtemp.add(fac,md);
+                    globalCoords.add(xtemp); 
+                }
+
+            }
+        }
+    }
+
+}
 
 
 

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2012   Borek Patzak
+ *               Copyright (C) 1993 - 2013   Borek Patzak
  *
  *
  *
@@ -128,8 +128,8 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatArray &G1, Floa
     double x, y, z, Mx, My, Mz, zeta;
     FloatArray lcoords = * gp->giveCoordinates();
     zeta = giveGlobalZcoord(gp);
-    FloatArray N, M;
-    FloatMatrix dNdxi, Mmat;
+    FloatArray M;
+    FloatMatrix dNdxi;
 
     // In plane base vectors
     FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
@@ -170,8 +170,8 @@ Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(GaussPoint *gp, const int iedge,
     double x, y, z, Mx, My, Mz, zeta;
     FloatArray lcoords = * gp->giveCoordinates();
     zeta = 0.0;     // no variation i z (yet)
-    FloatArray N, M, dNdxi;
-    FloatMatrix Mmat;
+    FloatArray M, dNdxi;
+
     IntArray edgeNodes;
     FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
 
@@ -218,7 +218,7 @@ Shell7Base :: evalContravarBaseVectorsAt(GaussPoint *gp, FloatArray &gcon1, Floa
 void
 Shell7Base :: giveDualBase(const FloatArray &G1, const FloatArray &G2, const FloatArray &G3, FloatArray &g1, FloatArray &g2, FloatArray &g3)
 {
-    FloatMatrix gmat, ginv, test;
+    FloatMatrix gmat, ginv;
 
     // Metric tensor
     gmat.resize(3, 3);
@@ -327,10 +327,10 @@ Shell7Base :: setupInitialNodeDirectors()
 void
 Shell7Base :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEps)
 {
-    FloatArray lcoords = * gp->giveCoordinates();
+    
     double zeta = giveGlobalZcoord(gp);
 
-    FloatArray dxdxi, dxdxi1, dxdxi2, m, dmdxi, dmdxi1, dmdxi2, dgamdxi,  test;
+    FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
     double dgamdxi1, dgamdxi2, gam;
     this->giveGeneralizedStrainComponents(genEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m, dgamdxi1, dgamdxi2, gam);
 
@@ -352,7 +352,7 @@ void
 Shell7Base :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatArray &g1, FloatArray &g3, TimeStep *tStep)
 {
     double zeta = 0.0, gam;
-    FloatArray lcoords = * gp->giveCoordinates();
+    
     FloatArray a;
     FloatMatrix B;
     IntArray edgeNodes;
@@ -365,7 +365,7 @@ Shell7Base :: edgeEvalCovarBaseVectorsAt(GaussPoint *gp, const int iedge, FloatA
     eps.beProductOf(B, a);    // [dxdxi, dmdxi, m, dgamdxi, gam]^T
 
 
-    FloatArray dxdxi, m, dmdxi, test;
+    FloatArray dxdxi, m, dmdxi;
     double dgamdxi;
     dxdxi.setValues( 3, eps.at(1), eps.at(2), eps.at(3) );
     dmdxi.setValues( 3, eps.at(4), eps.at(5), eps.at(6) );
@@ -407,7 +407,7 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     answer.resize(ndofs, ndofs);
     answer.zero();
 
-    FloatMatrix temp;
+
     FloatArray solVec, totalSolVec;
     //this->giveUpdatedSolutionVector(solVec, tStep);
 
@@ -440,7 +440,7 @@ void
 Shell7Base :: computeLambdaMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
 {
 
-    FloatArray m(3), dm1(3), dm2(3), temp1, temp2;
+    FloatArray m(3), dm1(3), dm2(3), temp1;
     double dgam1, dgam2, gam;
     this->giveGeneralizedStrainComponents(genEps, temp1, temp1, dm1, dm2, m, dgam1, dgam2, gam);
 
@@ -570,7 +570,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
     L44(2, 2), L45(2, 1),
     L55(1, 1);
     FloatMatrix B11, B22, B32, B43, B53;
-    FloatArray S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1, temp2;
+    FloatArray S1g(3), S2g(3), S3g(3), m(3), dm1(3), dm2(3), temp1;
     FloatMatrix K11(18, 18), K12(18, 18), K13(18, 6), K22(18, 18), K23(18, 6), K33(6, 6);
     K11.zero(), K12.zero(), K13.zero(), K22.zero(), K23.zero(), K33.zero();
 
@@ -856,10 +856,10 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, Material *mat, TimeStep
                                          FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) {
     // Fix material for layered cross section
 
-    FloatArray lcoords, cartStressVector, contravarStressVector, sectionalForces, BF, a;
-    FloatArray g1, g2, g3, m(3), dm1(3), dm2(3), temp1, temp2;
+    FloatArray cartStressVector, contravarStressVector;
+    FloatArray g1, g2, g3;
 
-    FloatMatrix D, Dcart, Mmat, S;
+    FloatMatrix D, Dcart, S;
 
     //A = L^iklj * (g_k x g_l) + S^ij*I
     mat->giveCharacteristicMatrix(Dcart, FullForm, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
@@ -1026,8 +1026,8 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
     IntegrationRule *iRule = integrationRulesArray [ 1 ];   // rule #2 for mid-plane integration only
 
     double dA, a, b;
-    FloatMatrix N, B, Nt, NtL, NtLB, L(7, 18);
-    FloatArray lcoords, BF;
+    FloatMatrix N, B, NtL, NtLB, L(7, 18);
+    FloatArray lcoords;
     double zeta = 1.e30;
     if ( iSurf == 1 ) {
         zeta = this->giveCrossSection()->give(CS_Thickness) * ( -0.5 );     // bottom surface -> iSurf = 1
@@ -1266,13 +1266,13 @@ Shell7Base :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
 //
 // Computes internal forces as a summation of: sectional forces + convective mass force
 {
-    FloatArray totalSolVec, solVec;
+    FloatArray solVec;
     //this->giveUpdatedSolutionVector(solVec, tStep);
     this->giveUpdatedSolutionVector(solVec, tStep); // da
     answer.resize( this->giveNumberOfDofs() );
     answer.zero();
 
-    FloatArray temp;
+
     this->computeSectionalForces(answer, tStep, solVec, useUpdatedGpRecord);
 
     ///@todo How to treat the convective force? Only active during dynamic simulations
@@ -1283,8 +1283,8 @@ void
 Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, int useUpdatedGpRecord)
 //
 {
-    FloatMatrix B;
-    FloatArray BtF, f, genEps;
+
+    FloatArray genEps;
     answer.resize( Shell7Base :: giveNumberOfDofs() );
     answer.zero();
 
@@ -1523,7 +1523,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     IntegrationRule *iRule = integrationRulesArray [ 1 ];
 
     //------------------------------
-    FloatMatrix N, Nt, Ntm, NtmN, temp;
+    FloatMatrix N, Ntm, NtmN, temp;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
 
@@ -1592,7 +1592,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     F.beSubMatrixOf(temp, 37, 42, 37, 42);
     //    B.printYourself();
 
-    FloatArray eig, sums(6);
+    FloatArray sums(6);
     sums.zero();
     for ( int i = 1; i <= 18; i++ ) {
         sums.at(1) += A.at(i, i);
@@ -1642,8 +1642,8 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     // For analytically integrated throught he thickness, see computeMassMatrix
 
 
-    FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
-    FloatArray solVec, unknowns;
+    FloatMatrix mass, temp;
+    FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int ndofs = this->giveNumberOfDofs();
     temp.resize(ndofs, ndofs);
@@ -2772,13 +2772,9 @@ Shell7Base :: computeNmatricesAt(GaussPoint *gp, FloatMatrix &N11, FloatMatrix &
 void
 Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords)
 {
-    double x, y, z, Mx, My, Mz, zeta;
-    //zeta = localCoords.at(3)*this->layeredCS->give(CS_Thickness);
-    zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
-    FloatArray N, M;
-
-    // In plane base vectors
+    double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
     FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( this->giveInterpolation() );
+    FloatArray N;
     fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
 
     globalCoords.resize(3);
@@ -2786,14 +2782,14 @@ Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int laye
 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         FloatArray *nodeI = this->giveNode(i)->giveCoordinates();
-        x = nodeI->at(1);
-        y = nodeI->at(2);
-        z = nodeI->at(3);
+        double x = nodeI->at(1);
+        double y = nodeI->at(2);
+        double z = nodeI->at(3);
 
-        M = this->giveInitialNodeDirector(i);
-        Mx = M.at(1);
-        My = M.at(2);
-        Mz = M.at(3);
+        FloatArray M = this->giveInitialNodeDirector(i);
+        double Mx = M.at(1);
+        double My = M.at(2);
+        double Mz = M.at(3);
 
         globalCoords.at(1) += N.at(i) * ( x + zeta * Mx );
         globalCoords.at(2) += N.at(i) * ( y + zeta * My );
@@ -2806,8 +2802,10 @@ Shell7Base :: vtkEvalInitialGlobalCoordinateAt(FloatArray &localCoords, int laye
 void
 Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
+    FloatArray solVec;
+    this->giveUpdatedSolutionVector(solVec, tStep);
     FloatArray x, m; double gam=0;
-    this->giveUnknownsAt(localCoords, x, m, gam, tStep); 
+    this->giveUnknownsAt(localCoords, solVec, x, m, gam, tStep); 
 
     double zeta = localCoords.at(3)*this->layeredCS->giveLayerThickness(layer)*0.5 + this->layeredCS->giveLayerMidZ(layer);
     double fac = ( zeta + 0.5 * gam * zeta * zeta );
@@ -2817,20 +2815,15 @@ Shell7Base :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int laye
 }
 
 void
-Shell7Base :: giveUnknownsAt(FloatArray &lcoords, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at aGaussPoint.
+Shell7Base :: giveUnknownsAt(FloatArray &lcoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
+// returns the unknowns evaluated at a point (xi1, xi2, xi3)
 {
-    FloatArray solVec;
-    this->giveUpdatedSolutionVector(solVec, tStep);
 
     FloatArray N;
     this->giveInterpolation()->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
 
-    x.resize(3);
-    x.zero();
-    m.resize(3);
-    m.zero();
+    x.resize(3); x.zero();
+    m.resize(3); m.zero();
     int ndofs_xm  = this->giveNumberOfFieldDofs(Midplane);
     for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
         x.at(1) += N.at(i) * solVec.at(1+j);

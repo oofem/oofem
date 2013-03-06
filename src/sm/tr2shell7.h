@@ -42,7 +42,7 @@
 
 #include "nlstructuralelement.h"
 #include "shell7base.h"
-#include "vtkxmlexportmodule.h"
+//#include "vtkxmlexportmodule.h"
 namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;
@@ -55,7 +55,7 @@ class BoundaryLoad;
  * @date 2012-11-01
  */
 
-class Tr2Shell7 : public Shell7Base, public VTKXMLExportModuleElementInterface
+class Tr2Shell7 : public Shell7Base
 {
 protected:
     int numberOfGaussPoints;

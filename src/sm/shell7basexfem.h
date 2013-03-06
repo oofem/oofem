@@ -120,6 +120,9 @@ protected:
     // Mass matrices
     void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep); 
 
+    // VTK
+    void vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+
 public:
     // constructor
     Shell7BaseXFEM(int n, Domain *d);   // : Shell7Base(n, d),  XfemElementInterface(this);
