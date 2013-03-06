@@ -83,6 +83,9 @@ public:
     { OOFEM_ERROR("BSplineInterpolation :: boundaryEvalNormal - Not implemented"); return 0.; }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("BSplineInterpolation :: boundaryGiveTransformationJacobian - Not implemented"); return 0.;}
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("BSplineInterpolation :: boundaryLocal2Global - Not implemented"); }
+
     
     virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
