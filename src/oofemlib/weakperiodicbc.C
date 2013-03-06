@@ -97,10 +97,8 @@ WeakPeriodicbc :: initializeFrom(InputRecord *ir)
     bcID = this->giveNumber();
     gammaDman = new Node(100, this->domain);
 
-    DofIDList.resize(orderOfPolygon + 1);
     for ( int i = 0; i <= orderOfPolygon; i++ ) {
-        gammaDman->appendDof( new MasterDof( i, gammaDman, ( DofIDItem ) ( bcID * 100 + i ) ) );
-        DofIDList.at(i + 1) = ( bcID * 100 + i );
+        gammaDman->appendDof( new MasterDof( i, gammaDman, (DofIDItem)this->domain->giveNextFreeDofID() ) );
     }
 
     return IRRT_OK;
@@ -204,14 +202,19 @@ void WeakPeriodicbc :: addElementSide(int newElement, int newSide)
 
 void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
+    if ( type != StiffnessMatrix ) {
+        return;
+    }
+
+    IntArray c_loc, r_loc;
+    gammaDman->giveCompleteLocationArray( r_loc, r_s );
+    gammaDman->giveCompleteLocationArray( c_loc, c_s );
+
     //printf("*** assemble\n");
     GaussIntegrationRule *iRule;
 
-    GaussPoint *gp;
-    FloatArray *lcoords, gcoords, normal;
+    FloatArray gcoords, normal;
     int normalSign, dofCountOnBoundary;
-
-    Element *thisElement;
 
     FEI2dTrLin interpolation_lin(1, 2);
     FEI2dTrQuad interpolation_quad(1, 2);
@@ -231,7 +234,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
         for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {       // Loop over each element on this edge
             FloatMatrix B, BT;
 
-            thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+            Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
             if ( ngp == -1 ) {
@@ -240,9 +243,11 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
             iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
             // Find dofs for this element side
-            IntArray tempSideLocation, sideLocation;
+            IntArray r_sideLoc, c_sideLoc;
 
-            thisElement->giveBoundaryLocationArray(tempSideLocation, side [ thisSide ].at(ielement), EID_MomentumBalance, r_s);
+            ///@todo See todo on assembleVector
+            //thisElement->giveBoundaryLocationArray(r_sideLoc, side [ thisSide ].at(ielement), eid, r_s);
+            //thisElement->giveBoundaryLocationArray(c_sideLoc, side [ thisSide ].at(ielement), eid, c_s);
 
             // Find dofs for this element which should be periodic
             IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
@@ -251,7 +256,8 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
 
             thisElement->giveInterpolation()->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
-            sideLocation.resize(0);
+            r_sideLoc.resize(0);
+            c_sideLoc.resize(0);
             dofCountOnBoundary = 0;
             for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
                 thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
@@ -259,7 +265,9 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
                     if ( nodeDofIDMask.at(j) == dofid ) {
                         thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, r_s);
-                        sideLocation.followedBy(nodalArray);
+                        r_sideLoc.followedBy(nodalArray);
+                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, c_s);
+                        c_sideLoc.followedBy(nodalArray);
                         dofCountOnBoundary++;
                     }
                 }
@@ -274,13 +282,10 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 interpolation = & interpolation_quad;
             }
 
-            IntArray cloc;
-            gammaDman->giveLocationArray( DofIDList, cloc, EModelDefaultEquationNumbering() );
-
             B.zero();
             for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-                gp = iRule->getIntegrationPoint(i);
-                lcoords = gp->giveCoordinates();
+                GaussPoint *gp = iRule->getIntegrationPoint(i);
+                FloatArray *lcoords = gp->giveCoordinates();
 
                 FloatArray N;
 
@@ -289,7 +294,7 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 // Compute base function values
                 interpolation->boundaryEvalN( N, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                 // Compute Jacobian
-                double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+                double detJ = fabs( interpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                 double s = gcoords.at(direction);
 
                 for ( int j = 0; j <= orderOfPolygon; j++ ) {
@@ -301,9 +306,10 @@ void WeakPeriodicbc :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID 
                 }
             }
 
-            answer->assemble(sideLocation, cloc, B);
             BT.beTranspositionOf(B);
-            answer->assemble(cloc, sideLocation, BT);
+
+            answer->assemble(r_sideLoc, c_loc, B);
+            answer->assemble(r_loc, c_sideLoc, BT);
 
             delete iRule;
         }
@@ -319,9 +325,9 @@ double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
         fVal = pow(coordinate, baseID);
     } else if ( useBasisType == trigonometric ) {
         if ( baseID % 2 == 0 ) {   // Even
-            fVal = cos( ( ( double ) baseID ) / 2 * ( coordinate * 2 * 3.141593 / sideLength ) );
+            fVal = cos( ( ( double ) baseID ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
         } else {
-            fVal = sin( ( ( double ) baseID + 1 ) / 2 * ( coordinate * 2 * 3.141593 / sideLength ) );
+            fVal = sin( ( ( double ) baseID + 1 ) / 2. * ( coordinate * 2. * M_PI / sideLength ) );
         }
     } else if ( useBasisType == legendre ) {
         double n = (double) baseID;
@@ -336,14 +342,17 @@ double WeakPeriodicbc :: computeBaseFunctionValue(int baseID, double coordinate)
 
 double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                         CharType type, ValueModeType mode,
-                                        const UnknownNumberingScheme &s, Domain *domain)
+                                        const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     //printf("*** assembleVector\n");
     double norm = 0.0;
 
     // Fetch unknowns of this boundary condition
+    IntArray gammaLoc, gammaDofIDs;
     FloatArray gamma;
-    gammaDman->giveUnknownVector(gamma, DofIDList, eid, mode, tStep);
+    gammaDman->giveCompleteUnknownVector( gamma, eid, mode, tStep);
+    gammaDman->giveCompleteLocationArray( gammaLoc, s );
+    gammaDman->giveCompleteMasterDofIDArray( gammaDofIDs );
 
     if ( type == InternalForcesVector ) {
         GaussIntegrationRule *iRule;
@@ -379,23 +388,25 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
 
                 iRule = new GaussIntegrationRule(1, thisElement, 1, 1);
                 if ( ngp == -1 ) {
-                    ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2.0+(int) orderOfPolygon);
+                    ngp=iRule->getRequiredNumberOfIntegrationPoints(_Line, 2 + orderOfPolygon);
                 }
                 iRule->setUpIntegrationPoints(_Line, ngp, _Unknown);
 
                 // Find dofs for this element side
-                IntArray tempSideLocation, sideLocation;
+                IntArray sideLocation, masterDofIDs;
 
-                thisElement->giveBoundaryLocationArray(tempSideLocation, side [ thisSide ].at(ielement), EID_MomentumBalance, s);
+                ///@todo Support explicitly asking specifying dofids instead of equation ids (Jim needed this feature as well, and it makes sense to have it)
+                //thisElement->giveBoundaryLocationArray(sideLocation, side [ thisSide ].at(ielement), eid, s, &masterDofIDs);
 
                 // Find dofs for this element which should be periodic
-                IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray, masterDofIDs; ///@todo masterDofIDs and eNorms
+                IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
                 periodicDofIDMask.resize(1);
                 periodicDofIDMask.at(1) = dofid;
 
                 thisElement->giveInterpolation()->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
                 sideLocation.resize(0);
+                masterDofIDs.resize(0);
                 a.resize(0);
                 dofCountOnBoundary = 0;
                 for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
@@ -404,8 +415,11 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                     for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
                         if ( nodeDofIDMask.at(j) == dofid ) {
                             thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, s);
-                            double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(eid, mode, tStep);
                             sideLocation.followedBy(nodalArray);
+                            thisElement->giveDofManager( bNodes.at(i) )->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
+                            masterDofIDs.followedBy(nodalArray);
+
+                            double value = thisElement->giveDofManager( bNodes.at(i) )->giveDof(j)->giveUnknown(eid, mode, tStep);
                             a.resize( sideLocation.giveSize() );
                             a.at( sideLocation.giveSize() ) = value;
                             dofCountOnBoundary++;
@@ -422,9 +436,6 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                     interpolation = & interpolation_quad;
                 }
 
-                IntArray cloc;
-                gammaDman->giveLocationArray( DofIDList, cloc, EModelDefaultEquationNumbering() );
-
                 B.zero();
                 for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                     gp = iRule->getIntegrationPoint(i);
@@ -437,7 +448,7 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
                     // Compute base function values
                     interpolation->boundaryEvalN( N, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
                     // Compute Jacobian
-                    double detJ = fabs( interpolation->edgeGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+                    double detJ = fabs( interpolation->boundaryGiveTransformationJacobian( side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) ) );
                     double s = gcoords.at(direction);
 
                     for ( int j = 0; j <= orderOfPolygon; j++ ) {
@@ -455,8 +466,18 @@ double WeakPeriodicbc :: assembleVector(FloatArray &answer, TimeStep *tStep, Equ
 
                 norm += myProd.computeSquaredNorm();
                 norm += myProdGamma.computeSquaredNorm();
+                if ( eNorms ) {
+                    for ( int i = 1; i <= gammaLoc.giveSize(); ++i ) {
+                        if ( gammaLoc.at(i) ) 
+                            eNorms->at(gammaDofIDs.at(i)) += myProd.at(i) * myProd.at(i);
+                    }
+                    for ( int i = 1; i <= sideLocation.giveSize(); ++i ) {
+                        if ( sideLocation.at(i) ) 
+                            eNorms->at(masterDofIDs.at(i)) += myProdGamma.at(i) * myProdGamma.at(i);
+                    }
+                }
 
-                answer.assemble(myProd, cloc);
+                answer.assemble(myProd, gammaLoc);
                 answer.assemble(myProdGamma, sideLocation);
 
                 delete iRule;

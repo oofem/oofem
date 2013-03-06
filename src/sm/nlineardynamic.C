@@ -64,7 +64,6 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     numMetStatus              = NM_None;
 
     ndomains                = 1;
-    internalForcesEBENorm   = 0;
     internalVarUpdateStamp  = 0;
     initFlag = commInitFlag = 1;
 

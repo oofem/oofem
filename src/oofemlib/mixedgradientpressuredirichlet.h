@@ -140,7 +140,7 @@ public:
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain);
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     virtual bool requiresActiveDofs() { return true; }
     virtual bool isPrimaryDof(ActiveDof *dof);

@@ -139,7 +139,7 @@ public:
      */
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain) { return 0.0; };
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL) { return 0.0; };
 
     /**
      * Gives a list of location arrays that will be assembled.

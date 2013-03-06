@@ -190,7 +190,7 @@ public:
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
                             FloatArray *X, FloatArray *dX, FloatArray *F,
-                            double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
+                            const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }
     virtual void setStepLength(double s) { deltaL = s; }
@@ -231,7 +231,7 @@ protected:
     bool checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                           const FloatArray &X, const FloatArray &ddX,
                           double Lambda, double RR0, double RR, double drProduct,
-                          double internalForcesEBENorm, int nite, bool &errorOutOfRange);
+                          const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange);
 
     /// Perform line search optimization of step length
     void do_lineSearch(FloatArray &X, const FloatArray &XInitial, const FloatArray &deltaX_, const FloatArray &deltaXt,

@@ -1077,26 +1077,36 @@ double EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, Equatio
                                     CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
-    double localNorm = 0.0;
-    localNorm += this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
-    localNorm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
-    localNorm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain, eNorms);
-#ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    return this->givePetscContext(domain->giveNumber(), eid)->accumulate(localNorm);
-
- #else
-    if ( this->isParallel() ) {
-        double globalNorm;
-        MPI_Allreduce(& localNorm, & globalNorm, 1, MPI_DOUBLE, MPI_SUM, comm);
-        return globalNorm;
+    double norm = 0.0;
+    if ( eNorms ) {
+        eNorms->resize( domain->giveMaxDofID() ); ///@todo What if different cores have different sizes?
+        eNorms->zero();
     }
 
- #endif
-#else
-    return localNorm;
+    norm += this->assembleVectorFromDofManagers(answer, tStep, eid, type, mode, s, domain, eNorms);
+    norm += this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
+    norm += this->assembleVectorFromActiveBC(answer, tStep, eid, type, mode, s, domain, eNorms);
 
+    // Collect over mpi;
+#ifdef __PARALLEL_MODE
+    if ( this->isParallel() ) {
+#ifdef __PETSC_MODULE
+        norm = this->givePetscContext(domain->giveNumber(), eid)->accumulate(norm);
+#else
+        double localNorm = norm;
+        MPI_Allreduce(& localNorm, & norm, 1, MPI_DOUBLE, MPI_SUM, comm);
 #endif
+        if ( eNorms ) {
+            FloatArray localENorms = *eNorms;
+#ifdef __PETSC_MODULE
+            this->givePetscContext(domain->giveNumber(), eid)->accumulate(localENorms, *eNorms);
+#else
+            MPI_Allreduce(localENorms.givePointer(), eNorms.givePointer(), eNorms.giveSize(), MPI_DOUBLE, MPI_SUM, comm);
+#endif
+        }
+    }
+#endif
+    return norm;
 }
 
 
@@ -1170,7 +1180,7 @@ double EngngModel :: assembleVectorFromActiveBC(FloatArray &answer, TimeStep *tS
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            norm += bc->assembleVector(answer, tStep, eid, type, mode, s, domain);
+            norm += bc->assembleVector(answer, tStep, eid, type, mode, s, domain, eNorms);
         }
     }
 
@@ -1214,7 +1224,7 @@ double EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tS
             continue;
         }
 
-        element->giveLocationArray(loc, eid, s);
+        element->giveLocationArray(loc, eid, s, &dofids);
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
             if ( element->giveRotationMatrix(R, eid) ) {

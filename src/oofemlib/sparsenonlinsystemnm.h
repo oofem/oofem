@@ -96,7 +96,7 @@ public:
      * @param X  Total solution (total displacement).
      * @param dX Increment of solution (incremental displacements).
      * @param F InternalRhs (real internal forces).
-     * @param internalForcesEBENorm Norm of internal nodal forces (evaluated on element by element basis).
+     * @param internalForcesEBENorm Norm of internal nodal forces (evaluated on element by element basis) (split into each DOF id).
      * @param s RHS scale factor (load level).
      * @param rlm Reference load mode.
      * @param nite Number of iterations needed.
@@ -105,7 +105,7 @@ public:
      */
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
                             FloatArray *X, FloatArray *dX, FloatArray *F,
-                            double &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
+                            const FloatArray &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *tStep) = 0;
 
     /**

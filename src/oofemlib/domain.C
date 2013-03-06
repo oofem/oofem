@@ -1231,6 +1231,11 @@ double Domain :: giveVolume()
 int
 Domain :: giveNextFreeDofID()
 {
+#ifdef __PARALLEL_MODE
+    if ( this->engineeringModel->isParallel() ) {
+        OOFEM_ERROR("Additional dof id's not implemented/tested for parallel problems");
+    }
+#endif
     return this->freeDofID++;
 }
 

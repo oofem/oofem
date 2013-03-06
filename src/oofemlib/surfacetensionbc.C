@@ -33,7 +33,6 @@
  */
 
 #include "surfacetensionbc.h"
-#include "elementside.h"
 #include "element.h"
 #include "node.h"
 #include "crosssection.h"
@@ -71,10 +70,12 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                 const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
-    if (!this->useTangent || type != TangentStiffnessMatrix)
+    if (eid == EID_MomentumBalance_ConservationEquation) {
+        eid = EID_MomentumBalance;
+    }
+    if (!this->useTangent || eid != EID_MomentumBalance || type != TangentStiffnessMatrix)
         return;
 
-    IntArray dofids, masterdofids;
     rows.resize(this->elements.size() + this->sides.size());
     cols.resize(this->elements.size() + this->sides.size());
 
@@ -88,10 +89,8 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
         int side = it->second;
-        ElementSide *es = e->giveSide(side);
-        e->giveDofManDofIDMask(1, eid, dofids); // NOTE! Assumes that the first node contains the relevant dof ID's.
-        es->giveLocationArray(dofids, rows[i], r_s);
-        es->giveLocationArray(dofids, cols[i], c_s);
+        e->giveBoundaryLocationArray(rows[i], side, eid, r_s);
+        e->giveBoundaryLocationArray(cols[i], side, eid, c_s);
         i++;
     }
 }
@@ -99,14 +98,16 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std::vector<IntArray>
 void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain)
 {
-    if (!this->useTangent || type != TangentStiffnessMatrix)
+    if (eid == EID_MomentumBalance_ConservationEquation) {
+        eid = EID_MomentumBalance;
+    }
+    if (!this->useTangent || eid != EID_MomentumBalance || type != TangentStiffnessMatrix)
         return;
 
     OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assemble - Not implemented yet.");
 
     FloatMatrix Ke;
     IntArray r_loc, c_loc;
-    IntArray dofids;
 
     for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(*it);
@@ -118,10 +119,8 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
         int side = it->second;
-        ElementSide *es = e->giveSide(side);
-        e->giveDofManDofIDMask(1, eid, dofids); // NOTE! Assumes that the first node contains the relevant dof ID's.
-        es->giveLocationArray(dofids, r_loc, r_s); // Assumes the element has a sane/normal location vector.
-        es->giveLocationArray(dofids, c_loc, c_s);
+        e->giveBoundaryLocationArray(r_loc, side, eid, r_s);
+        e->giveBoundaryLocationArray(c_loc, side, eid, c_s);
         this->computeTangentFromElement(Ke, e, side, tStep);
         answer->assemble(r_loc, c_loc, Ke);
     }
@@ -129,7 +128,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
 
 double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain)
+                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     if (type != InternalForcesVector) {
         return 0.0;
@@ -142,25 +141,34 @@ double SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, Tim
     }
 
     FloatArray fe;
-    IntArray loc, dofids, masterdofids; ///@todo masterDofIDs and eNorms.
+    IntArray loc, dofids, masterdofids;
     double norm = 0.0;
 
+    ///@todo Duplicated code here, should work exclusively on element boundaries (degenerate elements should just stick to boundary = 1)
     for (std :: list<int> :: const_iterator it = elements.begin(); it != elements.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(*it);
-        e->giveLocationArray(loc, eid, s); // Assumes the element has a sane/normal location vector.
+        e->giveLocationArray(loc, eid, s, &masterdofids); // Assumes the element has a sane/normal location vector.
         this->computeLoadVectorFromElement(fe, e, -1, tStep);
         answer.assemble(fe, loc);
         norm += fe.computeSquaredNorm();
+        if ( eNorms ) {
+            for ( int i = 1; i <= loc.giveSize(); ++i ) {
+                if ( loc.at(i) > 0 ) eNorms->at(masterdofids.at(1)) += fe.at(i) * fe.at(i);
+            }
+        }
     }
     for (std :: list< std::pair<int, int> > :: const_iterator it = sides.begin(); it != sides.end(); ++it ) {
         Element *e = this->giveDomain()->giveElement(it->first);
         int side = it->second;
-        ElementSide *es = e->giveSide(side);
-        e->giveDofManDofIDMask(1, eid, dofids); // NOTE! Assumes that the first node contains the relevant dof ID's.
-        es->giveLocationArray(dofids, loc, s); // Assumes the element has a sane/normal location vector.
+        e->giveBoundaryLocationArray(loc, side, eid, s, &masterdofids);
         this->computeLoadVectorFromElement(fe, e, side, tStep);
         answer.assemble(fe, loc);
         norm += fe.computeSquaredNorm();
+        if ( eNorms ) {
+            for ( int i = 1; i <= loc.giveSize(); ++i ) {
+                if ( loc.at(i) > 0 ) eNorms->at(masterdofids.at(1)) += fe.at(i) * fe.at(i);
+            }
+        }
     }
     return norm;
 }
@@ -176,10 +184,10 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
     integrationDomain id = e->giveIntegrationDomain();
     int nodes = e->giveNumberOfNodes();
 
-    if (nsd == 2) {
+    if ( nsd == 2 ) {
         if (!((side == -1 && id == _Line) || (side > 0 && (id == _Triangle || id == _Square))))
             OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Not a surface element.");
-        if (side == -1)
+        if ( side == -1 )
             side = 1;
 
         FEInterpolation2d *fei2d = static_cast<FEInterpolation2d*>(fei);
@@ -255,7 +263,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         answer.symmetrized();
 
-    }  else if (nsd ==  3) {
+    }  else if ( nsd ==  3 ) {
         if ( !(  ((id == _Triangle || id == _Square) && side == -1) || ((id == _Tetrahedra || id == _Cube) && side > 0)  ) )
             OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Not a surface element.");
         if (side == -1)
@@ -263,7 +271,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         FEInterpolation3d *fei3d = static_cast<FEInterpolation3d*>(fei);
 
-        OOFEM_ERROR("SurfaceTensionBoundaryCondition :: computeTangentFromElement - 3D tangents not implemented yet.");
+        OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D tangents not implemented yet.");
 
         FloatMatrix tmp(3*nodes, 3*nodes);
         FloatMatrix dNdx;
@@ -285,7 +293,8 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             //answer.plusProductSymmUpper(A,B, dV);
             ///@todo  Derive expressions for this.
         }
-        OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D Completely untested!");
+    } else {
+        OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Only 2D or 3D is possible!");
     }
 }
 
@@ -302,7 +311,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
 
     if (nsd == 2) {
         if ( !((side == -1 && id == _Line) || (side > 0 && (id == _Triangle || id == _Square))) )
-            OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Not a surface element.");
+            OOFEM_ERROR("SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement - Not a surface element.");
         if (side == -1)
             side = 1;
 

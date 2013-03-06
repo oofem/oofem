@@ -84,7 +84,6 @@ private:
     double computeBaseFunctionValue(int baseID, double coordinate);
 
     Node *gammaDman;
-    IntArray DofIDList;
 
     double factorial(int n);
 
@@ -98,11 +97,13 @@ public:
 
     basisType giveBasisType() {return useBasisType; };
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, 
+                          const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
+                          Domain *domain);
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain);
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorm = NULL);
 
     virtual int giveNumberOfInternalDofManagers();
 

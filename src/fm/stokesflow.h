@@ -66,7 +66,7 @@ protected:
     /// Linear solver type.
     LinSystSolverType solverType;
     /// Element norm for nonlinear analysis (squared)
-    double eNorm;
+    FloatArray eNorm;
 
     /// Used for determining if a new mesh must be created.
     MeshQualityErrorEstimator *meshqualityee;

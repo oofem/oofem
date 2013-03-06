@@ -397,6 +397,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                             ldm = globloc [ shdm ];
                         } else {
                             OOFEM_ERROR3("[%d] PetscNatural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
+                            ldm = 0;
                         }
 
                         dman = d->giveDofManager(ldm);
