@@ -50,7 +50,6 @@ class ElementSide;
  */
 class SurfaceTensionBoundaryCondition : public ActiveBoundaryCondition
 {
-    std::list<int> elements; ///< Surface elements on which load is applied.
     std::list<std::pair<int,int> > sides; ///< Sides of bulk elements on which load is applied.
 
     double gamma; ///< Surface tension.
@@ -66,10 +65,9 @@ public:
     /// Destructor.
     virtual ~SurfaceTensionBoundaryCondition() { sides.clear(); }
 
-    void addElement(int elem) { elements.push_back(elem); }
-    void addElementSide(int elem, int side) { sides.push_back(std::make_pair(elem,side)); }
+    virtual void addElement(int elem) { OOFEM_ERROR("SurfaceTensionBoundaryCondition :: addElement - Only applies to boundaries") }
+    virtual void addElementSide(int elem, int side) { sides.push_back(std::make_pair(elem,side)); }
 
-    void clearElements() { elements.clear(); }
     void clearElementSides() { sides.clear(); }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -79,7 +77,7 @@ public:
 
     virtual double assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, Domain *domain);
+                                  const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     virtual void giveLocationArrays(std::vector<IntArray> &rows, std::vector<IntArray> &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);

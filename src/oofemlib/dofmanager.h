@@ -249,13 +249,20 @@ public:
      * an error is generated and execution exits.
      * @param field Primary field.
      * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementation can return only values for current
+     * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
+     * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
      * @see Dof::giveUnknown
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    PrimaryField &field, ValueModeType mode, TimeStep *stepN);
+    /**
+     * Assembles the complete unknown vector in node. Does not transform and local->global coordinate systems.
+     * @param answer Complete vector of all dof values in receiver.
+     * @param mode Mode of unknowns.
+     * @param tstepN Time step when unknown is requested.
+     */
+    void giveCompleteUnknownVector(FloatArray &answer, EquationID type, ValueModeType mode, TimeStep *stepN);
     /**
      * Constructs the requested vector by assembling e.g. [D_u, D_v, D_w] or [V_u, V_v, V_w].
      * If for example D_v or V_w doesn't exist, then zero value is inserted.

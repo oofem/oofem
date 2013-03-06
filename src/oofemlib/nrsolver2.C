@@ -83,7 +83,7 @@ NRSolver2 :: ~NRSolver2()
 NM_Status
 NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                    FloatArray *X, FloatArray *dX, FloatArray *F,
-                   double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                    int &nite, TimeStep *tNow)
 //
 // this function solve the problem of the unbalanced equilibrium

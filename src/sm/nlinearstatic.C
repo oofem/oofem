@@ -62,7 +62,6 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     //
     prevStepLength = 0.;
     currentStepLength = 0.;
-    internalForcesEBENorm = 0.0;
     loadLevel = cumulatedLoadLevel = 0.;
     mstepCumulateLoadLevelFlag = 0;
     numMetStatus = NM_None;

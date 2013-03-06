@@ -114,7 +114,7 @@ CylindricalALM ::  ~CylindricalALM()
 NM_Status
 CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                         FloatArray *X, FloatArray *dX, FloatArray *F,
-                        double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
+                        const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tNow)
 {
     FloatArray rhs, deltaXt, deltaX_, dXm1, XInitial;
@@ -496,7 +496,7 @@ bool
 CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                                    const FloatArray &X, const FloatArray &ddX,
                                    double Lambda, double RR0, double RR, double drProduct,
-                                   double internalForcesEBENorm, int nite, bool &errorOutOfRange)
+                                   const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange)
 {
     /*
      * typedef std::set<DofID> __DofIDSet;
@@ -704,8 +704,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         // we compute a relative error norm
         if ( ( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
             forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
-        } else if ( internalForcesEBENorm > calm_SMALL_ERROR_NUM ) {
-            forceErr = sqrt(forceErr / internalForcesEBENorm);
+        } else if ( internalForcesEBENorm.at(1) > calm_SMALL_ERROR_NUM ) {
+            forceErr = sqrt(forceErr / internalForcesEBENorm.at(1));
         } else {
             forceErr = sqrt(forceErr);
         }

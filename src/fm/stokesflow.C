@@ -167,9 +167,9 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             solutionVector,
                                             & ( this->incrementOfSolution ),
                                             & ( this->internalForces ),
-                                            eNorm,
+                                            this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
-                                            SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType
+                                            SparseNonLinearSystemNM :: rlm_total,
                                             currentIterations,
                                             tStep);
 #else
@@ -202,13 +202,13 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         static_cast< FMElement* >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
     }
 
-    if (cmpn == InternalRhs) {
+    if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->eNorm = this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVector( this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+                              EModelDefaultEquationNumbering(), this->giveDomain(1), &this->eNorm );
         return;
 
-    } else if (cmpn == NonLinearLhs) {
+    } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
         this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
                 EModelDefaultEquationNumbering(), d);

@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***********************************
-//   *** CLASS NEWTON RAPHSON SOLVER ***
-//   ***********************************
-
 
 #ifndef nrsolver_h
 #define nrsolver_h
@@ -78,10 +74,8 @@ class NRSolver : public SparseNonLinearSystemNM
 {
 private:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
-    typedef std :: set< DofIDItem >__DofIDSet;
 
     int nite, nsmax, minIterations;
-    double rtol;
     double minStepLength;
     int solved;
     nrsolver_ModeType NR_Mode, NR_OldMode;
@@ -126,11 +120,6 @@ private:
     bool prescribedEgsIS_defined;
 #endif
 
-    // Support for evaluation of error norms for user defined dof-groups.
-    /// Number of convergence criteria dof groups
-    int nccdg;
-    /// Convergence criteria dof groups
-    std :: vector< __DofIDSet >ccDofGroups;
     /// Relative unbalanced force tolerance for each group
     FloatArray rtolf;
     /// Relative iterative displacement change tolerance for each group
@@ -143,7 +132,7 @@ public:
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                             FloatArray *X, FloatArray *dX, FloatArray *F,
-                            double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                            const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -182,7 +171,7 @@ protected:
      * @return True if solution has converged, otherwise false.
      */
     bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, double internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
 };
 } // end namespace oofem
 #endif // nrsolver_h

@@ -63,6 +63,8 @@ public:
     { return this->surfaceEvalNormal(answer, boundary, lcoords, cellgeo); }
     virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { return this->surfaceGiveTransformationJacobian(boundary, lcoords, cellgeo); }
+    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { return this->surfaceLocal2global(answer, boundary, lcoords, cellgeo); }
 
     /**@name Edge interpolation services */
     //@{

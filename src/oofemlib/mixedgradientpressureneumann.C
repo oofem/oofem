@@ -60,7 +60,7 @@ MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) :
 {
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = nsd*nsd - 1;
-    this->sigmaDev = new Node(1, d); // Node number lacks meaning here.
+    this->sigmaDev = new Node(0, d); // Node number lacks meaning here.
     for (int i = 0; i < components; i++) {
         // Just putting in X_i id-items since they don't matter.
         sigmaDev->appendDof(new MasterDof(i+1, sigmaDev, (DofIDItem)(d->giveNextFreeDofID()) ));
@@ -415,7 +415,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 
 
 double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain)
+                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     // Boundary condition only acts on the momentumbalance part.
     if (eid == EID_MomentumBalance_ConservationEquation)
@@ -426,7 +426,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
 
     double norm;
     IntArray loc, sigma_loc;  // For the velocities and stress respectively
-    IntArray masterDofIDs; ///@todo Support eNorms.
+    IntArray masterDofIDs, sigmaMasterDofIDs;
     this->sigmaDev->giveCompleteLocationArray(sigma_loc, s);
 
     if (type == ExternalForcesVector) {
@@ -443,10 +443,15 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
             Element *e = this->giveDomain()->giveElement( (*pos).first );
             int boundary = (*pos).second;
             
-            e->giveBoundaryLocationArray(loc, boundary, eid, s);
+            e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterDofIDs);
             this->integrateVolTangent(fe, e, boundary);
             fe.times(-this->pressure);
             answer.assemble(fe, loc);
+            if ( eNorms ) {
+                for ( int i = 1; i <= loc.giveSize(); ++i ) {
+                    if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe.at(i) * fe.at(i);
+                }
+            }
         }
         return norm;
         
@@ -456,10 +461,10 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
         FloatArray s_dev, e_v;
         
         // Fetch the current values of the stress;
-        s_dev.resize(this->sigmaDev->giveNumberOfDofs());
-        for ( int i = 1; i <= this->sigmaDev->giveNumberOfDofs(); i++ ) {
-            s_dev.at(i) = this->sigmaDev->giveDof(i)->giveUnknown(eid, mode, tStep);
-        }
+        this->sigmaDev->giveCompleteUnknownVector(s_dev, eid, mode, tStep);
+        // and the master dof ids for sigmadev used for the internal norms
+        this->sigmaDev->giveCompleteMasterDofIDArray(sigmaMasterDofIDs);
+
         // Assemble: int delta_v (x) n dA : E_i s_i
         //           int v (x) n dA : E_i delta_s_i
         norm = 0.;
@@ -468,7 +473,7 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
             int boundary = (*pos).second;
             
             // Fetch the element information;
-            e->giveBoundaryLocationArray(loc, boundary, eid, s);
+            e->giveBoundaryLocationArray(loc, boundary, eid, s, &masterDofIDs);
             e->computeBoundaryVectorOf(boundary, eid, mode, tStep, e_v);
             this->integrateDevTangent(Ke, e, boundary);
             
@@ -478,7 +483,15 @@ double MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeSt
             
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
-            norm += fe_v.computeNorm() /*+ fe_s.computeNorm()*/; ///@todo What to do with the mixed unknowns here? 
+            norm += fe_v.computeNorm() + fe_s.computeNorm(); ///@todo This is awful. Different units, therefore the split up use below;
+            if ( eNorms ) {
+                for ( int i = 1; i <= loc.giveSize(); ++i ) {
+                    if ( loc.at(i) ) eNorms->at(masterDofIDs.at(i)) += fe_s.at(i) * fe_s.at(i);
+                }
+                for ( int i = 1; i <= sigma_loc.giveSize(); ++i ) {
+                    if ( sigma_loc.at(i) ) eNorms->at(sigmaMasterDofIDs.at(i)) += fe_v.at(i) * fe_v.at(i);
+                }
+            }
         }
         return norm;
     }

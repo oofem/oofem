@@ -140,7 +140,7 @@ public:
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                             FloatArray *X, FloatArray *deltaX, FloatArray *F,
-                            double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                            const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

@@ -33,7 +33,6 @@ namespace oofem {
 class DarcyFlow : public EngngModel
 {
 private:
-
     LinSystSolverType solverType;
 
 protected:
@@ -41,14 +40,13 @@ protected:
     SparseMtrxType sparseMtrxType;
     SparseNonLinearSystemNM *nMethod;
 
-
     SparseMtrx *stiffnessMatrix;
     FloatArray internalForces;
     FloatArray externalForces;
     FloatArray incrementOfSolution;
 
     int currentIterations;
-    double ebenorm, loadLevel;
+    FloatArray ebeNorm;
     FloatArray incrementOfDisplacement;
     FloatArray incrementalBCLoadVector;
     FloatArray incrementalLoadVector;
@@ -63,13 +61,11 @@ public:
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK; };
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK; };
-    virtual void updateDomainLinks() { return; };
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; };
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_IOERR; };
     virtual int checkConsistency() { return 1; };
     virtual fMode giveFormulation() { return TL; }
-    virtual void updateInternalState(TimeStep *stepN) {return; };
-    virtual void giveInternalForces(FloatArray &answer, const FloatArray &DeltaR, Domain *domain, TimeStep *stepN) {};
+    virtual void updateInternalState(TimeStep *stepN) { return; };
 
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
 

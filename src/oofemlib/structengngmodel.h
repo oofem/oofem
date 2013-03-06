@@ -59,8 +59,8 @@ protected:
      */
     StateCounterType internalVarUpdateStamp;
 
-    // Norm of nodal internal forces evaluated on element by element basis
-    double internalForcesEBENorm;
+    /// Norm of nodal internal forces evaluated on element by element basis (squared)
+    FloatArray internalForcesEBENorm;
 
 #ifdef __PARALLEL_MODE
     /// Common Communicator buffer.
@@ -151,8 +151,9 @@ protected:
     void updateInternalState(TimeStep *tStep);
 public:
     /// Creates new StructuralEngngModel with number i, associated to domain d.
-    StructuralEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
-    { internalVarUpdateStamp = 0; }
+    StructuralEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+        internalVarUpdateStamp(0), internalForcesEBENorm()
+    { }
     /// Destructor.
     virtual ~StructuralEngngModel();
 

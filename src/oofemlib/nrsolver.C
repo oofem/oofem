@@ -39,6 +39,7 @@
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "element.h"
+#include "generalbc.h"
 #include "dof.h"
 #include "loadtime.h"
 #include "linesearch.h"
@@ -139,8 +140,15 @@ NRSolver :: initializeFrom(InputRecord *ir)
     solverType = ( LinSystSolverType ) _val;
     this->giveLinearSolver()->initializeFrom(ir);
 
-    // read relative error tolerances of the solver fo each cc
-    IR_GIVE_FIELD(ir, rtol, IFT_NRSolver_rtolv, "rtolv"); // Macro
+    // read relative error tolerances of the solver
+    // if rtolv provided set to this tolerance both rtolf and rtold
+    rtolf.resize(1);
+    rtolf.at(1) = 1.e-3; // Default value.
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), IFT_NRSolver_rtolv, "rtolv"); // Macro
+    rtold = rtolf;
+    // read optional force and displacement tolerances
+    IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), IFT_NRSolver_rtolf, "rtolf"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), IFT_NRSolver_rtold, "rtold"); // Macro
 
     prescribedDofs.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofs, IFT_NRSolver_ddm, "ddm"); // Macro
@@ -167,53 +175,6 @@ NRSolver :: initializeFrom(InputRecord *ir)
         this->giveLineSearchSolver()->initializeFrom(ir);
     }
 
-    /* initialize optional dof groups for convergence criteria evaluation */
-    this->nccdg = 0; // default, no dof cc group, all norms evaluated for all dofs
-    IR_GIVE_OPTIONAL_FIELD(ir, nccdg, IFT_NRSolver_nccdg, "nccdg"); // Macro
-    if ( nccdg >= 1 ) {
-        int _i, _j;
-        IntArray _val;
-        char name [ 12 ];
-        // create an empty set
-        __DofIDSet _set;
-        // resize gof group vector
-        this->ccDofGroups.resize(nccdg, _set);
-        for ( _i = 0; _i < nccdg; _i++ ) {
-            sprintf(name, "ccdg%d", _i + 1);
-            // read dof group as int array under ccdg# keyword
-            IR_GIVE_FIELD(ir, _val, IFT_NRSolver_ccdg, name); // Macro
-            // convert aray into set
-            for ( _j = 1; _j <= _val.giveSize(); _j++ ) {
-                ccDofGroups.at(_i).insert( (DofIDItem)_val.at(_j) );
-            }
-        }
-
-        // read relative error tolerances of the solver fo each cc
-        // if common rtolv provided, set to this tolerace both rtolf and rtold
-        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_NRSolver_rtolv, "rtolv"); // Macro
-        rtold = rtolf;
-        // read optional force and displacement tolerances
-        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_NRSolver_rtolf, "rtolf"); // Macro
-        IR_GIVE_OPTIONAL_FIELD(ir, rtold, IFT_NRSolver_rtold, "rtold"); // Macro
-
-        if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
-            _error2("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
-        }
-    } else {
-        nccdg = 0;
-        double _rtol = 1.e-3; // default tolerance
-        rtolf.resize(1);
-        rtold.resize(1);
-        // read relative error tolerances of the solver
-        // if common rtolv provided, set to this tolerance both rtolf and rtold
-        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtolf, "rtolv"); // Macro
-        rtolf.at(1) = rtold.at(1) = _rtol;
-        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtolf, "rtolf"); // Macro
-        rtolf.at(1) = _rtol;
-        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtold, "rtold"); // Macro
-        rtold.at(1) = _rtol;
-    }
-
     return IRRT_OK;
 }
 
@@ -235,7 +196,7 @@ NRSolver :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 NM_Status
 NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                   FloatArray *X, FloatArray *dX, FloatArray *F,
-                  double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                  const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tNow)
 //
 // this function solve the problem of the unbalanced equilibrium
@@ -654,11 +615,11 @@ NRSolver :: printState(FILE *outputStream)
 
 bool
 NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &ddX, FloatArray &X,
-                             double RRT, double internalForcesEBENorm,
+                             double RRT, const FloatArray &internalForcesEBENorm,
                              int nite, bool &errorOutOfRange, TimeStep *tNow)
 {
-    double forceErr, dispErr, _val;
-    FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
+    double forceErr, dispErr;
+    FloatArray dg_forceErr, dg_dispErr, dg_totalLoadLevel, dg_totalDisp;
     bool answer;
     EModelDefaultEquationNumbering dn;
  #ifdef __PARALLEL_MODE
@@ -681,93 +642,101 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     answer = true;
     errorOutOfRange = false;
 
-    if ( nccdg > 0 ) {
+    if ( internalForcesEBENorm.giveSize() > 1 ) { // Special treatment when just one norm is given; No grouping
+        int nccdg = this->domain->giveMaxDofID();
+        // Keeps tracks of which dof IDs are actually in use;
+        IntArray idsInUse(nccdg);
+        idsInUse.zero();
         // zero error norms per group
-        dg_forceErr.zero();
-        dg_dispErr.zero();
-        dg_totalLoadLevel.zero();
-        dg_totalDisp.zero();
+        dg_forceErr.resize(nccdg); dg_forceErr.zero();
+        dg_dispErr.resize(nccdg); dg_dispErr.zero();
+        dg_totalLoadLevel.resize(nccdg); dg_totalLoadLevel.zero();
+        dg_totalDisp.resize(nccdg); dg_totalDisp.zero();
         // loop over dof managers
         int ndofman = domain->giveNumberOfDofManagers();
         for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
-            DofManager *idofmanptr = domain->giveDofManager(idofman);
+            DofManager *dofman = domain->giveDofManager(idofman);
  #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-            if ( !parallel_context->isLocal(_idofmanptr) ) {
+            if ( !parallel_context->isLocal(dofman) ) {
                 continue;
             }
 
  #endif
 
             // loop over individual dofs
-            int ndof = idofmanptr->giveNumberOfDofs();
+            int ndof = dofman->giveNumberOfDofs();
             for ( int idof = 1; idof <= ndof; idof++ ) {
-                Dof *idofptr = idofmanptr->giveDof(idof);
-                // loop over dof groups
-                for ( int dg = 1; dg <= nccdg; dg++ ) {
-                    // test if dof ID is in active set
-                    if ( ccDofGroups.at(dg - 1).find( idofptr->giveDofID() ) != ccDofGroups.at(dg - 1).end() ) {
-                        int eq = idofptr->giveEquationNumber(dn);
-
-                        if ( eq ) {
-                            _val = rhs.at(eq);
-                            dg_forceErr.at(dg) += _val * _val;
-                            _val = ddX.at(eq);
-                            dg_dispErr.at(dg)  += _val * _val;
-                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-                            _val = RT.at(eq);
-                            dg_totalLoadLevel.at(dg) += _val * _val;
-                            _val = X.at(eq);
-                            dg_totalDisp.at(dg) += _val * _val;
-                        }
-                    }
-                } // end loop over dof groups
-
+                Dof *dof = dofman->giveDof(idof);
+                int eq = dof->giveEquationNumber(dn);
+                int dofid = dof->giveDofID();
+                if ( !eq ) continue;
+ 
+                dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
+                dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
+                dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
+                dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
+                idsInUse.at(dofid) = 1;
             } // end loop over DOFs
-
         } // end loop over dof managers
 
         // loop over elements and their DOFs
         int nelem = domain->giveNumberOfElements();
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *ielemptr = domain->giveElement(ielem);
+            Element *elem = domain->giveElement(ielem);
  #ifdef __PARALLEL_MODE
-            if ( _ielemptr->giveParallelMode() != Element_local ) {
+            if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
  #endif
-            // Aren't internal dofmanagers listed along with all the other dofmanagers, and included in the loop above? / Mikael
             // loop over element internal Dofs
-            for ( int idofman=1; idofman <= ielemptr->giveNumberOfInternalDofManagers(); idofman++) {
-                int ndof = ielemptr->giveInternalDofManager(idofman)->giveNumberOfDofs();
+            for ( int idofman = 1; idofman <= elem->giveNumberOfInternalDofManagers(); idofman++) {
+                DofManager *dofman = elem->giveInternalDofManager(idofman);
+                int ndof = dofman->giveNumberOfDofs();
                 // loop over individual dofs
                 for ( int idof = 1; idof <= ndof; idof++ ) {
-                    Dof *idofptr = ielemptr->giveInternalDofManager(idofman)->giveDof(idof);
-                    // loop over dof groups
-                    for ( int dg = 1; dg <= nccdg; dg++ ) {
-                        // test if dof ID is in active set
-                        if ( ccDofGroups.at(dg - 1).find( idofptr->giveDofID() ) != ccDofGroups.at(dg - 1).end() ) {
-                            int eq = idofptr->giveEquationNumber(dn);
-
-                            if ( eq ) {
+                    Dof *dof = dofman->giveDof(idof);
+                    int eq = dof->giveEquationNumber(dn);
+                    int dofid = dof->giveDofID();
+                    
  #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-                                if ( !n2l->giveNewEq(_eq) ) {
-                                    continue;
-                                }
+                    if ( !eq || !n2l->giveNewEq(eq) ) continue;
+ #else
+                    if ( !eq ) continue;
  #endif
+                    dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
+                    dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
+                    dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
+                    dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
+                    idsInUse.at(dofid) = 1;
+                } // end loop over DOFs
+            } // end loop over element internal dofmans
+        } // end loop over elements
+        
+        // loop over boundary conditions and their internal DOFs
+        for ( int ibc = 1; ibc <= domain->giveNumberOfBoundaryConditions(); ibc++ ) {
+            GeneralBoundaryCondition *bc = domain->giveBc(ibc);
 
-                                _val = rhs.at(eq);
-                                dg_forceErr.at(dg) += _val * _val;
-                                _val = ddX.at(eq);
-                                dg_dispErr.at(dg)  += _val * _val;
-                                // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-                                _val = RT.at(eq);
-                                dg_totalLoadLevel.at(dg) += _val * _val;
-                                _val = X.at(eq);
-                                dg_totalDisp.at(dg) += _val * _val;
-                            }
-                        }
-                    } // end loop over dof groups
+            // loop over element internal Dofs
+            for ( int idofman = 1; idofman <= bc->giveNumberOfInternalDofManagers(); idofman++) {
+                DofManager *dofman = bc->giveInternalDofManager(idofman);
+                int ndof = dofman->giveNumberOfDofs();
+                // loop over individual dofs
+                for ( int idof = 1; idof <= ndof; idof++ ) {
+                    Dof *dof = dofman->giveDof(idof);
+                    int eq = dof->giveEquationNumber(dn);
+                    int dofid = dof->giveDofID();
+
+ #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
+                    if ( !eq || !n2l->giveNewEq(eq) ) continue;
+ #else
+                    if ( !eq ) continue;
+ #endif
+                    dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
+                    dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
+                    dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
+                    dg_totalDisp.at(dofid) += X.at(eq) * X.at(eq);
+                    idsInUse.at(dofid) = 1;
                 } // end loop over DOFs
             } // end loop over element internal dofmans
         } // end loop over elements
@@ -781,7 +750,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         parallel_context->accumulate(dg_totalLoadLevel, collectiveErr); dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp,      collectiveErr); dg_totalDisp      = collectiveErr;
 #else
-        if (this->engngModel->isParallel()) {
+        if ( this->engngModel->isParallel() ) {
             FloatArray collectiveErr(nccdg);
             MPI_Allreduce(dg_forceErr.givePointer(), collectiveErr.givePointer(), nccdg, MPI_DOUBLE, MPI_SUM, comm);
             dg_forceErr = collectiveErr;
@@ -795,108 +764,66 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         }
 #endif
  #endif
-        OOFEM_LOG_INFO("NRSolver:     %-10d ", nite);
-        // loop over dof groups
+        OOFEM_LOG_INFO("NRSolver: %-5d", nite);
+        // loop over dof groups and check convergence individually
         for ( int dg = 1; dg <= nccdg; dg++ ) {
+            // Skips the ones which aren't used in this problem (the residual will be zero for these anyway, but it is annoying to print them all)
+            if ( !idsInUse.at(dg) ) {
+                continue;
+            }
             //  compute a relative error norm
-            if ( ( dg_totalLoadLevel.at(dg) ) < nrsolver_ERROR_NORM_SMALL_NUM ) {
-                dg_forceErr.at(dg) = sqrt( dg_forceErr.at(dg) );
+            if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
             } else {
-                dg_forceErr.at(dg) = sqrt( dg_forceErr.at(dg) / dg_totalLoadLevel.at(dg) );
+                 // If both external forces and internal ebe norms are zero, then the residual must be zero.
+                forceErr = sqrt( dg_forceErr.at(dg) );
             }
 
             //
             // compute displacement error
             //
-            if ( dg_totalDisp.at(dg) <  nrsolver_ERROR_NORM_SMALL_NUM ) {
-                dg_dispErr.at(dg) = sqrt( dg_dispErr.at(dg) );
+            if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
+                dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
             } else {
-                dg_dispErr.at(dg) = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
+                dispErr = sqrt( dg_dispErr.at(dg) );
             }
 
-            if ( ( fabs( dg_forceErr.at(dg) ) > rtolf.at(dg) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-                ( fabs( dg_dispErr.at(dg) )  > rtold.at(dg) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
+            if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ||
+                 dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
                 errorOutOfRange = true;
             }
 
-            if ( ( fabs( dg_forceErr.at(dg) ) > rtolf.at(dg) ) || ( fabs( dg_dispErr.at(dg) ) > rtold.at(dg) ) ) {
+            if ( forceErr > rtolf.at(1) || dispErr > rtold.at(1) ) {
                 answer = false;
             }
 
-            OOFEM_LOG_INFO( "%-15e %-15e ", dg_forceErr.at(dg), dg_dispErr.at(dg) );
+            OOFEM_LOG_INFO( "  %s: %.3e %.3e", __DofIDItemToString((DofIDItem)dg), forceErr, dispErr );
         }
         OOFEM_LOG_INFO("\n");
-    } else { // nccdg == 0 -> all dofs included
+    } else { // No dof grouping
         double dXX, dXdX;
  #ifdef __PARALLEL_MODE
         forceErr = parallel_context->norm(rhs); forceErr *= forceErr;
         dXX = parallel_context->localNorm(X); dXX *= dXX; // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
-        dXdX = parallel_context->norm(ddX); dXdX *= dXdX;
+        dXdX = parallel_context->localNorm(ddX); dXdX *= dXdX;
  #else
         forceErr = rhs.computeSquaredNorm();
         dXX = X.computeSquaredNorm();
         dXdX = ddX.computeSquaredNorm();
  #endif
         // we compute a relative error norm
-        if ( RRT > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt( forceErr / ( RRT ) );
-        } else if ( internalForcesEBENorm > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt(forceErr / internalForcesEBENorm);
+        if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
         } else {
-            forceErr = sqrt(forceErr); // absolute norm as last resort
+            forceErr = sqrt( forceErr ); // absolute norm as last resort
         }
-
- #if 0
-        // load vector norm close to zero
-        // try to take norm of reactions instead
-    } else {
-        FloatArray reactions;
-        int i, di = 1;   // hard wired domain index =  1
-        // ask emodel to evaluate reactions
-        static_cast< StructuralEngngModel * >( engngModel )->computeReactions(reactions, tNow, di);
-        // compute corresponding norm
-        double RN;
-
-  #ifdef __PARALLEL_MODE
-   #ifdef __PETSC_MODULE
-        double myRN = 0.0;
-        for ( i = 1; i <= reactions.giveSize(); i++ ) {
-            if ( n2l_prescribed->giveNewEq(i) ) {
-                myRN += reactions.at(i) * reactions.at(i);
-            }
-        }
-
-        // account for quasi bc reactions
-        for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            myRN += F.at( prescribedEqs.at(i) ) * F.at( prescribedEqs.at(i) );
-        }
-
-        MPI_Allreduce(& myRN, & RN, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-   #endif
-  #else
-        RN = reactions.computeSquaredNorm();
-        // account for quasi bc reactions
-        for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            RN += F.at( prescribedEqs.at(i) ) * F.at( prescribedEqs.at(i) );
-        }
-
-  #endif // __PARALLEL_MODE
-        if ( RN > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt( forceErr / ( RN ) );
-        } else {
-            forceErr = sqrt(forceErr); // absolute norm as last resort
-        }
-    }
-
- #endif // if 0
 
         // compute displacement error
-        //
         // err is relative displacement change
-        if ( dXX < nrsolver_ERROR_NORM_SMALL_NUM ) {
-            dispErr = sqrt(dXdX);
+        if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            dispErr = sqrt( dXdX / dXX );
         } else {
-            dispErr = sqrt(dXdX / dXX);
+            dispErr = sqrt( dXdX );
         }
 
         if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||

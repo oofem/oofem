@@ -59,7 +59,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     //
     // Sum all equivalent forces for all connected elements
     //
-    int i, numRestrDofs = 0;
+    int numRestrDofs = 0;
 
     IntArray ielemDofMask;
     FloatArray reactions;
@@ -84,13 +84,12 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     fprintf(outputStream, "\n\n\tR E A C T I O N S  O U T P U T:\n\t_______________________________\n\n\n");
 
     numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
-    reactions.resize(numRestrDofs);
     // compute reaction forces
     this->computeReaction(reactions, tStep, di);
     //
     // loop over reactions and print them
     //
-    for ( i = 1; i <= numRestrDofs; i++ ) {
+    for ( int i = 1; i <= numRestrDofs; i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
             fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
                     domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
@@ -160,10 +159,16 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     FloatMatrix R;
     int nelems;
     EModelDefaultEquationNumbering dn;
+    Domain *domain = this->giveDomain(di);
 
     answer.resize( this->giveNumberOfEquations( EID_MomentumBalance ) );
     answer.zero();
-    if ( normFlag ) internalForcesEBENorm = 0.0;
+    if ( normFlag ) {
+        // Sticking to only the total internal norm for now, but it should be changed to the split up version
+        internalForcesEBENorm.resize(1); ///@todo Remove this whole function, replace with the complete engngm-implementation.
+        //internalForcesEBENorm.resize( domain->giveMaxDofID() );
+        internalForcesEBENorm.zero();
+    }
 
     // Update solution state counter
     stepN->incrementStateCounter();
@@ -174,11 +179,11 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     }
 #endif
 
-    nelems = this->giveDomain(di)->giveNumberOfElements();
+    nelems = domain->giveNumberOfElements();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     for ( int i = 1; i <= nelems; i++ ) {
-        element = this->giveDomain(di)->giveElement(i);
+        element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to
@@ -194,7 +199,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
         answer.assemble(charVec, loc);
 
         // Compute element norm contribution.
-        if ( normFlag ) internalForcesEBENorm += charVec.computeSquaredNorm();
+        if ( normFlag ) internalForcesEBENorm.at(1) += charVec.computeSquaredNorm();
     }
 
     this->timer.pauseTimer( EngngModelTimer :: EMTT_NetComputationalStepTimer );
@@ -204,9 +209,9 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
     if ( normFlag ) {
         // Exchange norm contributions.
-        double localEBENorm = internalForcesEBENorm;
-        internalForcesEBENorm = 0.0;
-        MPI_Allreduce(& localEBENorm, & internalForcesEBENorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        ///@todo Can we trust that all local norms have the same size? Probably not (and if so, it should be padded)
+        FloatArray localEBENorm = internalForcesEBENorm;
+        MPI_Allreduce(localEBENorm.givePointer(), internalForcesEBENorm.givePointer(), localEBENorm.giveSize(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     }
 #endif
 
@@ -217,7 +222,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 void
 StructuralEngngModel :: updateInternalState(TimeStep *stepN)
 {
-    int j, nnodes;
+    int nnodes;
     Domain *domain;
 
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
@@ -225,7 +230,7 @@ StructuralEngngModel :: updateInternalState(TimeStep *stepN)
 
         nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
+            for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
@@ -233,7 +238,7 @@ StructuralEngngModel :: updateInternalState(TimeStep *stepN)
 
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
             int nelem = domain->giveNumberOfElements();
-            for ( j = 1; j <= nelem; j++ ) {
+            for ( int j = 1; j <= nelem; j++ ) {
                 domain->giveElement(j)->updateInternalState(stepN);
             }
 
@@ -251,7 +256,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
     Domain *domain = this->giveDomain(di);
     int numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
     int ndofMan = domain->giveNumberOfDofManagers();
-    int i, j, indofs, rindex, count = 0;
+    int indofs, rindex, count = 0;
     DofManager *inode;
     Dof *jdof;
 
@@ -260,10 +265,10 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
     restrDofs.resize(numRestrDofs);
     eqn.resize(numRestrDofs);
 
-    for ( i = 1; i <= ndofMan; i++ ) {
+    for ( int i = 1; i <= ndofMan; i++ ) {
         inode = domain->giveDofManager(i);
         indofs = inode->giveNumberOfDofs();
-        for ( j = 1; j <= indofs; j++ ) {
+        for ( int j = 1; j <= indofs; j++ ) {
             jdof = inode->giveDof(j);
             if ( jdof->isPrimaryDof() && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
                 rindex = jdof->__givePrescribedEquationNumber();
@@ -410,7 +415,7 @@ int
 StructuralEngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, size;
+    int size;
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     Element *element;
@@ -418,7 +423,7 @@ StructuralEngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm
 
 
     size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         element = domain->giveElement( toRecvMap->at(i) );
         if ( element->giveParallelMode() == Element_remote ) {
             result &= element->unpackAndUpdateUnknowns( * recv_buff, this->giveCurrentStep() );

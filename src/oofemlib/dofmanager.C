@@ -829,6 +829,16 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 }
 
 
+void DofManager :: giveCompleteUnknownVector(FloatArray &answer,
+                                EquationID type, ValueModeType mode, TimeStep *stepN)
+{
+    answer.resize( this->numberOfDofs );
+    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
+        answer.at(i) = this->giveDof(i)->giveUnknown(type, mode, stepN);
+    }
+}
+
+
 void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                           ValueModeType mode, TimeStep *stepN)
 {

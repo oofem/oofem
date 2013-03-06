@@ -13,6 +13,8 @@
 \else
  \usepackage[utf8]{inputenc}
 \fi
+
+%\def\pgfsysdriver{pgfsys-tex4ht.def} % force htlatex to generate svg from tikz figures
 \usepackage{microtype}
 \usepackage{html}
 \usepackage{graphicx}
@@ -21,6 +23,29 @@
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
 \usepackage{biblatex}
 \usepackage{ifthen}
+
+\usetikzlibrary{external} 
+\makeatletter
+\@ifpackageloaded{tex4ht}{
+\tikzexternalize[mode=only graphics]
+\tikzset{png export/.style={/pgf/images/external info,/pgf/images/include external/.code={%
+\includegraphics[width=\pgfexternalwidth,height=\pgfexternalheight]{##1.png}%
+}
+}
+}
+\tikzset{png export}% 
+}{%
+\tikzexternalize%
+\tikzset{pdf export/.style={/pgf/images/external info,/pgf/images/include external/.code={%
+\includegraphics[width=\pgfexternalwidth,height=\pgfexternalheight]{##1.pdf}%
+}
+}
+}
+\tikzset{pdf export}% 
+}
+\makeatother
+%\tikzexternalize[prefix=figures_external/]
+
 
 \input{include.tex}
 
@@ -69,30 +94,17 @@
 \addbibresource{References.bib}
 
 \begin{document}
-%begin{latexonly}
-\title{
-\begin{center}\oofemlnk{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}\end{center}
-%\input{oofem-logo-contour.pgf}
-Element Library Manual}
-\author{\bp \\ \\
+
+%\title{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.pdf}\\OOFEM Element Library Manual}
+\title{OOFEM Element Library Manual}
+\author{Bořek Patzák \\ \\
 Czech Technical University\\
 Faculty of Civil Engineering\\
 Department of Structural Mechanics\\
 Th\'akurova 7, 166 29 Prague, Czech Republic
 }
 \maketitle
-%end{latexonly}
-\begin{htmlonly}
-\begin{center}
-\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}}
-{\Large Element Library Manual}\\
-{\bp \\ \\
-Czech Technical University\\
-Faculty of Civil Engineering\\
-Department of Structural Mechanics\\
-Th\'akurova 7, 166 29 Prague, Czech Republic
-}
-\end{htmlonly}
+
 \newpage
 \tableofcontents
 \newpage
