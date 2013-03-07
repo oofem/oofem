@@ -7,7 +7,7 @@ html: pdf
 	for i in elementlibmanual-figure*.pdf; do convert -density 300 $$i `echo $$i | sed -e 's/\.pdf/\.png/g'`; done
 #mkdir html
 	mkdir -p html
-	htlatex elementlibmanual.tex "html,index=2,3,next" "" "-dhtml/" 
+	htlatex elementlibmanual.tex "elementlibmanual.cfg,html,index=2,3,next" "" "-dhtml/" 
 	rm elementlibmanual-figure*
 	rm *.html
 

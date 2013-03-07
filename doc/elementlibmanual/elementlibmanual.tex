@@ -79,6 +79,31 @@
 \newcommand{\Pfieldnotype   }[1]{\parallel{\fieldnotype{#1}}}
 \newcommand{\PoptField      }[2]{\parallel{\optField{#1}{#2}}}
 \newcommand{\PoptFieldnotype}[1]{\parallel{\optFieldnotype{#1}}}
+\newcommand{\elementSummaryBegin}[2]{
+\begin{center}
+\begin{table}[!htb]
+ \begin{tabular}{|l|p{9cm}|}\hline
+   {\bf Description} & {#1}\\
+   \hline
+   {\bf Specific parameters} & #2\\
+   \hline
+   Parameters &\\
+}
+\newcommand{\elementParam}[1]{
+   & {#1}\\
+}
+\newcommand{\elementDescription}[2]{
+  {#1} & {#2}\\
+}
+\newcommand{\elementSummaryEnd}[2]{
+   \hline
+   \end{tabular}
+ \caption{{#1}}
+ \label{{#2}}
+\end{table}
+\end{center}
+}
+\newcommand{\ignore}[1]{}
 
 \begin{htmlonly}
 \newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
@@ -138,33 +163,26 @@ Represents linear isoparametric truss element in 1D. The elements are
 assumed to be located along the x-axis. Requires cross section area to be
 specified.
 
-\elemkeyword{truss1d}\\
-\descitem{Parameters} none.\\
-\descitem{Unknowns}
-Single dof (u-displacement) is required in each node .
-
-\descitem{Approximation} Linear approximation of displacement and geometry.
-
-\descitem{Integration} Exact.
-
-\descitem{Features} Full dynamic analysis support, Full nonlocal
-constitutive support, Adaptivity support
-
-\descitem{CS properties} Area is required.
-
-\descitem{Loads} Body loads are supported. Boundary loads are
-not supported in current implementation.
-
-
-\descitem{Status} Reliable\\
-
+\elementSummaryBegin{{\bf truss1d} - 1D truss element}{-}
+\elementDescription{Unknowns}{Single dof (u-displacement) is required in each node}
+\elementDescription{Approximation}{Linear approximation of displacement and geometry}
+\elementDescription{Integration}{Exact}
+\elementDescription{Features}{Full dynamic analysis support, Full nonlocal constitutive support, Adaptivity support}
+\elementDescription{CS properties}{Area is required}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are
+not supported in current implementation}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{truss1d element summary}{truss1dsummary}
 
 
 \subsubsection{Truss 2D element}
 \label{Truss2d}
 
+
+
 Two node linear isoparametric truss element for 2D analysis. The
 element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
+
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -173,31 +191,25 @@ element geometry can be specified in (x,z), (x,y), or (y,z) plane.
  \caption{Truss2d element in (x,z) plane.}
 \end{figure}
 
-\elemkeyword{truss2d}\\
-\descitem{Parameters} \optField{cs}{in}\\
-
-\descitem{Unknowns}
-Two dofs representing displacements in definition plane are required
+\elementSummaryBegin{{\bf truss2d} - 2D truss element}{\optField{cs}{in}}
+\elementParam{\param{cs}: this parameter can be used to
+change default definition plane. The supported values of \param{cs}
+are following: 0 for (x,z) plane (default), 1 for (x,y)
+plane, and 3 for (y,z) plane.}
+\elementDescription{Unknowns}{Two dofs representing displacements in definition plane are required
 in each node. The element can be used in different planes, default
 definition plane is (x,z). The parameter \param{cs} can be used to
-change default definition plane. The supported values of \param{cs} 
-are following: 0 for (x,z) plane (default), 1 for (x,y)
-plane, and 3 for (y,z) plane.
-
-\descitem{Approximation} Linear approximation of displacements and geometry.
-
-\descitem{Integration} Exact.
-
-\descitem{Features} Full dynamic analysis support. Full nonlocal
-constitutive support.
-
-\descitem{CS properties} cross section area should be
-provided.
-
-\descitem{Loads} Edge loads are supported, Edge number should be equal
-to 1.
-
-\descitem{Status} Reliable
+change default definition plane.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Exact.}
+\elementDescription{Features}{Full dynamic analysis support. Full nonlocal
+constitutive support.}
+\elementDescription{CS properties}{cross section area should be
+provided.}
+\elementDescription{Loads}{Edge loads are supported, Edge number should be equal
+to 1}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{truss2d element summary}{truss2dsummary}
 
 
 \subsubsection{Truss 3D element}
@@ -206,20 +218,18 @@ to 1.
 Two node linear isoparametric truss element for 3D analysis. The
 element geometry is specified in (x,y,z) plane. 
 
-\elemkeyword{truss3d}\\
-\descitem{Parameters} none.\\
 
-\descitem{Unknowns}
-Three displacement DOFs (in x, y, and z directions) are required
-in each node.\\
-\descitem{Approximation} Linear approximation of displacements and geometry.\\
-\descitem{Integration} Exact.\\
-\descitem{Features} Full dynamic analysis support. Full nonlocal
-constitutive support.\\
-\descitem{CS properties} cross section area should be
-provided.\\
-\descitem{Status} Reliable
-
+\elementSummaryBegin{{\bf truss3d} - 3D truss element}{-}
+\elementDescription{Unknowns}{Three displacement DOFs (in x, y, and z directions) are required
+in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Exact.}
+\elementDescription{Features}{Full dynamic analysis support. Full nonlocal
+constitutive support.}
+\elementDescription{CS properties}{cross section area should be
+provided.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{truss3d element summary}{truss3dsummary}
 
 
 \subsection{Beam Elements}
@@ -240,34 +250,31 @@ printed.
  \label{beam2dfig}
 \end{figure}
 
-\elemkeyword{beam2d}\\
-\descitem{Parameters} \optField{dofstocondense}{ia}\\
-The \param{dofstocondense} parameter allows to specify local element dofs that
+\elementSummaryBegin{{\bf beam2d} - 2D beam element}{\optField{dofstocondense}{ia}}
+\elementParam{\param{dofstocondense}: allows to specify local element dofs that
 will be condensed. The numbering of local element dofs is shown in
 fig.~\ref{beam2dfig}. The size of this array should be equal to
 number of local element dofs (6) and nonzero value indicates the
-corresponding dof will be condensed.\\
-\descitem{Unknowns}
+corresponding dof will be condensed.}
+\elementDescription{Unknowns}{
 Three dofs (u-displacement, w-displacement, y-rotation) are required
-in each node.\\
-\descitem{Approximation} Cubic  approximations of lateral displacement and
+in each node.}
+\elementDescription{Approximation}{Cubic  approximations of lateral displacement and
 rotation are used. For longitudinal displacement the linear one is
-assumed.\\
-\descitem{Integration} Exact.\\
-\descitem{Features} Full dynamic analysis support. Linear stability
-analysis support.\\
-\descitem{CS properties} Area,
-inertia moment along y-axis (\param{iy} parameter) and equivalent shear area (\param{shearareaz} parameter) should be specified.\\ 
-\descitem{Loads}  Constant and linear edge loads are supported, shear
-influence is taken into account. 
+assumed.}
+\elementDescription{Integration}{Exact.}
+\elementDescription{Features}{Full dynamic analysis support. Linear stability analysis support.}
+\elementDescription{CS properties}{Area,inertia moment along y-axis (\param{iy} parameter) and equivalent shear area (\param{shearareaz} parameter) should be specified.}
+\elementDescription{Loads}{Constant and linear edge loads are supported, shear
+influence is taken into account.
 Edge number should be equal to 1. Temperature load is
 supported, the first coefficient of temperature load represent
 mid-plane temperature change, the second one represent difference
 between temperature change of local z+ and local z- surfaces of beam (in local coordinate
 system). Temperature load require that the ``thick'' property of cross
-section model is defined.
-
-\descitem{Status} Reliable.
+section model is defined.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{beam2d element summary}{beam2dsummary}
 
 \subsubsection{Beam3d element}
 Beam element for 3D {\bf linear} analysis, based on Timoshenko hypothesis. The internal condensation
@@ -298,39 +305,19 @@ z-axis direction vector by local x-axis direction vector.
  \label{beam3dfig}
 \end{figure}
 
-\elemkeyword{beam3d}\\
-\descitem{Parameters} \field{refnode}{in}
-\optField{dofstocondense}{ia}\\
-The \param{refnode} parameter
-determines the reference node. It determines the local coordinate
-system of beam element. The \param{dofstocondense} parameter allows to
-specify local element dofs that will be condensed. The numbering of
-local element dofs is shown in fig.~\ref{beam3dfig}. The size of this
-array should be equal to number of local element dofs (12) and nonzero
-value indicates the corresponding dof will be condensed.\\
-\descitem{Unknowns}
-Six dofs (u,v,w-displacements and x,y,z-rotations) are required in each node.\\
-\descitem{Approximation} Cubic  approximations of lateral displacement and
-rotation (along local y,z axes) are used. For longitudinal displacement
-and the rotation along local x-axis (torsion) the linear
-approximations are assumed.\\
-\descitem{Integration} Exact.\\
-\descitem{Features} Full dynamic analysis support. Linear stability
-analysis support.\\
-\descitem{CS properties} Area, inertia moment along y and z axis (\param{iy} and \param{iz} parameters), torsion inertia moment (\param{ik} parameter) and either cross section area shear correction factor (\param{beamshearcoeff} parameter) or equivalent shear areas (\param{shearareay} and \param{shearareaz} parameters) are required. These
-cross section properties are assumed to be defined in local coordinate
-system of element.\\
-\descitem{Loads}  Constant and linear edge loads are supported.
-Edge number should be equal to 1. Temperature load is
-supported, the first coefficient of temperature load represent
-mid-plane temperature change, the second one represent difference
-between temperature change of local z+ surface and local
-z- surface surface of beam and the third one represent difference
-between temperature change of local y+ surface and  local
-y- surface of beam. Requires the ``thick'' (measured in direction of
-local z axis) and ``width'' (measured in direction of local y axis) cross section
-model properties to be defined.\\
-\descitem{Status} Stable, various loadings require further testing.
+
+\elementSummaryBegin{{\bf beam3d} - 3D beam element}{\field{refnode}{in} \optField{dofstocondense}{ia}}
+\elementParam{\param{refnode}: sets reference node to determine the local coordinate system of element.}
+\elementParam{\param{dofstocondense}: allows to specify local element dofs that will be condensed. The numbering of local element dofs is shown in fig.~\ref{beam3dfig}. The size of this array should be equal to number of local element dofs (12) and nonzero value indicates the corresponding dof will be condensed.}
+\elementDescription{Unknowns}{Six dofs (u,v,w-displacements and x,y,z-rotations) are required in each node.}
+\elementDescription{Approximation}{Cubic  approximations of lateral displacement and rotation (along local y,z axes) are used. For longitudinal displacement and the rotation along local x-axis (torsion) the linear approximations are assumed.}
+\elementDescription{Integration}{Exact.}
+\elementDescription{Features}{Full dynamic analysis support. Linear stability analysis support.}
+\elementDescription{CS properties}{Area, inertia moment along y and z axis (\param{iy} and \param{iz} parameters), torsion inertia moment (\param{ik} parameter) and either cross section area shear correction factor (\param{beamshearcoeff} parameter) or equivalent shear areas (\param{shearareay} and \param{shearareaz} parameters) are required. These cross section properties are assumed to be defined in local coordinate system of element.}
+\elementDescription{Loads}{Constant and linear edge loads are supported. Edge number should be equal to 1. Temperature load is supported, the first coefficient of temperature load represent mid-plane temperature change, the second one represent difference between temperature change of local z+ surface and local z- surface surface of beam and the third one represent difference between temperature change of local y+ surface and  local y- surface of beam. Requires the ``thick'' (measured in direction of local z axis) and ``width'' (measured in direction of local y axis) cross section model properties to be defined.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{beam3d element summary}{beam3dsummary}
+
 
 \subsection{LatticeElements}
 \subsubsection{Lattice2d}
@@ -346,13 +333,13 @@ The element is defined in x,y plane.
  \label{lattice2dfig}
 \end{figure}
 
-\elemkeyword{lattice2d}\\
-\descitem{Parameters} \field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra} \\
-The \param{thick} parameter is the out of plane ($z$-direction) thickness. 
-The \param{width} parameter is the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre. 
-The \param{gpCooords} parameter is an array of the coordinates of the integration point $C$ in the global coordinate system.
-\descitem{Unknowns}
-Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node. 
+\elementSummaryBegin{{\bf lattice2d} element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}
+\elementParam{\param{thick}: defines the out of plane ($z$-direction) thickness}
+\elementParam{\param{width}: defines the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre}
+\elementParam{\param{gpCooords}: array of the coordinates of the integration point $C$ in the global coordinate system}
+\elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node.}
+\elementSummaryEnd{lattice2d element summary}{lattice2dsummary}
+
 
 \subsection{Plane Stress Elements}
 \subsubsection{PlaneStress2d}
@@ -371,34 +358,17 @@ z-axis).
  \label{Planestress2dfig}
 \end{figure}
 
-\elemkeyword{planestress2d}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
-
-\descitem{Approximation} Linear approximation of displacement and
-geometry.
-
-\descitem{Integration}
-Integration of membrane strain terms using Gauss integration formula
-in 1, 4 (default), 9 or 16 integration points. The default number of
-integration points used can be overloaded using \param{NIP} parameter.
-Reduced integration for shear terms is employed. Shear terms are
-always integrated using the 1-point integration rule.
-
-\descitem{Features} Nonlocal constitutive support, Geometric nonlinearity support.
-
-\descitem{CS properties} Thickness. 
-
-\descitem{Loads} Body loads are supported. Boundary loads are
-supported and computed using numerical integration. The side numbering is
-following. Each i-th element side begins in i-th element node and
-ends on next element node (i+1-th node or 1-st node, in the case of 
-side number 4). The local positive edge x-axis coincides with side
-direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{Planestress2dfig})).\\
-\descitem{Nlgeo} 0, 1.\\
-\descitem{Status} Reliable.
+\elementSummaryBegin{{\bf planestress2d} - 2D quadrilateral element for plane stress analysis}{\optField{NIP}{in}}
+\elementParam{\param{NIP}: allows to set the number of integration points}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacement and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using Gauss integration formula in 1, 4 (default), 9 or 16 integration points. The default number of integration points used can be overloaded using \param{NIP} parameter. Reduced integration for shear terms is employed. Shear terms are always integrated using the 1-point integration rule.}
+\elementDescription{Features}{Nonlocal constitutive support, Geometric nonlinearity support.}
+\elementDescription{CS properties}{cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are supported and computed using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 4). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Planestress2dfig})).}
+\elementDescription{Nlgeo}{0, 1.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{planestress2d element summary}{planestress2dsummary}
 
 \subsubsection{QPlaneStress2d}
 
