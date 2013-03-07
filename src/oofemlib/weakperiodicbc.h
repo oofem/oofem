@@ -110,6 +110,9 @@ public:
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual void addElementSide(int elem, int side);
+
+protected:
+    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */
