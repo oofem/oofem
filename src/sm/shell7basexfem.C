@@ -145,7 +145,6 @@ void
 Shell7BaseXFEM :: evalCovarBaseVectorsAt(GaussPoint *gp, FloatArray &g1, FloatArray &g2, FloatArray &g3, FloatArray &genEpsC)
 {
     // Continuous part
-    FloatArray g1c, g2c, g3c;
     Shell7Base :: evalCovarBaseVectorsAt(gp, g1, g2, g3, genEpsC);
     
     // Discontinuous part - ///@todo bad implementation regarding enr. functions - should be changed
@@ -221,7 +220,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
     IntArray ordering_cont = this->giveOrdering(field);
     IntArray fieldDofId    = this->giveFieldDofId(field);
 
-    IntArray ordering_temp, activeDofsArrayTemp, temp;
+    IntArray ordering_temp, activeDofsArrayTemp;
     ordering_temp.resize(ordering_cont.giveSize());
     activeDofsArrayTemp.resize(ordering_cont.giveSize());
 
@@ -254,7 +253,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
      
     // Reduce arrays to actual size ///@todo will not work if there are several ei
     int numActiveDofs = activeDofPos;
-    IntArray ordering; orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
+    orderingArray.resize(numActiveDofs), activeDofsArray.resize(numActiveDofs);
     
     for ( int i = 1; i <= numActiveDofs; i++ ) {
         orderingArray.at(i) = ordering_temp.at(i); 
@@ -395,7 +394,6 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     
     // Continuous part
     this->giveUpdatedSolutionVector(solVec, tStep);
-    //solVec.printYourself();
     this->new_computeBulkTangentMatrix(temp, solVec, solVec, solVec, rMode, tStep);
     IntArray ordering, activeDofs;
     this->computeOrderingArray(ordering, activeDofs, 0, All);
@@ -602,8 +600,8 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
     // For analytically integrated throught he thickness, see computeMassMatrix
 
 
-    FloatMatrix N, Nt, Ntm, NtmN, mass, temp;
-    FloatArray solVec, unknowns;
+    FloatMatrix mass, temp;
+    FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int ndofs = this->giveNumberOfDofs();
     temp.resize(ndofs, ndofs);
@@ -632,7 +630,9 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) {
             this->computeNmatricesAt(gp, N11, N22, N33);
             FloatArray xbar, m;
             double gam = 0.;
-            this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
+            //this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
+            FloatArray localCoords = * gp->giveCoordinates();
+            this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
             //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
