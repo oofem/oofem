@@ -46,10 +46,10 @@ PiecewiseLinFunction 3 nPoints 5 t 5 0.0 1.0 2.0 3.0 4.0 f(t) 5 1.0 0.0 1.0 1.0 
 #ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1  value 0.0
 ##
 #ELEMENT tStep 2 number 1 gp 1 keyword "strains" component 1  value 1.
-#ELEMENT tStep 2 number 2 gp 1 keyword "strains" component 1  value 0.0
+##ELEMENT tStep 2 number 2 gp 1 keyword "strains" component 1  value 0.0 # deactivated
 #ELEMENT tStep 2 number 3 gp 1 keyword "strains" component 1  value 0.0
 #ELEMENT tStep 2 number 1 gp 1 keyword "stresses" component 1  value 10.
-#ELEMENT tStep 2 number 2 gp 1 keyword "stresses" component 1  value 0.0
+##ELEMENT tStep 2 number 2 gp 1 keyword "stresses" component 1  value 0.0 # deactivated
 #ELEMENT tStep 2 number 3 gp 1 keyword "stresses" component 1  value 0.0
 ##
 #ELEMENT tStep 3 number 1 gp 1 keyword "strains" component 1  value 1.666666667
@@ -60,9 +60,9 @@ PiecewiseLinFunction 3 nPoints 5 t 5 0.0 1.0 2.0 3.0 4.0 f(t) 5 1.0 0.0 1.0 1.0 
 #ELEMENT tStep 3 number 3 gp 1 keyword "stresses" component 1  value -3.3333333334
 ##
 #ELEMENT tStep 4 number 1 gp 1 keyword "strains" component 1  value 2.
-#ELEMENT tStep 4 number 2 gp 1 keyword "strains" component 1  value 0.0
+##ELEMENT tStep 4 number 2 gp 1 keyword "strains" component 1  value 0.0 # deactivated
 #ELEMENT tStep 4 number 3 gp 1 keyword "strains" component 1  value 0.0
 #ELEMENT tStep 4 number 1 gp 1 keyword "stresses" component 1  value 20.
-#ELEMENT tStep 4 number 2 gp 1 keyword "stresses" component 1  value 0.0
+##ELEMENT tStep 4 number 2 gp 1 keyword "stresses" component 1  value 0.0 # deactivated
 #ELEMENT tStep 4 number 3 gp 1 keyword "stresses" component 1  value 0.0
 #%END_CHECK%

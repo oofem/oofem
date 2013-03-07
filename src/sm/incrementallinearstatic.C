@@ -247,15 +247,6 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void IncrementalLinearStatic :: updateYourself(TimeStep *stepN)
-{
-    // updates internal state to reached one
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
-
-
 double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
     if ( type != EID_MomentumBalance ) { // heat and mass concetration vector

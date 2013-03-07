@@ -115,7 +115,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         }
         if (this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef) {
             this->giveDomain(1)->giveTopology()->replaceFEMesh();
-            OOFEM_LOG_INFO("StokesFlow :: updateYourself - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
+            OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - New mesh created (%d elements).\n",this->giveDomain(1)->giveNumberOfElements());
             /*meshdeformation =*/ this->meshqualityee->giveValue(globalErrorEEV, tStep);
             this->giveExportModuleManager()->initialize();
         }
@@ -274,13 +274,13 @@ void StokesFlow :: initPetscContexts()
 
 int StokesFlow :: checkConsistency()
 {
-    int i, nelem;
+    int nelem;
     FMElement *sePtr;
     Domain *domain = this->giveDomain(1);
     nelem = domain->giveNumberOfElements();
 
     // check for proper element type
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
             OOFEM_WARNING2("Element %d has no FMElement base", i);

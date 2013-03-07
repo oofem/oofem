@@ -40,6 +40,12 @@
 #include "outputmanager.h"
 
 namespace oofem {
+
+StructuralEngngModel::StructuralEngngModel(int i, EngngModel* _master) : EngngModel(i, _master),
+    internalVarUpdateStamp(0), internalForcesEBENorm()
+{ }
+
+
 StructuralEngngModel :: ~StructuralEngngModel()
 {
 #ifdef __PARALLEL_MODE
@@ -111,10 +117,14 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     answer.resize(numRestrDofs);
     answer.zero();
 
-    // Internal forces contribution
-    this->computeInternalForceReactionContribution(contribution, tStep, di);
-    answer.add(contribution);
-    // External loading contribution
+    // Add internal forces
+    this->assembleVector( answer, tStep, EID_MomentumBalance, LastEquilibratedInternalForcesVector, VM_Total,
+                        EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    // Subtract external loading
+    ///@todo All engineering models should be using this (for consistency)
+    //this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    //                    EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    ///@todo This method is overloaded in some functions, it needs to be generalized.
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
     answer.subtract(contribution);
 
@@ -125,22 +135,11 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
 
 
 void
-StructuralEngngModel :: computeInternalForceReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
-    reactions.zero();
-    this->assembleVector( reactions, tStep, EID_MomentumBalance, LastEquilibratedInternalForcesVector, VM_Total,
-                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
-}
-
-
-void
 StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
 {
     int numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
     reactions.resize(numRestrDofs);
     reactions.zero();
-    FloatArray contribution(numRestrDofs);
 
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
@@ -153,71 +152,39 @@ void
 StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, int di, TimeStep *stepN)
 {
     // Simply assembles contributions from each element in domain
-    Element *element;
-    IntArray loc;
-    FloatArray charVec;
-    FloatMatrix R;
-    int nelems;
-    EModelDefaultEquationNumbering dn;
     Domain *domain = this->giveDomain(di);
-
-    answer.resize( this->giveNumberOfEquations( EID_MomentumBalance ) );
-    answer.zero();
-    if ( normFlag ) {
-        // Sticking to only the total internal norm for now, but it should be changed to the split up version
-        internalForcesEBENorm.resize(1); ///@todo Remove this whole function, replace with the complete engngm-implementation.
-        //internalForcesEBENorm.resize( domain->giveMaxDofID() );
-        internalForcesEBENorm.zero();
-    }
-
     // Update solution state counter
     stepN->incrementStateCounter();
 
 #ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
+    if ( this->isParallel() ) {
+        // Copies data from remote elements to make sure they have all information necessary for nonlocal averaging.
         exchangeRemoteElementData( RemoteElementExchangeTag  );
     }
 #endif
 
-    nelems = domain->giveNumberOfElements();
-    this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-    for ( int i = 1; i <= nelems; i++ ) {
-        element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
-        // Skip remote elements (these are used as mirrors of remote elements on other domains
-        // when nonlocal constitutive models are used. Their introduction is necessary to
-        // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) continue;
-
-#endif
-        element->giveLocationArray( loc, EID_MomentumBalance, dn );
-        element->giveCharacteristicVector( charVec, InternalForcesVector, VM_Total, stepN );
-        if ( element->giveRotationMatrix(R, EID_MomentumBalance) ) {
-            charVec.rotatedWith(R, 't');
-        }
-        answer.assemble(charVec, loc);
-
-        // Compute element norm contribution.
-        if ( normFlag ) internalForcesEBENorm.at(1) += charVec.computeSquaredNorm();
-    }
-
-    this->timer.pauseTimer( EngngModelTimer :: EMTT_NetComputationalStepTimer );
+    answer.resize( this->giveNumberOfDomainEquations(di, EID_MomentumBalance) );
+    answer.zero();
+    this->assembleVector( answer, stepN, EID_MomentumBalance, InternalForcesVector, VM_Total,
+                          EModelDefaultEquationNumbering(), domain, normFlag ? &this->internalForcesEBENorm : NULL );
 
 #ifdef __PARALLEL_MODE
+    // Redistributes answer so that every process have the full values on all shared equations
     this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
-
-    if ( normFlag ) {
-        // Exchange norm contributions.
-        ///@todo Can we trust that all local norms have the same size? Probably not (and if so, it should be padded)
-        FloatArray localEBENorm = internalForcesEBENorm;
-        MPI_Allreduce(localEBENorm.givePointer(), internalForcesEBENorm.givePointer(), localEBENorm.giveSize(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    }
 #endif
 
     // Remember last internal vars update time stamp.
     internalVarUpdateStamp = stepN->giveSolutionStateCounter();
 }
+
+
+void
+StructuralEngngModel :: updateYourself(TimeStep *stepN)
+{
+    this->updateInternalState(stepN);
+    EngngModel :: updateYourself(stepN);
+}
+
 
 void
 StructuralEngngModel :: updateInternalState(TimeStep *stepN)
@@ -234,7 +201,6 @@ StructuralEngngModel :: updateInternalState(TimeStep *stepN)
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
-
 
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
             int nelem = domain->giveNumberOfElements();
@@ -299,7 +265,7 @@ StructuralEngngModel :: updateSharedDofManagers(FloatArray &answer, int Exchange
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
 #endif
 
-        result &= communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packDofManagers );
+        result &= communicator->packAllData( this, & answer, & StructuralEngngModel :: packDofManagers );
 
 #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
@@ -311,7 +277,7 @@ StructuralEngngModel :: updateSharedDofManagers(FloatArray &answer, int Exchange
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
 #endif
 
-        result &= communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackDofManagers );
+        result &= communicator->unpackAllData( this, & answer, & StructuralEngngModel :: unpackDofManagers );
         result &= communicator->finishExchange();
     }
 
@@ -328,7 +294,7 @@ StructuralEngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, in
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedPrescribedDofManagers", "Packing data", this->giveRank() );
 #endif
 
-        result &= communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packPrescribedDofManagers );
+        result &= communicator->packAllData( this, & answer, & StructuralEngngModel :: packPrescribedDofManagers );
 
 #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedPrescribedDofManagers", "Exchange started", this->giveRank() );
@@ -340,7 +306,7 @@ StructuralEngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, in
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
 #endif
 
-        result &= communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackPrescribedDofManagers );
+        result &= communicator->unpackAllData( this, & answer, & StructuralEngngModel :: unpackPrescribedDofManagers );
         result &= communicator->finishExchange();
     }
 
@@ -369,7 +335,7 @@ StructuralEngngModel :: exchangeRemoteElementData(int ExchangeTag)
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
  #endif
 
-        result &= nonlocCommunicator->packAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: packRemoteElementData );
+        result &= nonlocCommunicator->packAllData( this, & StructuralEngngModel :: packRemoteElementData );
 
  #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
@@ -381,7 +347,7 @@ StructuralEngngModel :: exchangeRemoteElementData(int ExchangeTag)
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
  #endif
 
-        if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
+        if ( !( result &= nonlocCommunicator->unpackAllData( this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
             _error("StructuralEngngModel :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
         }
 
@@ -396,14 +362,14 @@ int
 StructuralEngngModel :: packRemoteElementData(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, size;
+    int size;
     IntArray const *toSendMap = processComm.giveToSendMap();
     CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     Domain *domain = this->giveDomain(1);
 
 
     size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         result &= domain->giveElement( toSendMap->at(i) )->packUnknowns( * send_buff, this->giveCurrentStep() );
     }
 
@@ -509,8 +475,8 @@ int
 StructuralEngngModel :: unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations)
 {
     int result = 1;
-    int i, size;
-    int j, ndofs, eqNum;
+    int size;
+    int ndofs, eqNum;
     Domain *domain = this->giveDomain(1);
     dofManagerParallelMode dofmanmode;
     IntArray const *toRecvMap = processComm.giveToRecvMap();
@@ -521,11 +487,11 @@ StructuralEngngModel :: unpackDofManagers(FloatArray *dest, ProcessCommunicator 
 
 
     size = toRecvMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
+    for ( int i = 1; i <= size; i++ ) {
         dman = domain->giveDofManager( toRecvMap->at(i) );
         ndofs = dman->giveNumberOfDofs();
         dofmanmode = dman->giveParallelMode();
-        for ( j = 1; j <= ndofs; j++ ) {
+        for ( int j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
             if ( prescribedEquations ) {
                 eqNum = jdof->__givePrescribedEquationNumber();
@@ -556,9 +522,8 @@ StructuralEngngModel :: initPetscContexts()
 {
     PetscContext *petscContext;
 
-    int i;
     petscContextList->growTo(ndomains);
-    for ( i = 0; i < this->ndomains; i++ ) {
+    for ( int i = 0; i < this->ndomains; i++ ) {
         petscContext =  new PetscContext(this, EID_MomentumBalance);
         petscContextList->put(i + 1, petscContext);
     }

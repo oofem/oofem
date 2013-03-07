@@ -119,13 +119,6 @@ protected:
     void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
     /**
-     * Computes the contribution of internal element forces to reaction forces in given domain.
-     * @param reactions Contains the computed contributions.
-     * @param tStep Solution step.
-     * @param di Domain number.
-     */
-    void computeInternalForceReactionContribution(FloatArray &reactions, TimeStep *tStep, int di);
-    /**
      * Computes the contribution external loading to reaction forces in given domain. Default implementations adds the
      * contribution from computeElementLoadReactionContribution and computeElementLoadReactionContribution methods.
      * @param reactions Contains the computed contributions.
@@ -141,6 +134,7 @@ protected:
      * @param tStep Solution step.
      */
     virtual void giveInternalForces(FloatArray &answer, bool normFlag, int di, TimeStep *tStep);
+    
     /**
      * Updates nodal values
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
@@ -149,13 +143,14 @@ protected:
      * @param tStep Solution step.
      */
     void updateInternalState(TimeStep *tStep);
+
 public:
     /// Creates new StructuralEngngModel with number i, associated to domain d.
-    StructuralEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
-        internalVarUpdateStamp(0), internalForcesEBENorm()
-    { }
+    StructuralEngngModel(int i, EngngModel *_master = NULL);
     /// Destructor.
     virtual ~StructuralEngngModel();
+
+    virtual void updateYourself(TimeStep *tStep);
 
     // identification
     virtual const char *giveClassName() const { return "StructuralEngngModel"; }

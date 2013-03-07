@@ -285,12 +285,6 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     tStep->incrementStateCounter();            // update solution state counter
 }
 
-void LinearStatic :: updateYourself(TimeStep *stepN)
-{
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
 
 contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //

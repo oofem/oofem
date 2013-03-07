@@ -578,19 +578,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
 
 void
-NonLinearStatic :: updateYourself(TimeStep *stepN)
-{
-    //
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
-
-void
 NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // updates some component, which is used by numerical method

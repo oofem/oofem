@@ -611,11 +611,6 @@ void NonLinearDynamic :: updateYourself(TimeStep *stepN)
         previousInternalForces.at(i)          = internalForces.at(i);
     }
 
-    // The following line is potentially serious performance leak.
-    // The numerical method may compute their internal forces - thus causing
-    // internal state to be updated, while checking equilibrium.
-    // update internal state only if necessary
-    this->updateInternalState(stepN);
     StructuralEngngModel :: updateYourself(stepN);
 }
 

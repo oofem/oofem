@@ -465,7 +465,6 @@ void DIIDynamic :: updateYourself(TimeStep *tStep)
         previousLoadVector.at(i)              = loadVector.at(i);
     }
 
-    this->updateInternalState(tStep);
     StructuralEngngModel :: updateYourself(tStep);
 }
 

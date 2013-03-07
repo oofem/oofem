@@ -126,7 +126,6 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual void updateYourself(TimeStep *tStep);
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 

@@ -357,13 +357,6 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-void DEIDynamic :: updateYourself(TimeStep *stepN)
-{
-    this->updateInternalState(stepN);
-    StructuralEngngModel :: updateYourself(stepN);
-}
-
-
 void DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     static char dofchar[] = "dva";
