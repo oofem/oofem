@@ -99,7 +99,7 @@
    \hline
    \end{tabular}
  \caption{{#1}}
- \label{{#2}}
+ \label{#2}
 \end{table}
 \end{center}
 }
@@ -161,7 +161,7 @@ information about the types of loadings supported by particular elements.
 
 Represents linear isoparametric truss element in 1D. The elements are
 assumed to be located along the x-axis. Requires cross section area to be
-specified.
+specified. The element features are summarized in Table~\ref{truss1dsummary}.
 
 \elementSummaryBegin{{\bf truss1d} - 1D truss element}{-}
 \elementDescription{Unknowns}{Single dof (u-displacement) is required in each node}
@@ -181,7 +181,7 @@ not supported in current implementation}
 
 
 Two node linear isoparametric truss element for 2D analysis. The
-element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
+element geometry can be specified in (x,z), (x,y), or (y,z) plane. The element features are summarized in Table~\ref{truss2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -216,7 +216,7 @@ to 1}
 \label{Truss3d}
 
 Two node linear isoparametric truss element for 3D analysis. The
-element geometry is specified in (x,y,z) plane. 
+element geometry is specified in (x,y,z) plane.  The element features are summarized in Table~\ref{truss3dsummary}.
 
 
 \elementSummaryBegin{{\bf truss3d} - 3D truss element}{-}
@@ -232,13 +232,16 @@ provided.}
 \elementSummaryEnd{truss3d element summary}{truss3dsummary}
 
 
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Beam Elements}
 \subsubsection{Beam2d element}
 Beam element for 2D analysis, based on Timoshenko hypothesis. Structure should be defined in x,z
 plane. The internal condensation
 of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end displacement and local end forces are
-printed. 
+printed. The element features are summarized in Table~\ref{beam2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -295,6 +298,7 @@ x-axis direction vector ($\mathbf{a}_1$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$
 \item local y-axis is then determined as vector product of local
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
+The element features are summarized in Table~\ref{beam3dsummary}.
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -319,10 +323,12 @@ z-axis direction vector by local x-axis direction vector.
 \elementSummaryEnd{beam3d element summary}{beam3dsummary}
 
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{LatticeElements}
 \subsubsection{Lattice2d}
 Represents two-node lattice element. Each node has 3 degrees of freedom.
-The element is defined in x,y plane.
+The element is defined in x,y plane. The element features are summarized in Table~\ref{lattice2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -341,13 +347,15 @@ The element is defined in x,y plane.
 \elementSummaryEnd{lattice2d element summary}{lattice2dsummary}
 
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Plane Stress Elements}
 \subsubsection{PlaneStress2d}
 Represents isoparametric four-node quadrilateral plane-stress
 finite element. Each node has 2 degrees of freedom.
 Structure should be defined in x,y plane. 
 The nodes should be numbered anti-clockwise (positive rotation around
-z-axis). 
+z-axis).  The element features are summarized in Table~\ref{planestress2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -361,7 +369,7 @@ z-axis).
 \elementSummaryBegin{{\bf planestress2d} - 2D quadrilateral element for plane stress analysis}{\optField{NIP}{in}}
 \elementParam{\param{NIP}: allows to set the number of integration points}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
-\elementDescription{Approximation}{Linear approximation of displacement and geometry.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
 \elementDescription{Integration}{Integration of membrane strain terms using Gauss integration formula in 1, 4 (default), 9 or 16 integration points. The default number of integration points used can be overloaded using \param{NIP} parameter. Reduced integration for shear terms is employed. Shear terms are always integrated using the 1-point integration rule.}
 \elementDescription{Features}{Nonlocal constitutive support, Geometric nonlinearity support.}
 \elementDescription{CS properties}{cross section thickness is required.}
@@ -375,7 +383,7 @@ z-axis).
 Implementation of quadratic isoparametric eight-node quadrilateral
 plane-stress  finite element. Each node has 2 degrees of freedom.
 The node numbering is anti-clockwise and is explained in fig. (\ref
-{qplanstrssfig}).
+{qplanstrssfig}). The element features are summarized in Table~\ref{qplanestress2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -386,31 +394,25 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
  \label{qplanstrssfig}
 \end{figure}
 
-\elemkeyword{qplanestress2d}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
+\elementSummaryBegin{{\bf qplanestress2d} - 2D quadratic isoparametric plane stress element}{\optField{NIP}{in}}
+\elementParam{\param{NIP}: allows to set the number of integration points}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration using Gauss integration formula in 4 (the default), 9 or 16 integration points. The default number of integration points used can be overloaded using \param{NIP} parameter.}
+\elementDescription{Features}{Adaptivity support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body and boundary loads are supported.}
+\elementDescription{Nlgeo}{0, 1.}
+\elementDescription{Status}{Stable}
+\elementSummaryEnd{qplanestress2d element summary}{qplanestress2dsummary}
 
-\descitem{Approximation} Quadratic approximation of displacement and
-geometry.
 
-\descitem{Integration}
-Full integration using Gauss integration formula
-in 4 (the default), 9 or 16 integration points. The default number of
-integration points used can be overloaded using \param{NIP} parameter.
 
-\descitem{Features} Adaptivity support.
-
-\descitem{CS properties} Thickness. 
-
-\descitem{Loads} Body and boundary loads are supported.\\
-\descitem{Nlgeo} 0, 1.\\
-\descitem{Status} Stable.
 
 \subsubsection{TrPlaneStress2d}
 Implements an triangular three-node  constant strain plane-stress  
 finite element. Each node has 2 degrees of freedom.
-The node numbering is anti-clockwise
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{trplanestress2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -421,36 +423,29 @@ The node numbering is anti-clockwise
  \label{TrPlanestressfig}
 \end{figure}
 
-\elemkeyword{trplanestress2d}\\
-\descitem{Parameters} none.\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
-
-\descitem{Approximation} Linear approximation of displacement and
-geometry.
-
-\descitem{Integration}
-Integration of membrane strain terms using one point gauss integration formula.
-
-\descitem{Features} Nonlocal constitutive support, Edge load
-support, Geometric nonlinearity support, Adaptivity support
-
-\descitem{CS properties} Thickness. 
-
-\descitem{Loads} Body loads are supported. Boundary loads are
+\elementSummaryBegin{{\bf trplanestress2d} - 2D linear triangular isoparametric plane stress element}{-}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using one point gauss integration formula.}
+\elementDescription{Features}{Nonlocal constitutive support, Edge load support, Geometric nonlinearity support, Adaptivity support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are
 supported and are computed  using numerical integration. The side numbering is
 following. Each i-th element side begins in i-th element node and
 ends on next element node (i+1-th node or 1-st node, in the case of 
 side number 3). The local positive edge x-axis coincides with side
 direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{TrPlanestressfig})).\\
-\descitem{Nlgeo} 0, 1.\\
-\descitem{Status} Reliable.
+anti-clockwise (see fig. (\ref{TrPlanestressfig})).}
+\elementDescription{Nlgeo}{0, 1.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{trplanestress2d element summary}{trplanestress2dsummary}
+
+
 
 \subsubsection{QTrPlStr}
 Implementation of quadratic six-node plane-stress finite
 element. Each node has 2 degrees of freedom. Node numbering is
-anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}).
+anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}). The element features are summarized in Table~\ref{qtrplstrsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -461,51 +456,45 @@ anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}).
  \label{qtrplanstressfig}
 \end{figure}
 
-\elemkeyword{qtrplstr}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
+\elementSummaryBegin{{\bf qtrplstr} - 2D quadratic triangular plane stress element}{\optField{NIP}{in}}
+\elementParam{\param{NIP}: allows to set the number of integration points}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration using gauss integration formula in 4 points (the
+default) or in 7 points (using \param{NIP} parameter).}
+\elementDescription{Features}{Adaptivity support (error indicator).}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Boundary loads are supported.}
+\elementDescription{Nlgeo}{0, 1.}
+\elementDescription{Status}{-}
+\elementSummaryEnd{qtrplstr element summary}{qtrplstrsummary}
 
-\descitem{Approximation} Quadratic approximation of displacement and
-geometry.
 
-\descitem{Integration}
-Full integration using gauss integration formula in 4 points (the
-default) or in 7 points (using \param{NIP} parameter).
 
-\descitem{Features} Adaptivity support (error indicator).
-
-\descitem{CS properties} Thickness. 
-
-\descitem{Loads} Boundary loads are supported.\\
-\descitem{Nlgeo} 0, 1.\\
-\descitem{Status} 
 
 \subsubsection{TrPlaneStrRot}
 Implementation of triangular three-node  plane-stress 
 finite element with independent rotation field.
-Each node has 3 degrees of freedom.
+Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{trplanestrrotsummary}.
 
-\elemkeyword{trplanestrrot}\\
-\descitem{Parameters} \optField{NIP}{in} \optField{NIPRot}{in}\\
-\descitem{Unknowns}
-Three dofs (u-displacement, v-displacement, z-rotation) are required in each node.
+\elementSummaryBegin{{\bf trplanestrrot} - 2D linear triangular plane stress element with rotational DOFs}{\optField{NIP}{in} \optField{NIPRot}{in}}
+\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementParam{\param{NIPRor}: allows to set the number of integration points for integration of terms associated to rotational field.}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, z-rotation) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using gauss integration formula in 4 points (default) or using 1 or 7 points (using \param{NIP} parameter). Integration of strains associated with rotational field integration using 1 point is default (4 and 7 points rules can be specified using \param{NIPRot} parameter).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\elementSummaryEnd{trplanestrrot element summary}{trplanestrrotsummary}
 
-%\descitem{Approximation}
 
-\descitem{Integration}
-Integration of membrane strain terms using gauss integration formula
-in 4 points (default) or using 1 or 7 points (using \param{NIP} parameter).
-Integration of strains associated with rotational field 
-integration using 1 point is default (4 and 7 points rules can be
-specified using \param{NIPRot} parameter).
 
-\descitem{CS properties} Thickness. 
 
-\descitem{Features} \\
-\descitem{Nlgeo} 0.\\
-\descitem{Status} 
-
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Plane Strain Elements}
 
 \subsubsection{Quad1PlaneStrain}
@@ -513,7 +502,7 @@ Represents isoparametric four-node quadrilateral plane-strain
 finite element. Each node has 2 degrees of freedom.
 Structure should be defined in x,y plane. 
 The nodes should be numbered anti-clockwise (positive rotation around
-z-axis). 
+z-axis). The element features are summarized in Table~\ref{quad1planestrainsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -525,40 +514,26 @@ z-axis).
  \label{Quad1PlaneStrainfig}
 \end{figure}
 
-\elemkeyword{quad1planestrain}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
+\elementSummaryBegin{{\bf quad1planestrain} - 2D linear quadrilateral plane-strain element}{\optField{NIP}{in}}
+\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using gauss integration formula in 4 (the default), 9 or 16 integration points. The default number of integration points used can be overloaded using \param{NIP} parameter. Reduced integration for shear terms is employed. Shear terms are always integrated using 1 point integration rule.}
+\elementDescription{Features}{Nonlocal constitutive support, Adaptivity support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are supported and computed using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 4). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Quad1PlaneStrainfig})).}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{quad1planestrain element summary}{quad1planestrainsummary}
 
-\descitem{Approximation} Linear approximation of displacement and
-geometry.
 
-\descitem{Integration}
-Integration of membrane strain terms using gauss integration formula
-in 4 (the default), 9 or 16 integration points. The default number of
-integration points used can be overloaded using \param{NIP} parameter.
-Reduced integration for shear terms is employed. Shear terms are
-always integrated using 1 point integration rule.
 
-\descitem{Features} Nonlocal constitutive support, Adaptivity support.
-
-\descitem{CS properties} Thickness. 
-
-\descitem{Loads} Body loads are supported. Boundary loads are
-supported and computed using numerical integration. The side numbering is
-following. Each i-th element side begins in i-th element node and
-ends on next element node (i+1-th node or 1-st node, in the case of 
-side number 4). The local positive edge x-axis coincides with side
-direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{Quad1PlaneStrainfig})).
-
-\descitem{Status} Reliable.
 
 
 \subsubsection{TrplaneStrain}
 Implements an triangular three-node  constant strain plane-strain  
 finite element. Each node has 2 degrees of freedom.
-The node numbering is anti-clockwise
+The node numbering is anti-clockwise. The element features are summarized in Table~\ref{trplanestrainsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -569,104 +544,105 @@ The node numbering is anti-clockwise
  \label{TrplaneStrain}
 \end{figure}
 
-\elemkeyword{trplanestrain}\\
-\descitem{Parameters} none.\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
-
-\descitem{Approximation} Linear approximation of displacement and
-geometry.
-
-\descitem{Integration}
-Integration of membrane strain terms using one point gauss integration formula.
-
-\descitem{Features} Nonlocal constitutive support. Edge load
-support, Adaptivity support.
-
-\descitem{CS properties} Thickness. 
-
-\descitem{Loads} Body loads are supported. Boundary loads are
-supported and are computed  using numerical integration. The side numbering is
-following. Each i-th element side begins in i-th element node and
-ends on next element node (i+1-th node or 1-st node, in the case of 
-side number 3). The local positive edge x-axis coincides with side
-direction, the positive local edge y-axis is rotated 90 degrees
-anti-clockwise (see fig. (\ref{TrplaneStrain})).
-
-\descitem{Status} Reliable.
+\elementSummaryBegin{{\bf trplanestrain} - 2D linear triangular plane-strain element}{-}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Integration of membrane strain terms using one point gauss integration formula.}
+\elementDescription{Features}{Nonlocal constitutive support. Edge load support, Adaptivity support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are supported and are computed  using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 3). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{TrplaneStrain})).}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{trplanestrain element summary}{trplanestrainsummary}
 
 
 
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Plate\&Shell Elements}
 \subsubsection {CCT Element}
 \label{cct}
 Implementation of constant curvature triangular element for plate
 analysis. Formulation based on Mindlin hypothesis. The structure should be defined in x,y plane. 
 The nodes should be numbered anti-clockwise (positive rotation around
-z-axis). 
+z-axis). The element features are summarized in Table~\ref{cctplatesummary}.
 
 
-\elemkeyword{cctplate}\\
-\descitem{Parameters} none.\\
-\descitem{Unknowns}
-Three dofs (w-displacement, u and v - rotation) are required in each node.
-
-%\descitem{Approximation} 
-
-\descitem{Integration}
-Integration of all terms using one point formula.
-
-\descitem{Features} Layered cross section support.
-
-\descitem{Loads} Body loads are supported. Boundary loads are
-not supported now.
-\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
+\elementSummaryBegin{{\bf cctplate} - 2D constant curvature triangular plate element}{-}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
+\elementDescription{Integration}{Integration of all terms using one point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
+\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
 $$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
 The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer. 
-\descitem{Status} Reliable.
+$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{cctplate element summary}{cctplatesummary}
+
+
+
+
+
 
 \subsubsection {CCT3D Element}
 Implementation of constant curvature triangular element for plate
 analysis. Formulation based on Mindlin hypothesis. The element could be arbitrarily oriented in space. 
 The nodes should be numbered anti-clockwise (positive rotation around element normal). 
+The element features are summarized in Table~\ref{cctplate3dsummary}.
 
+\elementSummaryBegin{{\bf cctplate3d} - constant curvature triangular plate element in arbitray position}{-}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node.}
+\elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
+\elementDescription{Integration}{Integration of all terms using one point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
+\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+The generalized stress vector contains corresponding integral forces/moments:
+$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{cctplate3d element summary}{cctplate3dsummary}
 
-\elemkeyword{cctplate3d}\\
-\descitem{Parameters} none.\\
-\descitem{Unknowns}
-Six dofs (u,v,w-displacements and u,v,w rotations) are required in each node.
-
-%\descitem{Approximation} 
-
-\descitem{Integration}
-Integration of all terms using one point formula. \\
-\descitem{Features} Layered cross section support. \\
-\descitem{Loads} Body loads are supported. Boundary loads are not supported.\\
-\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element.
-
-\descitem{Status} Reliable.
 
 \subsubsection {RerShell Element}
 Combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. The element curvature can be specified. 
 Although element requires generally six DOFs per node, no stiffness to
-local rotation along z-axis (rotation around element normal) is supplied.
+local rotation along z-axis (rotation around element normal) is supplied. 
+The element features are summarized in Table~\ref{rershellsummary}.
 
-\elemkeyword{rershell}\\
-\descitem{Parameters} none.\\
-\descitem{Integration}
-Integration of all terms using one point formula.\\
-\descitem{Features} Layered cross section support.\\
-\descitem{Loads} Body loads are supported. Boundary loads are
-not supported now.\\
-\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element. \\
-\descitem{Status} Reliable.
+\elementSummaryBegin{{\bf rershell} - simple shell based on combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element. element can be arbitrary positioned in space.}{-}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node. Note, that although element it requires generally six DOFs per node, no stiffness to local rotation along z-axis (rotation around element normal) is supplied.}
+\elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
+\elementDescription{Integration}{Integration of all terms using one point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
+\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+The generalized stress vector contains corresponding integral forces/moments:
+$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{rershell element summary}{rershellsummary}
+
 
 
 \subsubsection {tr\_shell01 element}
 Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane stress element
-for membrane behavior. It comes with complete set of 6 DOFs per node.
+for membrane behavior. It comes with complete set of 6 DOFs per node. 
+The element features are summarized in Table~\ref{trshell01summary}.
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -675,31 +651,45 @@ for membrane behavior. It comes with complete set of 6 DOFs per node.
  \caption{Geometry of tr\_shell01 element.}
 \end{figure}
 
-\elemkeyword{tr\_shell01}\\
-\descitem{Parameters} none.\\
-\descitem{Integration}
-Integration of all terms using one point formula.\\
-\descitem{Features} Layered cross section support.\\
-\descitem{Loads} Body loads are supported. Boundary loads are
-not supported.\\
-\descitem{Output} On output, the generalized strains are printed in a vector with 12 components, with the same meaning as explained in section \ref{cct} for CCT element. \\
-\descitem{Status} Reliable.
+\elementSummaryBegin{{\bf tr\_shell01} - triangular shell element combining CCT3D plate element (Mindlin hypothesis) with triangular plane stress element with rotational DOFs}{-}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node.}
+\elementDescription{Approximation}{See description of cct and trplanstrrot elements}
+\elementDescription{Integration}{Integration of all terms using one point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
+\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
+$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
+The generalized stress vector contains corresponding integral forces/moments:
+$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementSummaryEnd{tr\_shell01 element summary}{trshell01summary}
+
 
 \subsubsection{Quad1Mindlin Element} \label{quad1mindlin}
 This class implements an quadrilateral, bilinear, four-node Mindlin plate.
 This type of element exhibit strong shear locking (thin plates exhibit almost no bending).
 Implements the lumped mass matrix.
 
-\elemkeyword{quad1mindlin}\\
-\descitem{Parameters} \optField{NIP}{in} \\
-\descitem{Unknowns} Three dofs (w-displacement, u and v - rotation) are required in each node. \\
-\descitem{Integration} Default uses 4 integration points. No reduced integration is used, as it causes numerical problems. \\
-\descitem{Features} Layered cross section support. \\
-\descitem{Loads} Dead weight loads, and edge loads are supported. \\
-\descitem{Status} Experimental. \\
-\descitem{Reference} \cite{RobertCook1989}
+\elementSummaryBegin{{\bf quad1mindlin} -  quadrilateral, bilinear, four-node Mindlin plate}{\optField{NIP}{in}}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotation) are required in each node.}
+\elementDescription{Approximation}{Linear for all unknowns.}
+\elementDescription{Integration}{Default uses 4 integration points. No reduced integration is used, as it causes numerical problems.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Dead weight loads, and edge loads are supported.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Reference}{\cite{RobertCook1989}}
+\elementDescription{Status}{Experimental}
+\elementSummaryEnd{quad1mindlin element summary}{quad1mindlinsummary}
 
 
+
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Axisymmetric Elements}
 \subsubsection{Axisymm3d element}
 Implementation of triangular three-node finite element 
@@ -760,6 +750,8 @@ $\gamma_{rz}$) are integrated using one point integration formula.\\
 \descitem{Loads} No boundary and body loads are supported.\\
 \descitem{Status} 
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{3d Continuum Elements}
 \subsubsection{LSpace element}
 \label{lspacesect}
@@ -933,6 +925,8 @@ Full integration of all strain components.
 \descitem{Nlgeo} 0, 1, 2.\\
 \descitem{Status} 
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Interface elements}
 
 Interface elements represent a contact between two adjacent nodes. Interface material specific to interface element needs to be assigned - consult the {\it matlibmanual} for interface support. 
@@ -1013,7 +1007,8 @@ Full integration of all components using one point integration formula. \\
 \descitem{Loads} \\
 \descitem{Status} 
 
-
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Iso Geometric Analysis based (IGA) elements}
 The following record describes the common part of IGA element record:
  
@@ -1047,7 +1042,8 @@ The supported \entKeyword{IGAElement} values are following:\\
 The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ and \param{localindexknotvectorw} defined by the indices to global knot vectors (given by \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters) specify the local knot vectors for each control point of T-mesh (node) in the same order as the nodes have been specified for the element. The local knot vector in a particular direction has $p+2$ entries, where the $p$ is the polynomial degree in that direction.
 
 
-
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Special elements}
 \subsubsection{LumpedMass element}
 This element, defined by a single node, allows to introduce additional concentrated mass and/or rotational inertias in a node.
@@ -1096,6 +1092,8 @@ Note: the spring element nodes doesn't need to be coincident, but the spring ori
   \caption{Supported spring element modes } \label{spring_mode_table}
 \end{table}
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Geometric nonlinear analysis}
 To take geometric nonlinearity into account on an element, keyword \param{nlgeo} has to be specified. The \param{nlgeo} parameter defines which type of the strain tensor is computed (see Table~\ref{strain_tensor_table}).
 \begin{table}
@@ -1112,7 +1110,8 @@ To take geometric nonlinearity into account on an element, keyword \param{nlgeo}
   \caption{Nonlinear geometry modes} \label{strain_tensor_table}
 \end{table}
 
-
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \section{Elements for Transport problems (TM Module)}
 \subsection{2D Elements}
 \subsubsection{Quad1ht element}
@@ -1191,7 +1190,8 @@ direction, the positive local edge y-axis is rotated 90 degrees
 anti-clockwise (see fig. (\ref{Tr1htfig})).
 
 
-
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{Axisymmetric Elements}
 \subsubsection{Quadaxisym1ht element}
 Isoparametric four-node quadrilateral finite element for
@@ -1204,6 +1204,8 @@ Linear triangular finite element for axisymmetric heat transfer
 problems. The element description is
 similar to Tr1ht element, see section \ref{Tr1ht}.
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{3D Elements}
 \subsubsection{Tetrah1ht - tetrahedral 3D element}
 Represents isoparametric four-node tetrahedral element. Each node has 1 degree of freedom.
@@ -1282,6 +1284,8 @@ each node. Linear approximation of temperature and mass concentration.
 Other features are similar to QBrick1ht element, see section \ref{QBrick1ht_element}.
 
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \section{Elements for Fluid Dynamics problems (FM Module)}
 \subsection{Stokes' Flow Elements}
 Stokes' flow elements neglect acceleration, and thus requires no additional stabilization.
@@ -1321,6 +1325,8 @@ Should not be used with materials that have memory (which is uncommon for flow p
 \descitem{Unknowns} Unknown pressure (P\_f) in all nodes, and unknown velocity (V\_u, V\_v) in all nodes and one internal dof manager. \\
 \descitem{Status} Untested.
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{2D CBS Elements}
 \subsubsection{Tr1CBS element}
 \label{Tr1CBS}
@@ -1371,6 +1377,8 @@ represented by PrescribedTractionPressureBC. See section on boundary
 conditions in OOFEM input manual.}. Body loads
 representing the self-weight load are supported.
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{2D SUPG/PSGP Elements}
 \subsubsection{Tr1SUPG element}
 \label{Tr1SUPG}
@@ -1499,6 +1507,8 @@ filled with reference fluid (some form of source) using parameter
 the material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.
 
+%-----------------------------------------------------------------------------------------------
+\clearpage
 \subsection{3D SUPG/PSGP Elements}
 \subsubsection{Tet1\_3D\_SUPG element}
 \label{PY1_3D_SUPG}
