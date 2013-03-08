@@ -52,8 +52,8 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMC
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichementDomainList = new AList< BasicGeometry >(0); // Should be an enrichmentdomain type or something similar
     this->enrDomainList = new AList< EnrichmentDomain >(0); 
-    this->numberOfEnrichmentFunctions = -1;    
-    this->numberOfEnrichmentDomains = -1;  
+    this->numberOfEnrichmentFunctions = 1;    
+    this->numberOfEnrichmentDomains = 1;  
     this->startOfDofIdPool = -1;
     this->enrichesDofsWithIdArray = new IntArray;
     
@@ -185,7 +185,7 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
     int material = 0;
     IR_GIVE_FIELD(ir, material, IFT_RecordIDField, "material"); // Macro
     this->mat = this->giveDomain()->giveMaterial(material);
-    //this->numberOfEnrichmentFunctions = 1;
+    this->numberOfEnrichmentFunctions = 1;
     //IR_GIVE_OPTIONAL_FIELD(ir, numberOfEnrichmentFunctions, IFT_XfemManager_numberOfEnrichmentFunctions, "numberofenrichmentfunctions"); // Macro
     return IRRT_OK;
 }
@@ -298,6 +298,12 @@ EnrichmentItem :: giveNumberOfEnrDofs()
     return temp; 
 } 
     
+
+Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+{ 
+    this->enrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+}
+
 
 
 /**

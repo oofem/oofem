@@ -81,10 +81,12 @@ class EnrichmentDomain_BasicGeometry : public EnrichmentDomain
 private:
     BasicGeometry *bg;
 public:
-    void setGeometry(BasicGeometry *geom) { this->bg = geom;}
     EnrichmentDomain_BasicGeometry(){}; 
     virtual ~EnrichmentDomain_BasicGeometry() { }
-    virtual IRResultType initializeFrom(InputRecord *ir) { };
+    virtual IRResultType initializeFrom(InputRecord *ir) { return bg->initializeFrom(ir); };
+
+    //void setGeometry(BasicGeometry *geom) { this->bg = geom;}
+    virtual bool isDofManagerEnriched(const DofManager *dMan){ return false; };
    
 };
 

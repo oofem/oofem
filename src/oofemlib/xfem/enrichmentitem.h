@@ -164,9 +164,9 @@ class Inclusion : public EnrichmentItem
 {
 protected:
     Material *mat;
-
+    
 public:
-    Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    Inclusion(int n, XfemManager *xm, Domain *aDomain);
     virtual const char *giveClassName() const { return "Inclusion"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual Material *giveMaterial() { return mat; }

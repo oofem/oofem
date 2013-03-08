@@ -500,8 +500,10 @@ std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDom
 EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
 {
     if ( enrichmentDomainList.size() == 0 ) {
-        enrichmentDomainList [ "dofmanlist" ] = enrichmentDomainCreator< DofManList >;
+        enrichmentDomainList [ "dofmanlist" ]  = enrichmentDomainCreator< DofManList >;
         enrichmentDomainList [ "wholedomain" ] = enrichmentDomainCreator< WholeDomain >;
+        //enrichmentDomainList [ "circle" ]      = enrichmentDomainCreator< EnrichmentDomain_BasicGeometry >;
+        //enrichmentDomainList [ "line" ]        = enrichmentDomainCreator< BasicGeometryDomain<Line> >;
     }
     return ( enrichmentDomainList.count(aClass) == 1 ) ? enrichmentDomainList [ aClass ]() : NULL;
 }

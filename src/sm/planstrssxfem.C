@@ -83,37 +83,34 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
 
     // assemble xfem part of strain-displacement matrix
-    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
     int counter = 0;
     AList< FloatMatrix >additionals;
     additionals.put(1, simple);
     counter += simple->giveNumberOfColumns();
     // loop over enrichment items
-    for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *er = xf->giveEnrichmentItem(i);
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
         int erndofs = 0 ; //er->giveNumberOfDofs();
         
         // enrichment function at the gauss point     
-        // should ask after specific EF in a loop
-        //double efgp = er->giveEnrichmentFunction()->evaluateFunctionAt(gp, er);
-        double efgp = er->giveEnrichmentFunction(1)->evaluateFunctionAt(gp, er);
+        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
+        double efgp = ef->evaluateFunctionAt(gp, ei);
 
         // derivative of enrichment function at the gauss point
         FloatArray efgpD;
-        //er->giveEnrichmentFunction()->evaluateDerivativeAt(efgpD, gp, er);
-        // should ask after specific EF in a loop
-        er->giveEnrichmentFunction(1)->evaluateDerivativeAt(efgpD, gp, er);
+        ef->evaluateDerivativeAt(efgpD, gp, ei);
 
         // adds up the number of the dofs from an enrichment item
         // for each node
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-            if ( er->isDofManEnriched( this->giveDofManager( dofManArray.at(j) ) ) ) {
+            if ( ei->isDofManEnriched( this->giveDofManager( dofManArray.at(j) ) ) ) {
                 FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
                 // ef is a FloatArray containing the value of EnrichmentFunction in a specific for all enriched dofs
                 
                 // should ask after specific EF in a loop
                 //double efnode = er->giveEnrichmentFunction()->evaluateFunctionAt(nodecoords, er);
-                double efnode = er->giveEnrichmentFunction(1)->evaluateFunctionAt(nodecoords, er);
+                double efnode = ef->evaluateFunctionAt(nodecoords, ei);
 
                 // matrix to be added anytime a node is enriched
                 FloatMatrix *toAdd = new FloatMatrix(3, erndofs);
@@ -162,28 +159,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
     XfemManager *xf = this->giveDomain()->giveXfemManager(1);
     xf->giveActiveEIsFor( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
 
-    /* JB
-    // for all enrichment items which element interacts
-    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );
-        for ( int j = 1; j <= xf->giveNumberOfEnrichmentItems(); j++ ) {
-            EnrichmentItem *er = xf->giveEnrichmentItem(j);
-            if ( er->isDofManEnriched( dm ) ) {
-                IntArray *dofIdAr = er->getDofIdArray();
-                for ( int k = 1; k <= dofIdAr->giveSize(); k++ ) {
-                    if ( dm->hasDofID( ( DofIDItem ) dofIdAr->at(k) ) == false ) {
-                        int sz = dm->giveNumberOfDofs();
-                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, ( DofIDItem ) dofIdAr->at(k) );
-                        //int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
-                        int eqN = 1; // temporary
-                        df->setEquationNumber(eqN);
-                        dm->appendDof(df);
-                    }
-                }
-            }
-        }
-    }
-    */
+
     locationArray.resize(0);
     IntArray enriched;
     enriched.resize(0);
@@ -233,7 +209,27 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
         }
     }
     */
+
+    // Returns the total id mask of the dof manager - regular id's + enriched id's
+
+    // Continuous part
+    PlaneStress2d :: giveDofManDofIDMask(inode, EID_MomentumBalance, answer);
+
+    // Discontinuous part
+    DofManager *dMan = this->giveDofManager(inode);
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+        for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
+            if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
+                IntArray eiDofIdArray;
+                ei->giveEIDofIdArray(eiDofIdArray, j);
+                answer.followedBy(eiDofIdArray);
+            }
+        }
+    }
 }
+
+
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
@@ -286,8 +282,8 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
 {
     FloatArray Epsilon;
     this->computeStrainVector(Epsilon, gp, stepN);
-    XfemManager *xf = this->giveDomain()->giveXfemManager(1);
-    if ( xf->isElementEnriched(this) ) {
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+    if ( xMan->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = static_cast< PatchIntegrationRule * >( gp->giveIntegrationRule() );
         StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
         sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
@@ -307,6 +303,10 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
                                               TimeStep *tStep, int useUpdatedGpRecord) {
     this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
 }
+
+
+
+
 
 #ifdef __OOFEG
 void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
