@@ -98,8 +98,10 @@ Quad1MindlinShell3D :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _2dPlate);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dShell);
     }
+    ///@todo Deal with updated geometries and such.
+    this->computeLCS();
 }
 
 
@@ -118,7 +120,6 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(glob_gravity, stepN, mode);
     // Transform the load into the local c.s.
-    this->computeLCS();
     gravity.beProductOf(this->lcsMatrix, glob_gravity); ///@todo Check potential transpose here.
 
     if ( gravity.giveSize() ) {
@@ -135,7 +136,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
             forceZ.add(density * gravity.at(3) * dV, n);
         }
 
-        answer.resize(12);
+        answer.resize(24);
         answer.zero();
 
         answer.at(1)  = forceX.at(1);
@@ -162,8 +163,6 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
 void
 Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [5x9] strain-displacement matrix {B} of the receiver,
-// evaluated at gp.
 {
     FloatArray n;
     FloatMatrix dn;
@@ -171,7 +170,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
     this->interp.evaldNdx(dn, *gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, (const FloatArray **)lnodes));
     this->interp.evalN(n, *gp->giveCoordinates(),  FEIVoidCellGeometry());
 
-    answer.resize(5, 12);
+    answer.resize(8, 4*5);
     answer.zero();
 
     // Note: This is just for the 5 dofs.
@@ -220,7 +219,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     GaussPoint *gp;
     IntegrationRule *iRule;
 
-    FloatMatrix shellStiffness(24, 24), drillStiffness(4, 4);
+    FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
     shellStiffness.zero();
     drillStiffness.zero();
 
@@ -248,7 +247,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     }
     shellStiffness.symmetrized();
 
-    answer.resize(24,24);
+    answer.resize(24, 24);
     answer.zero();
     answer.assemble(shellStiffness, this->shellOrdering);
 
@@ -269,7 +268,6 @@ Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
     this->alpha = 1.0;
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, IFT_Quad1Mindlin_nip, "nip");
-    this->computeGaussPoints();
 
     return this->NLStructuralElement :: initializeFrom(ir);
 }
@@ -481,6 +479,7 @@ Quad1MindlinShell3D :: computeLCS()
 
     for ( int i = 1; i <= 4; i++ ) {
         this->lnodes[ i - 1 ]->beTProductOf( this->lcsMatrix, *this->giveNode(i)->giveCoordinates() );
+        this->lnodes[ i - 1 ]->printYourself();
     }
 }
 
