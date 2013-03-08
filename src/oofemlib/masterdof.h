@@ -159,11 +159,6 @@ public:
     virtual Dictionary *giveUnknowns() { return this->unknowns; }
     virtual int giveEqn() { return equationNumber; }
 
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);
-    virtual int unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);
-#endif
-
 protected:
     BoundaryCondition *giveBc();
     InitialCondition *giveIc();

@@ -44,7 +44,7 @@
 #include "feticommunicator.h"
 
 namespace oofem {
-FETISolver :: FETISolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m), pcbuff(CBT_static), processCommunicator(m, & pcbuff, 0)
+FETISolver :: FETISolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m), pcbuff(CBT_static), processCommunicator(& pcbuff, 0)
 {
     err    = 1.e-6;
     ni     = 20;

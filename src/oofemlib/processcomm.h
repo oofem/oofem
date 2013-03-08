@@ -38,11 +38,12 @@
 #ifdef __PARALLEL_MODE
 
  #include "combuff.h"
- #include "engngm.h"
  #include "commbufftype.h"
  #include "communicatormode.h"
  #include "flotmtrx.h"
  #include "flotarry.h"
+ #include "intarray.h"
+ #include "error.h"
 
  #include <mpi.h>
 
@@ -72,9 +73,10 @@ public:
     ProcessCommunicatorBuff(CommBuffType t);
     ~ProcessCommunicatorBuff() {
         if ( send_buff ) { delete send_buff; }
-
+        
         if ( recv_buff ) { delete recv_buff; }
     }
+
     /**@name Methods for datatype packing/unpacking to/from buffer */
     //@{
     /**
@@ -253,7 +255,7 @@ public:
 
 
 /**
- * Class representing process communicator for NlDEIDynamic engng model.
+ * Class representing process communicator for engineering model.
  * Process communicator provides all services for communication with
  * associated remote process (problem or task).
  */
@@ -262,8 +264,6 @@ class ProcessCommunicator
 protected:
     /// Associated partition (problem) number (rank)
     int rank; // remote problem id = rank
-    /// Local problem.
-    EngngModel *localProblem;
 
     /// Communicator buffers representation.
     ProcessCommunicatorBuff *pcBuffer;
@@ -279,12 +279,11 @@ public:
     /**
      * Constructor. Creates new problem (partition) communicator associated
      * to partition with number (rank) irank.
-     * @param emodel Local problem pointer.
      * @param b ProcessCommunicatorBuff to use.
      * @param irank Rank of associated partition.
      * @param m Mode of communicator.
      */
-    ProcessCommunicator(EngngModel *emodel, ProcessCommunicatorBuff *b, int irank, CommunicatorMode m = CommMode_Static);
+    ProcessCommunicator(ProcessCommunicatorBuff *b, int irank, CommunicatorMode m = CommMode_Static);
     /// Destructor
     ~ProcessCommunicator() { }
 

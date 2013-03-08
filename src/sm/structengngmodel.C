@@ -47,13 +47,7 @@ StructuralEngngModel::StructuralEngngModel(int i, EngngModel* _master) : EngngMo
 
 
 StructuralEngngModel :: ~StructuralEngngModel()
-{
-#ifdef __PARALLEL_MODE
-    delete communicator;
-    delete nonlocCommunicator;
-    delete commBuff;
-#endif
-}
+{ }
 
 
 void
@@ -157,6 +151,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     stepN->incrementStateCounter();
 
 #ifdef __PARALLEL_MODE
+    ///@todo Move this into assembleVector
     if ( this->isParallel() ) {
         // Copies data from remote elements to make sure they have all information necessary for nonlocal averaging.
         exchangeRemoteElementData( RemoteElementExchangeTag  );
@@ -170,6 +165,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
 #ifdef __PARALLEL_MODE
     // Redistributes answer so that every process have the full values on all shared equations
+    ///@todo This is basically "scatterN2L" which we should have available for all dofs (not just from dofmanagers). Should be moved into engngmodel as well
     this->updateSharedDofManagers(answer, InternalForcesExchangeTag);
 #endif
 
@@ -253,269 +249,6 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 }
 
 
-#ifdef __PARALLEL_MODE
-int
-StructuralEngngModel :: updateSharedDofManagers(FloatArray &answer, int ExchangeTag)
-{
-    int result = 1;
-
-
-    if ( isParallel() ) {
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
-#endif
-
-        result &= communicator->packAllData( this, & answer, & StructuralEngngModel :: packDofManagers );
-
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
-#endif
-
-        result &= communicator->initExchange(ExchangeTag);
-
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
-#endif
-
-        result &= communicator->unpackAllData( this, & answer, & StructuralEngngModel :: unpackDofManagers );
-        result &= communicator->finishExchange();
-    }
-
-    return result;
-}
-
-int
-StructuralEngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag)
-{
-    int result = 1;
-
-    if ( isParallel() ) {
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedPrescribedDofManagers", "Packing data", this->giveRank() );
-#endif
-
-        result &= communicator->packAllData( this, & answer, & StructuralEngngModel :: packPrescribedDofManagers );
-
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedPrescribedDofManagers", "Exchange started", this->giveRank() );
-#endif
-
-        result &= communicator->initExchange(ExchangeTag);
-
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
-#endif
-
-        result &= communicator->unpackAllData( this, & answer, & StructuralEngngModel :: unpackPrescribedDofManagers );
-        result &= communicator->finishExchange();
-    }
-
-    return result;
-}
-
-
-void
-StructuralEngngModel :: initializeCommMaps(bool forceInit)
-{
-    // Set up communication patterns.
-    communicator->setUpCommunicationMaps(this, true, forceInit);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
-    }
-}
-
-
-int
-StructuralEngngModel :: exchangeRemoteElementData(int ExchangeTag)
-{
-    int result = 1;
-
-    if ( isParallel() && nonlocalExt ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->packAllData( this, & StructuralEngngModel :: packRemoteElementData );
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->initExchange(ExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
- #endif
-
-        if ( !( result &= nonlocCommunicator->unpackAllData( this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
-            _error("StructuralEngngModel :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
-        }
-
-        result &= nonlocCommunicator->finishExchange();
-    }
-
-    return result;
-}
-
-
-int
-StructuralEngngModel :: packRemoteElementData(ProcessCommunicator &processComm)
-{
-    int result = 1;
-    int size;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
-    Domain *domain = this->giveDomain(1);
-
-
-    size = toSendMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        result &= domain->giveElement( toSendMap->at(i) )->packUnknowns( * send_buff, this->giveCurrentStep() );
-    }
-
-    return result;
-}
-
-
-int
-StructuralEngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
-{
-    int result = 1;
-    int size;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
-    Element *element;
-    Domain *domain = this->giveDomain(1);
-
-
-    size = toRecvMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        element = domain->giveElement( toRecvMap->at(i) );
-        if ( element->giveParallelMode() == Element_remote ) {
-            result &= element->unpackAndUpdateUnknowns( * recv_buff, this->giveCurrentStep() );
-        } else {
-            _error("unpackRemoteElementData: element is not remote");
-        }
-    }
-
-    return result;
-}
-
-
-int
-StructuralEngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm)
-{
-    int result = 1;
-    result &= this->packDofManagers(src, processComm, false);
-    return result;
-}
-
-
-int
-StructuralEngngModel :: packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
-{
-    int result = 1;
-    result &= this->packDofManagers(src, processComm, true);
-    return result;
-}
-
-
-int
-StructuralEngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm, bool prescribedEquations)
-{
-    int result = 1;
-    int i, size;
-    int j, ndofs, eqNum;
-    Domain *domain = this->giveDomain(1);
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    DofManager *dman;
-    Dof *jdof;
-
-    size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        dman = domain->giveDofManager( toSendMap->at(i) );
-        ndofs = dman->giveNumberOfDofs();
-        for ( j = 1; j <= ndofs; j++ ) {
-            jdof = dman->giveDof(j);
-            if ( prescribedEquations ) {
-                eqNum = jdof->__givePrescribedEquationNumber();
-            } else {
-                eqNum = jdof->__giveEquationNumber();
-            }
-            if ( jdof->isPrimaryDof() && eqNum ) {
-                    result &= pcbuff->packDouble( src->at(eqNum) );
-            }
-        }
-    }
-
-    return result;
-}
-
-
-int
-StructuralEngngModel :: unpackDofManagers(FloatArray *src, ProcessCommunicator &processComm)
-{
-    int result = 1;
-    result &= this->unpackDofManagers(src, processComm, false);
-    return result;
-}
-
-
-int
-StructuralEngngModel :: unpackPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
-{
-    int result = 1;
-    result &= this->unpackDofManagers(src, processComm, true);
-    return result;
-}
-
-
-int
-StructuralEngngModel :: unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations)
-{
-    int result = 1;
-    int size;
-    int ndofs, eqNum;
-    Domain *domain = this->giveDomain(1);
-    dofManagerParallelMode dofmanmode;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    DofManager *dman;
-    Dof *jdof;
-    double value;
-
-
-    size = toRecvMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        dman = domain->giveDofManager( toRecvMap->at(i) );
-        ndofs = dman->giveNumberOfDofs();
-        dofmanmode = dman->giveParallelMode();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            jdof = dman->giveDof(j);
-            if ( prescribedEquations ) {
-                eqNum = jdof->__givePrescribedEquationNumber();
-            } else {
-                eqNum = jdof->__giveEquationNumber();
-            }
-            if ( jdof->isPrimaryDof() && eqNum ) {
-                result &= pcbuff->unpackDouble(value);
-                if ( dofmanmode == DofManager_shared ) {
-                    dest->at(eqNum) += value;
-                } else if ( dofmanmode == DofManager_remote ) {
-                    dest->at(eqNum)  = value;
-                } else {
-                    _error("unpackReactions: unknown dof namager parallel mode");
-                }
-            }
-        }
-    }
-
-    return result;
-}
-#endif
-
-
 #ifdef __PETSC_MODULE
 void
 StructuralEngngModel :: initPetscContexts()
@@ -536,18 +269,14 @@ void
 StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
-    CharType ctype;
-    int i;
 
     if ( type != 1 ) {
         return;
     }
 
-    ctype = StiffnessMatrix;
-
     int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(ctype, context, atTime);
+    for ( int i = 1; i <= nelems; i++ ) {
+        domain->giveElement(i)->showSparseMtrxStructure(StiffnessMatrix, context, atTime);
     }
 }
 #endif

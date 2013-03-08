@@ -38,6 +38,9 @@
 #ifdef __PARALLEL_MODE
 
  #include "processcomm.h"
+ #include "commbufftype.h"
+ #include "communicatormode.h"
+ #include "engngm.h"
  #include "error.h"
 
  #ifdef __USE_MPI

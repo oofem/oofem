@@ -197,7 +197,7 @@ public:
     /// Returns reference to its domain.
     Domain *giveDomain() { return domain; }
     /// sets associated Domain
-    virtual void         setDomain(Domain *d) { this->domain = d; }
+    virtual void setDomain(Domain *d) { this->domain = d; }
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "LoadBalancer"; }
 

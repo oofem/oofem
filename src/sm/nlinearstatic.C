@@ -625,7 +625,7 @@ NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain 
         OOFEM_LOG_DEBUG("Updating internal forces\n");
 #endif
         // update internalForces and internalForcesEBENorm concurrently
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
         break;
     case NonLinearRhs_Incremental:
 #ifdef VERBOSE

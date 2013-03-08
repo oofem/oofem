@@ -323,7 +323,8 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep) {
 }
 
 void
-NonLinearDynamic :: terminate(TimeStep *tStep) {
+NonLinearDynamic :: terminate(TimeStep *tStep)
+{
     this->doStepOutput(tStep);
     this->printReactionForces(tStep, 1);
     fflush(this->giveOutputStream());
@@ -394,7 +395,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
             }
         }
 
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->giveInternalForces(internalForces, true, di, tStep);
     }
 
     if ( initFlag ) {

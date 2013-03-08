@@ -219,15 +219,15 @@ void
 Node :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    int ic;
+    DofManager :: updateYourself(tStep);
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     double dt = tStep->giveTimeIncrement();
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( mode == AL ) { // updated Lagrange
-            ic = domain->giveCorrespondingCoordinateIndex(i);
+    if ( mode == AL ) { // updated Lagrange
+        for ( int i = 1; i <= numberOfDofs; i++ ) {
+            int ic = domain->giveCorrespondingCoordinateIndex(i);
             if ( ic != 0 ) {
                 Dof *d = this->giveDof(i);
                 DofIDItem id = d->giveDofID();

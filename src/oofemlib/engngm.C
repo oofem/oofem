@@ -61,6 +61,11 @@
 #include "initmodulemanager.h"
 #include "usrdefsub.h"
 
+#ifdef __PARALLEL_MODE
+ #include "problemcomm.h"
+ #include "processcomm.h"
+#endif
+
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
@@ -123,6 +128,9 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     force_load_rebalance_in_first_step = false;
     lb = NULL;
     lbm = NULL;
+    communicator = NULL;
+    nonlocCommunicator = NULL;
+    commBuff = NULL;
 #endif
 
 #ifdef __PETSC_MODULE
@@ -240,6 +248,9 @@ EngngModel :: ~EngngModel()
         }
     }
 
+    if ( communicator ) delete communicator;
+    if ( nonlocCommunicator ) delete nonlocCommunicator;
+    if ( commBuff ) delete commBuff;
 #endif
 }
 
@@ -764,20 +775,16 @@ EngngModel :: updateYourself(TimeStep *stepN)
         nnodes = domain->giveNumberOfDofManagers();
         for ( int j = 1; j <= nnodes; j++ ) {
             domain->giveDofManager(j)->updateYourself(stepN);
-            domain->giveNode(j)->updateYourself(stepN);
-            //domain->giveDofManager(j)->printOutputAt(File, stepN);
         }
 
 #  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
+        VERBOSE_PRINT0("Updated nodes ", nnodes)
 #  endif
 
 
-        Element *elem;
-
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            elem = domain->giveElement(j);
+            Element *elem = domain->giveElement(j);
 #ifdef __PARALLEL_MODE
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
@@ -788,7 +795,6 @@ EngngModel :: updateYourself(TimeStep *stepN)
 
 #endif
             elem->updateYourself(stepN);
-            //elem -> printOutputAt(File, stepN) ;
         }
 
 #  ifdef VERBOSE
@@ -1963,5 +1969,254 @@ EngngModel :: balanceLoad(TimeStep *atTime)
         }
     }
 }
+
+
+int
+EngngModel :: updateSharedDofManagers(FloatArray &answer, int ExchangeTag)
+{
+    int result = 1;
+
+
+    if ( isParallel() ) {
+#ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
+#endif
+
+        result &= communicator->packAllData( this, & answer, & EngngModel :: packDofManagers );
+
+#ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
+#endif
+
+        result &= communicator->initExchange(ExchangeTag);
+
+#ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
+#endif
+
+        result &= communicator->unpackAllData( this, & answer, & EngngModel :: unpackDofManagers );
+        result &= communicator->finishExchange();
+    }
+
+    return result;
+}
+
+int
+EngngModel :: updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag)
+{
+    int result = 1;
+
+    if ( isParallel() ) {
+#ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedPrescribedDofManagers", "Packing data", this->giveRank() );
+#endif
+
+        result &= communicator->packAllData( this, & answer, & EngngModel :: packPrescribedDofManagers );
+
+#ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedPrescribedDofManagers", "Exchange started", this->giveRank() );
+#endif
+
+        result &= communicator->initExchange(ExchangeTag);
+
+#ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
+#endif
+
+        result &= communicator->unpackAllData( this, & answer, & EngngModel :: unpackPrescribedDofManagers );
+        result &= communicator->finishExchange();
+    }
+
+    return result;
+}
+
+
+void
+EngngModel :: initializeCommMaps(bool forceInit)
+{
+    // Set up communication patterns.
+    communicator->setUpCommunicationMaps(this, true, forceInit);
+    if ( nonlocalExt ) {
+        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
+    }
+}
+
+
+int
+EngngModel :: exchangeRemoteElementData(int ExchangeTag)
+{
+    int result = 1;
+
+    if ( isParallel() && nonlocalExt ) {
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
+ #endif
+
+        result &= nonlocCommunicator->packAllData( this, & EngngModel :: packRemoteElementData );
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
+ #endif
+
+        result &= nonlocCommunicator->initExchange(ExchangeTag);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
+ #endif
+
+        if ( !( result &= nonlocCommunicator->unpackAllData( this, & EngngModel :: unpackRemoteElementData ) ) ) {
+            _error("EngngModel :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
+        }
+
+        result &= nonlocCommunicator->finishExchange();
+    }
+
+    return result;
+}
+
+
+int
+EngngModel :: packRemoteElementData(ProcessCommunicator &processComm)
+{
+    int result = 1;
+    IntArray const *toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    Domain *domain = this->giveDomain(1);
+
+
+    for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
+        result &= domain->giveElement( toSendMap->at(i) )->packUnknowns( * send_buff, this->giveCurrentStep() );
+    }
+
+    return result;
+}
+
+
+int
+EngngModel :: unpackRemoteElementData(ProcessCommunicator &processComm)
+{
+    int result = 1;
+    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    Element *element;
+    Domain *domain = this->giveDomain(1);
+
+
+    for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
+        element = domain->giveElement( toRecvMap->at(i) );
+        if ( element->giveParallelMode() == Element_remote ) {
+            result &= element->unpackAndUpdateUnknowns( * recv_buff, this->giveCurrentStep() );
+        } else {
+            _error("unpackRemoteElementData: element is not remote");
+        }
+    }
+
+    return result;
+}
+
+
+int
+EngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm)
+{
+    return this->packDofManagers(src, processComm, false);
+}
+
+
+int
+EngngModel :: packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
+{
+    return this->packDofManagers(src, processComm, true);
+}
+
+
+int
+EngngModel :: packDofManagers(FloatArray *src, ProcessCommunicator &processComm, bool prescribedEquations)
+{
+    ///@todo Must fix: Internal dofmanagers in xfem and bc
+    int result = 1;
+    Domain *domain = this->giveDomain(1);
+    IntArray const *toSendMap = processComm.giveToSendMap();
+    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+
+    for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
+        DofManager *dman = domain->giveDofManager( toSendMap->at(i) );
+        int ndofs = dman->giveNumberOfDofs();
+        for ( int j = 1; j <= ndofs; j++ ) {
+            Dof *jdof = dman->giveDof(j);
+            if ( jdof->isPrimaryDof() ) {
+                int eqNum;
+                if ( prescribedEquations ) {
+                    eqNum = jdof->__givePrescribedEquationNumber();
+                } else {
+                    eqNum = jdof->__giveEquationNumber();
+                }
+                if ( eqNum ) {
+                    result &= pcbuff->packDouble( src->at(eqNum) );
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+
+int
+EngngModel :: unpackDofManagers(FloatArray *src, ProcessCommunicator &processComm)
+{
+    return this->unpackDofManagers(src, processComm, false);
+}
+
+
+int
+EngngModel :: unpackPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm)
+{
+    return this->unpackDofManagers(src, processComm, true);
+}
+
+
+int
+EngngModel :: unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations)
+{
+    int result = 1;
+    int size;
+    int ndofs, eqNum;
+    Domain *domain = this->giveDomain(1);
+    dofManagerParallelMode dofmanmode;
+    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+    DofManager *dman;
+    Dof *jdof;
+    double value;
+
+
+    size = toRecvMap->giveSize();
+    for ( int i = 1; i <= size; i++ ) {
+        dman = domain->giveDofManager( toRecvMap->at(i) );
+        ndofs = dman->giveNumberOfDofs();
+        dofmanmode = dman->giveParallelMode();
+        for ( int j = 1; j <= ndofs; j++ ) {
+            jdof = dman->giveDof(j);
+            if ( prescribedEquations ) {
+                eqNum = jdof->__givePrescribedEquationNumber();
+            } else {
+                eqNum = jdof->__giveEquationNumber();
+            }
+            if ( jdof->isPrimaryDof() && eqNum ) {
+                result &= pcbuff->unpackDouble(value);
+                if ( dofmanmode == DofManager_shared ) {
+                    dest->at(eqNum) += value;
+                } else if ( dofmanmode == DofManager_remote ) {
+                    dest->at(eqNum)  = value;
+                } else {
+                    _error("unpackReactions: unknown dof namager parallel mode");
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 #endif
 } // end namespace oofem

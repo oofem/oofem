@@ -377,7 +377,7 @@ public:
      * Updates receiver after equilibrium in time step has been reached.
      * @param tStep Active time step.
      */
-    void updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
 
     // Miscellaneous
     /// @return True if dofmanager is on boundary.
