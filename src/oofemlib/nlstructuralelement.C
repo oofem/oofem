@@ -494,8 +494,8 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     GaussPoint *gp;
     IntegrationRule *iRule;
     IntArray irlocnum;
-
-    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
+    int ndofs = computeNumberOfDofs(EID_MomentumBalance);
+    answer.resize( ndofs, ndofs );
     answer.zero();
     if ( !this->isActivated(tStep) ) {
         return;

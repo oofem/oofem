@@ -72,6 +72,7 @@ public:
     // Enrichment domains
     BasicGeometry *giveGeometry(int i);
     BasicGeometry *giveGeometry();
+    EnrichmentDomain *giveEnrichmentDomain(int i) { return this->enrDomainList->at(i); };
     int giveNumberOfEnrichmentDomains() { return this->numberOfEnrichmentDomains; };      
     
 
@@ -95,10 +96,10 @@ public:
 
 
 
-    bool isDofManEnriched(const DofManager *dMan);
-    bool isDofManEnrichedByEnrichmentDomain(const DofManager *dMan, int edNumber);
-    bool isElementEnriched(const Element *element); 
-    bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
+    bool isDofManEnriched(DofManager *dMan);
+    bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber);
+    bool isElementEnriched(Element *element); 
+    bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};

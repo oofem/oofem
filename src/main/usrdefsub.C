@@ -502,7 +502,7 @@ EnrichmentDomain *CreateUsrDefEnrichmentDomain(const char *aClass)
     if ( enrichmentDomainList.size() == 0 ) {
         enrichmentDomainList [ "dofmanlist" ]  = enrichmentDomainCreator< DofManList >;
         enrichmentDomainList [ "wholedomain" ] = enrichmentDomainCreator< WholeDomain >;
-        //enrichmentDomainList [ "circle" ]      = enrichmentDomainCreator< EnrichmentDomain_BasicGeometry >;
+        enrichmentDomainList [ "circle" ]      = enrichmentDomainCreator< EDBGCircle >;
         //enrichmentDomainList [ "line" ]        = enrichmentDomainCreator< BasicGeometryDomain<Line> >;
     }
     return ( enrichmentDomainList.count(aClass) == 1 ) ? enrichmentDomainList [ aClass ]() : NULL;

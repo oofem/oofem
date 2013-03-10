@@ -76,7 +76,14 @@ void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArra
 
 double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
 {
-    return fabs( ei->giveGeometry()->computeDistanceTo(point) );
+    //return fabs( ei->giveGeometry()->computeDistanceTo(point) );
+    if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
+        return fabs( edbg->bg->computeDistanceTo( point ) );
+    } else {
+        OOFEM_ERROR("RampFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");
+        return 0.;
+    }
+
 }
 
 void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
@@ -96,8 +103,13 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
     double dist = 0;
     double member = 0;
     for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-        dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
-        member += N.at(i) * dist;
+        if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
+            dist = edbg->bg->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+            //dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+            member += N.at(i) * dist;
+        } else {
+            OOFEM_ERROR("RampFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");
+        }
     }
 
     return fabs(member);
@@ -120,10 +132,15 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, En
     double dfdy = 0;
     double phi = 0;
     for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
-        dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
-        phi += N.at(i) * dist;
-        dfdx += dNdx.at(i, 1) * dist;
-        dfdy += dNdx.at(i, 2) * dist;
+        if ( EnrichmentDomain_BG *edbg = dynamic_cast< EnrichmentDomain_BG * > ( ei->giveEnrichmentDomain(1) ) ) {;  
+            //dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+            dist = edbg->bg->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+            phi += N.at(i) * dist;
+            dfdx += dNdx.at(i, 1) * dist;
+            dfdy += dNdx.at(i, 2) * dist;
+        } else {
+            OOFEM_ERROR("RampFunction :: evaluateFunctionAt - only supports enrichment domains of type Basic Geometry");
+        }
     }
 
     answer.resize(2);

@@ -99,7 +99,7 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 
 
 
-bool EnrichmentItem :: isElementEnriched(const Element *element) 
+bool EnrichmentItem :: isElementEnriched(Element *element) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         if ( this->isDofManEnriched( element->giveDofManager(i) ) ) {
@@ -109,7 +109,7 @@ bool EnrichmentItem :: isElementEnriched(const Element *element)
     return false;
 }
 
-bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
+bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(Element *element, int edNumber) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         DofManager *dMan = element->giveDofManager(i);
@@ -121,7 +121,7 @@ bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *elemen
 }
 
 
-bool EnrichmentItem :: isDofManEnriched(const DofManager *dMan)
+bool EnrichmentItem :: isDofManEnriched(DofManager *dMan)
 {
     for ( int i = 1; i <= this->enrichementDomainList->giveSize() ; i++ ) {
         if ( isDofManEnrichedByEnrichmentDomain(dMan, i) ){
@@ -131,7 +131,7 @@ bool EnrichmentItem :: isDofManEnriched(const DofManager *dMan)
     return false;
 }
 
-bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(const DofManager *dMan, int edNumber)
+bool EnrichmentItem :: isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber)
 {
     EnrichmentDomain *ed = this->enrDomainList->at(edNumber);
     return ed->isDofManagerEnriched(dMan);

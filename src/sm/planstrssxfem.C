@@ -61,6 +61,69 @@ PlaneStress2dXfem :: giveInterface(InterfaceType interface)
 
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
+
+#if 0
+
+    // Standard (continuous) part of the B-matrix
+    FloatMatrix Bc;
+    PlaneStress2d :: computeBmatrixAt(gp, Bc, li, ui);
+
+    // Enriched (discontinuous) part of the B-matrix
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
+
+    // loop over enrichment items
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+        
+        // Evaluate enrichment function and its gradient at a given gauss point     
+        EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
+        double valEF = ef->evaluateFunctionAt(gp, ei);
+        FloatArray gradEF;
+        ef->evaluateDerivativeAt(gradEF, gp, ei);
+
+        // nabla*ef
+        FloatMatrix nablaEF(3,2);
+        nablaEF.zero();
+        nablaEF.at(1,1) = gradEF.at(1);
+        nablaEF.at(2,2) = gradEF.at(2);
+        nablaEF.at(3,1) = gradEF.at(2);
+        nablaEF.at(3,2) = gradEF.at(1);
+
+        FloatMatrix Nc;
+        PlaneStress2d ::computeNmatrixAt(gp, Nc);
+
+        FloatMatrix Bd, B(2,16);
+        Bd.beProductOf(nablaEF,Nc);
+        Bd.add(valEF,Bc);
+
+        //answer.resize(3,16);
+        //answer.setSubMatrix(Bc,1,1);
+        //answer.setSubMatrix(Bd,1,9);
+
+        B.resize(3,16);
+        B.setSubMatrix(Bc,1,1);
+        B.setSubMatrix(Bd,1,9);
+        IntArray maskCol(4), maskRow(3);
+        maskCol.setValues(8,  1, 2, 3, 4, 5, 6, 7, 8);
+        maskRow.setValues(3,  1, 2, 3);
+        // Remove part which is not enriched
+        for ( int j = 1; j <= 4; j++ ) {
+            DofManager *dMan = this->giveDofManager(j);
+            if ( ei->isDofManEnriched(dMan) ) {
+                maskCol.followedBy(8+(j-1)*2 + 1);
+                maskCol.followedBy(8+(j-1)*2 + 2);
+            }
+        }
+
+        //answer.resize(maskRow.giveSize(), maskCol.giveSize());
+        answer.beSubMatrixOf(B, maskRow, maskCol);    
+        
+    }
+}
+
+#else
+
+    int i;
     // evaluation of N,dNdx
     FloatMatrix dNdx;
     FloatArray N;
@@ -71,12 +134,12 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     simple->zero();
 
     // assemble standard FEM part of strain-displacement matrix
-    for ( int i = 1; i <= 4; i++ ) {
+    for ( i = 1; i <= 4; i++ ) {
         simple->at(1, 2 * i - 1) = dNdx.at(i, 1);
         simple->at(2, 2 * i - 0) = dNdx.at(i, 2);
     }
 
-    for ( int i = 1; i <= 4; i++ ) {
+    for ( i = 1; i <= 4; i++ ) {
         simple->at(3, 2 * i - 1) = dNdx.at(i, 2);
         simple->at(3, 2 * i - 0) = dNdx.at(i, 1);
     }
@@ -91,7 +154,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     // loop over enrichment items
     for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-        int erndofs = 0 ; //er->giveNumberOfDofs();
+        int erndofs = 2 ; //er->giveNumberOfDofs();
         
         // enrichment function at the gauss point     
         EnrichmentFunction *ef = ei->giveEnrichmentFunction(1);
@@ -104,8 +167,10 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
         // adds up the number of the dofs from an enrichment item
         // for each node
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
-            if ( ei->isDofManEnriched( this->giveDofManager( dofManArray.at(j) ) ) ) {
-                FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
+            DofManager *dMan = this->giveDofManager(j);
+            if ( ei->isDofManEnriched( dMan ) ) {
+                //FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
+                FloatArray *nodecoords = dMan->giveCoordinates();
                 // ef is a FloatArray containing the value of EnrichmentFunction in a specific for all enriched dofs
                 
                 // should ask after specific EF in a loop
@@ -152,7 +217,10 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
         }
     }
 }
+#endif
 
+
+#if 0
 void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s, IntArray *dofIds) const
 {
     IntArray interactedEI;
@@ -177,7 +245,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
 
     locationArray.followedBy(enriched);
 }
-
+#endif
 
 int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
 {
@@ -196,29 +264,17 @@ int PlaneStress2dXfem :: computeNumberOfDofs(EquationID ut)
 void
 PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    /*
-    PlaneStress2d :: giveDofManDofIDMask(inode, EID_MomentumBalance, answer);
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    for ( int i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-        EnrichmentItem *er = xf->giveEnrichmentItem(i);
-        if ( er->isDofManEnriched( this->giveDofManager( dofManArray.at(inode) ) ) ) {
-            IntArray *dofIdAr = er->getDofIdArray();
-            for ( int j = 1; j <= dofIdAr->giveSize(); j++ ) {
-                answer.followedBy( dofIdAr->at(j) );
-            }
-        }
-    }
-    */
-
     // Returns the total id mask of the dof manager - regular id's + enriched id's
+#if 0
+    XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
 
     // Continuous part
     PlaneStress2d :: giveDofManDofIDMask(inode, EID_MomentumBalance, answer);
 
     // Discontinuous part
     DofManager *dMan = this->giveDofManager(inode);
-    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
-        EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
+    for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) { // Only one is supported at the moment
+        EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
         for ( int j = 1; j <= ei->giveNumberOfEnrichmentDomains(); j++ ) {
             if ( ei->isDofManEnrichedByEnrichmentDomain(dMan,j) ) {
                 IntArray eiDofIdArray;
@@ -227,6 +283,10 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
             }
         }
     }
+#else
+    DofManager *dMan = this->giveDofManager(inode);
+    dMan->giveCompleteMasterDofIDArray(answer);
+#endif
 }
 
 
@@ -234,21 +294,47 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     XfemManager *xf = this->giveDomain()->giveXfemManager(1);
+
     if ( xf->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = static_cast< PatchIntegrationRule * >( gp->giveIntegrationRule() );
-        StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
+        Inclusion *ei = static_cast< Inclusion * > ( xf->giveEnrichmentItem(1) );
+        StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
+        //StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
         sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
     } else {
         PlaneStress2d :: computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
     }
 }
 
-
+#if 1
 void
 PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
 // Total value) of the dofs in the element local c.s.
 {
+
+#if 0
+
+
+    answer.resize( this->computeNumberOfGlobalDofs(type) * 2 );
+    answer.zero();
+
+
+    int k = 0;
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+        DofManager *dMan = this->giveDofManager(i);        
+        IntArray  dofIdArray;
+        dMan->giveCompleteMasterDofIDArray(dofIdArray);
+        for (int j = 1; j <= dofIdArray.giveSize(); j++ ) {
+            Dof *d = dMan->giveDofWithID( dofIdArray.at(j) );
+            answer.at(k+j) = d->giveUnknown(EID_MomentumBalance, VM_Total, stepN); ///@todo: EID_MomentumBalance is just a dummy argument in this case and feels redundant
+        }
+        
+        k += 4;
+    }
+
+#else
+
     int k, m, nDofs, size;
     IntArray elementNodeMask;
     FloatArray vec;
@@ -274,8 +360,9 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
     }
 
     // Rotate it as well? but this element doesn't support local coordinate systems anyway.
+#endif
 }
-
+#endif
 
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
@@ -285,7 +372,9 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
     XfemManager *xMan = this->giveDomain()->giveXfemManager(1);
     if ( xMan->isElementEnriched(this) ) {
         PatchIntegrationRule *pir = static_cast< PatchIntegrationRule * >( gp->giveIntegrationRule() );
-        StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
+        Inclusion *ei = static_cast< Inclusion * > ( xMan->giveEnrichmentItem(1) );
+        StructuralMaterial *sm = static_cast< StructuralMaterial * >( ei->giveMaterial() );
+        //StructuralMaterial *sm = static_cast< StructuralMaterial * >( this->giveDomain()->giveMaterial( pir->giveMaterial() ) );
         sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
     } else {
         StructuralCrossSection *cs = static_cast< StructuralCrossSection * >( this->giveCrossSection() );

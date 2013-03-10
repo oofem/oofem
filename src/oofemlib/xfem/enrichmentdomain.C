@@ -60,7 +60,7 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
 }
 
 
-bool DofManList :: isDofManagerEnriched(const DofManager *dMan)
+bool DofManList :: isDofManagerEnriched(DofManager *dMan)
 {
     int dManNumber = dMan->giveNumber();
     std::list< int > :: iterator p;
@@ -73,6 +73,17 @@ bool DofManList :: isDofManagerEnriched(const DofManager *dMan)
     }
 }
 
+
+
+
+// Circle
+bool 
+EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
+{ 
+    FloatArray coords; 
+    coords = *(dMan->giveCoordinates());
+    return this->bg->isInside(coords);
+};
 
 
 } // end namespace oofem
