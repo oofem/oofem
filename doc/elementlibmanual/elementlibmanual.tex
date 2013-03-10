@@ -767,7 +767,7 @@ $\gamma_{rz}$) are integrated using one point integration formula.}
 \subsubsection{LSpace element}
 \label{lspacesect}
 Implementation of Linear 3d  eight - node 
-finite element. Each node has 3 degrees of freedom.
+finite element. Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{lspacesummary}.
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -798,7 +798,7 @@ Features and description identical to conventional lspace element, see section ~
 
 \subsubsection{QSpace element}\label{QSpace_element}
 Implementation of quadratic 3d 20-node 
-finite element. Each node has 3 degrees of freedom.
+finite element. Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{qspacesummary}.
 \begin{figure}[htb]
  \centering
  \begin{makeimage}
@@ -823,7 +823,7 @@ finite element. Each node has 3 degrees of freedom.
 
 \subsubsection{LTRSpace element}
 Implementation of tetrahedra four-node finite element. 
-Each node has 3 degrees of freedom.
+Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{LTRSpacesummary}.
 Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedron_fig}):
 \begin{itemize}
 \item Select a face that will contain the first three corners. The excluded corner will be the last one.
@@ -855,7 +855,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
 
 \subsubsection{QTRSpace element}
 Implementation of tetrahedra ten-node finite element. 
-Each node has 3 degrees of freedom.
+Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{QTRSpacesummary}.
 Following node numbering convention is adopted (see also Fig.~\ref{qtetrahedron_fig}):
 
 \begin{figure}[htb]
@@ -883,7 +883,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{qtetrahedron_
 
 \subsubsection{LWedge element}
 Implementation of wedge six-node finite element. 
-Each node has 3 degrees of freedom.
+Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{LWedgesummary}.
 Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}):
 
 \begin{figure}[htb]
@@ -909,7 +909,7 @@ Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}
 
 \subsubsection{QWedge element}
 Implementation of wedge fifteen-node finite element. 
-Each node has 3 degrees of freedom.
+Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{QWedgesummary}.
 Following node numbering convention is adopted (see also Fig.~\ref{qwedge_fig}):
 
 \begin{figure}[htb]
@@ -945,7 +945,7 @@ Implementation of one dimensional (slip) interface element.
 This element can connect two separate nodes by specifying the
 one-dimensional slip law, that determines the force acting between
 these nodes depending on their relative displacement. This element can
-be applied in 1D, 2D, and 3D settings (default).
+be applied in 1D, 2D, and 3D settings (default). The element features are summarized in Table~\ref{Interface1dsummary}.
 
 \begin{elementsummary}{{\bf Interface1d} -  one dimensional (slip) interface element}{\optField{refnode}{in} \optField{normal}{ra}}{Interface1d element summary}{Interface1dsummary}
 \elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
@@ -965,7 +965,7 @@ w-displacement) are required in each node, according to element mode (determined
 
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
-approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
+approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dquadsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -991,7 +991,7 @@ approximation of displacement field. Can be used to glue together two elements w
 
 \subsubsection{Interface3dtrlin element}
 Implementation of a three dimensional interface element with linear
-approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared triangular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared triangular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support. The element features are summarized in Table~\ref{Interface3dtrlinsummary}.
 
 \begin{figure}[htb]
  \centering
