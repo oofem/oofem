@@ -79,42 +79,45 @@
 \newcommand{\Pfieldnotype   }[1]{\parallel{\fieldnotype{#1}}}
 \newcommand{\PoptField      }[2]{\parallel{\optField{#1}{#2}}}
 \newcommand{\PoptFieldnotype}[1]{\parallel{\optFieldnotype{#1}}}
-\newcommand{\elementSummaryBegin}[2]{
-\begin{center}
-\begin{table}[!htb]
- \begin{tabular}{|l|p{9cm}|}\hline
-   {\bf Description} & {#1}\\
-   \hline
-   {\bf Specific parameters} & #2\\
-   \hline
-   Parameters &\\
+
+
+\newcommand{\templabel}{}% stores the label
+\newcommand{\tempcaption}{}% stores the caption
+\newcounter{nelpar}
+
+\newenvironment{elementsummary}[4]{%
+  \gdef\tempcaption{#3}% store the caption so we can use it later
+  \gdef\templabel{#4}% store the label so we can use it later
+  \setcounter{nelpar}{0}%
+  \begin{center} %
+    \begin{table}[!htb] %
+      \begin{tabular}{|l|p{9cm}|}\hline %
+        {\bf Description} & {#1}\\ \hline %
+        {\bf Specific parameters} & {#2}\\ \hline %
+}{%
+  \\ \hline %
+      \end{tabular}%
+      \caption{\tempcaption}% use the stored caption
+      \label{\templabel}% use the stored label (*after* the caption)
+    \end{table}%
+  \end{center}%
 }
-\newcommand{\elementParam}[1]{
-   & {#1}\\
+
+\newcommand{\elementParam}[1]{%
+  \ifthenelse{\value{nelpar}>0} %
+             {&{#1}}%
+             {\setcounter{nelpar}{1}Parameters&{#1}}%
+             \\%
 }
-\newcommand{\elementDescription}[2]{
-  {#1} & {#2}\\
-}
-\newcommand{\elementSummaryEnd}[2]{
-   \hline
-   \end{tabular}
- \caption{{#1}}
- \label{#2}
-\end{table}
-\end{center}
-}
+\newcommand{\elementDescription}[2]{{#1} & {#2}\\ }
 \newcommand{\ignore}[1]{}
 
-\begin{htmlonly}
-\newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
-\newcommand{\recentry}[2]{{#1}&{#2}\\}
-\end{htmlonly}
-%begin{latexonly}
+
 \newcounter{rcc}
 \newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
 %\newenvironment{record}{\begin{tabular}{|llr}}{\end{tabular*}\\}
 \newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
-%end{latexonly}
+
 
 \addbibresource{References.bib}
 
@@ -163,7 +166,7 @@ Represents linear isoparametric truss element in 1D. The elements are
 assumed to be located along the x-axis. Requires cross section area to be
 specified. The element features are summarized in Table~\ref{truss1dsummary}.
 
-\elementSummaryBegin{{\bf truss1d} - 1D truss element}{-}
+\begin{elementsummary}{{\bf truss1d} - 1D truss element}{-}{truss1d element summary}{truss1dsummary}
 \elementDescription{Unknowns}{Single dof (u-displacement) is required in each node}
 \elementDescription{Approximation}{Linear approximation of displacement and geometry}
 \elementDescription{Integration}{Exact}
@@ -172,7 +175,8 @@ specified. The element features are summarized in Table~\ref{truss1dsummary}.
 \elementDescription{Loads}{Body loads are supported. Boundary loads are
 not supported in current implementation}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{truss1d element summary}{truss1dsummary}
+\end{elementsummary}
+
 
 
 \subsubsection{Truss 2D element}
@@ -191,7 +195,7 @@ element geometry can be specified in (x,z), (x,y), or (y,z) plane. The element f
  \caption{Truss2d element in (x,z) plane.}
 \end{figure}
 
-\elementSummaryBegin{{\bf truss2d} - 2D truss element}{\optField{cs}{in}}
+\begin{elementsummary}{{\bf truss2d} - 2D truss element}{\optField{cs}{in}}{truss2d element summary}{truss2dsummary}
 \elementParam{\param{cs}: this parameter can be used to
 change default definition plane. The supported values of \param{cs}
 are following: 0 for (x,z) plane (default), 1 for (x,y)
@@ -209,7 +213,7 @@ provided.}
 \elementDescription{Loads}{Edge loads are supported, Edge number should be equal
 to 1}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{truss2d element summary}{truss2dsummary}
+\end{elementsummary}{truss2d element summary}{truss2dsummary}
 
 
 \subsubsection{Truss 3D element}
@@ -219,7 +223,7 @@ Two node linear isoparametric truss element for 3D analysis. The
 element geometry is specified in (x,y,z) plane.  The element features are summarized in Table~\ref{truss3dsummary}.
 
 
-\elementSummaryBegin{{\bf truss3d} - 3D truss element}{-}
+\begin{elementsummary}{{\bf truss3d} - 3D truss element}{-}{truss3d element summary}{truss3dsummary}
 \elementDescription{Unknowns}{Three displacement DOFs (in x, y, and z directions) are required
 in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
@@ -229,7 +233,7 @@ constitutive support.}
 \elementDescription{CS properties}{cross section area should be
 provided.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{truss3d element summary}{truss3dsummary}
+\end{elementsummary}
 
 
 
@@ -253,7 +257,7 @@ printed. The element features are summarized in Table~\ref{beam2dsummary}.
  \label{beam2dfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf beam2d} - 2D beam element}{\optField{dofstocondense}{ia}}
+\begin{elementsummary}{{\bf beam2d} - 2D beam element}{\optField{dofstocondense}{ia}}{beam2d element summary}{beam2dsummary}
 \elementParam{\param{dofstocondense}: allows to specify local element dofs that
 will be condensed. The numbering of local element dofs is shown in
 fig.~\ref{beam2dfig}. The size of this array should be equal to
@@ -277,7 +281,7 @@ between temperature change of local z+ and local z- surfaces of beam (in local c
 system). Temperature load require that the ``thick'' property of cross
 section model is defined.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{beam2d element summary}{beam2dsummary}
+\end{elementsummary}
 
 \subsubsection{Beam3d element}
 Beam element for 3D {\bf linear} analysis, based on Timoshenko hypothesis. The internal condensation
@@ -310,7 +314,7 @@ The element features are summarized in Table~\ref{beam3dsummary}.
 \end{figure}
 
 
-\elementSummaryBegin{{\bf beam3d} - 3D beam element}{\field{refnode}{in} \optField{dofstocondense}{ia}}
+\begin{elementsummary}{{\bf beam3d} - 3D beam element}{\field{refnode}{in} \optField{dofstocondense}{ia}}{beam3d element summary}{beam3dsummary}
 \elementParam{\param{refnode}: sets reference node to determine the local coordinate system of element.}
 \elementParam{\param{dofstocondense}: allows to specify local element dofs that will be condensed. The numbering of local element dofs is shown in fig.~\ref{beam3dfig}. The size of this array should be equal to number of local element dofs (12) and nonzero value indicates the corresponding dof will be condensed.}
 \elementDescription{Unknowns}{Six dofs (u,v,w-displacements and x,y,z-rotations) are required in each node.}
@@ -320,7 +324,7 @@ The element features are summarized in Table~\ref{beam3dsummary}.
 \elementDescription{CS properties}{Area, inertia moment along y and z axis (\param{iy} and \param{iz} parameters), torsion inertia moment (\param{ik} parameter) and either cross section area shear correction factor (\param{beamshearcoeff} parameter) or equivalent shear areas (\param{shearareay} and \param{shearareaz} parameters) are required. These cross section properties are assumed to be defined in local coordinate system of element.}
 \elementDescription{Loads}{Constant and linear edge loads are supported. Edge number should be equal to 1. Temperature load is supported, the first coefficient of temperature load represent mid-plane temperature change, the second one represent difference between temperature change of local z+ surface and local z- surface surface of beam and the third one represent difference between temperature change of local y+ surface and  local y- surface of beam. Requires the ``thick'' (measured in direction of local z axis) and ``width'' (measured in direction of local y axis) cross section model properties to be defined.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{beam3d element summary}{beam3dsummary}
+\end{elementsummary}
 
 
 %-----------------------------------------------------------------------------------------------
@@ -339,12 +343,12 @@ The element is defined in x,y plane. The element features are summarized in Tabl
  \label{lattice2dfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf lattice2d} element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}
+\begin{elementsummary}{{\bf lattice2d} element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}{lattice2d element summary}{lattice2dsummary}
 \elementParam{\param{thick}: defines the out of plane ($z$-direction) thickness}
 \elementParam{\param{width}: defines the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre}
 \elementParam{\param{gpCooords}: array of the coordinates of the integration point $C$ in the global coordinate system}
 \elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node.}
-\elementSummaryEnd{lattice2d element summary}{lattice2dsummary}
+\end{elementsummary}
 
 
 %-----------------------------------------------------------------------------------------------
@@ -366,7 +370,7 @@ z-axis).  The element features are summarized in Table~\ref{planestress2dsummary
  \label{Planestress2dfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf planestress2d} - 2D quadrilateral element for plane stress analysis}{\optField{NIP}{in}}
+\begin{elementsummary}{{\bf planestress2d} - 2D quadrilateral element for plane stress analysis}{\optField{NIP}{in}}{planestress2d element summary}{planestress2dsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
@@ -376,7 +380,7 @@ z-axis).  The element features are summarized in Table~\ref{planestress2dsummary
 \elementDescription{Loads}{Body loads are supported. Boundary loads are supported and computed using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 4). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Planestress2dfig})).}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{planestress2d element summary}{planestress2dsummary}
+\end{elementsummary}
 
 \subsubsection{QPlaneStress2d}
 
@@ -394,7 +398,7 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
  \label{qplanstrssfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf qplanestress2d} - 2D quadratic isoparametric plane stress element}{\optField{NIP}{in}}
+\begin{elementsummary}{{\bf qplanestress2d} - 2D quadratic isoparametric plane stress element}{\optField{NIP}{in}}{qplanestress2d element summary}{qplanestress2dsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
@@ -404,7 +408,7 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
 \elementDescription{Loads}{Body and boundary loads are supported.}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Stable}
-\elementSummaryEnd{qplanestress2d element summary}{qplanestress2dsummary}
+\end{elementsummary}
 
 
 
@@ -423,7 +427,7 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
  \label{TrPlanestressfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf trplanestress2d} - 2D linear triangular isoparametric plane stress element}{-}
+\begin{elementsummary}{{\bf trplanestress2d} - 2D linear triangular isoparametric plane stress element}{-}{trplanestress2d element summary}{trplanestress2dsummary}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
 \elementDescription{Integration}{Integration of membrane strain terms using one point gauss integration formula.}
@@ -438,7 +442,7 @@ direction, the positive local edge y-axis is rotated 90 degrees
 anti-clockwise (see fig. (\ref{TrPlanestressfig})).}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{trplanestress2d element summary}{trplanestress2dsummary}
+\end{elementsummary}
 
 
 
@@ -456,7 +460,7 @@ anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}). The element featur
  \label{qtrplanstressfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf qtrplstr} - 2D quadratic triangular plane stress element}{\optField{NIP}{in}}
+\begin{elementsummary}{{\bf qtrplstr} - 2D quadratic triangular plane stress element}{\optField{NIP}{in}}{qtrplstr element summary}{qtrplstrsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
@@ -467,7 +471,7 @@ default) or in 7 points (using \param{NIP} parameter).}
 \elementDescription{Loads}{Boundary loads are supported.}
 \elementDescription{Nlgeo}{0, 1.}
 \elementDescription{Status}{-}
-\elementSummaryEnd{qtrplstr element summary}{qtrplstrsummary}
+\end{elementsummary}
 
 
 
@@ -477,9 +481,9 @@ Implementation of triangular three-node  plane-stress
 finite element with independent rotation field.
 Each node has 3 degrees of freedom. The element features are summarized in Table~\ref{trplanestrrotsummary}.
 
-\elementSummaryBegin{{\bf trplanestrrot} - 2D linear triangular plane stress element with rotational DOFs}{\optField{NIP}{in} \optField{NIPRot}{in}}
+\begin{elementsummary}{{\bf trplanestrrot} - 2D linear triangular plane stress element with rotational DOFs}{\optField{NIP}{in} \optField{NIPRot}{in}}{trplanestrrot element summary}{trplanestrrotsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
-\elementParam{\param{NIPRor}: allows to set the number of integration points for integration of terms associated to rotational field.}
+\elementParam{\param{NIPRot}: allows to set the number of integration points for integration of terms associated to rotational field.}
 \elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, z-rotation) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
 \elementDescription{Integration}{Integration of membrane strain terms using gauss integration formula in 4 points (default) or using 1 or 7 points (using \param{NIP} parameter). Integration of strains associated with rotational field integration using 1 point is default (4 and 7 points rules can be specified using \param{NIPRot} parameter).}
@@ -488,7 +492,7 @@ Each node has 3 degrees of freedom. The element features are summarized in Table
 \elementDescription{Loads}{-}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{-}
-\elementSummaryEnd{trplanestrrot element summary}{trplanestrrotsummary}
+\end{elementsummary}
 
 
 
@@ -514,7 +518,7 @@ z-axis). The element features are summarized in Table~\ref{quad1planestrainsumma
  \label{Quad1PlaneStrainfig}
 \end{figure}
 
-\elementSummaryBegin{{\bf quad1planestrain} - 2D linear quadrilateral plane-strain element}{\optField{NIP}{in}}
+\begin{elementsummary}{{\bf quad1planestrain} - 2D linear quadrilateral plane-strain element}{\optField{NIP}{in}}{quad1planestrain element summary}{quad1planestrainsummary}
 \elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
@@ -524,7 +528,7 @@ z-axis). The element features are summarized in Table~\ref{quad1planestrainsumma
 \elementDescription{Loads}{Body loads are supported. Boundary loads are supported and computed using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 4). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{Quad1PlaneStrainfig})).}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{quad1planestrain element summary}{quad1planestrainsummary}
+\end{elementsummary}
 
 
 
@@ -544,7 +548,7 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
  \label{TrplaneStrain}
 \end{figure}
 
-\elementSummaryBegin{{\bf trplanestrain} - 2D linear triangular plane-strain element}{-}
+\begin{elementsummary}{{\bf trplanestrain} - 2D linear triangular plane-strain element}{-}{trplanestrain element summary}{trplanestrainsummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacements and geometry.}
@@ -554,7 +558,7 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
 \elementDescription{Loads}{Body loads are supported. Boundary loads are supported and are computed  using numerical integration. The side numbering is following. Each i-th element side begins in i-th element node and ends on next element node (i+1-th node or 1-st node, in the case of side number 3). The local positive edge x-axis coincides with side direction, the positive local edge y-axis is rotated 90 degrees anti-clockwise (see fig. (\ref{TrplaneStrain})).}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{trplanestrain element summary}{trplanestrainsummary}
+\end{elementsummary}
 
 
 
@@ -570,7 +574,7 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). The element features are summarized in Table~\ref{cctplatesummary}.
 
 
-\elementSummaryBegin{{\bf cctplate} - 2D constant curvature triangular plate element}{-}
+\begin{elementsummary}{{\bf cctplate} - 2D constant curvature triangular plate element}{-}{cctplate element summary}{cctplatesummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
@@ -584,7 +588,7 @@ The generalized stress vector contains corresponding integral forces/moments:
 $$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{cctplate element summary}{cctplatesummary}
+\end{elementsummary}
 
 
 
@@ -597,7 +601,7 @@ analysis. Formulation based on Mindlin hypothesis. The element could be arbitrar
 The nodes should be numbered anti-clockwise (positive rotation around element normal). 
 The element features are summarized in Table~\ref{cctplate3dsummary}.
 
-\elementSummaryBegin{{\bf cctplate3d} - constant curvature triangular plate element in arbitray position}{-}
+\begin{elementsummary}{{\bf cctplate3d} - constant curvature triangular plate element in arbitray position}{-}{cctplate3d element summary}{cctplate3dsummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node.}
 \elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
@@ -611,7 +615,7 @@ The generalized stress vector contains corresponding integral forces/moments:
 $$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{cctplate3d element summary}{cctplate3dsummary}
+\end{elementsummary}
 
 
 \subsubsection {RerShell Element}
@@ -621,7 +625,7 @@ Although element requires generally six DOFs per node, no stiffness to
 local rotation along z-axis (rotation around element normal) is supplied. 
 The element features are summarized in Table~\ref{rershellsummary}.
 
-\elementSummaryBegin{{\bf rershell} - simple shell based on combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element. element can be arbitrary positioned in space.}{-}
+\begin{elementsummary}{{\bf rershell} - simple shell based on combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element. element can be arbitrary positioned in space.}{-}{rershell element summary}{rershellsummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node. Note, that although element it requires generally six DOFs per node, no stiffness to local rotation along z-axis (rotation around element normal) is supplied.}
 \elementDescription{Approximation}{Linear approximation of ratations, quadratic approximation of displacement.}
@@ -635,7 +639,7 @@ The generalized stress vector contains corresponding integral forces/moments:
 $$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{rershell element summary}{rershellsummary}
+\end{elementsummary}
 
 
 
@@ -651,7 +655,7 @@ The element features are summarized in Table~\ref{trshell01summary}.
  \caption{Geometry of tr\_shell01 element.}
 \end{figure}
 
-\elementSummaryBegin{{\bf tr\_shell01} - triangular shell element combining CCT3D plate element (Mindlin hypothesis) with triangular plane stress element with rotational DOFs}{-}
+\begin{elementsummary}{{\bf tr\_shell01} - triangular shell element combining CCT3D plate element (Mindlin hypothesis) with triangular plane stress element with rotational DOFs}{-}{tr\_shell01 element summary}{trshell01summary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Six dofs (u,v,w-displacements and u,v,w rotations) are in general required in each node.}
 \elementDescription{Approximation}{See description of cct and trplanstrrot elements}
@@ -665,15 +669,15 @@ The generalized stress vector contains corresponding integral forces/moments:
 $$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
-\elementSummaryEnd{tr\_shell01 element summary}{trshell01summary}
+\end{elementsummary}
 
 
 \subsubsection{Quad1Mindlin Element} \label{quad1mindlin}
 This class implements an quadrilateral, bilinear, four-node Mindlin plate.
 This type of element exhibit strong shear locking (thin plates exhibit almost no bending).
-Implements the lumped mass matrix.
+Implements the lumped mass matrix. The element features are summarized in Table~\ref{quad1mindlinsummary}.
 
-\elementSummaryBegin{{\bf quad1mindlin} -  quadrilateral, bilinear, four-node Mindlin plate}{\optField{NIP}{in}}
+\begin{elementsummary}{{\bf quad1mindlin} -  quadrilateral, bilinear, four-node Mindlin plate}{\optField{NIP}{in}}{quad1mindlin element summary}{quad1mindlinsummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotation) are required in each node.}
 \elementDescription{Approximation}{Linear for all unknowns.}
@@ -684,7 +688,7 @@ Implements the lumped mass matrix.
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Reference}{\cite{RobertCook1989}}
 \elementDescription{Status}{Experimental}
-\elementSummaryEnd{quad1mindlin element summary}{quad1mindlinsummary}
+\end{elementsummary}
 
 
 
@@ -693,62 +697,69 @@ Implements the lumped mass matrix.
 \subsection{Axisymmetric Elements}
 \subsubsection{Axisymm3d element}
 Implementation of triangular three-node finite element 
-for axisymmetric continuum. Each node has 2 degrees of freedom.\\
-\elemkeyword{axisymm3d}\\
-\descitem{Parameters} \optField{NIP}{in} \optField{NIPfish}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacement and
-geometry.\\
-\descitem{Integration}
-The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} parameter (possible completions are 1 (default), 4 and 7
-point integration rule). The remaining strain components ($\varepsilon_\phi$ and
-$\gamma_{rz}$) can be integrated using 1 (default), 4 and 7 integration
-point formulae (\param{NIPfish} parameter).\\
-\descitem{Features} None.\\
-\descitem{Loads} Boundary and body loads are supported.\\
-\descitem{Status} 
+for axisymmetric continuum. Each node has 2 degrees of freedom. 
+The element should blocated in $x,y$ plane, where $x$ direction is the radial direction.
+The element features are summarized in Table~\ref{axisymm3dsummary}.
+
+
+
+\begin{elementsummary}{{\bf axisymm3d} -  triangular axisymmetric linear element}{\optField{NIP}{in} \optField{NIPfish}{in}}{axisymm3d element summary}{axisymm3dsummary}
+\elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1 (default), 4 and 7 point integration rule).}
+\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\phi$ and
+$\gamma_{rz}$) (Supported values include 1 (default), 4 and 7 integration point formula).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacement and geometry.}
+\elementDescription{Integration}{The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
+\param{NIP} paramter (default is 1 point integration).  The remaining terms corresponding to strain components $\varepsilon_\phi$ and
+$\gamma_{rz}$ are by default evaluated at 1 integration point, this can be changed by \param{NIPfish} parameter.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{Boundary and body loads are supported.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
 
 \subsubsection{Q4axisymm element}
 Implementation of quadratic isoparametric eight-node quadrilateral -
-finite element for axisimmetric 3d continuum. 
-Each node has 2 degrees of freedom.
+finite element for axisymmetric 3d continuum. 
+The element should blocated in $x,y$ plane, where $x$ direction is the radial direction.
+Each node has 2 degrees of freedom. The element features are summarized in Table~\ref{q4axisymmsummary}.
 
-\elemkeyword{q4axisymm}\\
-\descitem{Parameters} \optField{NIP}{in} \optField{NIPfish}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.\\
-\descitem{Approximation} Quadratic approximation of displacements and
-geometry.\\
-\descitem{Integration}
-The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
-point integration rule). The remaining strain components ($\varepsilon_\phi$ and
-$\gamma_{rz}$) can be integrated using 1 (default), 4, 9 and 16 integration
-point formulae (\param{NIPfish} parameter).\\
-\descitem{Features} None.\\
-\descitem{Loads} No boundary and body loads are supported.\\
-\descitem{Status} 
+
+\begin{elementsummary}{{\bf q4axisymm} -  quadratic isoparametric eight-node quadrilateral for axisymmetric analysis}{\optField{NIP}{in} \optField{NIPfish}{in}}{q4axisymm element summary}{q4axisymmsummary}
+\elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1, 4 (default), 9, and 16).}
+\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\phi$ and
+$\gamma_{rz}$) (Supported values include 1 (default), 4, 9, and 16 integration point formula).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacement and geometry.}
+\elementDescription{Integration}{The integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using \param{NIP} parameter (default is 4 point formula). The remaining terms (creesponding to $\varepsilon_\phi$ and $\gamma_{rz}$) are integrated by default using 1 point formula (see \param{NIPfish} parameter).}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{No boundary and body loads are supported.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
+
 
 \subsubsection{L4axisymm element}
 Implementation of isoparametric four-node quadrilateral axisymmetric
-finite element. Each node has 2 degrees of freedom.
+finite element. The element should blocated in $x,y$ plane, where $x$ direction is the radial direction.
+Each node has 2 degrees of freedom. The element features are summarized in Table~\ref{l4axisymmsummary}.
 
-\elemkeyword{l4axisymm}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacements and
-geometry.\\
-\descitem{Integration}
-The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
+\begin{elementsummary}{{\bf l4axisymm} -  isoparametric four-node quadrilateral element for axisymmetric analysis}{\optField{NIP}{in}}{l4axisymm element summary}{l4axisymmsummary}
+\elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1, 4 (default), 9, and 16).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacement and geometry.}
+\elementDescription{Integration}{The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
 \param{NIP} parameter (possible completions are 1, 4 (default), 9 or 16
 point integration rule). The remaining strain components ($\varepsilon_\phi$ and
-$\gamma_{rz}$) are integrated using one point integration formula.\\
-\descitem{Features} None.\\
-\descitem{Loads} No boundary and body loads are supported.\\
-\descitem{Status} 
+$\gamma_{rz}$) are integrated using one point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{No boundary and body loads are supported.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{-}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -766,19 +777,18 @@ finite element. Each node has 3 degrees of freedom.
  and surface numbers in red).}
 \end{figure}
 
-\elemkeyword{lspace}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacements and geometry. \\
-\descitem{Integration}
-Full integration of all strain components. \\
-\param{NIP} parameter (possible completions are 1, 8 (default) or 27)
-allows to change the integration formula.\\
-\descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
-\descitem{Loads} \\
-\descitem{Nlgeo} 0, 1, 2.\\
-\descitem{Status} 
+\begin{elementsummary}{{\bf lspace} -  linear isoparametric brick element}{\optField{NIP}{in}}{lspace element summary}{lspacesummary}
+\elementParam{\param{NIP}: allows to set the number of integration points (possible completions are 1, 8 (default), or 27).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacement and geometry.}
+\elementDescription{Integration}{Full integration of all strain components.}
+\elementDescription{Features}{Adaptivity support, Geometric nonlinearity support.}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0,1,2.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
 
 \subsubsection{LSpaceBB element}
 Implementation of 3d brick eight - node 
@@ -798,20 +808,18 @@ finite element. Each node has 3 degrees of freedom.
  \caption{QSpace element.}
 \end{figure}
 
-\elemkeyword{qspace}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
-\descitem{Approximation} Quadratic approximation of displacements and
-geometry.\\
-\descitem{Integration}
-Full integration of all strain components.
-\param{NIP} parameter (possible completions are 8 (default) and 27)
-allows to change the integration formula.\\
-\descitem{Features} None.\\
-\descitem{Loads} \\
-\descitem{Nlgeo} 0, 1, 2.\\
-\descitem{Status} 
+\begin{elementsummary}{{\bf qspace} -  linear isoparametric brick element}{\optField{NIP}{in}}{qspace element summary}{qspacesummary}
+\elementParam{\param{NIP}: allows to set the number of integration points (possible completions are 1, 8 (default), or 27).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacement and geometry.}
+\elementDescription{Integration}{Full integration of all strain components.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0,1,2.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
 
 \subsubsection{LTRSpace element}
 Implementation of tetrahedra four-node finite element. 
@@ -832,18 +840,18 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
  \label{lintetrahedron_fig}
 \end{figure}
 
-\elemkeyword{LTRSpace}\\
-\descitem{Parameters} None.\\
-\descitem{Unknowns}
-Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacements and
-geometry using linear volume coordinates.\\
-\descitem{Integration}
-Full integration of all strain components using four point Gauss integration formula.\\
-\descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
-\descitem{Loads} Surface and Edge loadings supported.\\
-\descitem{Nlgeo} 0, 1, 2.\\
-\descitem{Status} 
+\begin{elementsummary}{{\bf LTRSpace} -  linear tetrahedra element}{-}{LTRSpace element summary}{LTRSpacesummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points (possible completions are 1, 8 (default), or 27).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{ Linear approximation of displacements and geometry using linear volume coordinates.}
+\elementDescription{Integration}{Full integration of all strain components using four point Gauss integration formula.}
+\elementDescription{Features}{Adaptivity support, Geometric nonlinearity support.}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{Surface and Edge loadings supported.}
+\elementDescription{Nlgeo}{0,1,2.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
 
 \subsubsection{QTRSpace element}
 Implementation of tetrahedra ten-node finite element. 
@@ -860,17 +868,18 @@ Following node numbering convention is adopted (see also Fig.~\ref{qtetrahedron_
   \label{qtetrahedron_fig}
 \end{figure}
 
-\elemkeyword{QTRSpace}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
-\descitem{Approximation} Quadratic approximation of displacements and
-geometry\\
-\descitem{Integration}
-Full integration of all strain components.
-\param{NIP} parameter (possible completions are 1, 4 (default), 5, 11, 15, 24, and 45 allows to change the integration formula.\\
-\descitem{Nlgeo} 0, 1, 2.\\
-\descitem{Status} 
+\begin{elementsummary}{{\bf QTRSpace} -  3D tetrahedra element with quadratic interpolation}{\optField{NIP}{in}}{QTRSpace element summary}{QTRSpacesummary}
+\elementParam{\param{NIP}: allows to alter  the default integration formula (possible completions are 1, 4 (default), 5, 11, 15, 24, and 45 point intergartion formulas).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacements and geometry using linear volume coordinates.}
+\elementDescription{Integration}{Full integration of all strain components using four point Gauss integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0,1,2.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
+
 
 \subsubsection{LWedge element}
 Implementation of wedge six-node finite element. 
@@ -886,17 +895,17 @@ Following node numbering convention is adopted (see also Fig.~\ref{linwedge_fig}
   \label{linwedge_fig}
 \end{figure}
 
-\elemkeyword{LWedge}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacements and
-geometry.\\
-\descitem{Integration}
-Full integration of all strain components.
-\param{NIP} parameter (possible completions are 2 (default) and 9 allows to change the integration formula.\\
-\descitem{Nlgeo} 0, 1, 2.\\
-\descitem{Status} 
+\begin{elementsummary}{{\bf LWedge} -  3D wedge six-node finite element with linear interpolation}{\optField{NIP}{in}}{LWedge element summary}{LWedgesummary}
+\elementParam{\param{NIP}: allows to alter  the default integration formula (possible completions are 2 (default) and 9 point integration formulas).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all strain components using four point Gauss integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0,1,2.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
 
 \subsubsection{QWedge element}
 Implementation of wedge fifteen-node finite element. 
@@ -913,17 +922,17 @@ Following node numbering convention is adopted (see also Fig.~\ref{qwedge_fig}):
   \label{qwedge_fig}
 \end{figure}
 
-\elemkeyword{QWedge}\\
-\descitem{Parameters} \optField{NIP}{in}\\
-\descitem{Unknowns}
-Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
-\descitem{Approximation} Quadratic approximation of displacements and
-geometry.\\
-\descitem{Integration}
-Full integration of all strain components.
-\param{NIP} parameter (possible completions are 2 (default) and 9 allows to change the integration formula.\\
-\descitem{Nlgeo} 0, 1, 2.\\
-\descitem{Status} 
+\begin{elementsummary}{{\bf QWedge} -  3D wedge six-node finite element with quadratic interpolation}{\optField{NIP}{in}}{QWedge element summary}{QWedgesummary}
+\elementParam{\param{NIP}: allows to alter  the default integration formula (possible completions are 2 (default) and 9 point integration formulas).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all strain components using four point Gauss integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0,1,2.}
+\elementDescription{Status}{Reliable}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -938,24 +947,21 @@ one-dimensional slip law, that determines the force acting between
 these nodes depending on their relative displacement. This element can
 be applied in 1D, 2D, and 3D settings (default).
 
-\elemkeyword{Interface1d}\\
-\descitem{Parameters} \optField{refnode}{in} \optField{normal}{ra}\\
-The optional parameter \param{refnode} determines the reference node, which is used to
-specify a reference direction (the direction vector is obtained by
-subtracting the coordinates of the first node from the reference node). The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.
-The magnitude of slip is then obtained as relative displacement vector
-of two element nodes projected to reference direction. As a
-consequence, this will lead to linearized geometrical equations, where
-slip is always related to the original (undeformed) configuration.
-Element requires material model with \_1dInterface support.\\
-\descitem{Unknowns}
-One, two, or three DOFs (u-displacement, v-displacement,
-w-displacement) are required in each node, according to element mode.\\
-\descitem{Approximation} None. \\
-\descitem{Integration} None. \\
-\descitem{Features} None.\\
-\descitem{Loads} \\
-\descitem{Status} 
+\begin{elementsummary}{{\bf Interface1d} -  one dimensional (slip) interface element}{\optField{refnode}{in} \optField{normal}{ra}}{Interface1d element summary}{Interface1dsummary}
+\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\elementParam{\param{normal}: The reference direction can be directly specified by the optional parameter \param{normal}. Although both \param{refnode} and \param{normal} are optional, at least one of them must be specified.}
+
+\elementDescription{Unknowns}{One, two, or three DOFs (u-displacement, v-displacement,
+w-displacement) are required in each node, according to element mode (determined from domain type).}
+\elementDescription{Approximation}{-}
+\elementDescription{Integration}{-}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_1dInterface support.}
+\end{elementsummary}
 
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
@@ -970,17 +976,18 @@ approximation of displacement field. Can be used to glue together two elements w
  \label{interf2d_quad_fig}
 \end{figure}
 
-\elemkeyword{Interface2dquad}\\
-\descitem{Parameters} None.\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
-\descitem{Approximation} quadratic approximation of displacements and
-geometry. \\
-\descitem{Integration}
-Full integration of all strain components using four point integration formula. \\
-\descitem{Features} None.\\
-\descitem{Loads} \\
-\descitem{Status} 
+\begin{elementsummary}{{\bf Interface2dquad} -  2D  interface element with quadratic approximation}{-}{Interface2dquad element summary}{Interface2dquadsummary}
+%\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all strain components using four point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_2dInterface support.}
+\end{elementsummary}
 
 \subsubsection{Interface3dtrlin element}
 Implementation of a three dimensional interface element with linear
@@ -995,17 +1002,18 @@ approximation of displacement field. Can be used to glue together two elements w
  \label{interf3d_lin_fig}
 \end{figure}
 
-\elemkeyword{Interface3dtrlin}\\
-\descitem{Parameters} None.\\
-\descitem{Unknowns}
-Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacements and
-geometry.\\
-\descitem{Integration}
-Full integration of all components using one point integration formula. \\
-\descitem{Features} None.\\
-\descitem{Loads} \\
-\descitem{Status} 
+\begin{elementsummary}{{\bf Interface3dtrlin} -  3D  interface element with linear approximation}{-}{Interface3dtrlin element summary}{Interface3dtrlinsummary}
+%\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all components using one point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_3dInterface support.}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
