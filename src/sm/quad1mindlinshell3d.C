@@ -173,7 +173,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
     answer.resize(8, 4*5);
     answer.zero();
 
-    // Note: This is just for the 5 dofs.
+    // Note: This is just 5 dofs (sixth column is all zero, torsional stiffness handled separately.)
     for (int i = 0; i < 4; ++i) {
         ///@todo Check the rows for both parts here, to be consistent with _3dShell material definition
         // Part related to the membrane (columns represent coefficients for D_u, D_v)
@@ -209,25 +209,86 @@ Quad1MindlinShell3D :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 void
+Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+    // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)
+    // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
+    FloatMatrix b, d;
+    FloatArray n, strain, stress, bs;
+    FloatArray shellUnknowns(20), drillUnknowns(4), unknowns;
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
+    // Split this for practical reasons into normal shell dofs and drilling dofs
+    for ( int i = 0; i < 4; ++i ) {
+        shellUnknowns(0 + i*5) = unknowns(0 + i*6);
+        shellUnknowns(1 + i*5) = unknowns(1 + i*6);
+        shellUnknowns(2 + i*5) = unknowns(2 + i*6);
+        shellUnknowns(3 + i*5) = unknowns(3 + i*6);
+        shellUnknowns(4 + i*5) = unknowns(4 + i*6);
+        drillUnknowns(i) = unknowns(5 + i*6);
+    }
+
+    FloatArray shellForces(20), drillMoment(4);
+    shellForces.zero();
+    drillMoment.zero();
+    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial() );
+
+    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
+        this->computeBmatrixAt(gp, b);
+        double dV = this->computeVolumeAround(gp);
+
+        if ( useUpdatedGpRecord ) {
+            stress = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
+        } else {
+            strain.beProductOf(b, shellUnknowns);
+            mat->giveRealStressVector(stress, ReducedForm, gp, strain, tStep);
+        }
+        bs.beTProductOf(b, stress);
+        shellForces.add(dV, bs);
+
+        // Drilling stiffness is here for improved numerical properties
+        if (alpha > 0.) {
+            ///@todo Sort out the drilling stiffness thing.
+            this->computeConstitutiveMatrixAt(d, ElasticStiffness, gp, tStep);
+            double Et = d.at(1,1); ///@todo Elasticity modulus * thickness, taken from the membrane part of d
+            this->interp.evalN(n, *gp->giveCoordinates(), FEIVoidCellGeometry());
+            for ( int j = 0; j < 4; j++) {
+                n(j) -= 0.25;
+            }
+            double dtheta = n.dotProduct(drillUnknowns);
+            drillMoment.add(this->alpha * Et * dV * dtheta, n); ///@todo Decide on how to alpha should be defined.
+        }
+    }
+
+    answer.resize(24);
+    answer.zero();
+    answer.assemble(shellForces, this->shellOrdering);
+
+    if (alpha > 0.) {
+        answer.assemble(drillMoment, this->drillOrdering);
+    }
+}
+
+
+void
 Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
-    double dV;
     FloatMatrix d, b, db;
     FloatArray n;
-    GaussPoint *gp;
-    IntegrationRule *iRule;
 
     FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
     shellStiffness.zero();
     drillStiffness.zero();
 
-    iRule = integrationRulesArray [ 0 ];
+    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
-        dV = this->computeVolumeAround(gp);
+        double dV = this->computeVolumeAround(gp);
 
         this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
 
@@ -479,7 +540,6 @@ Quad1MindlinShell3D :: computeLCS()
 
     for ( int i = 1; i <= 4; i++ ) {
         this->lnodes[ i - 1 ]->beTProductOf( this->lcsMatrix, *this->giveNode(i)->giveCoordinates() );
-        this->lnodes[ i - 1 ]->printYourself();
     }
 }
 
@@ -487,14 +547,13 @@ Quad1MindlinShell3D :: computeLCS()
 bool
 Quad1MindlinShell3D :: computeGtoLRotationMatrix(FloatMatrix& answer)
 {
-    answer.resize(9, 24);
+    answer.resize(24, 24);
     answer.zero();
 
-    /// @TODO TODO I honestly don't understand this code at all. Most definitely wrong.
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i + 0) = answer.at(1 + 3, i + 0 + 6) = answer.at(1 + 6, i + 0 + 12) = this->lcsMatrix.at(3, i);
-        answer.at(2, i + 3) = answer.at(2 + 3, i + 3 + 6) = answer.at(2 + 6, i + 3 + 12) = this->lcsMatrix.at(1, i);
-        answer.at(3, i + 3) = answer.at(3 + 3, i + 3 + 6) = answer.at(3 + 6, i + 3 + 12) = this->lcsMatrix.at(2, i);
+    for ( int i = 0; i < 4; i++ ) { // Loops over nodes
+        // In each node, transform global c.s. {D_u, D_v, D_w, R_u, R_v, R_w} into local c.s.
+        answer.setSubMatrix(this->lcsMatrix, 1 + i*6    , 1 + i*6    ); // Displacements
+        answer.setSubMatrix(this->lcsMatrix, 1 + i*6 + 3, 1 + i*6 + 3); // Rotations
     }
 
     return true;

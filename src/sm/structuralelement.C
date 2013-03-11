@@ -828,7 +828,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         gp = iRule->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, b);
 
-        // TotalStressVector = gp->giveStressVector() ;
         if ( useUpdatedGpRecord == 1 ) {
             TotalStressVector = static_cast< StructuralMaterialStatus * >( mat->giveStatus(gp) )->giveStressVector();
         } else {
