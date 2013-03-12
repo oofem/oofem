@@ -37,6 +37,7 @@
 #include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "conTable.h"
 #include <algorithm>
 
 namespace oofem {
@@ -80,10 +81,39 @@ bool DofManList :: isDofManagerEnriched(DofManager *dMan)
 bool 
 EDBGCircle :: isDofManagerEnriched(DofManager *dMan)
 { 
+#if 0
     FloatArray coords; 
     coords = *(dMan->giveCoordinates());
     return this->bg->isInside(coords);
+#else
+    
+    int node = dMan->giveGlobalNumber();
+    // gets neighbouring elements of a node
+    Domain *d = dMan->giveDomain();
+    const IntArray *neighbours = d->giveConnectivityTable()->giveDofManConnectivityArray(node);
+    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
+        // for each of the neighbouring elements finds out whether it interacts with this EnrichmentItem
+        if ( isElementEnriched( d->giveElement( neighbours->at(i) ) ) ) {
+            return true;
+        }
+    }
+
+    return false;
+#endif
 };
 
+
+bool
+EDBGCircle :: isElementEnriched(const Element *element) 
+{
+    Circle *c = static_cast < Circle * > ( this->bg );
+    int numIntersections = c->computeNumberOfIntersectionPoints(element);
+    //int numIntersections = this->bg->computeNumberOfIntersectionPoints(element);
+    if ( numIntersections > 0 ) {
+        return true;
+    } else {
+        return false;
+    }
+};
 
 } // end namespace oofem

@@ -54,8 +54,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    /// Computes the enriched part of the location array
-    //virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray *dofIds = NULL) const;
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
     virtual classType giveClassID() const { return PlaneStress2dXfemClass; }
     virtual int computeNumberOfDofs(EquationID ut);
@@ -67,6 +65,8 @@ public:
     virtual void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+
+    virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &);

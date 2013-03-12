@@ -99,7 +99,7 @@ EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction(int n)
 
 
 
-bool EnrichmentItem :: isElementEnriched(Element *element) 
+bool EnrichmentItem :: isElementEnriched(const Element *element) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         if ( this->isDofManEnriched( element->giveDofManager(i) ) ) {
@@ -109,7 +109,7 @@ bool EnrichmentItem :: isElementEnriched(Element *element)
     return false;
 }
 
-bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(Element *element, int edNumber) 
+bool EnrichmentItem :: isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber) 
 {
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
         DofManager *dMan = element->giveDofManager(i);
@@ -233,6 +233,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         }
         this->enrDomainList->put(i, ed);
         ed->initializeFrom(mir);
+
     }
 
     // Set start of the enrichment dof pool for the given EI

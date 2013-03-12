@@ -83,7 +83,7 @@ XfemManager :: clear()
 
 
 
-void XfemManager :: giveActiveEIsFor(IntArray &answer, Element *elem)
+void XfemManager :: giveActiveEIsFor(IntArray &answer, const Element *elem)
 {
     int count = 0;
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
@@ -95,7 +95,7 @@ void XfemManager :: giveActiveEIsFor(IntArray &answer, Element *elem)
     }
 }
 
-bool XfemManager :: isElementEnriched(Element *elem)
+bool XfemManager :: isElementEnriched(const Element *elem)
 {
     // Loop over all EI which asks if el is E. 
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ){

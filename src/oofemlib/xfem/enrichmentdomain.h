@@ -64,15 +64,6 @@ public:
     //virtual bool isDofManagerEnriched(const DofManager *dMan) { return false; };
     virtual bool isDofManagerEnriched(DofManager *dMan) = 0 {};
     virtual bool isElementEnriched(Element *element) { return false; };
-    
-
-
-    //bool isDofManEnriched(int nodeNumber);
-    //bool isDofManEnrichedByEnrichmentDomain(int dofManNumber, int edNumber);
-    //bool isElementEnriched(Element *element); 
-    //virtual bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
-    // signed distance from a point to object- can all representations answer this?
-    
 
 };
 
@@ -93,13 +84,12 @@ BasicGeometry *bg;
 
 class EDBGCircle : public EnrichmentDomain_BG
 {
-private:
-    //BasicGeometry *bg;
 public:
     EDBGCircle(){ bg = new Circle; }; 
     virtual ~EDBGCircle() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return this->bg->initializeFrom(ir);  };
     virtual bool isDofManagerEnriched(DofManager *dMan);
+    virtual bool isElementEnriched(const Element *element);
    
 };
 

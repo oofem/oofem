@@ -98,8 +98,8 @@ public:
 
     bool isDofManEnriched(DofManager *dMan);
     bool isDofManEnrichedByEnrichmentDomain(DofManager *dMan, int edNumber);
-    bool isElementEnriched(Element *element); 
-    bool isElementEnrichedByEnrichmentDomain(Element *element, int edNumber); 
+    bool isElementEnriched(const Element *element); 
+    bool isElementEnrichedByEnrichmentDomain(const Element *element, int edNumber); 
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(TimeStep *tStep) {};
