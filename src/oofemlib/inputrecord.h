@@ -100,6 +100,7 @@ enum InputFieldType {
     IFT_VTKXMLExportModule_regionstoskip,
     IFT_VTKXMLExportModule_nvr,
     IFT_VTKXMLExportModule_vrmap,
+    IFT_VTKXMLExportModule_timeScale,
 
     IFT_POIExportModule_vars,
     IFT_POIExportModule_primvars,

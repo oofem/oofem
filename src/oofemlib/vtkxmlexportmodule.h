@@ -84,6 +84,8 @@ protected:
     int nvr;
     /// Real->virtual region map.
     IntArray vrmap;
+    /// Scaling time in output, e.g. conversion from seconds to hours
+    double timeScale;
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std::list< std::string > pvdBuffer;
